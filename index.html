@@ -22,7 +22,7 @@
             background: #000; padding: 6px 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #333;
         }
         
-        canvas { display: block; background: #1e272c; width: 100%; height: auto; border-radius: 0 0 0 0; }
+        canvas { display: block; background: #1e272c; width: 100%; height: auto; border-radius: 0 0 0 0; cursor: pointer; }
         
         #control-bar {
             display: flex; justify-content: space-between; align-items: center;
@@ -114,9 +114,9 @@
         
         #death-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 250px;
-            background: rgba(192, 57, 43, 0.85); color: white; display: none;
+            background: rgba(192, 57, 43, 0.90); color: white; display: none;
             justify-content: center; align-items: center; flex-direction: column;
-            z-index: 5000; text-shadow: 2px 2px 5px black; pointer-events: none;
+            z-index: 5000; text-shadow: 2px 2px 5px black; pointer-events: auto; cursor: pointer; text-align:center;
         }
         
         .live-drop-cols { display: flex; justify-content: space-between; margin-bottom: 10px; }
@@ -155,15 +155,26 @@
         <div id="top-nav">
             <div style="position: relative;">
                 <button onclick="toggleDungeonMenu()" style="background: #2c3e50; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🏰 Activities ▼</button>
-                <div id="dungeon-menu" style="display: none; position: absolute; top: 35px; left: 0; background: #151515; border: 1px solid #444; border-radius: 6px; padding: 12px; width: 240px; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.9);">
-                    <div style="color: #f1c40f; font-weight: bold; margin-bottom: 5px; font-size: 14px;">🏰 Active Dungeons</div>
-                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 10px; background: #111; padding: 6px; border-radius: 4px; border: 1px dashed #333;">
-                        <span>Keys: <span id="dungeon-keys-text" style="color: #2ecc71; font-weight: bold;">3</span>/3</span>
-                        <span id="dungeon-timer-text" style="color: #aaa; font-weight: bold;">(Full)</span>
+                <div id="dungeon-menu" style="display: none; position: absolute; top: 35px; left: 0; background: #151515; border: 1px solid #444; border-radius: 6px; padding: 12px; width: 260px; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.9);">
+                    <div style="color: #f1c40f; font-weight: bold; margin-bottom: 8px; font-size: 14px; text-align:center; border-bottom:1px solid #333; padding-bottom:5px;">🏰 Active Dungeons</div>
+                    
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
+                        <span style="color:#3498db; font-weight:bold;">⚔️ Equip: <span id="dk-equip">3</span>/3</span>
+                        <span id="dt-equip" style="color:#aaa;">(Full)</span>
                     </div>
-                    <button onclick="enterDungeon('equip')" style="width: 100%; background: #3498db; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; margin-bottom:6px; transition: 0.2s;">⚔️ Equipment Dungeon (1 Key)</button>
-                    <button onclick="enterDungeon('gold')" style="width: 100%; background: #f1c40f; color: #111; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; margin-bottom:6px; transition: 0.2s;">💰 Gold Mine Caverns (1 Key)</button>
-                    <button onclick="enterDungeon('mat')" style="width: 100%; background: #2ecc71; color: #111; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s;">📦 Toxic Material Pit (1 Key)</button>
+                    <button onclick="enterDungeon('equip')" style="width: 100%; background: #3498db; color: white; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:10px;">Enter Equipment Dungeon</button>
+                    
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
+                        <span style="color:#f1c40f; font-weight:bold;">💰 Gold: <span id="dk-gold">3</span>/3</span>
+                        <span id="dt-gold" style="color:#aaa;">(Full)</span>
+                    </div>
+                    <button onclick="enterDungeon('gold')" style="width: 100%; background: #f1c40f; color: #111; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:10px;">Enter Gold Mine Caverns</button>
+                    
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
+                        <span style="color:#2ecc71; font-weight:bold;">📦 Mats: <span id="dk-mat">3</span>/3</span>
+                        <span id="dt-mat" style="color:#aaa;">(Full)</span>
+                    </div>
+                    <button onclick="enterDungeon('mat')" style="width: 100%; background: #2ecc71; color: #111; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">Enter Toxic Material Pit</button>
                 </div>
             </div>
             <div style="font-size: 13px; color: #7f8c8d; font-weight: bold; align-self: center; letter-spacing: 1px;">Postknight Slayer</div>
@@ -184,9 +195,9 @@
             <div id="altar-list" style="display:flex; flex-direction:column; gap:8px;"></div>
         </div>
 
-        <div id="death-overlay">
+        <div id="death-overlay" onclick="respawnHero()">
             <div style="font-size: 42px; font-weight: bold;">DEFEATED</div>
-            <div style="font-size: 16px; margin-top: 10px;">Resetting to beginning of stage...</div>
+            <div style="font-size: 16px; margin-top: 10px; text-align:center;">Your hero has been defeated!<br><br><span style="color:#f1c40f; font-weight:bold; font-size:20px;">[ Click to Respawn ]</span></div>
         </div>
 
         <div id="control-bar">
@@ -196,7 +207,7 @@
 
         <div class="stats-hud">
             <div>Stage: <span id="hud-stage" style="color:#3498db;">1-1</span></div>
-            <div>Prog: <span id="hud-progress" style="color:#f1c40f;">0/7</span></div>
+            <div>Prog: <span id="hud-progress" style="color:#f1c40f;">0/5</span></div>
             <div>Buff: <span id="hud-buff" style="color:#aaa;">None</span></div>
             <div>Bag: <span id="hud-bag" style="color:#2ecc71;">0/20</span></div>
             <div>HP: <span id="hud-hp" style="color:#e74c3c;">100/100</span></div>
@@ -359,7 +370,8 @@ window.onload = function() {
         { name: "Zealot's Charm", trait: "active_spd", desc: "Reduces Active Attack cooldown limit", breakdown: "<strong>Feverish Swings:</strong><br>• Allows you to click or tap faster.", dropRate: 0, quality: 0, goldMulti: 0 },
         { name: "Survivor's Adrenaline", trait: "dodge_buff", desc: "Blocking/Parrying grants +100% Dmg for 10s", breakdown: "<strong>Adrenaline Rush:</strong><br>• Successful defensive procs double your damage output temporarily.", dropRate: 0, quality: 0, goldMulti: 0 },
         { name: "Chrono Hourglass", trait: "extend_buffs", desc: "Extends all temporary buffs by 5 seconds", breakdown: "<strong>Chronology:</strong><br>• Applies to Frenzy and Adrenaline durations.", dropRate: 0, quality: 0, goldMulti: 0 },
-        { name: "Dimensional Pouch", trait: "bag_space", desc: "Expands equipment sack capacity to 50", breakdown: "<strong>Bottomless Bag:</strong><br>• Carry more gear before having to salvage.", dropRate: 0, quality: 0, goldMulti: 0 }
+        { name: "Dimensional Pouch", trait: "bag_space", desc: "Expands equipment sack capacity to 50", breakdown: "<strong>Bottomless Bag:</strong><br>• Carry more gear before having to salvage.", dropRate: 0, quality: 0, goldMulti: 0 },
+        { name: "Phoenix Ankh", trait: "second_wind", desc: "Ignore a fatal blow once per stage (50% Heal)", breakdown: "<strong>Second Wind:</strong><br>• When taking lethal damage, survive and instantly restore 50% HP. Resets every new stage or dungeon.", dropRate: 0, quality: 0, goldMulti: 0 }
     ];
 
     window.addEtcDrop = function(itemName, amount = 1) {
@@ -370,6 +382,7 @@ window.onload = function() {
 
     function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function randFloat(min, max) { return Math.random() * (max - min) + min; }
+    function getStageTier() { return Math.floor((playerStats.stage - 1) / 10) % 5; }
 
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -379,14 +392,13 @@ window.onload = function() {
         baseIdleSpeed: 60, baseActiveSpeed: 15,
         baseDrop: 1.0, baseQuality: 1.0, baseGold: 1.0,
         baseCritChance: 0.05, baseCritDamage: 1.50, baseBlock: 0.0, baseParry: 0.0,
-        currentHp: 100, coins: 0, stage: 1, killCount: 0, totalLifetimeKills: 0, targetsRequired: 7,
-        isBossMode: false, isFarmingLoop: false, isUberBoss: false, frenzyTimer: 0, adrenalineTimer: 0,
-        isDungeonMode: false, currentDungeon: null, dungeonWave: 1, dungeonKeys: 3, nextKeyTime: 0
+        currentHp: 100, coins: 0, stage: 1, killCount: 0, totalLifetimeKills: 0, targetsRequired: 5,
+        isBossMode: false, isFarmingLoop: false, isUberBoss: false, frenzyTimer: 0, adrenalineTimer: 0, usedSecondWind: false,
+        isDungeonMode: false, currentDungeon: null, dungeonWave: 1, 
+        equipKeys: 3, goldKeys: 3, matKeys: 3, nextEquipKeyTime: 0, nextGoldKeyTime: 0, nextMatKeyTime: 0
     };
 
-    let equippedSlots = {
-        weapon: null, subweapon: null, helmet: null, chest: null, leggings: null, overall: null, boots: null, art1: null, art2: null, art3: null
-    };
+    let equippedSlots = { weapon: null, subweapon: null, helmet: null, chest: null, leggings: null, overall: null, boots: null, art1: null, art2: null, art3: null };
 
     let inventory = { EQUIP: [], ETC: {} };
     let logsHistory = [];
@@ -408,19 +420,28 @@ window.onload = function() {
     let isGamePaused = false;
     let reviveTimer = 0;
 
-    window.saveGame = function() {
-        let saveData = { playerStats, equippedSlots, inventory, idCounter, logsHistory, frozenItemDb, lastSaveTime: Date.now() };
-        localStorage.setItem('postknight_save_v6', JSON.stringify(saveData));
+    // Secret Developer Cheat
+    window.giveKeys = function(amount = 10) {
+        playerStats.equipKeys += amount;
+        playerStats.goldKeys += amount;
+        playerStats.matKeys += amount;
+        if (!inventory.ETC["Gacha Key"]) { inventory.ETC["Gacha Key"] = 0; }
+        inventory.ETC["Gacha Key"] += amount;
+        updateUI(); renderInventory(); window.saveGame();
+        console.log(`[CHEAT ENABLED] Granted ${amount} Dungeon Keys and Gacha Keys!`);
+        pushHeaderToast(`🛑 DEV CHEAT: +${amount} Keys!`, "#e74c3c");
     };
 
-    setInterval(() => {
-        window.saveGame();
-    }, 60000);
+    window.saveGame = function() {
+        let saveData = { playerStats, equippedSlots, inventory, idCounter, logsHistory, frozenItemDb, lastSaveTime: Date.now() };
+        localStorage.setItem('postknight_save_v7', JSON.stringify(saveData));
+    };
 
+    setInterval(() => { window.saveGame(); }, 60000);
     window.addEventListener('beforeunload', window.saveGame);
 
     window.loadGame = function() {
-        let data = localStorage.getItem('postknight_save_v6');
+        let data = localStorage.getItem('postknight_save_v7');
         if (data) {
             try {
                 let parsed = JSON.parse(data);
@@ -431,7 +452,14 @@ window.onload = function() {
                 logsHistory = parsed.logsHistory || logsHistory;
                 frozenItemDb = parsed.frozenItemDb || frozenItemDb;
                 
-                if (!playerStats.isDungeonMode) playerStats.targetsRequired = 7;
+                // Migrations & Fallbacks
+                if (!playerStats.targetsRequired || playerStats.targetsRequired === 7) playerStats.targetsRequired = 5;
+                if (playerStats.equipKeys === undefined) {
+                    playerStats.equipKeys = playerStats.dungeonKeys || 3;
+                    playerStats.goldKeys = 3; playerStats.matKeys = 3;
+                    playerStats.nextEquipKeyTime = playerStats.nextKeyTime || 0;
+                    playerStats.nextGoldKeyTime = 0; playerStats.nextMatKeyTime = 0;
+                }
                 
                 let box = document.getElementById('log-box');
                 box.innerHTML = logsHistory.join("<br><br>");
@@ -440,14 +468,19 @@ window.onload = function() {
                     let now = Date.now();
                     let offlineMs = now - parsed.lastSaveTime;
                     
-                    if (playerStats.dungeonKeys < 3) {
-                        let msSinceNextKey = now - playerStats.nextKeyTime;
-                        if (msSinceNextKey >= 0) {
-                            let keysEarned = 1 + Math.floor(msSinceNextKey / 3600000);
-                            playerStats.dungeonKeys = Math.min(3, playerStats.dungeonKeys + keysEarned);
-                            playerStats.nextKeyTime = now + (3600000 - (msSinceNextKey % 3600000));
+                    let keyTypes = ['equip', 'gold', 'mat'];
+                    keyTypes.forEach(k => {
+                        let count = k + 'Keys';
+                        let time = 'next' + k.charAt(0).toUpperCase() + k.slice(1) + 'KeyTime';
+                        if (playerStats[count] < 3) {
+                            let msSinceNextKey = now - playerStats[time];
+                            if (msSinceNextKey >= 0) {
+                                let keysEarned = 1 + Math.floor(msSinceNextKey / 3600000);
+                                playerStats[count] = Math.min(3, playerStats[count] + keysEarned);
+                                playerStats[time] = now + (3600000 - (msSinceNextKey % 3600000));
+                            }
                         }
-                    }
+                    });
                     
                     if (offlineMs > 60000) { 
                         let offlineSeconds = Math.floor(offlineMs / 1000);
@@ -462,17 +495,14 @@ window.onload = function() {
                             let goldEarned = Math.floor(simulatedKills * baseCoin * p.gold);
                             
                             let dropsEarned = 0;
-                            let dKeyDrop = 0;
                             let gachaKeyDrop = 0;
                             
                             for(let i=0; i<simulatedKills; i++) {
                                 if (Math.random() < (0.045 * p.drop * state.efficiency)) dropsEarned++;
-                                if (Math.random() < 0.01 && playerStats.dungeonKeys + dKeyDrop < 3) dKeyDrop++;
                                 if (Math.random() < 0.005) gachaKeyDrop++; 
                             }
                             
                             playerStats.coins += goldEarned;
-                            if (dKeyDrop > 0) playerStats.dungeonKeys = Math.min(3, playerStats.dungeonKeys + dKeyDrop);
                             if (gachaKeyDrop > 0) addEtcDrop("Gacha Key", gachaKeyDrop);
                             
                             let actualItems = 0;
@@ -503,24 +533,13 @@ window.onload = function() {
         }
     };
 
-    // Scenery Initialization
-    for(let i=0; i<12; i++) {
-        bgScenery.push({ x: Math.random() * canvas.width, y: 180, type: Math.random() > 0.5 ? 'tree' : 'bush', size: Math.random() * 0.5 + 0.5 });
-    }
-    
+    for(let i=0; i<12; i++) { bgScenery.push({ x: Math.random() * canvas.width, y: 180, type: Math.random() > 0.5 ? 'tree' : 'bush', size: Math.random() * 0.5 + 0.5 }); }
     let flowerColors = ["#f1c40f", "#e74c3c", "#9b59b6", "#3498db", "#ffffff", "#ff7979"];
     for(let i=0; i<25; i++) {
         let fgType = Math.random();
-        fgScenery.push({ 
-            x: Math.random() * canvas.width, 
-            y: 190 + Math.random() * 60, 
-            type: fgType > 0.8 ? 'bush' : (fgType > 0.5 ? 'flower' : 'grass'),
-            size: Math.random() * 0.7 + 0.5,
-            color: flowerColors[Math.floor(Math.random() * flowerColors.length)]
-        });
+        fgScenery.push({ x: Math.random() * canvas.width, y: 190 + Math.random() * 60, type: fgType > 0.8 ? 'bush' : (fgType > 0.5 ? 'flower' : 'grass'), size: Math.random() * 0.7 + 0.5, color: flowerColors[Math.floor(Math.random() * flowerColors.length)] });
     }
 
-    // Modal Builder
     window.buildAltarModal = function() {
         let listEl = document.getElementById('altar-list');
         listEl.innerHTML = ARTIFACT_POOL.map(art => {
@@ -550,7 +569,10 @@ window.onload = function() {
     };
 
     window.enterDungeon = function(type) {
-        if (playerStats.dungeonKeys < 1) {
+        let countField = type + 'Keys';
+        let timeField = 'next' + type.charAt(0).toUpperCase() + type.slice(1) + 'KeyTime';
+
+        if (playerStats[countField] < 1) {
             pushHeaderToast("Not enough keys!", "#e74c3c");
             return;
         }
@@ -558,16 +580,17 @@ window.onload = function() {
         let dNames = { 'equip': 'Equipment Dungeon', 'gold': 'Gold Mine', 'mat': 'Material Cavern' };
         if (!confirm(`Spend 1 Key to enter the ${dNames[type]}?`)) return;
         
-        playerStats.dungeonKeys--;
-        if (playerStats.dungeonKeys === 2) playerStats.nextKeyTime = Date.now() + 3600000;
+        playerStats[countField]--;
+        if (playerStats[countField] === 2) playerStats[timeField] = Date.now() + 3600000;
         
         playerStats.isDungeonMode = true;
         playerStats.currentDungeon = type;
         playerStats.dungeonWave = 1;
         playerStats.killCount = 0;
-        playerStats.targetsRequired = 7;
+        playerStats.targetsRequired = 5;
         playerStats.isBossMode = false;
         playerStats.isUberBoss = false;
+        playerStats.usedSecondWind = false;
         mob = null;
         
         let p = resolvePlayerStats();
@@ -709,37 +732,46 @@ window.onload = function() {
             if (playerStats.killCount >= playerStats.targetsRequired) {
                 if (playerStats.dungeonWave < 5) {
                     let label = "MINIBOSS (Wave " + playerStats.dungeonWave + ")";
-                    let hp = 40 * scale * hpScale;
-                    mob = { x: 750, y: 120, w: 30, h: 50, type: "dungeon_miniboss", hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor((3 + (3 * scale)) * 4.5), flashTimer: 0, isStopped: false };
+                    let hp = 30 * scale * hpScale;
+                    mob = { x: 750, y: 120, w: 30, h: 50, type: "dungeon_miniboss", hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor((1 + (2 * scale)) * 4.5), flashTimer: 0, isStopped: false };
                 } else {
                     let label = "DUNGEON OVERLORD";
-                    let hp = 80 * scale * hpScale;
-                    mob = { x: 750, y: 90, w: 50, h: 90, type: "dungeon_boss", hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor((4 + (4 * scale)) * 5.0), flashTimer: 0, isStopped: false };
+                    let hp = 60 * scale * hpScale;
+                    mob = { x: 750, y: 90, w: 50, h: 90, type: "dungeon_boss", hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor((2 + (3 * scale)) * 5.0), flashTimer: 0, isStopped: false };
                 }
             } else {
                 let isBat = Math.random() > 0.5;
-                mob = { x: 750, y: isBat ? 100 : 160, w: 25, h: 25, type: isBat ? "bat" : "crawler", hp: Math.floor(18 * scale * hpScale), maxHp: Math.floor(18 * scale * hpScale), damage: Math.floor((1 + (1.2 * scale)) * 4.0), flashTimer: 0, isStopped: false };
+                mob = { x: 750, y: isBat ? 100 : 160, w: 25, h: 25, type: isBat ? "bat" : "crawler", hp: Math.floor(14 * scale * hpScale), maxHp: Math.floor(14 * scale * hpScale), damage: Math.floor((1 + (1 * scale)) * 4.0), flashTimer: 0, isStopped: false };
             }
         } else {
+            let tier = getStageTier();
             if (playerStats.isBossMode) {
+                let baseBossHp = 45 * scale * (playerStats.isUberBoss ? 1.5 : 1);
+                mob = { x: 750, y: 100, w: 40, h: 80, type: "boss", visualTier: tier, hp: Math.floor(baseBossHp), maxHp: Math.floor(baseBossHp), damage: Math.floor((2 + (3 * scale)) * 5.0), flashTimer: 0, isStopped: false };
                 let label = playerStats.isUberBoss ? "ENRAGED RIFT GUARDIAN" : "STAGE BOSS";
-                let baseBossHp = 55 * scale * (playerStats.isUberBoss ? 1.5 : 1);
-                mob = { x: 750, y: 100, w: 40, h: 80, type: "boss", hp: Math.floor(baseBossHp), maxHp: Math.floor(baseBossHp), damage: Math.floor((2 + (3 * scale)) * 5.0), flashTimer: 0, isStopped: false };
                 pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[${label}]</span> blocked your transit route!`);
             } else {
-                let isBandit = Math.random() > 0.6;
-                mob = { x: 750, y: isBandit ? 145 : 160, w: isBandit ? 20 : 30, h: isBandit ? 45 : 25, type: isBandit ? "bandit" : "slime", hp: Math.floor(16 * scale), maxHp: Math.floor(16 * scale), damage: Math.floor((1 + (1.2 * scale)) * 4.5), flashTimer: 0, isStopped: false };
+                let isMelee = Math.random() > 0.5;
+                mob = { x: 750, y: isMelee ? 145 : 160, w: isMelee ? 25 : 30, h: isMelee ? 40 : 25, type: "mob", isMelee: isMelee, visualTier: tier, hp: Math.floor(12 * scale), maxHp: Math.floor(12 * scale), damage: Math.floor((1 + (1 * scale)) * 4.5), flashTimer: 0, isStopped: false };
             }
         }
     }
 
     function spawnDeathParticles(x, y, type) {
         let colors = []; let count = 15;
-        if (type === "slime") colors = ["#2ecc71", "#145a32", "#1e8449"];
-        else if (type === "bandit") colors = ["#c0392b", "#922b21", "#e67e22", "#d35400"];
+        if (type === "mob" || type === "boss") {
+            let t = mob ? mob.visualTier : getStageTier();
+            if (t===0) colors = ["#2ecc71", "#8B4513", "#27ae60"];
+            else if (t===1) colors = ["#bdc3c7", "#7f8c8d", "#2c3e50"];
+            else if (t===2) colors = ["#c0392b", "#e67e22", "#111"];
+            else if (t===3) colors = ["#8e44ad", "#2ecc71", "#1abc9c"];
+            else colors = ["#34495e", "#9b59b6", "#ecf0f1"];
+            if (type === "boss") count = 35;
+        }
         else if (type === "bat") colors = ["#5b2c6f", "#17202a", "#8e44ad"];
         else if (type === "crawler") colors = ["#a04000", "#d35400", "#e67e22"];
-        else if (type === "boss" || type === "dungeon_miniboss" || type === "dungeon_boss") { colors = playerStats.isUberBoss ? ["#9b59b6", "#1abc9c", "#e74c3c", "#f1c40f"] : ["#8B4513", "#228B22", "#e74c3c", "#5c4033"]; count = 35; }
+        else if (type === "dungeon_miniboss" || type === "dungeon_boss") { colors = ["#9b59b6", "#1abc9c", "#e74c3c", "#f1c40f"]; count = 35; }
+        
         colors.push("#f1c40f", "#f39c12");
         for (let i = 0; i < count; i++) {
             particles.push({ x: x + (Math.random() * 15), y: y + (Math.random() * 20), vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.7) * 7, radius: Math.random() * 3 + 1.5, color: colors[Math.floor(Math.random() * colors.length)], alpha: 1, life: Math.random() * 25 + 15 });
@@ -1067,7 +1099,12 @@ window.onload = function() {
         html += `<div class="tt-title" style="color:${titleColor}; white-space:normal;">${item.name}${temperTag}</div>`;
         html += `<div class="tt-subtitle">${subtitle}</div>`;
 
-        if (item.type === "artifact") {
+        if (item.id === "dummy") {
+            html += `<div class="tt-stat-line" style="color:#d2b4de; margin-bottom: 6px; white-space:normal;">• Effect: ${item.desc}</div>`;
+            html += `<div class="tt-trait">${item.breakdown}</div>`;
+            html += `<div style="font-weight:bold; color:#bdc3c7; margin-top:8px; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Bonus Parameters:</div>`;
+            html += `<div class="tt-stat-line" style="color:#aaa; font-style:italic;">* Rolls 3 random stat modifiers upon drop.</div>`;
+        } else if (item.type === "artifact") {
             html += `<div class="tt-stat-line" style="color:#d2b4de; margin-bottom: 6px; white-space:normal;">• Effect: ${item.desc}</div>`;
             html += `<div class="tt-trait">${item.breakdown}</div>`;
             html += `<div style="font-weight:bold; color:#aaa; margin-top:8px; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Bonus Parameters:</div>`;
@@ -1075,19 +1112,21 @@ window.onload = function() {
             html += `<div style="font-weight:bold; color:#aaa; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Current Parameters:</div>`;
         }
 
-        if (item.atk > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ⚔️ Attack: ${item.atk}</div>`;
-        if (item.maxHp > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ❤️ Max HP: ${item.maxHp}</div>`;
-        if (item.def > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🛡️ Defense: ${item.def}</div>`;
-        if (item.moveSpeed > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 👟 Move Speed: ${item.moveSpeed}</div>`;
-        
-        if (item.critChance > 0) html += `<div class="tt-stat-line" style="color:#e67e22;">• ✨ Crit Chance: +${Math.floor(item.critChance*100)}%</div>`;
-        if (item.critDamage > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• 💥 Crit Multi: +${Math.floor(item.critDamage*100)}%</div>`;
-        if (item.block > 0) html += `<div class="tt-stat-line" style="color:#3498db;">• 🛡️ Block Rate: +${Math.floor(item.block*100)}%</div>`;
-        if (item.parry > 0) html += `<div class="tt-stat-line" style="color:#e74c3c;">• ⚡ Parry Rate: +${Math.floor(item.parry*100)}%</div>`;
-        if (item.activeAttackSpeed < 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• ⚡ Active Atk Spd: ${item.activeAttackSpeed}f</div>`;
-        if (item.idleAttackSpeed < 0) html += `<div class="tt-stat-line" style="color:#1abc9c;">• ⏱️ Idle Atk Spd: ${item.idleAttackSpeed}f</div>`;
-        
-        if (item.statsRolled === 0 && item.temperLevel === 0 && item.type !== "artifact") { html += `<div class="tt-stat-line" style="color:#7f8c8d; font-style:italic; margin-top:4px;">No bonus modifiers applied.</div>`; }
+        if (item.id !== "dummy") {
+            if (item.atk > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ⚔️ Attack: ${item.atk}</div>`;
+            if (item.maxHp > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ❤️ Max HP: ${item.maxHp}</div>`;
+            if (item.def > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🛡️ Defense: ${item.def}</div>`;
+            if (item.moveSpeed > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 👟 Move Speed: ${item.moveSpeed}</div>`;
+            
+            if (item.critChance > 0) html += `<div class="tt-stat-line" style="color:#e67e22;">• ✨ Crit Chance: +${Math.floor(item.critChance*100)}%</div>`;
+            if (item.critDamage > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• 💥 Crit Multi: +${Math.floor(item.critDamage*100)}%</div>`;
+            if (item.block > 0) html += `<div class="tt-stat-line" style="color:#3498db;">• 🛡️ Block Rate: +${Math.floor(item.block*100)}%</div>`;
+            if (item.parry > 0) html += `<div class="tt-stat-line" style="color:#e74c3c;">• ⚡ Parry Rate: +${Math.floor(item.parry*100)}%</div>`;
+            if (item.activeAttackSpeed < 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• ⚡ Active Atk Spd: ${item.activeAttackSpeed}f</div>`;
+            if (item.idleAttackSpeed < 0) html += `<div class="tt-stat-line" style="color:#1abc9c;">• ⏱️ Idle Atk Spd: ${item.idleAttackSpeed}f</div>`;
+            
+            if (item.statsRolled === 0 && item.temperLevel === 0 && item.type !== "artifact") { html += `<div class="tt-stat-line" style="color:#7f8c8d; font-style:italic; margin-top:4px;">No bonus modifiers applied.</div>`; }
+        }
 
         if (compareEq && !isCurrentlyEquipped) {
             html += `<div style="font-weight:bold; color:#3498db; margin-top:8px; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Net Change vs. Equipped:</div>`;
@@ -1476,13 +1515,19 @@ window.onload = function() {
             pushToast("Ancient Core", null, "#9b59b6", true, 1);
         } else if (!isBoss && !playerStats.isDungeonMode) { 
             if (Math.random() < 0.15) {
-                let etcItemName = mob.type === "bandit" ? "Iron Scrap" : "Sticky Gel";
+                let etcItemName = Math.random() > 0.5 ? "Iron Scrap" : "Sticky Gel";
                 addEtcDrop(etcItemName); 
                 effects.push({ x: mob.x + 10, y: mob.y + 10, text: "+1 " + etcItemName, color: "#bdc3c7", life: 35 });
             }
-            if (Math.random() < 0.01 && playerStats.dungeonKeys < 3) {
-                playerStats.dungeonKeys++;
-                if (playerStats.dungeonKeys < 3) playerStats.nextKeyTime = Date.now() + 3600000;
+            
+            let keyTypes = ['equip', 'gold', 'mat'];
+            let randomKey = keyTypes[Math.floor(Math.random() * keyTypes.length)];
+            let countField = randomKey + 'Keys';
+            let timeField = 'next' + randomKey.charAt(0).toUpperCase() + randomKey.slice(1) + 'KeyTime';
+            
+            if (Math.random() < 0.01 && playerStats[countField] < 3) {
+                playerStats[countField]++;
+                if (playerStats[countField] < 3) playerStats[timeField] = Date.now() + 3600000;
                 pushToast("Dungeon Key", null, "#8e44ad", true, 1);
             }
         }
@@ -1502,7 +1547,8 @@ window.onload = function() {
             } else if (mob.type === "dungeon_boss") {
                 playerStats.isDungeonMode = false;
                 playerStats.killCount = 0;
-                playerStats.targetsRequired = 7;
+                playerStats.targetsRequired = 5;
+                playerStats.usedSecondWind = false;
                 pushLog(`<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON CLEARED] Returning to the surface.</span>`);
                 playerStats.currentHp = p.maxHp; 
                 window.saveGame();
@@ -1518,6 +1564,7 @@ window.onload = function() {
             }
             playerStats.killCount = 0; playerStats.isBossMode = false; playerStats.isFarmingLoop = false;
             playerStats.isUberBoss = false; 
+            playerStats.usedSecondWind = false;
             playerStats.currentHp = p.maxHp; 
             window.saveGame();
         } else { 
@@ -1536,20 +1583,26 @@ window.onload = function() {
         playerStats.isUberBoss = false; 
         playerStats.isDungeonMode = false;
         playerStats.killCount = 0; 
-        playerStats.targetsRequired = 7;
+        playerStats.targetsRequired = 5;
+        playerStats.usedSecondWind = false;
         mob = null;
-        let p = resolvePlayerStats(); playerStats.currentHp = p.maxHp; updateUI();
+        updateUI();
         pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[DEFEATED] Progress reset. Stage restarted!</span>`);
         
         let overlay = document.getElementById('death-overlay');
         overlay.style.display = "flex";
-        setTimeout(() => { 
-            overlay.style.display = "none"; 
-            reviveTimer = 90;
-            isGamePaused = false;
-            window.saveGame();
-        }, 1500);
+        window.saveGame();
     }
+
+    window.respawnHero = function() {
+        let overlay = document.getElementById('death-overlay');
+        overlay.style.display = "none";
+        let p = resolvePlayerStats(); 
+        playerStats.currentHp = p.maxHp; 
+        updateUI();
+        reviveTimer = 90;
+        isGamePaused = false;
+    };
 
     window.rechallengeBoss = function() { 
         playerStats.isBossMode = true; playerStats.isFarmingLoop = false; mob = null; updateUI(); 
@@ -1716,26 +1769,38 @@ window.onload = function() {
         if (isGamePaused) return;
         
         let now = Date.now();
-        if (playerStats.dungeonKeys < 3) {
-            if (!playerStats.nextKeyTime || playerStats.nextKeyTime < now - 3600000) {
-                playerStats.nextKeyTime = now + 3600000;
-            } else if (now >= playerStats.nextKeyTime) {
-                playerStats.dungeonKeys++;
-                if (playerStats.dungeonKeys < 3) playerStats.nextKeyTime = now + 3600000;
+        let keyTypes = ['equip', 'gold', 'mat'];
+        keyTypes.forEach(k => {
+            let count = k + 'Keys';
+            let time = 'next' + k.charAt(0).toUpperCase() + k.slice(1) + 'KeyTime';
+            if (playerStats[count] < 3) {
+                if (!playerStats[time] || playerStats[time] < now - 3600000) {
+                    playerStats[time] = now + 3600000;
+                } else if (now >= playerStats[time]) {
+                    playerStats[count]++;
+                    if (playerStats[count] < 3) playerStats[time] = now + 3600000;
+                }
             }
+        });
+
+        if (document.getElementById('dungeon-menu').style.display === 'block') {
+            keyTypes.forEach(k => {
+                let count = k + 'Keys';
+                let time = 'next' + k.charAt(0).toUpperCase() + k.slice(1) + 'KeyTime';
+                let timerEl = document.getElementById('dt-' + k);
+                let keysEl = document.getElementById('dk-' + k);
+                
+                if (playerStats[count] < 3) {
+                    let msLeft = playerStats[time] - now;
+                    let mins = Math.floor(msLeft / 60000);
+                    let secs = Math.floor((msLeft % 60000) / 1000);
+                    timerEl.innerText = `(${mins}m ${secs}s)`;
+                } else {
+                    timerEl.innerText = "(Full)";
+                }
+                keysEl.innerText = playerStats[count];
+            });
         }
-        
-        let timerEl = document.getElementById('dungeon-timer-text');
-        let keysEl = document.getElementById('dungeon-keys-text');
-        if (playerStats.dungeonKeys < 3) {
-            let msLeft = playerStats.nextKeyTime - now;
-            let mins = Math.floor(msLeft / 60000);
-            let secs = Math.floor((msLeft % 60000) / 1000);
-            timerEl.innerText = `(${mins}m ${secs}s)`;
-        } else {
-            timerEl.innerText = "(Full)";
-        }
-        keysEl.innerText = playerStats.dungeonKeys;
 
         let p = resolvePlayerStats();
         let scrollSpeed = p.moveSpeed * 0.3;
@@ -1772,7 +1837,7 @@ window.onload = function() {
                             let counterDmg = p.atk * (playerStats.adrenalineTimer > 0 ? 2 : 1);
                             mob.hp -= counterDmg;
                             effects.push({ x: mob.x, y: mob.y, text: "⚔️ " + counterDmg, color: "#f1c40f", life: 20 });
-                            if (mob.hp <= 0) handleMobDeath();
+                            if (mob.hp <= 0) { handleMobDeath(); return; }
                         }
                     }
                     else if (Math.random() < p.block) { 
@@ -1782,7 +1847,16 @@ window.onload = function() {
                     else {
                         let netDamage = Math.max(1, mob.damage - p.def); playerStats.currentHp -= netDamage; 
                         effects.push({ x: hero.x, y: hero.y, text: "-" + netDamage, color: "#e74c3c", life: 20 });
-                        if (playerStats.currentHp <= 0) { handlePlayerDefeat(); return; }
+                        
+                        if (playerStats.currentHp <= 0) { 
+                            if (checkArtifactTrait("second_wind") && !playerStats.usedSecondWind) {
+                                playerStats.usedSecondWind = true;
+                                playerStats.currentHp = Math.floor(p.maxHp * 0.5);
+                                effects.push({ x: hero.x, y: hero.y - 20, text: "🔥 SECOND WIND!", color: "#e67e22", life: 40 });
+                            } else {
+                                handlePlayerDefeat(); return; 
+                            }
+                        }
                     }
                     updateUI();
                 }
@@ -1795,6 +1869,8 @@ window.onload = function() {
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
+        let tier = getStageTier();
+
         if (playerStats.isDungeonMode) {
             let caveGrad = ctx.createLinearGradient(0, 0, 0, 180);
             
@@ -1837,18 +1913,27 @@ window.onload = function() {
             });
         } else {
             let skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
-            skyGrad.addColorStop(0, playerStats.isBossMode ? "#1a0b1c" : "#2b5876");
-            skyGrad.addColorStop(1, playerStats.isBossMode ? "#000000" : "#4e4376");
+            if (playerStats.isBossMode) {
+                skyGrad.addColorStop(0, "#1a0b1c"); skyGrad.addColorStop(1, "#000000");
+            } else {
+                if (tier===0) { skyGrad.addColorStop(0, "#2b5876"); skyGrad.addColorStop(1, "#4e4376"); }
+                else if (tier===1) { skyGrad.addColorStop(0, "#2c3e50"); skyGrad.addColorStop(1, "#17202a"); }
+                else if (tier===2) { skyGrad.addColorStop(0, "#641e16"); skyGrad.addColorStop(1, "#1b0000"); }
+                else if (tier===3) { skyGrad.addColorStop(0, "#145a32"); skyGrad.addColorStop(1, "#0b2b18"); }
+                else if (tier===4) { skyGrad.addColorStop(0, "#154360"); skyGrad.addColorStop(1, "#081a25"); }
+            }
             ctx.fillStyle = skyGrad; 
             ctx.fillRect(0, 0, canvas.width, 180);
 
-            ctx.fillStyle = playerStats.isBossMode ? "#1a0b1c" : "#212f3d";
+            ctx.fillStyle = playerStats.isBossMode ? "#1a0b1c" : (tier===1 ? "#1c2833" : (tier===2 ? "#4a2311" : (tier===3 ? "#0e331c" : (tier===4 ? "#17202a" : "#212f3d"))));
             ctx.beginPath(); ctx.moveTo(0, 180); ctx.lineTo(150, 80); ctx.lineTo(300, 180); ctx.fill();
             ctx.beginPath(); ctx.moveTo(200, 180); ctx.lineTo(400, 50); ctx.lineTo(600, 180); ctx.fill();
             ctx.beginPath(); ctx.moveTo(500, 180); ctx.lineTo(650, 90); ctx.lineTo(800, 180); ctx.fill();
 
-            ctx.fillStyle = "#3e2723"; ctx.fillRect(0, 180, canvas.width, 70);
-            ctx.fillStyle = "#4e342e";
+            ctx.fillStyle = (tier===1 ? "#34495e" : (tier===2 ? "#7b241c" : (tier===3 ? "#196f3d" : (tier===4 ? "#2e4053" : "#3e2723")))); 
+            ctx.fillRect(0, 180, canvas.width, 70);
+            
+            ctx.fillStyle = (tier===1 ? "#2c3e50" : (tier===2 ? "#4a2311" : (tier===3 ? "#114f2b" : (tier===4 ? "#1c2833" : "#4e342e"))));
             for(let i=0; i<canvas.width+80; i+=80) { 
                 let gx = i - (groundScroll % 80);
                 ctx.fillRect(gx, 200, 25, 4);
@@ -1857,70 +1942,150 @@ window.onload = function() {
                 ctx.fillRect(gx + 60, 225, 8, 3);
             }
 
-            ctx.fillStyle = "#2ecc71"; ctx.fillRect(0, 180, canvas.width, 8);
-            ctx.fillStyle = "#27ae60"; ctx.fillRect(0, 188, canvas.width, 6);
+            ctx.fillStyle = (tier===1 ? "#7f8c8d" : (tier===2 ? "#922b21" : (tier===3 ? "#229954" : (tier===4 ? "#5d6d7e" : "#2ecc71")))); 
+            ctx.fillRect(0, 180, canvas.width, 8);
+            ctx.fillStyle = (tier===1 ? "#95a5a6" : (tier===2 ? "#a93226" : (tier===3 ? "#1e8449" : (tier===4 ? "#85929e" : "#27ae60")))); 
+            ctx.fillRect(0, 188, canvas.width, 6);
             
             bgScenery.forEach(s => {
                 if (s.type === 'tree') {
                     let tx = s.x, ty = s.y - 40 * s.size, ts = s.size;
-                    ctx.fillStyle = "#5c4033"; ctx.fillRect(tx - 6*ts, ty, 12*ts, 40 * ts);
-                    ctx.fillStyle = "#3e2723"; ctx.fillRect(tx + 2*ts, ty, 4*ts, 40 * ts); 
                     
-                    ctx.fillStyle = "#1e8449"; ctx.beginPath(); ctx.arc(tx, ty - 10*ts, 22 * ts, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = "#27ae60"; ctx.beginPath(); ctx.arc(tx - 8*ts, ty - 5*ts, 18 * ts, 0, Math.PI*2); ctx.fill(); 
-                    ctx.fillStyle = "#2ecc71"; ctx.beginPath(); ctx.arc(tx + 8*ts, ty - 5*ts, 18 * ts, 0, Math.PI*2); ctx.fill(); 
-                    ctx.fillStyle = "#2ecc71"; ctx.beginPath(); ctx.arc(tx, ty - 15*ts, 15 * ts, 0, Math.PI*2); ctx.fill(); 
+                    if (tier===1) {
+                        ctx.fillStyle = "#5d6d7e"; ctx.beginPath(); ctx.moveTo(tx - 10*ts, 180); ctx.lineTo(tx, ty); ctx.lineTo(tx + 10*ts, 180); ctx.fill();
+                    } else if (tier===2) {
+                        ctx.fillStyle = "#111"; ctx.fillRect(tx - 3*ts, ty, 6*ts, 40 * ts);
+                        ctx.fillStyle = "#a93226"; ctx.beginPath(); ctx.arc(tx, ty, 15 * ts, 0, Math.PI*2); ctx.fill();
+                    } else if (tier===4) {
+                        ctx.fillStyle = "#1c2833"; ctx.fillRect(tx - 2*ts, ty, 4*ts, 40 * ts);
+                        ctx.fillStyle = "#2c3e50"; ctx.beginPath(); ctx.arc(tx, ty - 10*ts, 12 * ts, 0, Math.PI*2); ctx.fill();
+                    } else {
+                        let isSwamp = tier===3;
+                        ctx.fillStyle = isSwamp ? "#114f2b" : "#5c4033"; ctx.fillRect(tx - 6*ts, ty, 12*ts, 40 * ts);
+                        ctx.fillStyle = isSwamp ? "#0b2b18" : "#3e2723"; ctx.fillRect(tx + 2*ts, ty, 4*ts, 40 * ts); 
+                        ctx.fillStyle = isSwamp ? "#145a32" : "#1e8449"; ctx.beginPath(); ctx.arc(tx, ty - 10*ts, 22 * ts, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = isSwamp ? "#1e8449" : "#27ae60"; ctx.beginPath(); ctx.arc(tx - 8*ts, ty - 5*ts, 18 * ts, 0, Math.PI*2); ctx.fill(); 
+                        ctx.fillStyle = isSwamp ? "#229954" : "#2ecc71"; ctx.beginPath(); ctx.arc(tx + 8*ts, ty - 5*ts, 18 * ts, 0, Math.PI*2); ctx.fill(); 
+                        ctx.fillStyle = isSwamp ? "#229954" : "#2ecc71"; ctx.beginPath(); ctx.arc(tx, ty - 15*ts, 15 * ts, 0, Math.PI*2); ctx.fill(); 
+                    }
                 } else {
                     let bx = s.x, by = s.y, bs = s.size;
-                    ctx.fillStyle = "#1e8449"; ctx.beginPath(); ctx.arc(bx, by - 8 * bs, 14 * bs, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = "#27ae60"; ctx.beginPath(); ctx.arc(bx + 10 * bs, by - 6 * bs, 10 * bs, 0, Math.PI*2); ctx.fill();
+                    let c1 = tier===1?"#5d6d7e": (tier===2?"#641e16": (tier===3?"#114f2b": (tier===4?"#34495e": "#1e8449")));
+                    let c2 = tier===1?"#7f8c8d": (tier===2?"#922b21": (tier===3?"#145a32": (tier===4?"#5d6d7e": "#27ae60")));
+                    ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(bx, by - 8 * bs, 14 * bs, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(bx + 10 * bs, by - 6 * bs, 10 * bs, 0, Math.PI*2); ctx.fill();
                     ctx.beginPath(); ctx.arc(bx - 10 * bs, by - 6 * bs, 10 * bs, 0, Math.PI*2); ctx.fill();
                 }
             });
         }
 
         let hx = hero.x; let hy = hero.y;
-        ctx.fillStyle = playerStats.frenzyTimer > 0 ? "#e67e22" : "#3498db";
-        ctx.fillRect(hx + 5, hy, 15, 15);
-        ctx.fillRect(hx + 5, hy + 15, 15, 20);
-        if (hero.slashFrame) { 
-            ctx.fillRect(hx + 15, hy + 15, 20, 5);
-            ctx.fillStyle = "#ecf0f1"; ctx.fillRect(hx + 35, hy + 10, 25, 5);
+        
+        ctx.save();
+        ctx.translate(hx + 12, hy + 15);
+        let bounce = (!mob || !mob.isStopped) ? Math.abs(Math.sin(Date.now() / 150)) * 3 : 0;
+        
+        ctx.fillStyle = "#c0392b";
+        ctx.beginPath(); ctx.moveTo(-6, bounce); ctx.lineTo(-18, 15); ctx.lineTo(-2, 18); ctx.fill();
+        
+        ctx.fillStyle = "#95a5a6"; ctx.fillRect(-8, bounce, 14, 16);
+        ctx.fillStyle = "#bdc3c7"; ctx.fillRect(-10, -14 + bounce, 18, 16);
+        ctx.fillStyle = "#2c3e50"; ctx.fillRect(0, -8 + bounce, 6, 4);
+        ctx.fillStyle = playerStats.frenzyTimer > 0 ? "#f1c40f" : "#e74c3c"; 
+        ctx.fillRect(-5, -20 + bounce, 4, 6); ctx.fillRect(-9, -16 + bounce, 8, 4);
+
+        ctx.translate(2, 6 + bounce);
+        if (hero.slashFrame) {
+            ctx.rotate(Math.PI / 2.5); 
+            ctx.fillStyle = "#7f8c8d"; ctx.fillRect(-2, -2, 4, 10); 
+            ctx.fillStyle = "#8e44ad"; ctx.fillRect(-5, 8, 10, 4); 
+            ctx.fillStyle = "#ecf0f1"; ctx.fillRect(-2, 12, 4, 25); 
+            
+            ctx.fillStyle = "rgba(236, 240, 241, 0.4)";
+            ctx.beginPath(); ctx.arc(0, 0, 35, -Math.PI/4, Math.PI/2); ctx.lineTo(0,0); ctx.fill();
         } else {
-            ctx.fillRect(hx + 10, hy + 20, 5, 15);
+            ctx.rotate(-Math.PI / 6); 
+            ctx.fillStyle = "#7f8c8d"; ctx.fillRect(-2, -2, 4, 10); 
+            ctx.fillStyle = "#8e44ad"; ctx.fillRect(-5, 8, 10, 4); 
+            ctx.fillStyle = "#ecf0f1"; ctx.fillRect(-2, 12, 4, 25); 
         }
+        ctx.restore();
 
         if (mob) {
-            ctx.fillStyle = mob.flashTimer > 0 ? "#fff" : (mob.type === "boss" || mob.type === "dungeon_boss" || mob.type === "dungeon_miniboss" ? "#5c4033" : (mob.type === "bat" ? "#5b2c6f" : (mob.type === "crawler" ? "#a04000" : (mob.type === "bandit" ? "#c0392b" : "#006400"))));
+            let t = mob.visualTier;
+            ctx.fillStyle = mob.flashTimer > 0 ? "#fff" : (mob.type === "boss" || mob.type === "dungeon_boss" || mob.type === "dungeon_miniboss" ? "#5c4033" : (mob.type === "bat" ? "#5b2c6f" : (mob.type === "crawler" ? "#a04000" : (mob.type === "mob" ? (t===0?"#27ae60":(t===1?"#bdc3c7":(t===2?"#c0392b":(t===3?"#8e44ad":"#34495e")))) : "#006400"))));
             
-            if (mob.type === "slime") {
-                let hop = mob.isStopped ? 0 : Math.abs(Math.sin(Date.now() / 150)) * 15;
-                let sx = mob.x, sy = mob.y + mob.h - hop, sw = mob.w;
-                ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(sx, sy - mob.h, sx + sw/2, sy - mob.h); ctx.quadraticCurveTo(sx + sw, sy - mob.h, sx + sw, sy); ctx.lineTo(sx, sy); ctx.fill();
-                ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.beginPath(); ctx.arc(sx + sw*0.7, sy - mob.h*0.6, 2, 0, Math.PI*2); ctx.fill();
-            } else if (mob.type === "boss" || mob.type === "dungeon_boss") {
-                ctx.fillStyle = playerStats.isDungeonMode ? (playerStats.currentDungeon === 'gold' ? "#b8860b" : (playerStats.currentDungeon === 'mat' ? "#117a65" : "#2c3e50")) : "#8B4513";
-                ctx.fillRect(mob.x, mob.y, mob.w, mob.h);
-                ctx.beginPath(); ctx.moveTo(mob.x, mob.y+mob.h); ctx.lineTo(mob.x-10, mob.y+mob.h+5); ctx.lineTo(mob.x, mob.y+mob.h-5); ctx.fill();
-                ctx.beginPath(); ctx.moveTo(mob.x+mob.w, mob.y+mob.h); ctx.lineTo(mob.x+mob.w+10, mob.y+mob.h+5); ctx.lineTo(mob.x+mob.w, mob.y+mob.h-5); ctx.fill();
-                
-                ctx.fillStyle = mob.flashTimer > 0 ? "#fff" : (playerStats.isDungeonMode ? (playerStats.currentDungeon === 'gold' ? "#d4ac0d" : (playerStats.currentDungeon === 'mat' ? "#1abc9c" : "#5d6d7e")) : "#228B22"); 
-                ctx.beginPath(); ctx.arc(mob.x + mob.w/2, mob.y, 35, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(mob.x - 5, mob.y + 15, 25, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(mob.x + mob.w + 5, mob.y + 15, 25, 0, Math.PI*2); ctx.fill();
-
-                if (mob.flashTimer === 0) {
-                    ctx.fillStyle = playerStats.isDungeonMode ? (playerStats.currentDungeon === 'gold' ? "#7d3c98" : "#000") : "#000";
-                    ctx.beginPath(); ctx.ellipse(mob.x + 12, mob.y + 25, 3, 6, 0, 0, Math.PI*2); ctx.fill();
-                    ctx.beginPath(); ctx.ellipse(mob.x + mob.w - 12, mob.y + 25, 3, 6, 0, 0, Math.PI*2); ctx.fill();
-                    ctx.beginPath(); ctx.ellipse(mob.x + mob.w/2, mob.y + 45, 6, 8, 0, 0, Math.PI*2); ctx.fill();
+            if (mob.type === "mob") {
+                if (t===0) {
+                    if (mob.isMelee) { ctx.fillRect(mob.x, mob.y, mob.w, mob.h); ctx.fillStyle="#e67e22"; ctx.fillRect(mob.x+2, mob.y+4, 10, 4); } 
+                    else { 
+                        let hop = mob.isStopped ? 0 : Math.abs(Math.sin(Date.now() / 150)) * 15; let sx=mob.x, sy=mob.y+mob.h-hop, sw=mob.w;
+                        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(sx, sy-mob.h, sx+sw/2, sy-mob.h); ctx.quadraticCurveTo(sx+sw, sy-mob.h, sx+sw, sy); ctx.fill(); 
+                    }
+                } else if (t===1) {
+                    if (mob.isMelee) { ctx.fillRect(mob.x+10, mob.y, 4, 15); ctx.fillRect(mob.x+5, mob.y+15, 14, 25); } 
+                    else { ctx.beginPath(); ctx.arc(mob.x+15, mob.y+15, 10, 0, Math.PI*2); ctx.fill(); ctx.fillRect(mob.x+5, mob.y+25, 20, 15); }
+                } else if (t===2) {
+                    if (mob.isMelee) { ctx.beginPath(); ctx.moveTo(mob.x+15, mob.y); ctx.lineTo(mob.x, mob.y+mob.h); ctx.lineTo(mob.x+30, mob.y+mob.h); ctx.fill(); } 
+                    else { ctx.fillRect(mob.x, mob.y+10, 30, 15); ctx.fillRect(mob.x, mob.y+25, 5, 15); ctx.fillRect(mob.x+25, mob.y+25, 5, 15); }
+                } else if (t===3) {
+                    if (mob.isMelee) { ctx.beginPath(); ctx.arc(mob.x+15, mob.y+20, 12, 0, Math.PI*2); ctx.fill(); ctx.fillRect(mob.x, mob.y+20, 30, 2); ctx.fillRect(mob.x+5, mob.y+15, 20, 2); } 
+                    else { ctx.beginPath(); ctx.arc(mob.x+15, mob.y+10, 15, Math.PI, 0); ctx.fill(); ctx.fillRect(mob.x+10, mob.y+10, 10, 15); }
+                } else if (t===4) {
+                    if (mob.isMelee) { ctx.globalAlpha = 0.7; ctx.fillRect(mob.x, mob.y, 25, 40); ctx.globalAlpha = 1.0; } 
+                    else { let hover=Math.sin(Date.now()/150)*5; ctx.beginPath(); ctx.arc(mob.x+15, mob.y+10+hover, 12, Math.PI, 0); ctx.lineTo(mob.x+30, mob.y+35+hover); ctx.lineTo(mob.x, mob.y+35+hover); ctx.fill(); }
                 }
-                
-                if (!playerStats.isDungeonMode) {
-                    ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(mob.x + mob.w/2 - 12, mob.y + 8, 6, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = "#5c4033"; ctx.fillRect(mob.x + mob.w/2 - 13, mob.y + 1, 2, 4);
-                    ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(mob.x + mob.w/2 + 15, mob.y - 2, 5, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = "#5c4033"; ctx.fillRect(mob.x + mob.w/2 + 14, mob.y - 7, 2, 4);
+            } else if (mob.type === "boss" || mob.type === "dungeon_boss") {
+                if (playerStats.isDungeonMode) {
+                    ctx.fillStyle = playerStats.currentDungeon === 'gold' ? "#b8860b" : (playerStats.currentDungeon === 'mat' ? "#117a65" : "#2c3e50");
+                    ctx.fillRect(mob.x, mob.y, mob.w, mob.h);
+                    ctx.beginPath(); ctx.moveTo(mob.x, mob.y+mob.h); ctx.lineTo(mob.x-10, mob.y+mob.h+5); ctx.lineTo(mob.x, mob.y+mob.h-5); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(mob.x+mob.w, mob.y+mob.h); ctx.lineTo(mob.x+mob.w+10, mob.y+mob.h+5); ctx.lineTo(mob.x+mob.w, mob.y+mob.h-5); ctx.fill();
+                    
+                    ctx.fillStyle = mob.flashTimer > 0 ? "#fff" : (playerStats.currentDungeon === 'gold' ? "#d4ac0d" : (playerStats.currentDungeon === 'mat' ? "#1abc9c" : "#5d6d7e")); 
+                    ctx.beginPath(); ctx.arc(mob.x + mob.w/2, mob.y, 35, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(mob.x - 5, mob.y + 15, 25, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(mob.x + mob.w + 5, mob.y + 15, 25, 0, Math.PI*2); ctx.fill();
+
+                    if (mob.flashTimer === 0) {
+                        ctx.fillStyle = playerStats.currentDungeon === 'gold' ? "#7d3c98" : "#000";
+                        ctx.beginPath(); ctx.ellipse(mob.x + 12, mob.y + 25, 3, 6, 0, 0, Math.PI*2); ctx.fill();
+                        ctx.beginPath(); ctx.ellipse(mob.x + mob.w - 12, mob.y + 25, 3, 6, 0, 0, Math.PI*2); ctx.fill();
+                        ctx.beginPath(); ctx.ellipse(mob.x + mob.w/2, mob.y + 45, 6, 8, 0, 0, Math.PI*2); ctx.fill();
+                    }
+                } else {
+                    if (t===0) {
+                        ctx.fillStyle = "#8B4513"; ctx.fillRect(mob.x, mob.y, mob.w, mob.h);
+                        ctx.beginPath(); ctx.moveTo(mob.x, mob.y+mob.h); ctx.lineTo(mob.x-10, mob.y+mob.h+5); ctx.lineTo(mob.x, mob.y+mob.h-5); ctx.fill();
+                        ctx.beginPath(); ctx.moveTo(mob.x+mob.w, mob.y+mob.h); ctx.lineTo(mob.x+mob.w+10, mob.y+mob.h+5); ctx.lineTo(mob.x+mob.w, mob.y+mob.h-5); ctx.fill();
+                        ctx.fillStyle = mob.flashTimer > 0 ? "#fff" : "#228B22"; 
+                        ctx.beginPath(); ctx.arc(mob.x + mob.w/2, mob.y, 35, 0, Math.PI*2); ctx.fill();
+                        ctx.beginPath(); ctx.arc(mob.x - 5, mob.y + 15, 25, 0, Math.PI*2); ctx.fill();
+                        ctx.beginPath(); ctx.arc(mob.x + mob.w + 5, mob.y + 15, 25, 0, Math.PI*2); ctx.fill();
+                        if (mob.flashTimer === 0) {
+                            ctx.fillStyle = "#000"; ctx.beginPath(); ctx.ellipse(mob.x + 12, mob.y + 25, 3, 6, 0, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(mob.x + mob.w - 12, mob.y + 25, 3, 6, 0, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(mob.x + mob.w/2, mob.y + 45, 6, 8, 0, 0, Math.PI*2); ctx.fill();
+                        }
+                        ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(mob.x + mob.w/2 - 12, mob.y + 8, 6, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = "#5c4033"; ctx.fillRect(mob.x + mob.w/2 - 13, mob.y + 1, 2, 4);
+                        ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(mob.x + mob.w/2 + 15, mob.y - 2, 5, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = "#5c4033"; ctx.fillRect(mob.x + mob.w/2 + 14, mob.y - 7, 2, 4);
+                    } else if (t===1) {
+                        ctx.fillStyle = "#5d6d7e"; ctx.fillRect(mob.x, mob.y, mob.w, mob.h);
+                        ctx.fillRect(mob.x-10, mob.y+20, 60, 20); ctx.beginPath(); ctx.arc(mob.x+20, mob.y-10, 20, 0, Math.PI*2); ctx.fill();
+                        if (mob.flashTimer===0) { ctx.fillStyle="#f1c40f"; ctx.fillRect(mob.x+10, mob.y-15, 6, 6); ctx.fillRect(mob.x+24, mob.y-15, 6, 6); }
+                    } else if (t===2) {
+                        ctx.fillStyle = "#641e16"; ctx.fillRect(mob.x, mob.y, mob.w, mob.h);
+                        ctx.beginPath(); ctx.moveTo(mob.x, mob.y); ctx.lineTo(mob.x-15, mob.y-20); ctx.lineTo(mob.x+10, mob.y); ctx.fill();
+                        ctx.beginPath(); ctx.moveTo(mob.x+mob.w, mob.y); ctx.lineTo(mob.x+mob.w+15, mob.y-20); ctx.lineTo(mob.x+mob.w-10, mob.y); ctx.fill();
+                        if(mob.flashTimer===0){ctx.fillStyle="#f1c40f"; ctx.fillRect(mob.x+10, mob.y+10, 20, 5);}
+                    } else if (t===3) {
+                        ctx.fillStyle = "#fdf2e9"; ctx.fillRect(mob.x+10, mob.y+20, 20, mob.h-20);
+                        ctx.fillStyle = "#8e44ad"; ctx.beginPath(); ctx.arc(mob.x+20, mob.y+20, 30, Math.PI, 0); ctx.fill();
+                        ctx.fillStyle = "#2ecc71"; ctx.beginPath(); ctx.arc(mob.x+10, mob.y+10, 5, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(mob.x+30, mob.y+5, 4, 0, Math.PI*2); ctx.fill();
+                    } else if (t===4) {
+                        ctx.fillStyle = "#17202a"; ctx.beginPath(); ctx.moveTo(mob.x+20, mob.y); ctx.lineTo(mob.x, mob.y+mob.h); ctx.lineTo(mob.x+40, mob.y+mob.h); ctx.fill();
+                        if(mob.flashTimer===0){ctx.fillStyle="#1abc9c"; ctx.beginPath(); ctx.arc(mob.x+15, mob.y+30, 4, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(mob.x+25, mob.y+30, 4, 0, Math.PI*2); ctx.fill();}
+                    }
                 }
             } else if (mob.type === "bat") {
                 let hover = Math.sin(Date.now() / 100) * 5;
@@ -1938,11 +2103,6 @@ window.onload = function() {
                 ctx.fillStyle = playerStats.currentDungeon === 'gold' ? "#d4ac0d" : (playerStats.currentDungeon === 'mat' ? "#1abc9c" : "#5d6d7e"); 
                 ctx.beginPath(); ctx.moveTo(mob.x + mob.w/2, mob.y); ctx.lineTo(mob.x, mob.y + mob.h); ctx.lineTo(mob.x + mob.w, mob.y + mob.h); ctx.fill();
                 ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(mob.x + mob.w/2, mob.y + 20, 5, 0, Math.PI*2); ctx.fill();
-            } else {
-                ctx.fillRect(mob.x, mob.y, 20, 20);
-                ctx.fillRect(mob.x + 2, mob.y + 20, 16, 25);
-                ctx.fillRect(mob.x - 10, mob.y + 25, 15, 5);
-                ctx.fillStyle = "#ecf0f1"; ctx.fillRect(mob.x - 20, mob.y + 23, 10, 3);
             }
 
             let barW = (mob.type === "boss" || mob.type === "dungeon_boss") ? 50 : mob.w;
@@ -1953,17 +2113,24 @@ window.onload = function() {
         }
 
         if (!playerStats.isDungeonMode) {
+            let tier = getStageTier();
+            let cGrass = tier===1?"#7f8c8d": (tier===2?"#c0392b": (tier===3?"#1e8449": (tier===4?"#34495e": "#2ecc71")));
+            let cFlowerStem = tier===1?"#5d6d7e": (tier===2?"#922b21": (tier===3?"#145a32": (tier===4?"#2c3e50": "#27ae60")));
+            let cBush1 = tier===1?"#34495e": (tier===2?"#641e16": (tier===3?"#0b2b18": (tier===4?"#1c2833": "#145a32")));
+            let cBush2 = tier===1?"#5d6d7e": (tier===2?"#922b21": (tier===3?"#145a32": (tier===4?"#2c3e50": "#1e8449")));
+            let cBush3 = tier===1?"#7f8c8d": (tier===2?"#c0392b": (tier===3?"#1e8449": (tier===4?"#34495e": "#27ae60")));
+
             fgScenery.forEach(s => {
                 let sx = s.x, sy = s.y, ss = s.size;
                 if (s.type === 'grass') {
-                    ctx.fillStyle = "#2ecc71";
+                    ctx.fillStyle = cGrass;
                     ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(sx-5*ss, sy-10*ss, sx-8*ss, sy-15*ss); ctx.lineTo(sx-4*ss, sy); ctx.fill();
                     ctx.beginPath(); ctx.moveTo(sx+2*ss, sy); ctx.quadraticCurveTo(sx+5*ss, sy-12*ss, sx+2*ss, sy-18*ss); ctx.lineTo(sx+6*ss, sy); ctx.fill();
                     ctx.beginPath(); ctx.moveTo(sx+8*ss, sy); ctx.quadraticCurveTo(sx+12*ss, sy-8*ss, sx+15*ss, sy-12*ss); ctx.lineTo(sx+10*ss, sy); ctx.fill();
                 } else if (s.type === 'flower') {
-                    ctx.fillStyle = "#27ae60"; 
+                    ctx.fillStyle = cFlowerStem; ctx.strokeStyle = cFlowerStem;
                     ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(sx+3*ss, sy-10*ss, sx+1*ss, sy-18*ss); ctx.lineWidth=2; ctx.stroke();
-                    ctx.fillStyle = "#2ecc71"; ctx.beginPath(); ctx.ellipse(sx+4*ss, sy-8*ss, 4*ss, 2*ss, Math.PI/4, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.ellipse(sx+4*ss, sy-8*ss, 4*ss, 2*ss, Math.PI/4, 0, Math.PI*2); ctx.fill();
                     ctx.beginPath(); ctx.ellipse(sx-2*ss, sy-12*ss, 4*ss, 2*ss, -Math.PI/4, 0, Math.PI*2); ctx.fill();
                     ctx.fillStyle = s.color;
                     let px = sx+1*ss, py = sy-18*ss;
@@ -1972,50 +2139,26 @@ window.onload = function() {
                     }
                     ctx.fillStyle = "#f1c40f"; ctx.beginPath(); ctx.arc(px, py, 2.5*ss, 0, Math.PI*2); ctx.fill();
                 } else if (s.type === 'bush') {
-                    ctx.fillStyle = "#145a32"; ctx.beginPath(); ctx.arc(sx, sy, 14*ss, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = "#1e8449"; 
+                    ctx.fillStyle = cBush1; ctx.beginPath(); ctx.arc(sx, sy, 14*ss, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = cBush2; 
                     ctx.beginPath(); ctx.arc(sx-8*ss, sy-4*ss, 10*ss, 0, Math.PI*2); ctx.fill();
                     ctx.beginPath(); ctx.arc(sx+10*ss, sy-2*ss, 11*ss, 0, Math.PI*2); ctx.fill();
                     ctx.beginPath(); ctx.arc(sx+2*ss, sy-8*ss, 12*ss, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = "#27ae60"; 
+                    ctx.fillStyle = cBush3; 
                     ctx.beginPath(); ctx.arc(sx-4*ss, sy-10*ss, 6*ss, 0, Math.PI*2); ctx.fill();
                     ctx.beginPath(); ctx.arc(sx+6*ss, sy-8*ss, 5*ss, 0, Math.PI*2); ctx.fill();
                 }
             });
         }
 
-        if (reviveTimer > 0) {
-            ctx.save();
-            ctx.globalAlpha = reviveTimer / 90;
-            
-            let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            grad.addColorStop(0, "rgba(255, 255, 200, 0.8)");
-            grad.addColorStop(1, "rgba(255, 255, 200, 0)");
-            
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.moveTo(hero.x + 12, -10); 
-            ctx.lineTo(hero.x - 60, canvas.height); 
-            ctx.lineTo(hero.x + 80, canvas.height); 
-            ctx.fill();
-            
-            for(let i=0; i<8; i++) {
-                ctx.fillStyle = "#fff";
-                ctx.beginPath();
-                ctx.arc(hero.x - 40 + Math.random()*100, canvas.height - Math.random()*(90-reviveTimer)*4, Math.random()*2+1, 0, Math.PI*2);
-                ctx.fill();
-            }
-            ctx.restore();
-            reviveTimer--;
-        }
-
         particles.forEach(pt => { ctx.fillStyle = pt.color; ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2); ctx.fill(); });
-        effects.forEach(eff => { ctx.fillStyle = eff.color; ctx.font = "bold 12px sans-serif"; ctx.fillText(eff.text, eff.x, eff.y); });
+        effects.forEach(eff => { ctx.fillStyle = eff.color; ctx.font = "bold 18px sans-serif"; ctx.fillText(eff.text, eff.x, eff.y); });
         
         let buffEl = document.getElementById('hud-buff');
         let buffs = [];
         if (playerStats.frenzyTimer > 0) buffs.push(`🔥 FRENZY`);
         if (playerStats.adrenalineTimer > 0) buffs.push(`⚡ ADRENALINE`);
+        if (checkArtifactTrait("second_wind") && !playerStats.usedSecondWind) buffs.push(`🛡️ ANKH`);
         
         if (buffs.length > 0) {
             buffEl.innerText = buffs.join(" | ");
