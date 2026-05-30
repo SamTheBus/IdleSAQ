@@ -337,7 +337,6 @@
 
             <div id="tab-market" class="tab-content" onscroll="hideTooltip()" ontouchmove="hideTooltip()">
                 <div class="market-grid">
-                    <!-- Gacha & Altar -->
                     <div class="market-card" style="border-color: #f1c40f;" onmousemove="showGachaTooltip(event)" onmouseleave="hideTooltip()" ontouchstart="showGachaTooltip(event)">
                         <div>
                             <h3 style="margin-top:0; color:#f1c40f; font-size:14px;">🎰 VENDING MACHINE</h3>
@@ -360,7 +359,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- GOLD SHOP -->
                 <div style="margin-top: 15px; border-top: 2px solid #333; padding-top: 10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <h3 style="margin:0; color:#f1c40f; font-size:14px;">🛒 GOLD SHOP</h3>
@@ -442,7 +440,7 @@ window.onload = function() {
     let idCounter = 0;
     
     let forgeSelectedItem = null;
-    let forgeMode = 'temper'; // 'temper' or 'tier'
+    let forgeMode = 'temper'; 
 
     let hero = { x: 40, y: 155, w: 25, h: 35, attackTimer: 0, slashFrame: false };
     let mob = null;
@@ -562,10 +560,9 @@ window.onload = function() {
         fgScenery.push({ x: Math.random() * canvas.width, y: 190 + Math.random() * 60, type: fgType > 0.8 ? 'bush' : (fgType > 0.5 ? 'flower' : 'grass'), size: Math.random() * 0.7 + 0.5, color: flowerColors[Math.floor(Math.random() * flowerColors.length)] });
     }
 
-    // --- MARKET SYSTEM ---
     function refreshMarketShopIfNeeded() {
         if (Date.now() >= playerStats.shopRefreshTime || playerStats.shopItems.length === 0) {
-            playerStats.shopRefreshTime = Date.now() + (4 * 3600 * 1000); // 4 hours
+            playerStats.shopRefreshTime = Date.now() + (4 * 3600 * 1000); 
             playerStats.shopItems = [];
             
             let stageScale = Math.floor((playerStats.stage - 1) / 10) + 1;
@@ -573,34 +570,21 @@ window.onload = function() {
             
             for(let i=0; i<5; i++) {
                 let isIOTD = (i === 4);
-                let p = resolvePlayerStats();
-                let luckMultiplier = p.qly; 
-                let roll = Math.random() * 100;
-                let statLinesCount = 0;
+                let p = resolvePlayerStats(); let luckMultiplier = p.qly; let roll = Math.random() * 100; let statLinesCount = 0;
                 
                 if (isIOTD) {
-                    if (roll < (1.0 * luckMultiplier)) statLinesCount = 5; 
-                    else if (roll < (5.0 * luckMultiplier)) statLinesCount = 4;
-                    else if (roll < (20.0 * luckMultiplier)) statLinesCount = 3; 
-                    else if (roll < (50.0 * luckMultiplier)) statLinesCount = 2; 
-                    else statLinesCount = 1; // Guaranteed 1 star
+                    if (roll < (1.0 * luckMultiplier)) statLinesCount = 5; else if (roll < (5.0 * luckMultiplier)) statLinesCount = 4;
+                    else if (roll < (20.0 * luckMultiplier)) statLinesCount = 3; else if (roll < (50.0 * luckMultiplier)) statLinesCount = 2; else statLinesCount = 1; 
                 } else {
-                    if (roll < (0.01 * luckMultiplier)) statLinesCount = 5; 
-                    else if (roll < (0.10 * luckMultiplier)) statLinesCount = 4;
-                    else if (roll < (0.50 * luckMultiplier)) statLinesCount = 3; 
-                    else if (roll < (2.00 * luckMultiplier)) statLinesCount = 2; 
-                    else if (roll < (10.00 * luckMultiplier)) statLinesCount = 1; 
-                    else statLinesCount = 0;
+                    if (roll < (0.01 * luckMultiplier)) statLinesCount = 5; else if (roll < (0.10 * luckMultiplier)) statLinesCount = 4;
+                    else if (roll < (0.50 * luckMultiplier)) statLinesCount = 3; else if (roll < (2.00 * luckMultiplier)) statLinesCount = 2; 
+                    else if (roll < (10.00 * luckMultiplier)) statLinesCount = 1; else statLinesCount = 0;
                 }
 
                 let chosenType = types[Math.floor(Math.random() * types.length)];
-                
-                // Base Cost: 250g * stageScale. Increases drastically per star.
                 let cost = Math.floor(250 * stageScale * Math.pow(2.5, statLinesCount));
                 
-                playerStats.shopItems.push({
-                    type: chosenType, statsRolled: statLinesCount, stageScale: stageScale, cost: cost, purchased: false, isIOTD: isIOTD
-                });
+                playerStats.shopItems.push({ type: chosenType, statsRolled: statLinesCount, stageScale: stageScale, cost: cost, purchased: false, isIOTD: isIOTD });
             }
             window.saveGame();
         }
@@ -610,24 +594,14 @@ window.onload = function() {
     function renderMarketShop() {
         let listEl = document.getElementById('gold-shop-list');
         listEl.innerHTML = playerStats.shopItems.map((shopItem, index) => {
-            let nameColor = getTierColor(shopItem.statsRolled);
-            let tierName = getTierName(shopItem.statsRolled);
+            let nameColor = getTierColor(shopItem.statsRolled); let tierName = getTierName(shopItem.statsRolled);
             let name = `${tierName} ${shopItem.type.toUpperCase()} (+${shopItem.stageScale})`;
             let costColor = playerStats.coins >= shopItem.cost ? "#f1c40f" : "#e74c3c";
             
-            return `
-                <div class="shop-row ${shopItem.isIOTD ? 'iotd' : ''}">
-                    <div>
-                        ${shopItem.isIOTD ? '<span style="background:#f1c40f; color:#000; font-size:9px; font-weight:bold; padding:1px 3px; border-radius:2px;">ITEM OF THE DAY</span><br>' : ''}
-                        <strong style="color:${nameColor}; font-size:12px;">${name}</strong><br>
-                        <span style="font-size:10px; color:#aaa;">${shopItem.statsRolled}★ Quality</span>
-                    </div>
-                    <div style="text-align:right;">
-                        <div style="color:${costColor}; font-weight:bold; font-size:11px; margin-bottom:4px;">${shopItem.cost} Gold</div>
-                        <button class="btn-action" style="${shopItem.purchased || playerStats.coins < shopItem.cost ? 'opacity:0.5; cursor:not-allowed; background:#444;' : 'background:#f1c40f; color:#000;'}" onclick="buyShopItem(${index})">${shopItem.purchased ? 'SOLD' : 'BUY'}</button>
-                    </div>
-                </div>
-            `;
+            return `<div class="shop-row ${shopItem.isIOTD ? 'iotd' : ''}">
+                    <div>${shopItem.isIOTD ? '<span style="background:#f1c40f; color:#000; font-size:9px; font-weight:bold; padding:1px 3px; border-radius:2px;">ITEM OF THE DAY</span><br>' : ''}<strong style="color:${nameColor}; font-size:12px;">${name}</strong><br><span style="font-size:10px; color:#aaa;">${shopItem.statsRolled}★ Quality</span></div>
+                    <div style="text-align:right;"><div style="color:${costColor}; font-weight:bold; font-size:11px; margin-bottom:4px;">${shopItem.cost} Gold</div><button class="btn-action" style="${shopItem.purchased || playerStats.coins < shopItem.cost ? 'opacity:0.5; cursor:not-allowed; background:#444;' : 'background:#f1c40f; color:#000;'}" onclick="buyShopItem(${index})">${shopItem.purchased ? 'SOLD' : 'BUY'}</button></div>
+                </div>`;
         }).join("");
     }
 
@@ -638,9 +612,7 @@ window.onload = function() {
         let maxBag = checkArtifactTrait("bag_space") ? 50 : 20;
         if (inventory.EQUIP.length >= maxBag) { pushHeaderToast(`Inventory Full!`, "#e74c3c"); return; }
 
-        playerStats.coins -= shopItem.cost;
-        shopItem.purchased = true;
-        
+        playerStats.coins -= shopItem.cost; shopItem.purchased = true;
         generateEquipment(shopItem.type, shopItem.statsRolled, shopItem.stageScale, "Market", false, shopItem.statsRolled);
         renderMarketShop(); updateUI(); window.saveGame();
     };
@@ -648,17 +620,14 @@ window.onload = function() {
     window.buildAltarModal = function() {
         let listEl = document.getElementById('altar-list');
         listEl.innerHTML = ARTIFACT_POOL.map(art => {
-            return `
-                <div class="bag-item" style="cursor:help; border-left: 3px solid #1abc9c;" onclick="showDummyArtifact(event, '${art.trait}')">
+            return `<div class="bag-item" style="cursor:help; border-left: 3px solid #1abc9c;" onclick="showDummyArtifact(event, '${art.trait}')">
                     <div><strong style="color:#1abc9c;">⭐ UNIQUE ${art.name}</strong><br><span style="font-size:10px;color:#d2b4de;">Trait: ${art.desc}</span></div>
-                </div>
-            `;
+                </div>`;
         }).join("");
     };
 
     window.showDummyArtifact = function(e, traitId) {
-        e.stopPropagation();
-        document.querySelectorAll('.bag-item').forEach(el => el.classList.remove('active-tooltip'));
+        e.stopPropagation(); document.querySelectorAll('.bag-item').forEach(el => el.classList.remove('active-tooltip'));
         
         let artDef = ARTIFACT_POOL.find(a => a.trait === traitId);
         let dummy = {
@@ -677,9 +646,7 @@ window.onload = function() {
     };
 
     window.enterDungeon = function(type) {
-        let countField = type + 'Keys';
-        let timeField = 'next' + type.charAt(0).toUpperCase() + type.slice(1) + 'KeyTime';
-
+        let countField = type + 'Keys'; let timeField = 'next' + type.charAt(0).toUpperCase() + type.slice(1) + 'KeyTime';
         if (playerStats[countField] < 1) { pushHeaderToast("Not enough keys!", "#e74c3c"); return; }
         
         let dNames = { 'equip': 'Equipment Dungeon', 'gold': 'Gold Mine', 'mat': 'Material Cavern' };
@@ -688,48 +655,31 @@ window.onload = function() {
         playerStats[countField]--;
         if (playerStats[countField] === 2) playerStats[timeField] = Date.now() + 3600000;
         
-        playerStats.isDungeonMode = true;
-        playerStats.currentDungeon = type;
-        playerStats.dungeonWave = 1;
-        playerStats.killCount = 0;
-        playerStats.targetsRequired = 5;
-        playerStats.isBossMode = false;
-        playerStats.isUberBoss = false;
-        playerStats.usedSecondWind = false;
-        mob = null;
+        playerStats.isDungeonMode = true; playerStats.currentDungeon = type; playerStats.dungeonWave = 1;
+        playerStats.killCount = 0; playerStats.targetsRequired = 5; playerStats.isBossMode = false; playerStats.isUberBoss = false; playerStats.usedSecondWind = false; mob = null;
         
-        let p = resolvePlayerStats();
-        playerStats.currentHp = p.maxHp;
+        let p = resolvePlayerStats(); playerStats.currentHp = p.maxHp;
         
         pushLog(`<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON] Descended into the ${dNames[type]}!</span>`);
-        document.getElementById('dungeon-menu').style.display = 'none';
-        updateUI(); window.saveGame();
+        document.getElementById('dungeon-menu').style.display = 'none'; updateUI(); window.saveGame();
     };
 
     window.toggleAuto = function() {
-        state.autoAttack = !state.autoAttack;
-        let btn = document.getElementById('toggle-auto');
-        btn.innerText = state.autoAttack ? "Auto: ON" : "Auto: OFF";
-        btn.className = state.autoAttack ? "btn-toggle active" : "btn-toggle";
-        state.efficiency = state.autoAttack ? 0.5 : 1.0;
-        updateUI();
+        state.autoAttack = !state.autoAttack; let btn = document.getElementById('toggle-auto');
+        btn.innerText = state.autoAttack ? "Auto: ON" : "Auto: OFF"; btn.className = state.autoAttack ? "btn-toggle active" : "btn-toggle";
+        state.efficiency = state.autoAttack ? 0.5 : 1.0; updateUI();
     };
 
     window.triggerPlayerSlash = function() {
         if (isGamePaused) return;
-        let p = resolvePlayerStats();
-        let cooldownCap = playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
+        let p = resolvePlayerStats(); let cooldownCap = playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
         if (hero.attackTimer > 0) return; 
-        hero.attackTimer = cooldownCap; 
-        executeHitCalculations();
+        hero.attackTimer = cooldownCap; executeHitCalculations();
     };
 
-    window.addEventListener('keydown', function(e) { 
-        if (e.code === 'Space' && !spacePressed) { e.preventDefault(); spacePressed = true; window.triggerPlayerSlash(); } 
-    });
+    window.addEventListener('keydown', function(e) { if (e.code === 'Space' && !spacePressed) { e.preventDefault(); spacePressed = true; window.triggerPlayerSlash(); } });
     window.addEventListener('keyup', function(e) { if (e.code === 'Space') { spacePressed = false; } });
     
-    // Updated click listener to handle fairies!
     canvas.addEventListener('pointerdown', function(e) { 
         e.preventDefault(); 
         if (fairy.active) {
@@ -737,10 +687,7 @@ window.onload = function() {
             const clickX = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
             const clickY = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
             const dist = Math.hypot(clickX - fairy.x, clickY - fairy.y);
-            if (dist < 30) {
-                triggerFairyLoot();
-                return;
-            }
+            if (dist < 30) { triggerFairyLoot(); return; }
         }
         window.triggerPlayerSlash(); 
     });
@@ -752,53 +699,31 @@ window.onload = function() {
     });
 
     function triggerFairyLoot() {
-        fairy.active = false;
-        isGamePaused = true;
-        
+        fairy.active = false; isGamePaused = true;
         let maxBag = checkArtifactTrait("bag_space") ? 50 : 20;
-        if (inventory.EQUIP.length >= maxBag) {
-            pushHeaderToast(`Inventory Full! Scrap gained.`, "#e74c3c");
-            addEtcDrop("Iron Scrap", 5);
-            isGamePaused = false;
-            return;
-        }
+        if (inventory.EQUIP.length >= maxBag) { pushHeaderToast(`Inventory Full! Scrap gained.`, "#e74c3c"); addEtcDrop("Iron Scrap", 5); isGamePaused = false; return; }
 
-        let p = resolvePlayerStats();
         let types = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
         let chosenType = types[Math.floor(Math.random() * types.length)];
-        let statLinesCount = 1;
-        let roll = Math.random() * 100;
+        let statLinesCount = 1; let roll = Math.random() * 100;
         
-        // Fairy drops 1-3 star items guaranteed. 
-        if (roll < 5) statLinesCount = 3; 
-        else if (roll < 20) statLinesCount = 2; 
-        else statLinesCount = 1; 
+        if (roll < 5) statLinesCount = 3; else if (roll < 20) statLinesCount = 2; else statLinesCount = 1; 
 
         let stageScale = Math.floor((playerStats.stage - 1) / 10) + 1; 
-        
-        let initialLength = inventory.EQUIP.length;
         generateEquipment(chosenType, statLinesCount, stageScale, "Fairy", true, 1);
-        let newItem = inventory.EQUIP[inventory.EQUIP.length - 1]; // Grab the item just made
+        let newItem = inventory.EQUIP[inventory.EQUIP.length - 1]; 
 
         let color = getTierColor(newItem.statsRolled);
-        document.getElementById('fairy-reward-content').innerHTML = `
-            <strong style="color:${color}; font-size:16px;">${newItem.name}</strong><br>
-            <span style="font-size:12px; color:#aaa;">${newItem.statsRolled}★ ${getTierName(newItem.statsRolled)}</span>
-        `;
+        document.getElementById('fairy-reward-content').innerHTML = `<strong style="color:${color}; font-size:16px;">${newItem.name}</strong><br><span style="font-size:12px; color:#aaa;">${newItem.statsRolled}★ ${getTierName(newItem.statsRolled)}</span>`;
         document.getElementById('fairy-modal').style.display = "flex";
     }
 
     window.closeFairyModal = function() {
-        document.getElementById('fairy-modal').style.display = "none";
-        isGamePaused = false;
-        updateUI();
-        renderInventory();
+        document.getElementById('fairy-modal').style.display = "none"; isGamePaused = false; updateUI(); renderInventory();
     }
 
     function checkArtifactTrait(traitName) {
-        return (equippedSlots.art1 && equippedSlots.art1.trait === traitName) ||
-               (equippedSlots.art2 && equippedSlots.art2.trait === traitName) ||
-               (equippedSlots.art3 && equippedSlots.art3.trait === traitName);
+        return (equippedSlots.art1 && equippedSlots.art1.trait === traitName) || (equippedSlots.art2 && equippedSlots.art2.trait === traitName) || (equippedSlots.art3 && equippedSlots.art3.trait === traitName);
     }
 
     function resolvePlayerStats() {
@@ -821,17 +746,33 @@ window.onload = function() {
             }
         }
         
-        if (checkArtifactTrait("move_speed")) p.moveSpeed += 10;
-        if (checkArtifactTrait("defense")) p.def += 15;
-        if (checkArtifactTrait("idle_spd")) p.idleAttackSpeed -= 20;
-        if (checkArtifactTrait("active_spd")) p.activeAttackSpeed -= 3;
-        
-        if (p.idleAttackSpeed < 10) p.idleAttackSpeed = 10;
-        if (p.activeAttackSpeed < 4) p.activeAttackSpeed = 4;
-        
+        if (checkArtifactTrait("move_speed")) p.moveSpeed += 10; if (checkArtifactTrait("defense")) p.def += 15;
+        if (checkArtifactTrait("idle_spd")) p.idleAttackSpeed -= 20; if (checkArtifactTrait("active_spd")) p.activeAttackSpeed -= 3;
+        if (p.idleAttackSpeed < 10) p.idleAttackSpeed = 10; if (p.activeAttackSpeed < 4) p.activeAttackSpeed = 4;
         if (playerStats.frenzyTimer > 0) { p.critChance = 1.00; p.critDamage += 0.50; p.activeAttackSpeed = 4; p.idleAttackSpeed = 10; }
         
         return p;
+    }
+
+    // --- RE-INSERTED MISSING FUNCTION ---
+    function makeSlotHtml(slotKey, label) {
+        let item = equippedSlots[slotKey]; let el = document.getElementById('slot-' + slotKey);
+        if ((slotKey === 'chest' || slotKey === 'leggings') && equippedSlots.overall) { el.className = "slots-card locked"; el.innerHTML = `⚙️ LOCKED BY OVERALL`; el.style.borderColor = ""; return; }
+        if (slotKey === 'overall' && (equippedSlots.chest || equippedSlots.leggings)) { el.className = "slots-card locked"; el.innerHTML = `⚙️ LOCKED BY PIECE GEAR`; el.style.borderColor = ""; return; }
+        
+        if (!item) { el.className = "slots-card"; el.innerHTML = `<i>[Empty ${label}]</i>`; el.style.borderColor = ""; } 
+        else {
+            let isArt = slotKey.startsWith("art"); el.className = isArt ? "slots-card artifact-slot equipped" : "slots-card equipped";
+            el.style.borderColor = getTierColor(item.statsRolled);
+            let tierLabel = item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★ ${getTierName(item.statsRolled)}`;
+            let temperTag = item.temperLevel > 0 ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>` : "";
+
+            if (isArt) el.innerHTML = `<strong style="font-size:10px; color:#1abc9c;">${item.name}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="unequipItem('${slotKey}')">Remove</button>`;
+            else {
+                let s = []; if (item.atk > 0) s.push(`⚔️${item.atk}`); if (item.maxHp > 0) s.push(`❤️${item.maxHp}`); if (item.def > 0) s.push(`🛡️${item.def}`);
+                el.innerHTML = `<strong style="font-size:10px;">${item.name}${temperTag}</strong><div style="font-size:8px; color:${getTierColor(item.statsRolled)}; font-weight:bold; margin:2px 0;">${tierLabel}</div><span style="font-size:9px;color:#bbb;">${s.join(" ")}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="unequipItem('${slotKey}')">Remove</button>`;
+            }
+        }
     }
 
     function pushLog(text, itemId = null) {
@@ -843,25 +784,19 @@ window.onload = function() {
                 text = text.replace(item.name, `<span class="log-item-link" onclick="showLogTooltip(event, ${itemId})">${item.name}</span>`);
             }
         }
-        logsHistory.unshift(text);
-        if (logsHistory.length > 50) logsHistory.pop();
-        let box = document.getElementById('log-box');
-        box.innerHTML = logsHistory.join("<br><br>");
+        logsHistory.unshift(text); if (logsHistory.length > 50) logsHistory.pop();
+        document.getElementById('log-box').innerHTML = logsHistory.join("<br><br>");
     }
 
     function pushToast(name, stars, color, isEtc = false, quantity = 1, customText = null) {
-        let container = document.getElementById('toast-container');
-        let toast = document.createElement('div');
+        let container = document.getElementById('toast-container'); let toast = document.createElement('div');
         toast.style.background = "rgba(11, 15, 18, 0.95)"; toast.style.border = `2px solid ${color}`; toast.style.color = "#fff";
         toast.style.padding = "8px 16px"; toast.style.borderRadius = "6px"; toast.style.fontSize = "11px"; toast.style.fontWeight = "bold";
         toast.style.textAlign = "center"; toast.style.boxShadow = "0 4px 15px rgba(0,0,0,0.6)"; toast.style.animation = "toastFadeIn 0.3s ease-out";
         toast.style.maxWidth = "100%"; toast.style.pointerEvents = "none";
         
         if (customText) { toast.innerHTML = customText; } 
-        else {
-            let label = isEtc ? `📦 +${quantity} Loot` : (stars === "UNIQUE" ? "⭐ UNIQUE DETECTED!" : `⚔️ ITEM FOUND (${stars}★)`);
-            toast.innerHTML = `${label} : <span style="color:${color}">${name}</span>`;
-        }
+        else { let label = isEtc ? `📦 +${quantity} Loot` : (stars === "UNIQUE" ? "⭐ UNIQUE DETECTED!" : `⚔️ ITEM FOUND (${stars}★)`); toast.innerHTML = `${label} : <span style="color:${color}">${name}</span>`; }
         container.prepend(toast); 
         setTimeout(() => { toast.style.animation = "toastFadeOut 0.5s ease-in forwards"; setTimeout(() => toast.remove(), 450); }, 2800);
     }
@@ -875,12 +810,10 @@ window.onload = function() {
             
             if (playerStats.killCount >= playerStats.targetsRequired) {
                 if (playerStats.dungeonWave < 5) {
-                    let label = "MINIBOSS (Wave " + playerStats.dungeonWave + ")";
-                    let hp = 30 * scale * hpScale;
+                    let label = "MINIBOSS (Wave " + playerStats.dungeonWave + ")"; let hp = 30 * scale * hpScale;
                     mob = { x: 750, y: 120, w: 30, h: 50, type: "dungeon_miniboss", hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor((1 + (2 * scale)) * 4.5), flashTimer: 0, isStopped: false };
                 } else {
-                    let label = "DUNGEON OVERLORD";
-                    let hp = 60 * scale * hpScale;
+                    let label = "DUNGEON OVERLORD"; let hp = 60 * scale * hpScale;
                     mob = { x: 750, y: 90, w: 50, h: 90, type: "dungeon_boss", hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor((2 + (3 * scale)) * 5.0), flashTimer: 0, isStopped: false };
                 }
             } else {
@@ -892,8 +825,7 @@ window.onload = function() {
             if (playerStats.isBossMode) {
                 let baseBossHp = 45 * scale * (playerStats.isUberBoss ? 1.5 : 1);
                 mob = { x: 750, y: 100, w: 40, h: 80, type: "boss", visualTier: tier, hp: Math.floor(baseBossHp), maxHp: Math.floor(baseBossHp), damage: Math.floor((2 + (3 * scale)) * 5.0), flashTimer: 0, isStopped: false };
-                let label = playerStats.isUberBoss ? "ENRAGED RIFT GUARDIAN" : "STAGE BOSS";
-                pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[${label}]</span> blocked your transit route!`);
+                let label = playerStats.isUberBoss ? "ENRAGED RIFT GUARDIAN" : "STAGE BOSS"; pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[${label}]</span> blocked your transit route!`);
             } else {
                 let isMelee = Math.random() > 0.5;
                 mob = { x: 750, y: isMelee ? 145 : 160, w: isMelee ? 25 : 30, h: isMelee ? 40 : 25, type: "mob", isMelee: isMelee, visualTier: tier, hp: Math.floor(12 * scale), maxHp: Math.floor(12 * scale), damage: Math.floor((1 + (1 * scale)) * 4.5), flashTimer: 0, isStopped: false };
@@ -905,160 +837,84 @@ window.onload = function() {
         let colors = []; let count = 15;
         if (type === "mob" || type === "boss") {
             let t = mob ? mob.visualTier : getStageTier();
-            if (t===0) colors = ["#2ecc71", "#8B4513", "#27ae60"];
-            else if (t===1) colors = ["#bdc3c7", "#7f8c8d", "#2c3e50"];
-            else if (t===2) colors = ["#c0392b", "#e67e22", "#111"];
-            else if (t===3) colors = ["#8e44ad", "#2ecc71", "#1abc9c"];
-            else colors = ["#34495e", "#9b59b6", "#ecf0f1"];
+            if (t===0) colors = ["#2ecc71", "#8B4513", "#27ae60"]; else if (t===1) colors = ["#bdc3c7", "#7f8c8d", "#2c3e50"];
+            else if (t===2) colors = ["#c0392b", "#e67e22", "#111"]; else if (t===3) colors = ["#8e44ad", "#2ecc71", "#1abc9c"]; else colors = ["#34495e", "#9b59b6", "#ecf0f1"];
             if (type === "boss") count = 35;
         }
-        else if (type === "bat") colors = ["#5b2c6f", "#17202a", "#8e44ad"];
-        else if (type === "crawler") colors = ["#a04000", "#d35400", "#e67e22"];
+        else if (type === "bat") colors = ["#5b2c6f", "#17202a", "#8e44ad"]; else if (type === "crawler") colors = ["#a04000", "#d35400", "#e67e22"];
         else if (type === "dungeon_miniboss" || type === "dungeon_boss") { colors = ["#9b59b6", "#1abc9c", "#e74c3c", "#f1c40f"]; count = 35; }
         
         colors.push("#f1c40f", "#f39c12");
-        for (let i = 0; i < count; i++) {
-            particles.push({ x: x + (Math.random() * 15), y: y + (Math.random() * 20), vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.7) * 7, radius: Math.random() * 3 + 1.5, color: colors[Math.floor(Math.random() * colors.length)], alpha: 1, life: Math.random() * 25 + 15 });
-        }
+        for (let i = 0; i < count; i++) { particles.push({ x: x + (Math.random() * 15), y: y + (Math.random() * 20), vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.7) * 7, radius: Math.random() * 3 + 1.5, color: colors[Math.floor(Math.random() * colors.length)], alpha: 1, life: Math.random() * 25 + 15 }); }
     }
 
     function spawnTemperParticles(isSuccess) {
         let colors = isSuccess ? ["#f1c40f", "#2ecc71", "#ffffff"] : ["#7f8c8d", "#c0392b", "#2c3e50"];
-        for(let i=0; i<50; i++) {
-            particles.push({
-                x: canvas.width / 2, y: canvas.height / 2,
-                vx: (Math.random() - 0.5) * 16, vy: (Math.random() - 0.5) * 16,
-                radius: Math.random() * 4 + 1.5, color: colors[Math.floor(Math.random() * colors.length)], alpha: 1, life: isSuccess ? 45 : 30
-            });
-        }
+        for(let i=0; i<50; i++) { particles.push({ x: canvas.width / 2, y: canvas.height / 2, vx: (Math.random() - 0.5) * 16, vy: (Math.random() - 0.5) * 16, radius: Math.random() * 4 + 1.5, color: colors[Math.floor(Math.random() * colors.length)], alpha: 1, life: isSuccess ? 45 : 30 }); }
     }
 
     function getTierColor(stars) {
-        if (stars === "UNIQUE") return "#1abc9c"; 
-        if (stars === 5) return "#e74c3c"; 
-        if (stars === 4) return "#f1c40f"; 
-        if (stars === 3) return "#e67e22"; 
-        if (stars === 2) return "#9b59b6"; 
-        if (stars === 1) return "#3498db"; 
-        return "#ffffff"; 
+        if (stars === "UNIQUE") return "#1abc9c"; if (stars === 5) return "#e74c3c"; if (stars === 4) return "#f1c40f"; 
+        if (stars === 3) return "#e67e22"; if (stars === 2) return "#9b59b6"; if (stars === 1) return "#3498db"; return "#ffffff"; 
     }
 
     function getTierName(stars) {
-        if (stars === "UNIQUE") return "Unique Artifact";
-        if (stars === 5) return "Mythic";
-        if (stars === 4) return "Legendary";
-        if (stars === 3) return "Epic";
-        if (stars === 2) return "Magic";
-        if (stars === 1) return "Rare";
-        return "Common";
+        if (stars === "UNIQUE") return "Unique Artifact"; if (stars === 5) return "Mythic"; if (stars === 4) return "Legendary";
+        if (stars === 3) return "Epic"; if (stars === 2) return "Magic"; if (stars === 1) return "Rare"; return "Common";
     }
 
     function getScrapYieldName(stars) {
-        if (stars === "UNIQUE") return "Ancient Core";
-        if (stars === 5) return "Mythic Scrap";
-        if (stars === 4) return "Legendary Scrap";
-        if (stars === 3) return "Epic Scrap";
-        if (stars === 2) return "Magic Scrap";
-        if (stars === 1) return "Rare Scrap";
-        return "Iron Scrap";
+        if (stars === "UNIQUE") return "Ancient Core"; if (stars === 5) return "Mythic Scrap"; if (stars === 4) return "Legendary Scrap";
+        if (stars === 3) return "Epic Scrap"; if (stars === 2) return "Magic Scrap"; if (stars === 1) return "Rare Scrap"; return "Iron Scrap";
     }
 
     function getMaxTemper(stars) {
-        if (stars === "UNIQUE") return 5; 
-        if (stars === 5) return 15;
-        if (stars === 4) return 12;
-        if (stars === 3) return 9;
-        if (stars === 2) return 7;
-        if (stars === 1) return 5;
-        return 3;
+        if (stars === "UNIQUE") return 5; if (stars === 5) return 15; if (stars === 4) return 12; if (stars === 3) return 9;
+        if (stars === 2) return 7; if (stars === 1) return 5; return 3;
     }
 
     function getRequiredScrapForTemper(targetLevel, isArtifact) {
-        if (isArtifact) return "Overlord's Sigil";
-        if (targetLevel <= 3) return "Iron Scrap";
-        if (targetLevel <= 5) return "Rare Scrap";
-        if (targetLevel <= 7) return "Magic Scrap";
-        if (targetLevel <= 9) return "Epic Scrap";
-        if (targetLevel <= 12) return "Legendary Scrap";
-        return "Mythic Scrap";
+        if (isArtifact) return "Overlord's Sigil"; if (targetLevel <= 3) return "Iron Scrap"; if (targetLevel <= 5) return "Rare Scrap";
+        if (targetLevel <= 7) return "Magic Scrap"; if (targetLevel <= 9) return "Epic Scrap"; if (targetLevel <= 12) return "Legendary Scrap"; return "Mythic Scrap";
     }
 
     function getTemperGoldCost(item) {
-        let baseCost = item.type === "artifact" ? 1000 : 100;
-        return Math.floor(baseCost * Math.pow(1.5, item.temperLevel) * (item.statsRolled === "UNIQUE" ? 1 : (item.statsRolled + 1)));
+        let baseCost = item.type === "artifact" ? 1000 : 100; return Math.floor(baseCost * Math.pow(1.5, item.temperLevel) * (item.statsRolled === "UNIQUE" ? 1 : (item.statsRolled + 1)));
     }
     
     function getTierUpScrapName(stars) {
-        if (stars === 5) return "Mythic Scrap";
-        if (stars === 4) return "Legendary Scrap";
-        if (stars === 3) return "Epic Scrap";
-        if (stars === 2) return "Magic Scrap";
-        if (stars === 1) return "Rare Scrap";
-        return "Iron Scrap";
+        if (stars === 5) return "Mythic Scrap"; if (stars === 4) return "Legendary Scrap"; if (stars === 3) return "Epic Scrap";
+        if (stars === 2) return "Magic Scrap"; if (stars === 1) return "Rare Scrap"; return "Iron Scrap";
     }
 
     window.salvageItem = function(id) {
-        window.hideTooltip();
-        
-        let item = inventory.EQUIP.find(i => i.id === id);
-        let isEquipped = false;
-        let slotToClear = null;
-        
-        if (!item) {
-            for (let k in equippedSlots) {
-                if (equippedSlots[k] && equippedSlots[k].id === id) { item = equippedSlots[k]; isEquipped = true; slotToClear = k; break; }
-            }
-        }
+        window.hideTooltip(); let item = inventory.EQUIP.find(i => i.id === id); let isEquipped = false; let slotToClear = null;
+        if (!item) { for (let k in equippedSlots) { if (equippedSlots[k] && equippedSlots[k].id === id) { item = equippedSlots[k]; isEquipped = true; slotToClear = k; break; } } }
         if (!item) return;
 
-        if (isEquipped) { equippedSlots[slotToClear] = null; } 
-        else { inventory.EQUIP.splice(inventory.EQUIP.indexOf(item), 1); }
+        if (isEquipped) { equippedSlots[slotToClear] = null; } else { inventory.EQUIP.splice(inventory.EQUIP.indexOf(item), 1); }
         
-        let rolledTier = item.statsRolled;
-        let scrapsGained = [];
-        let yieldAmount = Math.floor(Math.random() * 3) + 1;
-        let scrapName = getScrapYieldName(rolledTier);
-        
-        addEtcDrop(scrapName, yieldAmount);
-        scrapsGained.push(`x${yieldAmount} ${scrapName}`);
+        let rolledTier = item.statsRolled; let scrapsGained = []; let yieldAmount = Math.floor(Math.random() * 3) + 1; let scrapName = getScrapYieldName(rolledTier);
+        addEtcDrop(scrapName, yieldAmount); scrapsGained.push(`x${yieldAmount} ${scrapName}`);
 
         for (let t = rolledTier - 1; t >= 0; t--) {
-            if (Math.random() < 0.60) {
-                let lowerYield = Math.floor(Math.random() * 2) + 1;
-                let lowerName = getScrapYieldName(t);
-                addEtcDrop(lowerName, lowerYield);
-                scrapsGained.push(`x${lowerYield} ${lowerName}`);
-            }
+            if (Math.random() < 0.60) { let lowerYield = Math.floor(Math.random() * 2) + 1; let lowerName = getScrapYieldName(t); addEtcDrop(lowerName, lowerYield); scrapsGained.push(`x${lowerYield} ${lowerName}`); }
         }
         
-        for(let i=0; i<30; i++) {
-            particles.push({
-                x: canvas.width / 2, y: canvas.height / 2,
-                vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12,
-                radius: Math.random() * 3 + 1.5, color: Math.random() > 0.5 ? "#bdc3c7" : "#e74c3c", alpha: 1, life: 35
-            });
-        }
+        for(let i=0; i<30; i++) { particles.push({ x: canvas.width / 2, y: canvas.height / 2, vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12, radius: Math.random() * 3 + 1.5, color: Math.random() > 0.5 ? "#bdc3c7" : "#e74c3c", alpha: 1, life: 35 }); }
         
-        pushLog(`<span style='color:#e74c3c;'>[SALVAGE]</span> Dismantled ${item.name} yielding: ${scrapsGained.join(", ")}`);
-        pushHeaderToast(`♻️ Salvaged: ${scrapsGained.join(", ")}`, "#e74c3c");
-        
+        pushLog(`<span style='color:#e74c3c;'>[SALVAGE]</span> Dismantled ${item.name} yielding: ${scrapsGained.join(", ")}`); pushHeaderToast(`♻️ Salvaged: ${scrapsGained.join(", ")}`, "#e74c3c");
         if (forgeSelectedItem && forgeSelectedItem.id === id) { forgeSelectedItem = null; renderForgeTab(); }
-        updateUI();
-        renderInventory();
-        window.saveGame();
+        updateUI(); renderInventory(); window.saveGame();
     };
 
     window.buyGachaCrate = function() {
-        if (!inventory.ETC["Gacha Key"] || inventory.ETC["Gacha Key"] < 1) { 
-            pushHeaderToast("Requires 1 Gacha Key!", "#e74c3c"); return; 
-        }
+        if (!inventory.ETC["Gacha Key"] || inventory.ETC["Gacha Key"] < 1) { pushHeaderToast("Requires 1 Gacha Key!", "#e74c3c"); return; }
         let maxBag = checkArtifactTrait("bag_space") ? 50 : 20;
         if (inventory.EQUIP.length >= maxBag) { pushHeaderToast(`Inventory Full!`, "#e74c3c"); return; }
         
-        inventory.ETC["Gacha Key"] -= 1;
-        if (inventory.ETC["Gacha Key"] === 0) delete inventory.ETC["Gacha Key"];
-        rollGachaDrop(); 
-        updateUI(); renderInventory(); window.saveGame();
+        inventory.ETC["Gacha Key"] -= 1; if (inventory.ETC["Gacha Key"] === 0) delete inventory.ETC["Gacha Key"];
+        rollGachaDrop(); updateUI(); renderInventory(); window.saveGame();
     };
 
     window.summonUberBoss = function() {
@@ -1068,8 +924,7 @@ window.onload = function() {
         
         if (!confirm("Sacrifice 5 Ancient Cores to summon the Enraged Rift Guardian?")) return;
 
-        inventory.ETC["Ancient Core"] -= 5;
-        if (inventory.ETC["Ancient Core"] === 0) delete inventory.ETC["Ancient Core"];
+        inventory.ETC["Ancient Core"] -= 5; if (inventory.ETC["Ancient Core"] === 0) delete inventory.ETC["Ancient Core"];
         
         playerStats.isBossMode = true; playerStats.isFarmingLoop = false; playerStats.isUberBoss = true; mob = null; 
         let p = resolvePlayerStats(); playerStats.currentHp = p.maxHp; 
@@ -1273,15 +1128,13 @@ window.onload = function() {
     }
 
     window.showInventoryTooltip = function(e, itemId) {
-        e.stopPropagation();
-        let item = inventory.EQUIP.find(i => i.id === itemId); if (!item) return;
+        e.stopPropagation(); let item = inventory.EQUIP.find(i => i.id === itemId); if (!item) return;
         let tt = document.getElementById('game-tooltip'); tt.innerHTML = buildGeneralTooltipHtml(item, true); 
         tt.style.borderColor = getTierColor(item.statsRolled); tt.style.display = "block"; window.positionTooltip(e, tt);
     };
 
     window.showForgeTooltip = function(e, itemId) {
-        e.stopPropagation();
-        let item = inventory.EQUIP.find(i => i.id === itemId); 
+        e.stopPropagation(); let item = inventory.EQUIP.find(i => i.id === itemId); 
         if (!item) { for (let k in equippedSlots) { if(equippedSlots[k] && equippedSlots[k].id === itemId) { item = equippedSlots[k]; item.isEquippedSlot = k; break;} } }
         if (!item) return;
         let tt = document.getElementById('game-tooltip'); tt.innerHTML = buildGeneralTooltipHtml(item, false); 
@@ -1289,23 +1142,20 @@ window.onload = function() {
     };
 
     window.showSlotTooltip = function(e, slotKey) {
-        e.stopPropagation();
-        let item = equippedSlots[slotKey]; if (!item) return;
+        e.stopPropagation(); let item = equippedSlots[slotKey]; if (!item) return;
         let tt = document.getElementById('game-tooltip'); tt.innerHTML = buildGeneralTooltipHtml(item, false); 
         tt.style.borderColor = getTierColor(item.statsRolled); tt.style.display = "block"; window.positionTooltip(e, tt);
     };
 
     window.showLogTooltip = function(e, itemId) {
-        e.stopPropagation();
-        let item = frozenItemDb[itemId]; if (!item) return;
+        e.stopPropagation(); let item = frozenItemDb[itemId]; if (!item) return;
         let tt = document.getElementById('log-item-tooltip'); 
         tt.innerHTML = `<div class="tooltip-flex-container"><div style="padding: 10px; width: 250px; box-sizing: border-box;">${generateItemCardHtml(item, null, false)}</div></div>`;
         tt.style.borderColor = getTierColor(item.statsRolled); tt.style.display = "block"; window.positionTooltip(e, tt);
     }
     
     window.showStatHoverTooltip = function(e, statType) {
-        e.stopPropagation();
-        let tt = document.getElementById('stat-tooltip'); let html = ""; let p = resolvePlayerStats();
+        e.stopPropagation(); let tt = document.getElementById('stat-tooltip'); let html = ""; let p = resolvePlayerStats();
         
         if (statType === 'ias') {
             html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;"><div class="tt-title" style="color:#3498db;">⏱️ Idle Attack Speed</div><div style="color:#aaa; font-size:11px;">The number of engine frames between your automatic attacks. (60 frames = 1 second).<br><br><b>Lower is faster!</b><br>Currently hitting automatically every ${(p.idleAttackSpeed/60).toFixed(2)} seconds.</div></div>`;
@@ -1326,15 +1176,13 @@ window.onload = function() {
     };
 
     window.showEtcTooltip = function(e, keyName) {
-        e.stopPropagation();
-        let tt = document.getElementById('etc-tooltip'); let desc = etcDex[keyName] || "Unknown material.";
+        e.stopPropagation(); let tt = document.getElementById('etc-tooltip'); let desc = etcDex[keyName] || "Unknown material.";
         tt.innerHTML = `<div style="padding: 10px; width: 200px; box-sizing: border-box;"><div class="tt-title" style="color:#bdc3c7;">📦 ${keyName}</div><div style="color:#aaa; font-size:11px;">${desc}</div></div>`;
         tt.style.borderColor = "#bdc3c7"; tt.style.display = "block"; window.positionTooltip(e, tt);
     };
 
     window.showGachaTooltip = function(e) {
-        e.stopPropagation();
-        let p = resolvePlayerStats(); let qly = p.qly;
+        e.stopPropagation(); let p = resolvePlayerStats(); let qly = p.qly;
         let mythic = (0.5 * qly); let leg = (2.0 * qly) - mythic; let epic = (10.0 * qly) - (2.0 * qly); let magic = (30.0 * qly) - (10.0 * qly); let rare = 100 - (30.0 * qly);
 
         let tt = document.getElementById('game-tooltip');
@@ -1457,7 +1305,6 @@ window.onload = function() {
             if (forgeSelectedItem.baseDef > 0) forgeSelectedItem.def += 1;
             if (forgeSelectedItem.baseMoveSpeed > 0) forgeSelectedItem.moveSpeed += 1;
             
-            // Reconstruct name to match new stage level
             let prefix = getTierName(forgeSelectedItem.statsRolled);
             forgeSelectedItem.name = `${prefix} ${forgeSelectedItem.type.toUpperCase()} (+${forgeSelectedItem.stageLevel})`;
             
@@ -1484,7 +1331,7 @@ window.onload = function() {
         else {
             listEl.innerHTML = allValidItems.map(item => {
                 let isArt = item.type === "artifact";
-                if (forgeMode === 'tier' && isArt) return ""; // Hide artifacts in Tier Up mode
+                if (forgeMode === 'tier' && isArt) return ""; 
                 
                 let nameColor = getTierColor(item.statsRolled); let temperTag = item.temperLevel > 0 ? ` [+${item.temperLevel}]` : "";
                 let bgStyle = forgeSelectedItem && forgeSelectedItem.id === item.id ? "background:#2c3e50; border-left:3px solid #3498db;" : "";
@@ -1615,7 +1462,6 @@ window.onload = function() {
         
         if (playerStats.isDungeonMode) {
             if (mob.type === "dungeon_miniboss" || mob.hp <= 0) {
-                // Wave Heal
                 if (mob.type === "dungeon_miniboss" || (!isBoss && playerStats.killCount >= playerStats.targetsRequired)) {
                     let healAmt = Math.floor(p.maxHp * randFloat(0.10, 0.15));
                     playerStats.currentHp = Math.min(p.maxHp, playerStats.currentHp + healAmt);
@@ -1744,6 +1590,14 @@ window.onload = function() {
         if (etcKeys.length === 0) { etcBox.innerHTML = "<div style='color:#666;text-align:center;padding-top:40px;'>No materials collected.</div>"; }
         else { etcBox.innerHTML = etcKeys.map(key => `<div class="bag-item" style="cursor:help;" onmousemove="showEtcTooltip(event, '${key}')" ontouchstart="showEtcTooltip(event, '${key}')" onmouseleave="hideTooltip()"><span>📦 ${key}</span><strong>x${inventory.ETC[key]}</strong></div>`).join(""); }
     }
+
+    window.switchSubTab = function(type) {
+        window.hideTooltip(); state.currentSubTab = type;
+        document.getElementById('sub-tab-eq').className = type === 'EQUIP' ? "sub-tab-btn active" : "sub-tab-btn";
+        document.getElementById('sub-tab-etc').className = type === 'ETC' ? "sub-tab-btn active" : "sub-tab-btn";
+        document.getElementById('bag-equip').style.display = type === 'EQUIP' ? "block" : "none";
+        document.getElementById('bag-etc').style.display = type === 'ETC' ? "block" : "none";
+    };
 
     function update() {
         if (isGamePaused) return;
@@ -1916,15 +1770,15 @@ window.onload = function() {
         ctx.translate(hx + 12, hy + 15);
         let bounce = (!mob || !mob.isStopped) ? Math.abs(Math.sin(Date.now() / 150)) * 3 : 0;
         
-        ctx.fillStyle = "#c0392b"; ctx.beginPath(); ctx.moveTo(-6, bounce); ctx.lineTo(-18, 15); ctx.lineTo(-2, 18); ctx.fill(); // cape
-        ctx.fillStyle = "#95a5a6"; ctx.fillRect(-8, bounce, 14, 16); // body
-        ctx.fillStyle = "#bdc3c7"; ctx.fillRect(-10, -14 + bounce, 18, 16); // helm
-        ctx.fillStyle = "#2c3e50"; ctx.fillRect(0, -8 + bounce, 6, 4); // eye slit
-        ctx.fillStyle = playerStats.frenzyTimer > 0 ? "#f1c40f" : "#e74c3c"; ctx.fillRect(-5, -20 + bounce, 4, 6); ctx.fillRect(-9, -16 + bounce, 8, 4); // plume
+        ctx.fillStyle = "#c0392b"; ctx.beginPath(); ctx.moveTo(-6, bounce); ctx.lineTo(-18, 15); ctx.lineTo(-2, 18); ctx.fill(); 
+        ctx.fillStyle = "#95a5a6"; ctx.fillRect(-8, bounce, 14, 16); 
+        ctx.fillStyle = "#bdc3c7"; ctx.fillRect(-10, -14 + bounce, 18, 16); 
+        ctx.fillStyle = "#2c3e50"; ctx.fillRect(0, -8 + bounce, 6, 4); 
+        ctx.fillStyle = playerStats.frenzyTimer > 0 ? "#f1c40f" : "#e74c3c"; ctx.fillRect(-5, -20 + bounce, 4, 6); ctx.fillRect(-9, -16 + bounce, 8, 4); 
 
         ctx.translate(2, 6 + bounce);
         if (hero.slashFrame) {
-            ctx.translate(15, -5); // SWING FORWARD TRANSLATION
+            ctx.translate(15, -5); 
             ctx.rotate(Math.PI / 2.5); 
             ctx.fillStyle = "#7f8c8d"; ctx.fillRect(-2, -2, 4, 10); 
             ctx.fillStyle = "#8e44ad"; ctx.fillRect(-5, 8, 10, 4); 
