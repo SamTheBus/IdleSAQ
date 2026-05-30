@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Postknight Slayer: Player Stats Dashboard</title>
+    <title>Postknight Slayer</title>
     <style>
         body {
             background-color: #121212; color: #ffffff;
@@ -18,29 +18,38 @@
             position: relative;
         }
         canvas { display: block; background: #1e272c; width: 100%; height: auto; }
+        
         #control-bar {
             display: flex; justify-content: space-between; align-items: center;
             background: #111; padding: 10px; border-bottom: 2px solid #333; font-size: 13px;
         }
         #menu-panel { padding: 12px; background: #222; position: relative; }
+        
         .stats-hud {
             display: flex; justify-content: space-between; padding: 8px;
             background: #0f0f0f; border-radius: 4px; margin-bottom: 10px;
-            font-weight: bold; font-size: 12px;
+            font-weight: bold; font-size: 12px; flex-wrap: wrap; gap: 5px;
         }
-        .tabs { display: flex; gap: 2px; margin-bottom: 12px; }
+        
+        .tabs { display: flex; gap: 2px; margin-bottom: 12px; flex-wrap: wrap; }
         .tab-btn {
             flex: 1; background: #333; color: #aaa; border: none; padding: 8px 2px;
-            cursor: pointer; font-weight: bold; border-radius: 4px 4px 0 0; font-size: 11px;
+            cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 11px;
+            min-width: 15%;
         }
         .tab-btn.active { background: #e67e22; color: white; }
+        
         .tab-content {
             background: #2a2a2a; padding: 10px; border-radius: 4px; min-height: 250px;
             display: none;
         }
         .tab-content.active { display: block; }
+        
         .grid-layout { display: grid; grid-template-columns: 240px 1fr; gap: 12px; }
+        .forge-grid { display: grid; grid-template-columns: 240px 1fr; gap: 12px; }
+        .market-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .paper-doll { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+        
         .slots-card {
             background: #151515; border: 1px dashed #444; border-radius: 4px;
             padding: 6px; font-size: 11px; min-height: 40px; display: flex;
@@ -50,12 +59,14 @@
         .slots-card.equipped { border-style: solid; background: #1b2a35; }
         .slots-card.artifact-slot.equipped { background: #251b35; }
         .slots-card.locked { background: #2c1a1a; border-color: #c0392b !important; color: #e74c3c; font-weight: bold; cursor: not-allowed; }
+        
         .bag-container { background: #111; border-radius: 4px; padding: 8px; height: 220px; overflow-y: auto; }
         .bag-item {
             background: #333; padding: 6px; margin-bottom: 6px; border-radius: 3px;
             font-size: 12px; display: flex; justify-content: space-between; align-items: center;
             position: relative; cursor: help;
         }
+        
         .btn-action {
             background: #2ecc71; color: white; border: none; padding: 4px 6px;
             font-size: 10px; font-weight: bold; border-radius: 3px; cursor: pointer;
@@ -67,6 +78,7 @@
             border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px;
         }
         .btn-toggle.active { background: #2ecc71; }
+        
         .sub-tabs { display: flex; gap: 5px; margin-bottom: 8px; }
         .sub-tab-btn {
             background: #444; color: #ccc; border: none; padding: 4px 10px;
@@ -76,25 +88,24 @@
 
         @keyframes pulseBtn { 0% { background: #c0392b; } 50% { background: #e74c3c; } 100% { background: #c0392b; } }
         .btn-pulse { animation: pulseBtn 1.5s infinite; border: 1px solid #e74c3c; }
-
-        .forge-grid { display: grid; grid-template-columns: 240px 1fr; gap: 12px; }
-        .forge-panel { background: #111; padding: 10px; border-radius: 4px; border: 1px solid #444; }
-        .market-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
         .market-card { background: #151515; border: 1px solid #444; padding: 12px; border-radius: 6px; text-align: center; cursor: pointer; }
 
-        #game-tooltip, #etc-tooltip, #log-item-tooltip, #stat-tooltip {
+        .tooltip-base {
             position: absolute; display: none; background: #0b0f12; color: #fff;
             border: 2px solid #3498db; border-radius: 6px;
             font-size: 11px; line-height: 1.4; z-index: 9999;
             box-shadow: 0 4px 15px rgba(0,0,0,0.7); pointer-events: none;
         }
+        .tooltip-flex-container { display: flex; }
+        
         .tt-title { font-weight: bold; font-size: 12px; margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
         .tt-subtitle { color: #aaa; font-style: italic; margin-bottom: 6px; font-size: 10px; }
         .tt-stat-line { color: #ecf0f1; font-family: monospace; margin-bottom: 2px; }
         .tt-trait { color: #f1c40f; font-weight: bold; margin-top: 5px; border-top: 1px dashed #444; padding-top: 4px; }
         
-        #log-box { height: 220px; overflow-y: auto; background: #111; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 11px; line-height: 1.5; }
-        .log-item-link { cursor: help; text-decoration: underline; text-decoration-style: dashed; }
+        #log-box { height: 220px; overflow-y: auto; background: #111; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 11px; line-height: 1.5; pointer-events: auto; }
+        .log-item-link { cursor: help; text-decoration: underline; text-decoration-style: dashed; pointer-events: auto; }
         
         #death-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 250px;
@@ -102,16 +113,32 @@
             justify-content: center; align-items: center; flex-direction: column;
             z-index: 5000; text-shadow: 2px 2px 5px black; pointer-events: none;
         }
-        .stat-hover { cursor: help; border-bottom: 1px dotted #888; }
+        
+        .live-drop-cols { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .stat-hover { cursor: help; border-bottom: 1px dotted #888; pointer-events: auto; }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 600px) {
+            .grid-layout { grid-template-columns: 1fr; }
+            .forge-grid { grid-template-columns: 1fr; }
+            .market-grid { grid-template-columns: 1fr; }
+            .paper-doll { grid-template-columns: 1fr; }
+            .tooltip-flex-container { flex-direction: column; }
+            .tooltip-flex-container > div { width: 100% !important; border-right: none !important; border-bottom: 1px solid #333; }
+            .stats-hud { font-size: 11px; }
+            .live-drop-cols { flex-direction: column; }
+            .live-drop-cols > div { width: 100%; margin-bottom: 10px; }
+            #control-bar { flex-direction: column; gap: 8px; }
+        }
     </style>
 </head>
 <body>
 
     <div id="game-container">
-        <div id="game-tooltip"></div>
-        <div id="etc-tooltip"></div>
-        <div id="log-item-tooltip"></div>
-        <div id="stat-tooltip"></div>
+        <div id="game-tooltip" class="tooltip-base"></div>
+        <div id="etc-tooltip" class="tooltip-base"></div>
+        <div id="log-item-tooltip" class="tooltip-base"></div>
+        <div id="stat-tooltip" class="tooltip-base"></div>
         
         <div id="death-overlay">
             <div style="font-size: 42px; font-weight: bold;">DEFEATED</div>
@@ -126,7 +153,7 @@
         <div class="stats-hud">
             <div>Stage: <span id="hud-stage" style="color:#3498db;">1-1</span></div>
             <div>Prog: <span id="hud-progress" style="color:#f1c40f;">0/10</span></div>
-            <div>Buff: <span id="hud-buff" style="color:#aaa;">None</span></div>
+            <div>Bag: <span id="hud-bag" style="color:#2ecc71;">0/20</span></div>
             <div>HP: <span id="hud-hp" style="color:#e74c3c;">100/100</span></div>
             <div>💰: <span id="hud-coins" style="color:#f1c40f;">0</span></div>
         </div>
@@ -170,8 +197,8 @@
                         <div>🛡️ Defense: <span id="stat-def" style="font-weight:bold;">0</span></div>
                         <div>👟 Move Speed: <span id="stat-mov" style="font-weight:bold;">10</span></div>
                         <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
-                        <div>⏱️ Idle Atk Spd: <span id="stat-ias" class="stat-hover" style="font-weight:bold; color: #3498db;" onmousemove="showStatHoverTooltip(event, 'ias')" onmouseleave="hideTooltip()">60f</span></div>
-                        <div>⚡ Active Atk Spd: <span id="stat-aas" class="stat-hover" style="font-weight:bold; color: #e74c3c;" onmousemove="showStatHoverTooltip(event, 'aas')" onmouseleave="hideTooltip()">15f</span></div>
+                        <div>⏱️ Idle Atk Spd: <span id="stat-ias" class="stat-hover" style="font-weight:bold; color: #3498db;" onmousemove="showStatHoverTooltip(event, 'ias')" ontouchstart="showStatHoverTooltip(event, 'ias')" onmouseleave="hideTooltip()">60f</span></div>
+                        <div>⚡ Active Atk Spd: <span id="stat-aas" class="stat-hover" style="font-weight:bold; color: #e74c3c;" onmousemove="showStatHoverTooltip(event, 'aas')" ontouchstart="showStatHoverTooltip(event, 'aas')" onmouseleave="hideTooltip()">15f</span></div>
                         <div>🔄 Idle DPS: <span id="stat-idps" style="font-weight:bold; color: #9b59b6;">0.0</span></div>
                         <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
                         <div>✨ Crit Chance: <span id="stat-crt" style="font-weight:bold; color: #e67e22;">5%</span></div>
@@ -179,15 +206,15 @@
                         <div>🛡️ Block Rate: <span id="stat-blk" style="font-weight:bold; color: #3498db;">0%</span></div>
                         <div>⚡ Parry Rate: <span id="stat-pry" style="font-weight:bold; color: #e74c3c;">0%</span></div>
                         <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
-                        <div>🍀 Drop Rate: <span id="stat-drp" class="stat-hover" style="font-weight:bold; color: #2ecc71;" onmousemove="showStatHoverTooltip(event, 'drp')" onmouseleave="hideTooltip()">+0%</span></div>
-                        <div>💎 Drop Quality: <span id="stat-qly" class="stat-hover" style="font-weight:bold; color: #9b59b6;" onmousemove="showStatHoverTooltip(event, 'qly')" onmouseleave="hideTooltip()">+0%</span></div>
+                        <div>🍀 Drop Rate: <span id="stat-drp" class="stat-hover" style="font-weight:bold; color: #2ecc71;" onmousemove="showStatHoverTooltip(event, 'drp')" ontouchstart="showStatHoverTooltip(event, 'drp')" onmouseleave="hideTooltip()">+0%</span></div>
+                        <div>💎 Drop Quality: <span id="stat-qly" class="stat-hover" style="font-weight:bold; color: #9b59b6;" onmousemove="showStatHoverTooltip(event, 'qly')" ontouchstart="showStatHoverTooltip(event, 'qly')" onmouseleave="hideTooltip()">+0%</span></div>
                         <div>🟡 Gold Multi: <span id="stat-gld" style="font-weight:bold; color: #f1c40f;">x1.0</span></div>
                     </div>
-                    <div style="font-size: 11px; background: #151515; padding: 12px; border: 1px solid #444; border-radius: 4px;">
+                    <div style="font-size: 11px; background: #151515; padding: 12px; border: 1px solid #444; border-radius: 4px; box-sizing: border-box;">
                         <h3 style="margin-top:0; color:#3498db; font-size:14px; border-bottom:1px solid #333; padding-bottom:4px;">Live Drop Analytics</h3>
                         <p style="color:#aaa; font-style:italic; margin-bottom:8px;">Your Drop Rate and Drop Quality stats dynamically alter these tables.</p>
                         
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <div class="live-drop-cols">
                             <div style="width:48%;">
                                 <div style="color:#2ecc71; font-weight:bold; margin-bottom:4px;">Route Drop Chances</div>
                                 <div>Standard Mob: <span id="live-rate-mob" style="color:#fff;">4.5%</span></div>
@@ -212,7 +239,7 @@
 
             <div id="tab-inv" class="tab-content">
                 <div class="sub-tabs">
-                    <button id="sub-tab-eq" class="sub-tab-btn active" onclick="switchSubTab('EQUIP')">Equipment</button>
+                    <button id="sub-tab-eq" class="sub-tab-btn active" onclick="switchSubTab('EQUIP')">Equipment (<span id="btn-bag-count">0</span>/20)</button>
                     <button id="sub-tab-etc" class="sub-tab-btn" onclick="switchSubTab('ETC')">ETC Items</button>
                 </div>
                 <div id="bag-equip" class="bag-container"></div>
@@ -232,13 +259,13 @@
                 <div class="market-grid">
                     <div class="market-card" style="border-color: #f1c40f;" onmousemove="showGachaTooltip(event)" onmouseleave="hideTooltip()" ontouchstart="showGachaTooltip(event)">
                         <h3 style="margin-top:0; color:#f1c40f; font-size:14px;">🎰 LUCK VENDING MACHINE</h3>
-                        <p style="font-size:11px; color:#aaa; min-height:36px;">Bypass route farming. Instantly roll a guaranteed random 1-5★ piece of standard gear.</p>
+                        <p style="font-size:11px; color:#aaa; min-height:36px;">Instantly roll a guaranteed random 1-5★ piece of standard gear.</p>
                         <div style="font-weight:bold; color:#2ecc71; margin-bottom:10px; font-size:13px;">Cost: 1 Gacha Key</div>
                         <button class="btn-action forge" style="background:#f1c40f; color:#111;" onclick="buyGachaCrate()">Dispense Gear</button>
                     </div>
                     <div class="market-card" style="border-color: #9b59b6;">
                         <h3 style="margin-top:0; color:#9b59b6; font-size:14px;">🔮 ANCIENT ALTAR</h3>
-                        <p style="font-size:11px; color:#aaa; min-height:36px;">Sacrifice Ancient Cores to spawn an Enraged Rift Guardian. <span style="color:#1abc9c; font-weight:bold;">Unique Artifact rate boosted to 30%!</span></p>
+                        <p style="font-size:11px; color:#aaa; min-height:36px;">Sacrifice Cores to spawn a Rift Guardian. <span style="color:#1abc9c; font-weight:bold;">Unique Artifact rate boosted to 30%!</span></p>
                         <div style="font-weight:bold; color:#9b59b6; margin-bottom:10px; font-size:13px;">Cost: 5 Ancient Cores</div>
                         <button class="btn-action forge" style="background:#9b59b6;" onclick="summonUberBoss()">Open Reality Rift</button>
                     </div>
@@ -254,7 +281,6 @@
 <script>
 window.onload = function() {
 
-    // Global dictionaries & state
     const etcDex = {
         "Gacha Key": "Guaranteed drop from Rift Guardians. Used at the Vending Machine for a gear roll.",
         "Ancient Core": "Extremely rare boss drop. Sacrifice 5 at the Ancient Altar to summon a Rift Guardian.",
@@ -307,15 +333,26 @@ window.onload = function() {
     let spacePressed = false;
     let state = { autoAttack: true, efficiency: 0.5, currentSubTab: 'EQUIP' };
     let isGamePaused = false;
+    let reviveTimer = 0;
+    let lastAutoSave = Date.now();
 
-    // Save System
+    // Event-Based Save System
     window.saveGame = function() {
-        let saveData = { playerStats, equippedSlots, inventory, idCounter, logsHistory, frozenItemDb };
-        localStorage.setItem('postknight_save_v2', JSON.stringify(saveData));
+        let saveData = { playerStats, equippedSlots, inventory, idCounter, logsHistory, frozenItemDb, lastSaveTime: Date.now() };
+        localStorage.setItem('postknight_save_v3', JSON.stringify(saveData));
     };
 
+    // Auto-Save Interval (Every 60s fallback)
+    setInterval(() => {
+        window.saveGame();
+        lastAutoSave = Date.now();
+    }, 60000);
+
+    // Save on close
+    window.addEventListener('beforeunload', window.saveGame);
+
     window.loadGame = function() {
-        let data = localStorage.getItem('postknight_save_v2');
+        let data = localStorage.getItem('postknight_save_v3');
         if (data) {
             try {
                 let parsed = JSON.parse(data);
@@ -328,13 +365,57 @@ window.onload = function() {
                 
                 let box = document.getElementById('log-box');
                 box.innerHTML = logsHistory.join("<br><br>");
+                
+                // Offline Progress Logic
+                if (parsed.lastSaveTime) {
+                    let now = Date.now();
+                    let offlineMs = now - parsed.lastSaveTime;
+                    if (offlineMs > 60000) { // Off for more than 1 minute
+                        let offlineSeconds = Math.floor(offlineMs / 1000);
+                        if (offlineSeconds > 7200) offlineSeconds = 7200; // 2 hour cap
+                        
+                        let p = resolvePlayerStats();
+                        let effMultiplier = 1 + (p.critChance * (p.critDamage - 1));
+                        let idps = (p.atk * effMultiplier) * (60 / p.idleAttackSpeed);
+                        
+                        let stageScale = 1 + (playerStats.stage * 0.15);
+                        let mobHp = Math.floor(16 * stageScale);
+                        
+                        let timePerKill = Math.max(1, mobHp / idps);
+                        let simulatedKills = Math.floor(offlineSeconds / timePerKill);
+                        
+                        if (simulatedKills > 0) {
+                            let baseCoin = Math.floor(1 + (playerStats.stage * 0.5));
+                            let goldEarned = Math.floor(simulatedKills * baseCoin * p.gold);
+                            
+                            let dropsEarned = 0;
+                            for(let i=0; i<simulatedKills; i++) {
+                                if (Math.random() < (0.045 * p.drop * state.efficiency)) dropsEarned++;
+                            }
+                            
+                            playerStats.coins += goldEarned;
+                            
+                            let actualItems = 0;
+                            let scraps = 0;
+                            for(let i=0; i<dropsEarned; i++) {
+                                if (inventory.EQUIP.length < 20) {
+                                    rollEquipmentDrop(false, true); // true flag for silent/offline roll
+                                    actualItems++;
+                                } else {
+                                    scraps++;
+                                }
+                            }
+                            if (scraps > 0) addEtcDrop("Iron Scrap", scraps);
+                            
+                            pushLog(`<span style='color:#3498db; font-weight:bold;'>[OFFLINE GAINS] Gone for ${Math.floor(offlineSeconds/60)} mins. Simulated Kills: ${simulatedKills}. Gold: +${goldEarned}. Items: +${actualItems}. Scraps (Bag Full): +${scraps}.</span>`);
+                            alert(`Offline Progress (Capped at 2 hrs)\n\nTime Offline: ${Math.floor(offlineSeconds/60)} mins\nKills Simulated: ${simulatedKills}\nGold Earned: ${goldEarned}\nItems Found: ${actualItems}\nScraps Gained (Bag Full): ${scraps}`);
+                        }
+                    }
+                }
                 pushLog(`<span style='color:#3498db; font-weight:bold;'>[SYSTEM] Local save loaded successfully.</span>`);
             } catch(e) { console.error("Save load failed", e); }
         }
     };
-
-    // Auto-save every 5 seconds
-    setInterval(window.saveGame, 5000);
 
     // Init Scenery
     for(let i=0; i<8; i++) {
@@ -407,7 +488,7 @@ window.onload = function() {
             let item = inventory.EQUIP.find(i => i.id === itemId);
             if (item) {
                 frozenItemDb[itemId] = JSON.parse(JSON.stringify(item));
-                text = text.replace(item.name, `<span class="log-item-link" onmousemove="showLogTooltip(event, ${itemId})" onmouseleave="hideTooltip()">${item.name}</span>`);
+                text = text.replace(item.name, `<span class="log-item-link" onmousemove="showLogTooltip(event, ${itemId})" ontouchstart="showLogTooltip(event, ${itemId})" onmouseleave="hideTooltip()">${item.name}</span>`);
             }
         }
         logsHistory.unshift(text);
@@ -439,7 +520,6 @@ window.onload = function() {
         let scale = 1 + (playerStats.stage * 0.15);
         if (playerStats.isBossMode) {
             let label = playerStats.isUberBoss ? "ENRAGED RIFT GUARDIAN" : "STAGE BOSS";
-            // Bosses now deal ~5.5x damage because they hit 5.5x slower (120 frames vs 22 frames)
             let baseBossHp = 55 * scale * (playerStats.isUberBoss ? 1.5 : 1);
             mob = { x: 750, y: 130, w: 35, h: 60, type: "boss", hp: Math.floor(baseBossHp), maxHp: Math.floor(baseBossHp), damage: Math.floor((4 + (5 * scale)) * 5.5), flashTimer: 0, isStopped: false };
             pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[${label}]</span> blocked your transit route!`);
@@ -540,6 +620,7 @@ window.onload = function() {
         
         pushLog(`<span style='color:#e74c3c;'>[SALVAGE]</span> Dismantled ${item.name} yielding: ${scrapsGained.join(", ")}`);
         if (forgeSelectedItem && forgeSelectedItem.id === id) { forgeSelectedItem = null; renderForgeTab(); }
+        updateUI();
         renderInventory();
         window.saveGame();
     };
@@ -549,6 +630,11 @@ window.onload = function() {
             pushHeaderToast("Requires 1 Gacha Key!", "#e74c3c");
             return; 
         }
+        if (inventory.EQUIP.length >= 20) {
+            pushHeaderToast("Inventory Full (20/20)!", "#e74c3c");
+            return;
+        }
+        
         inventory.ETC["Gacha Key"] -= 1;
         if (inventory.ETC["Gacha Key"] === 0) delete inventory.ETC["Gacha Key"];
         rollGachaDrop(); 
@@ -586,7 +672,7 @@ window.onload = function() {
         window.saveGame();
     };
 
-    function generateEquipment(chosenType, statLinesCount, stageScale, sourceName) {
+    function generateEquipment(chosenType, statLinesCount, stageScale, sourceName, silent = false) {
         let item = { 
             id: idCounter++, name: "", type: chosenType, statsRolled: statLinesCount, temperLevel: 0,
             atk: 0, maxHp: 0, def: 0, moveSpeed: 0, critChance: 0, critDamage: 0, block: 0, parry: 0, dropRate: 0, quality: 0, goldMulti: 0,
@@ -608,7 +694,7 @@ window.onload = function() {
             let chosenArt = artifactsPool[Math.floor(Math.random() * artifactsPool.length)];
             item.name = `⭐ UNIQUE ${chosenArt.name}`; item.trait = chosenArt.trait; item.desc = chosenArt.desc; item.breakdown = chosenArt.breakdown;
             item.dropRate = chosenArt.dropRate; item.quality = chosenArt.quality; item.goldMulti = chosenArt.goldMulti; item.statsRolled = "UNIQUE";
-            pushLog(`<strong style='color:#1abc9c;'>⭐ UNIQUE ARTIFACT DROPPED!</strong> Extracted: <span style='color:#1abc9c;'>${item.name}</span>!`, item.id);
+            if(!silent) pushLog(`<strong style='color:#1abc9c;'>⭐ UNIQUE ARTIFACT DROPPED!</strong> Extracted: <span style='color:#1abc9c;'>${item.name}</span>!`, item.id);
         } else {
             if (chosenType === "overall") { item.baseMaxHp = Math.ceil(40 * stageScale); }
             else if (chosenType === "chest" || chosenType === "leggings" || chosenType === "helmet") { 
@@ -644,20 +730,33 @@ window.onload = function() {
             let prefix = getTierName(item.statsRolled);
             item.name = `${prefix} ${chosenType.toUpperCase()} (+${stageScale})`;
             
-            if (sourceName === "Gacha") {
-                pushLog(`<strong style='color:#f1c40f;'>[GACHA]</strong> Dispensed: <span style='color:${getTierColor(item.statsRolled)};'>${item.name}</span>`, item.id);
-            } else {
-                pushLog(`<strong style='color:#ff9f43;'>BOSS KILLED!</strong> Found: <span style='color:${getTierColor(item.statsRolled)};'>${item.name}</span>`, item.id);
+            if(!silent) {
+                if (sourceName === "Gacha") {
+                    pushLog(`<strong style='color:#f1c40f;'>[GACHA]</strong> Dispensed: <span style='color:${getTierColor(item.statsRolled)};'>${item.name}</span>`, item.id);
+                } else {
+                    pushLog(`<strong style='color:#ff9f43;'>BOSS KILLED!</strong> Found: <span style='color:${getTierColor(item.statsRolled)};'>${item.name}</span>`, item.id);
+                }
             }
         }
 
-        pushToast(item.name, item.statsRolled, getTierColor(item.statsRolled));
+        if(!silent) pushToast(item.name, item.statsRolled, getTierColor(item.statsRolled));
         inventory.EQUIP.push(item);
-        renderInventory();
-        renderForgeTab();
+        if(!silent) {
+            renderInventory();
+            renderForgeTab();
+            updateUI();
+        }
     }
 
-    function rollEquipmentDrop(isBossKill) {
+    function rollEquipmentDrop(isBossKill, silent = false) {
+        if (inventory.EQUIP.length >= 20) {
+            if(!silent) {
+                pushToast("Bag Full! Scrap gained.", null, "#e74c3c", true, 1);
+                addEtcDrop(isBossKill ? "Ancient Core" : "Iron Scrap", 1);
+            }
+            return;
+        }
+
         let p = resolvePlayerStats();
         let artifactChance = playerStats.isUberBoss ? 0.30 : 0.05;
         let allowArtifact = isBossKill && (Math.random() < artifactChance); 
@@ -677,7 +776,7 @@ window.onload = function() {
         else statLinesCount = 0;
 
         let stageScale = Math.floor((playerStats.stage - 1) / 10) + 1; 
-        generateEquipment(chosenType, statLinesCount, stageScale, isBossKill ? "Boss" : "Route");
+        generateEquipment(chosenType, statLinesCount, stageScale, isBossKill ? "Boss" : "Route", silent);
     }
 
     function rollGachaDrop() {
@@ -712,11 +811,11 @@ window.onload = function() {
         let subtitle = item.type === "artifact" ? "Unique Boss Trophy Slot" : `${item.type.toUpperCase()} | <span style="color:${tierColor}; font-weight:bold;">${tierDisplay}</span>`;
         let temperTag = item.temperLevel > 0 ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>` : "";
 
-        html += `<div class="tt-title" style="color:${titleColor};">${item.name}${temperTag}</div>`;
+        html += `<div class="tt-title" style="color:${titleColor}; white-space:normal;">${item.name}${temperTag}</div>`;
         html += `<div class="tt-subtitle">${subtitle}</div>`;
 
         if (item.type === "artifact") {
-            html += `<div class="tt-stat-line" style="color:#d2b4de; margin-bottom: 6px;">• Effect: ${item.desc}</div>`;
+            html += `<div class="tt-stat-line" style="color:#d2b4de; margin-bottom: 6px; white-space:normal;">• Effect: ${item.desc}</div>`;
             html += `<div class="tt-trait">${item.breakdown}</div>`;
         } else {
             html += `<div style="font-weight:bold; color:#aaa; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Current Parameters:</div>`;
@@ -753,7 +852,7 @@ window.onload = function() {
                     let isPositive = s.inverseGood ? diff < 0 : diff > 0;
                     let color = isPositive ? "#2ecc71" : "#e74c3c"; let sign = diff > 0 ? "+" : "";
                     let diffStr = s.isPct ? sign + Math.round(diff*100) + "%" : sign + Math.round(diff);
-                    html += `<div class="tt-stat-line" style="color:${color}; font-weight:bold;">• ${s.icon} Total ${s.label}: ${diffStr}</div>`;
+                    html += `<div class="tt-stat-line" style="color:${color}; font-weight:bold; white-space:nowrap;">• ${s.icon} Total ${s.label}: ${diffStr}</div>`;
                 }
             });
             if (!hasDiffs) html += `<div class="tt-stat-line" style="color:#7f8c8d; font-style:italic;">No net difference.</div>`;
@@ -770,7 +869,7 @@ window.onload = function() {
         } else {
             html += `<div style="padding: 10px; width: 250px; box-sizing: border-box;">${generateItemCardHtml(item, null, false)}</div>`;
         }
-        return `<div style="display:flex;">${html}</div>`;
+        return `<div class="tooltip-flex-container">${html}</div>`;
     }
 
     function getEquippedItemForComparison(type) {
@@ -782,20 +881,20 @@ window.onload = function() {
     window.showInventoryTooltip = function(e, itemId) {
         let item = inventory.EQUIP.find(i => i.id === itemId); if (!item) return;
         let tt = document.getElementById('game-tooltip'); tt.innerHTML = buildGeneralTooltipHtml(item, true); 
-        tt.style.borderColor = getTierColor(item.statsRolled); tt.style.display = "flex"; window.positionTooltip(e, tt);
+        tt.style.borderColor = getTierColor(item.statsRolled); tt.style.display = "block"; window.positionTooltip(e, tt);
     };
 
     window.showSlotTooltip = function(e, slotKey) {
         let item = equippedSlots[slotKey]; if (!item) return;
         let tt = document.getElementById('game-tooltip'); tt.innerHTML = buildGeneralTooltipHtml(item, false); 
-        tt.style.borderColor = getTierColor(item.statsRolled); tt.style.display = "flex"; window.positionTooltip(e, tt);
+        tt.style.borderColor = getTierColor(item.statsRolled); tt.style.display = "block"; window.positionTooltip(e, tt);
     };
 
     window.showLogTooltip = function(e, itemId) {
         let item = frozenItemDb[itemId]; if (!item) return;
         let tt = document.getElementById('log-item-tooltip'); 
-        tt.innerHTML = `<div style="padding: 10px; width: 250px; box-sizing: border-box;">${generateItemCardHtml(item, null, false)}</div>`;
-        tt.style.borderColor = getTierColor(item.statsRolled); tt.style.display = "flex"; window.positionTooltip(e, tt);
+        tt.innerHTML = `<div class="tooltip-flex-container"><div style="padding: 10px; width: 250px; box-sizing: border-box;">${generateItemCardHtml(item, null, false)}</div></div>`;
+        tt.style.borderColor = getTierColor(item.statsRolled); tt.style.display = "block"; window.positionTooltip(e, tt);
     }
     
     window.showStatHoverTooltip = function(e, statType) {
@@ -849,35 +948,6 @@ window.onload = function() {
         tt.style.borderColor = "#bdc3c7"; tt.style.display = "block"; window.positionTooltip(e, tt);
     };
 
-    window.showGachaTooltip = function(e) {
-        let p = resolvePlayerStats();
-        let qly = p.qly;
-        
-        let mythic = (0.5 * qly);
-        let leg = (2.0 * qly) - mythic;
-        let epic = (10.0 * qly) - (2.0 * qly);
-        let magic = (30.0 * qly) - (10.0 * qly);
-        let rare = 100 - (30.0 * qly);
-
-        let tt = document.getElementById('game-tooltip');
-        tt.innerHTML = `
-            <div style="padding: 10px; width: 250px; box-sizing: border-box;">
-                <div class="tt-title" style="color:#f1c40f;">🎰 Vending Machine Rates</div>
-                <div class="tt-subtitle">Gacha Rarity Distribution</div>
-                <div class="tt-stat-line" style="color:#3498db;">• 1★ Rare: ${Math.max(0, rare).toFixed(2)}%</div>
-                <div class="tt-stat-line" style="color:#9b59b6;">• 2★ Magic: ${Math.max(0, magic).toFixed(2)}%</div>
-                <div class="tt-stat-line" style="color:#e67e22;">• 3★ Epic: ${Math.max(0, epic).toFixed(2)}%</div>
-                <div class="tt-stat-line" style="color:#f1c40f;">• 4★ Legendary: ${Math.max(0, leg).toFixed(2)}%</div>
-                <div class="tt-stat-line" style="color:#e74c3c;">• 5★ Mythic: ${Math.max(0, mythic).toFixed(2)}%</div>
-                <div class="tt-stat-line" style="color:#1abc9c; margin-top:4px;">• Bonus: 1% flat chance for Unique Artifact!</div>
-                <div class="tt-subtitle" style="margin-top:6px; border-top:1px solid #333; padding-top:4px;">Guaranteed 1★ to 5★ gear. Influenced by Drop Quality.</div>
-            </div>
-        `;
-        tt.style.borderColor = "#f1c40f";
-        tt.style.display = "flex"; 
-        window.positionTooltip(e, tt);
-    };
-
     window.positionTooltip = function(e, tt) {
         let container = document.getElementById('game-container').getBoundingClientRect();
         let clientX = e.clientX || (e.touches && e.touches[0].clientX); let clientY = e.clientY || (e.touches && e.touches[0].clientY);
@@ -920,6 +990,10 @@ window.onload = function() {
     };
 
     window.unequipItem = function(slotKey) {
+        if (inventory.EQUIP.length >= 20) {
+            pushHeaderToast("Inventory Full (20/20)!", "#e74c3c");
+            return;
+        }
         window.hideTooltip(); let item = equippedSlots[slotKey]; if (!item) return;
         equippedSlots[slotKey] = null; inventory.EQUIP.push(item); updateUI(); renderInventory(); renderForgeTab();
         window.saveGame();
@@ -1049,6 +1123,7 @@ window.onload = function() {
         overlay.style.display = "flex";
         setTimeout(() => { 
             overlay.style.display = "none"; 
+            reviveTimer = 90; // Trigger revive God Ray animation
             isGamePaused = false;
             window.saveGame();
         }, 1500);
@@ -1114,11 +1189,14 @@ window.onload = function() {
             progressEl.innerText = "💀 FARMING MODE";
             progressEl.style.color = "#7f8c8d";
         } else {
-            progressEl.innerText = `${playerStats.killCount} / ${playerStats.targetsRequired} Mobs`;
+            progressEl.innerText = `${playerStats.killCount} / ${playerStats.targetsRequired}`;
             progressEl.style.color = "#f1c40f";
         }
 
         document.getElementById('hud-hp').innerText = `${playerStats.currentHp}/${p.maxHp}`; document.getElementById('hud-coins').innerText = Math.floor(playerStats.coins);
+        document.getElementById('hud-bag').innerText = `${inventory.EQUIP.length}/20`;
+        document.getElementById('hud-bag').style.color = inventory.EQUIP.length >= 20 ? "#e74c3c" : "#2ecc71";
+        document.getElementById('btn-bag-count').innerText = inventory.EQUIP.length;
         
         document.getElementById('stat-atk').innerText = p.atk; document.getElementById('stat-mhp').innerText = p.maxHp; 
         document.getElementById('stat-def').innerText = p.def; document.getElementById('stat-mov').innerText = p.moveSpeed;
@@ -1126,8 +1204,7 @@ window.onload = function() {
         document.getElementById('stat-blk').innerText = Math.floor(p.block * 100) + "%"; document.getElementById('stat-pry').innerText = Math.floor(p.parry * 100) + "%";
         document.getElementById('stat-ias').innerText = p.idleAttackSpeed + "f"; document.getElementById('stat-aas').innerText = p.activeAttackSpeed + "f";
         
-        // Calculate Idle DPS
-        let effMultiplier = 1 + (p.critChance * (p.critDamage - 1)); // Expected damage multiplier
+        let effMultiplier = 1 + (p.critChance * (p.critDamage - 1)); 
         let idps = (p.atk * effMultiplier) * (60 / p.idleAttackSpeed);
         document.getElementById('stat-idps').innerText = idps.toFixed(1);
         
@@ -1168,9 +1245,9 @@ window.onload = function() {
                 let nameColor = getTierColor(item.statsRolled); let tierStr = item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★ ${getTierName(item.statsRolled)}`;
                 let temperTag = item.temperLevel > 0 ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>` : "";
                 let details = item.type === "artifact" ? `<span style="font-size:10px;color:#d2b4de;font-weight:bold;">Trait: ${item.desc}</span>` : `<span style="font-size:10px;color:#aaa;">Slot: ${item.type.toUpperCase()} | <span style="color:${nameColor};font-weight:bold;">${tierStr}</span></span>`;
-                return `<div class="bag-item" onmousemove="showInventoryTooltip(event, ${item.id})" onmouseleave="hideTooltip()" ontouchstart="showInventoryTooltip(event, ${item.id})">
+                return `<div class="bag-item" onmousemove="showInventoryTooltip(event, ${item.id})" ontouchstart="showInventoryTooltip(event, ${item.id})" onmouseleave="hideTooltip()">
                     <div><strong style="color:${nameColor};">${item.name}${temperTag}</strong><br>${details}</div>
-                    <div style="position:relative; z-index:10;">
+                    <div style="position:relative; z-index:10; white-space:nowrap;">
                         <button class="btn-action" onclick="equipItem(${item.id})">Equip</button>
                         ${item.type !== "artifact" ? `<button class="btn-action un" style="margin-left:2px;" onclick="salvageItem(${item.id})">Salvage</button>` : ''}
                     </div>
@@ -1180,7 +1257,7 @@ window.onload = function() {
         let etcBox = document.getElementById('bag-etc'); let etcKeys = Object.keys(inventory.ETC);
         if (etcKeys.length === 0) { etcBox.innerHTML = "<div style='color:#666;text-align:center;padding-top:40px;'>No materials collected.</div>"; }
         else { 
-            etcBox.innerHTML = etcKeys.map(key => `<div class="bag-item" style="cursor:help;" onmousemove="showEtcTooltip(event, '${key}')" onmouseleave="hideTooltip()"><span>📦 ${key}</span><strong>x${inventory.ETC[key]}</strong></div>`).join(""); 
+            etcBox.innerHTML = etcKeys.map(key => `<div class="bag-item" style="cursor:help;" onmousemove="showEtcTooltip(event, '${key}')" ontouchstart="showEtcTooltip(event, '${key}')" onmouseleave="hideTooltip()"><span>📦 ${key}</span><strong>x${inventory.ETC[key]}</strong></div>`).join(""); 
         }
     }
 
@@ -1231,7 +1308,6 @@ window.onload = function() {
                 if (logicClock % p.idleAttackSpeed === 0) {
                     if (state.autoAttack) window.triggerPlayerSlash();
                 }
-                // Enemies attack every 120 frames (2 seconds)
                 if (logicClock % 120 === 0 && mob && mob.hp > 0) {
                     if (Math.random() < p.parry) { effects.push({ x: hero.x, y: hero.y - 15, text: "⚡ PARRY COUNTER!", color: "#9b59b6", life: 25 }); executeHitCalculations(); }
                     else if (Math.random() < p.block) { effects.push({ x: hero.x, y: hero.y, text: "🛡️ BLOCKED", color: "#3498db", life: 20 }); }
@@ -1266,41 +1342,36 @@ window.onload = function() {
         ctx.fillStyle = "#2c3e50";
         for(let i=0; i<canvas.width+40; i+=40) { ctx.fillRect(i - (groundScroll % 40), 180, 4, 70); }
         
-        // Draw Hero Stickman/Block
         let hx = hero.x; let hy = hero.y;
         ctx.fillStyle = playerStats.frenzyTimer > 0 ? "#e67e22" : "#3498db";
-        ctx.fillRect(hx + 5, hy, 15, 15); // Head
-        ctx.fillRect(hx + 5, hy + 15, 15, 20); // Body
+        ctx.fillRect(hx + 5, hy, 15, 15);
+        ctx.fillRect(hx + 5, hy + 15, 15, 20);
         if (hero.slashFrame) { 
-            ctx.fillRect(hx + 15, hy + 15, 20, 5); // Arm extended
-            ctx.fillStyle = "#ecf0f1"; ctx.fillRect(hx + 35, hy + 10, 25, 5); // Sword
+            ctx.fillRect(hx + 15, hy + 15, 20, 5);
+            ctx.fillStyle = "#ecf0f1"; ctx.fillRect(hx + 35, hy + 10, 25, 5);
         } else {
-            ctx.fillRect(hx + 10, hy + 20, 5, 15); // Arm resting
+            ctx.fillRect(hx + 10, hy + 20, 5, 15);
         }
 
         if (mob) {
             ctx.fillStyle = mob.flashTimer > 0 ? "#fff" : (mob.type === "boss" ? "#5c4033" : mob.type === "bandit" ? "#c0392b" : "#006400");
             
             if (mob.type === "slime") {
-                // Hopping Slime
                 let hop = mob.isStopped ? 0 : Math.abs(Math.sin(Date.now() / 150)) * 15;
                 ctx.beginPath(); ctx.arc(mob.x + mob.w/2, mob.y + mob.h - hop, mob.w/2, Math.PI, 0); ctx.fill();
             } else if (mob.type === "boss") {
-                // Scary Tree Boss
-                ctx.fillRect(mob.x + 10, mob.y + 20, mob.w - 20, mob.h - 20); // Trunk
+                ctx.fillRect(mob.x + 10, mob.y + 20, mob.w - 20, mob.h - 20);
                 ctx.fillStyle = mob.flashTimer > 0 ? "#fff" : "#27ae60";
-                ctx.beginPath(); ctx.arc(mob.x + mob.w/2, mob.y + 15, 25, 0, Math.PI*2); ctx.fill(); // Leaves
-                ctx.fillStyle = "#e74c3c"; // Red eyes
+                ctx.beginPath(); ctx.arc(mob.x + mob.w/2, mob.y + 15, 25, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#e74c3c";
                 ctx.fillRect(mob.x + 12, mob.y + 10, 4, 4); ctx.fillRect(mob.x + 20, mob.y + 10, 4, 4);
             } else {
-                // Bandit Blockman
-                ctx.fillRect(mob.x, mob.y, 20, 20); // Head
-                ctx.fillRect(mob.x + 2, mob.y + 20, 16, 25); // Body
-                ctx.fillRect(mob.x - 10, mob.y + 25, 15, 5); // Arm
-                ctx.fillStyle = "#ecf0f1"; ctx.fillRect(mob.x - 20, mob.y + 23, 10, 3); // Dagger
+                ctx.fillRect(mob.x, mob.y, 20, 20);
+                ctx.fillRect(mob.x + 2, mob.y + 20, 16, 25);
+                ctx.fillRect(mob.x - 10, mob.y + 25, 15, 5);
+                ctx.fillStyle = "#ecf0f1"; ctx.fillRect(mob.x - 20, mob.y + 23, 10, 3);
             }
 
-            // High visibility Enemy HP Bar
             let barW = mob.type === "boss" ? 50 : mob.w;
             let barX = mob.type === "boss" ? mob.x - 7 : mob.x;
             ctx.fillStyle = "#e74c3c"; ctx.fillRect(barX, mob.y - 12, barW, 6);
@@ -1308,30 +1379,41 @@ window.onload = function() {
             ctx.strokeStyle = "#111"; ctx.lineWidth = 1; ctx.strokeRect(barX, mob.y - 12, barW, 6);
         }
 
+        // Draw God Rays Revive Animation
+        if (reviveTimer > 0) {
+            ctx.save();
+            ctx.globalAlpha = reviveTimer / 90;
+            ctx.fillStyle = "rgba(241, 196, 15, 0.4)";
+            ctx.beginPath();
+            ctx.moveTo(hero.x + 12, hero.y + 20);
+            ctx.lineTo(hero.x - 80, -50);
+            ctx.lineTo(hero.x + 100, -50);
+            ctx.fill();
+            
+            for(let i=0; i<8; i++) {
+                ctx.fillStyle = "#fff";
+                ctx.beginPath();
+                ctx.arc(hero.x - 30 + Math.random()*80, hero.y - Math.random()*(90-reviveTimer)*3, Math.random()*2+1, 0, Math.PI*2);
+                ctx.fill();
+            }
+            ctx.restore();
+            reviveTimer--;
+        }
+
         particles.forEach(pt => { ctx.fillStyle = pt.color; ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2); ctx.fill(); });
         effects.forEach(eff => { ctx.fillStyle = eff.color; ctx.font = "bold 12px sans-serif"; ctx.fillText(eff.text, eff.x, eff.y); });
 
+        // Draw active toasts stacked (dynamically sized for mobile)
         activeToasts.forEach(toast => {
             ctx.save(); ctx.globalAlpha = Math.max(0, toast.alpha);
             ctx.fillStyle = "rgba(11, 15, 18, 0.9)"; ctx.strokeStyle = toast.color; ctx.lineWidth = 2;
-            let boxWidth = 320; let boxHeight = 28; let boxX = (canvas.width / 2) - (boxWidth / 2); let boxY = toast.yOffset;
+            let boxWidth = Math.min(340, canvas.width - 20); let boxHeight = 28; let boxX = (canvas.width / 2) - (boxWidth / 2); let boxY = toast.yOffset;
             ctx.fillRect(boxX, boxY, boxWidth, boxHeight); ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
             ctx.fillStyle = "#ffffff"; ctx.font = "bold 11px sans-serif"; ctx.textAlign = "center";
-            if (toast.isHeader) {
-                ctx.fillText(toast.label, canvas.width / 2, boxY + 17);
-            } else {
-                ctx.fillText(`${toast.label} : ${toast.name}`, canvas.width / 2, boxY + 17);
-            }
+            let fullText = toast.isHeader ? toast.label : `${toast.label} : ${toast.name}`;
+            ctx.fillText(fullText, canvas.width / 2, boxY + 17, boxWidth - 10);
             ctx.restore();
         });
-
-        let buffEl = document.getElementById('hud-buff');
-        if (playerStats.frenzyTimer > 0) {
-            let secondsLeft = (playerStats.frenzyTimer / 60).toFixed(1);
-            buffEl.innerText = `🔥 FRENZY (${secondsLeft}s)`; buffEl.style.color = "#e67e22";
-        } else {
-            buffEl.innerText = "None"; buffEl.style.color = "#aaa";
-        }
     }
 
     function engineCycle() { 
@@ -1351,7 +1433,7 @@ window.onload = function() {
         }
     }
 
-    window.loadGame(); // Load before first render
+    window.loadGame(); 
     updateUI(); 
     renderInventory(); 
     engineCycle();
