@@ -457,6 +457,17 @@ window.onload = function() {
     let isGamePaused = false;
     let reviveTimer = 0;
 
+    // --- RE-ADDED MISSING SWITCH TAB FUNCTION ---
+    window.switchTab = function(id) {
+        window.hideTooltip(); 
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        event.target.classList.add('active'); 
+        document.getElementById('tab-' + id).classList.add('active');
+        if (id === 'forge') renderForgeTab();
+        if (id === 'market') refreshMarketShopIfNeeded();
+    };
+
     window.giveKeys = function(amount = 10) {
         playerStats.equipKeys += amount; playerStats.goldKeys += amount; playerStats.matKeys += amount;
         if (!inventory.ETC["Gacha Key"]) { inventory.ETC["Gacha Key"] = 0; }
@@ -754,7 +765,7 @@ window.onload = function() {
         return p;
     }
 
-    // --- RE-INSERTED MISSING FUNCTION ---
+    // MAKE SURE TO KEEP THIS FUNCTION!
     function makeSlotHtml(slotKey, label) {
         let item = equippedSlots[slotKey]; let el = document.getElementById('slot-' + slotKey);
         if ((slotKey === 'chest' || slotKey === 'leggings') && equippedSlots.overall) { el.className = "slots-card locked"; el.innerHTML = `⚙️ LOCKED BY OVERALL`; el.style.borderColor = ""; return; }
@@ -1284,9 +1295,7 @@ window.onload = function() {
                 spawnTemperParticles(false);
             }
         } else {
-            // TIER UP LOGIC
-            if (isArt) return; // Cannot tier up artifacts
-            
+            if (isArt) return; 
             let currentTier = forgeSelectedItem.stageLevel;
             let costGold = currentTier * 500;
             let scrapReq = getTierUpScrapName(forgeSelectedItem.statsRolled);
@@ -1776,16 +1785,17 @@ window.onload = function() {
         ctx.fillStyle = "#2c3e50"; ctx.fillRect(0, -8 + bounce, 6, 4); 
         ctx.fillStyle = playerStats.frenzyTimer > 0 ? "#f1c40f" : "#e74c3c"; ctx.fillRect(-5, -20 + bounce, 4, 6); ctx.fillRect(-9, -16 + bounce, 8, 4); 
 
-        ctx.translate(2, 6 + bounce);
+        // --- SWORD SWING MATH FIX ---
+        ctx.translate(5, 10 + bounce);
         if (hero.slashFrame) {
-            ctx.translate(15, -5); 
-            ctx.rotate(Math.PI / 2.5); 
+            ctx.translate(15, -10); 
+            ctx.rotate(-Math.PI / 2); // Perfectly forward
             ctx.fillStyle = "#7f8c8d"; ctx.fillRect(-2, -2, 4, 10); 
             ctx.fillStyle = "#8e44ad"; ctx.fillRect(-5, 8, 10, 4); 
             ctx.fillStyle = "#ecf0f1"; ctx.fillRect(-2, 12, 4, 25); 
-            ctx.fillStyle = "rgba(236, 240, 241, 0.4)"; ctx.beginPath(); ctx.arc(0, 0, 35, -Math.PI/4, Math.PI/2); ctx.lineTo(0,0); ctx.fill();
+            ctx.fillStyle = "rgba(236, 240, 241, 0.4)"; ctx.beginPath(); ctx.arc(0, 20, 35, 0, Math.PI/2); ctx.lineTo(0,0); ctx.fill();
         } else {
-            ctx.rotate(-Math.PI / 6); 
+            ctx.rotate(-Math.PI / 8); 
             ctx.fillStyle = "#7f8c8d"; ctx.fillRect(-2, -2, 4, 10); 
             ctx.fillStyle = "#8e44ad"; ctx.fillRect(-5, 8, 10, 4); 
             ctx.fillStyle = "#ecf0f1"; ctx.fillRect(-2, 12, 4, 25); 
@@ -1872,10 +1882,23 @@ window.onload = function() {
             ctx.strokeStyle = "#111"; ctx.lineWidth = 1; ctx.strokeRect(barX, mob.y - 12, barW, 6);
         }
 
+        // --- FAIRY GLOW AND WING FLAP FIX ---
         if (fairy.active) {
-            ctx.fillStyle = "rgba(255, 182, 193, 0.7)";
-            ctx.beginPath(); ctx.ellipse(fairy.x - 6, fairy.y - 4, 4, 10, Math.PI/4, 0, Math.PI*2); ctx.ellipse(fairy.x + 6, fairy.y - 4, 4, 10, -Math.PI/4, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#ffb6c1"; ctx.beginPath(); ctx.arc(fairy.x, fairy.y, 8, 0, Math.PI*2); ctx.fill();
+            let flap = Math.abs(Math.sin(Date.now() / 100)) * 8 + 2; 
+            let hover = Math.sin(Date.now() / 200) * 10;
+            let fx = fairy.x;
+            let fy = fairy.y + hover;
+
+            ctx.save();
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#ffb6c1";
+            
+            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.beginPath(); ctx.ellipse(fx - 4, fy - 4, 6, flap, Math.PI/6, 0, Math.PI*2); ctx.ellipse(fx + 4, fy - 4, 6, flap, -Math.PI/6, 0, Math.PI*2); ctx.fill();
+            
+            ctx.fillStyle = "#ffb6c1"; 
+            ctx.beginPath(); ctx.arc(fx, fy, 6, 0, Math.PI*2); ctx.fill();
+            ctx.restore();
         }
 
         if (!playerStats.isDungeonMode) {
