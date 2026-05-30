@@ -157,6 +157,7 @@
         <div class="stats-hud">
             <div>Stage: <span id="hud-stage" style="color:#3498db;">1-1</span></div>
             <div>Prog: <span id="hud-progress" style="color:#f1c40f;">0/10</span></div>
+            <div>Buff: <span id="hud-buff" style="color:#aaa;">None</span></div>
             <div>Bag: <span id="hud-bag" style="color:#2ecc71;">0/20</span></div>
             <div>HP: <span id="hud-hp" style="color:#e74c3c;">100/100</span></div>
             <div>💰: <span id="hud-coins" style="color:#f1c40f;">0</span></div>
@@ -1209,7 +1210,7 @@ window.onload = function() {
         if (playerStats.isUberBoss) {
             addEtcDrop("Gacha Key", 1);
             pushToast("Gacha Key", null, "#f1c40f", true, 1);
-        } else if (isBoss && Math.random() < 0.01) { 
+        } else if (isBoss && Math.random() < 0.05) { 
             addEtcDrop("Ancient Core", 1);
             pushToast("Ancient Core", null, "#9b59b6", true, 1);
         } else if (!isBoss && Math.random() < 0.03) { 
