@@ -571,6 +571,8 @@ window.onload = function() {
     window.hardResetGame = function() {
         if (confirm("🚨 WARNING: This will permanently delete your entire save file and progress! Are you absolutely sure you want to start over?")) {
             if (confirm("THIS CANNOT BE UNDONE! Confirm hard reset?")) {
+                // Remove the exit listener to prevent saving before the page reloads
+                window.removeEventListener('beforeunload', window.saveGame);
                 localStorage.removeItem('idle_game_v11');
                 window.location.reload();
             }
@@ -1140,7 +1142,7 @@ window.onload = function() {
             else if (roll < (25.0 * luckMultiplier)) statLinesCount = 3; else if (roll < (60.0 * luckMultiplier)) statLinesCount = 2; else statLinesCount = 1; 
         } else {
             if (roll < (0.02 * luckMultiplier)) statLinesCount = 5; else if (roll < (0.18 * luckMultiplier)) statLinesCount = 4;
-            else if (roll < (0.80 * luckMultiplier)) statLinesCount = 3; else if (roll < (4.00 * luckMultiplier)) statLinesCount = 2; 
+            else if (roll < (0.80 * luckMultiplier)) statLinesCount = 3; else if (roll < (4.00 * luckMultiplier)) statMiddleTierCount = 2; 
             else if (roll < (15.00 * luckMultiplier)) statLinesCount = 1; else statLinesCount = 0;
         }
 
@@ -1180,9 +1182,10 @@ window.onload = function() {
             atk: playerStats.baseAtk, maxHp: playerStats.baseMaxHp, def: playerStats.baseDef, moveSpeed: playerStats.baseMoveSpeed,
             idleAttackSpeed: playerStats.baseIdleSpeed, activeAttackSpeed: playerStats.baseActiveSpeed,
             drop: playerStats.baseDrop, qly: playerStats.baseQuality, gold: playerStats.baseGold,
-            critChance: playerStats.baseCritChance, critDamage: playerStats.baseCritDamage,
+            critChance: playerStats.baseCritChance, MathCritDamage: playerStats.baseCritDamage,
             block: playerStats.baseBlock, parry: playerStats.baseParry, rareSpawn: playerStats.baseRareSpawn
         };
+        p.critDamage = playerStats.baseCritDamage; // fallback correction
         
         let alloc = playerStats.spAllocations;
         p.maxHp += (alloc.spHp * 10);
