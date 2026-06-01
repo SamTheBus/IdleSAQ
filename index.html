@@ -953,7 +953,7 @@ window.onload = function() {
             }
             else if (chosenType === "weapon") { item.baseAtk = randInt(2, 4) * stageScale; }
             else if (chosenType === "subweapon") {
-                if (item.subType === "shield") { item.baseDef = randInt(1, 3) * stageScale; item.baseBlock = 0.02 * stageScale; }
+                if (item.subType === "shield") { item.baseDef = randInt(15, 30) * stageScale; item.baseBlock = 0.03 * stageScale; }
                 else if (item.subType === "dagger") { item.baseAtk = randInt(1, 2) * stageScale; item.baseParry = 0.02 * stageScale; }
                 else if (item.subType === "tome") { item.baseInt = randInt(1, 2) * stageScale; }
             }
@@ -1285,7 +1285,7 @@ window.onload = function() {
         if (Math.random() < 0.20) {
             let goldYield = Math.floor((100 + (playerStats.stage * 35)) * p.gold);
             playerStats.coins += goldYield;
-            effects.push({ x: spawnX, y: spawnY - 10, text: `+${goldYield} Gold!`, color: "#f1c40f", life: 40 });
+            effects.push({ x: spawnX, y: spawnY - 10, text: `+${goldYield} Gold!`, color: "#f1c40f", life: 80 });
             return;
         }
 
@@ -1471,10 +1471,21 @@ window.onload = function() {
         if (p.block > 0.75) p.block = 0.75;
         if (p.parry > 0.35) p.parry = 0.35; 
 
-        const hasShield = equippedSlots.subweapon && equippedSlots.subweapon.subType === "shield";
-        if (!hasShield) {
+        // Any subweapon allows blocking. Shields provide a massive flat and multiplicative defense boost.
+        const hasSubweapon = !!equippedSlots.subweapon;
+        if (!hasSubweapon) {
             p.block = 0.0;
         }
+
+        const hasShield = equippedSlots.subweapon && equippedSlots.subweapon.subType === "shield";
+        if (hasShield) {
+            p.def = Math.ceil((p.def + 40 + (equippedSlots.subweapon.stageLevel * 8)) * 1.6);
+        }
+
+        // Standardize decimal scales into final integer profiles for core gameplay metrics
+        p.atk = Math.floor(p.atk);
+        p.maxHp = Math.floor(p.maxHp);
+        p.def = Math.floor(p.def);
 
         // Standardize decimal scales into final integer profiles for core gameplay metrics
         p.atk = Math.floor(p.atk);
@@ -2274,7 +2285,7 @@ window.onload = function() {
         let coinYield = Math.ceil(baseCoin * p.gold);
         playerStats.coins += coinYield;
         spawnDeathParticles(mob.x + (mob.w / 2), mob.y + (mob.h / 2), mob.type);
-        effects.push({ x: mob.x + 35, y: mob.y + 25, text: "+" + coinYield + "g", color: "#f1c40f", life: 25 });
+        effects.push({ x: mob.x + 35, y: mob.y + 25, text: "+" + coinYield + "g", color: "#f1c40f", life: 50 });
         
         if (playerStats.isDungeonMode) {
             if (playerStats.currentDungeon === 'equip') {
@@ -2296,7 +2307,7 @@ window.onload = function() {
                     let r = Math.random();
                     if (r < 0.10) addEtcDrop("Epic Scrap", 1); else if (r < 0.30) addEtcDrop("Magic Scrap", 1);
                     else if (r < 0.60) addEtcDrop("Rare Scrap", 1); else addEtcDrop("Monster Soul", randInt(1, 3));
-                    effects.push({ x: mob.x + 10, y: mob.y + 10, text: "📦 Mats", color: "#bdc3c7", life: 35 });
+                    effects.push({ x: mob.x + 10, y: mob.y + 10, text: "📦 Mats", color: "#bdc3c7", life: 70 });
                 }
             } 
         } else {
@@ -2312,7 +2323,7 @@ window.onload = function() {
         } else if (!isBoss && !playerStats.isDungeonMode) { 
             if (Math.random() < (mob.isRare ? 0.50 : 0.15)) {
                 let etcItemName = mob.isRare ? "Luminous Soul" : "Monster Soul";
-                addEtcDrop(etcItemName); effects.push({ x: mob.x + 10, y: mob.y + 10, text: "+1 " + etcItemName, color: mob.isRare ? "#f1c40f" : "#bdc3c7", life: 35 });
+                addEtcDrop(etcItemName); effects.push({ x: mob.x + 10, y: mob.y + 10, text: "+1 " + etcItemName, color: mob.isRare ? "#f1c40f" : "#bdc3c7", life: 70 });
             }
             
             let keyTypes = ['equip', 'gold', 'mat'];
@@ -2344,7 +2355,7 @@ window.onload = function() {
                 if (mob.type === "dungeon_miniboss" || (!isBoss && playerStats.killCount >= playerStats.targetsRequired)) {
                     let healAmt = Math.floor(p.maxHp * randFloat(0.10, 0.15));
                     playerStats.currentHp = Math.min(p.maxHp, playerStats.currentHp + healAmt);
-                    effects.push({x: hero.x, y: hero.y - 20, text: "💚 +"+healAmt, color: "#2ecc71", life: 30});
+                    effects.push({x: hero.x, y: hero.y - 20, text: "💚 +"+healAmt, color: "#2ecc71", life: 60});
                 }
             }
             
@@ -2398,6 +2409,59 @@ window.onload = function() {
 
     window.rechallengeBoss = function() { playerStats.isBossMode = true; playerStats.isFarmingLoop = false; mob = null; updateUI(); };
 
+    function spawnDamageEffect(amount, type, isCrit) {
+        let existing = effects.find(e => e.isDamage && e.life > 0);
+        let doubleLife = 65 * 2; // Twice as long as default (24 * 2 = 48) -> We set to 130 frames for spectacular high-retention tracking
+
+        if (existing) {
+            if (!existing.damageBreakdown) {
+                existing.damageBreakdown = {};
+            }
+            existing.damageBreakdown[type] = (existing.damageBreakdown[type] || 0) + amount;
+            existing.amount += amount;
+            existing.life = doubleLife;
+            if (isCrit) existing.hasCrit = true;
+            
+            let totalStr = (existing.hasCrit ? "💥 " : "-") + existing.amount;
+            let detailParts = [];
+            const icons = { slash: "⚔️", dagger: "🗡️", lightning: "⚡", fire: "🔥", frost: "❄️", echo: "👻", counter: "🛡️" };
+            for (let key in existing.damageBreakdown) {
+                if (existing.damageBreakdown[key] > 0) {
+                    detailParts.push(`${icons[key]}${existing.damageBreakdown[key]}`);
+                }
+            }
+            existing.text = `${totalStr} (${detailParts.join(" ")})`;
+            existing.y = Math.max(mob.y - 45, existing.y - 1);
+            existing.x = mob.x + 15;
+        } else {
+            let breakdown = {};
+            breakdown[type] = amount;
+            const icons = { slash: "⚔️", dagger: "🗡️", lightning: "⚡", fire: "🔥", frost: "❄️", echo: "👻", counter: "🛡️" };
+            let totalStr = (isCrit ? "💥 " : "-") + amount;
+            let text = `${totalStr} (${icons[type]}${amount})`;
+            
+            let mainColor = "#ecf0f1";
+            if (isCrit) mainColor = "#e74c3c";
+            else if (type === 'lightning') mainColor = "#f1c40f";
+            else if (type === 'fire') mainColor = "#e67e22";
+            else if (type === 'frost') mainColor = "#3498db";
+            else if (type === 'echo') mainColor = "#9b59b6";
+            else if (type === 'counter') mainColor = "#f1c40f";
+            
+            effects.push({
+                x: mob.x + 15,
+                y: mob.y - 15,
+                text: text,
+                color: mainColor,
+                life: doubleLife,
+                isDamage: true,
+                amount: amount,
+                hasCrit: isCrit,
+                damageBreakdown: breakdown
+            });
+        }
+    }
+
     function executeHitCalculations() {
         if (mob && mob.x < hero.x + 65) {
             let p = resolvePlayerStats(); let finalDamage = p.atk; 
@@ -2406,7 +2470,7 @@ window.onload = function() {
             let isCrit = Math.random() < p.critChance; if (isCrit) finalDamage = Math.ceil(finalDamage * p.critDamage);
             
             mob.hp -= finalDamage; mob.flashTimer = 5;
-            effects.push({ x: mob.x + 5, y: mob.y - 10, text: isCrit ? "💥 " + finalDamage : "-" + finalDamage, color: isCrit ? "#e74c3c" : "#ecf0f1", life: 22 });
+            spawnDamageEffect(finalDamage, 'slash', isCrit);
             damageHistory.push({ time: Date.now(), amount: finalDamage });
 
             // Offhand Dagger Multi-Strike (Deals 50% of your total Attack as an extra hit)
@@ -2417,7 +2481,7 @@ window.onload = function() {
                 if (isDaggerCrit) daggerDmg = Math.ceil(daggerDmg * p.critDamage);
                 
                 mob.hp -= daggerDmg;
-                effects.push({ x: mob.x + 20, y: mob.y - 30, text: isDaggerCrit ? "🗡️💥 " + daggerDmg : "🗡️ " + daggerDmg, color: "#e74c3c", life: 20 });
+                spawnDamageEffect(daggerDmg, 'dagger', isDaggerCrit);
                 damageHistory.push({ time: Date.now(), amount: daggerDmg });
             }
 
@@ -2433,7 +2497,7 @@ window.onload = function() {
                     if (isSpellCrit) lightningDmg = Math.ceil(lightningDmg * p.critDamage);
                     
                     mob.hp -= lightningDmg;
-                    effects.push({ x: mob.x - 10, y: mob.y - 25, text: isSpellCrit ? "⚡💥 " + lightningDmg : "⚡ " + lightningDmg, color: "#f1c40f", life: 24 });
+                    spawnDamageEffect(lightningDmg, 'lightning', isSpellCrit);
                     damageHistory.push({ time: Date.now(), amount: lightningDmg });
 
                     // Descending crackling lightning bolt particles
@@ -2458,7 +2522,7 @@ window.onload = function() {
                     if (isSpellCrit) fireDmg = Math.ceil(fireDmg * p.critDamage);
                     
                     mob.hp -= fireDmg;
-                    effects.push({ x: mob.x + 15, y: mob.y - 15, text: isSpellCrit ? "🔥💥 " + fireDmg : "🔥 " + fireDmg, color: "#e67e22", life: 24 });
+                    spawnDamageEffect(fireDmg, 'fire', isSpellCrit);
                     damageHistory.push({ time: Date.now(), amount: fireDmg });
 
                     // Rising flame embers
@@ -2483,7 +2547,7 @@ window.onload = function() {
                     if (isSpellCrit) frostDmg = Math.ceil(frostDmg * p.critDamage);
                     
                     mob.hp -= frostDmg;
-                    effects.push({ x: mob.x + 35, y: mob.y - 30, text: isSpellCrit ? "❄️💥 " + frostDmg : "❄️ " + frostDmg, color: "#3498db", life: 24 });
+                    spawnDamageEffect(frostDmg, 'frost', isSpellCrit);
                     damageHistory.push({ time: Date.now(), amount: frostDmg });
 
                     // Radial ice shard burst
@@ -2504,12 +2568,12 @@ window.onload = function() {
 
             if (checkArtifactTrait("echo_strike")) {
                 let echoDmg = Math.max(1, Math.ceil(finalDamage * 0.5)); mob.hp -= echoDmg;
-                effects.push({ x: mob.x + 20, y: mob.y - 20, text: "👻 " + echoDmg, color: "#9b59b6", life: 20 });
+                spawnDamageEffect(echoDmg, 'echo', false);
                 damageHistory.push({ time: Date.now(), amount: echoDmg });
             }
             if (checkArtifactTrait("vampirism")) {
                 let heal = Math.max(1, Math.floor(finalDamage * 0.10)); playerStats.currentHp = Math.min(p.maxHp, playerStats.currentHp + heal);
-                effects.push({ x: hero.x - 25, y: hero.y - 10, text: "❤️ +" + heal, color: "#2ecc71", life: 30 });
+                effects.push({ x: hero.x - 25, y: hero.y - 10, text: "❤️ +" + heal, color: "#2ecc71", life: 60 });
             }
             updateUI(); if (mob.hp <= 0) handleMobDeath();
         }
@@ -2768,26 +2832,26 @@ window.onload = function() {
                 if (logicClock % p.idleAttackSpeed === 0) { if (state.autoAttack) window.triggerPlayerSlash(); }
                 if (logicClock % 120 === 0 && mob && mob.hp > 0) {
                     if (Math.random() < p.parry) { 
-                        effects.push({ x: hero.x, y: hero.y - 15, text: "⚡ PARRY COUNTER!", color: "#9b59b6", life: 25 }); 
+                        effects.push({ x: hero.x, y: hero.y - 15, text: "⚡ PARRY COUNTER!", color: "#9b59b6", life: 50 }); 
                         if (checkArtifactTrait("dodge_buff")) playerStats.adrenalineTimer = checkArtifactTrait("extend_buffs") ? 900 : 600;
                         if (checkArtifactTrait("parry_strike")) {
                             let counterDmg = p.atk * (playerStats.adrenalineTimer > 0 ? 2 : 1); mob.hp -= counterDmg;
-                            effects.push({ x: mob.x, y: mob.y, text: "⚔️ " + counterDmg, color: "#f1c40f", life: 20 });
+                            spawnDamageEffect(counterDmg, 'counter', false);
                             damageHistory.push({ time: Date.now(), amount: counterDmg });
                             if (mob.hp <= 0) { handleMobDeath(); return; }
                         }
                     }
                     else if (Math.random() < p.block) { 
-                        effects.push({ x: hero.x, y: hero.y, text: "🛡️ BLOCKED", color: "#3498db", life: 20 }); 
+                        effects.push({ x: hero.x, y: hero.y, text: "🛡️ BLOCKED", color: "#3498db", life: 40 }); 
                         if (checkArtifactTrait("dodge_buff")) playerStats.adrenalineTimer = checkArtifactTrait("extend_buffs") ? 900 : 600;
                     }
                     else {
                         let netDamage = Math.max(1, mob.damage - p.def); playerStats.currentHp -= netDamage; 
-                        effects.push({ x: hero.x, y: hero.y, text: "-" + netDamage, color: "#e74c3c", life: 20 });
+                        effects.push({ x: hero.x, y: hero.y, text: "-" + netDamage, color: "#e74c3c", life: 40 });
                         if (playerStats.currentHp <= 0) { 
                             if (checkArtifactTrait("second_wind") && !playerStats.usedSecondWind) {
                                 playerStats.usedSecondWind = true; playerStats.currentHp = Math.floor(p.maxHp * 0.5);
-                                effects.push({ x: hero.x, y: hero.y - 20, text: "🔥 SECOND WIND!", color: "#e67e22", life: 40 });
+                                effects.push({ x: hero.x, y: hero.y - 20, text: "🔥 SECOND WIND!", color: "#e67e22", life: 80 });
                             } else { handlePlayerDefeat(); return; }
                         }
                     }
