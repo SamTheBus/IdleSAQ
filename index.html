@@ -1442,6 +1442,78 @@ window.onload = function() {
             }
         }
 
+        // Primary attributes hybrid cross-scaling
+        p.atk += p.str * 0.75;
+        p.maxHp += p.str * 3;
+
+        p.critChance += p.dex * 0.001;
+        p.critDamage += p.dex * 0.005;
+        p.moveSpeed += p.dex * 0.1;
+
+        p.block += p.int * 0.001;
+        p.parry += p.int * 0.001;
+        p.def += p.int * 0.2;
+        
+        if (playerStats.atkPotionTimer > 0) p.atk = Math.ceil(p.atk * 1.10);
+        if (playerStats.hpPotionTimer > 0) p.maxHp = Math.ceil(p.maxHp * 1.10);
+        if (playerStats.defPotionTimer > 0) p.def = Math.ceil(p.def * 1.10);
+        if (playerStats.hastePotionTimer > 0) {
+            p.moveSpeed += 3; 
+            p.activeAttackSpeed -= 2;
+            if (p.activeAttackSpeed < 4) p.activeAttackSpeed = 4;
+        }
+
+        if (checkArtifactTrait("move_speed")) p.moveSpeed += 10; if (checkArtifactTrait("defense")) p.def += 15;
+        if (checkArtifactTrait("idle_spd")) p.idleAttackSpeed -= 20; if (checkArtifactTrait("active_spd")) p.activeAttackSpeed -= 3;
+        if (p.idleAttackSpeed < 10) p.idleAttackSpeed = 10; if (p.activeAttackSpeed < 4) p.activeAttackSpeed = 4;
+        if (playerStats.frenzyTimer > 0) { p.critChance = 1.00; p.critDamage += 0.50; p.activeAttackSpeed = 4; p.idleAttackSpeed = 20; }
+        
+        if (p.block > 0.75) p.block = 0.75;
+        if (p.parry > 0.35) p.parry = 0.35; 
+
+        const hasShield = equippedSlots.subweapon && equippedSlots.subweapon.subType === "shield";
+        if (!hasShield) {
+            p.block = 0.0;
+        }
+
+        // Standardize decimal scales into final integer profiles for core gameplay metrics
+        p.atk = Math.floor(p.atk);
+        p.maxHp = Math.floor(p.maxHp);
+        p.def = Math.floor(p.def);
+        p.moveSpeed = parseFloat(p.moveSpeed.toFixed(1));
+
+        return p;
+    }
+        
+        let alloc = playerStats.spAllocations;
+        
+        p.str += (alloc.spStr || 0);
+        p.dex += (alloc.spDex || 0);
+        p.int += (alloc.spInt || 0);
+
+        p.maxHp += (alloc.spHp * 10);
+        p.atk += (alloc.spAtk * 2);
+        p.def += (alloc.spDef * 1);
+        p.critChance += (alloc.spCrit * 0.005);
+        p.critDamage += (alloc.spCritDmg * 0.02);
+        p.block += (alloc.spBlock * 0.005);
+        p.parry += (alloc.spParry * 0.005);
+        p.moveSpeed += (alloc.spSpd * 1);
+        
+        for (let key in equippedSlots) {
+            let item = equippedSlots[key];
+            if (item) {
+                p.atk += (item.atk || 0); p.maxHp += (item.maxHp || 0); p.def += (item.def || 0); p.moveSpeed += (item.moveSpeed || 0);
+                p.idleAttackSpeed += (item.idleAttackSpeed || 0); p.activeAttackSpeed += (item.activeAttackSpeed || 0);
+                p.drop += (item.dropRate || 0); p.qly += (item.quality || 0); p.gold += (item.goldMulti || 0);
+                p.critChance += (item.critChance || 0); p.critDamage += (item.critDamage || 0);
+                p.block += (item.block || 0); p.parry += (item.parry || 0);
+                p.str += (item.str || 0); p.dex += (item.dex || 0); p.int += (item.int || 0);
+                p.rareSpawn += (item.rareSpawn || 0);
+                p.fairySpawn += (item.fairySpawn || 0);
+            }
+        }
+
         p.atk += Math.floor(p.str * 1.5);
             p.critChance += (p.dex * 0.001);
             p.critDamage += (p.dex * 0.005);
@@ -1916,57 +1988,40 @@ window.onload = function() {
         if (statKey === 'gold' && checkArtifactTrait("gold_hoard")) artTotal += 0.50;
         
         let formatVal = (v) => isPct ? `+${Math.floor(v*100)}%` : `+${v}`;
-            if (statKey === 'gold') formatVal = (v) => `+${v.toFixed(2)}`;
+        if (statKey === 'gold') formatVal = (v) => `+${v.toFixed(2)}`;
 
-            let html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;">
-                <div class="tt-title" style="color:${data.color};">${data.title} Breakdown</div>
-                <div class="tt-stat-line" style="color:#aaa;">• Base Entity: ${formatVal(data.base).replace('+','')}</div>`;
-                
-            if (data.lvl > 0) html += `<div class="tt-stat-line" style="color:#3498db;">• Level Stats (SP): ${formatVal(data.lvl)}</div>`;
-            if (gearTotal > 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• Equipment / Elixirs: ${formatVal(gearTotal)}</div>`;
-            if (artTotal > 0) html += `<div class="tt-stat-line" style="color:#9b59b6;">• Artifacts: ${formatVal(artTotal)}</div>`;
+        let html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;">
+            <div class="tt-title" style="color:${data.color};">${data.title} Breakdown</div>
+            <div class="tt-stat-line" style="color:#aaa;">• Base Entity: ${formatVal(data.base).replace('+','')}</div>`;
             
-            if (statKey === 'critChance' || statKey === 'critDamage') {
-                if (playerStats.frenzyTimer > 0) html += `<div class="tt-stat-line" style="color:#e67e22; font-weight:bold; margin-top:5px;">• FRENZY BUFF ACTIVE!</div>`;
-            }
-            
-            html += `</div>`;
-====
-            let formatVal = (v) => isPct ? `+${Math.floor(v*100)}%` : `+${v}`;
-            if (statKey === 'gold') formatVal = (v) => `+${v.toFixed(2)}`;
+        if (data.lvl > 0) html += `<div class="tt-stat-line" style="color:#3498db;">• Level Stats (SP): ${formatVal(data.lvl)}</div>`;
+        if (gearTotal > 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• Equipment / Elixirs: ${formatVal(gearTotal)}</div>`;
+        if (artTotal > 0) html += `<div class="tt-stat-line" style="color:#9b59b6;">• Artifacts: ${formatVal(artTotal)}</div>`;
+        
+        if (statKey === 'critChance' || statKey === 'critDamage') {
+            if (playerStats.frenzyTimer > 0) html += `<div class="tt-stat-line" style="color:#e67e22; font-weight:bold; margin-top:5px;">• FRENZY BUFF ACTIVE!</div>`;
+        }
 
-            let html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;">
-                <div class="tt-title" style="color:${data.color};">${data.title} Breakdown</div>
-                <div class="tt-stat-line" style="color:#aaa;">• Base Entity: ${formatVal(data.base).replace('+','')}</div>`;
-                
-            if (data.lvl > 0) html += `<div class="tt-stat-line" style="color:#3498db;">• Level Stats (SP): ${formatVal(data.lvl)}</div>`;
-            if (gearTotal > 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• Equipment / Elixirs: ${formatVal(gearTotal)}</div>`;
-            if (artTotal > 0) html += `<div class="tt-stat-line" style="color:#9b59b6;">• Artifacts: ${formatVal(artTotal)}</div>`;
-            
-            if (statKey === 'critChance' || statKey === 'critDamage') {
-                if (playerStats.frenzyTimer > 0) html += `<div class="tt-stat-line" style="color:#e67e22; font-weight:bold; margin-top:5px;">• FRENZY BUFF ACTIVE!</div>`;
-            }
-
-            // Append live mathematical scaling contributions for core attributes (STR, DEX, INT)
-            let totalVal = data.base + data.lvl + gearTotal + artTotal;
-            if (statKey === 'str') {
-                html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
-                html += `<div class="tt-stat-line" style="color:#2ecc71;">• ⚔️ Attack: +${Math.floor(totalVal * 0.75)}</div>`;
-                html += `<div class="tt-stat-line" style="color:#e74c3c;">• ❤️ Max HP: +${Math.floor(totalVal * 3)}</div>`;
-            } else if (statKey === 'dex') {
-                html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
-                html += `<div class="tt-stat-line" style="color:#e67e22;">• ✨ Crit Chance: +${(totalVal * 0.1).toFixed(1)}%</div>`;
-                html += `<div class="tt-stat-line" style="color:#f1c40f;">• 💥 Crit Multi: +${(totalVal * 0.5).toFixed(1)}%</div>`;
-                html += `<div class="tt-stat-line" style="color:#3498db;">• 👟 Move Speed: +${(totalVal * 0.1).toFixed(1)}</div>`;
-            } else if (statKey === 'int') {
-                html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
-                html += `<div class="tt-stat-line" style="color:#3498db;">• 🛡️ Block Rate: +${(totalVal * 0.1).toFixed(1)}%</div>`;
-                html += `<div class="tt-stat-line" style="color:#e74c3c;">• ⚡ Parry Rate: +${(totalVal * 0.1).toFixed(1)}%</div>`;
-                html += `<div class="tt-stat-line" style="color:#2ecc71;">• 🛡️ Defense: +${(totalVal * 0.2).toFixed(1)}</div>`;
-                html += `<div class="tt-stat-line" style="color:#9b59b6;">• 🧪 Potion Dur: +${Math.floor(totalVal)}%</div>`;
-            }
-            
-            html += `</div>`;
+        // Append live mathematical scaling contributions for core attributes (STR, DEX, INT)
+        let totalVal = data.base + data.lvl + gearTotal + artTotal;
+        if (statKey === 'str') {
+            html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
+            html += `<div class="tt-stat-line" style="color:#2ecc71;">• ⚔️ Attack: +${Math.floor(totalVal * 0.75)}</div>`;
+            html += `<div class="tt-stat-line" style="color:#e74c3c;">• ❤️ Max HP: +${Math.floor(totalVal * 3)}</div>`;
+        } else if (statKey === 'dex') {
+            html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
+            html += `<div class="tt-stat-line" style="color:#e67e22;">• ✨ Crit Chance: +${(totalVal * 0.1).toFixed(1)}%</div>`;
+            html += `<div class="tt-stat-line" style="color:#f1c40f;">• 💥 Crit Multi: +${(totalVal * 0.5).toFixed(1)}%</div>`;
+            html += `<div class="tt-stat-line" style="color:#3498db;">• 👟 Move Speed: +${(totalVal * 0.1).toFixed(1)}</div>`;
+        } else if (statKey === 'int') {
+            html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
+            html += `<div class="tt-stat-line" style="color:#3498db;">• 🛡️ Block Rate: +${(totalVal * 0.1).toFixed(1)}%</div>`;
+            html += `<div class="tt-stat-line" style="color:#e74c3c;">• ⚡ Parry Rate: +${(totalVal * 0.1).toFixed(1)}%</div>`;
+            html += `<div class="tt-stat-line" style="color:#2ecc71;">• 🛡️ Defense: +${(totalVal * 0.2).toFixed(1)}</div>`;
+            html += `<div class="tt-stat-line" style="color:#9b59b6;">• 🧪 Potion Dur: +${Math.floor(totalVal)}%</div>`;
+        }
+        
+        html += `</div>`;
         tt.style.borderColor = data.color;
         tt.innerHTML = html; tt.style.display = "block"; window.positionTooltip(e, tt);
     };
