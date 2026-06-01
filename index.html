@@ -327,6 +327,9 @@
                         <h3 style="margin:0; color:#9b59b6; font-size:14px;">Character Level: <span id="char-level" style="color:#fff;">1</span></h3>
                         <span style="color:#f1c40f; font-weight:bold;">SP Available: <span id="char-sp">0</span></span>
                     </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom: 8px;">
+                        <span style="color:#aaa;">Max Stage Reached: <span id="char-maxstage" style="color:#f1c40f; font-weight:bold;">1</span></span>
+                    </div>
                     <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:#aaa; margin-bottom:2px;">
                         <span>XP: <span id="char-xp-text">0 / 100</span></span>
                     </div>
@@ -559,7 +562,16 @@ window.onload = function() {
 
     function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function randFloat(min, max) { return Math.random() * (max - min) + min; }
-    function getStageTier() { return Math.floor((playerStats.stage - 1) / 10) % 5; }
+    
+    // Resolves background/sky visual presets. Spreads zones wider to keep the forest setting until stage 50.
+    function getStageTier() {
+        let st = playerStats.stage;
+        if (st <= 50) return 0;  // Forest (Stages 1 - 50)
+        if (st <= 100) return 1; // Peaks/Ruins (Stages 51 - 100)
+        if (st <= 150) return 2; // Inferno (Stages 101 - 150)
+        if (st <= 200) return 3; // Swamp (Stages 151 - 200)
+        return 4;                // Void (Stages 201+)
+    }
 
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -578,7 +590,7 @@ window.onload = function() {
         baseCritChance: 0.05, baseCritDamage: 1.50, baseBlock: 0.0, baseParry: 0.0,
         baseRareSpawn: 0.01, baseFairySpawn: 1.0,
         
-        currentHp: 100, coins: 0, stage: 1, killCount: 0, totalLifetimeKills: 0, targetsRequired: 5,
+        currentHp: 100, coins: 0, stage: 1, maxStage: 1, killCount: 0, totalLifetimeKills: 0, targetsRequired: 5,
         isBossMode: false, isFarmingLoop: false, isUberBoss: false, frenzyTimer: 0, frenzyKillCount: 0, adrenalineTimer: 0, usedSecondWind: false,
         isDungeonMode: false, currentDungeon: null, dungeonWave: 1, 
         equipKeys: 3, goldKeys: 3, matKeys: 3, nextEquipKeyTime: 0, nextGoldKeyTime: 0, nextMatKeyTime: 0,
@@ -717,6 +729,7 @@ window.onload = function() {
                 }
                 if (!playerStats.baseRareSpawn) playerStats.baseRareSpawn = 0.01;
                 if (!playerStats.baseFairySpawn) playerStats.baseFairySpawn = 1.0;
+                if (!playerStats.maxStage) playerStats.maxStage = playerStats.stage || 1;
                 
                 if (!playerStats.targetsRequired || playerStats.targetsRequired === 7) playerStats.targetsRequired = 5;
                 if (!playerStats.shopItems || (playerStats.shopItems.length > 0 && playerStats.shopItems[0].atk === undefined)) { 
@@ -2298,13 +2311,15 @@ window.onload = function() {
             } else { playerStats.killCount++; }
         } else if (isBoss) { 
             if (!playerStats.isUberBoss) {
-                playerStats.stage++; pushLog(`<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${playerStats.stage}.</span>`);
+                playerStats.stage++; 
+                playerStats.maxStage = Math.max(playerStats.maxStage || 1, playerStats.stage);
+                pushLog(`<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${playerStats.stage}.</span>`);
             } else {
                 pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[RIFT CLOSED] The Uber Boss was defeated! Returning to farming.</span>`);
             }
             playerStats.killCount = 0; playerStats.isBossMode = false; playerStats.isFarmingLoop = false; playerStats.isUberBoss = false; 
             playerStats.usedSecondWind = false; playerStats.currentHp = p.maxHp; window.saveGame();
-        } else { 
+        } else {
             if (!playerStats.isFarmingLoop) { 
                 playerStats.killCount++; 
                 if (playerStats.killCount >= playerStats.targetsRequired) playerStats.isBossMode = true; 
@@ -2313,12 +2328,18 @@ window.onload = function() {
         mob = null; updateUI();
     }
 
-    function handlePlayerDefeat() {
+   function handlePlayerDefeat() {
         isGamePaused = true; playerStats.isBossMode = false; playerStats.isFarmingLoop = false; playerStats.isUberBoss = false; playerStats.isDungeonMode = false;
         playerStats.killCount = 0; playerStats.targetsRequired = 5; playerStats.usedSecondWind = false;
         playerStats.frenzyTimer = 0; playerStats.frenzyKillCount = 0; playerStats.adrenalineTimer = 0;
-        hero.attackTimer = 0; hero.slashFrame = false; mob = null; updateUI();
-        pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[DEFEATED] Progress reset. Stage restarted!</span>`);
+        hero.attackTimer = 0; hero.slashFrame = false; mob = null;
+        
+        // Rogue-lite restart stage (10% of maximum reached stage, floor minimum 1)
+        let restartStage = Math.max(1, Math.floor((playerStats.maxStage || 1) * 0.10));
+        playerStats.stage = restartStage;
+        
+        updateUI();
+        pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[DEFEATED] Your hero fell in battle! Returned to Stage ${restartStage} (10% of Max Stage ${playerStats.maxStage || 1}). All attributes, stats, level, and items remain intact!</span>`);
         document.getElementById('death-overlay').style.display = "flex"; window.saveGame();
     }
 
@@ -2362,6 +2383,12 @@ window.onload = function() {
         
         document.getElementById('char-level').innerText = playerStats.level;
         document.getElementById('char-sp').innerText = playerStats.sp;
+        
+        let maxStageEl = document.getElementById('char-maxstage');
+        if (maxStageEl) {
+            maxStageEl.innerText = playerStats.maxStage || 1;
+        }
+        
         document.getElementById('char-xp-text').innerText = `${playerStats.xp} / ${playerStats.xpReq}`;
         document.getElementById('char-xp-fill').style.width = `${Math.min(100, (playerStats.xp / playerStats.xpReq) * 100)}%`;
         
