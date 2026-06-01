@@ -990,13 +990,13 @@ window.onload = function() {
         item.int = item.bonusInt || 0;
     }
 
-    function createItemObject(chosenType, statLinesCount, stageScale, minStars = 0) {
+     function createItemObject(chosenType, statLinesCount, stageScale, minStars = 0) {
         let isArt = (chosenType === "artifact");
         if (!isArt && statLinesCount < minStars) { statLinesCount = minStars; }
         
         let item = { 
             id: idCounter++, name: "", type: chosenType, statsRolled: isArt ? "UNIQUE" : statLinesCount, temperLevel: 0, stageLevel: stageScale,
-            atk: 0, maxHp: 0, def: 0, moveSpeed: 0, Math: 0, critChance: 0, critDamage: 0, block: 0, parry: 0, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0,
+            atk: 0, maxHp: 0, def: 0, moveSpeed: 0, critChance: 0, critDamage: 0, block: 0, parry: 0, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0,
             activeAttackSpeed: 0, idleAttackSpeed: 0,
             baseAtk: 0, baseMaxHp: 0, baseDef: 0, baseMoveSpeed: 0,
             bonusAtk: 0, bonusMaxHp: 0, bonusDef: 0, bonusMoveSpeed: 0, bonusCritChance: 0, bonusCritDamage: 0, bonusBlock: 0, bonusParry: 0,
@@ -1619,7 +1619,8 @@ window.onload = function() {
 
     function processEnemySpawn() {
         // Scale dungeon entities based on the player's highest historic stage peak to prevent low-level farming bottlenecks
-        let scale = Math.pow(1.15, playerStats.isDungeonMode ? (playerStats.maxStage || 1) : playerStats.stage);
+        // Optimized from 1.15 to 1.11 to maintain a sustainable combat curve alongside linear gear scaling
+        let scale = Math.pow(1.11, playerStats.isDungeonMode ? (playerStats.maxStage || 1) : playerStats.stage);
         if (playerStats.isDungeonMode) {
             let hpScale = playerStats.currentDungeon === 'gold' ? 1.5 : 1; 
             
@@ -2191,6 +2192,14 @@ window.onload = function() {
     window.enchantItem = function() {
         if (!forgeSelectedItem) return;
         let item = forgeSelectedItem;
+        
+        // Enforce maximum Temper level before allowing enchantments
+        let maxT = getMaxTemper(item.statsRolled);
+        if (item.temperLevel < maxT) {
+            pushHeaderToast(`Item must be fully Tempered first! (+${maxT})`, "#e74c3c");
+            return;
+        }
+        
         let maxEnchants = getMaxEnchants(item);
         let currentEnchants = item.totalEnchants || 0;
         if (currentEnchants >= maxEnchants) { pushHeaderToast("Max Enchantments Reached!", "#e74c3c"); return; }
@@ -2545,8 +2554,13 @@ window.onload = function() {
         } else if (forgeMode === 'enchant') {
             let maxEnchants = getMaxEnchants(item);
             let currentEnchants = item.totalEnchants || 0;
+            let maxT = getMaxTemper(item.statsRolled);
+            let isFullyTempered = item.temperLevel >= maxT;
+            
             if (maxEnchants === 0) {
                 html += `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 20px 0; font-size:11px;">THIS ITEM QUALITY CANNOT HOLD ENCHANTMENTS.<br><br><span style="color:#aaa; font-weight:normal;">Only Magic (2★), Epic (3★), Legendary (4★), and Mythic (5★) items can hold enchantments.</span></div>`;
+            } else if (!isFullyTempered) {
+                html += `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 20px 0; font-size:11px;">ITEM MUST BE FULLY TEMPERED FIRST<br><br><span style="color:#aaa; font-weight:normal;">Current Temper: [+${item.temperLevel}/${maxT}]. Temper this item to its absolute limit before infusing cosmic enchantments.</span></div>`;
             } else if (currentEnchants >= maxEnchants) {
                 html += `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 20px 0; font-size:11px;">MAXIMUM ENCHANTMENT LIMIT REACHED (${maxEnchants}/${maxEnchants})<br><br><span style="color:#aaa; font-weight:normal;">Reset this item's enchantments in "Reset Enchants" mode to enchant again.</span></div>`;
             } else {
@@ -2579,7 +2593,7 @@ window.onload = function() {
             previewHtml = `<div style="margin-top:15px; padding:10px; background:#111; border:1px dashed #f1c40f; border-radius:4px; font-size:11px; color:#ccc; text-align:center;">
                 * Star Tier UP preserves current modifiers, increases base multipliers, and unlocks <b>1 completely new random attribute parameter</b>!
             </div>`;
-        } else if (forgeMode === 'enchant' && item.totalEnchants < getMaxEnchants(item) && getMaxEnchants(item) > 0) {
+        } else if (forgeMode === 'enchant' && item.temperLevel >= getMaxTemper(item.statsRolled) && item.totalEnchants < getMaxEnchants(item) && getMaxEnchants(item) > 0) {
             previewHtml = `<div style="margin-top:15px; padding:10px; background:#111; border:1px dashed #9b59b6; border-radius:4px; font-size:11px; color:#ccc; text-align:center;">
                 * Enchanting will permanently snapshot pre-enchant stats, then select 1 parameter at random to scale by <b>+25%</b>.
             </div>`;
@@ -2610,7 +2624,8 @@ window.onload = function() {
         }
         gainXp(xpYield);
         
-        let baseCoin = isBoss ? 10 * playerStats.stage : Math.floor(1 + (playerStats.stage * 0.5));
+        // Exponential gold scaling aligned with upgrade costs and enemy health progression
+        let baseCoin = isBoss ? Math.floor(10 * Math.pow(1.06, playerStats.stage)) : Math.floor(1 + Math.pow(1.06, playerStats.stage) * 0.5);
         
         if (playerStats.isDungeonMode && playerStats.currentDungeon === 'gold') {
             baseCoin *= 5; if (mob.type === "dungeon_boss") baseCoin *= 4; 
