@@ -689,9 +689,9 @@ window.onload = function() {
     let state = { autoAttack: true, efficiency: 1.0, currentSubTab: 'EQUIP' };
     let isGamePaused = false;
     let reviveTimer = 0;
+    let lastUpdateTime = Date.now(); // High-resolution timestamp for gap detection
 
     let beams = [];
-
     /* ==========================================================================
        6. PROCEDURAL NAME GENERATOR
        ========================================================================== */
@@ -773,12 +773,73 @@ window.onload = function() {
     };
 
     window.saveGame = function() {
-        let saveData = { playerStats, equippedSlots, inventory, idCounter, logsHistory, frozenItemDb, lastSaveTime: Date.now() };
+        // Tie save-time strictly to the last processed loop step to prevent background auto-save temporal decay
+        let saveData = { playerStats, equippedSlots, inventory, idCounter, logsHistory, frozenItemDb, lastSaveTime: lastUpdateTime };
         localStorage.setItem('idle_game_v11', JSON.stringify(saveData));
     };
-
     setInterval(() => { window.saveGame(); }, 60000);
     window.addEventListener('beforeunload', window.saveGame);
+
+    /**
+     * Simulates standard combat progression over long absences.
+     * Capping logic is handled at the call sites to prevent temporal feedback exploits.
+     * Returns the exact amount of consumed milliseconds to preserve fractional remainder time.
+     */
+    function applyOfflineGains(offlineMs) {
+        if (offlineMs <= 60000) return 0; // Return 0 milliseconds consumed if under 1 minute
+        
+        let offlineSeconds = Math.floor(offlineMs / 1000);
+        if (offlineSeconds > 28800) offlineSeconds = 28800; // Safeguard fallback
+        
+        let p = resolvePlayerStats();
+        let timePerKill = 60; // 1 kill simulated per minute
+        let simulatedKills = Math.floor(offlineSeconds / timePerKill);
+        
+        if (simulatedKills > 0) {
+            let baseCoin = Math.floor(1 + (playerStats.stage * 0.5));
+            let goldEarned = Math.floor(simulatedKills * baseCoin * p.gold);
+            
+            let dropsEarned = 0; 
+            let gachaKeyDrop = 0; 
+            let totalXpEarned = 0;
+            
+            for (let i = 0; i < simulatedKills; i++) {
+                let isRare = Math.random() < p.rareSpawn;
+                let xpYield = isRare ? (playerStats.stage * 30) : (playerStats.stage * 10);
+                totalXpEarned += xpYield;
+                
+                let dropR = isRare ? 0.15 : 0.045;
+                if (Math.random() < (dropR * p.drop * state.efficiency)) dropsEarned++;
+                if (Math.random() < 0.005) gachaKeyDrop++; 
+            }
+            
+            playerStats.coins += goldEarned;
+            gainXp(totalXpEarned, true);
+            if (gachaKeyDrop > 0) addEtcDrop("Gacha Key", gachaKeyDrop);
+            
+            let actualItems = 0; 
+            let scraps = 0;
+            let maxBag = checkArtifactTrait("bag_space") ? 50 : 20;
+
+            for (let i = 0; i < dropsEarned; i++) {
+                if (inventory.EQUIP.length < maxBag) { 
+                    rollEquipmentDrop(false, true); 
+                    actualItems++; 
+                } else { 
+                    scraps++; 
+                }
+            }
+            if (scraps > 0) addEtcDrop("Monster Soul", scraps);
+            
+            setTimeout(() => {
+                pushLog(`<span style='color:#3498db; font-weight:bold;'>[OFFLINE GAINS] Gone for ${Math.floor(offlineSeconds/60)} mins. Kills: ${simulatedKills}. XP: +${totalXpEarned}. Gold: +${goldEarned}. Items: +${actualItems}. Souls: +${scraps}. Gacha Keys: +${gachaKeyDrop}</span>`);
+                // Provide high-feedback visual confirmation of offline earnings
+                pushHeaderToast(`💤 Welcome Back! Offline Gains: +${goldEarned} Gold, +${totalXpEarned} XP!`, "#3498db");
+            }, 500);
+            return simulatedKills * timePerKill * 1000; // Return exact time consumed
+        }
+        return 0;
+    }
 
     window.loadGame = function() {
         let data = localStorage.getItem('idle_game_v11');
@@ -792,7 +853,16 @@ window.onload = function() {
                 logsHistory = parsed.logsHistory || logsHistory;
                 frozenItemDb = parsed.frozenItemDb || frozenItemDb;
                 
-                if (!playerStats.level) { playerStats.level = 1; playerStats.xp = 0; playerStats.xpReq = 100; playerStats.sp = 0; playerStats.spAllocations = { spHp: 0, spAtk: 0, spDef: 0, spCrit: 0, spCritDmg: 0, spBlock: 0, spParry: 0, spSpd: 0, spStr: 0, spDex: 0, spInt: 0 }; }
+                // Safe legacy data migration checks to prevent boot crashes
+                if (!playerStats.level) { 
+                    playerStats.level = 1; 
+                    playerStats.xp = 0; 
+                    playerStats.xpReq = 100; 
+                    playerStats.sp = 0; 
+                }
+                if (!playerStats.spAllocations) {
+                    playerStats.spAllocations = { spHp: 0, spAtk: 0, spDef: 0, spCrit: 0, spCritDmg: 0, spBlock: 0, spParry: 0, spSpd: 0, spStr: 0, spDex: 0, spInt: 0 };
+                }
                 if (playerStats.spAllocations.spStr === undefined) {
                     playerStats.spAllocations.spStr = 0; playerStats.spAllocations.spDex = 0; playerStats.spAllocations.spInt = 0;
                     playerStats.baseStr = 5; playerStats.baseDex = 5; playerStats.baseInt = 5; playerStats.baseFairySpawn = 1.0;
@@ -824,12 +894,14 @@ window.onload = function() {
                     let now = Date.now();
                     let offlineMs = now - parsed.lastSaveTime;
                     
+                    // Division-based dungeon key catchup
                     let keyTypes = ['equip', 'gold', 'mat'];
                     keyTypes.forEach(k => {
                         let count = k + 'Keys';
                         let time = 'next' + k.charAt(0).toUpperCase() + k.slice(1) + 'KeyTime';
                         if (playerStats[count] < 3) {
-                            let msSinceNextKey = now - playerStats[time];
+                            let keyTime = playerStats[time] || now;
+                            let msSinceNextKey = now - keyTime;
                             if (msSinceNextKey >= 0) {
                                 let keysEarned = 1 + Math.floor(msSinceNextKey / 3600000);
                                 playerStats[count] = Math.min(3, playerStats[count] + keysEarned);
@@ -838,49 +910,8 @@ window.onload = function() {
                         }
                     });
                     
-                    if (offlineMs > 60000) { 
-                        let offlineSeconds = Math.floor(offlineMs / 1000);
-                        if (offlineSeconds > 28800) offlineSeconds = 28800; 
-                        
-                        let p = resolvePlayerStats();
-                        let timePerKill = 60; 
-                        let simulatedKills = Math.floor(offlineSeconds / timePerKill);
-                        
-                        if (simulatedKills > 0) {
-                            let baseCoin = Math.floor(1 + (playerStats.stage * 0.5));
-                            let goldEarned = Math.floor(simulatedKills * baseCoin * p.gold);
-                            
-                            let dropsEarned = 0; let gachaKeyDrop = 0; let totalXpEarned = 0;
-                            let rareCount = 0;
-                            for(let i=0; i<simulatedKills; i++) {
-                                let isRare = Math.random() < p.rareSpawn;
-                                if (isRare) rareCount++;
-                                let xpYield = isRare ? (playerStats.stage * 30) : (playerStats.stage * 10);
-                                totalXpEarned += xpYield;
-                                
-                                let dropR = isRare ? 0.15 : 0.045;
-                                if (Math.random() < (dropR * p.drop * state.efficiency)) dropsEarned++;
-                                if (Math.random() < 0.005) gachaKeyDrop++; 
-                            }
-                            
-                            playerStats.coins += goldEarned;
-                            gainXp(totalXpEarned, true);
-                            if (gachaKeyDrop > 0) addEtcDrop("Gacha Key", gachaKeyDrop);
-                            
-                            let actualItems = 0; let scraps = 0;
-                            let maxBag = checkArtifactTrait("bag_space") ? 50 : 20;
-
-                            for(let i=0; i<dropsEarned; i++) {
-                                if (inventory.EQUIP.length < maxBag) { rollEquipmentDrop(false, true); actualItems++; } 
-                                else { scraps++; }
-                            }
-                            if (scraps > 0) addEtcDrop("Monster Soul", scraps);
-                            
-                            setTimeout(() => {
-                                pushLog(`<span style='color:#3498db; font-weight:bold;'>[OFFLINE GAINS] Gone for ${Math.floor(offlineSeconds/60)} mins. Kills: ${simulatedKills}. XP: +${totalXpEarned}. Gold: +${goldEarned}. Items: +${actualItems}. Souls: +${scraps}. Gacha Keys: +${gachaKeyDrop}</span>`);
-                            }, 500);
-                        }
-                    }
+                    // Safe closed-tab offline gains trigger
+                    applyOfflineGains(offlineMs);
                 }
                 setTimeout(() => { pushLog(`<span style='color:#3498db; font-weight:bold;'>[SYSTEM] Local save loaded successfully.</span>`); }, 500);
             } catch(e) { console.error("Save load failed", e); }
@@ -3122,26 +3153,66 @@ window.onload = function() {
     }
 
     function update() {
-        if (isGamePaused) return;
-        
         let now = Date.now();
+        
+        // Prevent progression exploits while on the DEFEATED screen
+        if (isGamePaused) {
+            lastUpdateTime = now;
+            return;
+        }
+        
+        let gapMs = now - lastUpdateTime;
+        let maxOfflineMs = 28800 * 1000; // 8 hours maximum cap
+        
+        if (gapMs > maxOfflineMs) {
+            // Absolute truncation check prevents successive loop-bypass hacks
+            applyOfflineGains(maxOfflineMs);
+            lastUpdateTime = now;
+        } else if (gapMs > 60000) {
+            // Process offline gains and preserve the millisecond remainder to avoid fractional time-loss
+            let consumedMs = applyOfflineGains(gapMs);
+            lastUpdateTime += consumedMs;
+        } else {
+            // Synchronize active frames in real-time
+            lastUpdateTime = now;
+        }
+
+        // Multi-key secured catchup regeneration logic
         let keyTypes = ['equip', 'gold', 'mat'];
         keyTypes.forEach(k => {
-            let count = k + 'Keys'; let time = 'next' + k.charAt(0).toUpperCase() + k.slice(1) + 'KeyTime';
+            let count = k + 'Keys'; 
+            let time = 'next' + k.charAt(0).toUpperCase() + k.slice(1) + 'KeyTime';
             if (playerStats[count] < 3) {
-                if (!playerStats[time] || playerStats[time] < now - 3600000) { playerStats[time] = now + 3600000; } 
-                else if (now >= playerStats[time]) { playerStats[count]++; if (playerStats[count] < 3) playerStats[time] = now + 3600000; }
+                if (!playerStats[time]) { 
+                    playerStats[time] = now + 3600000; 
+                } else if (now >= playerStats[time]) {
+                    let msOver = now - playerStats[time];
+                    let keysEarned = 1 + Math.floor(msOver / 3600000);
+                    playerStats[count] = Math.min(3, playerStats[count] + keysEarned);
+                    if (playerStats[count] < 3) {
+                        playerStats[time] = now + (3600000 - (msOver % 3600000));
+                    } else {
+                        playerStats[time] = 0; // Timer reset at limit
+                    }
+                }
             }
         });
 
         if (document.getElementById('dungeon-menu').style.display === 'block') {
             keyTypes.forEach(k => {
-                let count = k + 'Keys'; let time = 'next' + k.charAt(0).toUpperCase() + k.slice(1) + 'KeyTime';
-                let timerEl = document.getElementById('dt-' + k); let keysEl = document.getElementById('dk-' + k);
+                let count = k + 'Keys'; 
+                let time = 'next' + k.charAt(0).toUpperCase() + k.slice(1) + 'KeyTime';
+                let timerEl = document.getElementById('dt-' + k); 
+                let keysEl = document.getElementById('dk-' + k);
                 if (playerStats[count] < 3) {
-                    let msLeft = playerStats[time] - now; let mins = Math.floor(msLeft / 60000); let secs = Math.floor((msLeft % 60000) / 1000);
+                    // Prevent visual negative desync on timer calculations
+                    let msLeft = Math.max(0, playerStats[time] - now); 
+                    let mins = Math.floor(msLeft / 60000); 
+                    let secs = Math.floor((msLeft % 60000) / 1000);
                     timerEl.innerText = `(${mins}m ${secs}s)`;
-                } else { timerEl.innerText = "(Full)"; }
+                } else { 
+                    timerEl.innerText = "(Full)"; 
+                }
                 keysEl.innerText = playerStats[count];
             });
         }
