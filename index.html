@@ -2420,6 +2420,87 @@ window.onload = function() {
                 damageHistory.push({ time: Date.now(), amount: daggerDmg });
             }
 
+            // Elemental Tome Spells (20% independent chance each for Lightning, Fire, and Frost)
+            const hasTome = equippedSlots.subweapon && equippedSlots.subweapon.subType === "tome";
+            if (hasTome) {
+                let spellDmgBase = Math.max(1, Math.ceil((p.atk * (playerStats.adrenalineTimer > 0 ? 2 : 1)) * 0.5));
+
+                // 1. Lightning Spell Roll
+                if (Math.random() < 0.20) {
+                    let lightningDmg = spellDmgBase;
+                    let isSpellCrit = Math.random() < p.critChance;
+                    if (isSpellCrit) lightningDmg = Math.ceil(lightningDmg * p.critDamage);
+                    
+                    mob.hp -= lightningDmg;
+                    effects.push({ x: mob.x - 10, y: mob.y - 25, text: isSpellCrit ? "⚡💥 " + lightningDmg : "⚡ " + lightningDmg, color: "#f1c40f", life: 24 });
+                    damageHistory.push({ time: Date.now(), amount: lightningDmg });
+
+                    // Descending crackling lightning bolt particles
+                    for (let i = 0; i < 15; i++) {
+                        particles.push({
+                            x: mob.x + mob.w / 2 + randFloat(-6, 6),
+                            y: mob.y - 40 + (i * (mob.h + 40) / 15),
+                            vx: randFloat(-2.5, 2.5),
+                            vy: randFloat(-1, 1),
+                            radius: randFloat(1.5, 3),
+                            color: Math.random() > 0.3 ? "#f1c40f" : "#fff",
+                            alpha: 1,
+                            life: randInt(10, 18)
+                        });
+                    }
+                }
+
+                // 2. Fire Spell Roll
+                if (Math.random() < 0.20) {
+                    let fireDmg = spellDmgBase;
+                    let isSpellCrit = Math.random() < p.critChance;
+                    if (isSpellCrit) fireDmg = Math.ceil(fireDmg * p.critDamage);
+                    
+                    mob.hp -= fireDmg;
+                    effects.push({ x: mob.x + 15, y: mob.y - 15, text: isSpellCrit ? "🔥💥 " + fireDmg : "🔥 " + fireDmg, color: "#e67e22", life: 24 });
+                    damageHistory.push({ time: Date.now(), amount: fireDmg });
+
+                    // Rising flame embers
+                    for (let i = 0; i < 15; i++) {
+                        particles.push({
+                            x: mob.x + randFloat(0, mob.w),
+                            y: mob.y + mob.h - 5,
+                            vx: randFloat(-1.2, 1.2),
+                            vy: randFloat(-4.5, -2),
+                            radius: randFloat(2, 4),
+                            color: Math.random() > 0.4 ? "#e67e22" : "#e74c3c",
+                            alpha: 1,
+                            life: randInt(18, 32)
+                        });
+                    }
+                }
+
+                // 3. Frost Spell Roll
+                if (Math.random() < 0.20) {
+                    let frostDmg = spellDmgBase;
+                    let isSpellCrit = Math.random() < p.critChance;
+                    if (isSpellCrit) frostDmg = Math.ceil(frostDmg * p.critDamage);
+                    
+                    mob.hp -= frostDmg;
+                    effects.push({ x: mob.x + 35, y: mob.y - 30, text: isSpellCrit ? "❄️💥 " + frostDmg : "❄️ " + frostDmg, color: "#3498db", life: 24 });
+                    damageHistory.push({ time: Date.now(), amount: frostDmg });
+
+                    // Radial ice shard burst
+                    for (let i = 0; i < 15; i++) {
+                        particles.push({
+                            x: mob.x + mob.w / 2,
+                            y: mob.y + mob.h / 2,
+                            vx: randFloat(-3.5, 3.5),
+                            vy: randFloat(-2.5, 2.5),
+                            radius: randFloat(1.5, 3),
+                            color: Math.random() > 0.5 ? "#3498db" : "#ffffff",
+                            alpha: 1,
+                            life: randInt(15, 28)
+                        });
+                    }
+                }
+            }
+
             if (checkArtifactTrait("echo_strike")) {
                 let echoDmg = Math.max(1, Math.ceil(finalDamage * 0.5)); mob.hp -= echoDmg;
                 effects.push({ x: mob.x + 20, y: mob.y - 20, text: "👻 " + echoDmg, color: "#9b59b6", life: 20 });
