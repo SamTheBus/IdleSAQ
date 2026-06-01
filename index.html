@@ -3128,9 +3128,107 @@ window.onload = function() {
                             ctx.fillStyle = "#e74c3c";
                         });
                     }
+                } else if (currentTier === 1) {
+                    // ==========================================================================
+                    // GIANT RUINED STONE GOLEM BOSS (Stage Tier 1 - Peaks Stage Boss)
+                    // ==========================================================================
+                    let bounceOffset = Math.sin(Date.now() / 200) * 3;
+                    let blockColor = mob.flashTimer > 0 ? "#ffffff" : "#3b3f46";
+                    let shadowColor = mob.flashTimer > 0 ? "#ffffff" : "#1f2126";
+                    let lavaColor = "#ff2200";
+
+                    // 1. Massive Stone Legs / Base Support
+                    ctx.fillStyle = shadowColor;
+                    ctx.fillRect(mob.x + 4, mob.y + mob.h - 16, mob.w - 8, 16);
+                    ctx.fillStyle = blockColor;
+                    ctx.fillRect(mob.x + 8, mob.y + mob.h - 14, 12, 14);
+                    ctx.fillRect(mob.x + mob.w - 20, mob.y + mob.h - 14, 12, 14);
+
+                    // 2. Colossal Cracked Torso Boulder
+                    ctx.fillStyle = shadowColor;
+                    ctx.beginPath();
+                    ctx.roundRect(mob.x - 2, mob.y + 24 + bounceOffset, mob.w + 4, mob.h - 40, [10]);
+                    ctx.fill();
+                    ctx.fillStyle = blockColor;
+                    ctx.beginPath();
+                    ctx.roundRect(mob.x, mob.y + 26 + bounceOffset, mob.w, mob.h - 44, [8]);
+                    ctx.fill();
+
+                    // 3. Huge Segmented Armored Shoulders
+                    ctx.fillStyle = "#121316";
+                    ctx.beginPath();
+                    ctx.roundRect(mob.x - 10, mob.y + 20 + bounceOffset, 14, 16, [4]);
+                    ctx.roundRect(mob.x + mob.w - 4, mob.y + 20 + bounceOffset, 14, 16, [4]);
+                    ctx.fill();
+
+                    // 4. Intimidating Stone Head Crown
+                    ctx.fillStyle = shadowColor;
+                    ctx.beginPath();
+                    ctx.roundRect(mob.x + 8, mob.y + 4 + bounceOffset, mob.w - 16, 22, [6]);
+                    ctx.fill();
+                    ctx.fillStyle = blockColor;
+                    ctx.beginPath();
+                    ctx.roundRect(mob.x + 10, mob.y + 6 + bounceOffset, mob.w - 20, 18, [4]);
+                    ctx.fill();
+
+                    // 5. Menacing Angular Red Eyes
+                    if (mob.flashTimer === 0) {
+                        ctx.fillStyle = lavaColor;
+                        ctx.shadowBlur = 15;
+                        ctx.shadowColor = lavaColor;
+
+                        ctx.beginPath();
+                        // Left eye slit
+                        ctx.moveTo(mob.x + 14, mob.y + 11 + bounceOffset);
+                        ctx.lineTo(mob.x + 22, mob.y + 16 + bounceOffset);
+                        ctx.lineTo(mob.x + 14, mob.y + 18 + bounceOffset);
+                        ctx.closePath();
+                        
+                        // Right eye slit
+                        ctx.moveTo(mob.x + mob.w - 14, mob.y + 11 + bounceOffset);
+                        ctx.lineTo(mob.x + mob.w - 22, mob.y + 16 + bounceOffset);
+                        ctx.lineTo(mob.x + mob.w - 14, mob.y + 18 + bounceOffset);
+                        ctx.closePath();
+                        ctx.fill();
+                        
+                        ctx.shadowBlur = 0;
+                    }
+
+                    // 6. Magma Cracks spreading from Runic Reactor Core
+                    if (mob.flashTimer === 0) {
+                        ctx.strokeStyle = lavaColor;
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = lavaColor;
+                        ctx.lineWidth = 2.5;
+
+                        // Engraved runic lines
+                        ctx.beginPath();
+                        ctx.moveTo(mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset);
+                        ctx.lineTo(mob.x + 10, mob.y + 35 + bounceOffset);
+                        ctx.moveTo(mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset);
+                        ctx.lineTo(mob.x + mob.w - 10, mob.y + 35 + bounceOffset);
+                        ctx.moveTo(mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset);
+                        ctx.lineTo(mob.x + mob.w/2, mob.y + mob.h - 22 + bounceOffset);
+                        ctx.stroke();
+
+                        // Glowing Core Reactor (Focal source of energy)
+                        let coreGrad = ctx.createRadialGradient(
+                            mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset, 1,
+                            mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset, 8
+                        );
+                        coreGrad.addColorStop(0, "#ffffff");
+                        coreGrad.addColorStop(0.3, "#ff3b30");
+                        coreGrad.addColorStop(1, "rgba(255, 0, 0, 0)");
+                        ctx.fillStyle = coreGrad;
+                        ctx.beginPath();
+                        ctx.arc(mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset, 8, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.shadowBlur = 0;
+                    }
                 } else {
                     // ==========================================================================
-                    // CLASSIC OVERLORD KNIGHT RENDERING (Stage Tier 1+ / Dungeon Bosses)
+                    // CLASSIC OVERLORD KNIGHT RENDERING (Stage Tier 2+ / Dungeon Bosses)
                     // ==========================================================================
                     ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#1a252f";
                     
