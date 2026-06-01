@@ -2754,7 +2754,8 @@ window.onload = function() {
                     <div style="position:relative; z-index:10; white-space:nowrap;">
                         <button class="btn-action" onclick="equipItem(${item.id})">Equip</button>
                         <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="toggleLock(${item.id})">${lockIcon}</button>
-                        <button class="btn-action un" style="margin-left:2px;" onclick="salvageItem(${item.id})">Salvage</button>
+                        <!-- Increased margin-left here to physically isolate the destructive Salvage button -->
+                        <button class="btn-action un" style="margin-left:12px;" onclick="salvageItem(${item.id})">Salvage</button>
                     </div>
                 </div>`;
             }).join("");
