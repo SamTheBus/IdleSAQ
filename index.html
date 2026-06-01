@@ -2119,6 +2119,36 @@ window.onload = function() {
     /* ==========================================================================
        9. FORGE INTERFACE OVERHAUL & UPGRADE IMPLEMENTATION
        ========================================================================== */
+    function applyTemperUpgrades(item, isArt) {
+        // Base Primary Stats
+        if (item.atk > 0 || item.type === "weapon" || isArt) item.atk += (isArt ? 5 : 2);
+        if (item.maxHp > 0 || isArt) item.maxHp += (isArt ? 25 : 10);
+        if (item.def > 0 || isArt) item.def += (isArt ? 2 : 1);
+        if (item.moveSpeed > 0) item.moveSpeed += 1;
+
+        // Base Core Attributes
+        if (item.str > 0) item.str += 1;
+        if (item.dex > 0) item.dex += 1;
+        if (item.int > 0) item.int += 1;
+
+        // Combat Probabilities & Multipliers
+        if (item.critChance > 0) item.critChance = parseFloat((item.critChance + 0.005).toFixed(4));
+        if (item.critDamage > 0) item.critDamage = parseFloat((item.critDamage + 0.015).toFixed(4));
+        if (item.block > 0) item.block = parseFloat((item.block + 0.005).toFixed(4));
+        if (item.parry > 0) item.parry = parseFloat((item.parry + 0.005).toFixed(4));
+
+        // Utility, Drop, & Farm Enhancements
+        if (item.dropRate > 0) item.dropRate = parseFloat((item.dropRate + 0.01).toFixed(4));
+        if (item.quality > 0) item.quality = parseFloat((item.quality + 0.005).toFixed(4));
+        if (item.goldMulti > 0) item.goldMulti = parseFloat((item.goldMulti + 0.01).toFixed(4));
+        if (item.rareSpawn > 0) item.rareSpawn = parseFloat((item.rareSpawn + 0.001).toFixed(4));
+        if (item.fairySpawn > 0) item.fairySpawn = parseFloat((item.fairySpawn + 0.01).toFixed(4));
+
+        // Frame Action Speeds (More negative = faster)
+        if (item.activeAttackSpeed < 0) item.activeAttackSpeed -= 1;
+        if (item.idleAttackSpeed < 0) item.idleAttackSpeed -= 2;
+    }
+
     window.temperItem = function() {
         if (!forgeSelectedItem) return;
         let isArt = forgeSelectedItem.type === "artifact";
@@ -2139,11 +2169,7 @@ window.onload = function() {
             if (inventory.ETC[scrapReq] === 0) delete inventory.ETC[scrapReq];
 
             if (isSuccess) {
-                if (forgeSelectedItem.baseAtk > 0 || forgeSelectedItem.type === "weapon" || isArt) forgeSelectedItem.atk += (isArt ? 5 : 2);
-                if (forgeSelectedItem.baseMaxHp > 0 || isArt) forgeSelectedItem.maxHp += (isArt ? 25 : 10);
-                if (forgeSelectedItem.baseDef > 0 || isArt) forgeSelectedItem.def += (isArt ? 2 : 1);
-                if (forgeSelectedItem.baseMoveSpeed > 0) forgeSelectedItem.moveSpeed += 1;
-                
+                applyTemperUpgrades(forgeSelectedItem, isArt);
                 forgeSelectedItem.temperLevel++;
                 pushLog(`<span style='color:#e67e22;'>[FORGE]</span> Successfully tempered ${forgeSelectedItem.name} to [+${forgeSelectedItem.temperLevel}]!`);
                 pushHeaderToast(`🔨 Success! [+${forgeSelectedItem.temperLevel}]`, "#2ecc71");
@@ -2153,52 +2179,6 @@ window.onload = function() {
                 pushHeaderToast(`💥 Temper Failed!`, "#e74c3c");
                 spawnTemperParticles(false);
             }
-        } else if (forgeMode === 'lvl') {
-            if (isArt) return; 
-            let currentTier = forgeSelectedItem.stageLevel;
-            let costGold = currentTier * 500;
-            let scrapReq = getTierUpScrapName(forgeSelectedItem.statsRolled);
-            let scrapReqAmount = currentTier * 2;
-            
-            if (playerStats.coins < costGold) { pushLog(`<span style='color:#e74c3c;'>Not enough Gold to Upgrade Level!</span>`); return; }
-            if (!inventory.ETC[scrapReq] || inventory.ETC[scrapReq] < scrapReqAmount) { pushLog(`<span style='color:#e74c3c;'>Not enough ${scrapReq} to Upgrade!</span>`); return; }
-            
-            playerStats.coins -= costGold; inventory.ETC[scrapReq] -= scrapReqAmount;
-            if (inventory.ETC[scrapReq] === 0) delete inventory.ETC[scrapReq];
-            
-            forgeSelectedItem.stageLevel++;
-            
-            if (forgeSelectedItem.baseAtk > 0) forgeSelectedItem.atk += 2;
-            if (forgeSelectedItem.baseMaxHp > 0) forgeSelectedItem.maxHp += 10;
-            if (forgeSelectedItem.baseDef > 0) forgeSelectedItem.def += 1;
-            if (forgeSelectedItem.baseMoveSpeed > 0) forgeSelectedItem.moveSpeed += 1;
-            
-            forgeSelectedItem.name = buildProceduralName(forgeSelectedItem);
-            
-            pushLog(`<span style='color:#9b59b6;'>[FORGE]</span> Successfully Upgraded Level to ${forgeSelectedItem.name}!`);
-            pushHeaderToast(`✨ Upgrade Success!`, "#9b59b6");
-            spawnTemperParticles(true);
-        } else if (forgeMode === 'tier') {
-            if (isArt || forgeSelectedItem.statsRolled >= 5) return;
-            let currentStars = forgeSelectedItem.statsRolled;
-            let costGold = (currentStars + 1) * 2500;
-            let scrapReqAmount = currentStars + 1;
-            
-            if (playerStats.coins < costGold) { pushLog(`<span style='color:#e74c3c;'>Not enough Gold to Tier Up!</span>`); return; }
-            if (!inventory.ETC["Eridium Shard"] || inventory.ETC["Eridium Shard"] < scrapReqAmount) { pushLog(`<span style='color:#e74c3c;'>Not enough Eridium Shards to Tier Up!</span>`); return; }
-            
-            playerStats.coins -= costGold; 
-            inventory.ETC["Eridium Shard"] -= scrapReqAmount;
-            if (inventory.ETC["Eridium Shard"] === 0) delete inventory.ETC["Eridium Shard"];
-            
-            forgeSelectedItem.statsRolled++;
-            addRandomStatLineToItem(forgeSelectedItem);
-            
-            forgeSelectedItem.name = buildProceduralName(forgeSelectedItem);
-            
-            pushLog(`<span style='color:#e67e22;'>[FORGE]</span> Tiered Up gear rarity to ${forgeSelectedItem.statsRolled}★!`);
-            pushHeaderToast(`🌟 Tier Up Success!`, "#e67e22");
-            spawnTemperParticles(true);
         }
 
         updateUI(); renderInventory(); renderForgeTab(); window.saveGame();
@@ -2262,10 +2242,7 @@ window.onload = function() {
                 let goldColor = playerStats.coins >= costGold ? "#f1c40f" : "#e74c3c"; let scrapColor = playerScrap >= scrapReqAmount ? "#bdc3c7" : "#e74c3c";
                 
                 previewItem.temperLevel++;
-                if (previewItem.baseAtk > 0 || previewItem.type === "weapon" || isArt) previewItem.atk += (isArt ? 5 : 2);
-                if (previewItem.baseMaxHp > 0 || isArt) previewItem.maxHp += (isArt ? 25 : 10);
-                if (previewItem.baseDef > 0 || isArt) previewItem.def += (isArt ? 2 : 1);
-                if (previewItem.baseMoveSpeed > 0) previewItem.moveSpeed += 1;
+                applyTemperUpgrades(previewItem, isArt);
                 
                 html += `<div style="font-size:11px; margin-bottom:10px; color:#aaa;">Temper Cap: <span style="color:#fff;">${item.temperLevel} / ${maxT}</span></div>`;
                 
