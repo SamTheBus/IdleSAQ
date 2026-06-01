@@ -428,9 +428,10 @@
                                 <div>Stage Boss: <span id="live-rate-boss" style="color:#fff;">25.0%</span></div>
                                 <div>Dung. Miniboss: <span id="live-rate-dmini" style="color:#fff;">30.0%</span></div>
                                 <div>Boss Core: <span id="live-rate-acore" style="color:#fff;">40.0%</span></div>
-                                <div style="margin-top:6px; color:#1abc9c; font-weight:bold;">Special Quantities</div>
+                                <div style="color:#1abc9c; font-weight:bold;">Special Quantities</div>
                                 <div>Ancient Core: <span id="live-qty-acore" style="color:#fff;">0</span></div>
                                 <div>Eridium Shard: <span id="live-qty-eshard" style="color:#fff;">0</span></div>
+                                <div>Astral Essence: <span id="live-qty-astral" style="color:#fff;">0</span></div>
                                 <div>Keys Held: <span id="live-qty-keys" style="color:#fff;">0</span></div>
                             </div>
                             <div style="width:48%;">
@@ -528,6 +529,7 @@ window.onload = function() {
         "Gacha Key": "Guaranteed drop from Rift Guardians. Used at the Vending Machine for a gear roll.",
         "Ancient Core": "Rare drop from Stage Bosses. Sacrifice 5 at the Ancient Altar to summon a Rift Guardian.",
         "Overlord's Sigil": "Guaranteed drop from the Equipment Dungeon Overlord. Used to temper Unique Artifacts.",
+        "Astral Essence": "A pulsing, cosmic residue extracted by salvaging Unique Artifacts. Exceedingly rare.",
         "Mythic Scrap": "Used to temper or upgrade levels. Salvaged from Mythic gear.",
         "Legendary Scrap": "Used for high-level tempering. Salvaged from Legendary gear.",
         "Epic Scrap": "Used to temper or upgrade levels. Salvaged from Epic gear.",
@@ -558,6 +560,26 @@ window.onload = function() {
         if (!inventory.ETC[itemName]) { inventory.ETC[itemName] = 0; }
         inventory.ETC[itemName] += amount;
         renderInventory();
+    };
+
+    window.toggleLock = function(id) {
+        let item = inventory.EQUIP.find(i => i.id === id);
+        if (!item) {
+            for (let k in equippedSlots) {
+                if (equippedSlots[k] && equippedSlots[k].id === id) {
+                    item = equippedSlots[k];
+                    break;
+                }
+            }
+        }
+        if (item) {
+            item.locked = !item.locked;
+            pushHeaderToast(item.locked ? "🔒 Item Locked!" : "🔓 Item Unlocked!", item.locked ? "#e74c3c" : "#2ecc71");
+            renderInventory();
+            renderForgeTab();
+            updateUI();
+            window.saveGame();
+        }
     };
 
     function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
@@ -1504,7 +1526,8 @@ window.onload = function() {
             let tierLabel = item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★ ${getTierName(item.statsRolled)}`;
             let temperTag = item.temperLevel > 0 ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>` : "";
 
-            if (isArt) el.innerHTML = `<strong style="font-size:10px; color:#1abc9c;">${item.name}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="unequipItem('${slotKey}')">Remove</button>`;
+            let lockTag = item.locked ? " 🔒" : "";
+            if (isArt) el.innerHTML = `<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="unequipItem('${slotKey}')">Remove</button>`;
             else {
                 let s = []; 
                 if (item.atk > 0) s.push(`⚔️${item.atk}`); if (item.maxHp > 0) s.push(`❤️${item.maxHp}`); if (item.def > 0) s.push(`🛡️${item.def}`);
@@ -1513,7 +1536,7 @@ window.onload = function() {
                 if (item.parry > 0) s.push(`⚡${Math.floor(item.parry*100)}%`);
                 if (item.str > 0) s.push(`💪S:${item.str}`); if (item.dex > 0) s.push(`🎯D:${item.dex}`); if (item.int > 0) s.push(`🧠I:${item.int}`);
                 
-                el.innerHTML = `<strong style="font-size:10px;">${item.name}${temperTag}</strong><div style="font-size:8px; color:${getTierColor(item.statsRolled)}; font-weight:bold; margin:2px 0;">${tierLabel}</div><div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${s.join(" ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="unequipItem('${slotKey}')">Remove</button>`;
+                el.innerHTML = `<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${getTierColor(item.statsRolled)}; font-weight:bold; margin:2px 0;">${tierLabel}</div><div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${s.join(" ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="unequipItem('${slotKey}')">Remove</button>`;
             }
         }
     }
@@ -1655,16 +1678,34 @@ window.onload = function() {
         if (!item) { for (let k in equippedSlots) { if (equippedSlots[k] && equippedSlots[k].id === id) { item = equippedSlots[k]; isEquipped = true; slotToClear = k; break; } } }
         if (!item) return;
 
+        if (item.locked) {
+            pushHeaderToast("🔒 Cannot salvage a Locked item!", "#e74c3c");
+            return;
+        }
+
         if (isEquipped) { equippedSlots[slotToClear] = null; } else { inventory.EQUIP.splice(inventory.EQUIP.indexOf(item), 1); }
         
-        let rolledTier = item.statsRolled; let scrapsGained = []; let yieldAmount = Math.floor(Math.random() * 3) + 1; let scrapName = getScrapYieldName(rolledTier);
-        addEtcDrop(scrapName, yieldAmount); scrapsGained.push(`x${yieldAmount} ${scrapName}`);
+        let rolledTier = item.statsRolled; 
+        let scrapsGained = []; 
+        let isArt = item.type === "artifact";
+        let scrapName = isArt ? "Astral Essence" : getScrapYieldName(rolledTier);
+        let yieldAmount = isArt ? Math.floor(Math.random() * 2) + 1 : Math.floor(Math.random() * 3) + 1;
+        
+        addEtcDrop(scrapName, yieldAmount); 
+        scrapsGained.push(`x${yieldAmount} ${scrapName}`);
 
-        for (let t = rolledTier - 1; t >= 0; t--) {
-            if (Math.random() < 0.60) { let lowerYield = Math.floor(Math.random() * 2) + 1; let lowerName = getScrapYieldName(t); addEtcDrop(lowerName, lowerYield); scrapsGained.push(`x${lowerYield} ${lowerName}`); }
+        if (!isArt) {
+            for (let t = rolledTier - 1; t >= 0; t--) {
+                if (Math.random() < 0.60) { 
+                    let lowerYield = Math.floor(Math.random() * 2) + 1; 
+                    let lowerName = getScrapYieldName(t); 
+                    addEtcDrop(lowerName, lowerYield); 
+                    scrapsGained.push(`x${lowerYield} ${lowerName}`); 
+                }
+            }
         }
         
-        for(let i=0; i<30; i++) { particles.push({ x: canvas.width / 2, y: canvas.height / 2, vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12, radius: Math.random() * 3 + 1.5, color: Math.random() > 0.5 ? "#bdc3c7" : "#e74c3c", alpha: 1, life: 35 }); }
+        for(let i=0; i<30; i++) { particles.push({ x: canvas.width / 2, y: canvas.height / 2, vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12, radius: Math.random() * 3 + 1.5, color: isArt ? "#9b59b6" : (Math.random() > 0.5 ? "#bdc3c7" : "#e74c3c"), alpha: 1, life: 35 }); }
         
         pushLog(`<span style='color:#e74c3c;'>[SALVAGE]</span> Dismantled ${item.name} yielding: ${scrapsGained.join(", ")}`); pushHeaderToast(`♻️ Salvaged: ${scrapsGained.join(", ")}`, "#e74c3c");
         if (forgeSelectedItem && forgeSelectedItem.id === id) { forgeSelectedItem = null; renderForgeTab(); }
@@ -1713,7 +1754,8 @@ window.onload = function() {
         let subtitle = item.type === "artifact" ? "Unique Boss Trophy Slot" : `${labelDisplay} | <span style="color:${tierColor}; font-weight:bold;">${tierDisplay}</span>`;
         let temperTag = item.temperLevel > 0 ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>` : "";
 
-        html += `<div class="tt-title" style="color:${titleColor}; white-space:normal;">${item.name}${temperTag}</div>`;
+        let lockTag = item.locked ? " 🔒" : "";
+        html += `<div class="tt-title" style="color:${titleColor}; white-space:normal;">${item.name}${temperTag}${lockTag}</div>`;
         html += `<div class="tt-subtitle">${subtitle}</div>`;
 
         if (item.id === "dummy") {
@@ -2146,11 +2188,12 @@ window.onload = function() {
                 if ((forgeMode === 'lvl' || forgeMode === 'tier') && isArt) return ""; 
                 
                 let nameColor = getTierColor(item.statsRolled); let temperTag = item.temperLevel > 0 ? ` [+${item.temperLevel}]` : "";
+                let lockTag = item.locked ? " 🔒" : "";
                 let bgStyle = forgeSelectedItem && forgeSelectedItem.id === item.id ? "background:#1e2a38; border: 1px solid #1abc9c;" : "";
                 let eqBadge = item.isEquippedSlot ? `<span style="background:#c0392b; color:white; padding:1px 3px; border-radius:2px; font-size:8px;">[EQUIPPED]</span> ` : "";
                 let rarityLabel = isArt ? "UNIQUE" : `${item.statsRolled}★`;
                 return `<div class="bag-item" style="cursor:pointer; ${bgStyle}" onclick="selectForgeItem(${item.id})" onmouseenter="showForgeTooltip(event, ${item.id})" onmouseleave="hideTooltip()" ontouchstart="showForgeTooltip(event, ${item.id})">
-                    <div>${eqBadge}<strong style="color:${nameColor};">${item.name}${temperTag}</strong><br><span style="font-size:10px;color:#aaa;">${item.type.toUpperCase()} | ${rarityLabel}</span></div>
+                    <div>${eqBadge}<strong style="color:${nameColor};">${item.name}${temperTag}${lockTag}</strong><br><span style="font-size:10px;color:#aaa;">${item.type.toUpperCase()} | ${rarityLabel}</span></div>
                 </div>`;
             }).join("");
         }
@@ -2662,6 +2705,8 @@ window.onload = function() {
 
         document.getElementById('live-qty-acore').innerText = inventory.ETC["Ancient Core"] || 0;
         document.getElementById('live-qty-eshard').innerText = inventory.ETC["Eridium Shard"] || 0;
+        let elAstral = document.getElementById('live-qty-astral');
+        if (elAstral) elAstral.innerText = inventory.ETC["Astral Essence"] || 0;
         document.getElementById('live-qty-keys').innerText = (inventory.ETC["Gacha Key"] || 0) + ` (E:${playerStats.equipKeys} G:${playerStats.goldKeys} M:${playerStats.matKeys})`;
         document.getElementById('live-qty-souls').innerText = (inventory.ETC["Monster Soul"] || 0) + (inventory.ETC["Luminous Soul"] || 0);
         
@@ -2696,16 +2741,20 @@ window.onload = function() {
             eqBox.innerHTML = inventory.EQUIP.map(item => {
                 let nameColor = getTierColor(item.statsRolled); let tierStr = item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★ ${getTierName(item.statsRolled)}`;
                 let temperTag = item.temperLevel > 0 ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>` : "";
+                let lockTag = item.locked ? " 🔒" : "";
+                let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
+                let lockIcon = item.locked ? "🔒" : "🔓";
                 let typeText = item.type.toUpperCase();
                 if (item.type === "subweapon" && item.subType) {
                     typeText = `${item.type.toUpperCase()} (${item.subType.toUpperCase()})`;
                 }
                 let details = item.type === "artifact" ? `<span style="font-size:10px;color:#d2b4de;font-weight:bold;">Trait: ${item.desc}</span>` : `<span style="font-size:10px;color:#aaa;">Slot: ${typeText} | <span style="color:${nameColor};font-weight:bold;">${tierStr}</span></span>`;
                 return `<div class="bag-item" onmouseenter="showInventoryTooltip(event, ${item.id})" ontouchstart="showInventoryTooltip(event, ${item.id})" onmouseleave="hideTooltip()">
-                    <div><strong style="color:${nameColor};">${item.name}${temperTag}</strong><br>${details}</div>
+                    <div><strong style="color:${nameColor};">${item.name}${temperTag}${lockTag}</strong><br>${details}</div>
                     <div style="position:relative; z-index:10; white-space:nowrap;">
                         <button class="btn-action" onclick="equipItem(${item.id})">Equip</button>
-                        ${item.type !== "artifact" ? `<button class="btn-action un" style="margin-left:2px;" onclick="salvageItem(${item.id})">Salvage</button>` : ''}
+                        <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="toggleLock(${item.id})">${lockIcon}</button>
+                        <button class="btn-action un" style="margin-left:2px;" onclick="salvageItem(${item.id})">Salvage</button>
                     </div>
                 </div>`;
             }).join("");
