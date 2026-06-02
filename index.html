@@ -529,9 +529,9 @@
                 
                 <div class="death-section-title">⚔️ Fatal Encounter</div>
                 <div id="death-stats-grid">
-                    <div class="death-stat-box">
-                        <span class="death-stat-label">Nemesis</span>
-                        <span class="death-stat-val" id="death-stat-nemesis" style="color: #e74c3c;">Unknown</span>
+                    <div class="death-stat-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80px; overflow: hidden; padding: 2px;">
+                        <span class="death-stat-label" style="margin-bottom: 2px;">Nemesis</span>
+                        <canvas id="death-enemy-canvas" width="60" height="60" style="background: rgba(0,0,0,0.5); border: 1px solid #781c1c; border-radius: 4px; display: block;"></canvas>
                     </div>
                     <div class="death-stat-box">
                         <span class="death-stat-label">Peak Stage</span>
@@ -926,7 +926,776 @@ window.onload = function() {
     function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function randFloat(min, max) { return Math.random() * (max - min) + min; }
     
-    // Resolves background/sky visual presets. Spreads zones wider to keep the forest setting until stage 50.
+    // Draw a single mob instance cleanly onto any rendering context
+    window.drawSingleMob = function(c, m) {
+        if (!m) return;
+        let t = m.visualTier;
+        c.save();
+        
+        let penWidth = (m.type === "boss" || m.type === "dungeon_boss") ? 2.4 : 1.8;
+        c.strokeStyle = "#000000";
+        c.lineWidth = penWidth;
+        c.lineJoin = "round";
+
+        if (m.flashTimer > 0) {
+            c.fillStyle = "#ffffff";
+        } else {
+            c.fillStyle = (m.type === "boss" || m.type === "dungeon_boss" || m.type === "dungeon_miniboss") ? "#34495e" : "#555";
+        }
+
+        if (m.type === "mob") {
+            if (m.flashTimer > 0) {
+                c.fillStyle = "#ffffff";
+            } else {
+                if (t === 0) c.fillStyle = m.isRare ? "#f1c40f" : "#2ecc71"; 
+                else if (t === 1) c.fillStyle = m.isRare ? "#bdc3c7" : "#7f8c8d"; 
+                else if (t === 2) c.fillStyle = m.isRare ? "#e67e22" : "#c0392b"; 
+                else if (t === 3) c.fillStyle = m.isRare ? "#1abc9c" : "#27ae60"; 
+                else c.fillStyle = m.isRare ? "#9b59b6" : "#34495e"; 
+            }
+
+            if (t === 0) {
+                let squish = Math.sin(Date.now() / 100) * 3;
+                c.beginPath();
+                c.ellipse(m.x + m.w / 2, m.y + m.h - 10 + squish / 2, m.w / 2 + squish, m.h / 2 - squish, 0, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+
+                if (m.flashTimer === 0) {
+                    c.fillStyle = "#111";
+                    c.beginPath(); c.arc(m.x + m.w / 2 - 4, m.y + m.h / 2, 2, 0, Math.PI * 2); c.fill(); c.stroke();
+                    c.beginPath(); c.arc(m.x + m.w / 2 + 4, m.y + m.h / 2, 2, 0, Math.PI * 2); c.fill(); c.stroke();
+                }
+            } else if (t === 1) {
+                let hover = Math.sin(Date.now() / 120) * 2;
+                let blockColor = m.flashTimer > 0 ? "#ffffff" : "#4e545c";
+                let shadowColor = m.flashTimer > 0 ? "#ffffff" : "#2f353d";
+                let runeColor = m.isRare ? "#ff007f" : "#ff3333";
+
+                // Golem back chest
+                c.fillStyle = shadowColor;
+                c.beginPath();
+                c.roundRect(m.x + 2, m.y + 10 + hover, m.w - 4, m.h - 10, [6]);
+                c.fill();
+                c.stroke();
+
+                // Golem front chest
+                c.fillStyle = blockColor;
+                c.beginPath();
+                c.roundRect(m.x + 4, m.y + 12 + hover, m.w - 8, m.h - 14, [4]);
+                c.fill();
+                c.stroke();
+
+                // Golem back head
+                c.fillStyle = shadowColor;
+                c.beginPath(); c.rect(m.x + 6, m.y + hover, m.w - 12, 10); c.fill(); c.stroke();
+                
+                // Golem front head
+                c.fillStyle = blockColor;
+                c.beginPath(); c.rect(m.x + 8, m.y + 2 + hover, m.w - 16, 8); c.fill(); c.stroke();
+
+                if (m.flashTimer === 0) {
+                    c.fillStyle = runeColor;
+                    c.shadowBlur = 8;
+                    c.shadowColor = runeColor;
+                    
+                    c.beginPath();
+                    c.moveTo(m.x + 8, m.y + 4 + hover);
+                    c.lineTo(m.x + 13, m.y + 7 + hover);
+                    c.lineTo(m.x + 8, m.y + 8 + hover);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    c.beginPath();
+                    c.moveTo(m.x + m.w - 8, m.y + 4 + hover);
+                    c.lineTo(m.x + m.w - 13, m.y + 7 + hover);
+                    c.lineTo(m.x + m.w - 8, m.y + 8 + hover);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+                    
+                    c.shadowBlur = 0; 
+                }
+
+                // Golem shoulders
+                c.fillStyle = shadowColor;
+                c.beginPath(); c.rect(m.x - 4, m.y + 12 + hover, 5, 8); c.fill(); c.stroke();
+                c.beginPath(); c.rect(m.x + m.w - 1, m.y + 12 + hover, 5, 8); c.fill(); c.stroke();
+                
+                c.fillStyle = blockColor;
+                c.beginPath(); c.rect(m.x - 3, m.y + 13 + hover, 3, 6); c.fill(); c.stroke();
+                c.beginPath(); c.rect(m.x + m.w - 2, m.y + 13 + hover, 3, 6); c.fill(); c.stroke();
+
+                if (m.flashTimer === 0) {
+                    c.strokeStyle = "#1b1d22";
+                    c.lineWidth = 1.5;
+                    c.beginPath();
+                    c.moveTo(m.x + 8, m.y + 18 + hover);
+                    c.lineTo(m.x + 14, m.y + 24 + hover);
+                    c.moveTo(m.x + m.w - 8, m.y + 16 + hover);
+                    c.lineTo(m.x + m.w - 12, m.y + 22 + hover);
+                    c.stroke();
+
+                    c.fillStyle = runeColor;
+                    c.beginPath();
+                    c.arc(m.x + m.w / 2, m.y + m.h / 2 + 4 + hover, 3, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+                }
+            } else if (t === 2) {
+                let flicker = Math.sin(Date.now() / 50) * 4;
+                c.beginPath();
+                c.moveTo(m.x + m.w / 2, m.y - flicker);
+                c.quadraticCurveTo(m.x + m.w + flicker, m.y + m.h / 2, m.x + m.w - 5, m.y + m.h);
+                c.lineTo(m.x + 5, m.y + m.h);
+                c.quadraticCurveTo(m.x - flicker, m.y + m.h / 2, m.x + m.w / 2, m.y - flicker);
+                c.closePath();
+                c.fill();
+                c.stroke();
+            } else if (t === 3) {
+                c.beginPath();
+                c.arc(m.x + m.w / 2, m.y + 10, m.w / 2, Math.PI, 0);
+                c.fill();
+                c.stroke();
+                
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f5f5dc";
+                c.beginPath();
+                c.rect(m.x + m.w / 2 - 4, m.y + 10, 8, m.h - 10);
+                c.fill();
+                c.stroke();
+            } else {
+                let hover = Math.sin(Date.now() / 150) * 4;
+                c.beginPath();
+                c.ellipse(m.x + m.w / 2, m.y + m.h / 2 + hover, m.w / 2, m.h / 3, 0, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+                
+                if (m.flashTimer === 0) {
+                    c.fillStyle = "#ff007f";
+                    c.beginPath();
+                    c.arc(m.x + m.w / 2, m.y + m.h / 2 + hover, 4, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+                }
+            }
+        } 
+        else if (m.type === "bat") {
+            let wingSpan = Math.sin(Date.now() / 80) * 14;
+            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#4a154b";
+            
+            c.beginPath();
+            c.ellipse(m.x + 12, m.y + 12, 8, 12, 0, 0, Math.PI*2);
+            c.fill();
+            c.stroke();
+            
+            c.beginPath();
+            c.moveTo(m.x + 6, m.y); c.lineTo(m.x + 9, m.y + 6); c.lineTo(m.x + 3, m.y + 6);
+            c.moveTo(m.x + 18, m.y); c.lineTo(m.x + 15, m.y + 6); c.lineTo(m.x + 21, m.y + 6);
+            c.fill();
+            c.stroke();
+            
+            c.beginPath();
+            c.moveTo(m.x + 6, m.y + 12);
+            c.bezierCurveTo(m.x - 10, m.y + 12 - wingSpan, m.x - 20, m.y + 20, m.x - 18, m.y + 26);
+            c.bezierCurveTo(m.x - 10, m.y + 22, m.x, m.y + 16, m.x + 6, m.y + 12);
+            c.fill();
+            c.stroke();
+            
+            c.beginPath();
+            c.moveTo(m.x + 18, m.y + 12);
+            c.bezierCurveTo(m.x + 34, m.y + 12 - wingSpan, m.x + 44, m.y + 20, m.x + 42, m.y + 26);
+            c.bezierCurveTo(m.x + 34, m.y + 22, m.x + 24, m.y + 16, m.x + 18, m.y + 12);
+            c.fill();
+            c.stroke();
+
+            if (m.flashTimer === 0) {
+                c.fillStyle = "#e74c3c";
+                c.beginPath(); c.arc(m.x + 9, m.y + 10, 1.5, 0, Math.PI*2); c.fill(); c.stroke();
+                c.beginPath(); c.arc(m.x + 15, m.y + 10, 1.5, 0, Math.PI*2); c.fill(); c.stroke();
+            }
+        } 
+        else if (m.type === "crawler") {
+            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#d35400";
+            
+            let segs = 4;
+            let spacing = m.w / segs;
+            let legCycle = Math.sin(Date.now() / 50) * 4;
+
+            for (let i = 0; i < segs; i++) {
+                let segX = m.x + (i * spacing);
+                c.beginPath();
+                c.ellipse(segX + spacing/2, m.y + 12, spacing * 0.7, 10, 0, 0, Math.PI*2);
+                c.fill();
+                c.stroke();
+                
+                c.fillStyle = "#2c3e50";
+                c.beginPath();
+                c.moveTo(segX + spacing/2 - 2, m.y + 4);
+                c.lineTo(segX + spacing/2, m.y - 2);
+                c.lineTo(segX + spacing/2 + 2, m.y + 4);
+                c.fill();
+                c.stroke();
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#d35400";
+
+                c.strokeStyle = "#a04000";
+                c.lineWidth = 2;
+                c.beginPath();
+                c.moveTo(segX + spacing/2, m.y + 18);
+                c.lineTo(segX + spacing/2 - 4, m.y + 24 + (i%2 === 0 ? legCycle : -legCycle));
+                c.moveTo(segX + spacing/2, m.y + 18);
+                c.lineTo(segX + spacing/2 + 4, m.y + 24 + (i%2 === 0 ? -legCycle : legCycle));
+                c.stroke();
+            }
+        } 
+        else if (m.type === "boss" || m.type === "dungeon_boss") {
+            c.lineWidth = 2.4;
+
+            if (m.type === "dungeon_boss") {
+                let dType = playerStats.currentDungeon || 'gold';
+                if (dType === 'gold') {
+                    let hover = Math.sin(Date.now() / 150) * 3;
+                    let baseColor = m.flashTimer > 0 ? "#ffffff" : "#27ae60";
+                    let goldColor1 = "#f1c40f";
+                    let goldColor2 = "#f39c12";
+
+                    c.fillStyle = goldColor2;
+                    c.beginPath();
+                    c.ellipse(m.x + m.w / 2, m.y + m.h - 10, m.w * 0.9, 15, 0, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = goldColor1;
+                    c.beginPath();
+                    c.ellipse(m.x + m.w / 2 - 5, m.y + m.h - 13, m.w * 0.7, 10, 0, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = "#fff";
+                    for (let i = 0; i < 5; i++) {
+                        c.fillRect(m.x + 8 + i * 8, m.y + m.h - 16 + Math.sin(i) * 3, 2, 2);
+                    }
+
+                    c.fillStyle = baseColor;
+                    c.beginPath();
+                    c.ellipse(m.x + m.w / 2, m.y + m.h - 32 + hover, m.w * 0.55, 20, 0, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    c.beginPath();
+                    c.arc(m.x + m.w / 2, m.y + m.h - 52 + hover, 14, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    c.beginPath();
+                    c.moveTo(m.x + m.w / 2 - 11, m.y + m.h - 54 + hover);
+                    c.lineTo(m.x + m.w / 2 - 26, m.y + m.h - 60 + hover);
+                    c.lineTo(m.x + m.w / 2 - 11, m.y + m.h - 46 + hover);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    c.beginPath();
+                    c.moveTo(m.x + m.w / 2 + 11, m.y + m.h - 54 + hover);
+                    c.lineTo(m.x + m.w / 2 + 26, m.y + m.h - 60 + hover);
+                    c.lineTo(m.x + m.w / 2 + 11, m.y + m.h - 46 + hover);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f1c40f";
+                    c.beginPath();
+                    c.moveTo(m.x + m.w / 2 - 10, m.y + m.h - 64 + hover);
+                    c.lineTo(m.x + m.w / 2 - 10, m.y + m.h - 73 + hover);
+                    c.lineTo(m.x + m.w / 2 - 4, m.y + m.h - 67 + hover);
+                    c.lineTo(m.x + m.w / 2, m.y + m.h - 75 + hover);
+                    c.lineTo(m.x + m.w / 2 + 4, m.y + m.h - 67 + hover);
+                    c.lineTo(m.x + m.w / 2 + 10, m.y + m.h - 73 + hover);
+                    c.lineTo(m.x + m.w / 2 + 10, m.y + m.h - 64 + hover);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = "#e74c3c";
+                        c.beginPath();
+                        c.arc(m.x + m.w / 2, m.y + m.h - 67 + hover, 2, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                    }
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = "#f1c40f";
+                        c.beginPath();
+                        c.arc(m.x + m.w / 2 - 5, m.y + m.h - 54 + hover, 1.5, 0, Math.PI * 2);
+                        c.arc(m.x + m.w / 2 + 5, m.y + m.h - 54 + hover, 1.5, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                    }
+
+                    c.strokeStyle = "#111";
+                    c.lineWidth = 1.5;
+                    c.beginPath();
+                    c.arc(m.x + m.w / 2, m.y + m.h - 48 + hover, 5, 0, Math.PI);
+                    c.stroke();
+
+                    c.fillStyle = "#d35400";
+                    c.beginPath();
+                    c.arc(m.x + m.w / 2 - 15, m.y + m.h - 30 + hover, 10, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+                } else if (dType === 'mat') {
+                    let pulse = Math.sin(Date.now() / 100) * 4;
+                    let baseColor = m.flashTimer > 0 ? "#ffffff" : "rgba(46, 204, 113, 0.85)";
+
+                    c.fillStyle = "rgba(39, 174, 96, 0.6)";
+                    c.beginPath();
+                    c.ellipse(m.x + m.w / 2, m.y + m.h - 10, m.w * 0.7, 10, 0, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = baseColor;
+                    c.beginPath();
+                    c.moveTo(m.x + 5 - pulse / 2, m.y + m.h);
+                    c.bezierCurveTo(
+                        m.x - 10 - pulse, m.y + m.h - 45, 
+                        m.x + 5, m.y + 10 + pulse, 
+                        m.x + m.w / 2, m.y + 10 + pulse
+                    );
+                    c.bezierCurveTo(
+                        m.x + m.w - 5, m.y + 10 + pulse, 
+                        m.x + m.w + 10 + pulse, m.y + m.h - 45, 
+                        m.x + m.w - 5 + pulse / 2, m.y + m.h
+                    );
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = "#9b59b6";
+                        c.shadowBlur = 8;
+                        c.shadowColor = "#9b59b6";
+                        c.beginPath();
+                        c.arc(m.x + m.w / 2 - 8, m.y + m.h / 2 + pulse / 2, 3, 0, Math.PI * 2);
+                        c.arc(m.x + m.w / 2 + 8, m.y + m.h / 2 + pulse / 2, 3, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                        c.shadowBlur = 0;
+                    }
+
+                    c.fillStyle = "rgba(46, 204, 113, 0.9)";
+                    let bubY = (Date.now() / 15) % 45;
+                    c.beginPath();
+                    c.arc(m.x + m.w / 2 - 10, m.y + m.h - bubY, 2.5, 0, Math.PI * 2);
+                    c.fill(); c.stroke();
+                    c.beginPath();
+                    c.arc(m.x + m.w / 2 + 7, m.y + m.h - 8 - ((bubY + 12) % 45), 3, 0, Math.PI * 2);
+                    c.fill(); c.stroke();
+                } else if (dType === 'equip') {
+                    let bounce = Math.sin(Date.now() / 200) * 3;
+                    let armorColor = m.flashTimer > 0 ? "#ffffff" : "#34495e";
+                    let jointColor = "#1a252f";
+                    let fireGlow = "#e67e22";
+
+                    c.fillStyle = jointColor;
+                    c.beginPath(); c.rect(m.x + 8, m.y + m.h - 20, 10, 20); c.fill(); c.stroke();
+                    c.beginPath(); c.rect(m.x + m.w - 18, m.y + m.h - 20, 10, 20); c.fill(); c.stroke();
+                    c.fillStyle = armorColor;
+                    c.beginPath(); c.rect(m.x + 6, m.y + m.h - 10, 14, 10); c.fill(); c.stroke();
+                    c.beginPath(); c.rect(m.x + m.w - 20, m.y + m.h - 10, 14, 10); c.fill(); c.stroke();
+
+                    c.fillStyle = jointColor;
+                    c.beginPath(); c.rect(m.x, m.y + 22 + bounce, m.w, m.h - 40); c.fill(); c.stroke();
+                    
+                    c.fillStyle = armorColor;
+                    c.beginPath();
+                    c.roundRect(m.x - 3, m.y + 18 + bounce, m.w + 6, m.h - 45, [5]);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        let coreRadius = 7 + Math.sin(Date.now() / 80) * 2;
+                        c.fillStyle = fireGlow;
+                        c.shadowBlur = 10;
+                        c.shadowColor = fireGlow;
+                        c.beginPath();
+                        c.arc(m.x + m.w / 2, m.y + m.h / 2 - 4 + bounce, coreRadius, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                        c.shadowBlur = 0;
+                    }
+
+                    c.fillStyle = armorColor;
+                    c.beginPath();
+                    c.moveTo(m.x - 5, m.y + 20 + bounce);
+                    c.lineTo(m.x - 12, m.y + 11 + bounce);
+                    c.lineTo(m.x + 2, m.y + 18 + bounce);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    c.beginPath();
+                    c.moveTo(m.x + m.w + 5, m.y + 20 + bounce);
+                    c.lineTo(m.x + m.w + 12, m.y + 11 + bounce);
+                    c.lineTo(m.x + m.w - 2, m.y + 18 + bounce);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = armorColor;
+                    c.beginPath(); c.rect(m.x - 10, m.y + m.h / 2 - 5 + bounce, 7, 12); c.fill(); c.stroke();
+                    c.strokeStyle = "#5d6d7e";
+                    c.lineWidth = 2.5;
+                    c.beginPath();
+                    c.moveTo(m.x - 6, m.y + 8 + bounce);
+                    c.lineTo(m.x - 6, m.y + m.h - 8 + bounce);
+                    c.stroke();
+
+                    c.fillStyle = "#2c3e50";
+                    c.beginPath(); c.rect(m.x - 15, m.y + 4 + bounce, 18, 9); c.fill(); c.stroke();
+
+                    c.fillStyle = armorColor;
+                    c.beginPath();
+                    c.roundRect(m.x + 9, m.y + bounce, m.w - 18, 20, [3]);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = jointColor;
+                    c.beginPath();
+                    c.moveTo(m.x + 11, m.y + 4 + bounce);
+                    c.quadraticCurveTo(m.x + 2, m.y - 8 + bounce, m.x + 4, m.y - 10 + bounce);
+                    c.lineTo(m.x + 14, m.y + 8 + bounce);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    c.beginPath();
+                    c.moveTo(m.x + m.w - 11, m.y + 4 + bounce);
+                    c.quadraticCurveTo(m.x + m.w - 2, m.y - 8 + bounce, m.x + m.w - 4, m.y - 10 + bounce);
+                    c.lineTo(m.x + m.w - 14, m.y + 8 + bounce);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = fireGlow;
+                        c.beginPath(); c.rect(m.x + 12, m.y + 7 + bounce, m.w - 24, 2); c.fill(); c.stroke();
+                    }
+                }
+            } else {
+                let currentTier = t !== undefined ? t : getStageTier();
+                if (currentTier === 0) {
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#a97026";
+                    for (let i = 0; i < 4; i++) {
+                        let rx = m.x + m.w * (0.2 + i * 0.2);
+                        c.beginPath();
+                        c.arc(rx, m.y + m.h, m.w * 0.15, Math.PI, 0);
+                        c.fill();
+                        c.stroke();
+                    }
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#dca04c";
+                    c.beginPath();
+                    c.moveTo(m.x + m.w * 0.3, m.y + m.h * 0.35); 
+                    c.lineTo(m.x + m.w * 0.7, m.y + m.h * 0.35);
+                    c.quadraticCurveTo(m.x + m.w * 0.75, m.y + m.h * 0.7, m.x + m.w * 0.85, m.y + m.h); 
+                    c.lineTo(m.x + m.w * 0.15, m.y + m.h);
+                    c.quadraticCurveTo(m.x + m.w * 0.25, m.y + m.h * 0.7, m.x + m.w * 0.3, m.y + m.h * 0.35); 
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#a97026";
+                    c.beginPath();
+                    c.ellipse(m.x + m.w * 0.72, m.y + m.h * 0.65, m.w * 0.15, m.h * 0.08, -Math.PI / 8, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        c.strokeStyle = "#825010";
+                        c.lineWidth = 1.5;
+                        c.beginPath();
+                        c.ellipse(m.x + m.w * 0.72, m.y + m.h * 0.65, m.w * 0.08, m.h * 0.04, -Math.PI / 8, 0, Math.PI * 2);
+                        c.stroke();
+                    }
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#dca04c";
+                    c.beginPath();
+                    c.roundRect(m.x + m.w * 0.05, m.y + m.h * 0.56, m.w * 0.45, m.h * 0.07, [4]);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#a97026"; 
+                    c.beginPath();
+                    c.roundRect(m.x + m.w * 0.05, m.y + m.h * 0.61, m.w * 0.45, m.h * 0.02, [2]);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = "#301a0d"; 
+                        c.beginPath();
+                        c.ellipse(m.x + m.w * 0.42, m.y + m.h * 0.5, m.w * 0.06, m.h * 0.08, 0, 0, Math.PI * 2);
+                        c.ellipse(m.x + m.w * 0.58, m.y + m.h * 0.5, m.w * 0.06, m.h * 0.08, 0, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                        
+                        c.beginPath();
+                        c.arc(m.x + m.w * 0.5, m.y + m.h * 0.68, m.w * 0.08, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                    }
+
+                    let cx = m.x + m.w / 2;
+                    let cy = m.y + m.h * 0.15;
+                    let r = m.w * 0.8;
+                    
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#4ba337"; 
+                    c.beginPath();
+                    c.arc(cx, cy, r, 0, Math.PI * 2);
+                    c.arc(cx - r * 0.5, cy - r * 0.1, r * 0.8, 0, Math.PI * 2);
+                    c.arc(cx + r * 0.5, cy - r * 0.1, r * 0.8, 0, Math.PI * 2);
+                    c.arc(cx, cy - r * 0.6, r * 0.9, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = "#69c453"; 
+                        c.beginPath();
+                        c.arc(cx, cy, r * 0.8, 0, Math.PI * 2);
+                        c.arc(cx - r * 0.4, cy - r * 0.1, r * 0.6, 0, Math.PI * 2);
+                        c.arc(cx + r * 0.4, cy - r * 0.1, r * 0.6, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                    }
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = "#e74c3c";
+                        if (!m.appleOffsets) {
+                            m.appleOffsets = [];
+                            let count = randInt(4, 8); 
+                            for (let i = 0; i < count; i++) {
+                                let angle = randFloat(0, Math.PI * 2);
+                                let dist = randFloat(0, r * 0.85); 
+                                m.appleOffsets.push({
+                                    dx: Math.cos(angle) * dist,
+                                    dy: Math.sin(angle) * dist - (r * 0.1) 
+                                });
+                            }
+                        }
+                        m.appleOffsets.forEach(ap => {
+                            let appleX = cx + ap.dx;
+                            let appleY = cy + ap.dy;
+
+                            c.beginPath();
+                            c.arc(appleX, appleY, m.w * 0.12, 0, Math.PI * 2);
+                            c.fill();
+                            c.stroke();
+                            
+                            c.strokeStyle = "#4d2e1a";
+                            c.lineWidth = 1.5;
+                            c.beginPath();
+                            c.moveTo(appleX, appleY - m.w * 0.1);
+                            c.lineTo(appleX - 2, appleY - m.w * 0.18);
+                            c.stroke();
+
+                            c.fillStyle = "#ffffff";
+                            c.beginPath();
+                            c.arc(appleX - m.w * 0.04, appleY - m.w * 0.04, m.w * 0.03, 0, Math.PI * 2);
+                            c.fill();
+                            c.fillStyle = "#e74c3c";
+                        });
+                    }
+                } else if (currentTier === 1) {
+                    let bounceOffset = Math.sin(Date.now() / 200) * 3;
+                    let blockColor = m.flashTimer > 0 ? "#ffffff" : "#3b3f46";
+                    let shadowColor = m.flashTimer > 0 ? "#ffffff" : "#1f2126";
+                    let lavaColor = "#ff2200";
+
+                    c.fillStyle = shadowColor;
+                    c.beginPath(); c.rect(m.x + 4, m.y + m.h - 16, m.w - 8, 16); c.fill(); c.stroke();
+                    c.fillStyle = blockColor;
+                    c.beginPath(); c.rect(m.x + 8, m.y + m.h - 14, 12, 14); c.fill(); c.stroke();
+                    c.beginPath(); c.rect(m.x + m.w - 20, m.y + m.h - 14, 12, 14); c.fill(); c.stroke();
+
+                    c.fillStyle = shadowColor;
+                    c.beginPath();
+                    c.roundRect(m.x - 2, m.y + 24 + bounceOffset, m.w + 4, m.h - 40, [10]);
+                    c.fill();
+                    c.stroke();
+                    
+                    c.fillStyle = blockColor;
+                    c.beginPath();
+                    c.roundRect(m.x, m.y + 26 + bounceOffset, m.w, m.h - 44, [8]);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = "#121316";
+                    c.beginPath();
+                    c.roundRect(m.x - 10, m.y + 20 + bounceOffset, 14, 16, [4]);
+                    c.roundRect(m.x + m.w - 4, m.y + 20 + bounceOffset, 14, 16, [4]);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = shadowColor;
+                    c.beginPath();
+                    c.roundRect(m.x + 8, m.y + 4 + bounceOffset, m.w - 16, 22, [6]);
+                    c.fill();
+                    c.stroke();
+                    
+                    c.fillStyle = blockColor;
+                    c.beginPath();
+                    c.roundRect(m.x + 10, m.y + 6 + bounceOffset, m.w - 20, 18, [4]);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = lavaColor;
+                        c.shadowBlur = 15;
+                        c.shadowColor = lavaColor;
+
+                        c.beginPath();
+                        c.moveTo(m.x + 14, m.y + 11 + bounceOffset);
+                        c.lineTo(m.x + 22, m.y + 16 + bounceOffset);
+                        c.lineTo(m.x + 14, m.y + 18 + bounceOffset);
+                        c.closePath();
+                        
+                        c.moveTo(m.x + m.w - 14, m.y + 11 + bounceOffset);
+                        c.lineTo(m.x + m.w - 22, m.y + 16 + bounceOffset);
+                        c.lineTo(m.x + m.w - 14, m.y + 18 + bounceOffset);
+                        c.closePath();
+                        c.fill();
+                        c.stroke();
+                        
+                        c.shadowBlur = 0;
+                    }
+
+                    if (m.flashTimer === 0) {
+                        c.strokeStyle = lavaColor;
+                        c.shadowBlur = 10;
+                        c.shadowColor = lavaColor;
+                        c.lineWidth = 2.5;
+
+                        c.beginPath();
+                        c.moveTo(m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset);
+                        c.lineTo(m.x + 10, m.y + 35 + bounceOffset);
+                        c.moveTo(m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset);
+                        c.lineTo(m.x + m.w - 10, m.y + 35 + bounceOffset);
+                        c.moveTo(m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset);
+                        c.lineTo(m.x + m.w/2, m.y + m.h - 22 + bounceOffset);
+                        c.stroke();
+
+                        let coreGrad = c.createRadialGradient(
+                            m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset, 1,
+                            m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset, 8
+                        );
+                        coreGrad.addColorStop(0, "#ffffff");
+                        coreGrad.addColorStop(0.3, "#ff3b30");
+                        coreGrad.addColorStop(1, "rgba(255, 0, 0, 0)");
+                        c.fillStyle = coreGrad;
+                        c.beginPath();
+                        c.arc(m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset, 8, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+
+                        c.shadowBlur = 0;
+                    }
+                } else {
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1a252f";
+                    
+                    c.beginPath();
+                    c.roundRect(m.x, m.y + 20, m.w, m.h - 20, [4, 4, 8, 8]);
+                    c.fill();
+                    c.stroke();
+                    
+                    c.fillStyle = "#34495e";
+                    c.beginPath();
+                    c.moveTo(m.x - 6, m.y + 20); c.lineTo(m.x + 6, m.y + 10); c.lineTo(m.x + 12, m.y + 20);
+                    c.moveTo(m.x + m.w + 6, m.y + 20); c.lineTo(m.x + m.w - 6, m.y + 10); c.lineTo(m.x + m.w - 12, m.y + 20);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = "#2c3e50";
+                    c.beginPath();
+                    c.arc(m.x + m.w/2, m.y + 10, 16, Math.PI, 0);
+                    c.fill();
+                    c.stroke();
+                    
+                    c.beginPath();
+                    c.moveTo(m.x + m.w/2 - 12, m.y + 2); c.quadraticCurveTo(m.x + m.w/2 - 20, m.y - 12, m.x + m.w/2 - 16, m.y - 14); c.lineTo(m.x + m.w/2 - 8, m.y + 6);
+                    c.fill(); c.stroke();
+                    
+                    c.beginPath();
+                    c.moveTo(m.x + m.w/2 + 12, m.y + 2); c.quadraticCurveTo(m.x + m.w/2 + 20, m.y - 12, m.x + m.w/2 + 16, m.y - 14); c.lineTo(m.x + m.w/2 + 8, m.y + 6);
+                    c.fill(); c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        let grad = c.createRadialGradient(m.x + m.w/2, m.y + 40, 2, m.x + m.w/2, m.y + 40, 12);
+                        grad.addColorStop(0, "#e74c3c");
+                        grad.addColorStop(1, "rgba(231,76,60,0)");
+                        c.fillStyle = grad;
+                        c.beginPath(); c.arc(m.x + m.w/2, m.y + 40, 12, 0, Math.PI*2); c.fill(); c.stroke();
+                    }
+                } 
+            } 
+        } 
+        else if (m.type === "dungeon_miniboss") {
+            let hoverY = Math.sin(Date.now() / 120) * 6;
+            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#2c3e50";
+            
+            c.beginPath();
+            c.moveTo(m.x + m.w/2, m.y + hoverY);
+            c.lineTo(m.x + m.w, m.y + m.h / 2 + hoverY);
+            c.lineTo(m.x + m.w / 2, m.y + m.h + hoverY);
+            c.lineTo(m.x, m.y + m.h / 2 + hoverY);
+            c.closePath();
+            c.fill();
+            c.stroke();
+            
+            if (m.flashTimer === 0) {
+                c.fillStyle = "#1abc9c";
+                c.beginPath();
+                c.arc(m.x + m.w / 2, m.y + m.h / 2 + hoverY, 4, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+            }
+        }
+        c.restore();
+    };
+
+    // Render an interactive live preview of the nemesis who vanquished the hero
+    function renderNemesisPreview(mobData) {
+        const dCanvas = document.getElementById('death-enemy-canvas');
+        if (!dCanvas) return;
+        const dCtx = dCanvas.getContext('2d');
+        dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+        
+        if (!mobData) {
+            dCtx.fillStyle = "#c0392b";
+            dCtx.font = "bold 20px sans-serif";
+            dCtx.textAlign = "center";
+            dCtx.textBaseline = "middle";
+            dCtx.fillText("💀", 30, 30);
+            return;
+        }
+
+        let renderMob = JSON.parse(JSON.stringify(mobData));
+        renderMob.flashTimer = 0; // Lock flash effects
+        
+        let maxDim = Math.max(renderMob.w, renderMob.h);
+        let scale = 1.0;
+        if (maxDim > 0) {
+            scale = 40 / maxDim; // Fit inside comfort box bounding margins of 60x60
+        }
+        
+        dCtx.save();
+        dCtx.translate(30, 30);
+        dCtx.scale(scale, scale);
+        // Translate coordinates to pivot and align the geometric center of the enemy bounding box
+        dCtx.translate(-(renderMob.x + renderMob.w / 2), -(renderMob.y + renderMob.h / 2));
+        
+        window.drawSingleMob(dCtx, renderMob);
+        dCtx.restore();
+    }
     function getStageTier() {
         let st = playerStats.stage;
         if (st <= 50) return 0;  // Forest (Stages 1 - 50)
@@ -976,7 +1745,8 @@ window.onload = function() {
         runKills: 0,
         runGold: 0,
         runXp: 0,
-        killedBy: "Unknown Foe"
+        killedBy: "Unknown Foe",
+        killedByMob: null
     };
 
     let equippedSlots = { weapon: null, subweapon: null, helmet: null, chest: null, leggings: null, overall: null, boots: null, art1: null, art2: null, art3: null };
@@ -1549,6 +2319,7 @@ window.onload = function() {
                 if (playerStats.runGold === undefined) playerStats.runGold = 0;
                 if (playerStats.runXp === undefined) playerStats.runXp = 0;
                 if (playerStats.killedBy === undefined) playerStats.killedBy = "Unknown Foe";
+                if (playerStats.killedByMob === undefined) playerStats.killedByMob = null;
                 
                 // Safe legacy data migration checks to prevent boot crashes
                 if (!playerStats.level) { 
@@ -3784,7 +4555,11 @@ window.onload = function() {
         document.getElementById('death-stat-kills').innerText = (playerStats.runKills || 0).toLocaleString();
         document.getElementById('death-stat-run-gold').innerText = `+` + (playerStats.runGold || 0).toLocaleString();
         document.getElementById('death-stat-run-xp').innerText = `+` + (playerStats.runXp || 0).toLocaleString();
-        document.getElementById('death-stat-nemesis').innerText = playerStats.killedBy || "Unknown Foe";
+        
+        let nemesisNameEl = document.getElementById('death-stat-nemesis');
+        if (nemesisNameEl) {
+            nemesisNameEl.innerText = playerStats.killedBy || "Unknown Foe";
+        }
         
         // Trigger visual DOM screen shake on the wrapper element
         let container = document.getElementById('game-container');
@@ -3830,6 +4605,7 @@ window.onload = function() {
         playerStats.runGold = 0;
         playerStats.runXp = 0;
         playerStats.killedBy = "Unknown Foe";
+        playerStats.killedByMob = null;
         
         updateUI(); 
         reviveTimer = 90; 
@@ -4387,8 +5163,9 @@ window.onload = function() {
                                 } else {
                                     playerStats.killedBy = mob.isRare ? "Rare Monster" : "Standard Monster";
                                 }
+                                playerStats.killedByMob = JSON.parse(JSON.stringify(mob));
                                 handlePlayerDefeat(); 
-                                return; 
+                                return;
                             }
                         }
                     }
@@ -5048,769 +5825,7 @@ window.onload = function() {
            14. STYLIZED MONSTERS DRAW ROUTINE (CEL-SHADED / TOON STYLED)
            ========================================================================== */
         if (mob) {
-            let t = mob.visualTier;
-            ctx.save();
-            
-            // Thick borders for active hostiles
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = penHero;
-            ctx.lineJoin = "round";
-
-            if (mob.flashTimer > 0) {
-                ctx.fillStyle = "#ffffff";
-            } else {
-                ctx.fillStyle = (mob.type === "boss" || mob.type === "dungeon_boss" || mob.type === "dungeon_miniboss") ? "#34495e" : "#555";
-            }
-
-            if (mob.type === "mob") {
-                if (mob.flashTimer > 0) {
-                    ctx.fillStyle = "#ffffff";
-                } else {
-                    if (t === 0) ctx.fillStyle = mob.isRare ? "#f1c40f" : "#2ecc71"; 
-                    else if (t === 1) ctx.fillStyle = mob.isRare ? "#bdc3c7" : "#7f8c8d"; 
-                    else if (t === 2) ctx.fillStyle = mob.isRare ? "#e67e22" : "#c0392b"; 
-                    else if (t === 3) ctx.fillStyle = mob.isRare ? "#1abc9c" : "#27ae60"; 
-                    else ctx.fillStyle = mob.isRare ? "#9b59b6" : "#34495e"; 
-                }
-
-                if (t === 0) {
-                    let squish = Math.sin(Date.now() / 100) * 3;
-                    ctx.beginPath();
-                    ctx.ellipse(mob.x + mob.w / 2, mob.y + mob.h - 10 + squish / 2, mob.w / 2 + squish, mob.h / 2 - squish, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    if (mob.flashTimer === 0) {
-                        ctx.fillStyle = "#111";
-                        ctx.beginPath(); ctx.arc(mob.x + mob.w / 2 - 4, mob.y + mob.h / 2, 2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                        ctx.beginPath(); ctx.arc(mob.x + mob.w / 2 + 4, mob.y + mob.h / 2, 2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                    }
-                } else if (t === 1) {
-                    let hover = Math.sin(Date.now() / 120) * 2;
-                    let blockColor = mob.flashTimer > 0 ? "#ffffff" : "#4e545c";
-                    let shadowColor = mob.flashTimer > 0 ? "#ffffff" : "#2f353d";
-                    let runeColor = mob.isRare ? "#ff007f" : "#ff3333";
-
-                    // Golem back chest
-                    ctx.fillStyle = shadowColor;
-                    ctx.beginPath();
-                    ctx.roundRect(mob.x + 2, mob.y + 10 + hover, mob.w - 4, mob.h - 10, [6]);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // Golem front chest
-                    ctx.fillStyle = blockColor;
-                    ctx.beginPath();
-                    ctx.roundRect(mob.x + 4, mob.y + 12 + hover, mob.w - 8, mob.h - 14, [4]);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // Golem back head
-                    ctx.fillStyle = shadowColor;
-                    ctx.beginPath(); ctx.rect(mob.x + 6, mob.y + hover, mob.w - 12, 10); ctx.fill(); ctx.stroke();
-                    
-                    // Golem front head
-                    ctx.fillStyle = blockColor;
-                    ctx.beginPath(); ctx.rect(mob.x + 8, mob.y + 2 + hover, mob.w - 16, 8); ctx.fill(); ctx.stroke();
-
-                    if (mob.flashTimer === 0) {
-                        ctx.fillStyle = runeColor;
-                        ctx.shadowBlur = 8;
-                        ctx.shadowColor = runeColor;
-                        
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x + 8, mob.y + 4 + hover);
-                        ctx.lineTo(mob.x + 13, mob.y + 7 + hover);
-                        ctx.lineTo(mob.x + 8, mob.y + 8 + hover);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x + mob.w - 8, mob.y + 4 + hover);
-                        ctx.lineTo(mob.x + mob.w - 13, mob.y + 7 + hover);
-                        ctx.lineTo(mob.x + mob.w - 8, mob.y + 8 + hover);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-                        
-                        ctx.shadowBlur = 0; 
-                    }
-
-                    // Golem shoulders
-                    ctx.fillStyle = shadowColor;
-                    ctx.beginPath(); ctx.rect(mob.x - 4, mob.y + 12 + hover, 5, 8); ctx.fill(); ctx.stroke();
-                    ctx.beginPath(); ctx.rect(mob.x + mob.w - 1, mob.y + 12 + hover, 5, 8); ctx.fill(); ctx.stroke();
-                    
-                    ctx.fillStyle = blockColor;
-                    ctx.beginPath(); ctx.rect(mob.x - 3, mob.y + 13 + hover, 3, 6); ctx.fill(); ctx.stroke();
-                    ctx.beginPath(); ctx.rect(mob.x + mob.w - 2, mob.y + 13 + hover, 3, 6); ctx.fill(); ctx.stroke();
-
-                    if (mob.flashTimer === 0) {
-                        ctx.strokeStyle = "#1b1d22";
-                        ctx.lineWidth = 1.5;
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x + 8, mob.y + 18 + hover);
-                        ctx.lineTo(mob.x + 14, mob.y + 24 + hover);
-                        ctx.moveTo(mob.x + mob.w - 8, mob.y + 16 + hover);
-                        ctx.lineTo(mob.x + mob.w - 12, mob.y + 22 + hover);
-                        ctx.stroke();
-
-                        ctx.fillStyle = runeColor;
-                        ctx.beginPath();
-                        ctx.arc(mob.x + mob.w / 2, mob.y + mob.h / 2 + 4 + hover, 3, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-                    }
-                } else if (t === 2) {
-                    let flicker = Math.sin(Date.now() / 50) * 4;
-                    ctx.beginPath();
-                    ctx.moveTo(mob.x + mob.w / 2, mob.y - flicker);
-                    ctx.quadraticCurveTo(mob.x + mob.w + flicker, mob.y + mob.h / 2, mob.x + mob.w - 5, mob.y + mob.h);
-                    ctx.lineTo(mob.x + 5, mob.y + mob.h);
-                    ctx.quadraticCurveTo(mob.x - flicker, mob.y + mob.h / 2, mob.x + mob.w / 2, mob.y - flicker);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
-                } else if (t === 3) {
-                    ctx.beginPath();
-                    ctx.arc(mob.x + mob.w / 2, mob.y + 10, mob.w / 2, Math.PI, 0);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#f5f5dc";
-                    ctx.beginPath();
-                    ctx.rect(mob.x + mob.w / 2 - 4, mob.y + 10, 8, mob.h - 10);
-                    ctx.fill();
-                    ctx.stroke();
-                } else {
-                    let hover = Math.sin(Date.now() / 150) * 4;
-                    ctx.beginPath();
-                    ctx.ellipse(mob.x + mob.w / 2, mob.y + mob.h / 2 + hover, mob.w / 2, mob.h / 3, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    if (mob.flashTimer === 0) {
-                        ctx.fillStyle = "#ff007f";
-                        ctx.beginPath();
-                        ctx.arc(mob.x + mob.w / 2, mob.y + mob.h / 2 + hover, 4, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-                    }
-                }
-            } 
-            else if (mob.type === "bat") {
-                let wingSpan = Math.sin(Date.now() / 80) * 14;
-                ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#4a154b";
-                
-                // Bat Body
-                ctx.beginPath();
-                ctx.ellipse(mob.x + 12, mob.y + 12, 8, 12, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.stroke();
-                
-                // Bat Ears
-                ctx.beginPath();
-                ctx.moveTo(mob.x + 6, mob.y); ctx.lineTo(mob.x + 9, mob.y + 6); ctx.lineTo(mob.x + 3, mob.y + 6);
-                ctx.moveTo(mob.x + 18, mob.y); ctx.lineTo(mob.x + 15, mob.y + 6); ctx.lineTo(mob.x + 21, mob.y + 6);
-                ctx.fill();
-                ctx.stroke();
-                
-                // Left Wing
-                ctx.beginPath();
-                ctx.moveTo(mob.x + 6, mob.y + 12);
-                ctx.bezierCurveTo(mob.x - 10, mob.y + 12 - wingSpan, mob.x - 20, mob.y + 20, mob.x - 18, mob.y + 26);
-                ctx.bezierCurveTo(mob.x - 10, mob.y + 22, mob.x, mob.y + 16, mob.x + 6, mob.y + 12);
-                ctx.fill();
-                ctx.stroke();
-                
-                // Right Wing
-                ctx.beginPath();
-                ctx.moveTo(mob.x + 18, mob.y + 12);
-                ctx.bezierCurveTo(mob.x + 34, mob.y + 12 - wingSpan, mob.x + 44, mob.y + 20, mob.x + 42, mob.y + 26);
-                ctx.bezierCurveTo(mob.x + 34, mob.y + 22, mob.x + 24, mob.y + 16, mob.x + 18, mob.y + 12);
-                ctx.fill();
-                ctx.stroke();
-
-                if (mob.flashTimer === 0) {
-                    ctx.fillStyle = "#e74c3c";
-                    ctx.beginPath(); ctx.arc(mob.x + 9, mob.y + 10, 1.5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-                    ctx.beginPath(); ctx.arc(mob.x + 15, mob.y + 10, 1.5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-                }
-            } 
-            else if (mob.type === "crawler") {
-                ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#d35400";
-                
-                let segs = 4;
-                let spacing = mob.w / segs;
-                let legCycle = Math.sin(Date.now() / 50) * 4;
-
-                for (let i = 0; i < segs; i++) {
-                    let segX = mob.x + (i * spacing);
-                    ctx.beginPath();
-                    ctx.ellipse(segX + spacing/2, mob.y + 12, spacing * 0.7, 10, 0, 0, Math.PI*2);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = "#2c3e50";
-                    ctx.beginPath();
-                    ctx.moveTo(segX + spacing/2 - 2, mob.y + 4);
-                    ctx.lineTo(segX + spacing/2, mob.y - 2);
-                    ctx.lineTo(segX + spacing/2 + 2, mob.y + 4);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#d35400";
-
-                    ctx.strokeStyle = "#a04000";
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(segX + spacing/2, mob.y + 18);
-                    ctx.lineTo(segX + spacing/2 - 4, mob.y + 24 + (i%2 === 0 ? legCycle : -legCycle));
-                    ctx.moveTo(segX + spacing/2, mob.y + 18);
-                    ctx.lineTo(segX + spacing/2 + 4, mob.y + 24 + (i%2 === 0 ? -legCycle : legCycle));
-                    ctx.stroke();
-                }
-            } 
-            else if (mob.type === "boss" || mob.type === "dungeon_boss") {
-                // Elite Hostiles use thicker ink borders
-                ctx.lineWidth = penBoss;
-
-                if (mob.type === "dungeon_boss") {
-                    let dType = playerStats.currentDungeon || 'gold';
-                    if (dType === 'gold') {
-                        // GOBLIN COIN KING
-                        let hover = Math.sin(Date.now() / 150) * 3;
-                        let baseColor = mob.flashTimer > 0 ? "#ffffff" : "#27ae60";
-                        let goldColor1 = "#f1c40f";
-                        let goldColor2 = "#f39c12";
-
-                        // Shifting Hoard Base
-                        ctx.fillStyle = goldColor2;
-                        ctx.beginPath();
-                        ctx.ellipse(mob.x + mob.w / 2, mob.y + mob.h - 10, mob.w * 0.9, 15, 0, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        ctx.fillStyle = goldColor1;
-                        ctx.beginPath();
-                        ctx.ellipse(mob.x + mob.w / 2 - 5, mob.y + mob.h - 13, mob.w * 0.7, 10, 0, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Hoard Sparkles
-                        ctx.fillStyle = "#fff";
-                        for (let i = 0; i < 5; i++) {
-                            ctx.fillRect(mob.x + 8 + i * 8, mob.y + mob.h - 16 + Math.sin(i) * 3, 2, 2);
-                        }
-
-                        // Squatted Body
-                        ctx.fillStyle = baseColor;
-                        ctx.beginPath();
-                        ctx.ellipse(mob.x + mob.w / 2, mob.y + mob.h - 32 + hover, mob.w * 0.55, 20, 0, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Goblin Face
-                        ctx.beginPath();
-                        ctx.arc(mob.x + mob.w / 2, mob.y + mob.h - 52 + hover, 14, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Pointed Ears
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x + mob.w / 2 - 11, mob.y + mob.h - 54 + hover);
-                        ctx.lineTo(mob.x + mob.w / 2 - 26, mob.y + mob.h - 60 + hover);
-                        ctx.lineTo(mob.x + mob.w / 2 - 11, mob.y + mob.h - 46 + hover);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x + mob.w / 2 + 11, mob.y + mob.h - 54 + hover);
-                        ctx.lineTo(mob.x + mob.w / 2 + 26, mob.y + mob.h - 60 + hover);
-                        ctx.lineTo(mob.x + mob.w / 2 + 11, mob.y + mob.h - 46 + hover);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Goblin Crown
-                        ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#f1c40f";
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x + mob.w / 2 - 10, mob.y + mob.h - 64 + hover);
-                        ctx.lineTo(mob.x + mob.w / 2 - 10, mob.y + mob.h - 73 + hover);
-                        ctx.lineTo(mob.x + mob.w / 2 - 4, mob.y + mob.h - 67 + hover);
-                        ctx.lineTo(mob.x + mob.w / 2, mob.y + mob.h - 75 + hover);
-                        ctx.lineTo(mob.x + mob.w / 2 + 4, mob.y + mob.h - 67 + hover);
-                        ctx.lineTo(mob.x + mob.w / 2 + 10, mob.y + mob.h - 73 + hover);
-                        ctx.lineTo(mob.x + mob.w / 2 + 10, mob.y + mob.h - 64 + hover);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-
-                        if (mob.flashTimer === 0) {
-                            ctx.fillStyle = "#e74c3c";
-                            ctx.beginPath();
-                            ctx.arc(mob.x + mob.w / 2, mob.y + mob.h - 67 + hover, 2, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.stroke();
-                        }
-
-                        // Eyes
-                        if (mob.flashTimer === 0) {
-                            ctx.fillStyle = "#f1c40f";
-                            ctx.beginPath();
-                            ctx.arc(mob.x + mob.w / 2 - 5, mob.y + mob.h - 54 + hover, 1.5, 0, Math.PI * 2);
-                            ctx.arc(mob.x + mob.w / 2 + 5, mob.y + mob.h - 54 + hover, 1.5, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.stroke();
-                        }
-
-                        // Smug Smile
-                        ctx.strokeStyle = "#111";
-                        ctx.lineWidth = 1.5;
-                        ctx.beginPath();
-                        ctx.arc(mob.x + mob.w / 2, mob.y + mob.h - 48 + hover, 5, 0, Math.PI);
-                        ctx.stroke();
-
-                        // Canvas Loot Bag
-                        ctx.fillStyle = "#d35400";
-                        ctx.beginPath();
-                        ctx.arc(mob.x + mob.w / 2 - 15, mob.y + mob.h - 30 + hover, 10, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-                    } else if (dType === 'mat') {
-                        // NOXIOUS SLUDGE ELEMENTAL
-                        let pulse = Math.sin(Date.now() / 100) * 4;
-                        let baseColor = mob.flashTimer > 0 ? "#ffffff" : "rgba(46, 204, 113, 0.85)";
-
-                        // Floor slime puddle
-                        ctx.fillStyle = "rgba(39, 174, 96, 0.6)";
-                        ctx.beginPath();
-                        ctx.ellipse(mob.x + mob.w / 2, mob.y + mob.h - 10, mob.w * 0.7, 10, 0, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // slime body curves
-                        ctx.fillStyle = baseColor;
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x + 5 - pulse / 2, mob.y + mob.h);
-                        ctx.bezierCurveTo(
-                            mob.x - 10 - pulse, mob.y + mob.h - 45, 
-                            mob.x + 5, mob.y + 10 + pulse, 
-                            mob.x + mob.w / 2, mob.y + 10 + pulse
-                        );
-                        ctx.bezierCurveTo(
-                            mob.x + mob.w - 5, mob.y + 10 + pulse, 
-                            mob.x + mob.w + 10 + pulse, mob.y + mob.h - 45, 
-                            mob.x + mob.w - 5 + pulse / 2, mob.y + mob.h
-                        );
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Hazard Purple eyes inside slurry
-                        if (mob.flashTimer === 0) {
-                            ctx.fillStyle = "#9b59b6";
-                            ctx.shadowBlur = 8;
-                            ctx.shadowColor = "#9b59b6";
-                            ctx.beginPath();
-                            ctx.arc(mob.x + mob.w / 2 - 8, mob.y + mob.h / 2 + pulse / 2, 3, 0, Math.PI * 2);
-                            ctx.arc(mob.x + mob.w / 2 + 8, mob.y + mob.h / 2 + pulse / 2, 3, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.stroke();
-                            ctx.shadowBlur = 0;
-                        }
-
-                        // Escape fumes
-                        ctx.fillStyle = "rgba(46, 204, 113, 0.9)";
-                        let bubY = (Date.now() / 15) % 45;
-                        ctx.beginPath();
-                        ctx.arc(mob.x + mob.w / 2 - 10, mob.y + mob.h - bubY, 2.5, 0, Math.PI * 2);
-                        ctx.fill(); ctx.stroke();
-                        ctx.beginPath();
-                        ctx.arc(mob.x + mob.w / 2 + 7, mob.y + mob.h - 8 - ((bubY + 12) % 45), 3, 0, Math.PI * 2);
-                        ctx.fill(); ctx.stroke();
-                    } else if (dType === 'equip') {
-                        // FORGEMASTER COLOSSUS
-                        let bounce = Math.sin(Date.now() / 200) * 3;
-                        let armorColor = mob.flashTimer > 0 ? "#ffffff" : "#34495e";
-                        let jointColor = "#1a252f";
-                        let fireGlow = "#e67e22";
-
-                        // Heavy limbs
-                        ctx.fillStyle = jointColor;
-                        ctx.beginPath(); ctx.rect(mob.x + 8, mob.y + mob.h - 20, 10, 20); ctx.fill(); ctx.stroke();
-                        ctx.beginPath(); ctx.rect(mob.x + mob.w - 18, mob.y + mob.h - 20, 10, 20); ctx.fill(); ctx.stroke();
-                        ctx.fillStyle = armorColor;
-                        ctx.beginPath(); ctx.rect(mob.x + 6, mob.y + mob.h - 10, 14, 10); ctx.fill(); ctx.stroke();
-                        ctx.beginPath(); ctx.rect(mob.x + mob.w - 20, mob.y + mob.h - 10, 14, 10); ctx.fill(); ctx.stroke();
-
-                        // Plate Core Torso
-                        ctx.fillStyle = jointColor;
-                        ctx.beginPath(); ctx.rect(mob.x, mob.y + 22 + bounce, mob.w, mob.h - 40); ctx.fill(); ctx.stroke();
-                        
-                        ctx.fillStyle = armorColor;
-                        ctx.beginPath();
-                        ctx.roundRect(mob.x - 3, mob.y + 18 + bounce, mob.w + 6, mob.h - 45, [5]);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Fire Core Reactor
-                        if (mob.flashTimer === 0) {
-                            let coreRadius = 7 + Math.sin(Date.now() / 80) * 2;
-                            ctx.fillStyle = fireGlow;
-                            ctx.shadowBlur = 10;
-                            ctx.shadowColor = fireGlow;
-                            ctx.beginPath();
-                            ctx.arc(mob.x + mob.w / 2, mob.y + mob.h / 2 - 4 + bounce, coreRadius, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.stroke();
-                            ctx.shadowBlur = 0;
-                        }
-
-                        // Spiked iron shoulders
-                        ctx.fillStyle = armorColor;
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x - 5, mob.y + 20 + bounce);
-                        ctx.lineTo(mob.x - 12, mob.y + 11 + bounce);
-                        ctx.lineTo(mob.x + 2, mob.y + 18 + bounce);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x + mob.w + 5, mob.y + 20 + bounce);
-                        ctx.lineTo(mob.x + mob.w + 12, mob.y + 11 + bounce);
-                        ctx.lineTo(mob.x + mob.w - 2, mob.y + 18 + bounce);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Arm holding colossal hammer
-                        ctx.fillStyle = armorColor;
-                        ctx.beginPath(); ctx.rect(mob.x - 10, mob.y + mob.h / 2 - 5 + bounce, 7, 12); ctx.fill(); ctx.stroke();
-                        ctx.strokeStyle = "#5d6d7e";
-                        ctx.lineWidth = 2.5;
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x - 6, mob.y + 8 + bounce);
-                        ctx.lineTo(mob.x - 6, mob.y + mob.h - 8 + bounce);
-                        ctx.stroke();
-
-                        ctx.fillStyle = "#2c3e50";
-                        ctx.beginPath(); ctx.rect(mob.x - 15, mob.y + 4 + bounce, 18, 9); ctx.fill(); ctx.stroke();
-
-                        // Great-helm
-                        ctx.fillStyle = armorColor;
-                        ctx.beginPath();
-                        ctx.roundRect(mob.x + 9, mob.y + bounce, mob.w - 18, 20, [3]);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Golem horns
-                        ctx.fillStyle = jointColor;
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x + 11, mob.y + 4 + bounce);
-                        ctx.quadraticCurveTo(mob.x + 2, mob.y - 8 + bounce, mob.x + 4, mob.y - 10 + bounce);
-                        ctx.lineTo(mob.x + 14, mob.y + 8 + bounce);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x + mob.w - 11, mob.y + 4 + bounce);
-                        ctx.quadraticCurveTo(mob.x + mob.w - 2, mob.y - 8 + bounce, mob.x + mob.w - 4, mob.y - 10 + bounce);
-                        ctx.lineTo(mob.x + mob.w - 14, mob.y + 8 + bounce);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Fire visor glow
-                        if (mob.flashTimer === 0) {
-                            ctx.fillStyle = fireGlow;
-                            ctx.beginPath(); ctx.rect(mob.x + 12, mob.y + 7 + bounce, mob.w - 24, 2); ctx.fill(); ctx.stroke();
-                        }
-                    }
-                } else {
-                    let currentTier = t !== undefined ? t : getStageTier();
-                    if (currentTier === 0) {
-                        ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#a97026";
-                        for (let i = 0; i < 4; i++) {
-                            let rx = mob.x + mob.w * (0.2 + i * 0.2);
-                            ctx.beginPath();
-                            ctx.arc(rx, mob.y + mob.h, mob.w * 0.15, Math.PI, 0);
-                            ctx.fill();
-                            ctx.stroke();
-                        }
-
-                        ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#dca04c";
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x + mob.w * 0.3, mob.y + mob.h * 0.35); 
-                        ctx.lineTo(mob.x + mob.w * 0.7, mob.y + mob.h * 0.35);
-                        ctx.quadraticCurveTo(mob.x + mob.w * 0.75, mob.y + mob.h * 0.7, mob.x + mob.w * 0.85, mob.y + mob.h); 
-                        ctx.lineTo(mob.x + mob.w * 0.15, mob.y + mob.h);
-                        ctx.quadraticCurveTo(mob.x + mob.w * 0.25, mob.y + mob.h * 0.7, mob.x + mob.w * 0.3, mob.y + mob.h * 0.35); 
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-
-                        ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#a97026";
-                        ctx.beginPath();
-                        ctx.ellipse(mob.x + mob.w * 0.72, mob.y + mob.h * 0.65, mob.w * 0.15, mob.h * 0.08, -Math.PI / 8, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        if (mob.flashTimer === 0) {
-                            ctx.strokeStyle = "#825010";
-                            ctx.lineWidth = 1.5;
-                            ctx.beginPath();
-                            ctx.ellipse(mob.x + mob.w * 0.72, mob.y + mob.h * 0.65, mob.w * 0.08, mob.h * 0.04, -Math.PI / 8, 0, Math.PI * 2);
-                            ctx.stroke();
-                        }
-
-                        ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#dca04c";
-                        ctx.beginPath();
-                        ctx.roundRect(mob.x + mob.w * 0.05, mob.y + mob.h * 0.56, mob.w * 0.45, mob.h * 0.07, [4]);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#a97026"; 
-                        ctx.beginPath();
-                        ctx.roundRect(mob.x + mob.w * 0.05, mob.y + mob.h * 0.61, mob.w * 0.45, mob.h * 0.02, [2]);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        if (mob.flashTimer === 0) {
-                            ctx.fillStyle = "#301a0d"; 
-                            ctx.beginPath();
-                            ctx.ellipse(mob.x + mob.w * 0.42, mob.y + mob.h * 0.5, mob.w * 0.06, mob.h * 0.08, 0, 0, Math.PI * 2);
-                            ctx.ellipse(mob.x + mob.w * 0.58, mob.y + mob.h * 0.5, mob.w * 0.06, mob.h * 0.08, 0, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.stroke();
-                            
-                            ctx.beginPath();
-                            ctx.arc(mob.x + mob.w * 0.5, mob.y + mob.h * 0.68, mob.w * 0.08, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.stroke();
-                        }
-
-                        let cx = mob.x + mob.w / 2;
-                        let cy = mob.y + mob.h * 0.15;
-                        let r = mob.w * 0.8;
-                        
-                        ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#4ba337"; 
-                        ctx.beginPath();
-                        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-                        ctx.arc(cx - r * 0.5, cy - r * 0.1, r * 0.8, 0, Math.PI * 2);
-                        ctx.arc(cx + r * 0.5, cy - r * 0.1, r * 0.8, 0, Math.PI * 2);
-                        ctx.arc(cx, cy - r * 0.6, r * 0.9, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        if (mob.flashTimer === 0) {
-                            ctx.fillStyle = "#69c453"; 
-                            ctx.beginPath();
-                            ctx.arc(cx, cy, r * 0.8, 0, Math.PI * 2);
-                            ctx.arc(cx - r * 0.4, cy - r * 0.1, r * 0.6, 0, Math.PI * 2);
-                            ctx.arc(cx + r * 0.4, cy - r * 0.1, r * 0.6, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.stroke();
-                        }
-
-                        if (mob.flashTimer === 0) {
-                            ctx.fillStyle = "#e74c3c";
-                            if (!mob.appleOffsets) {
-                                mob.appleOffsets = [];
-                                let count = randInt(4, 8); 
-                                for (let i = 0; i < count; i++) {
-                                    let angle = randFloat(0, Math.PI * 2);
-                                    let dist = randFloat(0, r * 0.85); 
-                                    mob.appleOffsets.push({
-                                        dx: Math.cos(angle) * dist,
-                                        dy: Math.sin(angle) * dist - (r * 0.1) 
-                                    });
-                                }
-                            }
-                            mob.appleOffsets.forEach(ap => {
-                                let appleX = cx + ap.dx;
-                                let appleY = cy + ap.dy;
-
-                                ctx.beginPath();
-                                ctx.arc(appleX, appleY, mob.w * 0.12, 0, Math.PI * 2);
-                                ctx.fill();
-                                ctx.stroke();
-                                
-                                ctx.strokeStyle = "#4d2e1a";
-                                ctx.lineWidth = 1.5;
-                                ctx.beginPath();
-                                ctx.moveTo(appleX, appleY - mob.w * 0.1);
-                                ctx.lineTo(appleX - 2, appleY - mob.w * 0.18);
-                                ctx.stroke();
-
-                                ctx.fillStyle = "#ffffff";
-                                ctx.beginPath();
-                                ctx.arc(appleX - mob.w * 0.04, appleY - mob.w * 0.04, mob.w * 0.03, 0, Math.PI * 2);
-                                ctx.fill();
-                                ctx.fillStyle = "#e74c3c";
-                            });
-                        }
-                    } else if (currentTier === 1) {
-                        let bounceOffset = Math.sin(Date.now() / 200) * 3;
-                        let blockColor = mob.flashTimer > 0 ? "#ffffff" : "#3b3f46";
-                        let shadowColor = mob.flashTimer > 0 ? "#ffffff" : "#1f2126";
-                        let lavaColor = "#ff2200";
-
-                        // Golem legs with outlines
-                        ctx.fillStyle = shadowColor;
-                        ctx.beginPath(); ctx.rect(mob.x + 4, mob.y + mob.h - 16, mob.w - 8, 16); ctx.fill(); ctx.stroke();
-                        ctx.fillStyle = blockColor;
-                        ctx.beginPath(); ctx.rect(mob.x + 8, mob.y + mob.h - 14, 12, 14); ctx.fill(); ctx.stroke();
-                        ctx.beginPath(); ctx.rect(mob.x + mob.w - 20, mob.y + mob.h - 14, 12, 14); ctx.fill(); ctx.stroke();
-
-                        // Golem Torso with outlines
-                        ctx.fillStyle = shadowColor;
-                        ctx.beginPath();
-                        ctx.roundRect(mob.x - 2, mob.y + 24 + bounceOffset, mob.w + 4, mob.h - 40, [10]);
-                        ctx.fill();
-                        ctx.stroke();
-                        
-                        ctx.fillStyle = blockColor;
-                        ctx.beginPath();
-                        ctx.roundRect(mob.x, mob.y + 26 + bounceOffset, mob.w, mob.h - 44, [8]);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Golem shoulders with outlines
-                        ctx.fillStyle = "#121316";
-                        ctx.beginPath();
-                        ctx.roundRect(mob.x - 10, mob.y + 20 + bounceOffset, 14, 16, [4]);
-                        ctx.roundRect(mob.x + mob.w - 4, mob.y + 20 + bounceOffset, 14, 16, [4]);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Golem head with outlines
-                        ctx.fillStyle = shadowColor;
-                        ctx.beginPath();
-                        ctx.roundRect(mob.x + 8, mob.y + 4 + bounceOffset, mob.w - 16, 22, [6]);
-                        ctx.fill();
-                        ctx.stroke();
-                        
-                        ctx.fillStyle = blockColor;
-                        ctx.beginPath();
-                        ctx.roundRect(mob.x + 10, mob.y + 6 + bounceOffset, mob.w - 20, 18, [4]);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        if (mob.flashTimer === 0) {
-                            ctx.fillStyle = lavaColor;
-                            ctx.shadowBlur = 15;
-                            ctx.shadowColor = lavaColor;
-
-                            ctx.beginPath();
-                            ctx.moveTo(mob.x + 14, mob.y + 11 + bounceOffset);
-                            ctx.lineTo(mob.x + 22, mob.y + 16 + bounceOffset);
-                            ctx.lineTo(mob.x + 14, mob.y + 18 + bounceOffset);
-                            ctx.closePath();
-                            
-                            ctx.moveTo(mob.x + mob.w - 14, mob.y + 11 + bounceOffset);
-                            ctx.lineTo(mob.x + mob.w - 22, mob.y + 16 + bounceOffset);
-                            ctx.lineTo(mob.x + mob.w - 14, mob.y + 18 + bounceOffset);
-                            ctx.closePath();
-                            ctx.fill();
-                            ctx.stroke();
-                            
-                            ctx.shadowBlur = 0;
-                        }
-
-                        if (mob.flashTimer === 0) {
-                            ctx.strokeStyle = lavaColor;
-                            ctx.shadowBlur = 10;
-                            ctx.shadowColor = lavaColor;
-                            ctx.lineWidth = 2.5;
-
-                            ctx.beginPath();
-                            ctx.moveTo(mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset);
-                            ctx.lineTo(mob.x + 10, mob.y + 35 + bounceOffset);
-                            ctx.moveTo(mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset);
-                            ctx.lineTo(mob.x + mob.w - 10, mob.y + 35 + bounceOffset);
-                            ctx.moveTo(mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset);
-                            ctx.lineTo(mob.x + mob.w/2, mob.y + mob.h - 22 + bounceOffset);
-                            ctx.stroke();
-
-                            let coreGrad = ctx.createRadialGradient(
-                                mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset, 1,
-                                mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset, 8
-                            );
-                            coreGrad.addColorStop(0, "#ffffff");
-                            coreGrad.addColorStop(0.3, "#ff3b30");
-                            coreGrad.addColorStop(1, "rgba(255, 0, 0, 0)");
-                            ctx.fillStyle = coreGrad;
-                            ctx.beginPath();
-                            ctx.arc(mob.x + mob.w/2, mob.y + mob.h/2 + 5 + bounceOffset, 8, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.stroke();
-
-                            ctx.shadowBlur = 0;
-                        }
-                    } else {
-                        ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#1a252f";
-                        
-                        ctx.beginPath();
-                        ctx.roundRect(mob.x, mob.y + 20, mob.w, mob.h - 20, [4, 4, 8, 8]);
-                        ctx.fill();
-                        ctx.stroke();
-                        
-                        ctx.fillStyle = "#34495e";
-                        ctx.beginPath();
-                        ctx.moveTo(mob.x - 6, mob.y + 20); ctx.lineTo(mob.x + 6, mob.y + 10); ctx.lineTo(mob.x + 12, mob.y + 20);
-                        ctx.moveTo(mob.x + mob.w + 6, mob.y + 20); ctx.lineTo(mob.x + mob.w - 6, mob.y + 10); ctx.lineTo(mob.x + mob.w - 12, mob.y + 20);
-                        ctx.fill();
-                        ctx.stroke();
-
-                        ctx.fillStyle = "#2c3e50";
-                        ctx.beginPath();
-                        ctx.arc(mob.x + mob.w/2, mob.y + 10, 16, Math.PI, 0);
-                        ctx.fill();
-                        ctx.stroke();
-                        
-                        ctx.beginPath(); // Horn Left
-                        ctx.moveTo(mob.x + mob.w/2 - 12, mob.y + 2); ctx.quadraticCurveTo(mob.x + mob.w/2 - 20, mob.y - 12, mob.x + mob.w/2 - 16, mob.y - 14); ctx.lineTo(mob.x + mob.w/2 - 8, mob.y + 6);
-                        ctx.fill(); ctx.stroke();
-                        
-                        ctx.beginPath(); // Horn Right
-                        ctx.moveTo(mob.x + mob.w/2 + 12, mob.y + 2); ctx.quadraticCurveTo(mob.x + mob.w/2 + 20, mob.y - 12, mob.x + mob.w/2 + 16, mob.y - 14); ctx.lineTo(mob.x + mob.w/2 + 8, mob.y + 6);
-                        ctx.fill(); ctx.stroke();
-
-                        if (mob.flashTimer === 0) {
-                            let grad = ctx.createRadialGradient(mob.x + mob.w/2, mob.y + 40, 2, mob.x + mob.w/2, mob.y + 40, 12);
-                            grad.addColorStop(0, "#e74c3c");
-                            grad.addColorStop(1, "rgba(231,76,60,0)");
-                            ctx.fillStyle = grad;
-                            ctx.beginPath(); ctx.arc(mob.x + mob.w/2, mob.y + 40, 12, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-                        }
-                    } 
-                } 
-            } 
-            else if (mob.type === "dungeon_miniboss") {
-                let hoverY = Math.sin(Date.now() / 120) * 6;
-                ctx.fillStyle = mob.flashTimer > 0 ? "#ffffff" : "#2c3e50";
-                
-                ctx.beginPath();
-                ctx.moveTo(mob.x + mob.w/2, mob.y + hoverY);
-                ctx.lineTo(mob.x + mob.w, mob.y + mob.h / 2 + hoverY);
-                ctx.lineTo(mob.x + mob.w / 2, mob.y + mob.h + hoverY);
-                ctx.lineTo(mob.x, mob.y + mob.h / 2 + hoverY);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-                
-                if (mob.flashTimer === 0) {
-                    ctx.fillStyle = "#1abc9c";
-                    ctx.beginPath();
-                    ctx.arc(mob.x + mob.w / 2, mob.y + mob.h / 2 + hoverY, 4, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                }
-            }
+            window.drawSingleMob(ctx, mob);
 
             // Floating health bars with neat black borders
             let barW = (mob.type === "boss" || mob.type === "dungeon_boss") ? 50 : mob.w;
@@ -5828,8 +5843,6 @@ window.onload = function() {
             ctx.strokeStyle = "#000000"; 
             ctx.lineWidth = 2; 
             ctx.strokeRect(barX, mob.y - 13, barW, 7);
-            
-            ctx.restore();
         }
 
         // 3. Fairy rendering with clean outlines
@@ -6047,6 +6060,11 @@ window.onload = function() {
             ctx.fillStyle = eff.color; 
             ctx.fillText(eff.text, eff.x, eff.y); 
         });
+
+        // 8. Continuous Nemesis Preview rendering during pause
+        if (isGamePaused && document.getElementById('death-overlay').style.display === "flex") {
+            renderNemesisPreview(playerStats.killedByMob);
+        }
     }
 
 function engineCycle() { 
