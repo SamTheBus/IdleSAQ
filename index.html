@@ -1758,6 +1758,7 @@ window.onload = function() {
     let logsHistory = [];
     let frozenItemDb = {}; 
     let idCounter = 0;
+    let activeStatTooltip = null; // Tracks active attribute matrix tooltip for auto-refresh
     
     let forgeSelectedItem = null;
     let forgeMode = 'temper'; 
@@ -3727,6 +3728,11 @@ window.onload = function() {
     
     window.showStatBreakdown = function(e, statKey, isPct = false) {
         e.stopPropagation(); let tt = document.getElementById('stat-tooltip');
+        
+        let clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        let clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+        activeStatTooltip = { type: 'breakdown', key: statKey, isPct: !!isPct, clientX: clientX, clientY: clientY, target: e.currentTarget || e.target };
+
         let alloc = playerStats.spAllocations;
         
         let map = {
@@ -3806,7 +3812,13 @@ window.onload = function() {
     };
 
     window.showStatHoverTooltip = function(e, statType) {
-        e.stopPropagation(); let tt = document.getElementById('stat-tooltip'); let html = ""; let p = resolvePlayerStats();
+        e.stopPropagation(); let tt = document.getElementById('stat-tooltip');
+        
+        let clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        let clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+        activeStatTooltip = { type: 'hover', key: statType, clientX: clientX, clientY: clientY, target: e.currentTarget || e.target };
+
+        let html = ""; let p = resolvePlayerStats();
         
         if (statType === 'ias') {
             html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;"><div class="tt-title" style="color:#3498db;">⏱️ Idle Attack Speed</div><div style="color:#aaa; font-size:11px;">The number of engine frames between your automatic attacks. (60 frames = 1 second).<br><br><b>Lower is faster!</b><br>Currently hitting automatically every ${(p.idleAttackSpeed/60).toFixed(2)} seconds.</div></div>`;
@@ -3878,6 +3890,7 @@ window.onload = function() {
     window.hideTooltip = function() { 
         document.getElementById('game-tooltip').style.display = "none"; document.getElementById('etc-tooltip').style.display = "none"; 
         document.getElementById('log-item-tooltip').style.display = "none"; document.getElementById('stat-tooltip').style.display = "none";
+        activeStatTooltip = null;
     };
 
     window.equipItem = function(id) {
@@ -4959,7 +4972,30 @@ window.onload = function() {
         
         makeSlotHtml('weapon', 'Weapon'); makeSlotHtml('subweapon', 'Sub-weapon'); makeSlotHtml('helmet', 'Helmet'); makeSlotHtml('chest', 'Chest Armor');
         makeSlotHtml('leggings', 'Leggings'); makeSlotHtml('overall', 'Overall Suit'); makeSlotHtml('boots', 'Boots'); makeSlotHtml('art1', 'Artifact 1'); makeSlotHtml('art2', 'Artifact 2'); makeSlotHtml('art3', 'Artifact 3');
+        
+        // Auto-refresh active attribute breakdown tooltip if currently open
+        if (typeof window.refreshActiveStatTooltip === "function") {
+            window.refreshActiveStatTooltip();
+        }
     }
+
+    window.refreshActiveStatTooltip = function() {
+        if (!activeStatTooltip) return;
+        let mockEvent = {
+            clientX: activeStatTooltip.clientX,
+            clientY: activeStatTooltip.clientY,
+            target: activeStatTooltip.target,
+            currentTarget: activeStatTooltip.target,
+            stopPropagation: function() {}
+        };
+        let cached = activeStatTooltip;
+        activeStatTooltip = null; 
+        if (cached.type === 'breakdown') {
+            window.showStatBreakdown(mockEvent, cached.key, cached.isPct);
+        } else if (cached.type === 'hover') {
+            window.showStatHoverTooltip(mockEvent, cached.key);
+        }
+    };
 
     function renderInventory() {
         let maxBag = checkArtifactTrait("bag_space") ? 50 : 20;
