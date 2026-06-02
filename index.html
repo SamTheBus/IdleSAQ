@@ -277,10 +277,10 @@
         
         #death-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10, 3, 3, 0.88); color: white; display: none;
+            background: rgba(8, 2, 2, 0.92); color: white; display: none;
             justify-content: center; align-items: center;
             z-index: 15000; pointer-events: auto;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(6px);
             border-radius: 8px;
             animation: deathFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
@@ -291,65 +291,82 @@
         }
 
         #death-card {
-            background: linear-gradient(135deg, #1d0707, #080101);
-            border: 2px solid #a32e2e;
-            border-radius: 8px;
-            padding: 24px;
-            width: 90%;
+            background: linear-gradient(135deg, #1f0505, #080000);
+            border: 2px solid #c0392b;
+            border-radius: 10px;
+            padding: 20px;
+            width: 92%;
             max-width: 440px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.95), inset 0 0 25px rgba(163, 46, 46, 0.25);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.95), inset 0 0 30px rgba(192, 57, 43, 0.3);
             text-align: center;
             transform: scale(0.9);
-            animation: deathCardPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+            animation: deathCardPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
         }
 
         @keyframes deathCardPop {
-            0% { transform: scale(0.9); }
-            100% { transform: scale(1); }
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         #death-header {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 900;
             color: #e74c3c;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
-            margin-bottom: 4px;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px rgba(231, 76, 60, 0.6);
+            margin-bottom: 2px;
         }
 
         #death-divider {
             height: 2px;
             background: linear-gradient(90deg, transparent, #e74c3c, transparent);
-            margin: 12px 0;
+            margin: 10px 0;
         }
 
         #death-quote {
             font-style: italic;
             font-size: 11px;
-            color: #bfa6a6;
-            margin-bottom: 20px;
+            color: #dca7a7;
+            margin-bottom: 15px;
+        }
+
+        .death-section-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: #e74c3c;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-align: left;
+            margin: 10px 0 6px 0;
+            border-left: 2px solid #e74c3c;
+            padding-left: 6px;
         }
 
         #death-stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .death-stat-box {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid #5a1919;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #781c1c;
             border-radius: 4px;
-            padding: 10px 4px;
+            padding: 8px 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            transition: border-color 0.2s;
+        }
+        
+        .death-stat-box:hover {
+            border-color: #e74c3c;
         }
 
         .death-stat-label {
-            font-size: 9px;
+            font-size: 8px;
             color: #aaa;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -357,47 +374,69 @@
         }
 
         .death-stat-val {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: bold;
             color: #f1c40f;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
         }
 
         #death-tip-container {
-            background: rgba(192, 57, 43, 0.08);
-            border: 1px solid rgba(192, 57, 43, 0.3);
+            background: rgba(231, 76, 60, 0.05);
+            border: 1px dashed rgba(231, 76, 60, 0.4);
             border-radius: 6px;
-            padding: 12px;
+            padding: 10px 12px;
             font-size: 11px;
             line-height: 1.4;
             color: #ddd;
             text-align: left;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         #death-respawn-btn {
-            background: linear-gradient(135deg, #c0392b, #8e2020);
-            border: 1px solid #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border: 1px solid #f1c40f;
             color: white;
             font-weight: bold;
             font-size: 13px;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
             padding: 12px 24px;
             border-radius: 4px;
             cursor: pointer;
             width: 100%;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
         }
 
         #death-respawn-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.45);
-            border-color: #f1c40f;
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.5);
+            border-color: #ffffff;
+            background: linear-gradient(135deg, #ff4d4d, #e74c3c);
         }
 
         #death-respawn-btn:active {
             transform: translateY(1px);
+        }
+
+        @keyframes screenShake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(0px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(2px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(2px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .shake {
+            animation: screenShake 0.4s ease-out;
         }
         
         .live-drop-cols { display: flex; justify-content: space-between; margin-bottom: 10px; }
@@ -488,18 +527,35 @@
                 <div id="death-divider"></div>
                 <div id="death-quote">"The path to glory is paved with countless falls."</div>
                 
+                <div class="death-section-title">⚔️ Fatal Encounter</div>
                 <div id="death-stats-grid">
                     <div class="death-stat-box">
-                        <span class="death-stat-label">Historic Peak</span>
+                        <span class="death-stat-label">Nemesis</span>
+                        <span class="death-stat-val" id="death-stat-nemesis" style="color: #e74c3c;">Unknown</span>
+                    </div>
+                    <div class="death-stat-box">
+                        <span class="death-stat-label">Peak Stage</span>
                         <span class="death-stat-val" id="death-stat-peak">Stage 1</span>
                     </div>
                     <div class="death-stat-box">
                         <span class="death-stat-label">Retreat Safe</span>
-                        <span class="death-stat-val" id="death-stat-retreat" style="color: #e74c3c;">Stage 1</span>
+                        <span class="death-stat-val" id="death-stat-retreat" style="color: #2ecc71;">Stage 1</span>
+                    </div>
+                </div>
+
+                <div class="death-section-title">📊 Spoils from this Attempt</div>
+                <div id="death-stats-grid">
+                    <div class="death-stat-box">
+                        <span class="death-stat-label">Slain</span>
+                        <span class="death-stat-val" id="death-stat-kills" style="color: #ffffff;">0</span>
                     </div>
                     <div class="death-stat-box">
-                        <span class="death-stat-label">Lifetime Slain</span>
-                        <span class="death-stat-val" id="death-stat-kills">0</span>
+                        <span class="death-stat-label">Run Gold</span>
+                        <span class="death-stat-val" id="death-stat-run-gold" style="color: #f1c40f;">+0</span>
+                    </div>
+                    <div class="death-stat-box">
+                        <span class="death-stat-label">Run XP</span>
+                        <span class="death-stat-val" id="death-stat-run-xp" style="color: #9b59b6;">+0</span>
                     </div>
                 </div>
 
@@ -914,7 +970,13 @@ window.onload = function() {
         shopRefreshTime: 0, shopItems: [],
         
         atkPotionTimer: 0, hpPotionTimer: 0, defPotionTimer: 0, hastePotionTimer: 0,
-        autoSalvageThreshold: -1 // -1 = Disabled, 0 = Common, 1 = Rare, 2 = Magic, 3 = Epic
+        autoSalvageThreshold: -1, // -1 = Disabled, 0 = Common, 1 = Rare, 2 = Magic, 3 = Epic
+        
+        // Run specific metrics for Death Screen summary reports
+        runKills: 0,
+        runGold: 0,
+        runXp: 0,
+        killedBy: "Unknown Foe"
     };
 
     let equippedSlots = { weapon: null, subweapon: null, helmet: null, chest: null, leggings: null, overall: null, boots: null, art1: null, art2: null, art3: null };
@@ -1482,6 +1544,12 @@ window.onload = function() {
                 logsHistory = parsed.logsHistory || logsHistory;
                 frozenItemDb = parsed.frozenItemDb || frozenItemDb;
                 
+                // Initialize run specific parameters if loading legacy save state
+                if (playerStats.runKills === undefined) playerStats.runKills = 0;
+                if (playerStats.runGold === undefined) playerStats.runGold = 0;
+                if (playerStats.runXp === undefined) playerStats.runXp = 0;
+                if (playerStats.killedBy === undefined) playerStats.killedBy = "Unknown Foe";
+                
                 // Safe legacy data migration checks to prevent boot crashes
                 if (!playerStats.level) { 
                     playerStats.level = 1; 
@@ -1557,6 +1625,11 @@ window.onload = function() {
     
     window.gainXp = function(amount, silent = false) {
         playerStats.xp += amount;
+        if (playerStats.runXp !== undefined) {
+            playerStats.runXp += amount;
+        } else {
+            playerStats.runXp = amount;
+        }
         let leveledUp = false;
         while (playerStats.xp >= playerStats.xpReq) {
             playerStats.xp -= playerStats.xpReq;
@@ -2057,6 +2130,11 @@ window.onload = function() {
         if (Math.random() < 0.20) {
             let goldYield = Math.floor((100 + (playerStats.stage * 35)) * p.gold);
             playerStats.coins += goldYield;
+            if (playerStats.runGold !== undefined) {
+                playerStats.runGold += goldYield;
+            } else {
+                playerStats.runGold = goldYield;
+            }
             effects.push({ x: spawnX, y: spawnY - 10, text: `+${goldYield} Gold!`, color: "#f1c40f", life: 80 });
             return;
         }
@@ -3544,6 +3622,11 @@ window.onload = function() {
         
         let coinYield = Math.ceil(baseCoin * p.gold);
         playerStats.coins += coinYield;
+        if (playerStats.runGold !== undefined) {
+            playerStats.runGold += coinYield;
+        } else {
+            playerStats.runGold = coinYield;
+        }
         spawnDeathParticles(mob.x + (mob.w / 2), mob.y + (mob.h / 2), mob.type);
         effects.push({ x: mob.x + 35, y: mob.y + 25, text: "+" + coinYield + "g", color: "#f1c40f", life: 50 });
         
@@ -3599,6 +3682,11 @@ window.onload = function() {
         }
         
         playerStats.totalLifetimeKills++;
+        if (playerStats.runKills !== undefined) {
+            playerStats.runKills++;
+        } else {
+            playerStats.runKills = 1;
+        }
         if (checkArtifactTrait("frenzy")) {
             if (playerStats.frenzyTimer <= 0) {
                 playerStats.frenzyKillCount++;
@@ -3664,8 +3752,18 @@ window.onload = function() {
         // Populate Death Screen Metrics
         document.getElementById('death-stat-peak').innerText = `Stage ${playerStats.maxStage || 1}`;
         document.getElementById('death-stat-retreat').innerText = `Stage ${restartStage}`;
-        document.getElementById('death-stat-kills').innerText = (playerStats.totalLifetimeKills || 0).toLocaleString();
+        document.getElementById('death-stat-kills').innerText = (playerStats.runKills || 0).toLocaleString();
+        document.getElementById('death-stat-run-gold').innerText = `+` + (playerStats.runGold || 0).toLocaleString();
+        document.getElementById('death-stat-run-xp').innerText = `+` + (playerStats.runXp || 0).toLocaleString();
+        document.getElementById('death-stat-nemesis').innerText = playerStats.killedBy || "Unknown Foe";
         
+        // Trigger visual DOM screen shake on the wrapper element
+        let container = document.getElementById('game-container');
+        if (container) {
+            container.classList.add('shake');
+            setTimeout(() => { container.classList.remove('shake'); }, 400);
+        }
+
         // Attribute Audit and Dynamic Advice
         let p = resolvePlayerStats();
         let stage = playerStats.stage;
@@ -3697,6 +3795,13 @@ window.onload = function() {
         document.getElementById('death-overlay').style.display = "none";
         let p = resolvePlayerStats(); 
         playerStats.currentHp = p.maxHp; 
+        
+        // Reset Run Statistics for the next adventure
+        playerStats.runKills = 0;
+        playerStats.runGold = 0;
+        playerStats.runXp = 0;
+        playerStats.killedBy = "Unknown Foe";
+        
         updateUI(); 
         reviveTimer = 90; 
         isGamePaused = false;
@@ -4241,7 +4346,20 @@ window.onload = function() {
                             if (checkArtifactTrait("second_wind") && !playerStats.usedSecondWind) {
                                 playerStats.usedSecondWind = true; playerStats.currentHp = Math.floor(p.maxHp * 0.5);
                                 effects.push({ x: hero.x, y: hero.y - 20, text: "🔥 SECOND WIND!", color: "#e67e22", life: 80 });
-                            } else { handlePlayerDefeat(); return; }
+                            } else { 
+                                // Capture the name of the entity that dealt the killing blow
+                                if (playerStats.isDungeonMode) {
+                                    playerStats.killedBy = mob.type === "dungeon_boss" ? "Dungeon Boss" : (mob.type === "dungeon_miniboss" ? "Dungeon Miniboss" : "Dungeon Minion");
+                                } else if (playerStats.isUberBoss) {
+                                    playerStats.killedBy = "Rift Guardian";
+                                } else if (playerStats.isBossMode) {
+                                    playerStats.killedBy = "Stage Boss";
+                                } else {
+                                    playerStats.killedBy = mob.isRare ? "Rare Monster" : "Standard Monster";
+                                }
+                                handlePlayerDefeat(); 
+                                return; 
+                            }
                         }
                     }
                     updateUI();
