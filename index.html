@@ -5235,6 +5235,7 @@ window.onload = function() {
                         // Prevents the binary "1 damage or instant death" bottleneck at higher stages
                         let effStage = playerStats.isDungeonMode ? Math.max(1, Math.floor((playerStats.maxStage || 1) * 0.85)) : playerStats.stage;
                         let mitigation = p.def / (p.def + 100 + (effStage * 12));
+                        let netDamage = Math.max(1, Math.ceil(mob.damage * (1 - mitigation)));
                         
                         playerStats.currentHp -= netDamage; 
                         effects.push({ x: hero.x, y: hero.y, text: "-" + netDamage, color: "#e74c3c", life: 40 });
