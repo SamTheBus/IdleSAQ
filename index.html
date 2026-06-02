@@ -2848,6 +2848,35 @@ window.onload = function() {
         return equippedSlots[type]; 
     }
 
+    // Performance-safe lookup of item value delta vs equipped target
+    function getComparisonDeltaBadge(item) {
+        if (item.type === "artifact") return "";
+        let eq = getEquippedItemForComparison(item.type);
+        if (!eq) return ` <span style="color:#2ecc71; font-weight:bold; font-size:9px;">[▲ NEW]</span>`;
+        
+        let primaryStat = "atk";
+        if (["chest", "leggings", "helmet", "overall"].includes(item.type)) {
+            primaryStat = "def";
+        } else if (item.type === "boots") {
+            primaryStat = "moveSpeed";
+        } else if (item.type === "subweapon") {
+            primaryStat = item.subType === "shield" ? "def" : "atk";
+        }
+        
+        let val = item[primaryStat] || 0;
+        let eqVal = eq[primaryStat] || 0;
+        let diff = val - eqVal;
+        
+        if (diff > 0.1) {
+            let label = primaryStat === "moveSpeed" ? diff.toFixed(1) : Math.round(diff);
+            return ` <span style="color:#2ecc71; font-weight:bold; font-size:9px;">[▲ +${label}]</span>`;
+        } else if (diff < -0.1) {
+            let label = primaryStat === "moveSpeed" ? Math.abs(diff).toFixed(1) : Math.round(Math.abs(diff));
+            return ` <span style="color:#e74c3c; font-weight:bold; font-size:9px;">[▼ -${label}]</span>`;
+        }
+        return "";
+    }
+
     window.showInventoryTooltip = function(e, itemId) {
         e.stopPropagation(); 
         let item = inventory.EQUIP.find(i => i.id === itemId) || (inventory.ARTIFACT && inventory.ARTIFACT.find(i => i.id === itemId)); 
@@ -4114,9 +4143,10 @@ window.onload = function() {
                 if (item.type === "subweapon" && item.subType) {
                     typeText = `${item.type.toUpperCase()} (${item.subType.toUpperCase()})`;
                 }
+                let comparisonBadge = getComparisonDeltaBadge(item);
                 let details = item.type === "artifact" ? `<span style="font-size:10px;color:#d2b4de;font-weight:bold;">Trait: ${item.desc}</span>` : `<span style="font-size:10px;color:#aaa;">Slot: ${typeText} | <span style="color:${nameColor};font-weight:bold;">${tierStr}</span></span>`;
                 return `<div class="bag-item" onmouseenter="showInventoryTooltip(event, ${item.id})" ontouchstart="showInventoryTooltip(event, ${item.id})" onmouseleave="hideTooltip()">
-                    <div><strong style="color:${nameColor};">${item.name}${temperTag}${lockTag}</strong><br>${details}</div>
+                    <div><strong style="color:${nameColor};">${item.name}${temperTag}${lockTag}</strong>${comparisonBadge}<br>${details}</div>
                     <div style="position:relative; z-index:10; white-space:nowrap;">
                         <button class="btn-action" onclick="equipItem(${item.id})">Equip</button>
                         <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="toggleLock(${item.id})">${lockIcon}</button>
