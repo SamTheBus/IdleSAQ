@@ -420,6 +420,19 @@
                     <button id="sub-tab-etc" class="sub-tab-btn" onclick="switchSubTab('ETC')">ETC Items</button>
                     <button id="sub-tab-use" class="sub-tab-btn" onclick="switchSubTab('USE')">Use Items</button>
                 </div>
+                
+                <!-- Non-blocking Bulk Salvage controls for standard gear -->
+                <div id="bulk-salvage-bar" style="display: flex; gap: 8px; margin-bottom: 8px; background: #151515; padding: 6px; border-radius: 4px; border: 1px dashed #444; align-items: center;">
+                    <span style="font-size: 11px; font-weight: bold; color: #e74c3c; white-space: nowrap;">♻️ BULK SALVAGE:</span>
+                    <select id="bulk-salvage-rarity" style="flex: 1; background: #222; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-size: 11px;">
+                        <option value="0">Common Gear (0★)</option>
+                        <option value="1">Rare & Under (1★)</option>
+                        <option value="2">Magic & Under (2★)</option>
+                        <option value="3">Epic & Under (3★)</option>
+                    </select>
+                    <button class="btn-action un" onclick="triggerBulkSalvage()" style="font-size: 11px; padding: 4px 8px; font-weight: bold;">Deconstruct</button>
+                </div>
+
                 <div id="bag-equip" class="bag-container" onscroll="hideTooltip()" ontouchmove="hideTooltip()"></div>
                 <div id="bag-art" class="bag-container" style="display:none;" onscroll="hideTooltip()" ontouchmove="hideTooltip()"></div>
                 <div id="bag-etc" class="bag-container" style="display:none;" onscroll="hideTooltip()" ontouchmove="hideTooltip()"></div>
@@ -2321,9 +2334,90 @@ window.onload = function() {
         pushLog(`<span style='color:#e74c3c;'>[SALVAGE]</span> Dismantled ${item.name} yielding: ${scrapsGained.join(", ")}`); pushHeaderToast(`♻️ Salvaged: ${scrapsGained.join(", ")}`, "#e74c3c");
         if (forgeSelectedItem && forgeSelectedItem.id === id) { forgeSelectedItem = null; renderForgeTab(); }
         
-        let newMaxHp = resolvePlayerStats().maxHp;
+         let newMaxHp = resolvePlayerStats().maxHp;
         playerStats.currentHp = Math.min(playerStats.currentHp, newMaxHp);
         updateUI(); renderInventory(); window.saveGame();
+    };
+
+    window.triggerBulkSalvage = function() {
+        window.hideTooltip();
+        let raritySelect = document.getElementById('bulk-salvage-rarity');
+        if (!raritySelect) return;
+        let maxStars = parseInt(raritySelect.value, 10);
+        
+        // Scan the equipment sack for eligible unlocked targets matching or below the selected rarity threshold
+        let targetItems = inventory.EQUIP.filter(item => !item.locked && item.statsRolled !== "UNIQUE" && item.statsRolled <= maxStars);
+        if (targetItems.length === 0) {
+            pushHeaderToast("No eligible unlocked items found under this rarity!", "#e74c3c");
+            return;
+        }
+        
+        let label = maxStars === 0 ? "Common Gear (0★)" : getTierName(maxStars) + " & Under";
+        if (!confirm(`Are you sure you want to bulk salvage ${targetItems.length} unlocked items (${label})?`)) return;
+        
+        let bulkScrapsHarvested = {};
+        function incrementScrap(name, amount) {
+            if (!bulkScrapsHarvested[name]) bulkScrapsHarvested[name] = 0;
+            bulkScrapsHarvested[name] += amount;
+            addEtcDrop(name, amount);
+        }
+
+        targetItems.forEach(item => {
+            let rolledTier = item.statsRolled;
+            let scrapName = getScrapYieldName(rolledTier);
+            let yieldAmount = Math.floor(Math.random() * 3) + 1;
+            
+            incrementScrap(scrapName, yieldAmount);
+
+            // Inherit standard cascading scrap recycling down the tier list
+            for (let t = rolledTier - 1; t >= 0; t--) {
+                if (Math.random() < 0.60) {
+                    let lowerYield = Math.floor(Math.random() * 2) + 1;
+                    let lowerName = getScrapYieldName(t);
+                    incrementScrap(lowerName, lowerYield);
+                }
+            }
+
+            // Remove item from active selection if currently placed on forge anvil
+            if (forgeSelectedItem && forgeSelectedItem.id === item.id) {
+                forgeSelectedItem = null;
+            }
+
+            // Safely de-reference from inventory list
+            let idx = inventory.EQUIP.indexOf(item);
+            if (idx !== -1) {
+                inventory.EQUIP.splice(idx, 1);
+            }
+        });
+
+        // Spawn a high-feedback visual particle explosion at center screen
+        for (let i = 0; i < 45; i++) {
+            particles.push({
+                x: canvas.width / 2 + (Math.random() - 0.5) * 120,
+                y: canvas.height / 2 + (Math.random() - 0.5) * 40,
+                vx: (Math.random() - 0.5) * 12,
+                vy: (Math.random() - 0.7) * 9,
+                radius: Math.random() * 3.5 + 1.5,
+                color: Math.random() > 0.5 ? "#7f8c8d" : "#e74c3c",
+                alpha: 1,
+                life: Math.random() * 30 + 15
+            });
+        }
+
+        // Format combined harvest output values into a single tidy entry
+        let outputReport = Object.keys(bulkScrapsHarvested).map(k => `x${bulkScrapsHarvested[k]} ${k}`).join(", ");
+        
+        pushLog(`<span style='color:#e74c3c;'>[BULK SALVAGE]</span> Dismantled ${targetItems.length} items. Harvested: ${outputReport}`);
+        pushHeaderToast(`♻️ Bulk Salvaged ${targetItems.length} Items!`, "#e74c3c");
+
+        // Recalculate and scale player HP dynamically in case attributes changed
+        let newMaxHp = resolvePlayerStats().maxHp;
+        playerStats.currentHp = Math.min(playerStats.currentHp, newMaxHp);
+
+        updateUI(); 
+        renderInventory(); 
+        renderForgeTab(); 
+        window.saveGame();
     };
 
     window.buyGachaCrate = function() {
@@ -3704,7 +3798,7 @@ window.onload = function() {
         }
     }
 
-    window.switchSubTab = function(type) {
+     window.switchSubTab = function(type) {
         window.hideTooltip(); state.currentSubTab = type;
         document.getElementById('sub-tab-eq').className = type === 'EQUIP' ? "sub-tab-btn active" : "sub-tab-btn";
         document.getElementById('sub-tab-art').className = type === 'ART' ? "sub-tab-btn active" : "sub-tab-btn";
@@ -3714,6 +3808,12 @@ window.onload = function() {
         document.getElementById('bag-art').style.display = type === 'ART' ? "block" : "none";
         document.getElementById('bag-etc').style.display = type === 'ETC' ? "block" : "none";
         document.getElementById('bag-use').style.display = type === 'USE' ? "block" : "none";
+        
+        // Only show bulk deconstruction when managing standard equipment
+        let bulkBar = document.getElementById('bulk-salvage-bar');
+        if (bulkBar) {
+            bulkBar.style.display = type === 'EQUIP' ? "flex" : "none";
+        }
     };
 
     // Infinitely randomizes foliage assets on wrap-around to eliminate repeating visual loops
