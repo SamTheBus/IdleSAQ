@@ -5768,25 +5768,94 @@ window.onload = function() {
                 ctx.translate(8, 8 + bounce);
                 ctx.rotate(Math.PI / 4);
                 
-                // Leather hilt handle with outline
-                ctx.fillStyle = "#8a5a36";
-                ctx.beginPath(); ctx.rect(-1.5, 4, 3, 5); ctx.fill(); 
-                ctx.strokeStyle = "#000000"; ctx.lineWidth = penHero - 0.3; ctx.stroke();
-                
-                // Metallic crossguard with outline
-                ctx.fillStyle = "#f1c40f";
-                ctx.beginPath(); ctx.rect(-4, 3, 8, 1.5); ctx.fill(); ctx.stroke();
-                
-                // Silver blade tapering to a point with outline
-                ctx.fillStyle = "#bdc3c7";
+                // 1. Pommel (Glowing Ruby Core in Gold Ring)
+                ctx.fillStyle = "#f1c40f"; // Gold pommel ring
                 ctx.beginPath();
-                ctx.moveTo(-2, 3);
-                ctx.lineTo(2, 3);
-                ctx.lineTo(0, -9);
+                ctx.arc(0, 10, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 1.3;
+                ctx.stroke();
+
+                ctx.fillStyle = "#e74c3c"; // Crimson ruby inset
+                ctx.beginPath();
+                ctx.arc(0, 10, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 2. Leather Wrapped Grip (Contrasting Red/Black bands)
+                ctx.fillStyle = "#1e1e1e"; // Under-wrap base
+                ctx.beginPath(); ctx.rect(-2, 3, 4, 7); ctx.fill(); 
+                ctx.strokeStyle = "#000000"; ctx.lineWidth = 1.5; ctx.stroke();
+
+                ctx.fillStyle = "#962d22"; // Leather wraps
+                ctx.fillRect(-2, 4.5, 4, 1.5);
+                ctx.fillRect(-2, 7.5, 4, 1.5);
+
+                // 3. Ornate Down-Swept Guard with Sapphire Core
+                ctx.fillStyle = "#f1c40f"; // Gold guard
+                ctx.beginPath();
+                ctx.moveTo(-6, 3);
+                ctx.quadraticCurveTo(0, 1, 6, 3);
+                ctx.quadraticCurveTo(0, 4.5, -6, 3);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.fillStyle = "#3498db"; // Glistening Sapphire inset
+                ctx.beginPath();
+                ctx.arc(0, 2.5, 1.3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 4. Sleek Dual-Tone Serrated Razor Blade
+                // Left half: Shadowed Dark Steel with serrated parrying notches
+                ctx.fillStyle = "#5d6d7e";
+                ctx.beginPath();
+                ctx.moveTo(0, 1.5);
+                ctx.lineTo(-3, -1);
+                ctx.lineTo(-1, -4);
+                ctx.lineTo(-4, -5);
+                ctx.lineTo(-1.5, -8);
+                ctx.lineTo(-3.5, -9);
+                ctx.lineTo(0, -15); // Blade tip
+                ctx.lineTo(0, 1.5);
                 ctx.closePath();
                 ctx.fill();
                 ctx.strokeStyle = "#000000"; ctx.lineWidth = penHero; ctx.stroke();
+
+                // Right half: Mirror-polished Razor Edge (Smooth Curve)
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                ctx.moveTo(0, 1.5);
+                ctx.quadraticCurveTo(4, -5, 0, -15); // Tip
+                ctx.lineTo(0, 1.5);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = "#000000"; ctx.lineWidth = penHero; ctx.stroke();
+
+                // 5. Glowing Poison Runic fuller down the middle
+                ctx.fillStyle = "#2ecc71"; // Bright poison green
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = "#2ecc71";
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(-0.8, -4);
+                ctx.lineTo(0, -11);
+                ctx.lineTo(0.8, -4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0; // Always restore shadow blur
+
+                // 6. Localized Poison Vapor Particle (Puffs rising from tip)
+                let mistCycle = (Date.now() / 150) % 6;
+                ctx.fillStyle = "rgba(46, 204, 113, " + (0.55 - (mistCycle / 12)) + ")";
+                ctx.beginPath();
+                ctx.arc(0, -16 - mistCycle, 1.2 + (mistCycle / 3), 0, Math.PI * 2);
+                ctx.fill();
+
                 ctx.restore();
+            }
             } else if (subType === "tome") {
                 ctx.save();
                 let tomeFloat = Math.sin(Date.now() / 200) * 5;
