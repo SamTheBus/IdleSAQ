@@ -654,11 +654,13 @@ window.onload = function() {
     const flowerColors = ["#e74c3c", "#9b59b6", "#f1c40f", "#3498db", "#e67e22", "#e84393"];
     
     const MYSTICAL_STOCK = [
-        { name: "SP Reset Scroll", cost: 2500, color: "#9b59b6", desc: "Refunds all spent Skill Points from the Attribute Matrix." },
-        { name: "Attack Elixir", cost: 500, color: "#2ecc71", desc: "Increases your Attack power by 10% temporarily." },
-        { name: "Vitality Elixir", cost: 500, color: "#e74c3c", desc: "Increases your Max HP by 10% temporarily." },
-        { name: "Armored Elixir", cost: 500, color: "#3498db", desc: "Increases your Defense by 10% temporarily." },
-        { name: "Haste Elixir", cost: 500, color: "#f1c40f", desc: "Increases your Attack and Move Speed temporarily." }
+        { name: "SP Reset Scroll", cost: 2500, currency: "Gold", color: "#9b59b6", desc: "Refunds all spent Skill Points from the Attribute Matrix." },
+        { name: "Attack Elixir", cost: 500, currency: "Gold", color: "#2ecc71", desc: "Increases your Attack power by 10% temporarily." },
+        { name: "Vitality Elixir", cost: 500, currency: "Gold", color: "#e74c3c", desc: "Increases your Max HP by 10% temporarily." },
+        { name: "Armored Elixir", cost: 500, currency: "Gold", color: "#3498db", desc: "Increases your Defense by 10% temporarily." },
+        { name: "Haste Elixir", cost: 500, currency: "Gold", color: "#f1c40f", desc: "Increases your Attack and Move Speed temporarily." },
+        { name: "Gacha Key", cost: 5, currency: "Luminous Soul", color: "#f1c40f", desc: "Exchange 5 rare Luminous Souls for 1 Gacha Key." },
+        { name: "Astral Essence", cost: 10, currency: "Luminous Soul", color: "#9b59b6", desc: "Exchange 10 rare Luminous Souls for 1 Astral Essence." }
     ];
 
     /* ==========================================================================
@@ -1659,11 +1661,22 @@ window.onload = function() {
         let el = document.getElementById('mystical-shop-list');
         if (!el) return;
         el.innerHTML = MYSTICAL_STOCK.map((item, index) => {
-            let costColor = playerStats.coins >= item.cost ? "#f1c40f" : "#e74c3c";
+            let hasAltCurrency = (item.currency === "Luminous Soul");
+            let costColor = "#e74c3c";
+            let currencyLabel = "Gold";
+            
+            if (hasAltCurrency) {
+                let owned = inventory.ETC["Luminous Soul"] || 0;
+                costColor = owned >= item.cost ? "#ffb6c1" : "#e74c3c";
+                currencyLabel = "Souls";
+            } else {
+                costColor = playerStats.coins >= item.cost ? "#f1c40f" : "#e74c3c";
+            }
+            
             return `<div class="shop-row" style="border-color: ${item.color}; background: rgba(155, 89, 182, 0.05); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 8px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <strong style="color:${item.color}; font-size:12px;">${item.name}</strong>
-                    <span style="color:${costColor}; font-weight:bold; font-size:11px;">${item.cost} Gold</span>
+                    <span style="color:${costColor}; font-weight:bold; font-size:11px;">${item.cost} ${currencyLabel}</span>
                 </div>
                 <div style="font-size:10px; color:#aaa; margin-bottom:6px;">${item.desc}</div>
                 <button class="btn-action" style="background:#9b59b6; color:#fff;" onclick="buyMysticalItem(${index})">Purchase</button>
@@ -1673,14 +1686,30 @@ window.onload = function() {
 
     window.buyMysticalItem = function(index) {
         let item = MYSTICAL_STOCK[index];
-        if (playerStats.coins < item.cost) { pushHeaderToast("Not enough Gold!", "#e74c3c"); return; }
         
-        playerStats.coins -= item.cost;
-        if (!inventory.USE[item.name]) inventory.USE[item.name] = 0;
-        inventory.USE[item.name]++;
+        // Handle currency validation and deduction
+        if (item.currency === "Luminous Soul") {
+            let owned = inventory.ETC["Luminous Soul"] || 0;
+            if (owned < item.cost) { pushHeaderToast("Not enough Luminous Souls!", "#e74c3c"); return; }
+            inventory.ETC["Luminous Soul"] -= item.cost;
+            if (inventory.ETC["Luminous Soul"] === 0) delete inventory.ETC["Luminous Soul"];
+        } else {
+            // Gold validation and deduction
+            if (playerStats.coins < item.cost) { pushHeaderToast("Not enough Gold!", "#e74c3c"); return; }
+            playerStats.coins -= item.cost;
+        }
         
-        pushLog(`<strong style='color:#9b59b6;'>[ALCHEMY]</strong> Purchased: <span style='color:${item.color};'>${item.name}</span>`);
-        pushHeaderToast(`Purchased ${item.name}! Check Use Sack.`, "#9b59b6");
+        // Direct items into their proper bag categories
+        if (item.name === "Gacha Key" || item.name === "Astral Essence") {
+            addEtcDrop(item.name, 1);
+            pushHeaderToast(`Exchanged for 1 ${item.name}!`, "#2ecc71");
+        } else {
+            if (!inventory.USE[item.name]) inventory.USE[item.name] = 0;
+            inventory.USE[item.name]++;
+            pushHeaderToast(`Purchased ${item.name}! Check Use Sack.`, item.color);
+        }
+        
+        pushLog(`<strong style='color:#9b59b6;'>[ALCHEMY]</strong> Acquired: <span style='color:${item.color};'>${item.name}</span>`);
         
         updateUI(); renderInventory(); renderMysticalShop(); window.saveGame();
     };
@@ -3478,6 +3507,9 @@ window.onload = function() {
         // Ensure cumulative damage values clear on player defeat
         effects = effects.filter(e => !e.isCumulative);
         isGamePaused = true; playerStats.isBossMode = false; playerStats.isFarmingLoop = false; playerStats.isUberBoss = false; playerStats.isDungeonMode = false;
+        
+        // Reset phoenix second wind flag upon run defeat to allow reuse on subsequent attempts
+        playerStats.usedSecondWind = false;
         
         // Rogue-lite restart stage (70% of maximum reached stage, floor minimum 1)
         let restartStage = Math.max(1, Math.floor((playerStats.maxStage || 1) * 0.70));
