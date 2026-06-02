@@ -5034,6 +5034,7 @@ window.onload = function() {
 
     function update() {
         let now = Date.now();
+        let gapMs = now - lastUpdateTime;
         
         // Prevent progression exploits while on the DEFEATED screen
         if (isGamePaused) {
@@ -5140,7 +5141,7 @@ window.onload = function() {
             }
         }
 
-        let p = resolvePlayerStats(); 
+        p = resolvePlayerStats(); 
         let scrollSpeed = 2 + (p.moveSpeed * 0.05);
 
         if (hero.attackTimer > 0) hero.attackTimer--; hero.slashFrame = (hero.attackTimer > 0 && hero.attackTimer < (p.activeAttackSpeed/2));
