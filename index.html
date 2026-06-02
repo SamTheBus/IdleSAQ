@@ -570,7 +570,10 @@
 
         <div id="control-bar">
             <div style="color: #aaa;">Spacebar or Click Canvas to Slash!</div>
-            <button id="toggle-auto" class="btn-toggle active" onclick="toggleAuto()">Auto: ON</button>
+            <div style="display: flex; gap: 8px;">
+                <button id="btn-pause" class="btn-toggle" onclick="togglePause()" style="background: #34495e;">▶️ Pause</button>
+                <button id="toggle-auto" class="btn-toggle active" onclick="toggleAuto()">Auto: ON</button>
+            </div>
         </div>
 
         <div class="stats-hud">
@@ -2284,7 +2287,7 @@ window.onload = function() {
             modal.style.animation = "toastFadeOut 0.25s ease-in forwards";
             setTimeout(() => {
                 modal.remove();
-                isGamePaused = false; // RESUME GAME PLAY!
+                window.setPauseState(false); // RESUME GAME PLAY!
                 updateUI();
                 renderInventory();
             }, 230);
@@ -2841,6 +2844,31 @@ window.onload = function() {
         
         pushLog(`<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON] Descended into the ${dNames[type]}!</span>`);
         document.getElementById('dungeon-menu').style.display = 'none'; updateUI(); window.saveGame();
+    };
+
+    window.setPauseState = function(paused) {
+        isGamePaused = paused;
+        let btn = document.getElementById('btn-pause');
+        if (btn) {
+            if (isGamePaused) {
+                btn.innerText = "⏸️ PAUSED";
+                btn.classList.add('active');
+                btn.style.background = "#e74c3c";
+            } else {
+                btn.innerText = "▶️ Pause";
+                btn.classList.remove('active');
+                btn.style.background = "#34495e";
+            }
+        }
+    };
+
+    window.togglePause = function() {
+        // Prevent manual toggles if already locked by the Defeated overlay or Offline Gains window
+        if (document.getElementById('death-overlay').style.display === "flex" || document.getElementById('offline-summary-modal')) {
+            return;
+        }
+        window.setPauseState(!isGamePaused);
+        pushHeaderToast(isGamePaused ? "⏸️ Game Paused!" : "▶️ Game Resumed!", isGamePaused ? "#e74c3c" : "#2ecc71");
     };
 
     window.toggleAuto = function() {
@@ -4625,7 +4653,7 @@ window.onload = function() {
         
         updateUI(); 
         reviveTimer = 90; // Triggers the overhauled visual revive cascade
-        isGamePaused = false;
+        window.setPauseState(false);
     };
 
     window.rechallengeBoss = function() { playerStats.isBossMode = true; playerStats.isFarmingLoop = false; mob = null; updateUI(); };
