@@ -3276,9 +3276,16 @@ window.onload = function() {
     function pushHeaderToast(text, color) { pushToast("", null, color, false, 0, text); }
 
     function processEnemySpawn() {
-        // Scale dungeon entities based on the player's highest historic stage peak to prevent low-level farming bottlenecks
-        // Optimized from 1.15 to 1.11 to maintain a sustainable combat curve alongside linear gear scaling
-        let scale = Math.pow(1.11, playerStats.isDungeonMode ? (playerStats.maxStage || 1) : playerStats.stage);
+        // Scale dungeon entities based on a softened curve of the player's highest historic stage peak.
+        // Instead of raw maxStage at 1.11 base (which scales too aggressively), dungeons use a gentler 1.065 base
+        // applied to 85% of the player's max stage to keep dungeons challenging but highly possible.
+        let scale;
+        if (playerStats.isDungeonMode) {
+            let effectiveDungeonStage = Math.max(1, Math.floor((playerStats.maxStage || 1) * 0.85));
+            scale = Math.pow(1.065, effectiveDungeonStage);
+        } else {
+            scale = Math.pow(1.11, playerStats.stage);
+        }
         if (playerStats.isDungeonMode) {
             let hpScale = playerStats.currentDungeon === 'gold' ? 1.5 : 1; 
             
@@ -5220,9 +5227,8 @@ window.onload = function() {
                     else {
                         // Smooth Diminishing Returns Mitigation Formula:
                         // Prevents the binary "1 damage or instant death" bottleneck at higher stages
-                        let effStage = playerStats.isDungeonMode ? (playerStats.maxStage || 1) : playerStats.stage;
+                        let effStage = playerStats.isDungeonMode ? Math.max(1, Math.floor((playerStats.maxStage || 1) * 0.85)) : playerStats.stage;
                         let mitigation = p.def / (p.def + 100 + (effStage * 12));
-                        let netDamage = Math.max(1, Math.ceil(mob.damage * (1 - mitigation)));
                         
                         playerStats.currentHp -= netDamage; 
                         effects.push({ x: hero.x, y: hero.y, text: "-" + netDamage, color: "#e74c3c", life: 40 });
