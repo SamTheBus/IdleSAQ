@@ -868,137 +868,262 @@ window.onload = function() {
      * Returns the exact amount of consumed milliseconds to preserve fractional remainder time.
      */
     function applyOfflineGains(offlineMs) {
-        if (offlineMs <= 60000) return 0; // Return 0 milliseconds consumed if under 1 minute
+        if (offlineMs <= 60000) return 0; // Return 0 if away for less than 1 minute
         
         let offlineSeconds = Math.floor(offlineMs / 1000);
-        if (offlineSeconds > 28800) offlineSeconds = 28800; // Safeguard fallback
+        if (offlineSeconds > 28800) offlineSeconds = 28800; // 8-hour progress limit cap
         
-        let p = resolvePlayerStats();
-        let timePerKill = 60; // 1 kill simulated per minute
-        let simulatedKills = Math.floor(offlineSeconds / timePerKill);
+        // Freeze real-time execution while the reward presentation modal is displayed
+        isGamePaused = true;
         
-        if (simulatedKills > 0) {
-            let baseCoin = Math.floor(1 + (playerStats.stage * 0.5));
-            let goldEarned = Math.floor(simulatedKills * baseCoin * p.gold);
+        let currentStage = playerStats.stage;
+        let originalStage = currentStage;
+        let remainingSeconds = offlineSeconds;
+        let elapsedSeconds = 0;
+        
+        let totalGold = 0;
+        let totalXp = 0;
+        let totalKills = 0;
+        let totalKeys = 0;
+        let stagesGained = 0;
+        let diedOffline = false;
+        let deathStage = 0;
+        
+        let itemsDropped = [];
+        let scrapsGainedMap = {};
+        
+        function recordScrapGained(name, amount) {
+            if (!scrapsGainedMap[name]) scrapsGainedMap[name] = 0;
+            scrapsGainedMap[name] += amount;
+            addEtcDrop(name, amount);
+        }
+
+        let maxBag = checkArtifactTrait("bag_space") ? 50 : 20;
+        let initialEquipIds = new Set(inventory.EQUIP.map(item => item.id));
+        let initialArtifactIds = new Set(inventory.ARTIFACT.map(item => item.id));
+        let equipTypesList = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
+
+        // Snapshot original active buff states to simulate accurate temporal decay
+        let originalBuffs = {
+            atk: playerStats.atkPotionTimer,
+            hp: playerStats.hpPotionTimer,
+            def: playerStats.defPotionTimer,
+            haste: playerStats.hastePotionTimer,
+            frenzy: playerStats.frenzyTimer,
+            adrenaline: playerStats.adrenalineTimer
+        };
+
+        // Non-blocking stage cap limits to prevent run-time computation overload
+        let maxStagesToAdvance = 100;
+        let stagesAdvancedCount = 0;
+
+        while (remainingSeconds > 0) {
+            // Decrement active buff states dynamically based on the current step timeline (60 frames per second)
+            let elapsedFrames = elapsedSeconds * 60;
+            playerStats.atkPotionTimer = Math.max(0, originalBuffs.atk - elapsedFrames);
+            playerStats.hpPotionTimer = Math.max(0, originalBuffs.hp - elapsedFrames);
+            playerStats.defPotionTimer = Math.max(0, originalBuffs.def - elapsedFrames);
+            playerStats.hastePotionTimer = Math.max(0, originalBuffs.haste - elapsedFrames);
+            playerStats.frenzyTimer = Math.max(0, originalBuffs.frenzy - elapsedFrames);
+            playerStats.adrenalineTimer = Math.max(0, originalBuffs.adrenaline - elapsedFrames);
+
+            // Re-resolve state parameters to factor in dynamic buff decay
+            let p = resolvePlayerStats();
+            let effMultiplier = 1 + (p.critChance * (p.critDamage - 1));
+            let playerDps = Math.max(1, p.atk * effMultiplier * (60 / p.idleAttackSpeed));
+
+            let scale = Math.pow(1.11, currentStage);
+            let mobHp = 12 * scale;
+            let bossHp = 45 * scale;
             
-            let dropsEarned = 0; 
-            let gachaKeyDrop = 0; 
-            let totalXpEarned = 0;
+            // Average blended HP profiles (5 mobs + 1 Boss)
+            let blendedMobHp = (1 - p.rareSpawn) * mobHp + p.rareSpawn * (2.5 * mobHp);
+            let avgHp = (5 * blendedMobHp + bossHp) / 6;
             
-            for (let i = 0; i < simulatedKills; i++) {
-                let isRare = Math.random() < p.rareSpawn;
-                let xpYield = isRare ? (playerStats.stage * 30) : (playerStats.stage * 10);
-                totalXpEarned += xpYield;
+            // TTK Calculations
+            let ttk = avgHp / playerDps;
+            let cycleTime = ttk + 2.0; // Dynamic combat time + travel buffer
+            cycleTime = Math.max(0.5, Math.min(300, cycleTime)); // Performance limits
+
+            // Progressive Survival Audit
+            let mobDmg = (1 + scale) * 4.5;
+            let mitigation = p.def / (p.def + 100 + (currentStage * 12));
+            let netMobDmg = Math.max(1, Math.ceil(mobDmg * (1 - mitigation)));
+            
+            let hitsTaken = Math.floor(ttk / 2);
+            let totalDmgTaken = hitsTaken * netMobDmg;
+            
+            let vampHeal = 0;
+            if (checkArtifactTrait("vampirism")) {
+                vampHeal = Math.floor((playerDps * ttk) * 0.10);
+            }
+            
+            let netDmgTaken = totalDmgTaken - vampHeal;
+            
+            // Retreat trigger if the wall can't be cleared safely
+            if (netDmgTaken > p.maxHp && !checkArtifactTrait("second_wind")) {
+                diedOffline = true;
+                deathStage = currentStage;
+                currentStage = Math.max(1, Math.floor(currentStage * 0.70)); // Retreat stage
+                stagesAdvancedCount = maxStagesToAdvance; // Lock further stage progression
+            }
+
+            let killsNeededForStage = 5 - playerStats.killCount; 
+            let timeNeededForStage = (killsNeededForStage + 1) * cycleTime; // Standard kills + boss fight
+            
+            if (timeNeededForStage <= remainingSeconds && stagesAdvancedCount < maxStagesToAdvance && !diedOffline && !playerStats.isFarmingLoop) {
+                // Progressively clear this stage
+                remainingSeconds -= timeNeededForStage;
+                elapsedSeconds += timeNeededForStage;
+                totalKills += (killsNeededForStage + 1);
                 
-                let dropR = isRare ? 0.15 : 0.045;
-                if (Math.random() < (dropR * p.drop * state.efficiency)) dropsEarned++;
-                if (Math.random() < 0.005) gachaKeyDrop++; 
+                // Normal monster farming rewards
+                for (let k = 0; k < killsNeededForStage; k++) {
+                    let isRare = Math.random() < p.rareSpawn;
+                    let baseGold = isRare ? Math.floor(1 + Math.pow(1.06, currentStage) * 2) : Math.floor(1 + Math.pow(1.06, currentStage) * 0.5);
+                    totalGold += Math.ceil(baseGold * p.gold);
+                    totalXp += isRare ? (currentStage * 30) : (currentStage * 10);
+                    
+                    let dropR = isRare ? 0.15 : 0.045;
+                    if (Math.random() < (dropR * p.drop * state.efficiency)) {
+                        rollOfflineItem(false, currentStage, isRare);
+                    }
+                    if (Math.random() < 0.005) {
+                        addEtcDrop("Gacha Key", 1);
+                        recordScrapGained("Gacha Key", 1);
+                    }
+                }
+                
+                // Boss clearance rewards
+                let baseBossGold = Math.floor(10 * Math.pow(1.06, currentStage));
+                totalGold += Math.ceil(baseBossGold * p.gold);
+                totalXp += currentStage * 50;
+                
+                if (Math.random() < (0.25 * p.drop * state.efficiency)) {
+                    rollOfflineItem(true, currentStage, false);
+                }
+                if (Math.random() < 0.40) recordScrapGained("Ancient Core", 1);
+                if (Math.random() < 0.10) recordScrapGained("Eridium Shard", 1);
+                
+                currentStage++;
+                stagesGained++;
+                stagesAdvancedCount++;
+                playerStats.killCount = 0;
+            } else {
+                // Simulating partial kills on the final stalled stage
+                let partialKills = Math.floor(remainingSeconds / cycleTime);
+                if (partialKills > 0) {
+                    totalKills += partialKills;
+                    let elapsedForKills = partialKills * cycleTime;
+                    elapsedSeconds += elapsedForKills;
+                    remainingSeconds -= elapsedForKills;
+                    
+                    for (let k = 0; k < partialKills; k++) {
+                        let isRare = Math.random() < p.rareSpawn;
+                        let baseGold = isRare ? Math.floor(1 + Math.pow(1.06, currentStage) * 2) : Math.floor(1 + Math.pow(1.06, currentStage) * 0.5);
+                        totalGold += Math.ceil(baseGold * p.gold);
+                        totalXp += isRare ? (currentStage * 30) : (currentStage * 10);
+                        
+                        let dropR = isRare ? 0.15 : 0.045;
+                        if (Math.random() < (dropR * p.drop * state.efficiency)) {
+                            rollOfflineItem(false, currentStage, isRare);
+                        }
+                        if (Math.random() < 0.005) {
+                            addEtcDrop("Gacha Key", 1);
+                            recordScrapGained("Gacha Key", 1);
+                        }
+                    }
+                }
+                remainingSeconds = 0;
             }
+        }
+        
+        // Write back post-decay buff values
+        let totalElapsedFrames = offlineSeconds * 60;
+        playerStats.atkPotionTimer = Math.max(0, originalBuffs.atk - totalElapsedFrames);
+        playerStats.hpPotionTimer = Math.max(0, originalBuffs.hp - totalElapsedFrames);
+        playerStats.defPotionTimer = Math.max(0, originalBuffs.def - totalElapsedFrames);
+        playerStats.hastePotionTimer = Math.max(0, originalBuffs.haste - totalElapsedFrames);
+        playerStats.frenzyTimer = Math.max(0, originalBuffs.frenzy - totalElapsedFrames);
+        playerStats.adrenalineTimer = Math.max(0, originalBuffs.adrenaline - totalElapsedFrames);
+
+        // Procedurally roll drops offline and apply comparison/salvage logic
+        function rollOfflineItem(isBossKill, stageNum, isRareMob) {
+            let pCurrent = resolvePlayerStats(); // Resolve using active temporal multipliers for this step
+            let artifactChance = 0.05;
+            let allowArtifact = isBossKill && (Math.random() < artifactChance);
+            let chosenType = allowArtifact ? "artifact" : equipTypesList[Math.floor(Math.random() * equipTypesList.length)];
             
-            playerStats.coins += goldEarned;
-            gainXp(totalXpEarned, true);
-            if (gachaKeyDrop > 0) addEtcDrop("Gacha Key", gachaKeyDrop);
-            
-            let actualItems = 0; 
-            let actualArtifacts = 0;
-            let scrapsGainedMap = {}; 
-            let maxBag = checkArtifactTrait("bag_space") ? 50 : 20;
+            let statLinesCount = 0;
+            let luckMultiplier = pCurrent.qly;
+            let rollVal = Math.random() * 100;
 
-            function recordScrapGained(name, amount) {
-                if (!scrapsGainedMap[name]) scrapsGainedMap[name] = 0;
-                scrapsGainedMap[name] += amount;
-                addEtcDrop(name, amount);
-            }
+            if (rollVal < (0.02 * luckMultiplier)) statLinesCount = 5;
+            else if (rollVal < (0.18 * luckMultiplier)) statLinesCount = 4;
+            else if (rollVal < (0.80 * luckMultiplier)) statLinesCount = 3;
+            else if (rollVal < (4.00 * luckMultiplier)) statLinesCount = 2;
+            else if (rollVal < (15.00 * luckMultiplier)) statLinesCount = 1;
 
-            // Snapshot existing items at the beginning of offline calculation to protect them from auto-salvaging
-            let initialEquipIds = new Set(inventory.EQUIP.map(item => item.id));
-            let initialArtifactIds = new Set(inventory.ARTIFACT.map(item => item.id));
-            let equipTypesList = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
+            let stageScale = Math.floor((stageNum - 1) / 10) + 1;
+            let newItem = createItemObject(chosenType, statLinesCount, stageScale, 0);
 
-            for (let i = 0; i < dropsEarned; i++) {
-                let isRareMob = Math.random() < p.rareSpawn;
-                let artifactChance = playerStats.isUberBoss ? 0.30 : 0.05;
-                let isBossKill = false;
-                let allowArtifact = isBossKill && (Math.random() < artifactChance);
-
-                let chosenType = allowArtifact ? "artifact" : equipTypesList[Math.floor(Math.random() * equipTypesList.length)];
-                let statLinesCount = 0;
-                let luckMultiplier = p.qly;
-                let rollVal = Math.random() * 100;
-
-                if (rollVal < (0.02 * luckMultiplier)) statLinesCount = 5;
-                else if (rollVal < (0.18 * luckMultiplier)) statLinesCount = 4;
-                else if (rollVal < (0.80 * luckMultiplier)) statLinesCount = 3;
-                else if (rollVal < (4.00 * luckMultiplier)) statLinesCount = 2;
-                else if (rollVal < (15.00 * luckMultiplier)) statLinesCount = 1;
-                else statLinesCount = 0;
-
-                let stageScale = Math.floor((playerStats.stage - 1) / 10) + 1;
-                let newItem = createItemObject(chosenType, statLinesCount, stageScale, 0);
-
-                if (newItem.type === "artifact") {
-                    if (inventory.ARTIFACT.length < maxBag) {
-                        inventory.ARTIFACT.push(newItem);
-                        actualArtifacts++;
-                    } else {
-                        // Artifact Sack is full. Look only at candidates dropped during this session that are unlocked.
-                        let newlyAddedArts = inventory.ARTIFACT.filter(item => !initialArtifactIds.has(item.id) && !item.locked);
-                        if (newlyAddedArts.length > 0) {
-                            // Unique artifacts are sorted by level
-                            newlyAddedArts.sort((a, b) => a.stageLevel - b.stageLevel);
-                            let worstArt = newlyAddedArts[0];
-                            if (newItem.stageLevel > worstArt.stageLevel) {
-                                recordScrapGained("Astral Essence", Math.floor(Math.random() * 2) + 1);
-                                let wIndex = inventory.ARTIFACT.findIndex(item => item.id === worstArt.id);
-                                if (wIndex !== -1) inventory.ARTIFACT.splice(wIndex, 1);
-                                inventory.ARTIFACT.push(newItem);
-                            } else {
-                                recordScrapGained("Astral Essence", Math.floor(Math.random() * 2) + 1);
-                            }
+            if (newItem.type === "artifact") {
+                if (inventory.ARTIFACT.length < maxBag) {
+                    inventory.ARTIFACT.push(newItem);
+                    itemsDropped.push(newItem);
+                } else {
+                    // Unique comparative salvage
+                    let newlyAddedArts = inventory.ARTIFACT.filter(item => !initialArtifactIds.has(item.id) && !item.locked);
+                    if (newlyAddedArts.length > 0) {
+                        newlyAddedArts.sort((a, b) => a.stageLevel - b.stageLevel);
+                        let worstArt = newlyAddedArts[0];
+                        if (newItem.stageLevel > worstArt.stageLevel) {
+                            recordScrapGained("Astral Essence", Math.floor(Math.random() * 2) + 1);
+                            let wIndex = inventory.ARTIFACT.findIndex(item => item.id === worstArt.id);
+                            if (wIndex !== -1) inventory.ARTIFACT.splice(wIndex, 1);
+                            inventory.ARTIFACT.push(newItem);
+                            itemsDropped.push(newItem);
+                            
+                            let droppedIdx = itemsDropped.findIndex(x => x.id === worstArt.id);
+                            if (droppedIdx !== -1) itemsDropped.splice(droppedIdx, 1);
                         } else {
                             recordScrapGained("Astral Essence", Math.floor(Math.random() * 2) + 1);
                         }
-                    }
-                } else {
-                    if (inventory.EQUIP.length < maxBag) {
-                        inventory.EQUIP.push(newItem);
-                        actualItems++;
                     } else {
-                        // Equipment Sack is full. Look only at candidates dropped during this session that are unlocked.
-                        let newlyAddedEquip = inventory.EQUIP.filter(item => !initialEquipIds.has(item.id) && !item.locked);
-                        if (newlyAddedEquip.length > 0) {
-                            newlyAddedEquip.sort((a, b) => {
-                                if (a.statsRolled !== b.statsRolled) return a.statsRolled - b.statsRolled;
-                                return a.stageLevel - b.stageLevel;
-                            });
-                            let worstEquip = newlyAddedEquip[0];
-                            // Replace worst item if the new item is higher tier (or same tier but higher level)
-                            if (newItem.statsRolled > worstEquip.statsRolled || (newItem.statsRolled === worstEquip.statsRolled && newItem.stageLevel > worstEquip.stageLevel)) {
-                                let rolledTier = worstEquip.statsRolled;
-                                let scrapName = getScrapYieldName(rolledTier);
-                                let yieldAmount = Math.floor(Math.random() * 3) + 1;
-                                recordScrapGained(scrapName, yieldAmount);
-                                for (let t = rolledTier - 1; t >= 0; t--) {
-                                    if (Math.random() < 0.60) {
-                                        recordScrapGained(getScrapYieldName(t), Math.floor(Math.random() * 2) + 1);
-                                    }
-                                }
-                                let wIndex = inventory.EQUIP.findIndex(item => item.id === worstEquip.id);
-                                if (wIndex !== -1) inventory.EQUIP.splice(wIndex, 1);
-                                inventory.EQUIP.push(newItem);
-                            } else {
-                                let rolledTier = newItem.statsRolled;
-                                let scrapName = getScrapYieldName(rolledTier);
-                                let yieldAmount = Math.floor(Math.random() * 3) + 1;
-                                recordScrapGained(scrapName, yieldAmount);
-                                for (let t = rolledTier - 1; t >= 0; t--) {
-                                    if (Math.random() < 0.60) {
-                                        recordScrapGained(getScrapYieldName(t), Math.floor(Math.random() * 2) + 1);
-                                    }
+                        recordScrapGained("Astral Essence", Math.floor(Math.random() * 2) + 1);
+                    }
+                }
+            } else {
+                if (inventory.EQUIP.length < maxBag) {
+                    inventory.EQUIP.push(newItem);
+                    itemsDropped.push(newItem);
+                } else {
+                    // Equipment Sack comparative salvage
+                    let newlyAddedEquip = inventory.EQUIP.filter(item => !initialEquipIds.has(item.id) && !item.locked);
+                    if (newlyAddedEquip.length > 0) {
+                        newlyAddedEquip.sort((a, b) => {
+                            if (a.statsRolled !== b.statsRolled) return a.statsRolled - b.statsRolled;
+                            return a.stageLevel - b.stageLevel;
+                        });
+                        let worstEquip = newlyAddedEquip[0];
+                        if (newItem.statsRolled > worstEquip.statsRolled || (newItem.statsRolled === worstEquip.statsRolled && newItem.stageLevel > worstEquip.stageLevel)) {
+                            let rolledTier = worstEquip.statsRolled;
+                            let scrapName = getScrapYieldName(rolledTier);
+                            let yieldAmount = Math.floor(Math.random() * 3) + 1;
+                            recordScrapGained(scrapName, yieldAmount);
+                            for (let t = rolledTier - 1; t >= 0; t--) {
+                                if (Math.random() < 0.60) {
+                                    recordScrapGained(getScrapYieldName(t), Math.floor(Math.random() * 2) + 1);
                                 }
                             }
+                            let wIndex = inventory.EQUIP.findIndex(item => item.id === worstEquip.id);
+                            if (wIndex !== -1) inventory.EQUIP.splice(wIndex, 1);
+                            inventory.EQUIP.push(newItem);
+                            itemsDropped.push(newItem);
+                            
+                            let droppedIdx = itemsDropped.findIndex(x => x.id === worstEquip.id);
+                            if (droppedIdx !== -1) itemsDropped.splice(droppedIdx, 1);
                         } else {
-                            // Entire sack is composed of pre-existing/locked items; salvage the new item directly
                             let rolledTier = newItem.statsRolled;
                             let scrapName = getScrapYieldName(rolledTier);
                             let yieldAmount = Math.floor(Math.random() * 3) + 1;
@@ -1009,22 +1134,153 @@ window.onload = function() {
                                 }
                             }
                         }
+                    } else {
+                        let rolledTier = newItem.statsRolled;
+                        let scrapName = getScrapYieldName(rolledTier);
+                        let yieldAmount = Math.floor(Math.random() * 3) + 1;
+                        recordScrapGained(scrapName, yieldAmount);
+                        for (let t = rolledTier - 1; t >= 0; t--) {
+                            if (Math.random() < 0.60) {
+                                recordScrapGained(getScrapYieldName(t), Math.floor(Math.random() * 2) + 1);
+                            }
+                        }
                     }
                 }
             }
-
-            let salvageReport = Object.keys(scrapsGainedMap).map(k => `x${scrapsGainedMap[k]} ${k}`).join(", ");
-            let salvageText = salvageReport ? `. Auto-salvaged: ${salvageReport}` : "";
-
-            setTimeout(() => {
-                pushLog(`<span style='color:#3498db; font-weight:bold;'>[OFFLINE GAINS] Gone for ${Math.floor(offlineSeconds/60)} mins. Kills: ${simulatedKills}. XP: +${totalXpEarned}. Gold: +${goldEarned}. Items: +${actualItems}${actualArtifacts > 0 ? `, Artifacts: +${actualArtifacts}` : ""}. Gacha Keys: +${gachaKeyDrop}${salvageText}</span>`);
-                // Provide high-feedback visual confirmation of offline earnings
-                pushHeaderToast(`💤 Welcome Back! Offline Gains: +${goldEarned} Gold, +${totalXpEarned} XP!`, "#3498db");
-            }, 500);
-
-            return simulatedKills * timePerKill * 1000; // Return exact time consumed
         }
-        return 0;
+        
+        // Commit values
+        playerStats.coins += totalGold;
+        playerStats.stage = currentStage;
+        playerStats.maxStage = Math.max(playerStats.maxStage || 1, playerStats.stage);
+        gainXp(totalXp, true);
+        
+        // Display high-resolution summary card to the player
+        showOfflineSummaryModal(offlineSeconds, originalStage, currentStage, totalGold, totalXp, totalKills, itemsDropped, scrapsGainedMap, diedOffline, deathStage);
+        
+        return offlineSeconds * 1000;
+    }
+
+    function showOfflineSummaryModal(seconds, fromStage, toStage, gold, xp, kills, items, scraps, died, dStage) {
+        let modal = document.createElement('div');
+        modal.id = 'offline-summary-modal';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.85)';
+        modal.style.display = 'flex';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        modal.style.zIndex = '30000';
+        modal.style.padding = '15px';
+        
+        let hours = Math.floor(seconds / 3600);
+        let mins = Math.floor((seconds % 3600) / 60);
+        let timeStr = `${hours > 0 ? hours + 'h ' : ''}${mins}m`;
+        if (hours === 0 && mins === 0) timeStr = `${seconds}s`;
+
+        let stageDiffText = "";
+        if (toStage > fromStage) {
+            stageDiffText = `<span style="color:#2ecc71;">Stage ${fromStage} ➔ Stage ${toStage} (+${toStage - fromStage})</span>`;
+        } else {
+            stageDiffText = `<span style="color:#aaa;">Stage ${toStage} (Farming)</span>`;
+        }
+
+        let deathAlert = "";
+        if (died) {
+            deathAlert = `
+                <div style="background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; border-radius: 4px; padding: 10px; margin-bottom: 15px; font-size: 11px; text-align: left; line-height: 1.4;">
+                    <strong style="color: #e74c3c;">⚠️ RETREAT ENCOUNTERED:</strong> Your hero hit a survival bottleneck at Stage ${dStage}. Progression halted, and safety protocols triggered automatic farming back at Stage ${toStage}.
+                </div>
+            `;
+        }
+
+        let itemsListHtml = "";
+        if (items.length > 0) {
+            itemsListHtml = items.map(item => {
+                let color = getTierColor(item.statsRolled);
+                let stars = item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★`;
+                return `<div style="background:#1a1d20; border-left: 3px solid ${color}; padding: 6px 10px; border-radius: 3px; font-size: 11px; margin-bottom: 5px; text-align:left; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color:${color}; font-weight:bold;">${item.name}</span>
+                    <span style="color:#888; font-size: 10px;">${stars}</span>
+                </div>`;
+            }).join("");
+        } else {
+            itemsListHtml = `<div style="color:#666; font-style:italic; font-size:11px; padding: 15px 0;">No new high-quality gear kept.</div>`;
+        }
+
+        let scrapsListHtml = "";
+        let scrapKeys = Object.keys(scraps);
+        if (scrapKeys.length > 0) {
+            scrapsListHtml = scrapKeys.map(key => {
+                let color = key.includes("Scrap") ? "#3498db" : (key.includes("Soul") ? "#ffb6c1" : "#9b59b6");
+                if (key === "Eridium Shard") color = "#8e44ad";
+                return `<div style="background:#111; border: 1px solid #222; padding: 5px 10px; border-radius: 3px; font-size: 11px; display:inline-block; margin: 3px;">
+                    <span style="color:#aaa;">${key}:</span> <strong style="color:${color};">+${scraps[key]}</strong>
+                </div>`;
+            }).join("");
+        } else {
+            scrapsListHtml = `<div style="color:#666; font-style:italic; font-size:11px; padding: 5px 0;">No materials salvaged.</div>`;
+        }
+
+        modal.innerHTML = `
+            <div style="background:#1a1a1a; border: 2px solid var(--accent-blue); border-radius: 8px; width:100%; max-width:460px; max-height: 85vh; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.95); animation: toastFadeIn 0.3s ease-out;">
+                <!-- Header -->
+                <div style="background:#0b0f12; border-bottom: 1px solid #333; padding:12px 15px; display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="margin:0; color:var(--accent-blue); font-size:15px; font-weight:bold; letter-spacing:1px;">💤 OFFLINE PROGRESS</h3>
+                    <span style="background:rgba(52, 152, 219, 0.2); color:var(--accent-blue); padding:3px 10px; border-radius:10px; font-size:10px; font-weight:bold;">${timeStr}</span>
+                </div>
+                
+                <!-- Content -->
+                <div style="padding:15px; overflow-y:auto; flex: 1; text-align:center; overscroll-behavior: contain;">
+                    ${deathAlert}
+                    
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                        <div style="background:#111; padding:10px; border-radius:5px; border:1px solid #222;">
+                            <div style="font-size:10px; color:#aaa; margin-bottom:4px; letter-spacing:0.5px;">💰 GOLD ACCUMULATED</div>
+                            <div style="font-size:16px; color:#f1c40f; font-weight:bold;">+${gold.toLocaleString()}</div>
+                        </div>
+                        <div style="background:#111; padding:10px; border-radius:5px; border:1px solid #222;">
+                            <div style="font-size:10px; color:#aaa; margin-bottom:4px; letter-spacing:0.5px;">⭐ EXPERIENCE HARVESTED</div>
+                            <div style="font-size:16px; color:#9b59b6; font-weight:bold;">+${xp.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background:#111; padding:10px; border-radius:5px; margin-bottom:15px; font-size:11px; display:flex; justify-content:space-between; border:1px solid #222;">
+                        <span>⚔️ Simulated Kills: <strong style="color:#fff;">${kills}</strong></span>
+                        <span>🏰 Stage Reached: ${stageDiffText}</span>
+                    </div>
+                    
+                    <h4 style="margin: 0 0 8px 0; font-size:11px; color:#fff; text-align:left; text-transform:uppercase; letter-spacing:0.5px; border-bottom: 1px solid #333; padding-bottom:4px;">💼 Kept Drops</h4>
+                    <div style="max-height:140px; overflow-y:auto; margin-bottom:15px; padding-right:4px;">
+                        ${itemsListHtml}
+                    </div>
+                    
+                    <h4 style="margin: 0 0 8px 0; font-size:11px; color:#fff; text-align:left; text-transform:uppercase; letter-spacing:0.5px; border-bottom: 1px solid #333; padding-bottom:4px;">♻️ Auto-Salvage Yield</h4>
+                    <div style="text-align:left; margin-bottom:10px; max-height:100px; overflow-y:auto;">
+                        ${scrapsListHtml}
+                    </div>
+                </div>
+                
+                <!-- Claim Footer -->
+                <div style="background:#0b0f12; border-top: 1px solid #333; padding:12px; display:flex; justify-content:center;">
+                    <button id="close-offline-summary" style="background:var(--accent-blue); color:white; border:none; padding:10px 24px; font-weight:bold; font-size:12px; border-radius:4px; cursor:pointer; width:100%; transition: background 0.2s;" onmouseover="this.style.background='#2980b9'" onmouseout="this.style.background='var(--accent-blue)'">Claim Loot & Continue</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        document.getElementById('close-offline-summary').onclick = function() {
+            modal.style.animation = "toastFadeOut 0.25s ease-in forwards";
+            setTimeout(() => {
+                modal.remove();
+                isGamePaused = false; // RESUME GAME PLAY!
+                updateUI();
+                renderInventory();
+            }, 230);
+        };
     }
 
     window.loadGame = function() {
