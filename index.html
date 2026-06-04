@@ -2397,48 +2397,575 @@ window.onload = function() {
     const deathMaxFrames = 90; // 1.5 seconds of dramatic visual slowdown on death
     let lastUpdateTime = Date.now(); // High-resolution timestamp for gap detection
 
-    let beams = [];
-    /* ==========================================================================
-       6. PROCEDURAL NAME GENERATOR
-       ========================================================================== */
-    function buildProceduralName(item) {
-        let stars = item.statsRolled;
-        if (stars === "UNIQUE") return item.name;
-        let prefix = getTierName(stars);
-        
-        let highestKey = "maxHp";
-        let maxVal = -9999;
-        const checkKeys = ["bonusAtk", "bonusMaxHp", "bonusDef", "bonusMoveSpeed", "bonusCritChance", "bonusCritDamage", "bonusBlock", "bonusParry"];
-        checkKeys.forEach(k => {
-            if (item[k] && item[k] > maxVal) {
-                maxVal = item[k];
-                highestKey = k;
-            }
-        });
-
-        const nomenclature = {
-            bonusAtk: { name: "Vanguard", suffix: "of Shattering" },
-            bonusMaxHp: { name: "Colossus", suffix: "of Vitality" },
-            bonusDef: { name: "Bastion", suffix: "of Fortification" },
-            bonusMoveSpeed: { name: "Windrunner", suffix: "of Swiftness" },
-            bonusCritChance: { name: "Wraith", suffix: "of Lethality" },
-            bonusCritDamage: { name: "Reaver", suffix: "of Havoc" },
-            bonusBlock: { name: "Dreadnought", suffix: "of the Wall" },
-            bonusParry: { name: "Duellist", suffix: "of Reflection" }
-        };
-
-        const theme = nomenclature[highestKey] || { name: "Standard", suffix: "of Adaptation" };
-        let typeLabel = item.type.toUpperCase();
-        if (item.type === "subweapon" && item.subType) {
-            typeLabel = item.subType.toUpperCase();
+    <<<<
+function buildProceduralName(item) {
+    let stars = item.statsRolled;
+    if (stars === "UNIQUE") return item.name;
+    let prefix = getTierName(stars);
+    
+    let highestKey = "maxHp";
+    let maxVal = -9999;
+    const checkKeys = ["bonusAtk", "bonusMaxHp", "bonusDef", "bonusMoveSpeed", "bonusCritChance", "bonusCritDamage", "bonusBlock", "bonusParry"];
+    checkKeys.forEach(k => {
+        if (item[k] && item[k] > maxVal) {
+            maxVal = item[k];
+            highestKey = k;
         }
+    });
 
-        return `${prefix} ${theme.name} ${typeLabel} ${theme.suffix} (Lv. ${item.stageLevel})`;
+    const nomenclature = {
+        bonusAtk: { name: "Vanguard", suffix: "of Shattering" },
+        bonusMaxHp: { name: "Colossus", suffix: "of Vitality" },
+        bonusDef: { name: "Bastion", suffix: "of Fortification" },
+        bonusMoveSpeed: { name: "Windrunner", suffix: "of Swiftness" },
+        bonusCritChance: { name: "Wraith", suffix: "of Lethality" },
+        bonusCritDamage: { name: "Reaver", suffix: "of Havoc" },
+        bonusBlock: { name: "Dreadnought", suffix: "of the Wall" },
+        bonusParry: { name: "Duellist", suffix: "of Reflection" }
+    };
+
+    const theme = nomenclature[highestKey] || { name: "Standard", suffix: "of Adaptation" };
+    let typeLabel = item.type.toUpperCase();
+    if (item.type === "subweapon" && item.subType) {
+        typeLabel = item.subType.toUpperCase();
     }
 
-    /* ==========================================================================
-       7. STATS RESOLUTION & MATRIX IMPLEMENTATION
-       ========================================================================== */
+    return `${prefix} ${theme.name} ${typeLabel} ${theme.suffix} (Lv. ${item.stageLevel})`;
+}
+
+/* ==========================================================================
+   7. STATS RESOLUTION & MATRIX IMPLEMENTATION
+   ========================================================================== */
+====
+function buildProceduralName(item) {
+    let stars = item.statsRolled;
+    if (stars === "UNIQUE") return item.name;
+    let prefix = getTierName(stars);
+    
+    let highestKey = "maxHp";
+    let maxVal = -9999;
+    const checkKeys = ["bonusAtk", "bonusMaxHp", "bonusDef", "bonusMoveSpeed", "bonusCritChance", "bonusCritDamage", "bonusBlock", "bonusParry"];
+    checkKeys.forEach(k => {
+        if (item[k] && item[k] > maxVal) {
+            maxVal = item[k];
+            highestKey = k;
+        }
+    });
+
+    const nomenclature = {
+        bonusAtk: { name: "Vanguard", suffix: "of Shattering" },
+        bonusMaxHp: { name: "Colossus", suffix: "of Vitality" },
+        bonusDef: { name: "Bastion", suffix: "of Fortification" },
+        bonusMoveSpeed: { name: "Windrunner", suffix: "of Swiftness" },
+        bonusCritChance: { name: "Wraith", suffix: "of Lethality" },
+        bonusCritDamage: { name: "Reaver", suffix: "of Havoc" },
+        bonusBlock: { name: "Dreadnought", suffix: "of the Wall" },
+        bonusParry: { name: "Duellist", suffix: "of Reflection" }
+    };
+
+    const theme = nomenclature[highestKey] || { name: "Standard", suffix: "of Adaptation" };
+    let typeLabel = item.type.toUpperCase();
+    if (item.type === "subweapon" && item.subType) {
+        typeLabel = item.subType.toUpperCase();
+    }
+
+    return `${prefix} ${theme.name} ${typeLabel} ${theme.suffix} (Lv. ${item.stageLevel})`;
+}
+
+/* ==========================================================================
+   STAT RANGE CALCULATION HELPERS
+   ========================================================================== */
+function getStatBaseRange(item, statKey) {
+    let stageLevel = item.stageLevel || 1;
+    let isArt = item.type === "artifact";
+    let rarityMult = isArt ? 1.45 : (1 + ((item.statsRolled || 0) * 0.15));
+    
+    let min = 0;
+    let max = 0;
+    
+    if (statKey === "atk") {
+        if (item.type === "weapon") {
+            min += 2 * stageLevel;
+            max += 4 * stageLevel;
+        } else if (item.type === "subweapon" && item.subType === "dagger") {
+            min += 1 * stageLevel;
+            max += 2 * stageLevel;
+        }
+        if (item.bonusAtk > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(2 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "maxHp") {
+        if (item.type === "overall") {
+            min += 30 * stageLevel;
+            max += 50 * stageLevel;
+        } else if (["chest", "leggings", "helmet"].includes(item.type) && item.baseMaxHp > 0) {
+            min += 10 * stageLevel;
+            max += 20 * stageLevel;
+        }
+        if (item.bonusMaxHp > 0) {
+            min += Math.ceil(3 * stageLevel * rarityMult);
+            max += Math.ceil(8 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "def") {
+        if (item.type === "subweapon" && item.subType === "shield") {
+            min += 15 * stageLevel;
+            max += 30 * stageLevel;
+        } else if (["chest", "leggings", "helmet"].includes(item.type) && item.baseDef > 0) {
+            min += 1 * stageLevel;
+            max += 3 * stageLevel;
+        }
+        if (item.bonusDef > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(2 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "moveSpeed") {
+        if (item.type === "boots") {
+            min += 1 * stageLevel;
+            max += 3 * stageLevel;
+        }
+        if (item.bonusMoveSpeed > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(2 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "str") {
+        if (item.bonusStr > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(3 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "dex") {
+        if (item.bonusDex > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(3 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "int") {
+        if (item.type === "subweapon" && item.subType === "tome") {
+            min += 1 * stageLevel;
+            max += 2 * stageLevel;
+        }
+        if (item.bonusInt > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(3 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "critChance") {
+        if (item.bonusCritChance > 0) {
+            min += 0.01 * stageLevel * rarityMult;
+            max += 0.025 * stageLevel * rarityMult;
+        }
+    }
+    else if (statKey === "critDamage") {
+        if (item.bonusCritDamage > 0) {
+            min += 0.03 * stageLevel * rarityMult;
+            max += 0.06 * stageLevel * rarityMult;
+        }
+    }
+    else if (statKey === "block") {
+        if (item.type === "subweapon" && item.subType === "shield") {
+            min += 0.03 * stageLevel;
+            max += 0.03 * stageLevel;
+        }
+        if (item.bonusBlock > 0) {
+            min += 0.005 * stageLevel * rarityMult;
+            max += 0.015 * stageLevel * rarityMult;
+        }
+    }
+    else if (statKey === "parry") {
+        if (item.type === "subweapon" && item.subType === "dagger") {
+            min += 0.02 * stageLevel;
+            max += 0.02 * stageLevel;
+        }
+        if (item.bonusParry > 0) {
+            min += 0.005 * stageLevel * rarityMult;
+            max += 0.015 * stageLevel * rarityMult;
+        }
+    }
+    else if (statKey === "activeAttackSpeed") {
+        if (item.bonusActiveSpeed < 0) {
+            min += -2;
+            max += -1;
+        }
+    }
+    else if (statKey === "idleAttackSpeed") {
+        if (item.bonusIdleSpeed < 0) {
+            min += -4;
+            max += -2;
+        }
+    }
+    else if (statKey === "rareSpawn") {
+        if (item.rareSpawn > 0) {
+            min += 0.002 * rarityMult;
+            max += 0.006 * rarityMult;
+        }
+    }
+    else if (statKey === "dropRate") {
+        if (item.dropRate > 0) {
+            min += 0.02 * rarityMult;
+            max += 0.05 * rarityMult;
+        }
+    }
+    else if (statKey === "quality") {
+        if (item.quality > 0) {
+            min += 0.01 * rarityMult;
+            max += 0.03 * rarityMult;
+        }
+    }
+    else if (statKey === "goldMulti") {
+        if (item.goldMulti > 0) {
+            min += 0.02 * rarityMult;
+            max += 0.05 * rarityMult;
+        }
+    }
+    else if (statKey === "fairySpawn") {
+        if (item.fairySpawn > 0) {
+            min += 0.02 * rarityMult;
+            max += 0.06 * rarityMult;
+        }
+    }
+    
+    let tempers = item.temperLevel || 0;
+    if (tempers > 0) {
+        if (statKey === "atk") { min += tempers * (isArt ? 5 : 2); max += tempers * (isArt ? 5 : 2); }
+        else if (statKey === "maxHp") { min += tempers * (isArt ? 25 : 10); max += tempers * (isArt ? 25 : 10); }
+        else if (statKey === "def") { min += tempers * (isArt ? 2 : 1); max += tempers * (isArt ? 2 : 1); }
+        else if (statKey === "moveSpeed") { min += tempers; max += tempers; }
+        else if (statKey === "str" || statKey === "dex" || statKey === "int") { min += tempers; max += tempers; }
+        else if (statKey === "critChance") { min += tempers * 0.005; max += tempers * 0.005; }
+        else if (statKey === "critDamage") { min += tempers * 0.015; max += tempers * 0.015; }
+        else if (statKey === "block") { min += tempers * 0.005; max += tempers * 0.005; }
+        else if (statKey === "parry") { min += tempers * 0.005; max += tempers * 0.005; }
+        else if (statKey === "activeAttackSpeed") { min += tempers * -1; max += tempers * -1; }
+        else if (statKey === "idleAttackSpeed") { min += tempers * -2; max += tempers * -2; }
+        else if (statKey === "rareSpawn") { min += tempers * 0.001; max += tempers * 0.001; }
+        else if (statKey === "dropRate") { min += tempers * 0.01; max += tempers * 0.01; }
+        else if (statKey === "quality") { min += tempers * 0.005; max += tempers * 0.005; }
+        else if (statKey === "goldMulti") { min += tempers * 0.01; max += tempers * 0.01; }
+        else if (statKey === "fairySpawn") { min += tempers * 0.01; max += tempers * 0.01; }
+    }
+    
+    if (item.enchantments && item.enchantments[statKey]) {
+        let count = item.enchantments[statKey];
+        let multiplier = Math.pow(1.25, count);
+        
+        const integerStats = ["atk", "maxHp", "def", "str", "dex", "int"];
+        if (integerStats.includes(statKey)) {
+            min = Math.ceil(min * multiplier);
+            max = Math.ceil(max * multiplier);
+        } else if (statKey === "activeAttackSpeed" || statKey === "idleAttackSpeed") {
+            min = Math.floor(min * multiplier);
+            max = Math.floor(max * multiplier);
+        } else {
+            min = min * multiplier;
+            max = max * multiplier;
+        }
+    }
+    
+    return { min, max };
+}
+
+function formatStatRangeStr(item, statKey, isPct = false) {
+    let range = getStatBaseRange(item, statKey);
+    if (range.min === 0 && range.max === 0) return "";
+    
+    let minStr, maxStr;
+    if (statKey === "rareSpawn") {
+        minStr = (range.min * 100).toFixed(2) + "%";
+        maxStr = (range.max * 100).toFixed(2) + "%";
+    } else if (isPct) {
+        minStr = Math.floor(range.min * 100) + "%";
+        maxStr = Math.floor(range.max * 100) + "%";
+    } else if (statKey === "activeAttackSpeed" || statKey === "idleAttackSpeed") {
+        minStr = range.min + "f";
+        maxStr = range.max + "f";
+    } else if (["dropRate", "quality", "goldMulti", "fairySpawn"].includes(statKey)) {
+        minStr = Math.floor(range.min * 100) + "%";
+        maxStr = Math.floor(range.max * 100) + "%";
+    } else {
+        minStr = Math.round(range.min);
+        maxStr = Math.round(range.max);
+    }
+    
+    if (minStr === maxStr) {
+        return ` <span style="color:#7f8c8d; font-size:9px;">(${minStr})</span>`;
+    }
+    
+    return ` <span style="color:#7f8c8d; font-size:9px;">(${minStr} ~ ${maxStr})</span>`;
+}
+
+/* ==========================================================================
+   7. STATS RESOLUTION & MATRIX IMPLEMENTATION
+   ========================================================================== */
+>>>>
+    function buildProceduralName(item) {
+    let stars = item.statsRolled;
+    if (stars === "UNIQUE") return item.name;
+    let prefix = getTierName(stars);
+    
+    let highestKey = "maxHp";
+    let maxVal = -9999;
+    const checkKeys = ["bonusAtk", "bonusMaxHp", "bonusDef", "bonusMoveSpeed", "bonusCritChance", "bonusCritDamage", "bonusBlock", "bonusParry"];
+    checkKeys.forEach(k => {
+        if (item[k] && item[k] > maxVal) {
+            maxVal = item[k];
+            highestKey = k;
+        }
+    });
+
+    const nomenclature = {
+        bonusAtk: { name: "Vanguard", suffix: "of Shattering" },
+        bonusMaxHp: { name: "Colossus", suffix: "of Vitality" },
+        bonusDef: { name: "Bastion", suffix: "of Fortification" },
+        bonusMoveSpeed: { name: "Windrunner", suffix: "of Swiftness" },
+        bonusCritChance: { name: "Wraith", suffix: "of Lethality" },
+        bonusCritDamage: { name: "Reaver", suffix: "of Havoc" },
+        bonusBlock: { name: "Dreadnought", suffix: "of the Wall" },
+        bonusParry: { name: "Duellist", suffix: "of Reflection" }
+    };
+
+    const theme = nomenclature[highestKey] || { name: "Standard", suffix: "of Adaptation" };
+    let typeLabel = item.type.toUpperCase();
+    if (item.type === "subweapon" && item.subType) {
+        typeLabel = item.subType.toUpperCase();
+    }
+
+    return `${prefix} ${theme.name} ${typeLabel} ${theme.suffix} (Lv. ${item.stageLevel})`;
+}
+
+/* ==========================================================================
+   STAT RANGE CALCULATION HELPERS
+   ========================================================================== */
+function getStatBaseRange(item, statKey) {
+    let stageLevel = item.stageLevel || 1;
+    let isArt = item.type === "artifact";
+    let rarityMult = isArt ? 1.45 : (1 + ((item.statsRolled || 0) * 0.15));
+    
+    let min = 0;
+    let max = 0;
+    
+    if (statKey === "atk") {
+        if (item.type === "weapon") {
+            min += 2 * stageLevel;
+            max += 4 * stageLevel;
+        } else if (item.type === "subweapon" && item.subType === "dagger") {
+            min += 1 * stageLevel;
+            max += 2 * stageLevel;
+        }
+        if (item.bonusAtk > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(2 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "maxHp") {
+        if (item.type === "overall") {
+            min += 30 * stageLevel;
+            max += 50 * stageLevel;
+        } else if (["chest", "leggings", "helmet"].includes(item.type) && item.baseMaxHp > 0) {
+            min += 10 * stageLevel;
+            max += 20 * stageLevel;
+        }
+        if (item.bonusMaxHp > 0) {
+            min += Math.ceil(3 * stageLevel * rarityMult);
+            max += Math.ceil(8 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "def") {
+        if (item.type === "subweapon" && item.subType === "shield") {
+            min += 15 * stageLevel;
+            max += 30 * stageLevel;
+        } else if (["chest", "leggings", "helmet"].includes(item.type) && item.baseDef > 0) {
+            min += 1 * stageLevel;
+            max += 3 * stageLevel;
+        }
+        if (item.bonusDef > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(2 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "moveSpeed") {
+        if (item.type === "boots") {
+            min += 1 * stageLevel;
+            max += 3 * stageLevel;
+        }
+        if (item.bonusMoveSpeed > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(2 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "str") {
+        if (item.bonusStr > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(3 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "dex") {
+        if (item.bonusDex > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(3 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "int") {
+        if (item.type === "subweapon" && item.subType === "tome") {
+            min += 1 * stageLevel;
+            max += 2 * stageLevel;
+        }
+        if (item.bonusInt > 0) {
+            min += Math.ceil(1 * stageLevel * rarityMult);
+            max += Math.ceil(3 * stageLevel * rarityMult);
+        }
+    }
+    else if (statKey === "critChance") {
+        if (item.bonusCritChance > 0) {
+            min += 0.01 * stageLevel * rarityMult;
+            max += 0.025 * stageLevel * rarityMult;
+        }
+    }
+    else if (statKey === "critDamage") {
+        if (item.bonusCritDamage > 0) {
+            min += 0.03 * stageLevel * rarityMult;
+            max += 0.06 * stageLevel * rarityMult;
+        }
+    }
+    else if (statKey === "block") {
+        if (item.type === "subweapon" && item.subType === "shield") {
+            min += 0.03 * stageLevel;
+            max += 0.03 * stageLevel;
+        }
+        if (item.bonusBlock > 0) {
+            min += 0.005 * stageLevel * rarityMult;
+            max += 0.015 * stageLevel * rarityMult;
+        }
+    }
+    else if (statKey === "parry") {
+        if (item.type === "subweapon" && item.subType === "dagger") {
+            min += 0.02 * stageLevel;
+            max += 0.02 * stageLevel;
+        }
+        if (item.bonusParry > 0) {
+            min += 0.005 * stageLevel * rarityMult;
+            max += 0.015 * stageLevel * rarityMult;
+        }
+    }
+    else if (statKey === "activeAttackSpeed") {
+        if (item.bonusActiveSpeed < 0) {
+            min += -2;
+            max += -1;
+        }
+    }
+    else if (statKey === "idleAttackSpeed") {
+        if (item.bonusIdleSpeed < 0) {
+            min += -4;
+            max += -2;
+        }
+    }
+    else if (statKey === "rareSpawn") {
+        if (item.rareSpawn > 0) {
+            min += 0.002 * rarityMult;
+            max += 0.006 * rarityMult;
+        }
+    }
+    else if (statKey === "dropRate") {
+        if (item.dropRate > 0) {
+            min += 0.02 * rarityMult;
+            max += 0.05 * rarityMult;
+        }
+    }
+    else if (statKey === "quality") {
+        if (item.quality > 0) {
+            min += 0.01 * rarityMult;
+            max += 0.03 * rarityMult;
+        }
+    }
+    else if (statKey === "goldMulti") {
+        if (item.goldMulti > 0) {
+            min += 0.02 * rarityMult;
+            max += 0.05 * rarityMult;
+        }
+    }
+    else if (statKey === "fairySpawn") {
+        if (item.fairySpawn > 0) {
+            min += 0.02 * rarityMult;
+            max += 0.06 * rarityMult;
+        }
+    }
+    
+    let tempers = item.temperLevel || 0;
+    if (tempers > 0) {
+        if (statKey === "atk") { min += tempers * (isArt ? 5 : 2); max += tempers * (isArt ? 5 : 2); }
+        else if (statKey === "maxHp") { min += tempers * (isArt ? 25 : 10); max += tempers * (isArt ? 25 : 10); }
+        else if (statKey === "def") { min += tempers * (isArt ? 2 : 1); max += tempers * (isArt ? 2 : 1); }
+        else if (statKey === "moveSpeed") { min += tempers; max += tempers; }
+        else if (statKey === "str" || statKey === "dex" || statKey === "int") { min += tempers; max += tempers; }
+        else if (statKey === "critChance") { min += tempers * 0.005; max += tempers * 0.005; }
+        else if (statKey === "critDamage") { min += tempers * 0.015; max += tempers * 0.015; }
+        else if (statKey === "block") { min += tempers * 0.005; max += tempers * 0.005; }
+        else if (statKey === "parry") { min += tempers * 0.005; max += tempers * 0.005; }
+        else if (statKey === "activeAttackSpeed") { min += tempers * -1; max += tempers * -1; }
+        else if (statKey === "idleAttackSpeed") { min += tempers * -2; max += tempers * -2; }
+        else if (statKey === "rareSpawn") { min += tempers * 0.001; max += tempers * 0.001; }
+        else if (statKey === "dropRate") { min += tempers * 0.01; max += tempers * 0.01; }
+        else if (statKey === "quality") { min += tempers * 0.005; max += tempers * 0.005; }
+        else if (statKey === "goldMulti") { min += tempers * 0.01; max += tempers * 0.01; }
+        else if (statKey === "fairySpawn") { min += tempers * 0.01; max += tempers * 0.01; }
+    }
+    
+    if (item.enchantments && item.enchantments[statKey]) {
+        let count = item.enchantments[statKey];
+        let multiplier = Math.pow(1.25, count);
+        
+        const integerStats = ["atk", "maxHp", "def", "str", "dex", "int"];
+        if (integerStats.includes(statKey)) {
+            min = Math.ceil(min * multiplier);
+            max = Math.ceil(max * multiplier);
+        } else if (statKey === "activeAttackSpeed" || statKey === "idleAttackSpeed") {
+            min = Math.floor(min * multiplier);
+            max = Math.floor(max * multiplier);
+        } else {
+            min = min * multiplier;
+            max = max * multiplier;
+        }
+    }
+    
+    return { min, max };
+}
+
+function formatStatRangeStr(item, statKey, isPct = false) {
+    let range = getStatBaseRange(item, statKey);
+    if (range.min === 0 && range.max === 0) return "";
+    
+    let minStr, maxStr;
+    if (statKey === "rareSpawn") {
+        minStr = (range.min * 100).toFixed(2) + "%";
+        maxStr = (range.max * 100).toFixed(2) + "%";
+    } else if (isPct) {
+        minStr = Math.floor(range.min * 100) + "%";
+        maxStr = Math.floor(range.max * 100) + "%";
+    } else if (statKey === "activeAttackSpeed" || statKey === "idleAttackSpeed") {
+        minStr = range.min + "f";
+        maxStr = range.max + "f";
+    } else if (["dropRate", "quality", "goldMulti", "fairySpawn"].includes(statKey)) {
+        minStr = Math.floor(range.min * 100) + "%";
+        maxStr = Math.floor(range.max * 100) + "%";
+    } else {
+        minStr = Math.round(range.min);
+        maxStr = Math.round(range.max);
+    }
+    
+    if (minStr === maxStr) {
+        return ` <span style="color:#7f8c8d; font-size:9px;">(${minStr})</span>`;
+    }
+    
+    return ` <span style="color:#7f8c8d; font-size:9px;">(${minStr} ~ ${maxStr})</span>`;
+}
+
+/* ==========================================================================
+   7. STATS RESOLUTION & MATRIX IMPLEMENTATION
+   ========================================================================== */
     window.switchTab = function(id) {
         window.hideTooltip(); 
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -4512,26 +5039,26 @@ window.onload = function() {
         }
 
         if (item.id !== "dummy") {
-            if (item.atk > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ⚔️ Attack: +${item.atk}${getStatEnchantSuffix(item, 'atk')}</div>`;
-            if (item.maxHp > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ❤️ Max HP: +${item.maxHp}${getStatEnchantSuffix(item, 'maxHp')}</div>`;
-            if (item.def > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🛡️ Defense: +${item.def}${getStatEnchantSuffix(item, 'def')}</div>`;
-            if (item.moveSpeed > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 👟 Move Speed: +${item.moveSpeed}${getStatEnchantSuffix(item, 'moveSpeed')}</div>`;
-            if (item.str > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 💪 STR (Strength): +${item.str}${getStatEnchantSuffix(item, 'str')}</div>`;
-            if (item.dex > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🎯 DEX (Dexterity): +${item.dex}${getStatEnchantSuffix(item, 'dex')}</div>`;
-            if (item.int > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🧠 INT (Intelligence): +${item.int}${getStatEnchantSuffix(item, 'int')}</div>`;
+            if (item.atk > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ⚔️ Attack: +${item.atk}${getStatEnchantSuffix(item, 'atk')}${formatStatRangeStr(item, 'atk')}</div>`;
+            if (item.maxHp > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ❤️ Max HP: +${item.maxHp}${getStatEnchantSuffix(item, 'maxHp')}${formatStatRangeStr(item, 'maxHp')}</div>`;
+            if (item.def > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🛡️ Defense: +${item.def}${getStatEnchantSuffix(item, 'def')}${formatStatRangeStr(item, 'def')}</div>`;
+            if (item.moveSpeed > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 👟 Move Speed: +${item.moveSpeed}${getStatEnchantSuffix(item, 'moveSpeed')}${formatStatRangeStr(item, 'moveSpeed')}</div>`;
+            if (item.str > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 💪 STR (Strength): +${item.str}${getStatEnchantSuffix(item, 'str')}${formatStatRangeStr(item, 'str')}</div>`;
+            if (item.dex > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🎯 DEX (Dexterity): +${item.dex}${getStatEnchantSuffix(item, 'dex')}${formatStatRangeStr(item, 'dex')}</div>`;
+            if (item.int > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🧠 INT (Intelligence): +${item.int}${getStatEnchantSuffix(item, 'int')}${formatStatRangeStr(item, 'int')}</div>`;
             
-            if (item.critChance > 0) html += `<div class="tt-stat-line" style="color:#e67e22;">• ✨ Crit Chance: +${Math.floor(item.critChance*100)}%${getStatEnchantSuffix(item, 'critChance')}</div>`;
-            if (item.critDamage > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• 💥 Crit Multi: +${Math.floor(item.critDamage*100)}%${getStatEnchantSuffix(item, 'critDamage')}</div>`;
-            if (item.block > 0) html += `<div class="tt-stat-line" style="color:#3498db;">• 🛡️ Block Rate: +${Math.floor(item.block*100)}%${getStatEnchantSuffix(item, 'block')}</div>`;
-            if (item.parry > 0) html += `<div class="tt-stat-line" style="color:#e74c3c;">• ⚡ Parry Rate: +${Math.floor(item.parry*100)}%${getStatEnchantSuffix(item, 'parry')}</div>`;
-            if (item.activeAttackSpeed < 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• ⚡ Active Atk Spd: ${item.activeAttackSpeed}f${getStatEnchantSuffix(item, 'activeAttackSpeed')}</div>`;
-            if (item.idleAttackSpeed < 0) html += `<div class="tt-stat-line" style="color:#1abc9c;">• ⏱️ Idle Atk Spd: ${item.idleAttackSpeed}f${getStatEnchantSuffix(item, 'idleAttackSpeed')}</div>`;
+            if (item.critChance > 0) html += `<div class="tt-stat-line" style="color:#e67e22;">• ✨ Crit Chance: +${Math.floor(item.critChance*100)}%${getStatEnchantSuffix(item, 'critChance')}${formatStatRangeStr(item, 'critChance', true)}</div>`;
+            if (item.critDamage > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• 💥 Crit Multi: +${Math.floor(item.critDamage*100)}%${getStatEnchantSuffix(item, 'critDamage')}${formatStatRangeStr(item, 'critDamage', true)}</div>`;
+            if (item.block > 0) html += `<div class="tt-stat-line" style="color:#3498db;">• 🛡️ Block Rate: +${Math.floor(item.block*100)}%${getStatEnchantSuffix(item, 'block')}${formatStatRangeStr(item, 'block', true)}</div>`;
+            if (item.parry > 0) html += `<div class="tt-stat-line" style="color:#e74c3c;">• ⚡ Parry Rate: +${Math.floor(item.parry*100)}%${getStatEnchantSuffix(item, 'parry')}${formatStatRangeStr(item, 'parry', true)}</div>`;
+            if (item.activeAttackSpeed < 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• ⚡ Active Atk Spd: ${item.activeAttackSpeed}f${getStatEnchantSuffix(item, 'activeAttackSpeed')}${formatStatRangeStr(item, 'activeAttackSpeed')}</div>`;
+            if (item.idleAttackSpeed < 0) html += `<div class="tt-stat-line" style="color:#1abc9c;">• ⏱️ Idle Atk Spd: ${item.idleAttackSpeed}f${getStatEnchantSuffix(item, 'idleAttackSpeed')}${formatStatRangeStr(item, 'idleAttackSpeed')}</div>`;
             
-            if (item.rareSpawn > 0) html += `<div class="tt-stat-line" style="color:#ffb6c1;">• ✨ Rare Spawn: +${(item.rareSpawn*100).toFixed(2)}%</div>`;
-            if (item.dropRate > 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• 🍀 Drop Rate: +${Math.floor(item.dropRate*100)}%</div>`;
-            if (item.quality > 0) html += `<div class="tt-stat-line" style="color:#9b59b6;">• 💎 Drop Quality: +${Math.floor(item.quality*100)}%</div>`;
-            if (item.goldMulti > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• 🟡 Gold Multi: +${Math.floor(item.goldMulti*100)}%</div>`;
-            if (item.fairySpawn > 0) html += `<div class="tt-stat-line" style="color:#ffb6c1;">• 🧚 Fairy Spawn: +${Math.floor(item.fairySpawn*100)}%</div>`;
+            if (item.rareSpawn > 0) html += `<div class="tt-stat-line" style="color:#ffb6c1;">• ✨ Rare Spawn: +${(item.rareSpawn*100).toFixed(2)}%${formatStatRangeStr(item, 'rareSpawn')}</div>`;
+            if (item.dropRate > 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• 🍀 Drop Rate: +${Math.floor(item.dropRate*100)}%${formatStatRangeStr(item, 'dropRate')}</div>`;
+            if (item.quality > 0) html += `<div class="tt-stat-line" style="color:#9b59b6;">• 💎 Drop Quality: +${Math.floor(item.quality*100)}%${formatStatRangeStr(item, 'quality')}</div>`;
+            if (item.goldMulti > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• 🟡 Gold Multi: +${Math.floor(item.goldMulti*100)}%${formatStatRangeStr(item, 'goldMulti')}</div>`;
+            if (item.fairySpawn > 0) html += `<div class="tt-stat-line" style="color:#ffb6c1;">• 🧚 Fairy Spawn: +${Math.floor(item.fairySpawn*100)}%${formatStatRangeStr(item, 'fairySpawn')}</div>`;
 
             if (item.statsRolled === 0 && item.temperLevel === 0 && item.type !== "artifact") { html += `<div class="tt-stat-line" style="color:#7f8c8d; font-style:italic; margin-top:4px;">No bonus modifiers applied.</div>`; }
         }
@@ -6095,16 +6622,43 @@ window.onload = function() {
     }
 
     function update() {
-        let now = Date.now();
-        let gapMs = now - lastUpdateTime;
-        
-        // Prevent progression exploits while on the DEFEATED screen
-        if (isGamePaused) {
-            lastUpdateTime = now;
-            return;
-        }
+    let now = Date.now();
+    let gapMs = now - lastUpdateTime;
+    
+    // Prevent progression exploits while on the DEFEATED screen
+    if (isGamePaused) {
+        lastUpdateTime = now;
+        return;
+    }
 
-        // Handle Visual Death Animation Countdown before popping HTML Overlay
+    // Snowflakes update & spawn logic (only active on Peak stage, tier === 1, outdoors)
+    if (getStageTier() === 1 && !playerStats.isDungeonMode) {
+        if (!isGamePaused && Math.random() < 0.40) { // Spawn snowflakes gently
+            snowflakes.push({
+                x: Math.random() * canvas.width,
+                y: -10,
+                r: Math.random() * 1.8 + 0.8, // diameter between 1.6 and 5.2
+                speed: Math.random() * 0.8 + 0.4,
+                swingSpeed: Math.random() * 0.02 + 0.01,
+                swingRange: Math.random() * 1.5 + 0.5
+            });
+        }
+    } else {
+        snowflakes = []; // Flush snowflakes when entering other tiers/dungeons
+    }
+
+    for (let i = snowflakes.length - 1; i >= 0; i--) {
+        let sf = snowflakes[i];
+        if (!isGamePaused) {
+            sf.y += sf.speed;
+            sf.x += Math.sin(logicClock * sf.swingSpeed) * sf.swingRange * 0.4;
+        }
+        if (sf.y > canvas.height + 10 || sf.x < -10 || sf.x > canvas.width + 10) {
+            snowflakes.splice(i, 1);
+        }
+    }
+
+    // Handle Visual Death Animation Countdown before popping HTML Overlay
         let p = resolvePlayerStats(); 
         if (deathAnimationTimer > 0) {
             deathAnimationTimer--;
@@ -6369,27 +6923,65 @@ window.onload = function() {
                 ctx.stroke();
 
                 // Far Hills
-                ctx.fillStyle = "#1e3d29"; ctx.beginPath(); ctx.moveTo(0, 180); ctx.quadraticCurveTo(100, 110, 220, 180); ctx.quadraticCurveTo(350, 95, 480, 180); ctx.quadraticCurveTo(620, 115, 800, 180); ctx.fill();
-                ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
-                
-                // Near Hills
-                ctx.fillStyle = "#154f2c"; ctx.beginPath(); ctx.moveTo(0, 180); ctx.quadraticCurveTo(150, 130, 320, 180); ctx.quadraticCurveTo(500, 120, 680, 180); ctx.quadraticCurveTo(740, 150, 800, 180); ctx.fill();
-                ctx.stroke();
-            } else if (tier === 1) {
-                ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-                for(let i = 0; i < 20; i++) { ctx.fillRect((i * 37) % canvas.width, (i * 13) % 90, 1, 1); }
-                
-                // Jagged Peak Mountains
-                ctx.fillStyle = "#1c2833"; ctx.beginPath(); ctx.moveTo(0, 180); ctx.lineTo(100, 80); ctx.lineTo(180, 130); ctx.lineTo(310, 60); ctx.lineTo(450, 150); ctx.lineTo(580, 75); ctx.lineTo(700, 140); ctx.lineTo(800, 180); ctx.fill();
-                ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
-                
-                // Snowy Caps
-                ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.moveTo(100, 80); ctx.lineTo(85, 95); ctx.lineTo(115, 95); ctx.moveTo(310, 60); ctx.lineTo(290, 85); ctx.lineTo(330, 85); ctx.moveTo(580, 75); ctx.lineTo(565, 90); ctx.lineTo(595, 90); ctx.fill();
-                ctx.strokeStyle = "#000000"; ctx.lineWidth = penSky; ctx.stroke();
-                
-                // Midground Mountains
-                ctx.fillStyle = "#2c3e50"; ctx.beginPath(); ctx.moveTo(0, 180); ctx.lineTo(150, 110); ctx.lineTo(280, 180); ctx.lineTo(440, 100); ctx.lineTo(600, 180); ctx.lineTo(700, 120); ctx.lineTo(800, 180); ctx.fill();
-                ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
+        ctx.fillStyle = "#1e3d29"; ctx.beginPath(); ctx.moveTo(0, 180); ctx.quadraticCurveTo(100, 110, 220, 180); ctx.quadraticCurveTo(350, 95, 480, 180); ctx.quadraticCurveTo(620, 115, 800, 180); ctx.fill();
+        ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
+        
+        // Near Hills
+        ctx.fillStyle = "#154f2c"; ctx.beginPath(); ctx.moveTo(0, 180); ctx.quadraticCurveTo(150, 130, 320, 180); ctx.quadraticCurveTo(500, 120, 680, 180); ctx.quadraticCurveTo(740, 150, 800, 180); ctx.fill();
+        ctx.stroke();
+    } else if (tier === 1) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+        for(let i = 0; i < 20; i++) { ctx.fillRect((i * 37) % canvas.width, (i * 13) % 90, 1, 1); }
+        
+        // Jagged Peak Mountains (Background)
+        ctx.fillStyle = "#1c2833"; ctx.beginPath(); 
+        ctx.moveTo(0, 180); 
+        ctx.lineTo(100, 80); 
+        ctx.lineTo(180, 130); 
+        ctx.lineTo(310, 60); 
+        ctx.lineTo(450, 150); 
+        ctx.lineTo(580, 75); 
+        ctx.lineTo(700, 140); 
+        ctx.lineTo(800, 180); 
+        ctx.lineTo(0, 180);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
+        
+        // Background Snowy Caps (Rendered individually with closePath)
+        ctx.fillStyle = "#ecf0f1";
+        ctx.lineWidth = penSky;
+        // Peak 1 cap
+        ctx.beginPath(); ctx.moveTo(100, 80); ctx.lineTo(85, 95); ctx.lineTo(115, 95); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Peak 2 cap
+        ctx.beginPath(); ctx.moveTo(310, 60); ctx.lineTo(290, 85); ctx.lineTo(330, 85); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Peak 3 cap
+        ctx.beginPath(); ctx.moveTo(580, 75); ctx.lineTo(565, 90); ctx.lineTo(595, 90); ctx.closePath(); ctx.fill(); ctx.stroke();
+        
+        // Midground Mountains
+        ctx.fillStyle = "#2c3e50"; ctx.beginPath(); 
+        ctx.moveTo(0, 180); 
+        ctx.lineTo(150, 110); 
+        ctx.lineTo(280, 180); 
+        ctx.lineTo(440, 100); 
+        ctx.lineTo(600, 180); 
+        ctx.lineTo(700, 120); 
+        ctx.lineTo(800, 180); 
+        ctx.lineTo(0, 180);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
+
+        // Midground Snowy Caps (Crisp, cel-shaded caps on the midground mountains as well!)
+        ctx.fillStyle = "#ecf0f1";
+        ctx.lineWidth = penSky;
+        // Midground Peak 1 cap
+        ctx.beginPath(); ctx.moveTo(150, 110); ctx.lineTo(135, 122); ctx.lineTo(165, 122); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Midground Peak 2 cap
+        ctx.beginPath(); ctx.moveTo(440, 100); ctx.lineTo(420, 115); ctx.lineTo(460, 115); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Midground Peak 3 cap
+        ctx.beginPath(); ctx.moveTo(700, 120); ctx.lineTo(685, 130); ctx.lineTo(715, 130); ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (tier === 2) {
             } else if (tier === 2) {
                 ctx.fillStyle = "rgba(230, 126, 34, 0.08)"; ctx.fillRect(0, 0, canvas.width, 180);
                 for (let i = 0; i < 8; i++) {
@@ -7275,7 +7867,7 @@ window.onload = function() {
             reviveTimer--;
         }
 
-        // 5.5. Death Vignette Overlay (Closing darkness centering on the hero)
+         // 5.5. Death Vignette Overlay (Closing darkness centering on the hero)
         if (deathAnimationTimer > 0) {
             ctx.save();
             let t = (deathMaxFrames - deathAnimationTimer) / deathMaxFrames;
@@ -7293,6 +7885,20 @@ window.onload = function() {
             
             ctx.fillStyle = vignette;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.restore();
+        }
+
+        // Draw Snowflakes (Tier 1 Outdoors)
+        if (getStageTier() === 1 && !playerStats.isDungeonMode) {
+            ctx.save();
+            ctx.fillStyle = "rgba(240, 248, 255, 0.85)"; // Styled light ice-blue/white
+            ctx.shadowColor = "#ffffff";
+            ctx.shadowBlur = 2;
+            snowflakes.forEach(sf => {
+                ctx.beginPath();
+                ctx.arc(sf.x, sf.y, sf.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
             ctx.restore();
         }
 
