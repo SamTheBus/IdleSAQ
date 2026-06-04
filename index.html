@@ -563,13 +563,24 @@
         <div id="log-item-tooltip" class="tooltip-base"></div>
         <div id="stat-tooltip" class="tooltip-base"></div>
         
-        <div id="altar-modal">
+         <div id="altar-modal">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
                 <h3 style="margin:0; color:#1abc9c;">🔮 Artifact Database</h3>
                 <button onclick="document.getElementById('altar-modal').style.display='none'" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 12px; font-weight:bold; cursor:pointer;">Close</button>
             </div>
             <div style="color:#aaa; font-size:11px; margin-bottom:12px;">Tap any artifact to view its unique trait details and base parameters. All artifacts now drop with 3 randomized stat lines!</div>
             <div id="altar-list" style="display:flex; flex-direction:column; gap:8px;" onscroll="hideTooltip()" ontouchmove="hideTooltip()"></div>
+        </div>
+
+        <div id="achievements-modal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); 
+            width:90%; max-width:500px; background:#111; border:2px solid var(--accent-purple); border-radius:8px; 
+            z-index:11000; padding:15px; box-shadow:0 0 30px rgba(0,0,0,0.9); max-height:80vh; overflow-y:auto; overscroll-behavior: contain;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
+                <h3 style="margin:0; color:#f1c40f;">🏆 Trophies & Milestones</h3>
+                <button onclick="toggleAchievements()" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 12px; font-weight:bold; cursor:pointer;">Close</button>
+            </div>
+            <div style="color:#aaa; font-size:11px; margin-bottom:12px;">Complete milestone challenges to earn permanent stat bonuses. Hover or tap an achievement to view its progress and rewards.</div>
+            <div id="achievements-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:8px;" onscroll="hideTooltip()" ontouchmove="hideTooltip()"></div>
         </div>
 
         <div id="death-overlay">
@@ -611,7 +622,7 @@
                 </div>
 
                 <div id="death-tip-container">
-                    <strong style="color: #e74c3c; display: block; margin-bottom: 4px;">💡 VALKYRIE'S ADVICE:</strong>
+                    <strong style="color: #e74c3c; display: block; margin-bottom: 4px;">💡 HOOR'S ADVICE:</strong>
                     <span id="death-tip-text">Optimize your attributes to better match this environment.</span>
                 </div>
 
@@ -622,6 +633,7 @@
         <div id="control-bar">
             <div style="color: #aaa;">Spacebar or Click Canvas to Slash!</div>
             <div style="display: flex; gap: 8px;">
+                <button id="btn-achievements" class="btn-toggle" onclick="toggleAchievements()" style="background: #8e44ad; opacity: 1;">🏆 Trophies</button>
                 <button id="btn-pause" class="btn-toggle" onclick="togglePause()" style="background: #34495e;">▶️ Pause</button>
                 <button id="toggle-auto" class="btn-toggle active" onclick="toggleAuto()">Auto: ON</button>
             </div>
@@ -2977,6 +2989,13 @@ window.onload = function() {
                 if (playerStats.defPotionTimer === undefined) playerStats.defPotionTimer = 0;
                 if (playerStats.hastePotionTimer === undefined) playerStats.hastePotionTimer = 0;
                 
+                // Safe state migrations for Achievements tracking
+                if (playerStats.unlockedAchievements === undefined) playerStats.unlockedAchievements = [];
+                if (playerStats.totalGoldEarned === undefined) playerStats.totalGoldEarned = playerStats.coins || 0;
+                if (playerStats.totalTempers === undefined) playerStats.totalTempers = 0;
+                if (playerStats.totalEnchants === undefined) playerStats.totalEnchants = 0;
+                if (playerStats.riftGuardiansSlain === undefined) playerStats.riftGuardiansSlain = 0;
+                
                 // Audio setting migration checks
                 if (playerStats.volumeMaster === undefined) playerStats.volumeMaster = 0.5;
                 if (playerStats.volumeSFX === undefined) playerStats.volumeSFX = 0.8;
@@ -2985,8 +3004,11 @@ window.onload = function() {
                 if (inventory.ETC["Iron Scrap"]) { addEtcDrop("Monster Soul", inventory.ETC["Iron Scrap"]); delete inventory.ETC["Iron Scrap"]; }
                 if (inventory.ETC["Sticky Gel"]) { addEtcDrop("Monster Soul", inventory.ETC["Sticky Gel"]); delete inventory.ETC["Sticky Gel"]; }
                 
-                let box = document.getElementById('log-box');
+                 let box = document.getElementById('log-box');
                 box.innerHTML = logsHistory.join("<br><br>");
+                
+                // Evaluate achievements upon loading state
+                window.checkAchievements();
                 
                 // Initialize range sliders and sync variables
                 updateAudioUI();
@@ -3050,6 +3072,7 @@ window.onload = function() {
             pushHeaderToast(`⭐ LEVEL UP! Level ${playerStats.level}`, "#f1c40f");
             let p = resolvePlayerStats();
             playerStats.currentHp = p.maxHp; 
+            window.checkAchievements();
         }
     };
     
@@ -3826,6 +3849,51 @@ window.onload = function() {
             str: playerStats.baseStr, dex: playerStats.baseDex, int: playerStats.baseInt, fairySpawn: playerStats.baseFairySpawn
         };
         
+        // Sum achievement bonuses dynamically
+        let achAtk = 0, achMaxHp = 0, achDef = 0, achMoveSpeed = 0;
+        let achCritChance = 0, achCritDamage = 0, achBlock = 0, achParry = 0;
+        let achDrop = 0, achQly = 0, achGold = 0, achStr = 0, achDex = 0, achInt = 0, achFairySpawn = 0;
+
+        if (playerStats.unlockedAchievements && window.AchievementsData) {
+            playerStats.unlockedAchievements.forEach(id => {
+                let ach = window.AchievementsData.find(a => a.id === id);
+                if (ach && ach.stats) {
+                    if (ach.stats.atk) achAtk += ach.stats.atk;
+                    if (ach.stats.maxHp) achMaxHp += ach.stats.maxHp;
+                    if (ach.stats.def) achDef += ach.stats.def;
+                    if (ach.stats.moveSpeed) achMoveSpeed += ach.stats.moveSpeed;
+                    if (ach.stats.critChance) achCritChance += ach.stats.critChance;
+                    if (ach.stats.critDamage) achCritDamage += ach.stats.critDamage;
+                    if (ach.stats.block) achBlock += ach.stats.block;
+                    if (ach.stats.parry) achParry += ach.stats.parry;
+                    if (ach.stats.drop) achDrop += ach.stats.drop;
+                    if (ach.stats.qly) achQly += ach.stats.qly;
+                    if (ach.stats.gold) achGold += ach.stats.gold;
+                    if (ach.stats.str) achStr += ach.stats.str;
+                    if (ach.stats.dex) achDex += ach.stats.dex;
+                    if (ach.stats.int) achInt += ach.stats.int;
+                    if (ach.stats.fairySpawn) achFairySpawn += ach.stats.fairySpawn;
+                }
+            });
+        }
+
+        // Apply achievement bonuses directly to base profile
+        p.atk += achAtk;
+        p.maxHp += achMaxHp;
+        p.def += achDef;
+        p.moveSpeed += achMoveSpeed;
+        p.critChance += achCritChance;
+        p.critDamage += achCritDamage;
+        p.block += achBlock;
+        p.parry += achParry;
+        p.drop += achDrop;
+        p.qly += achQly;
+        p.gold += achGold;
+        p.str += achStr;
+        p.dex += achDex;
+        p.int += achInt;
+        p.fairySpawn += achFairySpawn;
+
         let alloc = playerStats.spAllocations;
         
         p.str += (alloc.spStr || 0) * 3;  // +3 Strength per spent SP
@@ -4579,7 +4647,18 @@ window.onload = function() {
             }
         }
 
-        if (statKey === 'atk' && playerStats.atkPotionTimer > 0) gearTotal += Math.ceil((playerStats.baseAtk + alloc.spAtk * 6 + gearTotal + artTotal) * 0.10);
+        // Compute total contributions from unlocked Achievements
+        let achTotal = 0;
+        if (playerStats.unlockedAchievements && window.AchievementsData) {
+            playerStats.unlockedAchievements.forEach(id => {
+                let ach = window.AchievementsData.find(a => a.id === id);
+                if (ach && ach.stats && ach.stats[statKey] !== undefined) {
+                    achTotal += ach.stats[statKey];
+                }
+            });
+        }
+
+        if (statKey === 'atk' && playerStats.atkPotionTimer > 0) gearTotal += Math.ceil((playerStats.baseAtk + alloc.spAtk * 6 + gearTotal + artTotal + achTotal) * 0.10);
         if (statKey === 'maxHp' && playerStats.hpPotionTimer > 0) gearTotal += Math.ceil((playerStats.baseMaxHp + alloc.spHp * 40 + gearTotal + artTotal) * 0.10);
         if (statKey === 'def' && playerStats.defPotionTimer > 0) gearTotal += Math.ceil((playerStats.baseDef + alloc.spDef * 3 + gearTotal + artTotal) * 0.10);
         if (statKey === 'moveSpeed' && playerStats.hastePotionTimer > 0) gearTotal += 3;
@@ -4598,6 +4677,7 @@ window.onload = function() {
         if (data.lvl > 0) html += `<div class="tt-stat-line" style="color:#3498db;">• Level Stats (SP): ${formatVal(data.lvl)}</div>`;
         if (gearTotal > 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• Equipment / Elixirs: ${formatVal(gearTotal)}</div>`;
         if (artTotal > 0) html += `<div class="tt-stat-line" style="color:#9b59b6;">• Artifacts: ${formatVal(artTotal)}</div>`;
+        if (achTotal > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• Achievements: ${formatVal(achTotal)}</div>`;
         
         if (statKey === 'critChance' || statKey === 'critDamage') {
             if (playerStats.frenzyTimer > 0) html += `<div class="tt-stat-line" style="color:#e67e22; font-weight:bold; margin-top:5px;">• FRENZY BUFF ACTIVE!</div>`;
@@ -4937,6 +5017,8 @@ window.onload = function() {
         item.enchantments = item.enchantments || {};
         item.enchantments[selectedStat] = (item.enchantments[selectedStat] || 0) + 1;
         item.totalEnchants = (item.totalEnchants || 0) + 1;
+        playerStats.totalEnchants = (playerStats.totalEnchants || 0) + 1;
+        window.checkAchievements();
         
         const integerStats = ["atk", "maxHp", "def", "str", "dex", "int"];
         if (integerStats.includes(selectedStat)) {
@@ -5063,16 +5145,15 @@ window.onload = function() {
             if (inventory.ETC[scrapReq] === 0) delete inventory.ETC[scrapReq];
 
             if (isSuccess) {
+                if (isSuccess) {
                 applyTemperUpgrades(forgeSelectedItem, isArt);
                 forgeSelectedItem.temperLevel++;
+                playerStats.totalTempers = (playerStats.totalTempers || 0) + 1;
                 pushLog(`<span style='color:#e67e22;'>[FORGE]</span> Successfully tempered ${forgeSelectedItem.name} to [+${forgeSelectedItem.temperLevel}]!`);
                 pushHeaderToast("🔨 Success! [+" + forgeSelectedItem.temperLevel + "]", "#2ecc71");
                 spawnTemperParticles(true);
+                window.checkAchievements();
             } else {
-                pushLog(`<span style='color:#e74c3c;'>[FORGE]</span> Temper failed on ${forgeSelectedItem.name}! Materials lost.`);
-                pushHeaderToast(`💥 Temper Failed!`, "#e74c3c");
-                spawnTemperParticles(false);
-            }
         } else if (forgeMode === 'lvl') {
             let currentTier = forgeSelectedItem.stageLevel;
             let costGold = currentTier * 500;
@@ -5325,6 +5406,7 @@ window.onload = function() {
         
         let coinYield = Math.ceil(baseCoin * p.gold);
         playerStats.coins += coinYield;
+        playerStats.totalGoldEarned = (playerStats.totalGoldEarned || 0) + coinYield;
         if (playerStats.runGold !== undefined) {
             playerStats.runGold += coinYield;
         } else {
@@ -5363,6 +5445,7 @@ window.onload = function() {
         
         if (playerStats.isUberBoss) {
             addEtcDrop("Gacha Key", 1); pushToast("Gacha Key", null, "#f1c40f", true, 1);
+            playerStats.riftGuardiansSlain = (playerStats.riftGuardiansSlain || 0) + 1;
         } else if (mob.type === "boss") { 
             if (Math.random() < 0.40) { addEtcDrop("Ancient Core", 1); pushToast("Ancient Core", null, "#9b59b6", true, 1); }
             if (Math.random() < 0.10) { addEtcDrop("Eridium Shard", 1); pushToast("Eridium Shard", null, "#8e44ad", true, 1); }
@@ -5429,13 +5512,15 @@ window.onload = function() {
             playerStats.killCount = 0; playerStats.isBossMode = false; playerStats.isFarmingLoop = false; playerStats.isUberBoss = false; 
             playerStats.currentHp = p.maxHp; window.saveGame();
         } else {
-            if (!playerStats.isFarmingLoop) { 
-                playerStats.killCount++; 
-                if (playerStats.killCount >= playerStats.targetsRequired) playerStats.isBossMode = true; 
-            } 
+                if (!playerStats.isFarmingLoop) { 
+                    playerStats.killCount++; 
+                    if (playerStats.killCount >= playerStats.targetsRequired) playerStats.isBossMode = true; 
+                } 
+            }
+            mob = null; 
+            window.checkAchievements();
+            updateUI();
         }
-        mob = null; updateUI();
-    }
 
    function handlePlayerDefeat() {
         // Ensure cumulative damage values clear on player defeat
@@ -7286,6 +7371,140 @@ function engineCycle() {
         }
     }
 }
+
+/* ==========================================================================
+       ACHIEVEMENTS SYSTEM CORE DATA & UI HANDLERS
+       ========================================================================== */
+    window.AchievementsData = [
+        { id: "slayer_1", name: "Novice Slayer", icon: "⚔️", desc: "Slay 100 total enemies", reqType: "kills", reqValue: 100, stats: { atk: 2 } },
+        { id: "slayer_2", name: "Adept Slayer", icon: "💀", desc: "Slay 1,000 total enemies", reqType: "kills", reqValue: 1000, stats: { atk: 5 } },
+        { id: "slayer_3", name: "Deathbringer", icon: "😈", desc: "Slay 10,000 total enemies", reqType: "kills", reqValue: 10000, stats: { critChance: 0.01 } },
+        
+        { id: "hoarder_1", name: "Penny Pincher", icon: "🪙", desc: "Collect 5,000 total gold", reqType: "gold", reqValue: 5000, stats: { maxHp: 10 } },
+        { id: "hoarder_2", name: "Merchant's Trust", icon: "💰", desc: "Collect 50,000 total gold", reqType: "gold", reqValue: 50000, stats: { gold: 0.01 } },
+        { id: "hoarder_3", name: "Capitalist Overlord", icon: "💎", desc: "Collect 500,000 total gold", reqType: "gold", reqValue: 500000, stats: { qly: 0.01 } },
+        
+        { id: "stage_1", name: "Greenhorn Explorer", icon: "🗺️", desc: "Reach Stage 10", reqType: "stage", reqValue: 10, stats: { def: 1 } },
+        { id: "stage_2", name: "Seasoned Ranger", icon: "🧭", desc: "Reach Stage 50", reqType: "stage", reqValue: 50, stats: { def: 2 } },
+        { id: "stage_3", name: "The Abyss Crawler", icon: "🌋", desc: "Reach Stage 100", reqType: "stage", reqValue: 100, stats: { drop: 0.01 } },
+        
+        { id: "forge_1", name: "Bronze Anvil", icon: "🔨", desc: "Temper any equipment gear item", reqType: "temper", reqValue: 1, stats: { str: 2 } },
+        { id: "enchant_1", name: "Magic Infusion", icon: "🔮", desc: "Enchant any fully-tempered equipment item", reqType: "enchant", reqValue: 1, stats: { int: 2 } },
+        { id: "rift_1", name: "Reality Breaker", icon: "🌌", desc: "Summon and defeat an Enraged Rift Guardian", reqType: "rift", reqValue: 1, stats: { fairySpawn: 0.01 } }
+    ];
+
+    window.getAchievementProgress = function(ach) {
+        if (ach.reqType === "kills") return playerStats.totalLifetimeKills || 0;
+        if (ach.reqType === "gold") return playerStats.totalGoldEarned || 0;
+        if (ach.reqType === "stage") return playerStats.maxStage || 1;
+        if (ach.reqType === "temper") return playerStats.totalTempers || 0;
+        if (ach.reqType === "enchant") return playerStats.totalEnchants || 0;
+        if (ach.reqType === "rift") return playerStats.riftGuardiansSlain || 0;
+        return 0;
+    };
+
+    window.checkAchievements = function() {
+        if (!playerStats.unlockedAchievements) playerStats.unlockedAchievements = [];
+        let unlockedAny = false;
+
+        window.AchievementsData.forEach(ach => {
+            if (playerStats.unlockedAchievements.includes(ach.id)) return;
+            let progress = window.getAchievementProgress(ach);
+            if (progress >= ach.reqValue) {
+                playerStats.unlockedAchievements.push(ach.id);
+                unlockedAny = true;
+                pushLog(`<strong style="color:#f1c40f;">🏆 CHALLENGE ACHIEVED: [${ach.name}]!</strong> - ${ach.desc}`);
+                pushHeaderToast(`🏆 Milestone Unlocked: ${ach.name}!`, "#f1c40f");
+            }
+        });
+
+        if (unlockedAny) {
+            let p = resolvePlayerStats();
+            playerStats.currentHp = Math.min(playerStats.currentHp, p.maxHp);
+            updateUI();
+            renderInventory();
+            window.saveGame();
+        }
+    };
+
+    window.toggleAchievements = function() {
+        let modal = document.getElementById('achievements-modal');
+        if (modal.style.display === 'none') {
+            window.hideTooltip();
+            window.setPauseState(true);
+            window.buildAchievementsModal();
+            modal.style.display = 'block';
+        } else {
+            modal.style.display = 'none';
+            window.setPauseState(false);
+            window.hideTooltip();
+        }
+    };
+
+    window.buildAchievementsModal = function() {
+        let listEl = document.getElementById('achievements-list');
+        if (!listEl) return;
+
+        listEl.innerHTML = window.AchievementsData.map(ach => {
+            let unlocked = playerStats.unlockedAchievements && playerStats.unlockedAchievements.includes(ach.id);
+            let borderStyle = unlocked 
+                ? "border-color: #f1c40f; background: rgba(241, 196, 15, 0.05); color: #fff;" 
+                : "border-color: #333; opacity: 0.5; filter: grayscale(100%); color: #7f8c8d;";
+            let iconDisplay = unlocked ? ach.icon : "🔒";
+
+            return `<div class="bag-item" style="cursor:help; display:flex; flex-direction:row; justify-content:flex-start; align-items:center; gap:10px; ${borderStyle}; padding:8px;" 
+                onmouseenter="window.showAchievementTooltip(event, '${ach.id}')" 
+                ontouchstart="window.showAchievementTooltip(event, '${ach.id}')" 
+                onmouseleave="hideTooltip()">
+                <span style="font-size:22px; width:30px; text-align:center;">${iconDisplay}</span>
+                <div style="flex:1; text-align:left;">
+                    <strong style="color:${unlocked ? '#f1c40f' : '#666'}; font-size:12px;">${ach.name}</strong>
+                    <div style="font-size:9px; color:#aaa; margin-top:2px; line-height:1.2;">${ach.desc}</div>
+                </div>
+            </div>`;
+        }).join("");
+    };
+
+    window.showAchievementTooltip = function(e, achId) {
+        e.stopPropagation();
+        let ach = window.AchievementsData.find(a => a.id === achId);
+        if (!ach) return;
+
+        let unlocked = playerStats.unlockedAchievements && playerStats.unlockedAchievements.includes(achId);
+        let tt = document.getElementById('game-tooltip');
+        
+        let statsDesc = Object.keys(ach.stats).map(k => {
+            let val = ach.stats[k];
+            let isPct = ["critChance", "critDamage", "block", "parry", "drop", "qly", "gold", "fairySpawn", "rareSpawn"].includes(k);
+            let labelMap = {
+                atk: "⚔️ Attack", maxHp: "❤️ Max HP", def: "🛡️ Defense", moveSpeed: "👟 Move Speed",
+                critChance: "✨ Crit Chance", critDamage: "💥 Crit Multiplier", block: "🛡️ Block Rate", parry: "⚡ Parry Rate",
+                str: "💪 STR", dex: "🎯 DEX", int: "🧠 INT",
+                drop: "🍀 Drop Rate Mod", qly: "💎 Drop Quality Mod", gold: "🟡 Gold Multiplier",
+                fairySpawn: "🧚 Fairy Spawn Mod", rareSpawn: "✨ Rare Spawn Rate"
+            };
+            let cleanLabel = labelMap[k] || k.toUpperCase();
+            let cleanVal = isPct ? `+${(val * 100).toFixed(0)}%` : `+${val}`;
+            return `<div class="tt-stat-line" style="color:#2ecc71;">• ${cleanLabel}: ${cleanVal}</div>`;
+        }).join("");
+
+        let progressVal = window.getAchievementProgress(ach);
+        let percentDone = Math.min(100, (progressVal / ach.reqValue) * 100);
+
+        let html = `<div style="padding: 10px; width: 230px; box-sizing: border-box;">
+            <div class="tt-title" style="color:${unlocked ? '#f1c40f' : '#aaa'};">${ach.icon} ${ach.name}</div>
+            <div class="tt-subtitle" style="color:${unlocked ? '#2ecc71' : '#e74c3c'}; font-weight:bold;">${unlocked ? '🔓 UNLOCKED' : '🔒 LOCKED'}</div>
+            <div style="color:#ddd; font-size:11px; margin-bottom:6px; white-space:normal; line-height:1.3;">${ach.desc}</div>
+            <div style="font-size:10px; color:#aaa; margin-bottom:6px; font-family:monospace;">Progress: ${progressVal.toLocaleString()} / ${ach.reqValue.toLocaleString()} (${percentDone.toFixed(1)}%)</div>
+            <div style="font-weight:bold; color:#aaa; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Permanent Reward:</div>
+            ${statsDesc}
+        </div>`;
+
+        tt.style.borderColor = unlocked ? "#f1c40f" : "#444";
+        tt.innerHTML = html;
+        tt.style.display = "block";
+        window.positionTooltip(e, tt);
+    };
 
 window.loadGame(); 
 updateUI(); 
