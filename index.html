@@ -3457,7 +3457,7 @@ window.onload = function() {
             window.spawnPurchaseCelebration('gold', getTierColor(purchasedItem.statsRolled), purchasedItem.statsRolled);
         }
 
-        renderMarketShop(); updateUI(); renderInventory(); renderForgeTab(); window.saveGame();
+        renderMarketShop(); window.checkAchievements(); updateUI(); renderInventory(); renderForgeTab(); window.saveGame();
     };
 
     window.showMarketTooltip = function(e, index) {
@@ -3707,6 +3707,7 @@ window.onload = function() {
         });
 
         pushToast(newItem.name, newItem.statsRolled, color);
+        window.checkAchievements();
         updateUI(); 
         renderInventory(); 
         renderForgeTab();
@@ -4358,6 +4359,7 @@ window.onload = function() {
         
          let newMaxHp = resolvePlayerStats().maxHp;
         playerStats.currentHp = Math.min(playerStats.currentHp, newMaxHp);
+        window.checkAchievements();
         updateUI(); renderInventory(); window.saveGame();
     };
 
@@ -4442,6 +4444,7 @@ window.onload = function() {
         let newMaxHp = resolvePlayerStats().maxHp;
         playerStats.currentHp = Math.min(playerStats.currentHp, newMaxHp);
 
+        window.checkAchievements();
         updateUI(); 
         renderInventory(); 
         renderForgeTab(); 
@@ -4894,7 +4897,6 @@ window.onload = function() {
         window.checkAchievements();
         updateUI(); renderInventory(); renderForgeTab(); window.saveGame();
     };
-
     window.unequipItem = function(slotKey) {
         let maxBag = checkArtifactTrait("bag_space") ? 50 : 20;
         window.hideTooltip(); let item = equippedSlots[slotKey]; if (!item) return;
@@ -7476,6 +7478,19 @@ function engineCycle() {
         { id: "salvage_2", name: "Deconstruction Derby", icon: "🚜", desc: "Salvage 100 total items", reqType: "salvage", reqValue: 100, stats: { drop: 0.05 } }
     ];
 
+    window.getAchievementProgress = function(ach) {
+        if (ach.reqType === "kills") return playerStats.totalLifetimeKills || 0;
+        if (ach.reqType === "gold") return playerStats.totalGoldEarned || 0;
+        if (ach.reqType === "stage") return playerStats.maxStage || 1;
+        if (ach.reqType === "temper") return playerStats.totalTempers || 0;
+        if (ach.reqType === "enchant") return playerStats.totalEnchants || 0;
+        if (ach.reqType === "rift") return playerStats.riftGuardiansSlain || 0;
+        if (ach.reqType === "level") return playerStats.level || 1;
+        if (ach.reqType === "elixirs") return playerStats.elixirsConsumed || 0;
+        if (ach.reqType === "bag_count") return inventory.EQUIP.length || 0;
+        if (ach.reqType === "salvage") return playerStats.itemsSalvaged || 0;
+        return 0;
+    };
     window.getAchievementProgress = function(ach) {
         if (ach.reqType === "kills") return playerStats.totalLifetimeKills || 0;
         if (ach.reqType === "gold") return playerStats.totalGoldEarned || 0;
