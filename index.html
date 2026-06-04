@@ -532,6 +532,10 @@
                             <span style="color:#9b59b6; font-weight:bold;">🔥 Souls Held:</span>
                             <span style="color:#aaa;"><span id="crucible-souls-held">0</span>/100</span>
                         </div>
+                        <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:4px; align-items:center;">
+                            <span style="color:#9b59b6; font-weight:bold;">🏆 Peak Wave:</span>
+                            <span style="color:#aaa;"><span id="crucible-peak-wave">1</span></span>
+                        </div>
                         <button onclick="enterCrucible()" style="width: 100%; background: #9b59b6; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">Enter Astral Crucible</button>
                     </div>
                 </div>
@@ -640,12 +644,12 @@
         <div id="control-bar">
             <div style="color: #aaa;">Spacebar or Click Canvas to Slash!</div>
             <div style="display: flex; gap: 8px;">
+                <button id="btn-leave-activity" class="btn-toggle" onclick="leaveActivity()" style="background: #c0392b; display: none; opacity: 1; border-color: #f1c40f;">🏃 Leave</button>
                 <button id="btn-achievements" class="btn-toggle" onclick="toggleAchievements()" style="background: #8e44ad; opacity: 1;">🏆 Trophies</button>
                 <button id="btn-pause" class="btn-toggle" onclick="togglePause()" style="background: #34495e;">▶️ Pause</button>
                 <button id="toggle-auto" class="btn-toggle active" onclick="toggleAuto()">Auto: ON</button>
             </div>
         </div>
-
         <div class="stats-hud">
             <div>Stage <span id="hud-stage" style="color:#3498db;">1</span></div>
             <div><span id="hud-progress" style="color:#f1c40f;">0/5</span></div>
@@ -2447,6 +2451,7 @@ window.onload = function() {
         currentDungeonStage: { equip: 1, gold: 1, mat: 1 },
         astralShards: 0,
         crucibleWave: 1,
+        cruciblePeak: 1,
         isCrucibleMode: false,
         crucibleKills: 0,
 
@@ -3438,6 +3443,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 if (playerStats.currentDungeonStage === undefined) playerStats.currentDungeonStage = { equip: 1, gold: 1, mat: 1 };
                 if (playerStats.astralShards === undefined) playerStats.astralShards = 0;
                 if (playerStats.crucibleWave === undefined) playerStats.crucibleWave = 1;
+                if (playerStats.cruciblePeak === undefined) playerStats.cruciblePeak = 1;
                 if (playerStats.isCrucibleMode === undefined) playerStats.isCrucibleMode = false;
                 if (playerStats.crucibleKills === undefined) playerStats.crucibleKills = 0;
                 
@@ -4066,7 +4072,68 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             }
         }
     }
-     window.enterDungeon = function(type) {
+     function saveCurrentActivityPeak() {
+        if (playerStats.isCrucibleMode) {
+            let finalWave = playerStats.crucibleWave || 1;
+            playerStats.cruciblePeak = Math.max(playerStats.cruciblePeak || 1, finalWave);
+        } else if (playerStats.isDungeonMode && playerStats.currentDungeon) {
+            let dType = playerStats.currentDungeon;
+            let dStage = playerStats.currentDungeonStage[dType] || 1;
+            playerStats.dungeonPeaks[dType] = Math.max(playerStats.dungeonPeaks[dType] || 1, dStage);
+        }
+    }
+
+    window.leaveActivity = function() {
+        if (!playerStats.isDungeonMode && !playerStats.isCrucibleMode) {
+            pushHeaderToast("You are not currently in an activity!", "#e74c3c");
+            return;
+        }
+        if (!confirm("Are you sure you want to retreat to the Campaign? You will keep your current peaks and earn prorated rewards.")) return;
+
+        let p = resolvePlayerStats();
+        
+        if (playerStats.isCrucibleMode) {
+            let finalWave = playerStats.crucibleWave || 1;
+            playerStats.cruciblePeak = Math.max(playerStats.cruciblePeak || 1, finalWave);
+            
+            let gainedShards = Math.floor(finalWave * 1.5);
+            let gainedCores = Math.floor(finalWave / 10) + (Math.random() < 0.20 ? 1 : 0);
+            
+            playerStats.astralShards = (playerStats.astralShards || 0) + gainedShards;
+            if (gainedCores > 0) addEtcDrop("Catalyst Core", gainedCores);
+            
+            pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE RETREAT] Safely left the Crucible at Wave ${finalWave}. Earned ${gainedShards} Shards and ${gainedCores} Catalyst Cores!</span>`);
+            pushHeaderToast(`🏃 Crucible Cleared! Wave ${finalWave}`, "#9b59b6");
+            
+            showCrucibleSummaryModal(finalWave, gainedShards, gainedCores);
+        } else if (playerStats.isDungeonMode) {
+            let dType = playerStats.currentDungeon;
+            let dStage = playerStats.currentDungeonStage[dType] || 1;
+            playerStats.dungeonPeaks[dType] = Math.max(playerStats.dungeonPeaks[dType] || 1, dStage);
+            
+            pushLog(`<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON RETREAT] Safely retreated from ${dType.toUpperCase()} Dungeon at Stage ${dStage}.</span>`);
+            pushHeaderToast(`🏃 Retreated! Stage ${dStage}`, "#8e44ad");
+        }
+
+        playerStats.isDungeonMode = false;
+        playerStats.isCrucibleMode = false;
+        playerStats.currentDungeon = null;
+        mob = null;
+        playerStats.usedSecondWind = false;
+        
+        playerStats.runKills = 0;
+        playerStats.runGold = 0;
+        playerStats.runXp = 0;
+        playerStats.killedBy = "Unknown Foe";
+        playerStats.killedByMob = null;
+
+        playerStats.currentHp = p.maxHp;
+        updateUI();
+        renderInventory();
+        window.saveGame();
+    };
+
+    window.enterDungeon = function(type) {
         let countField = type + 'Keys'; let timeField = 'next' + type.charAt(0).toUpperCase() + type.slice(1) + 'KeyTime';
         if (playerStats[countField] < 1) { pushHeaderToast("Not enough keys!", "#e74c3c"); return; }
         
@@ -4079,6 +4146,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         
         if (!confirm(`Spend 1 Key to enter the Infinite ${dNames[type]}? Starting checkpoint: Stage ${checkpoint}`)) return;
         
+        // Secure previous state prior to loading new parameters
+        saveCurrentActivityPeak();
+
         playerStats[countField]--;
         if (playerStats[countField] === 2) playerStats[timeField] = Date.now() + 3600000;
         
@@ -4105,6 +4175,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         
         if (!confirm("Burn 100 Monster Souls to enter the Astral Crucible endless waves?")) return;
         
+        // Secure previous state prior to loading new parameters
+        saveCurrentActivityPeak();
+
         inventory.ETC["Monster Soul"] -= 100;
         if (inventory.ETC["Monster Soul"] === 0) delete inventory.ETC["Monster Soul"];
         
@@ -6242,6 +6315,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         if (playerStats.isCrucibleMode) {
             if (mob.type === "dungeon_boss") {
                 playerStats.crucibleWave++;
+                playerStats.cruciblePeak = Math.max(playerStats.cruciblePeak || 1, playerStats.crucibleWave);
                 playerStats.killCount = 0;
                 pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE] Advanced to Wave ${playerStats.crucibleWave}!</span>`);
             } else {
@@ -6807,6 +6881,16 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         
         let soulsLabel = document.getElementById('crucible-souls-held');
         if (soulsLabel) soulsLabel.innerText = soulsTotal;
+        
+        let peakWaveEl = document.getElementById('crucible-peak-wave');
+        if (peakWaveEl) {
+            peakWaveEl.innerText = playerStats.cruciblePeak || 1;
+        }
+
+        let leaveBtn = document.getElementById('btn-leave-activity');
+        if (leaveBtn) {
+            leaveBtn.style.display = (playerStats.isDungeonMode || playerStats.isCrucibleMode) ? "inline-block" : "none";
+        }
 
         let scrapsSum = (inventory.ETC["Mythic Scrap"] || 0) + (inventory.ETC["Legendary Scrap"] || 0) + (inventory.ETC["Epic Scrap"] || 0) + (inventory.ETC["Magic Scrap"] || 0) + (inventory.ETC["Rare Scrap"] || 0);
         document.getElementById('live-qty-scraps').innerText = scrapsSum;
