@@ -5401,13 +5401,6 @@ window.onload = function() {
             }
         }
         
-        // Post-battle active recovery (Valkyrie's Blessing)
-        if (!playerStats.isDungeonMode && !isBoss) {
-            let healAmt = Math.floor(p.maxHp * 0.15);
-            playerStats.currentHp = Math.min(p.maxHp, playerStats.currentHp + healAmt);
-            effects.push({ x: hero.x, y: hero.y - 20, text: "💚 +" + healAmt, color: "#2ecc71", life: 60 });
-        }
-
         if (playerStats.isDungeonMode) {
             if (mob.type === "dungeon_miniboss" || mob.hp <= 0) {
                 if (mob.type === "dungeon_miniboss" || (!isBoss && playerStats.killCount >= playerStats.targetsRequired)) {
