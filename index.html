@@ -2544,7 +2544,7 @@ window.onload = function() {
             let effMultiplier = 1 + (p.critChance * (p.critDamage - 1));
             let playerDps = Math.max(1, p.atk * effMultiplier * (60 / p.idleAttackSpeed));
 
-            let scale = Math.pow(1.11, currentStage);
+            let scale = Math.pow(1.08, currentStage);
             let mobHp = 12 * scale;
             let bossHp = 45 * scale;
             
@@ -2557,7 +2557,7 @@ window.onload = function() {
             let cycleTime = ttk + 2.0; // Dynamic combat time + travel buffer
             cycleTime = Math.max(0.5, Math.min(300, cycleTime)); // Performance limits
 
-            // Progressive Survival Audit
+            // Progressive Survival Audit (Corrected for Stage Attrition and Valkyrie's Blessing)
             let mobDmg = (1 + scale) * 4.5;
             let mitigation = p.def / (p.def + 100 + (currentStage * 12));
             let netMobDmg = Math.max(1, Math.ceil(mobDmg * (1 - mitigation)));
@@ -2565,15 +2565,27 @@ window.onload = function() {
             let hitsTaken = Math.floor(ttk / 2);
             let totalDmgTaken = hitsTaken * netMobDmg;
             
-            let vampHeal = 0;
-            if (checkArtifactTrait("vampirism")) {
-                vampHeal = Math.floor((playerDps * ttk) * 0.10);
-            }
+            let vampHeal = checkArtifactTrait("vampirism") ? Math.floor((playerDps * ttk) * 0.10) : 0;
+            let netDmgTaken = Math.max(0, totalDmgTaken - vampHeal);
             
-            let netDmgTaken = totalDmgTaken - vampHeal;
+            // Post-battle active recovery representation (+15% Max HP on normal mob kill)
+            let activeRecoveryPerKill = Math.floor(p.maxHp * 0.15);
+            let netMobAttrition = Math.max(0, netDmgTaken - activeRecoveryPerKill);
             
-            // Retreat trigger if the wall can't be cleared safely
-            if (netDmgTaken > p.maxHp && !checkArtifactTrait("second_wind")) {
+            // Calculate boss fight attrition for this stage
+            let bossTtk = bossHp / playerDps;
+            let bossHits = Math.floor(bossTtk / 2);
+            let bossDmg = (2 + (3 * scale)) * 5.0;
+            let bossNetDmg = Math.max(1, Math.ceil(bossDmg * (1 - mitigation)));
+            let bossDmgTaken = bossHits * bossNetDmg;
+            let bossVampHeal = checkArtifactTrait("vampirism") ? Math.floor((playerDps * bossTtk) * 0.10) : 0;
+            let bossNetDmgTaken = Math.max(0, bossDmgTaken - bossVampHeal);
+            
+            // Total cumulative damage attrition for the entire stage (standard mobs + boss)
+            let cumulativeStageDamage = (netMobAttrition * killsNeededForStage) + bossNetDmgTaken;
+            
+            // Retreat trigger if cumulative stage attrition exceeds safety limits
+            if (cumulativeStageDamage > p.maxHp && !checkArtifactTrait("second_wind")) {
                 diedOffline = true;
                 deathStage = currentStage;
                 currentStage = Math.max(1, Math.floor(currentStage * 0.70)); // Retreat stage
@@ -3829,21 +3841,43 @@ window.onload = function() {
         p.parry += (alloc.spParry * 0.005);
         p.moveSpeed += (alloc.spSpd * 1);
         
+         // Initialize base Defense scaling with SP and Intelligence allocation
+        let flatDef = playerStats.baseDef + (alloc.spDef * 3) + (p.int * 0.75);
+        let defMultiplier = 1.0;
+
         for (let key in equippedSlots) {
             let item = equippedSlots[key];
             if (item) {
-                p.atk += (item.atk || 0); p.maxHp += (item.maxHp || 0); p.def += (item.def || 0); p.moveSpeed += (item.moveSpeed || 0);
-                p.idleAttackSpeed += (item.idleAttackSpeed || 0); p.activeAttackSpeed += (item.activeAttackSpeed || 0);
-                p.drop += (item.dropRate || 0); p.qly += (item.quality || 0); p.gold += (item.goldMulti || 0);
-                p.critChance += (item.critChance || 0); p.critDamage += (item.critDamage || 0);
-                p.block += (item.block || 0); p.parry += (item.parry || 0);
-                p.str += (item.str || 0); p.dex += (item.dex || 0); p.int += (item.int || 0);
+                p.atk += (item.atk || 0); 
+                p.maxHp += (item.maxHp || 0); 
+                p.moveSpeed += (item.moveSpeed || 0);
+                p.idleAttackSpeed += (item.idleAttackSpeed || 0); 
+                p.activeAttackSpeed += (item.activeAttackSpeed || 0);
+                p.drop += (item.dropRate || 0); 
+                p.qly += (item.quality || 0); 
+                p.gold += (item.goldMulti || 0);
+                p.critChance += (item.critChance || 0); 
+                p.critDamage += (item.critDamage || 0);
+                p.block += (item.block || 0); 
+                p.parry += (item.parry || 0);
+                p.str += (item.str || 0); 
+                p.dex += (item.dex || 0); 
+                p.int += (item.int || 0);
                 p.rareSpawn += (item.rareSpawn || 0);
                 p.fairySpawn += (item.fairySpawn || 0);
+                
+                // Track flat defense from non-shield items
+                flatDef += (item.def || 0);
+                
+                // Derive multiplicative % defense from high-quality structural armor
+                if (["chest", "leggings", "overall", "helmet"].includes(item.type)) {
+                    let stars = item.statsRolled === "UNIQUE" ? 5 : (item.statsRolled || 0);
+                    defMultiplier += (stars * 0.03) + (item.temperLevel * 0.01);
+                }
             }
         }
 
-        // Primary attributes hybrid cross-scaling (Significantly amplified)
+        // Primary attributes hybrid cross-scaling
         p.atk += p.str * 1.5;              // 1 STR = +1.5 Attack
         p.maxHp += p.str * 10;             // 1 STR = +10 Max HP
 
@@ -3853,24 +3887,9 @@ window.onload = function() {
 
         p.block += p.int * 0.002;          // 1 INT = +0.2% Block Rate
         p.parry += p.int * 0.002;          // 1 INT = +0.2% Parry Rate
-        p.def += p.int * 0.75;             // 1 INT = +0.75 Defense
         
-        if (playerStats.atkPotionTimer > 0) p.atk = Math.ceil(p.atk * 1.10);
-        if (playerStats.hpPotionTimer > 0) p.maxHp = Math.ceil(p.maxHp * 1.10);
-        if (playerStats.defPotionTimer > 0) p.def = Math.ceil(p.def * 1.10);
-        if (playerStats.hastePotionTimer > 0) {
-            p.moveSpeed += 3; 
-            p.activeAttackSpeed -= 2;
-            if (p.activeAttackSpeed < 4) p.activeAttackSpeed = 4;
-        }
-
-        if (checkArtifactTrait("move_speed")) p.moveSpeed += 10; if (checkArtifactTrait("defense")) p.def += 15;
-        if (checkArtifactTrait("idle_spd")) p.idleAttackSpeed -= 20; if (checkArtifactTrait("active_spd")) p.activeAttackSpeed -= 3;
-        if (p.idleAttackSpeed < 10) p.idleAttackSpeed = 10; if (p.activeAttackSpeed < 4) p.activeAttackSpeed = 4;
-        if (playerStats.frenzyTimer > 0) { p.critChance = 1.00; p.critDamage += 0.50; p.activeAttackSpeed = 4; p.idleAttackSpeed = 20; }
-        
-        if (p.block > 0.75) p.block = 0.75;
-        if (p.parry > 0.35) p.parry = 0.35; 
+        // Add flat defense from checking special artifact buffs
+        if (checkArtifactTrait("defense")) flatDef += 15;
 
         // Any subweapon allows blocking. Shields provide a balanced flat and multiplicative defense boost.
         const hasSubweapon = !!equippedSlots.subweapon;
@@ -3880,9 +3899,35 @@ window.onload = function() {
 
         const hasShield = equippedSlots.subweapon && equippedSlots.subweapon.subType === "shield";
         if (hasShield) {
-            // Toned down to prevent early-game invincibility while retaining its robust defensive identity
-            p.def = Math.ceil((p.def + 15 + (equippedSlots.subweapon.stageLevel * 3)) * 1.25);
+            let shield = equippedSlots.subweapon;
+            let shieldStars = shield.statsRolled === "UNIQUE" ? 5 : (shield.statsRolled || 0);
+            
+            // Shields provide a massive flat defense and a solid multiplicative boost
+            flatDef += 15 + (shield.stageLevel * 3);
+            defMultiplier += 0.25 + (shieldStars * 0.02) + (shield.temperLevel * 0.01);
         }
+
+        // Apply final derived flat and multiplicative calculations to player profile
+        p.def = Math.ceil(flatDef * defMultiplier);
+
+        if (playerStats.atkPotionTimer > 0) p.atk = Math.ceil(p.atk * 1.10);
+        if (playerStats.hpPotionTimer > 0) p.maxHp = Math.ceil(p.maxHp * 1.10);
+        if (playerStats.defPotionTimer > 0) p.def = Math.ceil(p.def * 1.10);
+        if (playerStats.hastePotionTimer > 0) {
+            p.moveSpeed += 3; 
+            p.activeAttackSpeed -= 2;
+            if (p.activeAttackSpeed < 4) p.activeAttackSpeed = 4;
+        }
+
+        if (checkArtifactTrait("move_speed")) p.moveSpeed += 10;
+        if (checkArtifactTrait("idle_spd")) p.idleAttackSpeed -= 20; 
+        if (checkArtifactTrait("active_spd")) p.activeAttackSpeed -= 3;
+        if (p.idleAttackSpeed < 10) p.idleAttackSpeed = 10; 
+        if (p.activeAttackSpeed < 4) p.activeAttackSpeed = 4;
+        if (playerStats.frenzyTimer > 0) { p.critChance = 1.00; p.critDamage += 0.50; p.activeAttackSpeed = 4; p.idleAttackSpeed = 20; }
+        
+        if (p.block > 0.75) p.block = 0.75;
+        if (p.parry > 0.35) p.parry = 0.35;
 
         // Standardize decimal scales into final integer profiles for core gameplay metrics
         p.atk = Math.floor(p.atk);
@@ -3978,12 +4023,12 @@ window.onload = function() {
         // Scale dungeon entities based on a softened curve of the player's highest historic stage peak.
         // Instead of raw maxStage at 1.11 base (which scales too aggressively), dungeons use a gentler 1.065 base
         // applied to 85% of the player's max stage to keep dungeons challenging but highly possible.
-        let scale;
+         let scale;
         if (playerStats.isDungeonMode) {
             let effectiveDungeonStage = Math.max(1, Math.floor((playerStats.maxStage || 1) * 0.85));
-            scale = Math.pow(1.065, effectiveDungeonStage);
+            scale = Math.pow(1.05, effectiveDungeonStage); // Slightly softened for dungeon metrics
         } else {
-            scale = Math.pow(1.11, playerStats.stage);
+            scale = Math.pow(1.08, playerStats.stage);
         }
         if (playerStats.isDungeonMode) {
             let hpScale = playerStats.currentDungeon === 'gold' ? 1.5 : 1; 
@@ -5356,6 +5401,13 @@ window.onload = function() {
             }
         }
         
+        // Post-battle active recovery (Valkyrie's Blessing)
+        if (!playerStats.isDungeonMode && !isBoss) {
+            let healAmt = Math.floor(p.maxHp * 0.15);
+            playerStats.currentHp = Math.min(p.maxHp, playerStats.currentHp + healAmt);
+            effects.push({ x: hero.x, y: hero.y - 20, text: "💚 +" + healAmt, color: "#2ecc71", life: 60 });
+        }
+
         if (playerStats.isDungeonMode) {
             if (mob.type === "dungeon_miniboss" || mob.hp <= 0) {
                 if (mob.type === "dungeon_miniboss" || (!isBoss && playerStats.killCount >= playerStats.targetsRequired)) {
