@@ -2556,8 +2556,8 @@ window.onload = function() {
             let effMultiplier = 1 + (p.critChance * (p.critDamage - 1));
             let playerDps = Math.max(1, p.atk * effMultiplier * (60 / p.idleAttackSpeed));
 
-            // Declare remaining monster count first to prevent initialization access errors
-            let killsNeededForStage = 5 - playerStats.killCount; 
+            // Safely resolve monster requirement count at the start of loop step to prevent TDZ errors
+            let killsNeededForStage = 5 - playerStats.killCount;
 
             let scale = Math.pow(1.08, currentStage);
             let mobHp = 12 * scale;
@@ -2572,7 +2572,7 @@ window.onload = function() {
             let cycleTime = ttk + 2.0; // Dynamic combat time + travel buffer
             cycleTime = Math.max(0.5, Math.min(300, cycleTime)); // Performance limits
 
-            // Progressive Survival Audit (Corrected for Stage Attrition and Valkyrie's Blessing)
+            // Progressive Survival Audit (Cumulative Stage Attrition)
             let mobDmg = (1 + scale) * 4.5;
             let mitigation = p.def / (p.def + 100 + (currentStage * 12));
             let netMobDmg = Math.max(1, Math.ceil(mobDmg * (1 - mitigation)));
@@ -5143,7 +5143,6 @@ window.onload = function() {
             if (inventory.ETC[scrapReq] === 0) delete inventory.ETC[scrapReq];
 
             if (isSuccess) {
-                if (isSuccess) {
                 applyTemperUpgrades(forgeSelectedItem, isArt);
                 forgeSelectedItem.temperLevel++;
                 playerStats.totalTempers = (playerStats.totalTempers || 0) + 1;
@@ -5152,6 +5151,10 @@ window.onload = function() {
                 spawnTemperParticles(true);
                 window.checkAchievements();
             } else {
+                pushLog(`<span style='color:#e74c3c;'>[FORGE]</span> Temper failed on ${forgeSelectedItem.name}! Materials lost.`);
+                pushHeaderToast(`💥 Temper Failed!`, "#e74c3c");
+                spawnTemperParticles(false);
+            }
         } else if (forgeMode === 'lvl') {
             let currentTier = forgeSelectedItem.stageLevel;
             let costGold = currentTier * 500;
