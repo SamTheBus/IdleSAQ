@@ -503,6 +503,66 @@
     <div id="game-container">
         
         <div id="top-nav">
+            <div style="display: flex; gap: 8px; position: relative;">
+                <div style="position: relative;">
+                    <button onclick="toggleDungeonMenu()" style="background: #2c3e50; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🏰 Activities ▼</button>
+                    <div id="dungeon-menu" style="display: none; position: absolute; top: 35px; left: 0; background: #151515; border: 1px solid #444; border-radius: 6px; padding: 12px; width: 260px; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.9);">
+                        <div style="color: #f1c40f; font-weight: bold; margin-bottom: 8px; font-size: 14px; text-align:center; border-bottom:1px solid #333; padding-bottom:5px;">🏰 Infinite Dungeons</div>
+                        
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
+                            <span style="color:#3498db; font-weight:bold;">⚔️ Equip: <span id="dk-equip">3</span>/3</span>
+                            <span id="dt-equip" style="color:#aaa;">(Full)</span>
+                        </div>
+                        <button onclick="enterDungeon('equip')" style="width: 100%; background: #3498db; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Equipment Dungeon</button>
+                        
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
+                            <span style="color:#f1c40f; font-weight:bold;">💰 Gold: <span id="dk-gold">3</span>/3</span>
+                            <span id="dt-gold" style="color:#aaa;">(Full)</span>
+                        </div>
+                        <button onclick="enterDungeon('gold')" style="width: 100%; background: #f1c40f; color: #111; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Gold Mine Caverns</button>
+                        
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
+                            <span style="color:#2ecc71; font-weight:bold;">📦 Mats: <span id="dk-mat">3</span>/3</span>
+                            <span id="dt-mat" style="color:#aaa;">(Full)</span>
+                        </div>
+                        <button onclick="enterDungeon('mat')" style="width: 100%; background: #2ecc71; color: #111; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Toxic Material Pit</button>
+
+                        <div style="color: #9b59b6; font-weight: bold; margin-top: 8px; margin-bottom: 8px; font-size: 14px; text-align:center; border-top:1px solid #333; padding-top:5px;">🔮 Wave Survival Crucible</div>
+                        <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:4px; align-items:center;">
+                            <span style="color:#9b59b6; font-weight:bold;">🔥 Souls Held:</span>
+                            <span style="color:#aaa;"><span id="crucible-souls-held">0</span>/100</span>
+                        </div>
+                        <button onclick="enterCrucible()" style="width: 100%; background: #9b59b6; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">Enter Astral Crucible</button>
+                    </div>
+                </div>
+                
+                <div style="position: relative;">
+                    <button onclick="toggleAudioMenu()" style="background: #2c3e50; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🔊 Sound ▼</button>
+                    <div id="audio-menu" style="display: none; position: absolute; top: 35px; left: 0; background: #151515; border: 1px solid #444; border-radius: 6px; padding: 12px; width: 220px; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.9);">
+                        <div style="color: #f1c40f; font-weight: bold; margin-bottom: 10px; font-size: 14px; text-align:center; border-bottom:1px solid #333; padding-bottom:5px;">🔊 Sound Control</div>
+                        
+                        <div style="margin-bottom: 10px;">
+                            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                                <span style="color:#aaa;">Master Vol:</span>
+                                <span id="vol-master-label" style="color:#3498db; font-weight:bold;">50%</span>
+                            </div>
+                            <input type="range" id="slider-vol-master" min="0" max="1" step="0.05" value="0.5" oninput="changeVolume('master', this.value)" style="width: 100%; background:#333; outline:none; height:4px; border-radius:2px; appearance:none; cursor:pointer;">
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                                <span style="color:#aaa;">SFX Vol:</span>
+                                <span id="vol-sfx-label" style="color:#2ecc71; font-weight:bold;">80%</span>
+                            </div>
+                            <input type="range" id="slider-vol-sfx" min="0" max="1" step="0.05" value="0.8" oninput="changeVolume('sfx', this.value)" style="width: 100%; background:#333; outline:none; height:4px; border-radius:2px; appearance:none; cursor:pointer;">
+                        </div>
+                        
+                        <button id="btn-audio-mute" onclick="toggleMute()" style="width: 100%; background: #c0392b; color: white; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; transition: background 0.2s;">Mute Audio</button>
+                    </div>
+                </div>
+            </div>
+            <div style="font-size: 13px; color: #7f8c8d; font-weight: bold; align-self: center; letter-spacing: 1px;">Idle SAQ: Slaying and Questing</div>
+        </div>
 
         <div id="toast-container"></div>
         <div id="game-tooltip" class="tooltip-base"></div>
@@ -6532,11 +6592,31 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         let pBtn = document.getElementById('btn-sp-parry'); if (pBtn && alloc.spParry >= 40) pBtn.style.display = "none";
 
         let progressEl = document.getElementById('hud-progress');
-        if (playerStats.isDungeonMode) {
-            document.getElementById('hud-stage').innerText = `Dungeon`; document.getElementById('hud-stage').style.color = "#8e44ad";
-            progressEl.innerText = `Wave ${playerStats.dungeonWave}/5 (${playerStats.killCount}/${playerStats.targetsRequired})`; progressEl.style.color = "#8e44ad";
+        if (playerStats.isCrucibleMode) {
+            document.getElementById('hud-stage').innerText = `Crucible`;
+            document.getElementById('hud-stage').style.color = "#9b59b6";
+            if (playerStats.killCount >= playerStats.targetsRequired) {
+                progressEl.innerText = `ELITE WAVE!`;
+                progressEl.style.color = "#e74c3c";
+            } else {
+                progressEl.innerText = `Floor ${playerStats.crucibleWave} (${playerStats.killCount}/5)`;
+                progressEl.style.color = "#9b59b6";
+            }
+        } else if (playerStats.isDungeonMode) {
+            let dType = playerStats.currentDungeon;
+            let dStage = playerStats.currentDungeonStage[dType] || 1;
+            document.getElementById('hud-stage').innerText = `Dung. Stage ${dStage}`;
+            document.getElementById('hud-stage').style.color = "#8e44ad";
+            if (playerStats.killCount >= playerStats.targetsRequired) {
+                progressEl.innerText = `BOSS READY!`;
+                progressEl.style.color = "#e74c3c";
+            } else {
+                progressEl.innerText = `${playerStats.killCount} / ${playerStats.targetsRequired}`;
+                progressEl.style.color = "#f1c40f";
+            }
         } else {
-            document.getElementById('hud-stage').innerText = `${playerStats.stage}`; document.getElementById('hud-stage').style.color = "#3498db";
+            document.getElementById('hud-stage').innerText = `Stage ${playerStats.stage}`;
+            document.getElementById('hud-stage').style.color = "#3498db";
             if (playerStats.isBossMode) { progressEl.innerText = playerStats.isUberBoss ? "⚡ RIFT BOSS!" : "🎯 BOSS READY!"; progressEl.style.color = playerStats.isUberBoss ? "#9b59b6" : "#e74c3c"; } 
             else if (playerStats.isFarmingLoop) { progressEl.innerText = "💀 FARMING MODE"; progressEl.style.color = "#7f8c8d"; } 
             else { progressEl.innerText = `${playerStats.killCount} / ${playerStats.targetsRequired}`; progressEl.style.color = "#f1c40f"; }
@@ -6808,7 +6888,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     }
 
     // Snowflakes update & spawn logic (only active on Peak stage, tier === 1, outdoors)
-    if (getStageTier() === 1 && !playerStats.isDungeonMode) {
+    if (getStageTier() === 1 && !playerStats.isDungeonMode && !playerStats.isCrucibleMode) {
         if (!isGamePaused && Math.random() < 0.40) { // Spawn snowflakes gently
             snowflakes.push({
                 x: Math.random() * canvas.width,
@@ -7041,7 +7121,33 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         const penBoss = 2.4;        // Dungeon bosses and Rift Guardians
 
         // 1. SKY & BACKGROUND FILL
-        if (playerStats.isDungeonMode) {
+        if (playerStats.isCrucibleMode) {
+            // Pulsing Astral Cosmic Void
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
+            skyGrad.addColorStop(0, "#05010c");
+            skyGrad.addColorStop(1, "#150221");
+            ctx.fillStyle = skyGrad; 
+            ctx.fillRect(0, 0, canvas.width, 180);
+
+            // Glistening Space dust
+            ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+            for (let i = 0; i < 25; i++) {
+                let size = (Math.sin(Date.now() / 200 + i) * 0.5 + 0.5) * 1.5;
+                ctx.fillRect((i * 47) % canvas.width, (i * 13) % 150, size, size);
+            }
+
+            // Pulsing Nebulae Ring (preserves toon ink trace)
+            let pulseRad = 65 + Math.sin(Date.now() / 250) * 15;
+            let spaceGlow = ctx.createRadialGradient(canvas.width / 2, 80, 2, canvas.width / 2, 80, pulseRad);
+            spaceGlow.addColorStop(0, "rgba(155, 89, 182, 0.45)");
+            spaceGlow.addColorStop(0.5, "rgba(232, 67, 147, 0.15)");
+            spaceGlow.addColorStop(1, "rgba(155, 89, 182, 0)");
+            
+            ctx.fillStyle = spaceGlow;
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, 80, pulseRad, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (playerStats.isDungeonMode) {
             let caveGrad = ctx.createLinearGradient(0, 0, 0, 180);
             if (playerStats.currentDungeon === 'gold') { caveGrad.addColorStop(0, "#0f0800"); caveGrad.addColorStop(1, "#1d1205"); } 
             else if (playerStats.currentDungeon === 'mat') { caveGrad.addColorStop(0, "#040d08"); caveGrad.addColorStop(1, "#0d2115"); } 
@@ -7211,6 +7317,10 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             ctx.lineWidth = penBgScenery * ts;
             ctx.lineJoin = "round";
 
+            if (playerStats.isCrucibleMode) {
+                ctx.restore();
+                return; // Block background scenery in space
+            }
             if (playerStats.isDungeonMode) {
                 let isCeiling = s.seed < 0.45; 
                 if (isCeiling) {
@@ -7384,7 +7494,29 @@ function formatStatRangeStr(item, statKey, isPct = false) {
 
         // 3. GROUND FLOOR RENDERING WITH DETAILED TEXTURES
         ctx.save();
-        if (playerStats.isDungeonMode) {
+        if (playerStats.isCrucibleMode) {
+            // Dark levitating cosmic platform floor
+            let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+            groundGrad.addColorStop(0, "#0a0316"); 
+            groundGrad.addColorStop(1, "#030005");
+            ctx.fillStyle = groundGrad; 
+            ctx.fillRect(0, 180, canvas.width, 70);
+
+            // Shimmering void energy grid
+            ctx.strokeStyle = "rgba(155, 89, 182, 0.4)"; 
+            ctx.lineWidth = 1;
+            for (let i = -100; i < canvas.width + 100; i += 40) {
+                let gx = i - (groundScroll % 40);
+                ctx.beginPath();
+                ctx.moveTo(gx, 180);
+                ctx.lineTo(gx - 20, 250);
+                ctx.stroke();
+            }
+            ctx.beginPath();
+            ctx.moveTo(0, 195); ctx.lineTo(canvas.width, 195);
+            ctx.moveTo(0, 215); ctx.lineTo(canvas.width, 215);
+            ctx.stroke();
+        } else if (playerStats.isDungeonMode) {
             if (playerStats.currentDungeon === 'gold') {
                 let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
                 groundGrad.addColorStop(0, "#2c1c0a"); groundGrad.addColorStop(1, "#120a03");
@@ -7853,6 +7985,10 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             ctx.lineWidth = penFgScenery * ss;
             ctx.lineJoin = "round";
 
+            if (playerStats.isCrucibleMode) {
+                ctx.restore();
+                return; // Block foreground scenery in space
+            }
             if (playerStats.isDungeonMode) {
                 if (playerStats.currentDungeon === 'gold') {
                     if (s.type === 'grass') {
