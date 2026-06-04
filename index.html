@@ -503,68 +503,6 @@
     <div id="game-container">
         
         <div id="top-nav">
-            <div style="display: flex; gap: 8px; position: relative;">
-                <div style="position: relative;">
-                    <button onclick="toggleDungeonMenu()" style="background: #2c3e50; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🏰 Activities ▼</button>
-                    <div id="dungeon-menu" style="display: none; position: absolute; top: 35px; left: 0; background: #151515; border: 1px solid #444; border-radius: 6px; padding: 12px; width: 260px; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.9);">
-                        <div style="color: #f1c40f; font-weight: bold; margin-bottom: 8px; font-size: 14px; text-align:center; border-bottom:1px solid #333; padding-bottom:5px;">🏰 Infinite Dungeons</div>
-                        
-                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
-                            <span style="color:#3498db; font-weight:bold;">⚔️ Equip: <span id="dk-equip">3</span>/3</span>
-                            <span id="dt-equip" style="color:#aaa;">(Full)</span>
-                        </div>
-                        <button onclick="enterDungeon('equip')" style="width: 100%; background: #3498db; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Equipment Dungeon</button>
-                        
-                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
-                            <span style="color:#f1c40f; font-weight:bold;">💰 Gold: <span id="dk-gold">3</span>/3</span>
-                            <span id="dt-gold" style="color:#aaa;">(Full)</span>
-                        </div>
-                        <button onclick="enterDungeon('gold')" style="width: 100%; background: #f1c40f; color: #111; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Gold Mine Caverns</button>
-                        
-                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
-                            <span style="color:#2ecc71; font-weight:bold;">📦 Mats: <span id="dk-mat">3</span>/3</span>
-                            <span id="dt-mat" style="color:#aaa;">(Full)</span>
-                        </div>
-                        <button onclick="enterDungeon('mat')" style="width: 100%; background: #2ecc71; color: #111; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Toxic Material Pit</button>
-
-                        <div style="color: #9b59b6; font-weight: bold; margin-top: 8px; margin-bottom: 8px; font-size: 14px; text-align:center; border-top:1px solid #333; padding-top:5px;">🔮 Wave Survival Crucible</div>
-                        <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:4px; align-items:center;">
-                            <span style="color:#9b59b6; font-weight:bold;">🔥 Souls Held:</span>
-                            <span style="color:#aaa;"><span id="crucible-souls-held">0</span>/100</span>
-                        </div>
-                        <button onclick="enterCrucible()" style="width: 100%; background: #9b59b6; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">Enter Astral Crucible</button>
-                    </div>
-                        <button onclick="enterDungeon('mat')" style="width: 100%; background: #2ecc71; color: #111; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">Enter Toxic Material Pit</button>
-                    </div>
-                </div>
-                
-                <div style="position: relative;">
-                    <button onclick="toggleAudioMenu()" style="background: #2c3e50; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🔊 Sound ▼</button>
-                    <div id="audio-menu" style="display: none; position: absolute; top: 35px; left: 0; background: #151515; border: 1px solid #444; border-radius: 6px; padding: 12px; width: 220px; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.9);">
-                        <div style="color: #f1c40f; font-weight: bold; margin-bottom: 10px; font-size: 14px; text-align:center; border-bottom:1px solid #333; padding-bottom:5px;">🔊 Sound Control</div>
-                        
-                        <div style="margin-bottom: 10px;">
-                            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
-                                <span style="color:#aaa;">Master Vol:</span>
-                                <span id="vol-master-label" style="color:#3498db; font-weight:bold;">50%</span>
-                            </div>
-                            <input type="range" id="slider-vol-master" min="0" max="1" step="0.05" value="0.5" oninput="changeVolume('master', this.value)" style="width: 100%; background:#333; outline:none; height:4px; border-radius:2px; appearance:none; cursor:pointer;">
-                        </div>
-                        
-                        <div style="margin-bottom: 12px;">
-                            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
-                                <span style="color:#aaa;">SFX Vol:</span>
-                                <span id="vol-sfx-label" style="color:#2ecc71; font-weight:bold;">80%</span>
-                            </div>
-                            <input type="range" id="slider-vol-sfx" min="0" max="1" step="0.05" value="0.8" oninput="changeVolume('sfx', this.value)" style="width: 100%; background:#333; outline:none; height:4px; border-radius:2px; appearance:none; cursor:pointer;">
-                        </div>
-                        
-                        <button id="btn-audio-mute" onclick="toggleMute()" style="width: 100%; background: #c0392b; color: white; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; transition: background 0.2s;">Mute Audio</button>
-                    </div>
-                </div>
-            </div>
-            <div style="font-size: 13px; color: #7f8c8d; font-weight: bold; align-self: center; letter-spacing: 1px;">Idle SAQ: Slaying and Questing</div>
-        </div>
 
         <div id="toast-container"></div>
         <div id="game-tooltip" class="tooltip-base"></div>
@@ -1485,7 +1423,8 @@ window.onload = function() {
         { name: "Armored Elixir", cost: 500, currency: "Gold", color: "#3498db", desc: "Increases your Defense by 10% temporarily." },
         { name: "Haste Elixir", cost: 500, currency: "Gold", color: "#f1c40f", desc: "Increases your Attack and Move Speed temporarily." },
         { name: "Gacha Key", cost: 5, currency: "Luminous Soul", color: "#f1c40f", desc: "Exchange 5 rare Luminous Souls for 1 Gacha Key." },
-        { name: "Astral Essence", cost: 10, currency: "Luminous Soul", color: "#9b59b6", desc: "Exchange 10 rare Luminous Souls for 1 Astral Essence." }
+        { name: "Astral Essence", cost: 10, currency: "Luminous Soul", color: "#9b59b6", desc: "Exchange 10 rare Luminous Souls for 1 Astral Essence." },
+        { name: "Catalyst Core", cost: 15, currency: "Astral Shards", color: "#2ecc71", desc: "Exchange 15 Astral Shards earned in the Crucible for 1 Catalyst Core." }
     ];
 
     /* ==========================================================================
@@ -3750,14 +3689,17 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         let el = document.getElementById('mystical-shop-list');
         if (!el) return;
         el.innerHTML = MYSTICAL_STOCK.map((item, index) => {
-            let hasAltCurrency = (item.currency === "Luminous Soul");
             let costColor = "#e74c3c";
             let currencyLabel = "Gold";
             
-            if (hasAltCurrency) {
+            if (item.currency === "Luminous Soul") {
                 let owned = inventory.ETC["Luminous Soul"] || 0;
                 costColor = owned >= item.cost ? "#ffb6c1" : "#e74c3c";
                 currencyLabel = "Souls";
+            } else if (item.currency === "Astral Shards") {
+                let owned = playerStats.astralShards || 0;
+                costColor = owned >= item.cost ? "#9b59b6" : "#e74c3c";
+                currencyLabel = "Shards";
             } else {
                 costColor = playerStats.coins >= item.cost ? "#f1c40f" : "#e74c3c";
             }
@@ -3782,6 +3724,10 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             if (owned < item.cost) { pushHeaderToast("Not enough Luminous Souls!", "#e74c3c"); return; }
             inventory.ETC["Luminous Soul"] -= item.cost;
             if (inventory.ETC["Luminous Soul"] === 0) delete inventory.ETC["Luminous Soul"];
+        } else if (item.currency === "Astral Shards") {
+            let owned = playerStats.astralShards || 0;
+            if (owned < item.cost) { pushHeaderToast("Not enough Astral Shards!", "#e74c3c"); return; }
+            playerStats.astralShards -= item.cost;
         } else {
             // Gold validation and deduction
             if (playerStats.coins < item.cost) { pushHeaderToast("Not enough Gold!", "#e74c3c"); return; }
@@ -3789,7 +3735,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         }
         
         // Direct items into their proper bag categories
-        if (item.name === "Gacha Key" || item.name === "Astral Essence") {
+        if (item.name === "Gacha Key" || item.name === "Astral Essence" || item.name === "Catalyst Core") {
             addEtcDrop(item.name, 1);
             pushHeaderToast(`Exchanged for 1 ${item.name}!`, "#2ecc71");
         } else {
