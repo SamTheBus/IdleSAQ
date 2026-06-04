@@ -808,9 +808,12 @@
                         <div class="stat-hover" style="color: #9b59b6;" onmouseenter="showStatHoverTooltip(event, 'qly')" ontouchstart="showStatHoverTooltip(event, 'qly')" onmouseleave="hideTooltip()">
                             <span>💎 Drop Quality Mod: <span id="stat-qly" style="font-weight:bold; color:#fff;">+0%</span></span>
                         </div>
-                        <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'gold', true)" ontouchstart="showStatBreakdown(event, 'gold', true)" onmouseleave="hideTooltip()">
+                       <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'gold', true)" ontouchstart="showStatBreakdown(event, 'gold', true)" onmouseleave="hideTooltip()">
                             <span style="color:#f1c40f;">🟡 Gold Multiplier: <span id="stat-gld" style="font-weight:bold; color:#fff;">x1.0</span></span>
                         </div>
+                        <div style="margin: 6px 0; border-bottom: 1px dashed #333;"></div>
+                        <div style="color: #f1c40f; font-weight: bold; margin-bottom: 4px; font-size: 11px;">✨ Active Set Synergies</div>
+                        <div id="active-sets-list" style="color: #aaa; font-size: 10px; line-height: 1.4;">No active set synergies.</div>
                     </div>
                     
                     <div style="font-size: 11px; background: #151515; padding: 12px; border: 1px solid #444; border-radius: 4px; box-sizing: border-box;">
@@ -2397,8 +2400,80 @@ window.onload = function() {
     const deathMaxFrames = 90; // 1.5 seconds of dramatic visual slowdown on death
     let lastUpdateTime = Date.now(); // High-resolution timestamp for gap detection
 
-    let beams = [];
+  let beams = [];
     let snowflakes = [];
+
+    /* ==========================================================================
+       SET BONUS DEFINITIONS & HELPER SYSTEMS
+       ========================================================================== */
+    const SET_DEFINITIONS = {
+        Vanguard: {
+            name: "Vanguard",
+            bonuses: [
+                { count: 2, desc: "+5% Attack Power", apply: (p) => { p.atkPctBonus = (p.atkPctBonus || 0) + 0.05; } },
+                { count: 4, desc: "+10% Attack Power, +15 Flat Attack", apply: (p) => { p.atkPctBonus = (p.atkPctBonus || 0) + 0.10; p.atk += 15; } }
+            ]
+        },
+        Colossus: {
+            name: "Colossus",
+            bonuses: [
+                { count: 2, desc: "+8% Max HP", apply: (p) => { p.maxHpPctBonus = (p.maxHpPctBonus || 0) + 0.08; } },
+                { count: 4, desc: "+15% Max HP, +50 Flat Max HP", apply: (p) => { p.maxHpPctBonus = (p.maxHpPctBonus || 0) + 0.15; p.maxHp += 50; } }
+            ]
+        },
+        Bastion: {
+            name: "Bastion",
+            bonuses: [
+                { count: 2, desc: "+5% Defense", apply: (p) => { p.defPctBonus = (p.defPctBonus || 0) + 0.05; } },
+                { count: 4, desc: "+12% Defense, +10 Flat Defense", apply: (p) => { p.defPctBonus = (p.defPctBonus || 0) + 0.12; p.flatDefBonus = (p.flatDefBonus || 0) + 10; } }
+            ]
+        },
+        Windrunner: {
+            name: "Windrunner",
+            bonuses: [
+                { count: 2, desc: "+5 Move Speed", apply: (p) => { p.moveSpeed += 5; } },
+                { count: 4, desc: "+15 Move Speed, -3 frames Idle Attack Speed", apply: (p) => { p.moveSpeed += 15; p.idleAttackSpeed -= 3; } }
+            ]
+        },
+        Wraith: {
+            name: "Wraith",
+            bonuses: [
+                { count: 2, desc: "+3% Crit Chance", apply: (p) => { p.critChance += 0.03; } },
+                { count: 4, desc: "+8% Crit Chance, +15% Crit Multiplier", apply: (p) => { p.critChance += 0.08; p.critDamage += 0.15; } }
+            ]
+        },
+        Reaver: {
+            name: "Reaver",
+            bonuses: [
+                { count: 2, desc: "+15% Crit Multiplier", apply: (p) => { p.critDamage += 0.15; } },
+                { count: 4, desc: "+35% Crit Multiplier, +2% Crit Chance", apply: (p) => { p.critDamage += 0.35; p.critChance += 0.02; } }
+            ]
+        },
+        Dreadnought: {
+            name: "Dreadnought",
+            bonuses: [
+                { count: 2, desc: "+3% Block Rate", apply: (p) => { p.block += 0.03; } },
+                { count: 4, desc: "+8% Block Rate, +5 Flat Defense", apply: (p) => { p.block += 0.08; p.flatDefBonus = (p.flatDefBonus || 0) + 5; } }
+            ]
+        },
+        Duellist: {
+            name: "Duellist",
+            bonuses: [
+                { count: 2, desc: "+2% Parry Rate", apply: (p) => { p.parry += 0.02; } },
+                { count: 4, desc: "+6% Parry Rate, -1 frame Active Attack Speed", apply: (p) => { p.parry += 0.06; p.activeAttackSpeed -= 1; } }
+            ]
+        }
+    };
+
+    function getItemSetName(item) {
+        if (!item || item.type === "artifact" || item.statsRolled === "UNIQUE") return null;
+        if (item.setName) return item.setName;
+        const names = ["Vanguard", "Colossus", "Bastion", "Windrunner", "Wraith", "Reaver", "Dreadnought", "Duellist"];
+        for (let name of names) {
+            if (item.name && item.name.includes(name)) return name;
+        }
+        return null;
+    }
 
     /* ==========================================================================
        6. PROCEDURAL NAME GENERATOR
@@ -4181,6 +4256,50 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             }
         }
 
+        // Resolve active set synergy counters and contextual parameters
+        let setCounts = {};
+        const eligibleSetSlots = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
+        eligibleSetSlots.forEach(slot => {
+            let item = equippedSlots[slot];
+            if (item) {
+                let setName = getItemSetName(item);
+                if (setName) {
+                    setCounts[setName] = (setCounts[setName] || 0) + 1;
+                }
+            }
+        });
+
+        let setCtx = {
+            atk: 0, maxHp: 0, moveSpeed: 0, idleAttackSpeed: 0, activeAttackSpeed: 0,
+            critChance: 0, critDamage: 0, block: 0, parry: 0,
+            atkPctBonus: 0, maxHpPctBonus: 0, defPctBonus: 0, flatDefBonus: 0
+        };
+
+        for (let setName in setCounts) {
+            let count = setCounts[setName];
+            let setDef = SET_DEFINITIONS[setName];
+            if (setDef) {
+                setDef.bonuses.forEach(b => {
+                    if (count >= b.count) b.apply(setCtx);
+                });
+            }
+        }
+
+        // Apply flat parameters from completed sets
+        p.atk += setCtx.atk;
+        p.maxHp += setCtx.maxHp;
+        p.moveSpeed += setCtx.moveSpeed;
+        p.idleAttackSpeed += setCtx.idleAttackSpeed;
+        p.activeAttackSpeed += setCtx.activeAttackSpeed;
+        p.critChance += setCtx.critChance;
+        p.critDamage += setCtx.critDamage;
+        p.block += setCtx.block;
+        p.parry += setCtx.parry;
+
+        // Apply percentage multipliers to direct coefficients
+        achAtkPct += setCtx.atkPctBonus;
+        achMaxHpPct += setCtx.maxHpPctBonus;
+
         // Apply attribute multipliers prior to cross-scaling to dynamically scale cross-dependencies
         p.str = Math.floor(p.str * achStrPct);
         p.dex = Math.floor(p.dex * achDexPct);
@@ -4198,8 +4317,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         p.parry += p.int * 0.002;          // 1 INT = +0.2% Parry Rate
         
         // Initialize base Defense scaling with SP and Intelligence allocation
-        let flatDef = playerStats.baseDef + (alloc.spDef * 3) + (p.int * 0.75);
-        let defMultiplier = 1.0;
+        let flatDef = playerStats.baseDef + (alloc.spDef * 3) + (p.int * 0.75) + setCtx.flatDefBonus;
+        let defMultiplier = 1.0 + setCtx.defPctBonus;
 
         for (let key in equippedSlots) {
             let item = equippedSlots[key];
@@ -4761,7 +4880,30 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             if (item.goldMulti > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• 🟡 Gold Multi: +${Math.floor(item.goldMulti*100)}%${formatStatRangeStr(item, 'goldMulti')}</div>`;
             if (item.fairySpawn > 0) html += `<div class="tt-stat-line" style="color:#ffb6c1;">• 🧚 Fairy Spawn: +${Math.floor(item.fairySpawn*100)}%${formatStatRangeStr(item, 'fairySpawn')}</div>`;
 
-            if (item.statsRolled === 0 && item.temperLevel === 0 && item.type !== "artifact") { html += `<div class="tt-stat-line" style="color:#7f8c8d; font-style:italic; margin-top:4px;">No bonus modifiers applied.</div>`; }
+           if (item.statsRolled === 0 && item.temperLevel === 0 && item.type !== "artifact") { html += `<div class="tt-stat-line" style="color:#7f8c8d; font-style:italic; margin-top:4px;">No bonus modifiers applied.</div>`; }
+
+            // Dynamic set synergy preview block
+            let setName = getItemSetName(item);
+            if (setName && SET_DEFINITIONS[setName]) {
+                let setDef = SET_DEFINITIONS[setName];
+                let currentEquippedCount = 0;
+                const eligibleSetSlots = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
+                eligibleSetSlots.forEach(slot => {
+                    let eqItem = equippedSlots[slot];
+                    if (eqItem && getItemSetName(eqItem) === setName) {
+                        currentEquippedCount++;
+                    }
+                });
+
+                html += `<div style="margin-top:10px; padding-top:6px; border-top:1px dashed #555;">`;
+                html += `<div style="font-weight:bold; color:#f1c40f; font-size:10px;">🌟 SET: ${setDef.name} (${currentEquippedCount}/4 equipped)</div>`;
+                setDef.bonuses.forEach(b => {
+                    let activeColor = currentEquippedCount >= b.count ? "#2ecc71" : "#7f8c8d";
+                    let prefix = currentEquippedCount >= b.count ? "🟢" : "⚫";
+                    html += `<div style="font-size:9px; color:${activeColor}; margin-top:2px;">${prefix} (${b.count} pieces): ${b.desc}</div>`;
+                });
+                html += `</div>`;
+            }
         }
 
         if (compareEq && !isCurrentlyEquipped) {
@@ -6132,6 +6274,38 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         document.getElementById('stat-idps').innerText = idps.toFixed(1);
         document.getElementById('stat-drp').innerText = "+" + Math.floor((p.drop - 1) * 100) + "%"; document.getElementById('stat-qly').innerText = "+" + Math.floor((p.qly - 1) * 100) + "%";
         document.getElementById('stat-gld').innerText = "x" + p.gold.toFixed(2); 
+
+        // Update Set Synergy interface HUD
+        let activeSetsHtml = [];
+        let activeSetCounts = {};
+        const checkSetSlots = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
+        checkSetSlots.forEach(slot => {
+            let item = equippedSlots[slot];
+            if (item) {
+                let sName = getItemSetName(item);
+                if (sName) {
+                    activeSetCounts[sName] = (activeSetCounts[sName] || 0) + 1;
+                }
+            }
+        });
+
+        for (let sName in activeSetCounts) {
+            let count = activeSetCounts[sName];
+            let setDef = SET_DEFINITIONS[sName];
+            if (setDef) {
+                let activeBonuses = setDef.bonuses.filter(b => count >= b.count);
+                if (activeBonuses.length > 0) {
+                    let bonusesText = activeBonuses.map(b => b.desc).join(", ");
+                    activeSetsHtml.push(`<div style="margin-bottom: 5px;"><strong style="color: #2ecc71;">${sName} (${count} pcs):</strong> <span style="color:#fff;">${bonusesText}</span></div>`);
+                } else {
+                    activeSetsHtml.push(`<div style="margin-bottom: 5px; color: #7f8c8d;"><strong>${sName} (${count}/2):</strong> No active bonus</div>`);
+                }
+            }
+        }
+        let setsListEl = document.getElementById('active-sets-list');
+        if (setsListEl) {
+            setsListEl.innerHTML = activeSetsHtml.length > 0 ? activeSetsHtml.join("") : "No active set synergies. Equip matching named gear (e.g. Colossus, Windrunner).";
+        }
         
         let drp = p.drop * state.efficiency;
         document.getElementById('live-rate-mob').innerText = (4.5 * drp).toFixed(2) + "%"; 
