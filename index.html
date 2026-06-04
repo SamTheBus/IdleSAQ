@@ -529,12 +529,12 @@
 
                         <div style="color: #9b59b6; font-weight: bold; margin-top: 8px; margin-bottom: 8px; font-size: 14px; text-align:center; border-top:1px solid #333; padding-top:5px;">🔮 Wave Survival Crucible</div>
                         <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:4px; align-items:center;">
-                            <span style="color:#9b59b6; font-weight:bold;">🔥 Souls Held:</span>
-                            <span style="color:#aaa;"><span id="crucible-souls-held">0</span>/100</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:4px; align-items:center;">
                             <span style="color:#9b59b6; font-weight:bold;">🏆 Peak Wave:</span>
                             <span style="color:#aaa;"><span id="crucible-peak-wave">1</span></span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:4px; align-items:center;">
+                            <span style="color:#9b59b6; font-weight:bold;">🏁 Start Checkpoint:</span>
+                            <span style="color:#aaa;">Wave <span id="crucible-checkpoint-wave">1</span></span>
                         </div>
                         <button onclick="enterCrucible()" style="width: 100%; background: #9b59b6; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">Enter Astral Crucible</button>
                     </div>
@@ -2452,6 +2452,7 @@ window.onload = function() {
         astralShards: 0,
         crucibleWave: 1,
         cruciblePeak: 1,
+        crucibleStartWave: 1,
         isCrucibleMode: false,
         crucibleKills: 0,
 
@@ -3444,6 +3445,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 if (playerStats.astralShards === undefined) playerStats.astralShards = 0;
                 if (playerStats.crucibleWave === undefined) playerStats.crucibleWave = 1;
                 if (playerStats.cruciblePeak === undefined) playerStats.cruciblePeak = 1;
+                if (playerStats.crucibleStartWave === undefined) playerStats.crucibleStartWave = 1;
                 if (playerStats.isCrucibleMode === undefined) playerStats.isCrucibleMode = false;
                 if (playerStats.crucibleKills === undefined) playerStats.crucibleKills = 0;
                 
@@ -4096,8 +4098,19 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             let finalWave = playerStats.crucibleWave || 1;
             playerStats.cruciblePeak = Math.max(playerStats.cruciblePeak || 1, finalWave);
             
-            let gainedShards = Math.floor(finalWave * 1.5);
-            let gainedCores = Math.floor(finalWave / 10) + (Math.random() < 0.20 ? 1 : 0);
+            let startW = playerStats.crucibleStartWave || 1;
+            let gainedShards = 0;
+            let gainedCores = 0;
+            
+            // Prorated active run scaling calculations
+            for (let w = startW; w < finalWave; w++) {
+                gainedShards += Math.ceil(1.5 * (1 + (w * 0.03)));
+                if (w % 10 === 0) {
+                    gainedCores++;
+                } else if (Math.random() < 0.05) {
+                    gainedCores++;
+                }
+            }
             
             playerStats.astralShards = (playerStats.astralShards || 0) + gainedShards;
             if (gainedCores > 0) addEtcDrop("Catalyst Core", gainedCores);
@@ -4173,7 +4186,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         let souls = inventory.ETC["Monster Soul"] || 0;
         if (souls < 100) { pushHeaderToast("Requires 100 Monster Souls!", "#e74c3c"); return; }
         
-        if (!confirm("Burn 100 Monster Souls to enter the Astral Crucible endless waves?")) return;
+        let checkpoint = Math.max(1, Math.floor((playerStats.cruciblePeak || 1) * 0.80));
+        if (!confirm(`Burn 100 Monster Souls to enter the Astral Crucible? Starting checkpoint: Wave ${checkpoint}`)) return;
         
         // Secure previous state prior to loading new parameters
         saveCurrentActivityPeak();
@@ -4183,7 +4197,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         
         playerStats.isCrucibleMode = true;
         playerStats.isDungeonMode = false;
-        playerStats.crucibleWave = 1;
+        playerStats.crucibleWave = checkpoint;
+        playerStats.crucibleStartWave = checkpoint;
         playerStats.killCount = 0;
         playerStats.targetsRequired = 5;
         playerStats.isBossMode = false;
@@ -4192,7 +4207,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         
         let p = resolvePlayerStats(); playerStats.currentHp = p.maxHp;
         
-        pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE] Entered the Astral Crucible! Stand your ground!</span>`);
+        pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE] Entered the Astral Crucible at Wave ${checkpoint}! Stand your ground!</span>`);
         document.getElementById('dungeon-menu').style.display = 'none'; updateUI(); window.saveGame();
     };
 
@@ -6431,8 +6446,19 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     SoundManager.play('defeat');
     
     if (wasCrucible) {
-        let gainedShards = Math.floor(finalWave * 1.5);
-        let gainedCores = Math.floor(finalWave / 10) + (Math.random() < 0.20 ? 1 : 0);
+        let startW = playerStats.crucibleStartWave || 1;
+        let gainedShards = 0;
+        let gainedCores = 0;
+        
+        // Prorated active run scaling calculations
+        for (let w = startW; w < finalWave; w++) {
+            gainedShards += Math.ceil(1.5 * (1 + (w * 0.03)));
+            if (w % 10 === 0) {
+                gainedCores++;
+            } else if (Math.random() < 0.05) {
+                gainedCores++;
+            }
+        }
         
         playerStats.astralShards = (playerStats.astralShards || 0) + gainedShards;
         if (gainedCores > 0) addEtcDrop("Catalyst Core", gainedCores);
@@ -6885,6 +6911,11 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         let peakWaveEl = document.getElementById('crucible-peak-wave');
         if (peakWaveEl) {
             peakWaveEl.innerText = playerStats.cruciblePeak || 1;
+        }
+        
+        let checkpointWaveEl = document.getElementById('crucible-checkpoint-wave');
+        if (checkpointWaveEl) {
+            checkpointWaveEl.innerText = Math.max(1, Math.floor((playerStats.cruciblePeak || 1) * 0.80));
         }
 
         let leaveBtn = document.getElementById('btn-leave-activity');
