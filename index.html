@@ -2827,7 +2827,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             if (cumulativeStageDamage > p.maxHp && !checkArtifactTrait("second_wind")) {
                 diedOffline = true;
                 deathStage = currentStage;
-                currentStage = Math.max(1, Math.floor(currentStage * 0.70)); // Retreat stage
+                currentStage = Math.max(1, Math.floor(currentStage * 0.80)); // Retreat stage
                 stagesAdvancedCount = maxStagesToAdvance; // Lock further stage progression
             }
 
@@ -5812,8 +5812,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         // Play cinema dark doom chords
         SoundManager.play('defeat');
         
-        // Rogue-lite restart stage (70% of maximum reached stage, floor minimum 1)
-        let restartStage = Math.max(1, Math.floor((playerStats.maxStage || 1) * 0.70));
+        // Rogue-lite restart stage (80% of maximum reached stage, floor minimum 1)
+        let restartStage = Math.max(1, Math.floor((playerStats.maxStage || 1) * 0.80));
         
         // Populate Death Screen Metrics
         document.getElementById('death-stat-peak').innerText = `Stage ${playerStats.maxStage || 1}`;
@@ -5855,7 +5855,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         playerStats.stage = restartStage;
         
         updateUI();
-        pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[DEFEATED] Your hero fell in battle! Returned to Stage ${restartStage} (70% of Max Stage ${playerStats.maxStage || 1}). All attributes, stats, level, and items remain intact!</span>`);
+        pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[DEFEATED] Your hero fell in battle! Returned to Stage ${restartStage} (80% of Max Stage ${playerStats.maxStage || 1}). All attributes, stats, level, and items remain intact!</span>`);
         
         document.getElementById('death-overlay').style.display = "flex"; 
         window.saveGame();
