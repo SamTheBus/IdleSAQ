@@ -5484,11 +5484,6 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         let effectiveDex = Math.max(0, p.dex - 5);
         let effectiveInt = Math.max(0, p.int - 5);
 
-        // Define effective attributes above the neutral baseline of 5
-        let effectiveStr = Math.max(0, p.str - 5);
-        let effectiveDex = Math.max(0, p.dex - 5);
-        let effectiveInt = Math.max(0, p.int - 5);
-
         // Primary attributes hybrid cross-scaling (Keep STR linear for healthy high-stage scaling)
         p.atk += effectiveStr * 1.5;              
         p.maxHp += effectiveStr * 10;             
