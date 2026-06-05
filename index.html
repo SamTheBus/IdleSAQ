@@ -637,6 +637,17 @@
                     <span id="death-tip-text">Optimize your attributes to better match this environment.</span>
                 </div>
 
+                <div id="death-respawn-timer-container" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; gap: 8px;">
+                    <div style="position: relative; width: 44px; height: 44px;">
+                        <svg width="44" height="44" viewBox="0 0 44 44" style="transform: rotate(-90deg);">
+                            <circle cx="22" cy="22" r="18" fill="none" stroke="#2a1212" stroke-width="3"></circle>
+                            <circle id="death-respawn-spinner" cx="22" cy="22" r="18" fill="none" stroke="#e74c3c" stroke-width="3" stroke-dasharray="113.1" stroke-dashoffset="0" style="transition: stroke-dashoffset 0.1s linear;"></circle>
+                        </svg>
+                        <div id="death-respawn-timer-text" style="position: absolute; top: 0; left: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-family: monospace; font-weight: bold; color: #fff;">10</div>
+                    </div>
+                    <span style="font-size: 11px; color: #dca7a7; font-family: monospace;">Reclaiming automatically in <span id="death-timer-seconds">10</span>s...</span>
+                </div>
+
                 <button id="death-respawn-btn" onclick="respawnHero()">Arise & Reclaim</button>
             </div>
         </div>
@@ -7017,6 +7028,48 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     
     document.getElementById('death-overlay').style.display = "flex"; 
     window.saveGame();
+
+    // Automatic 10-second respawn timer setup
+    let timeLeft = 10;
+    const maxCircumference = 113.1;
+    const spinner = document.getElementById('death-respawn-spinner');
+    const timerText = document.getElementById('death-respawn-timer-text');
+    const secondsLabel = document.getElementById('death-timer-seconds');
+    
+    if (spinner) spinner.style.strokeDashoffset = "0";
+    if (timerText) timerText.innerText = timeLeft;
+    if (secondsLabel) secondsLabel.innerText = timeLeft;
+
+    if (window.respawnIntervalId) {
+        clearInterval(window.respawnIntervalId);
+    }
+
+    let tickCount = 0;
+    const tickRate = 100; // Ticks every 100ms for high-frequency progress bar updates
+    const totalTicks = 10 * (1000 / tickRate);
+
+    window.respawnIntervalId = setInterval(() => {
+        if (isGamePaused) {
+            tickCount++;
+            let progress = tickCount / totalTicks;
+            let remainingSeconds = Math.ceil(10 - (tickCount * tickRate / 1000));
+
+            if (spinner) {
+                spinner.style.strokeDashoffset = (progress * maxCircumference).toFixed(2);
+            }
+            if (timerText) timerText.innerText = remainingSeconds;
+            if (secondsLabel) secondsLabel.innerText = remainingSeconds;
+
+            if (tickCount >= totalTicks) {
+                clearInterval(window.respawnIntervalId);
+                window.respawnIntervalId = null;
+                respawnHero();
+            }
+        } else {
+            clearInterval(window.respawnIntervalId);
+            window.respawnIntervalId = null;
+        }
+    }, tickRate);
 }
 
     function showCrucibleSummaryModal(waves, shards, cores) {
@@ -7065,6 +7118,10 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     }
 
     window.respawnHero = function() {
+        if (window.respawnIntervalId) {
+            clearInterval(window.respawnIntervalId);
+            window.respawnIntervalId = null;
+        }
         document.getElementById('death-overlay').style.display = "none";
         let p = resolvePlayerStats(); 
         playerStats.currentHp = p.maxHp; 
