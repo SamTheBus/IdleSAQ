@@ -7599,6 +7599,13 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         return;
     }
 
+    // Calculate Campaign Rollback Percentage based on prestige history
+    let prestigeCount = playerStats.prestigeCount || 0;
+    let rollbackPercent = 0.80;
+    if (prestigeCount >= 1) {
+        rollbackPercent = Math.min(0.95, 0.90 + (prestigeCount - 1) * 0.01);
+    }
+
     let restartStage;
     if (wasDungeon) {
         // Return to primary campaign progress with no penalty
@@ -7609,7 +7616,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         document.getElementById('death-stat-retreat').innerText = `Campaign Stage ${restartStage}`;
     } else {
         // Apply campaign rollback penalty
-        restartStage = Math.max(1, Math.floor((playerStats.maxStage || 1) * 0.80));
+        restartStage = Math.max(1, Math.floor((playerStats.maxStage || 1) * rollbackPercent));
         playerStats.stage = restartStage;
         document.getElementById('death-stat-peak').innerText = `Stage ${playerStats.maxStage || 1}`;
         document.getElementById('death-stat-retreat').innerText = `Stage ${restartStage}`;
@@ -7627,7 +7634,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     if (wasDungeon) {
         pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[DUNGEON STAGE FAILIURE] Died on Dungeon Floor. Safely returned to Campaign Stage ${restartStage}.</span>`);
     } else {
-        pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[DEFEATED] Returned to Stage ${restartStage} (80% of Max Stage). No equipment lost!</span>`);
+        let displayPct = Math.round(rollbackPercent * 100);
+        pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[DEFEATED] Returned to Stage ${restartStage} (${displayPct}% of Max Stage). No equipment lost!</span>`);
     }
     
     document.getElementById('death-overlay').style.display = "flex"; 
