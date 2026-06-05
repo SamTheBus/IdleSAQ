@@ -3386,11 +3386,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         playerStats.stage = 1;
         playerStats.maxStage = 1;
         
-        // Reset activity checks
-        playerStats.dungeonPeaks = { equip: 1, gold: 1, mat: 1 };
-        playerStats.currentDungeonStage = { equip: 1, gold: 1, mat: 1 };
+        // Reset active run parameters (Dungeon and Crucible peaks are permanently preserved)
         playerStats.crucibleWave = 1;
-        playerStats.cruciblePeak = 1;
         playerStats.crucibleStartWave = 1;
         
         playerStats.isPrestigeBossMode = false;
