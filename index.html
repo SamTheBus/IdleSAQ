@@ -1537,20 +1537,20 @@ window.onload = function() {
     };
 
     const ARTIFACT_POOL = [
-        { name: "Berserker Stone", trait: "frenzy", desc: "Grants Frenzy Mode for 10s every 10 kills", breakdown: "<strong>Frenzy Buff Breakdown:</strong><br>• Active Atk Spd: Max Haste (4-frame cap)<br>• Crit Chance: <span style='color:#e67e22;'>100% Guaranteed</span><br>• Crit Multi: <span style='color:#f1c40f;'>+50% Extra Multiplier</span>", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Blood-Soaked Chalice", trait: "vampirism", desc: "Heals 10% of damage dealt on every hit", breakdown: "<strong>Vampirism Breakdown:</strong><br>• Life Steal: <span style='color:#e74c3c;'>10% of total slash damage</span> directly heals your HP pool.", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Philosopher's Anchor", trait: "gold_hoard", desc: "Permanent x1.50 Gold Multiplier bonus", breakdown: "<strong>Hoard Breakdown:</strong><br>• Multiplies all direct gold drops from mobs and bosses by flat <span style='color:#f1c40f;'>+50%</span>.", dropRate: 0, quality: 0, goldMulti: 0.50, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Gilded Scarab", trait: "magic_find", desc: "+50% Drop Rate and +30% Drop Quality", breakdown: "<strong>Scarab Hunting Breakdown:</strong><br>• Drop Rate: <span style='color:#2ecc71;'>+50% Item Frequency</span><br>• Drop Quality: <span style='color:#9b59b6;'>+30% Higher Stat Line Probability</span>", dropRate: 0.50, quality: 0.30, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Windwalker Boots", trait: "move_speed", desc: "Grants +10 Base Movement Speed", breakdown: "<strong>Fleet Footed:</strong><br>• Flat increase to your scrolling momentum.", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Aegis Core", trait: "defense", desc: "Grants +15 Base Defense", breakdown: "<strong>Iron Clad:</strong><br>• Flat reduction to incoming enemy damage hits.", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Riposte Gauntlet", trait: "parry_strike", desc: "Parrying instantly counters for 100% damage", breakdown: "<strong>Lethal Deflection:</strong><br>• Upon a successful parry roll, instantly strike the enemy back.", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Phantom Blade", trait: "echo_strike", desc: "Attacks hit a second time for 50% damage", breakdown: "<strong>Echo Strike:</strong><br>• Every swing triggers a secondary phantom hit.", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Sloth's Blessing", trait: "idle_spd", desc: "Reduces Idle Attack delay by 20 frames", breakdown: "<strong>Lazy Haste:</strong><br>• Your auto-attacks trigger significantly faster.", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Zealot's Charm", trait: "active_spd", desc: "Reduces Active Attack cooldown limit", breakdown: "<strong>Feverish Swings:</strong><br>• Allows you to click or tap faster.", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Survivor's Adrenaline", trait: "dodge_buff", desc: "Blocking/Parrying grants +100% Dmg for 10s", breakdown: "<strong>Adrenaline Rush:</strong><br>• Successful defensive procs double your damage output temporarily.", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Chrono Hourglass", trait: "extend_buffs", desc: "Extends all temporary buffs by 5 seconds", breakdown: "<strong>Chronology:</strong><br>• Applies to Frenzy and Adrenaline durations.", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Dimensional Pouch", trait: "bag_space", desc: "Expands equipment sack capacity to 50", breakdown: "<strong>Bottomless Bag:</strong><br>• Carry more gear before having to salvage.", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
-        { name: "Phoenix Ankh", trait: "second_wind", desc: "Ignore a fatal blow once per run (50% Heal)", breakdown: "<strong>Second Wind:</strong><br>• When taking lethal damage, survive and instantly restore 50% HP. Resets only upon defeat.", dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 }
+        { name: "Berserker Stone", trait: "frenzy", desc: "Grants Frenzy Mode for 10s every 8 kills. Passive +5% Crit Chance.", breakdown: "<strong>Frenzy Buff Breakdown:</strong><br>• Trigger Requirement: <span style='color:#2ecc71;'>Reduced to 8 kills</span><br>• Active Atk Spd: Max Haste (4-frame cap)<br>• Crit Chance: <span style='color:#e67e22;'>100% Guaranteed</span><br>• Crit Multi: <span style='color:#f1c40f;'>+50% Extra Multiplier</span><br>• Passive: <span style='color:#e67e22;'>+5% Base Crit Chance</span>", critChance: 0.05, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Blood-Soaked Chalice", trait: "vampirism", desc: "Heals 3% of damage dealt on hit (Capped at 5% Max HP). Passive +30 Max HP.", breakdown: "<strong>Vampirism Breakdown:</strong><br>• Life Steal: <span style='color:#e74c3c;'>3% of total slash damage</span> directly heals your HP pool.<br>• Max Healing Cap: <span style='color:#aaa;'>Capped at 5% of Max HP per hit</span> to keep progression healthy.<br>• Passive: <span style='color:#e74c3c;'>+30 Flat Max HP</span>", maxHp: 30, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Philosopher's Anchor", trait: "gold_hoard", desc: "Permanent x1.50 Gold Multiplier bonus. Passive +15 Attack.", breakdown: "<strong>Hoard Breakdown:</strong><br>• Gold: Multiplies direct gold drops from mobs and bosses by flat <span style='color:#f1c40f;'>+50%</span>.<br>• Passive: <span style='color:#f1c40f;'>+15 Flat Attack</span> to support combat pacing.", atk: 15, dropRate: 0, quality: 0, goldMulti: 0.50, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Gilded Scarab", trait: "magic_find", desc: "+50% Drop Rate and +30% Drop Quality. Passive +5 DEX.", breakdown: "<strong>Scarab Hunting Breakdown:</strong><br>• Drop Rate: <span style='color:#2ecc71;'>+50% Item Frequency</span><br>• Drop Quality: <span style='color:#9b59b6;'>+30% Higher Stat Line Probability</span><br>• Passive: <span style='color:#3498db;'>+5 Flat DEX</span>", dex: 5, dropRate: 0.50, quality: 0.30, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Windwalker Boots", trait: "move_speed", desc: "Grants +12 Base Movement Speed and +5% Parry Rate.", breakdown: "<strong>Fleet Footed:</strong><br>• Movement: Flat increase of <span style='color:#3498db;'>+12 Move Speed</span>.<br>• Defensive: Grants <span style='color:#e74c3c;'>+5% Parry Rate</span> to evade high-stage damage.", moveSpeed: 12, parry: 0.05, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Aegis Core", trait: "defense", desc: "Grants +25 Base Defense and +50 Max HP.", breakdown: "<strong>Iron Clad:</strong><br>• Mitigation: Flat reduction of <span style='color:#3498db;'>+25 Defense</span>.<br>• Pool: Flat increase of <span style='color:#e74c3c;'>+50 Max HP</span>.", def: 25, maxHp: 50, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Riposte Gauntlet", trait: "parry_strike", desc: "Parrying instantly counters for 100% damage. Passive +4% Parry Rate.", breakdown: "<strong>Lethal Deflection:</strong><br>• Counter Strike: Successful parries immediately hit back for full weapon power.<br>• Passive: Increases your base chance to parry by <span style='color:#e74c3c;'>+4%</span>.", parry: 0.04, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Phantom Blade", trait: "echo_strike", desc: "Attacks have 50% chance to hit a second time for 40% damage. Passive +5 Attack.", breakdown: "<strong>Echo Strike:</strong><br>• Phantom Hit: Every swing has a <span style='color:#9b59b6;'>50% chance</span> to trigger a secondary hit for 40% damage.<br>• Passive: <span style='color:#f1c40f;'>+5 Flat Attack</span>", atk: 5, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Sloth's Blessing", trait: "idle_spd", desc: "Reduces Idle Attack delay by 15 frames. Passive +5% Gold Multiplier.", breakdown: "<strong>Lazy Haste:</strong><br>• Delay Reduction: Attacks trigger <span style='color:#3498db;'>15 frames</span> faster automatically.<br>• Passive: Adds <span style='color:#f1c40f;'>+5% Gold Multiplier</span>.", idleAttackSpeed: -15, goldMulti: 0.05, dropRate: 0, quality: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Zealot's Charm", trait: "active_spd", desc: "Reduces Active Attack cooldown limit. Passive +5% Crit Chance.", breakdown: "<strong>Feverish Swings:</strong><br>• Limit Reduction: Reduces minimum active click limit by <span style='color:#2ecc71;'>3 frames</span>.<br>• Passive: <span style='color:#e67e22;'>+5% Base Crit Chance</span>", activeAttackSpeed: -3, critChance: 0.05, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Survivor's Adrenaline", trait: "dodge_buff", desc: "Blocking/Parrying grants +100% Dmg for 10s. Passive +3% Block & Parry.", breakdown: "<strong>Adrenaline Rush:</strong><br>• Buff: Double your damage output temporarily on defensive procs.<br>• Passive: Adds <span style='color:#3498db;'>+3% Block Rate</span> and <span style='color:#e74c3c;'>+3% Parry Rate</span>.", block: 0.03, parry: 0.03, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Chrono Hourglass", trait: "extend_buffs", desc: "Extends all temporary buffs by 5 seconds. Passive +5 INT.", breakdown: "<strong>Chronology:</strong><br>• Buff Hold: Extends active Frenzy or Adrenaline by <span style='color:#f1c40f;'>5s</span>.<br>• Passive: Adds <span style='color:#9b59b6;'>+5 INT</span> to extend potion durations and boost defense.", int: 5, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Dimensional Pouch", trait: "bag_space", desc: "Expands equipment sack capacity to 50. Passive +10% Drop Rate.", breakdown: "<strong>Bottomless Bag:</strong><br>• Space: Expanded bag capacity.<br>• Passive: Adds <span style='color:#2ecc71;'>+10% Drop Rate</span> to help fill your larger satchel.", dropRate: 0.10, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
+        { name: "Phoenix Ankh", trait: "second_wind", desc: "Ignore a fatal blow once per run (50% Heal). Passive +5 STR & +50 Max HP.", breakdown: "<strong>Second Wind:</strong><br>• Survive fatal blows with <span style='color:#e74c3c;'>50% HP restored</span>.<br>• Passive: Grants <span style='color:#e74c3c;'>+5 STR</span> (+50 Max HP and +7.5 Atk) and <span style='color:#2ecc71;'>+50 Flat Max HP</span>.", str: 5, maxHp: 50, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 }
     ];
     
     window.addEtcDrop = function(itemName, amount = 1) {
@@ -3567,7 +3567,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             let hitsTaken = Math.floor(ttk / 2);
             let totalDmgTaken = hitsTaken * netMobDmg;
             
-            let vampHeal = checkArtifactTrait("vampirism") ? Math.floor((playerDps * ttk) * 0.10) : 0;
+            let vampHeal = checkArtifactTrait("vampirism") ? Math.min(Math.floor((playerDps * ttk) * 0.03), Math.ceil(p.maxHp * 0.05 * (ttk * (60 / p.idleAttackSpeed)))) : 0;
             let netDmgTaken = Math.max(0, totalDmgTaken - vampHeal);
             
             // Calculate boss fight attrition for this stage
@@ -3576,7 +3576,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             let bossDmg = (2 + (3 * scale)) * 5.0;
             let bossNetDmg = Math.max(1, Math.ceil(bossDmg * (1 - mitigation)));
             let bossDmgTaken = bossHits * bossNetDmg;
-            let bossVampHeal = checkArtifactTrait("vampirism") ? Math.floor((playerDps * bossTtk) * 0.10) : 0;
+            let bossVampHeal = checkArtifactTrait("vampirism") ? Math.min(Math.floor((playerDps * bossTtk) * 0.03), Math.ceil(p.maxHp * 0.05 * (bossTtk * (60 / p.idleAttackSpeed)))) : 0;
             let bossNetDmgTaken = Math.max(0, bossDmgTaken - bossVampHeal);
             
             // Total cumulative damage attrition for the entire stage (standard mobs + boss)
@@ -4233,11 +4233,37 @@ function formatStatRangeStr(item, statKey, isPct = false) {
 
         if (isArt) {
             let chosenArt = ARTIFACT_POOL[Math.floor(Math.random() * ARTIFACT_POOL.length)];
-            item.name = `⭐ UNIQUE ${chosenArt.name}`; item.trait = chosenArt.trait; item.desc = chosenArt.desc; item.breakdown = chosenArt.breakdown;
-            item.dropRate = chosenArt.dropRate; item.quality = chosenArt.quality; item.goldMulti = chosenArt.goldMulti;
+            item.name = `⭐ UNIQUE ${chosenArt.name}`; 
+            item.trait = chosenArt.trait; 
+            item.desc = chosenArt.desc; 
+            item.breakdown = chosenArt.breakdown;
             item.statsRolled = "UNIQUE";
+            
+            // Explicitly copy baseline artifact attributes
+            item.baseAtk = chosenArt.atk || 0;
+            item.baseMaxHp = chosenArt.maxHp || 0;
+            item.baseDef = chosenArt.def || 0;
+            item.baseMoveSpeed = chosenArt.moveSpeed || 0;
+            item.baseCritChance = chosenArt.critChance || 0;
+            item.bonusCritDamage = chosenArt.critDamage || 0;
+            item.baseBlock = chosenArt.block || 0;
+            item.baseParry = chosenArt.parry || 0;
+            item.bonusActiveSpeed = chosenArt.activeAttackSpeed || 0;
+            item.bonusIdleSpeed = chosenArt.idleAttackSpeed || 0;
+            
+            item.dropRate = chosenArt.dropRate || 0; 
+            item.quality = chosenArt.quality || 0; 
+            item.goldMulti = chosenArt.goldMulti || 0;
+            item.rareSpawn = chosenArt.rareSpawn || 0;
+            item.fairySpawn = chosenArt.fairySpawn || 0;
+            
+            item.baseStr = chosenArt.str || 0;
+            item.baseDex = chosenArt.dex || 0;
+            item.baseInt = chosenArt.int || 0;
+            
             statLinesCount = 3; 
-        } else {
+        } 
+        else {
             if (chosenType === "overall") { item.baseMaxHp = Math.ceil(randInt(30, 50) * stageScale * prestigeMult); }
             else if (chosenType === "chest" || chosenType === "leggings" || chosenType === "helmet") { 
                 if (Math.random() > 0.5) item.baseMaxHp = Math.ceil(randInt(10, 20) * stageScale * prestigeMult); else item.baseDef = Math.ceil(randInt(1, 3) * stageScale * prestigeMult); 
@@ -6984,7 +7010,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         if (checkArtifactTrait("frenzy")) {
             if (playerStats.frenzyTimer <= 0) {
                 playerStats.frenzyKillCount++;
-                if (playerStats.frenzyKillCount >= 10) {
+                if (playerStats.frenzyKillCount >= 8) {
                     playerStats.frenzyTimer = checkArtifactTrait("extend_buffs") ? 900 : 600;
                     playerStats.frenzyKillCount = 0;
                     pushLog(`<strong style='color:#e67e22;'>[BERSERKER RAGE]</strong> 100% Critical Frenzy Unleashed!`);
@@ -7393,13 +7419,16 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 }
             }
 
-            if (checkArtifactTrait("echo_strike")) {
-                let echoDmg = Math.max(1, Math.ceil(finalDamage * 0.5)); mob.hp -= echoDmg;
+            if (checkArtifactTrait("echo_strike") && Math.random() < 0.50) {
+                let echoDmg = Math.max(1, Math.ceil(finalDamage * 0.40)); mob.hp -= echoDmg;
                 spawnDamageEffect(echoDmg, 'echo', false);
                 damageHistory.push({ time: Date.now(), amount: echoDmg });
             }
             if (checkArtifactTrait("vampirism")) {
-                let heal = Math.max(1, Math.floor(finalDamage * 0.10)); playerStats.currentHp = Math.min(p.maxHp, playerStats.currentHp + heal);
+                let heal = Math.max(1, Math.floor(finalDamage * 0.03));
+                let maxHealCap = Math.ceil(p.maxHp * 0.05);
+                if (heal > maxHealCap) heal = maxHealCap;
+                playerStats.currentHp = Math.min(p.maxHp, playerStats.currentHp + heal);
                 effects.push({ x: hero.x - 25, y: hero.y - 10, text: "❤️ +" + heal, color: "#2ecc71", life: 60 });
             }
             updateUI(); if (mob.hp <= 0) handleMobDeath();
