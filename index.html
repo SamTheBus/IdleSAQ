@@ -3286,6 +3286,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         document.getElementById('btn-prestige-ascend-confirm').onclick = function() {
             modal.remove();
             isGamePaused = false;
+            window.checkAchievements();
             updateUI();
             renderPrestigeTab();
             renderInventory();
@@ -4526,11 +4527,11 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         playerStats.killedByMob = null;
 
         playerStats.currentHp = p.maxHp;
+        window.checkAchievements();
         updateUI();
         renderInventory();
         window.saveGame();
     };
-
     window.enterDungeon = function(type) {
         let countField = type + 'Keys'; let timeField = 'next' + type.charAt(0).toUpperCase() + type.slice(1) + 'KeyTime';
         if (playerStats[countField] < 1) { pushHeaderToast("Not enough keys!", "#e74c3c"); return; }
@@ -9171,11 +9172,11 @@ function engineCycle() {
         { id: "prestige_2", name: "Chrono Rebirth", icon: "⌛", desc: "Ascend 5 times at the Altar", reqType: "prestige", reqValue: 5, stats: { expPct: 0.05, gold: 0.05 } },
         { id: "prestige_3", name: "Eternal Paradigm", icon: "🌌", desc: "Ascend 20 times at the Altar", reqType: "prestige", reqValue: 20, stats: { expPct: 0.10, gold: 0.10, drop: 0.02 } },
 
-        // NEW: CRUCIBLE (Astral Crucible Wave Survival)
-        { id: "crucible_1", name: "Spark of Survival", icon: "🔥", desc: "Reach Floor 15 in the Astral Crucible", reqType: "crucible", reqValue: 15, stats: { block: 0.01 } },
-        { id: "crucible_2", name: "Crucible Crusader", icon: "💥", desc: "Reach Floor 50 in the Astral Crucible", reqType: "crucible", reqValue: 50, stats: { block: 0.02, parry: 0.01 } },
-        { id: "crucible_3", name: "Astral Sentinel", icon: "🛡️", desc: "Reach Floor 100 in the Astral Crucible", reqType: "crucible", reqValue: 100, stats: { block: 0.03, parry: 0.03, defPct: 0.05 } },
-        { id: "crucible_4", name: "Cosmic Immortal", icon: "🌠", desc: "Reach Floor 200 in the Astral Crucible", reqType: "crucible", reqValue: 200, stats: { block: 0.05, parry: 0.05, defPct: 0.10 } },
+         // NEW: CRUCIBLE (Astral Crucible Wave Survival)
+        { id: "crucible_1", name: "Spark of Survival", icon: "🔥", desc: "Reach Wave 15 in the Astral Crucible", reqType: "crucible", reqValue: 15, stats: { block: 0.01 } },
+        { id: "crucible_2", name: "Crucible Crusader", icon: "💥", desc: "Reach Wave 50 in the Astral Crucible", reqType: "crucible", reqValue: 50, stats: { block: 0.02, parry: 0.01 } },
+        { id: "crucible_3", name: "Astral Sentinel", icon: "🛡️", desc: "Reach Wave 100 in the Astral Crucible", reqType: "crucible", reqValue: 100, stats: { block: 0.03, parry: 0.03, defPct: 0.05 } },
+        { id: "crucible_4", name: "Cosmic Immortal", icon: "🌠", desc: "Reach Wave 200 in the Astral Crucible", reqType: "crucible", reqValue: 200, stats: { block: 0.05, parry: 0.05, defPct: 0.10 } },
 
         // NEW: INFINITE DUNGEONS (Peaks)
         { id: "dung_equip_1", name: "Steel Miner", icon: "⛏️", desc: "Reach Floor 20 in the Equipment Dungeon", reqType: "dungeon_equip", reqValue: 20, stats: { atk: 15 } },
