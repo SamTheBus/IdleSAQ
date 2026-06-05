@@ -4937,6 +4937,36 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 currentStage++;
                 stagesGained++;
                 stagesAdvancedCount++;
+                playerStats.killCount = 0;
+            } else {
+                // Simulating partial kills on the final stalled stage
+                let partialKills = Math.floor(remainingSeconds / cycleTime);
+                if (partialKills > 0) {
+                    totalKills += partialKills;
+                    let elapsedForKills = partialKills * cycleTime;
+                    elapsedSeconds += elapsedForKills;
+                    remainingSeconds -= elapsedForKills;
+                    
+                    for (let k = 0; k < partialKills; k++) {
+                        let isRare = Math.random() < p.rareSpawn;
+                        let baseGold = isRare ? Math.floor((2 + Math.pow(1.08, currentStage) * 0.65) * 4) : Math.floor(2 + Math.pow(1.08, currentStage) * 0.65);
+                        totalGold += Math.ceil(baseGold * p.gold);
+                        // Standard campaign monster scaling adjustments: 5 base + 5/stage (15 base + 15/stage if Rare)
+                        totalXp += isRare ? (15 + (currentStage * 15)) : (5 + (currentStage * 5));
+                        
+                        let dropR = isRare ? 0.15 : 0.045;
+                        if (Math.random() < (dropR * p.drop * state.efficiency)) {
+                            rollOfflineItem(false, currentStage, isRare);
+                        }
+                        // Roll silent offline potion drops for partial kills
+                        let rolledPartialPot = rollPotionDrop(false, isRare, true);
+                        if (rolledPartialPot) {
+                            recordScrapGained(rolledPartialPot, 1);
+                        }
+                    }
+                }
+                remainingSeconds = 0;
+            }
         }
         
         // Write back post-decay buff values
