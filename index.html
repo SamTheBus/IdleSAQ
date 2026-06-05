@@ -2520,7 +2520,7 @@ window.onload = function() {
        5. ENGINE GLOBAL STATE
        ========================================================================== */
     let playerStats = {
-        level: 1, xp: 0, xpReq: 100, sp: 0,
+        level: 1, xp: 0, xpReq: 250, sp: 0,
         spAllocations: { spHp: 0, spAtk: 0, spDef: 0, spCrit: 0, spCritDmg: 0, spBlock: 0, spParry: 0, spSpd: 0, spStr: 0, spDex: 0, spInt: 0 },
         
         baseStr: 5, baseDex: 5, baseInt: 5,
@@ -3454,25 +3454,27 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 
                 // Normal monster farming rewards
                 for (let k = 0; k < killsNeededForStage; k++) {
-                    let isRare = Math.random() < p.rareSpawn;
-                    let baseGold = isRare ? Math.floor((2 + Math.pow(1.08, currentStage) * 0.65) * 4) : Math.floor(2 + Math.pow(1.08, currentStage) * 0.65);
-                    totalGold += Math.ceil(baseGold * p.gold);
-                    totalXp += isRare ? (currentStage * 30) : (currentStage * 10);
+                        let isRare = Math.random() < p.rareSpawn;
+                        let baseGold = isRare ? Math.floor((2 + Math.pow(1.08, currentStage) * 0.65) * 4) : Math.floor(2 + Math.pow(1.08, currentStage) * 0.65);
+                        totalGold += Math.ceil(baseGold * p.gold);
+                        // Standard campaign monster scaling adjustments: 5 base + 5/stage (15 base + 15/stage if Rare)
+                        totalXp += isRare ? (15 + (currentStage * 15)) : (5 + (currentStage * 5));
+                        
+                        let dropR = isRare ? 0.15 : 0.045;
+                        if (Math.random() < (dropR * p.drop * state.efficiency)) {
+                            rollOfflineItem(false, currentStage, isRare);
+                        }
+                        if (Math.random() < 0.005) {
+                            addEtcDrop("Gacha Key", 1);
+                            recordScrapGained("Gacha Key", 1);
+                        }
+                    }
                     
-                    let dropR = isRare ? 0.15 : 0.045;
-                    if (Math.random() < (dropR * p.drop * state.efficiency)) {
-                        rollOfflineItem(false, currentStage, isRare);
-                    }
-                    if (Math.random() < 0.005) {
-                        addEtcDrop("Gacha Key", 1);
-                        recordScrapGained("Gacha Key", 1);
-                    }
-                }
-                
-                // Boss clearance rewards
-                let baseBossGold = Math.floor(15 * Math.pow(1.08, currentStage));
-                totalGold += Math.ceil(baseBossGold * p.gold);
-                totalXp += currentStage * 50;
+                    // Boss clearance rewards
+                    let baseBossGold = Math.floor(15 * Math.pow(1.08, currentStage));
+                    totalGold += Math.ceil(baseBossGold * p.gold);
+                    // Standard campaign boss scaling adjustments: 25 base + 25/stage
+                    totalXp += 25 + (currentStage * 25);
                 
                 if (Math.random() < (0.25 * p.drop * state.efficiency)) {
                     rollOfflineItem(true, currentStage, false);
@@ -3497,7 +3499,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                         let isRare = Math.random() < p.rareSpawn;
                         let baseGold = isRare ? Math.floor((2 + Math.pow(1.08, currentStage) * 0.65) * 4) : Math.floor(2 + Math.pow(1.08, currentStage) * 0.65);
                         totalGold += Math.ceil(baseGold * p.gold);
-                        totalXp += isRare ? (currentStage * 30) : (currentStage * 10);
+                        // Standard campaign monster scaling adjustments: 5 base + 5/stage (15 base + 15/stage if Rare)
+                        totalXp += isRare ? (15 + (currentStage * 15)) : (5 + (currentStage * 5));
                         
                         let dropR = isRare ? 0.15 : 0.045;
                         if (Math.random() < (dropR * p.drop * state.efficiency)) {
@@ -3808,9 +3811,10 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 if (!playerStats.level) { 
                     playerStats.level = 1; 
                     playerStats.xp = 0; 
-                    playerStats.xpReq = 100; 
                     playerStats.sp = 0; 
                 }
+                // Recalculate xpReq to dynamically align existing saves to the new 250-base XP curve
+                playerStats.xpReq = Math.floor(250 * Math.pow(1.2, playerStats.level - 1));
                 if (!playerStats.spAllocations) {
                     playerStats.spAllocations = { spHp: 0, spAtk: 0, spDef: 0, spCrit: 0, spCritDmg: 0, spBlock: 0, spParry: 0, spSpd: 0, spStr: 0, spDex: 0, spInt: 0 };
                 }
@@ -6693,16 +6697,19 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         SoundManager.play('death');
         
         let xpYield = 0;
-        let scaleVal = playerStats.isDungeonMode ? (playerStats.currentDungeonStage[playerStats.currentDungeon] || 1) : playerStats.stage;
-        
-        if (playerStats.isCrucibleMode) {
-            xpYield = playerStats.crucibleWave * 15;
-        } else if (playerStats.isDungeonMode) {
-            xpYield = mob.type === "dungeon_boss" ? scaleVal * 150 : scaleVal * 30;
-        } else {
-            xpYield = isBoss ? scaleVal * 50 : (mob.isRare ? scaleVal * 30 : scaleVal * 10);
-        }
-        gainXp(xpYield);
+            let scaleVal = playerStats.isDungeonMode ? (playerStats.currentDungeonStage[playerStats.currentDungeon] || 1) : playerStats.stage;
+            
+            if (playerStats.isCrucibleMode) {
+                // Slower wave XP progression: 10 base + 10 per wave
+                xpYield = 10 + (playerStats.crucibleWave * 10);
+            } else if (playerStats.isDungeonMode) {
+                // Dungeon common/boss scaling adjustments: 15 base + 15/stage (75 base + 75/stage for Bosses)
+                xpYield = mob.type === "dungeon_boss" ? 75 + (scaleVal * 75) : 15 + (scaleVal * 15);
+            } else {
+                // Standard campaign monster scaling adjustments: 5 base + 5/stage (15 base + 15/stage if Rare, 25 base + 25/stage if Boss)
+                xpYield = isBoss ? 25 + (scaleVal * 25) : (mob.isRare ? 15 + (scaleVal * 15) : 5 + (scaleVal * 5));
+            }
+            gainXp(xpYield);
         
         let baseCoin = isBoss ? Math.floor(15 * Math.pow(1.08, scaleVal)) : Math.floor(2 + Math.pow(1.08, scaleVal) * 0.65);
         if (playerStats.isCrucibleMode) baseCoin = 0; // Crucible awards survival stats on death summary
