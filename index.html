@@ -2383,166 +2383,215 @@ window.onload = function() {
             }
         }
         else if (m.type === "prestige_boss") {
-            let hoverY = Math.sin(Date.now() / 150) * 6;
-            let jawOpen = Math.abs(Math.sin(Date.now() / 400)) * 12; 
-            
-            c.save();
-            c.translate(m.x, m.y + hoverY);
-            
-            let baseW = 70;
-            let baseH = 80;
-            let scaleX = m.w / baseW;
-            let scaleY = m.h / baseH;
-            c.scale(scaleX, scaleY);
-            
-            // Neck segment loop drawing (Alternating Sage Green underbelly & Crimson scales)
-            for (let i = 6; i >= 1; i--) {
-                let segX = baseW / 2 + (i * 18);
-                let segY = baseH / 2 + Math.sin(Date.now() / 180 + i * 0.7) * 8;
-                
-                // Outer Back Dragon Scales (Crimson Red)
-                c.save();
-                c.fillStyle = "#c0392b";
-                c.strokeStyle = "#000000";
-                c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
-                c.beginPath();
-                c.arc(segX, segY, 26 - (i * 2.2), 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-                c.restore();
+                    let hoverY = Math.sin(Date.now() / 150) * 6;
+                    let jawOpen = Math.abs(Math.sin(Date.now() / 400)) * 12; 
+                    
+                    c.save();
+                    c.translate(m.x, m.y + hoverY);
+                    
+                    let baseW = 70;
+                    let baseH = 80;
+                    let scaleX = m.w / baseW;
+                    let scaleY = m.h / baseH;
+                    c.scale(scaleX, scaleY);
 
-                // Inner Underbelly Ridges (Sage Green segments)
-                c.save();
-                c.fillStyle = "#7ca982";
-                c.strokeStyle = "#000000";
-                c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
-                c.beginPath();
-                c.arc(segX - 8, segY + 6, (26 - (i * 2.2)) * 0.8, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-                c.restore();
-            }
+                    // 1. Magma / Dark Void Under-Glow Aura
+                    let auraGlow = c.createRadialGradient(baseW/2, baseH/2, 10, baseW/2, baseH/2, 100);
+                    auraGlow.addColorStop(0, "rgba(231, 76, 60, 0.45)");
+                    auraGlow.addColorStop(0.5, "rgba(142, 68, 173, 0.15)");
+                    auraGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
+                    c.fillStyle = auraGlow;
+                    c.beginPath();
+                    c.arc(baseW/2 + 30, baseH/2, 80, 0, Math.PI * 2);
+                    c.fill();
+                    
+                    // Neck segment loop drawing (Charred Obsidian & Glowing Lava segments)
+                    for (let i = 6; i >= 1; i--) {
+                        let segX = baseW / 2 + (i * 18);
+                        let segY = baseH / 2 + Math.sin(Date.now() / 180 + i * 0.7) * 8;
+                        
+                        // Outer Back Dragon Scales (Charred obsidian black / molten deep crimson)
+                        c.save();
+                        c.fillStyle = i % 2 === 0 ? "#111116" : "#5a0e0e";
+                        c.strokeStyle = "#000000";
+                        c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
+                        c.beginPath();
+                        c.arc(segX, segY, 26 - (i * 2.2), 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                        c.restore();
 
-            // Draw Ears/Horns on Head BEFORE drawing Skull overlay
-            c.save();
-            c.fillStyle = "#f39c12"; // Gold horns
-            c.strokeStyle = "#000000";
-            c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
-            c.lineJoin = "round";
-            c.beginPath();
-            c.moveTo(baseW - 25, -20);
-            c.quadraticCurveTo(baseW, -45, baseW + 15, -40);
-            c.quadraticCurveTo(baseW - 5, -25, baseW - 30, -5);
-            c.closePath();
-            c.fill();
-            c.stroke();
-            c.restore();
+                        // Inner Molten Magma core details inside scales
+                        c.save();
+                        c.fillStyle = "#ff5500";
+                        c.beginPath();
+                        c.arc(segX, segY, (26 - (i * 2.2)) * 0.4, 0, Math.PI * 2);
+                        c.fill();
+                        c.restore();
 
-            // Draw Floppy Skin Wings flapping behind neck
-            c.save();
-            c.fillStyle = "#a93226"; // Darker dragon wing red
-            c.strokeStyle = "#000000";
-            c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
-            c.lineJoin = "round";
-            let wingFlap = Math.sin(Date.now() / 100) * 12;
-            c.translate(baseW / 2 + 50, baseH / 2 + 10);
-            c.rotate(wingFlap * Math.PI / 180);
-            c.beginPath();
-            c.moveTo(0, 0);
-            c.lineTo(35, -20);
-            c.lineTo(45, 0);
-            c.lineTo(25, 10);
-            c.lineTo(40, 20);
-            c.lineTo(5, 15);
-            c.closePath();
-            c.fill();
-            c.stroke();
-            c.restore();
-            
-            // Upper Head/Skull
-            c.save();
-            c.strokeStyle = "#000000";
-            c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
-            c.lineJoin = "round";
-            
-            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#c0392b";
-            c.beginPath();
-            c.moveTo(baseW - 5, -15); // spike back 1
-            c.lineTo(baseW - 20, 10);
-            c.lineTo(baseW - 15, -25); // spike back 2
-            c.lineTo(baseW - 35, 12);
-            c.lineTo(5, 5); // Forehead
-            c.lineTo(-10, 18); // Snout
-            c.lineTo(-15, 30); // Tip
-            c.lineTo(5, 38); // Jawline joint
-            c.lineTo(baseW - 10, 38);
-            c.lineTo(baseW, 15);
-            c.closePath();
-            c.fill();
-            c.stroke();
+                        // Inner Underbelly Ridges (Glowing Volcanic Orange)
+                        c.save();
+                        c.fillStyle = "#e67e22";
+                        c.strokeStyle = "#000000";
+                        c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
+                        c.beginPath();
+                        c.arc(segX - 8, segY + 6, (26 - (i * 2.2)) * 0.8, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                        c.restore();
+                    }
 
-            // Glowing evil eye
-            c.fillStyle = "#000000";
-            c.beginPath();
-            if (c.ellipse) {
-                c.ellipse(22, 18, 7, 5, Math.PI / 12, 0, Math.PI * 2);
-            } else {
-                c.arc(22, 18, 6, 0, Math.PI * 2);
-            }
-            c.fill();
-            
-            c.fillStyle = "#f1c40f"; // Gold pupil
-            c.beginPath();
-            if (c.ellipse) {
-                c.ellipse(22, 18, 5, 3, Math.PI / 12, 0, Math.PI * 2);
-            } else {
-                c.arc(22, 18, 4, 0, Math.PI * 2);
-            }
-            c.fill();
-            
-            c.fillStyle = "#ffffff";
-            c.beginPath();
-            c.arc(21, 17, 1.5, 0, Math.PI * 2);
-            c.fill();
+                    // Draw Volcanic Jagged Gold Horns with blackened tips
+                    c.save();
+                    c.fillStyle = "#d35400"; // Sharp Magma Gold
+                    c.strokeStyle = "#000000";
+                    c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
+                    c.lineJoin = "round";
+                    c.beginPath();
+                    c.moveTo(baseW - 25, -20);
+                    c.quadraticCurveTo(baseW + 5, -50, baseW + 22, -45); // Extended and sharpened
+                    c.quadraticCurveTo(baseW - 3, -25, baseW - 30, -5);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
 
-            // Giant round red nose (The Thousand-Year Door signature style)
-            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b03a2e";
-            c.beginPath();
-            c.arc(-11, 23, 10, 0, Math.PI * 2);
-            c.fill();
-            c.stroke();
+                    // Blackened tips highlights
+                    c.fillStyle = "#111115";
+                    c.beginPath();
+                    c.moveTo(baseW + 5, -44);
+                    c.lineTo(baseW + 22, -45);
+                    c.lineTo(baseW + 15, -35);
+                    c.closePath();
+                    c.fill();
+                    c.restore();
 
-            // Dark nostril slot
-            c.fillStyle = "#111111";
-            c.beginPath();
-            c.arc(-14, 21, 3, 0, Math.PI * 2);
-            c.fill();
+                    // Draw Giant Spiked Devilish Wings flapping behind neck
+                    c.save();
+                    c.fillStyle = "#110202"; // Obsidian back wing body
+                    c.strokeStyle = "#e74c3c"; // Crimson trim veins
+                    c.lineWidth = 3 / Math.max(scaleX, scaleY);
+                    c.lineJoin = "round";
+                    let wingFlap = Math.sin(Date.now() / 100) * 12;
+                    c.translate(baseW / 2 + 50, baseH / 2 + 10);
+                    c.rotate(wingFlap * Math.PI / 180);
+                    c.beginPath();
+                    c.moveTo(0, 0);
+                    c.lineTo(50, -30); // Expanded spiked profile
+                    c.lineTo(60, 5);
+                    c.lineTo(40, 15);
+                    c.lineTo(55, 35);
+                    c.lineTo(5, 22);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
 
-            // Lower Jaw with Drop rotation during chomps
-            c.save();
-            c.translate(15, 38);
-            c.rotate(jawOpen * Math.PI / 180);
-            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#962d22";
-            c.beginPath();
-            c.moveTo(0, 0);
-            c.lineTo(-25, 4); // Chin tip
-            c.lineTo(5, 15);
-            c.lineTo(baseW - 15, 10);
-            c.closePath();
-            c.fill();
-            c.stroke();
+                    // Internal visual wing bones
+                    c.strokeStyle = "#851c1c";
+                    c.lineWidth = 1.8;
+                    c.beginPath();
+                    c.moveTo(0, 0); c.lineTo(50, -30);
+                    c.moveTo(0, 0); c.lineTo(60, 5);
+                    c.moveTo(0, 0); c.lineTo(40, 15);
+                    c.stroke();
+                    c.restore();
+                    
+                    // Upper Head/Skull (Charred magma skull overlay)
+                    c.save();
+                    c.strokeStyle = "#000000";
+                    c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
+                    c.lineJoin = "round";
+                    
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#111115"; // Charred Obsidian Skull plate
+                    c.beginPath();
+                    c.moveTo(baseW - 5, -15); // spike back 1
+                    c.lineTo(baseW - 20, 10);
+                    c.lineTo(baseW - 15, -25); // spike back 2
+                    c.lineTo(baseW - 35, 12);
+                    c.lineTo(5, 5); // Forehead
+                    c.lineTo(-10, 18); // Snout
+                    c.lineTo(-15, 30); // Tip
+                    c.lineTo(5, 38); // Jawline joint
+                    c.lineTo(baseW - 10, 38);
+                    c.lineTo(baseW, 15);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
 
-            // Razor sharp fangs
-            c.fillStyle = "#ffffff";
-            c.beginPath();
-            c.moveTo(-15, 2); c.lineTo(-12, 8); c.lineTo(-9, 2);
-            c.moveTo(-5, 1); c.lineTo(-2, 7); c.lineTo(1, 1);
-            c.fill();
+                    // Glowing Magma cracks on the face plates
+                    if (m.flashTimer === 0) {
+                        c.strokeStyle = "#ff3300";
+                        c.lineWidth = 2;
+                        c.beginPath();
+                        c.moveTo(8, 12); c.lineTo(25, 23);
+                        c.moveTo(28, 26); c.lineTo(38, 30);
+                        c.stroke();
+                    }
 
-            c.restore(); // end jaw draw
-            c.restore(); // end skull save
-            c.restore(); // end master translate & scale
-        }
+                    // Glowing Sinister Evil Eye (Pulsing Hellfire Crimson)
+                    c.save();
+                    c.shadowBlur = 15;
+                    c.shadowColor = "#ff0000";
+                    c.fillStyle = "#ff0000";
+                    c.beginPath();
+                    if (c.ellipse) {
+                        c.ellipse(22, 18, 8, 6, Math.PI / 12, 0, Math.PI * 2);
+                    } else {
+                        c.arc(22, 18, 7, 0, Math.PI * 2);
+                    }
+                    c.fill();
+                    c.restore();
+                    
+                    // Reptilian slit pupil
+                    c.fillStyle = "#f1c40f";
+                    c.beginPath();
+                    if (c.ellipse) {
+                        c.ellipse(22, 18, 2, 5, Math.PI / 12, 0, Math.PI * 2);
+                    } else {
+                        c.rect(21, 15, 2, 6);
+                    }
+                    c.fill();
+
+                    // Terrifying razor-sharp spiked snout horn (Replaces the rounded cute nose)
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1c2833";
+                    c.beginPath();
+                    c.moveTo(-10, 18);
+                    c.lineTo(-26, 23); // Extremely sharp spiked profile
+                    c.lineTo(-10, 28);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    // Dark volcanic nostril slot
+                    c.fillStyle = "#000000";
+                    c.beginPath();
+                    c.arc(-10, 21, 3, 0, Math.PI * 2);
+                    c.fill();
+
+                    // Lower Jaw with Drop rotation during chomps
+                    c.save();
+                    c.translate(15, 38);
+                    c.rotate(jawOpen * Math.PI / 180);
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#631c15"; // Charred jaw undertone
+                    c.beginPath();
+                    c.moveTo(0, 0);
+                    c.lineTo(-25, 4); // Chin tip
+                    c.lineTo(5, 15);
+                    c.lineTo(baseW - 15, 10);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    // Razor sharp glowing fangs
+                    c.fillStyle = "#ffeaa7"; // Bone ivory fangs
+                    c.beginPath();
+                    c.moveTo(-15, 2); c.lineTo(-12, 9); c.lineTo(-9, 2);
+                    c.moveTo(-5, 1); c.lineTo(-2, 8); c.lineTo(1, 1);
+                    c.fill();
+
+                    c.restore(); // end jaw draw
+                    c.restore(); // end skull save
+                    c.restore(); // end master translate & scale
+                }
         c.restore();
     };
 
@@ -7774,7 +7823,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                     // Spawn Hooktail based on ascension counts
                     let scaleVal = playerStats.prestigeCount || 0;
                     let hp = 15000 * Math.pow(3, scaleVal);
-                    let dmg = 120 * Math.pow(1.6, scaleVal);
+                    let dmg = 300 * Math.pow(1.6, scaleVal);
                     let def = 40 + (60 * scaleVal);
                     
                     mob = {
@@ -7940,18 +7989,33 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             }
             
             let isHooktail = (mob.type === "prestige_boss");
-            if (isHooktail) {
-                mob.x = canvas.width - 230;
-                mob.isStopped = true;
-            }
+                    if (isHooktail) {
+                        mob.x = canvas.width - 230;
+                        mob.isStopped = true;
+                    }
 
-            if (!isHooktail && mob.x > (hero.x + hero.w + 30)) { 
-                mob.x -= (4 + scrollSpeed); mob.isStopped = false; 
-                scrollScenery(scrollSpeed);
-            } else {
-                mob.isStopped = true; 
-                if (logicClock % p.idleAttackSpeed === 0) { if (state.autoAttack) window.triggerPlayerSlash(); }
-                if (logicClock % 120 === 0 && mob && mob.hp > 0) {
+                    if (!isHooktail && mob.x > (hero.x + hero.w + 30)) { 
+                        mob.x -= (4 + scrollSpeed); mob.isStopped = false; 
+                        scrollScenery(scrollSpeed);
+                    } else {
+                        mob.isStopped = true; 
+                        if (logicClock % p.idleAttackSpeed === 0) { if (state.autoAttack) window.triggerPlayerSlash(); }
+                        
+                        // Constant scary dark smoke puff leakage from Hooktail's snout
+                        if (mob.type === "prestige_boss" && Math.random() < 0.25 && !isGamePaused) {
+                            particles.push({
+                                x: mob.x + 20,
+                                y: mob.y + 55,
+                                vx: -randFloat(1.5, 3.5),
+                                vy: -randFloat(0.5, 1.5),
+                                radius: randFloat(2.5, 5),
+                                color: Math.random() > 0.5 ? "#2c3e50" : "#111", // Charred dark ash clouds
+                                alpha: 0.8,
+                                life: randInt(25, 50)
+                            });
+                        }
+
+                        if (logicClock % 120 === 0 && mob && mob.hp > 0) {
                     // Standard damage resolution
                 if (Math.random() < p.parry) { 
                     effects.push({ x: hero.x, y: hero.y - 15, text: "⚡ PARRY COUNTER!", color: "#9b59b6", life: 50 }); 
