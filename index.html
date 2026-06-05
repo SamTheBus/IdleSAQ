@@ -918,6 +918,11 @@
                 </div>
                 
                 <div style="margin-top: 15px; border-top: 2px solid #333; padding-top: 10px;">
+                    <h3 style="margin:0 0 8px 0; color:#2ecc71; font-size:14px;">🪙 GOLD QUALITY SINKS</h3>
+                    <div id="gold-upgrades-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:8px;"></div>
+                </div>
+
+                <div style="margin-top: 15px; border-top: 2px solid #333; padding-top: 10px;">
                     <h3 style="margin:0 0 8px 0; color:#9b59b6; font-size:14px;">🔮 MYSTICAL ALCHEMY SHOP</h3>
                     <div id="mystical-shop-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:8px;"></div>
                 </div>
@@ -2657,6 +2662,9 @@ window.onload = function() {
     let playerStats = {
         level: 1, xp: 0, xpReq: 250, sp: 0,
         spAllocations: { spHp: 0, spAtk: 0, spDef: 0, spCrit: 0, spCritDmg: 0, spBlock: 0, spParry: 0, spSpd: 0, spStr: 0, spDex: 0, spInt: 0 },
+        vendingQLevel: 0,
+        shopQLevel: 0,
+        globalQLevel: 0,
         
         baseStr: 5, baseDex: 5, baseInt: 5,
         baseAtk: 10, baseMaxHp: 100, baseDef: 0, baseMoveSpeed: 10,
@@ -3183,6 +3191,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         if (id === 'market') {
             refreshMarketShopIfNeeded();
             renderMysticalShop();
+            renderGoldUpgrades();
         }
         if (id === 'prestige') {
             renderPrestigeTab();
@@ -3252,7 +3261,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 <div style="background:#151515; border: 1px solid #333; border-radius:6px; padding:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:8px; margin-bottom:10px;">
                         <h4 style="margin:0; color:#f1c40f; font-size:13px; text-transform:uppercase;">✨ PERMANENT ASCENSION ALTAR</h4>
-                        <span style="background:#9b59b6; color:#fff; font-weight:bold; font-size:11px; padding:3px 10px; border-radius:10px; box-shadow: 0 0 8px rgba(155, 89, 182, 0.3);">PP Available: <span id="prestige-points-qty">${p.prestigePoints}</span></span>
+                        <span style="background:#9b59b6; color:#fff; font-weight:bold; font-size:11px; padding:3px 10px; border-radius:10px; box-shadow: 0 0 8px rgba(155, 89, 182, 0.3);">PP Available: <span id="prestige-points-qty">${p.prestigePoints.toLocaleString()}</span></span>
                     </div>
 
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -3261,7 +3270,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                             <div>
                                 <strong style="color:#3498db; font-size:12px;">🎒 Dimensional Satchel</strong>
                                 <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +10 permanent backpack slots to carry more gear.</div>
-                                <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${bagPts * 10} slots</span></div>
+                                <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(bagPts * 10).toLocaleString()} slots</span></div>
                             </div>
                             <button class="btn-action" style="margin-top:8px; background:#3498db;" ${bagDisabled} onclick="buyPrestigeUpgrade('bag')">Upgrade (1 PP)</button>
                         </div>
@@ -3271,7 +3280,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                             <div>
                                 <strong style="color:#f1c40f; font-size:12px;">🟡 Midas' Legacy</strong>
                                 <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +25% Global Gold multiplier.</div>
-                                <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${goldPts * 25}% Gold</span></div>
+                                <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(goldPts * 25).toLocaleString()}% Gold</span></div>
                             </div>
                             <button class="btn-action" style="margin-top:8px; background:#f1c40f; color:#000;" ${goldDisabled} onclick="buyPrestigeUpgrade('gold')">Upgrade (1 PP)</button>
                         </div>
@@ -3281,7 +3290,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                             <div>
                                 <strong style="color:#9b59b6; font-size:12px;">🧠 Ancient Wisdom</strong>
                                 <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +10% Global EXP rate to level back up faster.</div>
-                                <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${expPts * 10}% EXP</span></div>
+                                <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(expPts * 10).toLocaleString()}% EXP</span></div>
                             </div>
                             <button class="btn-action" style="margin-top:8px; background:#9b59b6;" ${expDisabled} onclick="buyPrestigeUpgrade('exp')">Upgrade (1 PP)</button>
                         </div>
@@ -3291,10 +3300,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                             <div>
                                 <strong style="color:#2ecc71; font-size:12px;">🍀 Cosmic Fortune</strong>
                                 <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +5% Global Drop Rate.</div>
-                                <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${dropPts * 5}% Drop</span></div>
+                                <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(dropPts * 5).toLocaleString()}% Drop</span></div>
                             </div>
-                            <button class="btn-action" style="margin-top:8px; background:#2ecc71;" ${dropDisabled} onclick="buyPrestigeUpgrade('drop')">Upgrade (1 PP)</button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -4007,6 +4014,11 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 // Reset active prestige boss combat state on fresh load to prevent phantom state desync
                 playerStats.isPrestigeBossMode = false;
                 playerStats.prestigeApproachTimer = 0;
+
+                // Safe Gold Quality Upgrade migrations
+                if (playerStats.vendingQLevel === undefined) playerStats.vendingQLevel = 0;
+                if (playerStats.shopQLevel === undefined) playerStats.shopQLevel = 0;
+                if (playerStats.globalQLevel === undefined) playerStats.globalQLevel = 0;
                 
                 if (inventory.ETC["Iron Scrap"]) { addEtcDrop("Monster Soul", inventory.ETC["Iron Scrap"]); delete inventory.ETC["Iron Scrap"]; }
                 if (inventory.ETC["Sticky Gel"]) { addEtcDrop("Monster Soul", inventory.ETC["Sticky Gel"]); delete inventory.ETC["Sticky Gel"]; }
@@ -4315,7 +4327,10 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             
             for(let i=0; i<5; i++) {
                 let isIOTD = (i === 4);
-                let p = resolvePlayerStats(); let luckMultiplier = p.qly; let roll = Math.random() * 100; let statLinesCount = 0;
+                let p = resolvePlayerStats(); 
+                // Incorporate Merchant Investment (+1% quality multiplier per level) for shop items
+                let luckMultiplier = p.qly + ((playerStats.shopQLevel || 0) * 0.01); 
+                let roll = Math.random() * 100; let statLinesCount = 0;
                 
                 if (isIOTD) {
                     if (roll < (1.0 * luckMultiplier)) statLinesCount = 5; else if (roll < (5.0 * luckMultiplier)) statLinesCount = 4;
@@ -4349,7 +4364,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             
             return `<div class="shop-row ${shopItem.isIOTD ? 'iotd' : ''}" onmouseenter="showMarketTooltip(event, ${index})" onmouseleave="hideTooltip()" ontouchstart="showMarketTooltip(event, ${index})">
                     <div>${shopItem.isIOTD ? '<span style="background:#f1c40f; color:#000; font-size:9px; font-weight:bold; padding:1px 3px; border-radius:2px;">ITEM OF THE DAY</span><br>' : ''}<strong style="color:${nameColor}; font-size:12px;">${shopItem.name}</strong><br><span style="font-size:10px; color:#aaa;">${shopItem.statsRolled}★ Quality</span></div>
-                    <div style="text-align:right; position:relative; z-index:10;"><div style="color:${costColor}; font-weight:bold; font-size:11px; margin-bottom:4px;">${shopItem.cost} Gold</div><button class="btn-action" style="${shopItem.purchased || playerStats.coins < shopItem.cost ? 'opacity:0.5; cursor:not-allowed; background:#444;' : 'background:#f1c40f; color:#000;'}" onclick="buyShopItem(${index})">${shopItem.purchased ? 'SOLD' : 'BUY'}</button></div>
+                    <div style="text-align:right; position:relative; z-index:10;"><div style="color:${costColor}; font-weight:bold; font-size:11px; margin-bottom:4px;">${shopItem.cost.toLocaleString()} Gold</div><button class="btn-action" style="${shopItem.purchased || playerStats.coins < shopItem.cost ? 'opacity:0.5; cursor:not-allowed; background:#444;' : 'background:#f1c40f; color:#000;'}" onclick="buyShopItem(${index})">${shopItem.purchased ? 'SOLD' : 'BUY'}</button></div>
                 </div>`;
         }).join("");
     }
@@ -4376,7 +4391,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             return `<div class="shop-row" style="border-color: ${item.color}; background: rgba(155, 89, 182, 0.05); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 8px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <strong style="color:${item.color}; font-size:12px;">${item.name}</strong>
-                    <span style="color:${costColor}; font-weight:bold; font-size:11px;">${item.cost} ${currencyLabel}</span>
+                    <span style="color:${costColor}; font-weight:bold; font-size:11px;">${item.cost.toLocaleString()} ${currencyLabel}</span>
                 </div>
                 <div style="font-size:10px; color:#aaa; margin-bottom:6px;">${item.desc}</div>
                 <button class="btn-action" style="background:#9b59b6; color:#fff;" onclick="buyMysticalItem(${index})">Purchase</button>
@@ -5006,7 +5021,10 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         if (inventory.EQUIP.length >= maxBag) { pushHeaderToast(`Inventory Full!`, "#e74c3c"); return; }
     }
     
-    let statLinesCount = 1; let luckMultiplier = p.qly; let roll = Math.random() * 100;
+    let statLinesCount = 1; 
+    // Incorporate Gacha Calibration (+1% quality multiplier per level) for vending drops
+    let luckMultiplier = p.qly + ((playerStats.vendingQLevel || 0) * 0.01); 
+    let roll = Math.random() * 100;
         
         if (roll < (0.5 * luckMultiplier)) statLinesCount = 5; else if (roll < (2.0 * luckMultiplier)) statLinesCount = 4;
         else if (roll < (10.0 * luckMultiplier)) statLinesCount = 3; else if (roll < (30.0 * luckMultiplier)) statLinesCount = 2; else statLinesCount = 1; 
@@ -5271,6 +5289,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
 
         let prestigeDropBonus = (playerStats.prestigeUpgrades?.drop || 0) * 0.05;
         p.drop += prestigeDropBonus;
+
+        // Apply Aura of Fortune upgrade (+1% global drop quality multiplier per level)
+        p.qly += (playerStats.globalQLevel || 0) * 0.01;
 
         return p;
     }
@@ -5790,13 +5811,13 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         }
 
         if (item.id !== "dummy") {
-            if (item.atk > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ⚔️ Attack: +${item.atk}${getStatEnchantSuffix(item, 'atk')}${formatStatRangeStr(item, 'atk')}</div>`;
-            if (item.maxHp > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ❤️ Max HP: +${item.maxHp}${getStatEnchantSuffix(item, 'maxHp')}${formatStatRangeStr(item, 'maxHp')}</div>`;
-            if (item.def > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🛡️ Defense: +${item.def}${getStatEnchantSuffix(item, 'def')}${formatStatRangeStr(item, 'def')}</div>`;
-            if (item.moveSpeed > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 👟 Move Speed: +${item.moveSpeed}${getStatEnchantSuffix(item, 'moveSpeed')}${formatStatRangeStr(item, 'moveSpeed')}</div>`;
-            if (item.str > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 💪 STR (Strength): +${item.str}${getStatEnchantSuffix(item, 'str')}${formatStatRangeStr(item, 'str')}</div>`;
-            if (item.dex > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🎯 DEX (Dexterity): +${item.dex}${getStatEnchantSuffix(item, 'dex')}${formatStatRangeStr(item, 'dex')}</div>`;
-            if (item.int > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🧠 INT (Intelligence): +${item.int}${getStatEnchantSuffix(item, 'int')}${formatStatRangeStr(item, 'int')}</div>`;
+            if (item.atk > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ⚔️ Attack: +${item.atk.toLocaleString()}${getStatEnchantSuffix(item, 'atk')}${formatStatRangeStr(item, 'atk')}</div>`;
+            if (item.maxHp > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• ❤️ Max HP: +${item.maxHp.toLocaleString()}${getStatEnchantSuffix(item, 'maxHp')}${formatStatRangeStr(item, 'maxHp')}</div>`;
+            if (item.def > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🛡️ Defense: +${item.def.toLocaleString()}${getStatEnchantSuffix(item, 'def')}${formatStatRangeStr(item, 'def')}</div>`;
+            if (item.moveSpeed > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 👟 Move Speed: +${item.moveSpeed.toLocaleString()}${getStatEnchantSuffix(item, 'moveSpeed')}${formatStatRangeStr(item, 'moveSpeed')}</div>`;
+            if (item.str > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 💪 STR (Strength): +${item.str.toLocaleString()}${getStatEnchantSuffix(item, 'str')}${formatStatRangeStr(item, 'str')}</div>`;
+            if (item.dex > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🎯 DEX (Dexterity): +${item.dex.toLocaleString()}${getStatEnchantSuffix(item, 'dex')}${formatStatRangeStr(item, 'dex')}</div>`;
+            if (item.int > 0) html += `<div class="tt-stat-line" style="color:#ecf0f1;">• 🧠 INT (Intelligence): +${item.int.toLocaleString()}${getStatEnchantSuffix(item, 'int')}${formatStatRangeStr(item, 'int')}</div>`;
             
             if (item.critChance > 0) html += `<div class="tt-stat-line" style="color:#e67e22;">• ✨ Crit Chance: +${Math.floor(item.critChance*100)}%${getStatEnchantSuffix(item, 'critChance')}${formatStatRangeStr(item, 'critChance', true)}</div>`;
             if (item.critDamage > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• 💥 Crit Multi: +${Math.floor(item.critDamage*100)}%${getStatEnchantSuffix(item, 'critDamage')}${formatStatRangeStr(item, 'critDamage', true)}</div>`;
@@ -5854,7 +5875,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                     hasDiffs = true; 
                     let isPositive = s.inverseGood ? diff < 0 : diff > 0;
                     let color = isPositive ? "#2ecc71" : "#e74c3c"; let sign = diff > 0 ? "+" : "";
-                    let diffStr = s.isPct ? sign + Math.round(diff*100) + "%" : sign + Math.round(diff);
+                    let diffStr = s.isPct ? sign + Math.round(diff*100) + "%" : sign + Math.round(diff).toLocaleString();
                     html += `<div class="tt-stat-line" style="color:${color}; font-weight:bold; white-space:nowrap;">• ${s.icon} Total ${s.label}: ${diffStr}</div>`;
                 }
             });
@@ -6084,7 +6105,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     };
 
     window.showGachaTooltip = function(e) {
-        e.stopPropagation(); let p = resolvePlayerStats(); let qly = p.qly;
+        e.stopPropagation(); let p = resolvePlayerStats(); 
+        // Incorporate Gacha Calibration quality multiplier in tooltips
+        let qly = p.qly + ((playerStats.vendingQLevel || 0) * 0.01);
         let mythic = (0.5 * qly); let leg = (2.0 * qly) - mythic; let epic = (10.0 * qly) - (2.0 * qly); let magic = (30.0 * qly) - (10.0 * qly); let rare = 100 - (30.0 * qly);
 
         let tt = document.getElementById('game-tooltip');
@@ -6729,8 +6752,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 html += `<div style="font-size:11px; margin-bottom:10px; color:#aaa;">Temper Cap: <span style="color:#fff;">${item.temperLevel} / ${maxT}</span></div>`;
                 let pct = (item.temperLevel / maxT) * 100;
                 html += `<div class="forge-progress-bg"><div class="forge-progress-fill" style="width:${pct}%"></div></div>`;
-                html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${costGold} Gold Required</div>`;
-                html += `<div style="font-size:11px; color:${scrapColor}; margin-bottom:10px;">• ${scrapReqAmount}x ${scrapReq} (Owned: ${playerScrap})</div>`;
+                html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${costGold.toLocaleString()} Gold Required</div>`;
+                html += `<div style="font-size:11px; color:${scrapColor}; margin-bottom:10px;">• ${scrapReqAmount.toLocaleString()}x ${scrapReq} (Owned: ${playerScrap.toLocaleString()})</div>`;
                 html += `<div style="font-size:11px; color:#e74c3c; font-weight:bold; margin-bottom:15px;">⚠️ ${failChance}% Chance to Fail</div>`;
                 html += `<button class="forge-anvil-button" style="width:100%;" ${(playerStats.coins >= costGold) && (playerScrap >= scrapReqAmount) ? '' : 'disabled'} onclick="temperItem()">Harness Heat</button>`;
             }
@@ -6767,9 +6790,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                         <span style="font-size:9px; color:#aaa;">(All other stat lines on this item are permanently locked!)</span>
                     </div>`;
 
-                    html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${costGold} Gold Required</div>`;
-                    html += `<div style="font-size:11px; color:${scrapColor}; margin-bottom:3px;">• ${scrapReqAmount}x ${scrapReq} (Owned: ${ownedScrap})</div>`;
-                    html += `<div style="font-size:11px; color:${coresColor}; margin-bottom:12px;">• 1x Catalyst Core (Owned: ${ownedCores})</div>`;
+                    html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${costGold.toLocaleString()} Gold Required</div>`;
+                    html += `<div style="font-size:11px; color:${scrapColor}; margin-bottom:3px;">• ${scrapReqAmount.toLocaleString()}x ${scrapReq} (Owned: ${ownedScrap.toLocaleString()})</div>`;
+                    html += `<div style="font-size:11px; color:${coresColor}; margin-bottom:12px;">• 1x Catalyst Core (Owned: ${ownedCores.toLocaleString()})</div>`;
                     html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #111);" ${(playerStats.coins >= costGold) && (ownedScrap >= scrapReqAmount) && (ownedCores >= 1) ? '' : 'disabled'} onclick="reforgeItemStat()">Reforge Locked Modifier</button>`;
                 }
             }
@@ -6788,8 +6811,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 previewItem.statsRolled++;
                 
                 html += `<div style="font-size:11px; margin-bottom:15px; color:#aaa;">Rarity Transition: <span style="color:#fff;">${currentStars}★</span> ➔ <span style="color:#f1c40f;">${currentStars+1}★</span></div>`;
-                html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${costGold} Gold Required</div>`;
-                html += `<div style="font-size:11px; color:${scrapColor}; margin-bottom:10px;">• ${scrapReqAmount}x Eridium Shard (Owned: ${playerScrap})</div>`;
+                html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${costGold.toLocaleString()} Gold Required</div>`;
+                html += `<div style="font-size:11px; color:${scrapColor}; margin-bottom:10px;">• ${scrapReqAmount.toLocaleString()}x Eridium Shard (Owned: ${playerScrap.toLocaleString()})</div>`;
                 html += `<div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:15px;">✨ 100% Awakening Guaranteed</div>`;
                 html += `<button class="forge-anvil-button" style="width:100%; border-color:#e67e22;" ${(playerStats.coins >= costGold) && (playerScrap >= scrapReqAmount) ? '' : 'disabled'} onclick="temperItem()">Awaken Rarity</button>`;
             }
@@ -6825,7 +6848,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 let goldColor = playerStats.coins >= resetGoldCost ? "#f1c40f" : "#e74c3c";
                 
                 html += `<div style="font-size:11px; margin-bottom:10px; color:#aaa;">Active Enchantments to Purge: <span style="color:#9b59b6; font-weight:bold;">${currentEnchants}</span></div>`;
-                html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:15px;">• ${resetGoldCost} Gold Required (Owned: ${Math.floor(playerStats.coins)})</div>`;
+                html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:15px;">• ${resetGoldCost.toLocaleString()} Gold Required (Owned: ${Math.floor(playerStats.coins).toLocaleString()})</div>`;
                 html += `<div style="font-size:11px; color:#e74c3c; font-weight:bold; margin-bottom:15px;">⚠️ Restores all enchanted parameters to their original pre-enchanted values. Material scraps are non-refundable.</div>`;
                 html += `<button class="forge-anvil-button" style="width:100%; border-color:#e74c3c; background: linear-gradient(135deg, #c0392b, #111);" ${playerStats.coins >= resetGoldCost ? '' : 'disabled'} onclick="resetItemEnchants()">Purge Enchantments</button>`;
             }
@@ -7386,15 +7409,15 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     function updateUI() {
         let p = resolvePlayerStats(); 
         
-        document.getElementById('char-level').innerText = playerStats.level;
-        document.getElementById('char-sp').innerText = playerStats.sp;
+        document.getElementById('char-level').innerText = playerStats.level.toLocaleString();
+        document.getElementById('char-sp').innerText = playerStats.sp.toLocaleString();
         
         let maxStageEl = document.getElementById('char-maxstage');
         if (maxStageEl) {
-            maxStageEl.innerText = playerStats.maxStage || 1;
+            maxStageEl.innerText = (playerStats.maxStage || 1).toLocaleString();
         }
         
-        document.getElementById('char-xp-text').innerText = `${playerStats.xp} / ${playerStats.xpReq}`;
+        document.getElementById('char-xp-text').innerText = `${playerStats.xp.toLocaleString()} / ${playerStats.xpReq.toLocaleString()}`;
         document.getElementById('char-xp-fill').style.width = `${Math.min(100, (playerStats.xp / playerStats.xpReq) * 100)}%`;
         
         let alloc = playerStats.spAllocations;
@@ -7437,7 +7460,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         }
 
         let maxBag = getMaxBagSlots();
-        document.getElementById('hud-hp').innerText = `${playerStats.currentHp}/${p.maxHp}`; document.getElementById('hud-coins').innerText = Math.floor(playerStats.coins);
+        document.getElementById('hud-hp').innerText = `${Math.floor(playerStats.currentHp).toLocaleString()}/${Math.floor(p.maxHp).toLocaleString()}`; document.getElementById('hud-coins').innerText = Math.floor(playerStats.coins).toLocaleString();
         document.getElementById('hud-bag').innerText = `${inventory.EQUIP.length}/${maxBag} (A:${inventory.ARTIFACT.length})`; document.getElementById('hud-bag').style.color = (inventory.EQUIP.length >= maxBag || inventory.ARTIFACT.length >= maxBag) ? "#e74c3c" : "#2ecc71";
         document.getElementById('btn-bag-count').innerText = inventory.EQUIP.length; document.getElementById('btn-bag-max').innerText = maxBag;
         let btnArtCount = document.getElementById('btn-art-count');
@@ -7446,12 +7469,12 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         if (btnArtMax) btnArtMax.innerText = maxBag;
 
         
-        document.getElementById('stat-str').innerText = p.str;
-        document.getElementById('stat-dex').innerText = p.dex;
-        document.getElementById('stat-int').innerText = p.int;
+        document.getElementById('stat-str').innerText = p.str.toLocaleString();
+        document.getElementById('stat-dex').innerText = p.dex.toLocaleString();
+        document.getElementById('stat-int').innerText = p.int.toLocaleString();
 
-        document.getElementById('stat-atk').innerText = p.atk; document.getElementById('stat-mhp').innerText = p.maxHp; 
-        document.getElementById('stat-def').innerText = p.def; document.getElementById('stat-mov').innerText = p.moveSpeed;
+        document.getElementById('stat-atk').innerText = p.atk.toLocaleString(); document.getElementById('stat-mhp').innerText = p.maxHp.toLocaleString(); 
+        document.getElementById('stat-def').innerText = p.def.toLocaleString(); document.getElementById('stat-mov').innerText = p.moveSpeed.toLocaleString();
         document.getElementById('stat-crt').innerText = Math.floor(p.critChance * 100) + "%"; document.getElementById('stat-crd').innerText = Math.floor(p.critDamage * 100) + "%";
         document.getElementById('stat-blk').innerText = Math.floor(p.block * 100) + "%"; document.getElementById('stat-pry').innerText = Math.floor(p.parry * 100) + "%";
         document.getElementById('stat-ias').innerText = p.idleAttackSpeed + "f"; document.getElementById('stat-aas').innerText = p.activeAttackSpeed + "f";
@@ -7519,18 +7542,18 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         document.getElementById('star-rate-1').innerText = p1.toFixed(2) + "%";
 
         document.getElementById('live-qty-acore').innerText = inventory.ETC["Ancient Core"] || 0;
-        document.getElementById('live-qty-eshard').innerText = inventory.ETC["Eridium Shard"] || 0;
+        document.getElementById('live-qty-eshard').innerText = (inventory.ETC["Eridium Shard"] || 0).toLocaleString();
         
         let elAstral = document.getElementById('live-qty-astral');
-        if (elAstral) elAstral.innerText = (inventory.ETC["Astral Essence"] || 0) + ` (Shared Shards: ${playerStats.astralShards || 0})`;
+        if (elAstral) elAstral.innerText = (inventory.ETC["Astral Essence"] || 0).toLocaleString() + ` (Shared Shards: ${(playerStats.astralShards || 0).toLocaleString()})`;
         
-        document.getElementById('live-qty-keys').innerText = (inventory.ETC["Gacha Key"] || 0) + ` (E:${playerStats.equipKeys} G:${playerStats.goldKeys} M:${playerStats.matKeys})`;
+        document.getElementById('live-qty-keys').innerText = (inventory.ETC["Gacha Key"] || 0).toLocaleString() + ` (E:${playerStats.equipKeys} G:${playerStats.goldKeys} M:${playerStats.matKeys})`;
         
         let soulsTotal = (inventory.ETC["Monster Soul"] || 0);
-        document.getElementById('live-qty-souls').innerText = soulsTotal + (inventory.ETC["Luminous Soul"] || 0) + ` (Locked Cores: ${inventory.ETC["Catalyst Core"] || 0})`;
+        document.getElementById('live-qty-souls').innerText = (soulsTotal + (inventory.ETC["Luminous Soul"] || 0)).toLocaleString() + ` (Locked Cores: ${(inventory.ETC["Catalyst Core"] || 0).toLocaleString()})`;
         
         let soulsLabel = document.getElementById('crucible-souls-held');
-        if (soulsLabel) soulsLabel.innerText = soulsTotal;
+        if (soulsLabel) soulsLabel.innerText = soulsTotal.toLocaleString();
         
         let peakWaveEl = document.getElementById('crucible-peak-wave');
         if (peakWaveEl) {
@@ -7548,7 +7571,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         }
 
         let scrapsSum = (inventory.ETC["Mythic Scrap"] || 0) + (inventory.ETC["Legendary Scrap"] || 0) + (inventory.ETC["Epic Scrap"] || 0) + (inventory.ETC["Magic Scrap"] || 0) + (inventory.ETC["Rare Scrap"] || 0);
-        document.getElementById('live-qty-scraps').innerText = scrapsSum;
+        document.getElementById('live-qty-scraps').innerText = scrapsSum.toLocaleString();
 
         let activeBuffs = [];
         if (playerStats.frenzyTimer > 0) activeBuffs.push("🔥 Frenzy");
@@ -9656,8 +9679,88 @@ function engineCycle() {
         window.positionTooltip(e, tt);
     };
 
+window.renderGoldUpgrades = function() {
+    let el = document.getElementById('gold-upgrades-list');
+    if (!el) return;
+    let p = playerStats;
+    
+    let upgrades = [
+        {
+            id: 'vending',
+            name: "🎰 Gacha Calibration",
+            level: p.vendingQLevel || 0,
+            cost: Math.floor(15000 * Math.pow(1.18, p.vendingQLevel || 0)),
+            desc: "Increases Vending Machine loot quality by +1% per level.",
+            color: "#f1c40f"
+        },
+        {
+            id: 'shop',
+            name: "🛒 Merchant Investment",
+            level: p.shopQLevel || 0,
+            cost: Math.floor(30000 * Math.pow(1.22, p.shopQLevel || 0)),
+            desc: "Increases Gold Shop stock quality by +1% per level.",
+            color: "#3498db"
+        },
+        {
+            id: 'global',
+            name: "🍀 Aura of Fortune",
+            level: p.globalQLevel || 0,
+            cost: Math.floor(100000 * Math.pow(1.28, p.globalQLevel || 0)),
+            desc: "Increases all global and dungeon drop quality by +1% per level.",
+            color: "#2ecc71"
+        }
+    ];
+    
+    el.innerHTML = upgrades.map(up => {
+        let costColor = p.coins >= up.cost ? "#f1c40f" : "#e74c3c";
+        return `<div class="shop-row" style="border-color: ${up.color}; background: rgba(46, 204, 113, 0.05); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="color:${up.color}; font-size:12px;">${up.name} <span style="color:#aaa;">(Lv. ${up.level})</span></strong>
+                <span style="color:${costColor}; font-weight:bold; font-size:11px;">${up.cost.toLocaleString()} Gold</span>
+            </div>
+            <div style="font-size:10px; color:#aaa; margin-bottom:6px;">${up.desc} Currently: <span style="color:#fff; font-weight:bold;">+${up.level}% Quality</span></div>
+            <button class="btn-action" style="background:${up.color}; color:#111; font-weight:bold;" onclick="buyGoldUpgrade('${up.id}')">Upgrade</button>
+        </div>`;
+    }).join("");
+};
+
+window.buyGoldUpgrade = function(type) {
+    let p = playerStats;
+    let cost = 0;
+    if (type === 'vending') {
+        cost = Math.floor(15000 * Math.pow(1.18, p.vendingQLevel || 0));
+        if (p.coins < cost) { pushHeaderToast("Not enough Gold!", "#e74c3c"); return; }
+        p.coins -= cost;
+        p.vendingQLevel = (p.vendingQLevel || 0) + 1;
+        pushHeaderToast(`🎰 Vending Quality upgraded to Lv. ${p.vendingQLevel}!`, "#f1c40f");
+    } else if (type === 'shop') {
+        cost = Math.floor(30000 * Math.pow(1.22, p.shopQLevel || 0));
+        if (p.coins < cost) { pushHeaderToast("Not enough Gold!", "#e74c3c"); return; }
+        p.coins -= cost;
+        p.shopQLevel = (p.shopQLevel || 0) + 1;
+        pushHeaderToast(`🛒 Shop Quality upgraded to Lv. ${p.shopQLevel}!`, "#3498db");
+        refreshMarketShopIfNeeded();
+    } else if (type === 'global') {
+        cost = Math.floor(100000 * Math.pow(1.28, p.globalQLevel || 0));
+        if (p.coins < cost) { pushHeaderToast("Not enough Gold!", "#e74c3c"); return; }
+        p.coins -= cost;
+        p.globalQLevel = (p.globalQLevel || 0) + 1;
+        pushHeaderToast(`🍀 Global Quality upgraded to Lv. ${p.globalQLevel}!`, "#2ecc71");
+    }
+    
+    let colors = { vending: "#f1c40f", shop: "#3498db", global: "#2ecc71" };
+    if (typeof window.spawnPurchaseCelebration === "function") {
+        window.spawnPurchaseCelebration('alchemy', colors[type]);
+    }
+    
+    updateUI();
+    renderInventory();
+    renderGoldUpgrades();
+    window.saveGame();
+};
+
 window.loadGame(); 
-updateUI(); 
+updateUI();  
 renderInventory(); 
 updateAudioUI();
 engineCycle();
