@@ -1571,7 +1571,8 @@ window.onload = function() {
         { name: "Philosopher's Catalyst", trait: "philosopher_catalyst", desc: "Consuming an elixir has a 25% chance to not consume the item. Passive +8 INT.", breakdown: "<strong>Philosopher's Catalyst Breakdown:</strong><br>• Sparing Effect: Sparing consumption check with <span style='color:#2ecc71;'>25% free use probability</span>.<br>• Passive: Adds <span style='color:#9b59b6;'>+8 INT</span>.", int: 8, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 },
         { name: "Cauldron of Eternity", trait: "cauldron_eternity", desc: "While any potion buff is active, reduces Idle Attack delay by 3 frames. Passive +10% Max HP.", breakdown: "<strong>Cauldron of Eternity Breakdown:</strong><br>• Haste Trigger: Attacks automatically <span style='color:#3498db;'>3 frames faster</span> while any potion effect is running.<br>• Passive: Adds a <span style='color:#e74c3c;'>+10% Max HP</span> multiplier.", maxHpPct: 0.10, dropRate: 0, quality: 0, goldMulti: 0, rareSpawn: 0, fairySpawn: 0 }
     ];
-    ];
+    
+    window.addEtcDrop = function(itemName, amount = 1) {
     
     window.addEtcDrop = function(itemName, amount = 1) {
         if (!inventory.ETC[itemName]) { inventory.ETC[itemName] = 0; }
@@ -3429,10 +3430,12 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                         <!-- Drop Multiplier -->
                         <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
                             <div>
-                                <strong style="color:#2ecc71; font-size:12px;">🍀 Cosmic Fortune</strong>
+                                <strong style="color:#2ecc71; font-size:12px;">Cosmic Fortune</strong>
                                 <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +5% Global Drop Rate.</div>
                                 <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(dropPts * 5).toLocaleString()}% Drop</span></div>
                             </div>
+                            <button class="btn-action" style="margin-top:8px; background:#2ecc71;" ${dropDisabled} onclick="buyPrestigeUpgrade('drop')">Upgrade (1 PP)</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -7186,8 +7189,6 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             pushLog(`<strong style='color:#9b59b6;'>[VOID CORE]</strong> Syphoned <span style='color:#2ecc71;'>${healAmount} HP</span> from the fallen rare.`);
         }
 
-        SoundManager.play('death');
-        
         SoundManager.play('death');
         
         let xpYield = 0;
