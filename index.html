@@ -1670,14 +1670,14 @@ window.onload = function() {
             }
 
             if (vType === "slime") {
-                // Classic squishy slime: Clean, simplified, and glossy
+                // Bouncy slime: Lime-green translucent body with head sprout, bead eyes, blush, and smiling face
                 let squish = Math.sin(Date.now() / 100) * 3.5;
                 let wScale = m.w / 2 + squish;
                 let hScale = m.h / 2 - squish;
                 let cx = m.x + m.w / 2;
                 let cy = m.y + m.h - 10 + squish / 2;
                 
-                let slimeGrad = c.createRadialGradient(cx - 3, cy - 5, 2, cx, cy, m.w * 0.7);
+                let slimeGrad = c.createRadialGradient(cx - 3, cy - 5, 2, cx, cy, m.w * 0.75);
                 if (m.flashTimer > 0) {
                     slimeGrad.addColorStop(0, "#ffffff");
                     slimeGrad.addColorStop(1, "#ffffff");
@@ -1685,27 +1685,47 @@ window.onload = function() {
                     slimeGrad.addColorStop(0, "#ffeaa7");
                     slimeGrad.addColorStop(1, "#f1c40f");
                 } else {
-                    slimeGrad.addColorStop(0, "#55efc4");
-                    slimeGrad.addColorStop(1, "#00b894");
+                    slimeGrad.addColorStop(0, "#a3fd83");
+                    slimeGrad.addColorStop(1, "#2ecc71");
                 }
+                
                 c.fillStyle = slimeGrad;
                 c.beginPath();
-                c.ellipse(cx, cy, wScale, hScale, 0, 0, Math.PI * 2);
+                c.ellipse(cx, cy, wScale * 1.15, hScale * 0.95, 0, 0, Math.PI * 2);
                 c.fill();
                 c.stroke();
                 
                 if (m.flashTimer === 0) {
-                    // Crisp glossy reflection highlight
-                    c.fillStyle = "rgba(255, 255, 255, 0.5)";
+                    // Glossy specular highlight
+                    c.fillStyle = "rgba(255, 255, 255, 0.6)";
                     c.beginPath();
-                    c.ellipse(cx - wScale * 0.4, cy - hScale * 0.4, wScale * 0.22, hScale * 0.18, Math.PI / 4, 0, Math.PI * 2);
+                    c.ellipse(cx - wScale * 0.4, cy - hScale * 0.4, wScale * 0.25, hScale * 0.2, Math.PI / 4, 0, Math.PI * 2);
                     c.fill();
                     
-                    // Eyes and glints scaling in sync with squish deformation
+                    // Head Stem & Sprouting Leaf
+                    c.save();
+                    c.strokeStyle = "#4d2e1a";
+                    c.lineWidth = 2.5;
+                    c.beginPath();
+                    let stemTopY = cy - hScale * 0.95;
+                    c.moveTo(cx, stemTopY);
+                    c.quadraticCurveTo(cx - 2, stemTopY - 8, cx + 4, stemTopY - 12);
+                    c.stroke();
+                    
+                    c.fillStyle = "#2ecc71";
+                    c.beginPath();
+                    c.ellipse(cx + 4, stemTopY - 12, 5, 2.5, -Math.PI / 6, 0, Math.PI * 2);
+                    c.fill();
+                    c.strokeStyle = "#000000";
+                    c.lineWidth = 1.2;
+                    c.stroke();
+                    c.restore();
+
+                    // Cute simple dot eyes
                     c.fillStyle = "#1e272e";
-                    let eyeOffsetX = wScale * 0.35;
+                    let eyeOffsetX = wScale * 0.3;
                     let eyeOffsetY = hScale * 0.1;
-                    let eyeRadius = Math.max(1, hScale * 0.15);
+                    let eyeRadius = Math.max(1, hScale * 0.12);
                     c.beginPath();
                     c.arc(cx - eyeOffsetX, cy - eyeOffsetY, eyeRadius, 0, Math.PI * 2);
                     c.arc(cx + eyeOffsetX, cy - eyeOffsetY, eyeRadius, 0, Math.PI * 2);
@@ -1716,34 +1736,76 @@ window.onload = function() {
                     c.arc(cx - eyeOffsetX - eyeRadius * 0.2, cy - eyeOffsetY - eyeRadius * 0.2, eyeRadius * 0.3, 0, Math.PI * 2);
                     c.arc(cx + eyeOffsetX - eyeRadius * 0.2, cy - eyeOffsetY - eyeRadius * 0.2, eyeRadius * 0.3, 0, Math.PI * 2);
                     c.fill();
+
+                    // Happy curve mouth
+                    c.strokeStyle = "#1e272e";
+                    c.lineWidth = 2;
+                    c.beginPath();
+                    c.arc(cx, cy + hScale * 0.05, wScale * 0.12, 0, Math.PI);
+                    c.stroke();
+                    
+                    // Soft blush cheeks
+                    c.fillStyle = "rgba(231, 76, 60, 0.4)";
+                    c.beginPath();
+                    c.ellipse(cx - eyeOffsetX - 2, cy - eyeOffsetY + 3, 2.5, 1.2, 0, 0, Math.PI * 2);
+                    c.ellipse(cx + eyeOffsetX + 2, cy - eyeOffsetY + 3, 2.5, 1.2, 0, 0, Math.PI * 2);
+                    c.fill();
                 }
             } 
             else if (vType === "sprout") {
-                // Minimalist forest twig with leaves
-                let sway = Math.sin(Date.now() / 140) * 0.12;
+                // Orange Mushroom: Stout cream stem with a glossy oversized orange dome cap
+                let squish = Math.sin(Date.now() / 110) * 2.5;
+                let wScale = m.w / 2 + squish;
+                let hScale = m.h / 2 - squish;
                 let cx = m.x + m.w / 2;
                 let cy = m.y + m.h;
-                
-                // Stem structure
-                c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#4d2e1a";
-                c.lineWidth = 3.2;
-                c.beginPath();
-                c.moveTo(cx, cy);
-                c.quadraticCurveTo(cx - 4, cy - 12, cx + Math.sin(Date.now() / 120) * 3, cy - 22);
-                c.stroke();
 
-                // Leaf clusters
-                c.save();
-                c.translate(cx + Math.sin(Date.now() / 120) * 3, cy - 22);
-                c.rotate(sway);
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f1c40f" : "#2ecc71");
+                // 1. Stout rounded cream stalk base
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#fdf6e2";
                 c.beginPath();
-                c.ellipse(-4, -1, 5, 2.2, -Math.PI / 6, 0, Math.PI * 2);
-                c.ellipse(4, -1, 5, 2.2, Math.PI / 6, 0, Math.PI * 2);
+                c.ellipse(cx, cy - hScale * 0.4, wScale * 0.65, hScale * 0.45, 0, 0, Math.PI * 2);
                 c.fill();
                 c.stroke();
-                c.restore();
-            } 
+
+                // Stalk details: Cute black bead eyes
+                if (m.flashTimer === 0) {
+                    c.fillStyle = "#1e272e";
+                    let eyeOffsetX = wScale * 0.22;
+                    let eyeY = cy - hScale * 0.45;
+                    let eyeSize = Math.max(1, hScale * 0.12);
+                    c.beginPath();
+                    c.arc(cx - eyeOffsetX, eyeY, eyeSize, 0, Math.PI * 2);
+                    c.arc(cx + eyeOffsetX, eyeY, eyeSize, 0, Math.PI * 2);
+                    c.fill();
+                    
+                    // Blush cheeks
+                    c.fillStyle = "rgba(231, 76, 60, 0.45)";
+                    c.beginPath();
+                    c.ellipse(cx - eyeOffsetX - 3, eyeY + 3, 3, 1.5, 0, 0, Math.PI * 2);
+                    c.ellipse(cx + eyeOffsetX + 3, eyeY + 3, 3, 1.5, 0, 0, Math.PI * 2);
+                    c.fill();
+                }
+
+                // 2. Large Orange Cap Dome
+                let capY = cy - hScale * 1.05;
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f1c40f" : "#ff6b1a");
+                c.beginPath();
+                c.ellipse(cx, capY, wScale * 1.25, hScale * 0.85, 0, Math.PI, 0); 
+                c.lineTo(cx + wScale * 1.25, capY + hScale * 0.1);
+                // Lower curved underbelly rim
+                c.quadraticCurveTo(cx, capY + hScale * 0.4, cx - wScale * 1.25, capY + hScale * 0.1);
+                c.closePath();
+                c.fill();
+                c.stroke();
+
+                if (m.flashTimer === 0) {
+                    // Soft white shine reflection on top left
+                    c.fillStyle = "rgba(255, 255, 255, 0.5)";
+                    c.beginPath();
+                    c.ellipse(cx - wScale * 0.5, capY - hScale * 0.35, wScale * 0.3, hScale * 0.15, -Math.PI / 6, 0, Math.PI * 2);
+                    c.fill();
+                }
+            }
             else if (vType === "thorn_wyrm") {
                 // Upgraded green caterpillar-dragon facing LEFT with limbs and leaf-armor plates
                 let cx = m.x + m.w / 2;
