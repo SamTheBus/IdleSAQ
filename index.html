@@ -3092,7 +3092,7 @@ function getStatBaseRange(item, statKey) {
 
     const unscaledStats = ["activeAttackSpeed", "idleAttackSpeed"];
     if (!unscaledStats.includes(statKey)) {
-        let prestigeMult = 1 + ((playerStats.prestigeCount || 0) * 0.02);
+        let prestigeMult = 1 + ((playerStats.prestigeCount || 0) * 0.10);
         min = min * prestigeMult;
         max = max * prestigeMult;
     }
@@ -4216,7 +4216,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             item.noun = nounList ? nounList[Math.floor(Math.random() * nounList.length)] : chosenType.toUpperCase();
         }
 
-        let prestigeMult = 1 + ((playerStats.prestigeCount || 0) * 0.02);
+        let prestigeMult = 1 + ((playerStats.prestigeCount || 0) * 0.10);
 
         if (isArt) {
             let chosenArt = ARTIFACT_POOL[Math.floor(Math.random() * ARTIFACT_POOL.length)];
@@ -8002,7 +8002,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                         if (logicClock % p.idleAttackSpeed === 0) { if (state.autoAttack) window.triggerPlayerSlash(); }
                         
                         // Constant scary dark smoke puff leakage from Hooktail's snout
-                        if (mob.type === "prestige_boss" && Math.random() < 0.25 && !isGamePaused) {
+                        if (mob && mob.type === "prestige_boss" && Math.random() < 0.25 && !isGamePaused) {
                             particles.push({
                                 x: mob.x + 20,
                                 y: mob.y + 55,
