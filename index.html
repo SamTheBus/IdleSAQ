@@ -1918,6 +1918,128 @@ window.onload = function() {
                     c.fill();
                 }
             }
+            else if (vType === "rift_drifter") {
+                // Rift Drifter: Translucent pink/purple core orb with rotating geometric shard rings
+                let hover = Math.sin(Date.now() / 110) * 6;
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2 + hover;
+
+                let coreGrad = c.createRadialGradient(cx, cy, 1, cx, cy, 12);
+                coreGrad.addColorStop(0, "#ffffff");
+                coreGrad.addColorStop(0.4, "#e84393");
+                coreGrad.addColorStop(1, "rgba(142, 68, 173, 0)");
+                c.fillStyle = coreGrad;
+                c.beginPath();
+                c.arc(cx, cy, 12, 0, Math.PI * 2);
+                c.fill();
+
+                c.fillStyle = "#8e44ad";
+                c.strokeStyle = "#000000";
+                c.lineWidth = 1.5;
+                for (let i = 0; i < 3; i++) {
+                    let angle = (Date.now() / 180) + (i * Math.PI * 2 / 3);
+                    let sx = cx + Math.cos(angle) * 16;
+                    let sy = cy + Math.sin(angle) * 8;
+                    
+                    c.beginPath();
+                    c.moveTo(sx, sy - 4);
+                    c.lineTo(sx + 3, sy);
+                    c.lineTo(sx, sy + 4);
+                    c.lineTo(sx - 3, sy);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+                }
+            }
+            else if (vType === "star_weaver") {
+                // Star Weaver: Constellation-jointed cyber spider made of shimmering lines
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2 + Math.sin(Date.now() / 130) * 4;
+
+                c.save();
+                c.strokeStyle = "#3498db";
+                c.lineWidth = 1.8;
+                c.shadowBlur = 10;
+                c.shadowColor = "#3498db";
+
+                // Geometric constellation body lines
+                c.beginPath();
+                c.moveTo(cx, cy - 12);
+                c.lineTo(cx + 10, cy);
+                c.lineTo(cx + 6, cy + 10);
+                c.lineTo(cx - 6, cy + 10);
+                c.lineTo(cx - 10, cy);
+                c.closePath();
+                c.stroke();
+
+                c.fillStyle = "#ffffff";
+                let joints = [[cx, cy - 12], [cx + 10, cy], [cx + 6, cy + 10], [cx - 6, cy + 10], [cx - 10, cy]];
+                joints.forEach(j => {
+                    c.beginPath();
+                    c.arc(j[0], j[1], 2.5, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+                });
+
+                // Twister legs
+                c.strokeStyle = "#ffffff";
+                c.lineWidth = 1.5;
+                for (let i = 0; i < 4; i++) {
+                    let side = i % 2 === 0 ? -1 : 1;
+                    let legYOffset = (i < 2 ? -4 : 4);
+                    let swing = Math.sin(Date.now() / 80 + i) * 6;
+                    
+                    c.beginPath();
+                    c.moveTo(cx + (10 * side), cy + legYOffset);
+                    c.lineTo(cx + (22 * side) + swing, cy + legYOffset - 4);
+                    c.lineTo(cx + (26 * side) + swing, cy + legYOffset + 14);
+                    c.stroke();
+                }
+                c.restore();
+            }
+            else if (vType === "void_wraith") {
+                // Void Wraith: Phantasmal phantom hooded wrap with glowing eye slits and purple claws
+                let hover = Math.sin(Date.now() / 150) * 6;
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2 - 2 + hover;
+
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1b0a2a";
+                c.strokeStyle = "#000000";
+                c.lineWidth = 1.8;
+                c.beginPath();
+                c.moveTo(cx, cy - 16);
+                c.quadraticCurveTo(cx - 12, cy - 6, cx - 10, cy + 14);
+                c.lineTo(cx - 4, cy + 8);
+                c.lineTo(cx, cy + 18);
+                c.lineTo(cx + 4, cy + 8);
+                c.lineTo(cx + 10, cy + 14);
+                c.quadraticCurveTo(cx + 13, cy - 6, cx, cy - 16);
+                c.closePath();
+                c.fill();
+                c.stroke();
+
+                if (m.flashTimer === 0) {
+                    c.strokeStyle = "#8e44ad";
+                    c.lineWidth = 2.0;
+                    let clawSwing = Math.sin(Date.now() / 100) * 3;
+                    c.beginPath();
+                    c.moveTo(cx - 8, cy + 2);
+                    c.lineTo(cx - 16 + clawSwing, cy + 4);
+                    c.lineTo(cx - 20 + clawSwing, cy + 1);
+                    c.moveTo(cx - 8, cy + 2);
+                    c.lineTo(cx - 17 + clawSwing, cy + 7);
+                    c.stroke();
+
+                    c.fillStyle = "#e84393";
+                    c.shadowBlur = 6;
+                    c.shadowColor = "#e84393";
+                    c.beginPath();
+                    c.ellipse(cx - 3, cy - 5, 1.2, 3, Math.PI / 12, 0, Math.PI * 2);
+                    c.ellipse(cx + 1, cy - 5, 1.2, 3, -Math.PI / 12, 0, Math.PI * 2);
+                    c.fill();
+                    c.shadowBlur = 0;
+                }
+            }
             else if (vType === "sprout") {
                 // Orange Mushroom: Stout cream stem with a glossy oversized orange dome cap
                 let squish = Math.sin(Date.now() / 110) * 2.5;
@@ -3350,6 +3472,19 @@ window.onload = function() {
                 let currentTier = t !== undefined ? t : getStageTier();
                 let bounce = 0; // Prevent ReferenceError
                 if (currentTier === 0) {
+                    // Wrap with a pivot coordinate space to organic-sway and breathe from the root base
+                    c.save();
+                    let ox = m.x + m.w / 2;
+                    let oy = m.y + m.h;
+                    let sway = Math.sin(Date.now() / 240) * 0.035; 
+                    let breatheW = 1 + Math.sin(Date.now() / 150) * 0.015; 
+                    let breatheH = 1 + Math.cos(Date.now() / 150) * 0.008; 
+                    
+                    c.translate(ox, oy);
+                    c.rotate(sway);
+                    c.scale(breatheW, breatheH);
+                    c.translate(-ox, -oy);
+
                     c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#a97026";
                     for (let i = 0; i < 4; i++) {
                         let rx = m.x + m.w * (0.2 + i * 0.2);
@@ -3470,6 +3605,7 @@ window.onload = function() {
                             c.fillStyle = "#e74c3c";
                         });
                     }
+                    c.restore();
                 } else if (currentTier === 1) {
                     let bounceOffset = Math.sin(Date.now() / 200) * 3;
                     let blockColor = m.flashTimer > 0 ? "#ffffff" : "#3b3f46";
@@ -6658,13 +6794,13 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 let hp = Math.floor(100 * scale);
                 mob = { x: 750, y: 90, w: 45, h: 75, type: "dungeon_boss", isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor((3 + (3 * scale)) * 5.0), flashTimer: 0, isStopped: false };
             } else {
-                // Crucible Multidimensional Mashup: Randomly selects from all visual mobs in-game
-                let cruciblePool = ["slime", "sprout", "thorn_wyrm", "golem", "wyrmling", "gargoyle", "magma_elemental", "lava_serpent", "hell_bat", "marsh_ghost", "swamp_basilisk", "toxic_fly", "void_orb", "void_crawler", "void_spectre"];
+                // Bespoke Crucible Thematic pool: rift_drifter, star_weaver, or void_wraith
+                let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
                 let chosenVisual = cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
-                let isFlying = ["gargoyle", "toxic_fly", "marsh_ghost", "hell_bat", "void_spectre"].includes(chosenVisual);
+                let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
                 
                 let hp = Math.floor(18 * scale);
-                mob = { x: 750, y: isFlying ? 100 : 145, w: 25, h: 30, type: "mob", visualType: chosenVisual, isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor((2 + scale) * 4.0), flashTimer: 0, isStopped: false };
+                mob = { x: 750, y: isFlying ? 95 : 145, w: 25, h: 30, type: "mob", visualType: chosenVisual, isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor((2 + scale) * 4.0), flashTimer: 0, isStopped: false };
             }
             return;
         }
