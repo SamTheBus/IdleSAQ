@@ -1645,7 +1645,7 @@ window.onload = function() {
         }
 
         if (m.type === "mob") {
-            // Draw glowing halo first if it is a rare mob to establish premium aura layering
+            // Background glow layer for Rare targets to immediately signify high-tier spawns
             if (m.isRare) {
                 c.save();
                 let auraPulse = 1 + Math.sin(Date.now() / 150) * 0.12;
@@ -1663,16 +1663,14 @@ window.onload = function() {
                 c.restore();
             }
 
-            // Derive active visual design index
             let vType = m.visualType;
             if (!vType) {
-                // Backward compatibility fallbacks
                 let fallbacks = { 0: "slime", 1: "golem", 2: "magma_elemental", 3: "marsh_ghost", 4: "void_orb" };
                 vType = fallbacks[t] || "slime";
             }
 
             if (vType === "slime") {
-                // Overhauled jelly slime: highly fluid, core-centric & responsive squishing
+                // Classic squishy slime: Clean, simplified, and glossy
                 let squish = Math.sin(Date.now() / 100) * 3.5;
                 let wScale = m.w / 2 + squish;
                 let hScale = m.h / 2 - squish;
@@ -1697,119 +1695,94 @@ window.onload = function() {
                 c.stroke();
                 
                 if (m.flashTimer === 0) {
-                    // Stylized high-shine liquid reflection
-                    c.fillStyle = "rgba(255, 255, 255, 0.42)";
+                    // Crisp glossy reflection highlight
+                    c.fillStyle = "rgba(255, 255, 255, 0.5)";
                     c.beginPath();
                     c.ellipse(cx - wScale * 0.4, cy - hScale * 0.4, wScale * 0.22, hScale * 0.18, Math.PI / 4, 0, Math.PI * 2);
                     c.fill();
                     
-                    // Floating Nucleolus Core
-                    c.fillStyle = m.isRare ? "#d35400" : "#0984e3";
-                    c.beginPath();
-                    c.arc(cx, cy + 3, 4.5, 0, Math.PI * 2);
-                    c.fill();
-                    c.strokeStyle = "#000000";
-                    c.lineWidth = 1;
-                    c.stroke();
-                    
-                    // Eyes
+                    // Simple, clean black bead eyes
                     c.fillStyle = "#1e272e";
                     c.beginPath();
-                    c.arc(cx - 5, cy - 2, 2.2, 0, Math.PI * 2);
-                    c.arc(cx + 5, cy - 2, 2.2, 0, Math.PI * 2);
+                    c.arc(cx - 5, cy - 1, 2.5, 0, Math.PI * 2);
+                    c.arc(cx + 5, cy - 1, 2.5, 0, Math.PI * 2);
                     c.fill();
-                    
-                    // Cheeks
-                    c.fillStyle = "rgba(235, 77, 75, 0.55)";
-                    c.beginPath();
-                    c.arc(cx - 8, cy, 1.8, 0, Math.PI * 2);
-                    c.arc(cx + 8, cy, 1.8, 0, Math.PI * 2);
-                    c.fill();
-
-                    // Mouth
-                    c.strokeStyle = "#1e272e";
-                    c.lineWidth = 1.2;
-                    c.beginPath();
-                    c.arc(cx, cy - 1, 3, 0, Math.PI);
-                    c.stroke();
                 }
             } 
             else if (vType === "sprout") {
+                // Minimalist forest twig with leaves
                 let sway = Math.sin(Date.now() / 140) * 0.12;
                 let cx = m.x + m.w / 2;
                 let cy = m.y + m.h;
                 
                 // Stem structure
                 c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#4d2e1a";
-                c.lineWidth = 2.8;
+                c.lineWidth = 3.2;
                 c.beginPath();
                 c.moveTo(cx, cy);
-                c.quadraticCurveTo(cx - 5, cy - 15, cx + Math.sin(Date.now() / 120) * 3, cy - 25);
+                c.quadraticCurveTo(cx - 4, cy - 12, cx + Math.sin(Date.now() / 120) * 3, cy - 22);
                 c.stroke();
 
-                // Bulb
+                // Leaf clusters
+                c.save();
+                c.translate(cx + Math.sin(Date.now() / 120) * 3, cy - 22);
+                c.rotate(sway);
                 c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f1c40f" : "#2ecc71");
                 c.beginPath();
-                c.arc(cx + Math.sin(Date.now() / 120) * 3, cy - 25, 7.5, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-
-                // Foliage crown
-                c.save();
-                c.translate(cx + Math.sin(Date.now() / 120) * 3, cy - 31);
-                c.rotate(sway);
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#e67e22" : "#27ae60");
-                c.beginPath();
-                c.ellipse(-3.5, -2, 4.5, 1.8, -Math.PI / 6, 0, Math.PI * 2);
-                c.ellipse(3.5, -2, 4.5, 1.8, Math.PI / 6, 0, Math.PI * 2);
+                c.ellipse(-4, -1, 5, 2.2, -Math.PI / 6, 0, Math.PI * 2);
+                c.ellipse(4, -1, 5, 2.2, Math.PI / 6, 0, Math.PI * 2);
                 c.fill();
                 c.stroke();
                 c.restore();
             } 
-            else if (vType === "beetle") {
+            else if (vType === "thorn_wyrm") {
+                // Segmented green caterpillar slithering (Hooktail-inspired)
                 let cx = m.x + m.w / 2;
-                let cy = m.y + m.h - 10;
-                let run = Math.sin(Date.now() / 80) * 3.5;
+                let cy = m.y + m.h / 2 + 10;
+                let time = Date.now() / 130;
 
-                // Legs
-                c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#1e272e";
-                c.lineWidth = 2;
-                c.beginPath();
-                c.moveTo(cx - 8, cy); c.lineTo(cx - 14, cy + run);
-                c.moveTo(cx - 8, cy + 4); c.lineTo(cx - 15, cy + 4 - run);
-                c.moveTo(cx + 8, cy); c.lineTo(cx + 14, cy - run);
-                c.moveTo(cx + 8, cy + 4); c.lineTo(cx + 15, cy + 4 + run);
-                c.stroke();
+                for (let i = 4; i >= 0; i--) {
+                    let segX = cx - (i * 9);
+                    let segY = cy + Math.sin(time + i * 0.8) * 5;
+                    let radius = 10 - (i * 1.1);
 
-                // Shell carapace
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#1abc9c" : "#7f8c8d");
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#e67e22" : "#27ae60");
+                    c.beginPath();
+                    c.arc(segX, segY, radius, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    // Spine spike details on back
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = m.isRare ? "#f1c40f" : "#e67e22";
+                        c.beginPath();
+                        c.moveTo(segX - 2, segY - radius);
+                        c.lineTo(segX, segY - radius - 4);
+                        c.lineTo(segX + 2, segY - radius);
+                        c.closePath();
+                        c.fill();
+                        c.stroke();
+                    }
+                }
+                
+                // Head Segment
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f39c12" : "#2ecc71");
+                let hX = cx + 8;
+                let hY = cy + Math.sin(time) * 5;
                 c.beginPath();
-                c.ellipse(cx, cy, 10, 13, 0, 0, Math.PI * 2);
+                c.arc(hX, hY, 11, 0, Math.PI * 2);
                 c.fill();
                 c.stroke();
 
                 if (m.flashTimer === 0) {
-                    c.strokeStyle = "#1e272e";
-                    c.lineWidth = 1.2;
-                    c.beginPath(); c.moveTo(cx, cy - 13); c.lineTo(cx, cy + 13); c.stroke();
+                    c.fillStyle = "#ffffff";
+                    c.beginPath();
+                    c.arc(hX + 3, hY - 3, 1.8, 0, Math.PI * 2);
+                    c.fill();
                 }
-
-                // Head
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#2c3e50";
-                c.beginPath();
-                c.arc(cx, cy - 14, 5.5, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-
-                // Horns
-                c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f1c40f" : "#111115");
-                c.lineWidth = 2.2;
-                c.beginPath();
-                c.moveTo(cx, cy - 19);
-                c.quadraticCurveTo(cx - 5, cy - 26, cx - 10, cy - 24);
-                c.stroke();
             } 
             else if (vType === "golem") {
+                // Classic mechanical stone structure
                 let hover = Math.sin(Date.now() / 120) * 2;
                 let blockColor = m.flashTimer > 0 ? "#ffffff" : "#4e545c";
                 let shadowColor = m.flashTimer > 0 ? "#ffffff" : "#2f353d";
@@ -1882,273 +1855,377 @@ window.onload = function() {
                     c.stroke();
                 }
             } 
-            else if (vType === "gryphon") {
+            else if (vType === "iron_wyrm") {
+                // Segmented Iron Serpent (Hooktail-inspired neck mechanics)
                 let cx = m.x + m.w / 2;
-                let cy = m.y + m.h / 2 + Math.sin(Date.now() / 120) * 3;
-                let wing = Math.sin(Date.now() / 80) * 10;
+                let cy = m.y + m.h / 2;
+                let time = Date.now() / 150;
 
-                // Wings
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f39c12" : "#7f8c8d");
+                for (let i = 5; i >= 0; i--) {
+                    let segX = cx - (i * 11);
+                    let segY = cy + Math.sin(time + i * 0.8) * 6;
+                    let radius = 11 - (i * 1.2);
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f39c12" : "#7f8c8d");
+                    c.beginPath();
+                    c.arc(segX, segY, radius, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    // Glowing furnace internal core joint
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = m.isRare ? "#ff7f50" : "#e74c3c";
+                        c.beginPath();
+                        c.arc(segX, segY, radius * 0.4, 0, Math.PI * 2);
+                        c.fill();
+                    }
+                }
+
+                // Ornate Iron Head
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f1c40f" : "#4e545c");
+                let hX = cx + 8;
+                let hY = cy + Math.sin(time) * 6;
                 c.beginPath();
-                c.ellipse(cx - 8, cy - 3, 7, 14 + wing, -Math.PI / 4, 0, Math.PI * 2);
-                c.ellipse(cx + 8, cy - 3, 7, 14 + wing, Math.PI / 4, 0, Math.PI * 2);
+                c.arc(hX, hY, 12, 0, Math.PI * 2);
                 c.fill();
                 c.stroke();
 
-                // Core body
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f1c40f" : "#dca04c");
+                // Spiked horns
+                c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#111115";
+                c.lineWidth = 2.4;
                 c.beginPath();
-                c.ellipse(cx, cy, 11, 14, 0, 0, Math.PI * 2);
-                c.fill();
+                c.moveTo(hX - 3, hY - 10);
+                c.quadraticCurveTo(hX - 10, hY - 18, hX - 15, hY - 15);
                 c.stroke();
 
-                // Feather Head
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#ffffff" : "#f5f6fa");
-                c.beginPath();
-                c.arc(cx, cy - 13, 7, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
+                if (m.flashTimer === 0) {
+                    c.fillStyle = "#ff3333";
+                    c.beginPath();
+                    c.arc(hX + 3, hY - 3, 2, 0, Math.PI * 2);
+                    c.fill();
+                }
+            } 
+            else if (vType === "gargoyle") {
+                // Stone Gargoyle: Sleek posture, flapping wings, simple glowing eyes
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2;
+                let wings = Math.sin(Date.now() / 90) * 11;
 
-                // Gold beak
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f1c40f";
+                // Bat-styled Stone Wings
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#34495e";
                 c.beginPath();
-                c.moveTo(cx, cy - 15);
-                c.lineTo(cx - 10, cy - 13);
-                c.lineTo(cx, cy - 10);
+                c.moveTo(cx - 3, cy); c.lineTo(cx - 22, cy - 14 + wings); c.lineTo(cx - 10, cy + 8);
+                c.moveTo(cx + 3, cy); c.lineTo(cx + 22, cy - 14 + wings); c.lineTo(cx + 10, cy + 8);
                 c.closePath();
                 c.fill();
                 c.stroke();
-            } 
-            else if (vType === "wyrmling") {
-                let cx = m.x + m.w / 2;
-                let cy = m.y + m.h / 2 + Math.sin(Date.now() / 100) * 3;
-                
-                // Segments
-                for (let i = 0; i < 4; i++) {
-                    let segX = cx + Math.sin(Date.now() / 150 + i) * 5;
-                    let segY = cy + (i * 7) - 8;
-                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#9b59b6" : "#4a5568");
-                    c.beginPath();
-                    c.arc(segX, segY, 8.5 - i * 1.3, 0, Math.PI * 2);
-                    c.fill();
-                    c.stroke();
-                }
-                
-                // Head
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#9b59b6" : "#4a5568");
+
+                // Base stone torso
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#5d6d7e";
                 c.beginPath();
-                c.arc(cx, cy - 13, 8.5, 0, Math.PI * 2);
+                c.ellipse(cx, cy + 6, 8, 11, 0, 0, Math.PI * 2);
                 c.fill();
                 c.stroke();
-                
+
+                // Stony head
+                c.beginPath();
+                c.arc(cx, cy - 10, 7.5, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+
                 if (m.flashTimer === 0) {
-                    c.fillStyle = m.isRare ? "#f1c40f" : "#e74c3c";
+                    c.fillStyle = "#f1c40f"; // Glowing golden yellow eyes
                     c.beginPath();
-                    c.arc(cx - 3, cy - 15, 1.8, 0, Math.PI * 2);
-                    c.arc(cx + 3, cy - 15, 1.8, 0, Math.PI * 2);
+                    c.arc(cx - 2.5, cy - 11, 1.8, 0, Math.PI * 2);
+                    c.arc(cx + 2.5, cy - 11, 1.8, 0, Math.PI * 2);
                     c.fill();
                 }
             } 
             else if (vType === "magma_elemental") {
-                let flicker = Math.sin(Date.now() / 50) * 4;
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f1c40f" : "#e67e22");
-                c.beginPath();
-                c.moveTo(m.x + m.w / 2, m.y - flicker);
-                c.quadraticCurveTo(m.x + m.w + flicker, m.y + m.h / 2, m.x + m.w - 5, m.y + m.h);
-                c.lineTo(m.x + 5, m.y + m.h);
-                c.quadraticCurveTo(m.x - flicker, m.y + m.h / 2, m.x + m.w / 2, m.y - flicker);
-                c.closePath();
-                c.fill();
-                c.stroke();
-            } 
-            else if (vType === "hellhound") {
+                // Layered clean shifting flame
+                let flicker = Math.sin(Date.now() / 60) * 4.5;
                 let cx = m.x + m.w / 2;
-                let cy = m.y + m.h - 13;
-                let dogPulse = Math.sin(Date.now() / 90) * 2.5;
+                let cy = m.y + m.h / 2;
 
-                c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#000000";
-                c.lineWidth = 2.2;
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#c0392b";
                 c.beginPath();
-                c.moveTo(cx - 8, cy); c.lineTo(cx - 12, cy + 13 + dogPulse);
-                c.moveTo(cx + 8, cy); c.lineTo(cx + 12, cy + 13 - dogPulse);
-                c.stroke();
-
-                let bodyGrad = c.createLinearGradient(cx, cy - 12, cx, cy + 12);
-                bodyGrad.addColorStop(0, "#ff5500");
-                bodyGrad.addColorStop(1, m.isRare ? "#f1c40f" : "#e74c3c");
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : bodyGrad;
-                c.beginPath();
-                c.ellipse(cx, cy, 12, 17, 0, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#3d0e05" : "#1a0200");
-                c.beginPath();
-                c.ellipse(cx, cy - 14, 8, 10, Math.PI / 4, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-
-                if (m.flashTimer === 0) {
-                    c.fillStyle = "#ffffff";
-                    c.beginPath();
-                    c.arc(cx - 2.5, cy - 16, 1.5, 0, Math.PI * 2);
-                    c.arc(cx + 2.5, cy - 16, 1.5, 0, Math.PI * 2);
-                    c.fill();
-                }
-            } 
-            else if (vType === "imp") {
-                let cx = m.x + m.w / 2;
-                let cy = m.y + m.h / 2 + Math.sin(Date.now() / 110) * 4;
-                let wing = Math.sin(Date.now() / 70) * 8;
-
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#120202";
-                c.beginPath();
-                c.moveTo(cx - 4, cy); c.lineTo(cx - 21, cy - 10 + wing); c.lineTo(cx - 10, cy + 6);
-                c.moveTo(cx + 4, cy); c.lineTo(cx + 21, cy - 10 + wing); c.lineTo(cx + 10, cy + 6);
+                c.moveTo(cx, cy - 22 - flicker);
+                c.quadraticCurveTo(cx + 15 + flicker, cy, cx + 8, cy + 20);
+                c.lineTo(cx - 8, cy + 20);
+                c.quadraticCurveTo(cx - 15 - flicker, cy, cx, cy - 22 - flicker);
                 c.closePath();
                 c.fill();
                 c.stroke();
 
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#e67e22" : "#c0392b");
-                c.beginPath();
-                c.ellipse(cx, cy, 7.5, 12.5, 0, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-
-                c.beginPath();
-                c.arc(cx, cy - 12.5, 7.5, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f1c40f" : "#1a0200");
-                c.beginPath();
-                c.moveTo(cx - 4.5, cy - 18); c.lineTo(cx - 10, cy - 23); c.lineTo(cx - 1.8, cy - 16);
-                c.moveTo(cx + 4.5, cy - 18); c.lineTo(cx + 10, cy - 23); c.lineTo(cx + 1.8, cy - 16);
-                c.fill();
-                c.stroke();
+                if (m.flashTimer === 0) {
+                    // Golden core
+                    c.fillStyle = m.isRare ? "#ffffff" : "#f1c40f";
+                    c.beginPath();
+                    c.moveTo(cx, cy - 10 - flicker * 0.5);
+                    c.quadraticCurveTo(cx + 8, cy, cx + 4, cy + 12);
+                    c.lineTo(cx - 4, cy + 12);
+                    c.quadraticCurveTo(cx - 8, cy, cx, cy - 10 - flicker * 0.5);
+                    c.closePath();
+                    c.fill();
+                }
             } 
-            else if (vType === "marsh_ghost") {
-                c.beginPath();
-                c.arc(m.x + m.w / 2, m.y + 10, m.w / 2, Math.PI, 0);
-                c.fill();
-                c.stroke();
-                
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f5f5dc";
-                c.beginPath();
-                c.rect(m.x + m.w / 2 - 4, m.y + 10, 8, m.h - 10);
-                c.fill();
-                c.stroke();
-            } 
-            else if (vType === "croc") {
+            else if (vType === "lava_serpent") {
+                // Segmented slithering lava serpent (Hooktail scale mechanics)
                 let cx = m.x + m.w / 2;
-                let cy = m.y + m.h - 10;
-                let wiggle = Math.sin(Date.now() / 110) * 4;
+                let cy = m.y + m.h / 2 + 5;
+                let time = Date.now() / 140;
 
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#2ecc71" : "#1e3f20");
-                c.beginPath();
-                c.moveTo(cx + 11, cy + 2);
-                c.quadraticCurveTo(cx + 25 + wiggle, cy + 6, cx + 19, cy);
-                c.closePath();
-                c.fill();
-                c.stroke();
+                for (let i = 5; i >= 0; i--) {
+                    let segX = cx - (i * 10);
+                    let segY = cy + Math.sin(time + i * 0.8) * 6;
+                    let radius = 10.5 - (i * 1.1);
 
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#00b894" : "#122a14");
-                c.beginPath();
-                c.ellipse(cx, cy, 18, 8, 0, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-
-                if (m.flashTimer === 0) {
-                    c.fillStyle = "#000000";
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#ff8c00" : "#1a0805");
                     c.beginPath();
-                    c.moveTo(cx - 9, cy - 8); c.lineTo(cx - 7, cy - 11); c.lineTo(cx - 5, cy - 8);
-                    c.moveTo(cx, cy - 8); c.lineTo(cx + 2, cy - 11); c.lineTo(cx + 4, cy - 8);
-                    c.fill();
-                }
-
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#00b894" : "#122a14");
-                c.beginPath();
-                c.ellipse(cx - 16, cy, 10, 5, 0, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-            } 
-            else if (vType === "toxic_spore") {
-                let cx = m.x + m.w / 2;
-                let cy = m.y + m.h / 2 + Math.sin(Date.now() / 130) * 5;
-
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f1c40f" : "#2ecc71");
-                for (let i = 0; i < 4; i++) {
-                    let sy = cy + 12 + Math.sin(Date.now() / 60 + i) * 5;
-                    c.beginPath();
-                    c.arc(cx - 7 + (i * 4.5), sy, 1.8, 0, Math.PI * 2);
-                    c.fill();
-                }
-
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#e67e22" : "#9b59b6");
-                c.beginPath();
-                c.arc(cx, cy, 11, Math.PI, 0);
-                c.fill();
-                c.stroke();
-
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#ecf0f1";
-                c.beginPath();
-                c.ellipse(cx, cy, 11, 3.5, 0, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-
-                if (m.flashTimer === 0) {
-                    c.fillStyle = "#ffffff";
-                    c.beginPath();
-                    c.arc(cx - 3, cy - 5, 1.8, 0, Math.PI * 2);
-                    c.arc(cx + 4, cy - 3, 2.2, 0, Math.PI * 2);
-                    c.fill();
-                }
-            } 
-            else if (vType === "void_orb") {
-                let hover = Math.sin(Date.now() / 150) * 4;
-                c.beginPath();
-                c.ellipse(m.x + m.w / 2, m.y + m.h / 2 + hover, m.w / 2, m.h / 3, 0, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-                
-                if (m.flashTimer === 0) {
-                    c.fillStyle = "#ff007f";
-                    c.beginPath();
-                    c.arc(m.x + m.w / 2, m.y + m.h / 2 + hover, 4, 0, Math.PI * 2);
+                    c.arc(segX, segY, radius, 0, Math.PI * 2);
                     c.fill();
                     c.stroke();
+
+                    // Glowing core lava joint seams
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = m.isRare ? "#ffffff" : "#ff3300";
+                        c.beginPath();
+                        c.arc(segX, segY, radius * 0.45, 0, Math.PI * 2);
+                        c.fill();
+                    }
+                }
+
+                // Obsidian wyrm head
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#ff4500" : "#110200");
+                let hX = cx + 8;
+                let hY = cy + Math.sin(time) * 6;
+                c.beginPath();
+                c.arc(hX, hY, 11, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+
+                if (m.flashTimer === 0) {
+                    c.fillStyle = "#ffffff";
+                    c.beginPath();
+                    c.arc(hX + 3, hY - 3, 1.8, 0, Math.PI * 2);
+                    c.fill();
                 }
             } 
-            else if (vType === "void_parasite") {
+            else if (vType === "hell_bat") {
+                // Rapidly flapping sleek devil bat
                 let cx = m.x + m.w / 2;
                 let cy = m.y + m.h / 2 + Math.sin(Date.now() / 110) * 3;
-                
-                for (let i = 0; i < 5; i++) {
-                    let sy = cy + Math.sin(Date.now() / 120 + i) * 4.5;
-                    let sx = cx - (i * 6) + 8;
-                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#f1c40f" : "#2c0e3a");
+                let batWing = Math.sin(Date.now() / 70) * 11;
+
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1e1f26";
+                c.beginPath();
+                c.ellipse(cx, cy, 7, 11, 0, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+
+                // Sharp red wings
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#962d22";
+                c.beginPath();
+                c.moveTo(cx - 5, cy - 2);
+                c.quadraticCurveTo(cx - 18, cy - 12 - batWing, cx - 22, cy - 5 - batWing);
+                c.quadraticCurveTo(cx - 12, cy, cx - 5, cy - 2);
+                c.moveTo(cx + 5, cy - 2);
+                c.quadraticCurveTo(cx + 18, cy - 12 - batWing, cx + 22, cy - 5 - batWing);
+                c.quadraticCurveTo(cx + 12, cy, cx + 5, cy - 2);
+                c.closePath();
+                c.fill();
+                c.stroke();
+
+                // Eyes
+                if (m.flashTimer === 0) {
+                    c.fillStyle = "#ff6b6b";
                     c.beginPath();
-                    c.arc(sx, sy, 8.5 - i * 1.2, 0, Math.PI * 2);
+                    c.arc(cx - 2, cy - 4, 1.5, 0, Math.PI * 2);
+                    c.arc(cx + 2, cy - 4, 1.5, 0, Math.PI * 2);
                     c.fill();
-                    c.stroke();
                 }
+            } 
+            else if (vType === "marsh_ghost") {
+                // Floating phantom shroud with clean lines
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2 + Math.sin(Date.now() / 150) * 7;
+
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#1abc9c" : "#2c3e50");
+                c.beginPath();
+                c.moveTo(cx, cy - 18);
+                c.quadraticCurveTo(cx - 12, cy - 8, cx - 10, cy + 14);
+                c.lineTo(cx - 3, cy + 6);
+                c.lineTo(cx, cy + 18);
+                c.lineTo(cx + 3, cy + 6);
+                c.lineTo(cx + 10, cy + 14);
+                c.quadraticCurveTo(cx + 13, cy - 8, cx, cy - 18);
+                c.closePath();
+                c.fill();
+                c.stroke();
 
                 if (m.flashTimer === 0) {
-                    c.fillStyle = "#ff007f";
+                    // Single glowing cyclopean phantom light
+                    c.fillStyle = m.isRare ? "#ffffff" : "#2ecc71";
                     c.beginPath();
-                    c.arc(cx + 10, cy - 3, 2.5, 0, Math.PI * 2);
+                    c.arc(cx, cy - 3, 3, 0, Math.PI * 2);
+                    c.fill();
+                }
+            } 
+            else if (vType === "swamp_basilisk") {
+                // Segmented moss-green serpent with spikes (Hooktail joint scales)
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2 + 5;
+                let time = Date.now() / 150;
+
+                for (let i = 5; i >= 0; i--) {
+                    let segX = cx - (i * 10);
+                    let segY = cy + Math.sin(time + i * 0.8) * 6;
+                    let radius = 10.5 - (i * 1.1);
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#00b894" : "#1a3a22");
+                    c.beginPath();
+                    c.arc(segX, segY, radius, 0, Math.PI * 2);
                     c.fill();
                     c.stroke();
+
+                    // Toxic poison spine detail on back
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = m.isRare ? "#ff007f" : "#9b59b6";
+                        c.beginPath();
+                        c.moveTo(segX - 2.5, segY - radius);
+                        c.lineTo(segX, segY - radius - 5);
+                        c.lineTo(segX + 2.5, segY - radius);
+                        c.closePath();
+                        c.fill();
+                        c.stroke();
+                    }
+                }
+
+                // Serpent head
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#00b894" : "#122c19");
+                let hX = cx + 8;
+                let hY = cy + Math.sin(time) * 6;
+                c.beginPath();
+                c.arc(hX, hY, 11, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+
+                if (m.flashTimer === 0) {
+                    c.fillStyle = "#ffffff";
+                    c.beginPath();
+                    c.arc(hX + 3, hY - 3, 1.8, 0, Math.PI * 2);
+                    c.fill();
+                }
+            } 
+            else if (vType === "toxic_fly") {
+                // Clean simple fly: flapping translucent wings and glowing abdomen
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2 + Math.sin(Date.now() / 110) * 4;
+                let wing = Math.sin(Date.now() / 60) * 11;
+
+                // Wide translucent green wings
+                c.fillStyle = "rgba(46, 204, 113, 0.4)";
+                c.beginPath();
+                c.ellipse(cx - 7, cy - 4, 5, 12 + wing, -Math.PI / 4, 0, Math.PI * 2);
+                c.ellipse(cx + 7, cy - 4, 5, 12 + wing, Math.PI / 4, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+
+                // Core thorax
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#2c3e50";
+                c.beginPath();
+                c.arc(cx, cy, 6, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+
+                // Glowing green poison sack
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#2ecc71";
+                c.beginPath();
+                c.ellipse(cx, cy + 9, 5, 7, 0, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+            } 
+            else if (vType === "void_orb") {
+                // Deep black hole singularity with orbital rings
+                let hover = Math.sin(Date.now() / 150) * 4;
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2 + hover;
+
+                // Event Horizon
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#0d011a";
+                c.beginPath();
+                c.arc(cx, cy, 14, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+
+                if (m.flashTimer === 0) {
+                    c.strokeStyle = "#8e44ad";
+                    c.lineWidth = 1.8;
+                    c.save();
+                    c.translate(cx, cy);
+                    c.rotate(Date.now() / 800);
+                    c.beginPath();
+                    c.ellipse(0, 0, 22, 6, 0, 0, Math.PI * 2);
+                    c.stroke();
+                    c.restore();
+                }
+            } 
+            else if (vType === "void_crawler") {
+                // Segmented chitinous alien slithering (Hooktail-inspired)
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2 + 5;
+                let time = Date.now() / 150;
+
+                for (let i = 6; i >= 0; i--) {
+                    let segX = cx - (i * 9);
+                    let segY = cy + Math.sin(time + i * 0.7) * 5.5;
+                    let radius = 10 - (i * 1.1);
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#ff007f" : "#1a022b");
+                    c.beginPath();
+                    c.arc(segX, segY, radius, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    // Segment underside legs
+                    if (m.flashTimer === 0) {
+                        c.strokeStyle = "#000000";
+                        c.lineWidth = 1.5;
+                        c.beginPath();
+                        c.moveTo(segX, segY + radius);
+                        c.lineTo(segX - 3, segY + radius + 4);
+                        c.moveTo(segX, segY + radius);
+                        c.lineTo(segX + 3, segY + radius + 4);
+                        c.stroke();
+                    }
+                }
+
+                // Crawler Void head
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#ff007f" : "#11001c");
+                let hX = cx + 8;
+                let hY = cy + Math.sin(time) * 5.5;
+                c.beginPath();
+                c.arc(hX, hY, 10.5, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+
+                if (m.flashTimer === 0) {
+                    c.fillStyle = "#ffffff";
+                    c.beginPath();
+                    c.arc(hX + 3, hY - 3, 1.8, 0, Math.PI * 2);
+                    c.fill();
                 }
             } 
             else if (vType === "void_spectre") {
+                // Minimal hooded void specter with empty space and glowing pink slits
                 let cx = m.x + m.w / 2;
                 let cy = m.y + m.h / 2 + Math.sin(Date.now() / 140) * 6;
 
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : (m.isRare ? "#1abc9c" : "#111116");
+                // Hood outline
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#110221";
                 c.beginPath();
-                c.moveTo(cx, cy - 17);
-                c.quadraticCurveTo(cx - 13, cy - 8, cx - 10, cy + 15);
+                c.moveTo(cx, cy - 18);
+                c.quadraticCurveTo(cx - 12, cy - 8, cx - 10, cy + 15);
                 c.lineTo(cx - 3, cy + 6);
                 c.lineTo(cx, cy + 17);
                 c.lineTo(cx + 3, cy + 6);
@@ -2159,15 +2236,22 @@ window.onload = function() {
                 c.stroke();
 
                 if (m.flashTimer === 0) {
-                    c.fillStyle = "#e84393";
+                    // Inner hood empty darkness
+                    c.fillStyle = "#000000";
                     c.beginPath();
-                    c.arc(cx - 3.5, cy - 2.5, 1.8, 0, Math.PI * 2);
-                    c.arc(cx + 3.5, cy - 2.5, 1.8, 0, Math.PI * 2);
+                    c.ellipse(cx, cy - 3, 5, 6, 0, 0, Math.PI * 2);
+                    c.fill();
+
+                    // Glowing red/pink slits
+                    c.fillStyle = m.isRare ? "#ffffff" : "#ff007f";
+                    c.beginPath();
+                    c.arc(cx - 2, cy - 3, 1.5, 0, Math.PI * 2);
+                    c.arc(cx + 2, cy - 3, 1.5, 0, Math.PI * 2);
                     c.fill();
                 }
             }
 
-            // Draw a floating halo and shimmering star sparkles above the rare mob's head
+            // Floating golden halo above the head of any rare creature
             if (m.isRare) {
                 c.save();
                 let glowTime = Date.now() / 200;
@@ -6269,13 +6353,13 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 let isRare = Math.random() < p.rareSpawn;
                 let hpMult = isRare ? 2.5 : 1; let dmgMult = isRare ? 1.5 : 1;
                 
-                // Diversified enemy selection pool mapped directly to campaign visual tiers
+                // Refined, high-performance campaign enemy selection pool
                 let visualPool = {
-                    0: ["slime", "sprout", "beetle"],
-                    1: ["golem", "gryphon", "wyrmling"],
-                    2: ["magma_elemental", "hellhound", "imp"],
-                    3: ["marsh_ghost", "croc", "toxic_spore"],
-                    4: ["void_orb", "void_parasite", "void_spectre"]
+                    0: ["slime", "sprout", "thorn_wyrm"],
+                    1: ["golem", "iron_wyrm", "gargoyle"],
+                    2: ["magma_elemental", "lava_serpent", "hell_bat"],
+                    3: ["marsh_ghost", "swamp_basilisk", "toxic_fly"],
+                    4: ["void_orb", "void_crawler", "void_spectre"]
                 };
                 let choices = visualPool[tier] || ["slime"];
                 let visualType = choices[Math.floor(Math.random() * choices.length)];
