@@ -3027,9 +3027,9 @@ window.onload = function() {
             // Blackened tips highlights
             c.fillStyle = "#111115";
             c.beginPath();
-            ctx.moveTo(baseW + 5, -44);
-            ctx.lineTo(baseW + 22, -45);
-            ctx.lineTo(baseW + 15, -35);
+            c.moveTo(baseW + 5, -44);
+            c.lineTo(baseW + 22, -45);
+            c.lineTo(baseW + 15, -35);
             c.closePath();
             c.fill();
             c.restore();
@@ -10816,9 +10816,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 ctx.beginPath();
                 ctx.arc(0, -16 - mistCycle, 1.2 + (mistCycle / 3), 0, Math.PI * 2);
                 ctx.fill();
-
-                ctx.restore();
-                } else if (subType === "tome") {
+            }
+            else if (subType === "tome") {
                     ctx.save();
                 let tomeFloat = Math.sin(Date.now() / 200) * 5;
                 ctx.translate(24, -6 + bounce + tomeFloat);
