@@ -4335,6 +4335,34 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             else if (item.subType === "tome") pool = ["critDamage", "int", "activeSpd", "idleSpd"];
         }
 
+        // Exclude already active bonuses to ensure a brand-new, unique stat line is gained
+        pool = pool.filter(stat => {
+            if (stat === "atk" && item.bonusAtk > 0) return false;
+            if (stat === "maxHp" && item.bonusMaxHp > 0) return false;
+            if (stat === "def" && item.bonusDef > 0) return false;
+            if (stat === "moveSpeed" && item.bonusMoveSpeed > 0) return false;
+            if (stat === "critChance" && item.bonusCritChance > 0) return false;
+            if (stat === "critDamage" && item.bonusCritDamage > 0) return false;
+            if (stat === "block" && item.bonusBlock > 0) return false;
+            if (stat === "parry" && item.bonusParry > 0) return false;
+            if (stat === "activeSpd" && item.bonusActiveSpeed < 0) return false;
+            if (stat === "idleSpd" && item.bonusIdleSpeed < 0) return false;
+            if (stat === "str" && item.bonusStr > 0) return false;
+            if (stat === "dex" && item.bonusDex > 0) return false;
+            if (stat === "int" && item.bonusInt > 0) return false;
+            return true;
+        });
+
+        // Fallback to the original pool if the item somehow has everything or list is empty
+        if (pool.length === 0) {
+            pool = ["critChance", "critDamage", "block", "parry", "atk", "maxHp", "def", "moveSpeed", "activeSpd", "idleSpd", "str", "dex", "int"];
+            if (item.type === "subweapon") {
+                if (item.subType === "shield") pool = ["block", "atk", "maxHp", "def", "str"];
+                else if (item.subType === "dagger") pool = ["parry", "atk", "critChance", "dex"];
+                else if (item.subType === "tome") pool = ["critDamage", "int", "activeSpd", "idleSpd"];
+            }
+        }
+
         let selectedStat = pool[Math.floor(Math.random() * pool.length)];
         let stageScale = item.stageLevel || 1;
         let rarityMult = 1 + (item.statsRolled * 0.15);
@@ -4358,16 +4386,16 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp; 
         item.def = (item.baseDef || 0) + item.bonusDef; 
         item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
-        item.critChance = item.bonusCritChance; 
-        item.critDamage = item.bonusCritDamage; 
-        item.block = item.bonusBlock; 
-        item.parry = item.bonusParry;
-        item.activeAttackSpeed = item.bonusActiveSpeed; 
-        item.idleAttackSpeed = item.bonusIdleSpeed;
+        item.critChance = (item.baseCritChance || 0) + item.bonusCritChance; 
+        item.critDamage = (item.baseCritDamage || 0) + item.bonusCritDamage; 
+        item.block = (item.baseBlock || 0) + item.bonusBlock; 
+        item.parry = (item.baseParry || 0) + item.bonusParry;
+        item.activeAttackSpeed = (item.baseActiveSpeed || 0) + item.bonusActiveSpeed; 
+        item.idleAttackSpeed = (item.baseIdleSpeed || 0) + item.bonusIdleSpeed;
         
-        item.str = item.bonusStr || 0;
-        item.dex = item.bonusDex || 0;
-        item.int = item.bonusInt || 0;
+        item.str = (item.baseStr || 0) + item.bonusStr;
+        item.dex = (item.baseDex || 0) + item.bonusDex;
+        item.int = (item.baseInt || 0) + item.bonusInt;
     }
 
      function createItemObject(chosenType, statLinesCount, stageScale, minStars = 0) {
