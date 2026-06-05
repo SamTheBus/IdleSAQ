@@ -8264,22 +8264,76 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             }
         }
 
+        // Internal renderers to map beautiful, theme-appropriate icons
+        const getEtcIconHtml = (key) => {
+            let bg = "rgba(170, 170, 170, 0.12)";
+            let border = "#444";
+            let icon = "📦";
+
+            if (key === "Eridium Shard") { bg = "rgba(155, 89, 182, 0.25)"; border = "#9b59b6"; icon = "🔮"; }
+            else if (key === "Gacha Key") { bg = "rgba(241, 196, 15, 0.25)"; border = "#f1c40f"; icon = "🔑"; }
+            else if (key === "Ancient Core") { bg = "rgba(231, 76, 60, 0.25)"; border = "#e74c3c"; icon = "🔴"; }
+            else if (key === "Overlord's Sigil") { bg = "rgba(26, 188, 156, 0.25)"; border = "#1abc9c"; icon = "🔱"; }
+            else if (key === "Astral Essence") { bg = "rgba(142, 68, 173, 0.25)"; border = "#8e44ad"; icon = "🌌"; }
+            else if (key === "Mythic Scrap") { bg = "rgba(231, 76, 60, 0.25)"; border = "#e74c3c"; icon = "🟥"; }
+            else if (key === "Legendary Scrap") { bg = "rgba(241, 196, 15, 0.25)"; border = "#f1c40f"; icon = "🟨"; }
+            else if (key === "Epic Scrap") { bg = "rgba(230, 126, 34, 0.25)"; border = "#e67e22"; icon = "🟧"; }
+            else if (key === "Magic Scrap") { bg = "rgba(155, 89, 182, 0.25)"; border = "#9b59b6"; icon = "🟪"; }
+            else if (key === "Rare Scrap") { bg = "rgba(52, 152, 219, 0.25)"; border = "#3498db"; icon = "🟦"; }
+            else if (key === "Luminous Soul") { bg = "rgba(255, 182, 193, 0.25)"; border = "#ffb6c1"; icon = "💖"; }
+            else if (key === "Monster Soul") { bg = "rgba(170, 170, 170, 0.25)"; border = "#888"; icon = "💀"; }
+            else if (key === "Catalyst Core") { bg = "rgba(46, 204, 113, 0.25)"; border = "#2ecc71"; icon = "💚"; }
+
+            return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; margin-right: 12px; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${icon}</span>`;
+        };
+
+        const getUseIconHtml = (key) => {
+            let bg = "rgba(170, 170, 170, 0.12)";
+            let border = "#444";
+            let icon = "🍶";
+
+            if (key === "SP Reset Scroll") { bg = "rgba(155, 89, 182, 0.25)"; border = "#9b59b6"; icon = "📜"; }
+            else if (key.includes("Attack")) { bg = "rgba(46, 204, 113, 0.25)"; border = "#2ecc71"; icon = "🧪"; }
+            else if (key.includes("Vitality")) { bg = "rgba(231, 76, 60, 0.25)"; border = "#e74c3c"; icon = "🧪"; }
+            else if (key.includes("Armored")) { bg = "rgba(52, 152, 219, 0.25)"; border = "#3498db"; icon = "🧪"; }
+            else if (key.includes("Haste")) { bg = "rgba(241, 196, 15, 0.25)"; border = "#f1c40f"; icon = "🧪"; }
+
+            return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; margin-right: 12px; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${icon}</span>`;
+        };
+
         let etcBox = document.getElementById('bag-etc'); let etcKeys = Object.keys(inventory.ETC);
         if (etcKeys.length === 0) { etcBox.innerHTML = "<div style='color:#666;text-align:center;padding-top:40px;'>No materials collected.</div>"; }
-        else { etcBox.innerHTML = etcKeys.map(key => `<div class="bag-item" style="cursor:help;" onmouseenter="showEtcTooltip(event, this.dataset.key)" ontouchstart="showEtcTooltip(event, this.dataset.key)" onmouseleave="hideTooltip()" data-key="${key}"><span>📦 ${key}</span><strong>x${inventory.ETC[key]}</strong></div>`).join(""); }
+        else { 
+            etcBox.innerHTML = etcKeys.map(key => `
+                <div class="bag-item" style="cursor:help; display:flex; align-items:center; justify-content:space-between; padding:6px 12px;" onmouseenter="showEtcTooltip(event, this.dataset.key)" ontouchstart="showEtcTooltip(event, this.dataset.key)" onmouseleave="hideTooltip()" data-key="${key}">
+                    <div style="display:flex; align-items:center;">
+                        ${getEtcIconHtml(key)}
+                        <span>${key}</span>
+                    </div>
+                    <strong>x${inventory.ETC[key]}</strong>
+                </div>
+            `).join(""); 
+        }
 
         let useBox = document.getElementById('bag-use'); let useKeys = Object.keys(inventory.USE || {});
         if (useKeys.length === 0) { useBox.innerHTML = "<div style='color:#666;text-align:center;padding-top:40px;'>No usable items. Purchase potions/scrolls at the Market!</div>"; }
         else {
             useBox.innerHTML = useKeys.map(key => {
                 let count = inventory.USE[key];
-                return `<div class="bag-item">
-                    <div><strong>${key}</strong><br><span style="font-size:10px; color:#aaa;">Qty: ${count}</span></div>
-                    <button class="btn-action" style="background:#2ecc71;" onclick="useItem('${key}')">Consume</button>
-                </div>`;
+                return `
+                    <div class="bag-item" style="display:flex; align-items:center; justify-content:space-between; padding:6px 12px;">
+                        <div style="display:flex; align-items:center;">
+                            ${getUseIconHtml(key)}
+                            <div>
+                                <strong>${key}</strong><br>
+                                <span style="font-size:10px; color:#aaa;">Qty: ${count}</span>
+                            </div>
+                        </div>
+                        <button class="btn-action" style="background:#2ecc71;" onclick="useItem('${key}')">Consume</button>
+                    </div>
+                `;
             }).join("");
         }
-    }
 
      window.switchSubTab = function(type) {
         window.hideTooltip(); state.currentSubTab = type;
