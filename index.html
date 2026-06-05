@@ -3023,19 +3023,19 @@ function getStatBaseRange(item, statKey) {
             max += 0.05 * rarityMult;
         }
     }
-    lse if (statKey === "fairySpawn") {
-            if (item.fairySpawn > 0) {
-                min += 0.02 * rarityMult;
-                max += 0.06 * rarityMult;
-            }
+    else if (statKey === "fairySpawn") {
+        if (item.fairySpawn > 0) {
+            min += 0.02 * rarityMult;
+            max += 0.06 * rarityMult;
         }
+    }
 
-        const unscaledStats = ["activeAttackSpeed", "idleAttackSpeed"];
-        if (!unscaledStats.includes(statKey)) {
-            let prestigeMult = 1 + ((playerStats.prestigeCount || 0) * 0.02);
-            min = min * prestigeMult;
-            max = max * prestigeMult;
-        }
+    const unscaledStats = ["activeAttackSpeed", "idleAttackSpeed"];
+    if (!unscaledStats.includes(statKey)) {
+        let prestigeMult = 1 + ((playerStats.prestigeCount || 0) * 0.02);
+        min = min * prestigeMult;
+        max = max * prestigeMult;
+    }
         
         let tempers = item.temperLevel || 0;
     if (tempers > 0) {
