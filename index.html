@@ -266,6 +266,30 @@
                 height: auto !important;
                 min-height: 250px !important;
             }
+
+            /* Grid layout for Main Tabs to prevent clipping text like 'Equipmen' */
+            .tabs {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 4px !important;
+            }
+            .tab-btn {
+                font-size: 10px !important;
+                padding: 6px 2px !important;
+                min-width: 0 !important;
+                text-align: center !important;
+            }
+
+            /* Fix Forge Station Dropdown bleed */
+            #forge-station-container {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 6px !important;
+            }
+            #forge-station-select {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
         }
 
         /* Fooproof Touch Optimization for Small Mobile Screens */
@@ -874,7 +898,7 @@
             </div>
             
             <div id="tab-forge" class="tab-content" onscroll="hideTooltip()" ontouchmove="hideTooltip()">
-                <div style="margin-bottom:12px; display:flex; align-items:center; gap:8px; background:#1a1d20; padding:6px; border-radius:4px; border:1px solid #333;">
+                <div id="forge-station-container" style="margin-bottom:12px; display:flex; align-items:center; gap:8px; background:#1a1d20; padding:6px; border-radius:4px; border:1px solid #333;">
                     <span style="font-size:11px; font-weight:bold; color:#e67e22; white-space:nowrap;">🔨 FORGING POST:</span>
                     <select id="forge-station-select" onchange="switchForgeStation(this.value)" style="flex:1; background:#111; color:#fff; border:1px solid #e67e22; padding:4px 6px; border-radius:4px; font-weight:bold; font-size:11px;">
                         <option value="blacksmith">🛡️ Blacksmith Station (Temper / Level / Tier)</option>
@@ -3498,6 +3522,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         playerStats.prestigePoints += 3;
         playerStats.prestigeCount++;
         
+        // Safeguard lifetime peak stats prior to wipe
+        playerStats.lifetimePeakStage = Math.max(playerStats.lifetimePeakStage || 1, playerStats.maxStage || 1);
+
         // Force autounequip all gear back into inventory to lock items until players hit level requirements
         for (let slot in equippedSlots) {
             if (equippedSlots[slot]) {
@@ -3922,6 +3949,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         playerStats.coins += totalGold;
         playerStats.stage = currentStage;
         playerStats.maxStage = Math.max(playerStats.maxStage || 1, playerStats.stage);
+        playerStats.lifetimePeakStage = Math.max(playerStats.lifetimePeakStage || 1, playerStats.maxStage);
         gainXp(totalXp, true);
         
         // Display high-resolution summary card to the player
@@ -5624,7 +5652,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                         }
                     });
                     if (matchingCount >= 2) {
-                        setLabelHtml = `<div style="font-size:8px; color:#2ecc71; font-weight:bold; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;">✨ ${setName} Set (${matchingCount}/4)</div>`;
+                        let displayCount = Math.min(3, matchingCount);
+                        setLabelHtml = `<div style="font-size:8px; color:#2ecc71; font-weight:bold; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;">✨ ${setName} Set (${displayCount}/3)</div>`;
                     }
                 }
 
@@ -6157,7 +6186,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 });
 
                 html += `<div style="margin-top:10px; padding-top:6px; border-top:1px dashed #555;">`;
-                html += `<div style="font-weight:bold; color:#f1c40f; font-size:10px;">🌟 SET: ${setDef.name} (${currentEquippedCount}/4 equipped)</div>`;
+                let displayCount = Math.min(3, currentEquippedCount);
+                html += `<div style="font-weight:bold; color:#f1c40f; font-size:10px;">🌟 SET: ${setDef.name} (${displayCount}/3 equipped)</div>`;
                 setDef.bonuses.forEach(b => {
                     let activeColor = currentEquippedCount >= b.count ? "#2ecc71" : "#7f8c8d";
                     let prefix = currentEquippedCount >= b.count ? "🟢" : "⚫";
@@ -6603,7 +6633,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
 
     window.setForgeMode = function(mode) {
         forgeMode = mode;
-        const modes = ['temper', 'lvl', 'tier', 'enchant', 'reset_enchant'];
+        const modes = ['temper', 'reforge', 'tier', 'enchant', 'reset_enchant'];
         modes.forEach(m => {
             let el = document.getElementById('btn-mode-' + (m === 'reset_enchant' ? 'reset-enchant' : m));
             if (el) {
@@ -6616,7 +6646,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         if (activeEl) {
             activeEl.className = "btn-toggle active";
             if (mode === 'temper') activeEl.style.background = "#2980b9";
-            if (mode === 'lvl') activeEl.style.background = "#8e44ad";
+            if (mode === 'reforge') activeEl.style.background = "#8e44ad";
             if (mode === 'tier') activeEl.style.background = "#e67e22";
             if (mode === 'enchant') activeEl.style.background = "#9b59b6";
             if (mode === 'reset_enchant') activeEl.style.background = "#c0392b";
@@ -7377,6 +7407,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             if (!playerStats.isUberBoss) {
                 playerStats.stage++; 
                 playerStats.maxStage = Math.max(playerStats.maxStage || 1, playerStats.stage);
+                playerStats.lifetimePeakStage = Math.max(playerStats.lifetimePeakStage || 1, playerStats.maxStage);
                 pushLog(`<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${playerStats.stage}.</span>`);
             }
             playerStats.killCount = 0; playerStats.isBossMode = false; playerStats.isFarmingLoop = false; playerStats.isUberBoss = false; 
@@ -7789,7 +7820,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         
         let maxStageEl = document.getElementById('char-maxstage');
         if (maxStageEl) {
-            maxStageEl.innerText = (playerStats.stage || 1).toLocaleString();
+            maxStageEl.innerText = (playerStats.maxStage || 1).toLocaleString();
         }
 
         // Persistent Ascension Data Binding
@@ -7886,11 +7917,12 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             let setDef = SET_DEFINITIONS[sName];
             if (setDef) {
                 let activeBonuses = setDef.bonuses.filter(b => count >= b.count);
+                let displayCount = Math.min(3, count);
                 if (activeBonuses.length > 0) {
                     let bonusesText = activeBonuses.map(b => b.desc).join(", ");
-                    activeSetsHtml.push(`<div style="margin-bottom: 5px;"><strong style="color: #2ecc71;">${sName} (${count} pcs):</strong> <span style="color:#fff;">${bonusesText}</span></div>`);
+                    activeSetsHtml.push(`<div style="margin-bottom: 5px;"><strong style="color: #2ecc71;">${sName} (${displayCount}/3):</strong> <span style="color:#fff;">${bonusesText}</span></div>`);
                 } else {
-                    activeSetsHtml.push(`<div style="margin-bottom: 5px; color: #7f8c8d;"><strong>${sName} (${count}/2):</strong> No active bonus</div>`);
+                    activeSetsHtml.push(`<div style="margin-bottom: 5px; color: #7f8c8d;"><strong>${sName} (${displayCount}/3):</strong> No active bonus</div>`);
                 }
             }
         }
