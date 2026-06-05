@@ -4060,7 +4060,10 @@ window.onload = function() {
        ========================================================================== */
     function buildProceduralName(item) {
         let stars = item.statsRolled;
-        if (stars === "UNIQUE") return item.name;
+        if (stars === "UNIQUE") {
+            let baseName = item.name.replace(/\s*\(Lv\.\s*\d+\)/g, "");
+            return `${baseName} (Lv. ${item.stageLevel || 1})`;
+        }
         let prefix = getTierName(stars);
         
         let highestKey = "maxHp";
@@ -5428,8 +5431,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
 
         if (isArt) {
             let chosenArt = ARTIFACT_POOL[Math.floor(Math.random() * ARTIFACT_POOL.length)];
-            item.name = `⭐ UNIQUE ${chosenArt.name}`; 
-            item.trait = chosenArt.trait; 
+            item.name = `⭐ UNIQUE ${chosenArt.name} (Lv. ${stageScale})`; 
+            item.trait = chosenArt.trait;
             item.desc = chosenArt.desc; 
             item.breakdown = chosenArt.breakdown;
             item.statsRolled = "UNIQUE";
@@ -5863,7 +5866,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         
         let artDef = ARTIFACT_POOL.find(a => a.trait === traitId);
         let dummy = {
-            id: "dummy", name: "⭐ UNIQUE " + artDef.name, type: "artifact", statsRolled: "UNIQUE", temperLevel: 0, stageLevel: 1,
+            id: "dummy", name: "⭐ UNIQUE " + artDef.name + " (Lv. 1)", type: "artifact", statsRolled: "UNIQUE", temperLevel: 0, stageLevel: 1,
             atk: 0, maxHp: 0, def: 0, moveSpeed: 0, critChance: 0, critDamage: 0, block: 0, parry: 0, dropRate: artDef.dropRate, quality: artDef.quality, goldMulti: artDef.goldMulti,
             activeAttackSpeed: 0, idleAttackSpeed: 0, trait: artDef.trait, desc: artDef.desc, breakdown: artDef.breakdown,
             str: 0, dex: 0, int: 0
@@ -7044,6 +7047,44 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         if (stars === 2) return "Magic Scrap"; if (stars === 1) return "Rare Scrap"; return "Monster Soul";
     }
 
+    function getRequiredScrapForTemper(targetLevel, isArtifact) {
+        if (isArtifact) return "Overlord's Sigil"; 
+        if (targetLevel <= 3) return "Monster Soul"; 
+        if (targetLevel <= 5) return "Rare Scrap";
+        if (targetLevel <= 7) return "Magic Scrap"; 
+        if (targetLevel <= 9) return "Epic Scrap"; 
+        if (targetLevel <= 12) return "Legendary Scrap"; 
+        return "Mythic Scrap";
+    }
+
+    function getRequiredScrapAmountForTemper(targetLevel, isArtifact) {
+        if (isArtifact) {
+            if (targetLevel <= 2) return 1;
+            if (targetLevel <= 4) return 2;
+            return 3;
+        }
+        if (targetLevel <= 1) return 10;
+        if (targetLevel <= 2) return 25;
+        if (targetLevel <= 3) return 50;
+        if (targetLevel <= 4) return 5;
+        if (targetLevel <= 5) return 10;
+        if (targetLevel <= 6) return 4;
+        if (targetLevel <= 7) return 8;
+        if (targetLevel <= 8) return 3;
+        if (targetLevel <= 9) return 6;
+        if (targetLevel <= 10) return 2;
+        if (targetLevel <= 11) return 3;
+        if (targetLevel <= 12) return 4;
+        if (targetLevel <= 13) return 1;
+        if (targetLevel <= 14) return 2;
+        if (targetLevel <= 15) return 3;
+        if (targetLevel === 16) return 4;
+        if (targetLevel === 17) return 5;
+        if (targetLevel === 18) return 6;
+        if (targetLevel === 19) return 8;
+        return 10;
+    }
+
     window.salvageItem = function(id) {
         window.hideTooltip(); 
         let item = inventory.EQUIP.find(i => i.id === id); 
@@ -8064,7 +8105,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             let maxT = getMaxTemper(forgeSelectedItem.statsRolled, forgeSelectedItem.type); 
             if (forgeSelectedItem.temperLevel >= maxT) return;
             let costGold = getTemperGoldCost(forgeSelectedItem); 
-            let scrapReqAmount = isArt ? 1 : 1 + Math.floor(forgeSelectedItem.temperLevel / 3);
+            let scrapReqAmount = getRequiredScrapAmountForTemper(forgeSelectedItem.temperLevel + 1, isArt);
             let scrapReq = getRequiredScrapForTemper(forgeSelectedItem.temperLevel + 1, isArt);
             
             if (playerStats.coins < costGold) { pushLog(`<span style='color:#e74c3c;'>Not enough Gold to temper!</span>`); return; }
@@ -8310,8 +8351,10 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             let maxT = getMaxTemper(item.statsRolled, item.type);
             if (item.temperLevel >= maxT) { html += `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 20px 0;">MAXIMUM TEMPER LIMIT REACHED</div>`; } 
             else {
-                let costGold = getTemperGoldCost(item); let scrapReqAmount = item.type === "artifact" ? 1 : 1 + Math.floor(item.temperLevel / 3);
-                let scrapReq = getRequiredScrapForTemper(item.temperLevel + 1, item.type === "artifact"); let playerScrap = inventory.ETC[scrapReq] || 0;
+                let costGold = getTemperGoldCost(item); 
+                let scrapReqAmount = getRequiredScrapAmountForTemper(item.temperLevel + 1, item.type === "artifact");
+                let scrapReq = getRequiredScrapForTemper(item.temperLevel + 1, item.type === "artifact"); 
+                let playerScrap = inventory.ETC[scrapReq] || 0;
                 let failChance = item.temperLevel * 5;
                 let goldColor = playerStats.coins >= costGold ? "#f1c40f" : "#e74c3c"; let scrapColor = playerScrap >= scrapReqAmount ? "#bdc3c7" : "#e74c3c";
                 
