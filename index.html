@@ -3028,6 +3028,30 @@ window.onload = function() {
                 c.stroke();
                 c.restore();
 
+                // Menacing Spikes on Neck Segments (Jagged obsidian spikes pointing upwards/backwards)
+                c.save();
+                c.fillStyle = i % 2 === 0 ? "#d35400" : "#111116"; // Alternating magma orange & obsidian
+                c.strokeStyle = "#000000";
+                c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
+                c.lineJoin = "round";
+                
+                let neckR = 26 - (i * 2.2);
+                let spikeAngle = -Math.PI / 3.5;
+                let startX = segX + Math.cos(spikeAngle) * neckR;
+                let startY = segY + Math.sin(spikeAngle) * neckR;
+                
+                let spikeLen = 14 - (i * 1.0); 
+                let spikeW = 6 - (i * 0.4);
+                
+                c.beginPath();
+                c.moveTo(startX - Math.sin(spikeAngle) * spikeW, startY + Math.cos(spikeAngle) * spikeW);
+                c.lineTo(startX + Math.cos(spikeAngle) * spikeLen, startY + Math.sin(spikeAngle) * spikeLen);
+                c.lineTo(startX + Math.sin(spikeAngle) * spikeW, startY - Math.cos(spikeAngle) * spikeW);
+                c.closePath();
+                c.fill();
+                c.stroke();
+                c.restore();
+
                 // Inner Molten Magma core details inside scales
                 c.save();
                 c.fillStyle = "#ff5500";
@@ -3198,7 +3222,7 @@ window.onload = function() {
             c.restore(); // end jaw draw
             c.restore(); // end skull save
 
-            // Draw Gargantuan Spiked Dragon Tail coiling under her body with a massive jagged blade tip
+            // 1. Draw Gargantuan Spiked Dragon Tail coiling from her rear hips (right side of canvas)
             c.save();
             c.strokeStyle = "#000000";
             c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
@@ -3206,13 +3230,12 @@ window.onload = function() {
 
             let tailSwayTime = Date.now() / 150;
             
-            // Draw 6 massive jointed tail segments coiling down and sweeping forward towards the player
+            // Draw 6 jointed tail segments coiling from the hip (X=100) extending back-right and up
             for (let i = 1; i <= 6; i++) {
-                let segmentSway = Math.sin(tailSwayTime - i * 0.5) * (i * 2.5);
-                // Start from rear of body and sweep down-left
-                let segX = 80 + (i * 8) - (i * i * 1.8) + segmentSway;
-                let segY = 45 + (i * 10) - (i * 1.2);
-                let r = 24 - (i * 2.5); // Tapers down
+                let segmentSway = Math.sin(tailSwayTime - i * 0.4) * (i * 2.0);
+                let segX = 100 + (i * 12) + segmentSway;
+                let segY = 48 - (i * 4) + (i * i * 0.5); // Curves down-right then up
+                let r = 18 - (i * 2.0); // Tapers down
 
                 // Draw outer segment (charred obsidian black / blood red)
                 c.fillStyle = i % 2 === 0 ? "#111116" : "#4a0a0a";
@@ -3221,43 +3244,157 @@ window.onload = function() {
                 c.fill();
                 c.stroke();
 
-                // Draw sharp, menacing spinal spikes on each tail segment
+                // Menacing spinal spikes on the tail
                 c.fillStyle = "#d35400"; // Molten gold spikes
                 c.beginPath();
                 c.moveTo(segX, segY - r);
-                c.lineTo(segX - 3, segY - r - 10);
-                c.lineTo(segX + 4, segY - r - 4);
+                c.lineTo(segX + 4, segY - r - 8);
+                c.lineTo(segX + 8, segY - r - 2);
                 c.closePath();
                 c.fill();
                 c.stroke();
             }
 
             // Draw the Enormous Jagged Blade Tip (Thagomizer) on the end of the tail
-            let tipSway = Math.sin(tailSwayTime - 6 * 0.5) * 15;
-            let tipX = 80 + 48 - (36 * 1.8) + tipSway; // approx 63
-            let tipY = 45 + 60 - 7.2; // approx 98
+            let tipSway = Math.sin(tailSwayTime - 6 * 0.4) * 12;
+            let tipX = 100 + 72 + tipSway; 
+            let tipY = 48 - 24 + 18; 
             
             c.fillStyle = "#d35400"; // Molten golden blade
             c.beginPath();
             c.moveTo(tipX, tipY);
-            // Huge curved scythe tip pointing forward/left to impale the player
-            c.quadraticCurveTo(tipX - 25, tipY + 10, tipX - 35, tipY - 15);
-            c.quadraticCurveTo(tipX - 10, tipY - 5, tipX + 5, tipY - 5);
+            // Scythe tip pointing up-right and curling menacingly
+            c.quadraticCurveTo(tipX + 18, tipY - 8, tipX + 28, tipY - 22);
+            c.quadraticCurveTo(tipX + 12, tipY - 14, tipX + 2, tipY - 4);
             c.closePath();
             c.fill();
             c.stroke();
 
-            // Extra spinal blade on the tip
+            // Extra bone spur highlight
             c.fillStyle = "#ffeaa7";
             c.beginPath();
-            c.moveTo(tipX - 15, tipY - 8);
-            c.lineTo(tipX - 25, tipY - 18);
-            c.lineTo(tipX - 10, tipY - 5);
+            c.moveTo(tipX + 10, tipY - 8);
+            c.lineTo(tipX + 20, tipY - 18);
+            c.lineTo(tipX + 5, tipY - 4);
             c.closePath();
             c.fill();
             c.stroke();
 
             c.restore(); // end tail draw
+
+            // 2. Draw Menacing Volcanic Dragon Leg & Heavy Armored Claws (left side / under chest)
+            c.save();
+            c.strokeStyle = "#000000";
+            c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
+            c.lineJoin = "round";
+
+            // Thigh Plate (Obsidian scaled shoulder shield)
+            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#111116"; 
+            c.beginPath();
+            c.moveTo(38, 32);
+            c.quadraticCurveTo(15, 35, 14, 55); 
+            c.lineTo(28, 62);
+            c.quadraticCurveTo(34, 50, 44, 45); 
+            c.closePath();
+            c.fill();
+            c.stroke();
+
+            // Fire veins in muscle plate
+            if (m.flashTimer === 0) {
+                c.strokeStyle = "#ff3300";
+                c.lineWidth = 1.5;
+                c.beginPath();
+                c.moveTo(22, 40);
+                c.lineTo(18, 50);
+                c.lineTo(24, 56);
+                c.stroke();
+            }
+
+            // Knee Cap Plate with forward-pointing spike
+            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#d35400"; 
+            c.beginPath();
+            c.moveTo(14, 55);
+            c.lineTo(2, 60); 
+            c.lineTo(18, 64);
+            c.closePath();
+            c.fill();
+            c.stroke();
+
+            // Thick Muscular Calf/Shin Section
+            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1b1b22";
+            c.beginPath();
+            c.moveTo(18, 62);
+            c.lineTo(16, 76); 
+            c.lineTo(30, 78); 
+            c.lineTo(28, 62);
+            c.closePath();
+            c.fill();
+            c.stroke();
+
+            // Heavy Front Claw (planted forward)
+            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#d35400"; 
+            c.beginPath();
+            c.moveTo(16, 76); 
+            c.quadraticCurveTo(-2, 74, -10, 84); 
+            c.lineTo(-6, 85);
+            c.quadraticCurveTo(5, 80, 20, 78);
+            c.closePath();
+            c.fill();
+            c.stroke();
+
+            // Front Talon Bone Tip
+            c.fillStyle = "#ffeaa7";
+            c.beginPath();
+            c.moveTo(-10, 84);
+            c.lineTo(-18, 86); 
+            c.lineTo(-6, 85);
+            c.closePath();
+            c.fill();
+            c.stroke();
+
+            // Middle Claw (gripping down)
+            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#d35400";
+            c.beginPath();
+            c.moveTo(20, 77);
+            c.quadraticCurveTo(10, 81, 6, 85); 
+            c.lineTo(11, 86);
+            c.quadraticCurveTo(18, 82, 24, 78);
+            c.closePath();
+            c.fill();
+            c.stroke();
+
+            // Middle Talon Bone Tip
+            c.fillStyle = "#ffeaa7";
+            c.beginPath();
+            c.moveTo(6, 85);
+            c.lineTo(0, 88); 
+            c.lineTo(11, 86);
+            c.closePath();
+            c.fill();
+            c.stroke();
+
+            // Heavy Rear Anchor Spur (Heel talon)
+            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#111116";
+            c.beginPath();
+            c.moveTo(26, 78);
+            c.quadraticCurveTo(38, 77, 44, 82); 
+            c.lineTo(41, 83);
+            c.quadraticCurveTo(34, 81, 28, 78);
+            c.closePath();
+            c.fill();
+            c.stroke();
+
+            // Rear Spur Bone Tip
+            c.fillStyle = "#ffeaa7";
+            c.beginPath();
+            c.moveTo(44, 82);
+            c.lineTo(49, 84); 
+            c.lineTo(41, 83);
+            c.closePath();
+            c.fill();
+            c.stroke();
+
+            c.restore(); // end leg draw
 
             c.restore(); // end master translate & scale
         }
