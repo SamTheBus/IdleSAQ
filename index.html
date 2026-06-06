@@ -5486,6 +5486,91 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     /* ==========================================================================
        8. ANVIL & ITEM QUALITY RE-GENERATORS
        ========================================================================== */
+    function scaleItemBonusStats(item, oldStars, newStars) {
+        if (item.type === "artifact" || oldStars === "UNIQUE" || newStars === "UNIQUE") return;
+        let oldMult = 1 + (oldStars * 0.15);
+        let newMult = 1 + (newStars * 0.15);
+        let ratio = newMult / oldMult;
+
+        const scaleKeys = [
+            "bonusAtk", "bonusMaxHp", "bonusDef", "bonusMoveSpeed", 
+            "bonusCritChance", "bonusCritDamage", "bonusBlock", "bonusParry", 
+            "bonusStr", "bonusDex", "bonusInt", "bonusActiveSpeed", "bonusIdleSpeed"
+        ];
+        
+        scaleKeys.forEach(k => {
+            if (item[k]) {
+                if (["bonusCritChance", "bonusCritDamage", "bonusBlock", "bonusParry"].includes(k)) {
+                    item[k] = parseFloat((item[k] * ratio).toFixed(4));
+                } else if (["bonusActiveSpeed", "bonusIdleSpeed"].includes(k)) {
+                    item[k] = Math.floor(item[k] * ratio);
+                } else {
+                    item[k] = Math.ceil(item[k] * ratio);
+                }
+            }
+        });
+    }
+
+    function recalculateItemStats(item) {
+        // 1. Reset parameters to un-tempered base + bonus values
+        item.atk = (item.baseAtk || 0) + item.bonusAtk; 
+        item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp; 
+        item.def = (item.baseDef || 0) + item.bonusDef; 
+        item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
+        item.critChance = (item.baseCritChance || 0) + item.bonusCritChance; 
+        item.critDamage = (item.baseCritDamage || 0) + item.bonusCritDamage; 
+        item.block = (item.baseBlock || 0) + item.bonusBlock; 
+        item.parry = (item.baseParry || 0) + item.bonusParry;
+        item.activeAttackSpeed = (item.baseActiveSpeed || 0) + item.bonusActiveSpeed; 
+        item.idleAttackSpeed = (item.baseIdleSpeed || 0) + item.bonusIdleSpeed;
+        item.str = (item.baseStr || 0) + item.bonusStr;
+        item.dex = (item.baseDex || 0) + item.bonusDex;
+        item.int = (item.baseInt || 0) + item.bonusInt;
+
+        // 2. Re-apply tempering levels dynamically
+        let tempers = item.temperLevel || 0;
+        if (tempers > 0) {
+            let isArt = item.type === "artifact";
+            if (item.atk > 0 || item.type === "weapon" || isArt) item.atk += tempers * (isArt ? 5 : 2);
+            if (item.maxHp > 0 || isArt) item.maxHp += tempers * (isArt ? 30 : 12);
+            if (item.def > 0 || isArt) item.def += tempers * (isArt ? 3 : 2);
+            if (item.moveSpeed > 0) item.moveSpeed += tempers * 1;
+            if (item.str > 0) item.str += tempers * 1;
+            if (item.dex > 0) item.dex += tempers * 1;
+            if (item.int > 0) item.int += tempers * 1;
+            
+            if (item.critChance > 0) item.critChance = parseFloat((item.critChance + tempers * 0.005).toFixed(4));
+            if (item.critDamage > 0) item.critDamage = parseFloat((item.critDamage + tempers * 0.015).toFixed(4));
+            if (item.block > 0) item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
+            if (item.parry > 0) item.parry = parseFloat((item.parry + tempers * 0.005).toFixed(4));
+            
+            if (item.dropRate > 0) item.dropRate = parseFloat((item.dropRate + tempers * 0.01).toFixed(4));
+            if (item.quality > 0) item.quality = parseFloat((item.quality + tempers * 0.005).toFixed(4));
+            if (item.goldMulti > 0) item.goldMulti = parseFloat((item.goldMulti + tempers * 0.01).toFixed(4));
+            if (item.rareSpawn > 0) item.rareSpawn = parseFloat((item.rareSpawn + tempers * 0.001).toFixed(4));
+            if (item.fairySpawn > 0) item.fairySpawn = parseFloat((item.fairySpawn + tempers * 0.01).toFixed(4));
+            
+            if (item.activeAttackSpeed < 0) item.activeAttackSpeed -= tempers * 1;
+            if (item.idleAttackSpeed < 0) item.idleAttackSpeed -= tempers * 2;
+        }
+
+        // 3. Re-apply mystical enchantments
+        if (item.enchantments) {
+            for (let statKey in item.enchantments) {
+                let count = item.enchantments[statKey];
+                let multiplier = Math.pow(1.25, count);
+                const integerStats = ["atk", "maxHp", "def", "str", "dex", "int"];
+                if (integerStats.includes(statKey)) {
+                    item[statKey] = Math.ceil(item[statKey] * multiplier);
+                } else if (statKey === "activeAttackSpeed" || statKey === "idleAttackSpeed") {
+                    item[statKey] = Math.floor(item[statKey] * multiplier);
+                } else {
+                    item[statKey] = parseFloat((item[statKey] * multiplier).toFixed(4));
+                }
+            }
+        }
+    }
+
     function addRandomStatLineToItem(item) {
         let pool = ["critChance", "critDamage", "block", "parry", "atk", "maxHp", "def", "moveSpeed", "activeSpd", "idleSpd", "str", "dex", "int"];
         
@@ -5555,20 +5640,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         else if (selectedStat === "dex") item.bonusDex += Math.ceil(randInt(1, 3) * stageScale * rarityMult * prestigeMult);
         else if (selectedStat === "int") item.bonusInt += Math.ceil(randInt(1, 3) * stageScale * rarityMult * prestigeMult);
 
-        item.atk = (item.baseAtk || 0) + item.bonusAtk; 
-        item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp; 
-        item.def = (item.baseDef || 0) + item.bonusDef; 
-        item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
-        item.critChance = (item.baseCritChance || 0) + item.bonusCritChance; 
-        item.critDamage = (item.baseCritDamage || 0) + item.bonusCritDamage; 
-        item.block = (item.baseBlock || 0) + item.bonusBlock; 
-        item.parry = (item.baseParry || 0) + item.bonusParry;
-        item.activeAttackSpeed = (item.baseActiveSpeed || 0) + item.bonusActiveSpeed; 
-        item.idleAttackSpeed = (item.baseIdleSpeed || 0) + item.bonusIdleSpeed;
-        
-        item.str = (item.baseStr || 0) + item.bonusStr;
-        item.dex = (item.baseDex || 0) + item.bonusDex;
-        item.int = (item.baseInt || 0) + item.bonusInt;
+        recalculateItemStats(item);
     }
 
      function createItemObject(chosenType, statLinesCount, stageScale, minStars = 0) {
@@ -5647,7 +5719,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             }
             else if (chosenType === "subweapon") {
                 if (item.subType === "shield") { 
-                    item.baseDef = Math.ceil(randInt(15, 30) * stageScale * prestigeMult); 
+                    item.baseDef = Math.ceil(randInt(10, 18) * stageScale * prestigeMult); 
                     item.baseBlock = 0.03 * stageScale * prestigeMult; 
                 }
                 else if (item.subType === "dagger") { 
@@ -6832,8 +6904,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             if (subType === "shield") {
                 let shield = equippedSlots.subweapon;
                 let shieldStars = shield.statsRolled === "UNIQUE" ? 5 : (shield.statsRolled || 0);
-                flatDef += 15 + (shield.stageLevel * 3);
-                defMultiplier += 0.25 + (shieldStars * 0.02) + (shield.temperLevel * 0.01);
+                defMultiplier += 0.12 + (shieldStars * 0.02) + (shield.temperLevel * 0.01);
                 maxBlockCap = checkArtifactTrait("titan_grip") ? 0.40 : 0.30; // Shield block cap buff
             } else if (subType === "tome") {
                 // Tome: Arcane Barrier scales with INT up to a 35% absorption cap
@@ -7524,7 +7595,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
 
         if (item.id !== "dummy" && item.type === "subweapon") {
             if (item.subType === "shield") {
-                html += `<div style="color:#3498db; font-size:10px; font-weight:bold; margin-bottom:8px; border: 1px dashed #3498db; padding: 4px; border-radius:3px; background: rgba(52, 152, 219, 0.05); text-align: center; white-space:normal; line-height:1.3;">🛡️ BULWARK PASSIVE:<br>Raises Block Rate Cap to 30% (+40% if Titan's Grip equipped).</div>`;
+                html += `<div style="color:#3498db; font-size:10px; font-weight:bold; margin-bottom:8px; border: 1px dashed #3498db; padding: 4px; border-radius:3px; background: rgba(52, 152, 219, 0.05); text-align: center; white-space:normal; line-height:1.3;">🛡️ BULWARK PASSIVE:<br>Grants +12% Defense multiplier and raises Block Rate Cap to 30% (+40% if Titan's Grip equipped).</div>`;
             } else if (item.subType === "dagger") {
                 html += `<div style="color:#e74c3c; font-size:10px; font-weight:bold; margin-bottom:8px; border: 1px dashed #e74c3c; padding: 4px; border-radius:3px; background: rgba(231, 76, 60, 0.05); text-align: center; white-space:normal; line-height:1.3;">🗡️ ELUSIVE PARRIES PASSIVE:<br>Raises Parry Cap to 35% (+45% if Titan's Grip equipped). Successful parries slash the enemy's next hit by 50%.</div>`;
             } else if (item.subType === "tome") {
@@ -8408,6 +8479,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             inventory.ETC["Eridium Shard"] -= scrapReqAmount;
             if (inventory.ETC["Eridium Shard"] === 0) delete inventory.ETC["Eridium Shard"];
 
+            // Scale existing bonus stats proportionally to the new tier
+            scaleItemBonusStats(forgeSelectedItem, currentStars, currentStars + 1);
+
             // Awaken to next star level and inherit 1 new fully functional random stat modifier
             forgeSelectedItem.statsRolled++;
             addRandomStatLineToItem(forgeSelectedItem);
@@ -8511,20 +8585,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         item[newProp] = rolledValue;
         item.reforgedProperty = newProp; // Maintain locked slot
 
-        // Recalculate properties
-        item.atk = (item.baseAtk || 0) + item.bonusAtk;
-        item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
-        item.def = (item.baseDef || 0) + item.bonusDef;
-        item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
-        item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
-        item.critDamage = item.bonusCritDamage;
-        item.block = (item.baseBlock || 0) + item.bonusBlock;
-        item.parry = (item.baseParry || 0) + item.bonusParry;
-        item.activeAttackSpeed = item.bonusActiveSpeed;
-        item.idleAttackSpeed = item.bonusIdleSpeed;
-        item.str = item.bonusStr || 0;
-        item.dex = item.bonusDex || 0;
-        item.int = (item.baseInt || 0) + item.bonusInt;
+        recalculateItemStats(item);
 
         item.name = buildProceduralName(item);
 
