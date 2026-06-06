@@ -3504,96 +3504,141 @@ window.onload = function() {
                 } else {
                     let dType = playerStats.currentDungeon || 'gold';
                     if (dType === 'gold') {
-                        let hover = Math.sin(Date.now() / 150) * 3;
-                        let baseColor = m.flashTimer > 0 ? "#ffffff" : "#27ae60";
-                        let goldColor1 = "#f1c40f";
-                        let goldColor2 = "#f39c12";
-
-                        c.fillStyle = goldColor2;
+                        let hover = Math.sin(Date.now() / 120) * 4;
+                        
+                        // 1. Shimmering treasure mound at feet
+                        c.fillStyle = "#b7950b";
                         c.beginPath();
-                        c.ellipse(m.x + m.w / 2, m.y + m.h - 10, m.w * 0.9, 15, 0, 0, Math.PI * 2);
-                        c.fill();
-                        c.stroke();
+                        c.ellipse(m.x + m.w / 2, m.y + m.h - 5, m.w * 0.9, 10, 0, 0, Math.PI * 2);
+                        c.fill(); c.stroke();
 
-                        c.fillStyle = goldColor1;
+                        c.fillStyle = "#f1c40f";
                         c.beginPath();
-                        c.ellipse(m.x + m.w / 2 - 5, m.y + m.h - 13, m.w * 0.7, 10, 0, 0, Math.PI * 2);
-                        c.fill();
-                        c.stroke();
+                        c.ellipse(m.x + m.w / 2 - 4, m.y + m.h - 8, m.w * 0.75, 7, 0, 0, Math.PI * 2);
+                        c.fill(); c.stroke();
 
-                        c.fillStyle = "#fff";
+                        // Sparkles in the gold heap
+                        c.fillStyle = "#ffffff";
                         for (let i = 0; i < 5; i++) {
-                            c.fillRect(m.x + 8 + i * 8, m.y + m.h - 16 + Math.sin(i) * 3, 2, 2);
+                            c.fillRect(m.x + 8 + i * 8, m.y + m.h - 10 + Math.sin(i) * 3, 2, 2);
                         }
 
-                        c.fillStyle = baseColor;
-                        c.beginPath();
-                        c.ellipse(m.x + m.w / 2, m.y + m.h - 32 + hover, m.w * 0.55, 20, 0, 0, Math.PI * 2);
-                        c.fill();
-                        c.stroke();
+                        // 2. Bulky Golden Legs
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
+                        c.beginPath(); c.roundRect(m.x + 8, m.y + m.h - 22, 12, 18, [3]); c.fill(); c.stroke();
+                        c.beginPath(); c.roundRect(m.x + m.w - 20, m.y + m.h - 22, 12, 18, [3]); c.fill(); c.stroke();
 
-                        c.beginPath();
-                        c.arc(m.x + m.w / 2, m.y + m.h - 52 + hover, 14, 0, Math.PI * 2);
-                        c.fill();
-                        c.stroke();
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f1c40f";
+                        c.beginPath(); c.roundRect(m.x + 10, m.y + m.h - 20, 8, 14, [2]); c.fill(); c.stroke();
+                        c.beginPath(); c.roundRect(m.x + m.w - 18, m.y + m.h - 20, 8, 14, [2]); c.fill(); c.stroke();
 
-                        c.beginPath();
-                        c.moveTo(m.x + m.w / 2 - 11, m.y + m.h - 54 + hover);
-                        c.lineTo(m.x + m.w / 2 - 26, m.y + m.h - 60 + hover);
-                        c.lineTo(m.x + m.w / 2 - 11, m.y + m.h - 46 + hover);
-                        c.closePath();
-                        c.fill();
-                        c.stroke();
+                        // 3. Vault Chest Torso
+                        let bx = m.x + 3;
+                        let by = m.y + 24 + hover;
+                        let bw = m.w - 6;
+                        let bh = 46;
 
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1a1c23"; // Dark iron core
                         c.beginPath();
-                        c.moveTo(m.x + m.w / 2 + 11, m.y + m.h - 54 + hover);
-                        c.lineTo(m.x + m.w / 2 + 26, m.y + m.h - 60 + hover);
-                        c.lineTo(m.x + m.w / 2 + 11, m.y + m.h - 46 + hover);
-                        c.closePath();
-                        c.fill();
-                        c.stroke();
+                        c.roundRect(bx, by, bw, bh, [6]);
+                        c.fill(); c.stroke();
+
+                        // Side gold trim brackets
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
+                        c.beginPath(); c.rect(bx, by, 8, bh); c.rect(bx + bw - 8, by, 8, bh); c.fill(); c.stroke();
+
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f1c40f";
+                        c.beginPath(); c.rect(bx + 2, by, 4, bh); c.rect(bx + bw - 6, by, 4, bh); c.fill(); c.stroke();
+
+                        // Center locking vault wheel
+                        let wheelX = bx + bw / 2;
+                        let wheelY = by + bh / 2 + 2;
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
+                        c.beginPath(); c.arc(wheelX, wheelY, 9, 0, Math.PI * 2); c.fill(); c.stroke();
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f1c40f";
+                        c.beginPath(); c.arc(wheelX, wheelY, 6, 0, Math.PI * 2); c.fill(); c.stroke();
+
+                        // Wheel spokes (gently animated in real-time)
+                        c.strokeStyle = "#000000"; c.lineWidth = 1.8;
+                        for (let i = 0; i < 4; i++) {
+                            let angle = (Date.now() / 600) + (i * Math.PI / 2);
+                            c.beginPath();
+                            c.moveTo(wheelX, wheelY);
+                            c.lineTo(wheelX + Math.cos(angle) * 11, wheelY + Math.sin(angle) * 11);
+                            c.stroke();
+                        }
+
+                        // Molten gold leak
+                        if (m.flashTimer === 0) {
+                            c.fillStyle = "#ffaa00";
+                            c.beginPath();
+                            c.ellipse(wheelX, by + bh - 2, 12, 3, 0, 0, Math.PI * 2);
+                            c.fill();
+
+                            c.beginPath();
+                            c.rect(wheelX - 4, by + bh - 2, 2.5, 8);
+                            c.rect(wheelX + 2, by + bh - 2, 2, 11);
+                            c.fill();
+                        }
+
+                        // 4. Heavy Bullion Arms
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
+                        c.beginPath(); c.roundRect(bx - 8, by + 6, 9, 28, [3]); c.fill(); c.stroke();
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f1c40f";
+                        c.beginPath(); c.roundRect(bx - 7, by + 8, 7, 24, [2]); c.fill(); c.stroke();
+
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
+                        c.beginPath(); c.roundRect(bx + bw - 1, by + 6, 9, 28, [3]); c.fill(); c.stroke();
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f1c40f";
+                        c.beginPath(); c.roundRect(bx + bw - 1, by + 8, 7, 24, [2]); c.fill(); c.stroke();
+
+                        // 5. Crown Helmet
+                        let hx = bx + bw / 2;
+                        let hy = by - 12;
+
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
+                        c.beginPath();
+                        c.roundRect(hx - 12, hy, 24, 20, [4]);
+                        c.fill(); c.stroke();
 
                         c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f1c40f";
                         c.beginPath();
-                        c.moveTo(m.x + m.w / 2 - 10, m.y + m.h - 64 + hover);
-                        c.lineTo(m.x + m.w / 2 - 10, m.y + m.h - 73 + hover);
-                        c.lineTo(m.x + m.w / 2 - 4, m.y + m.h - 67 + hover);
-                        c.lineTo(m.x + m.w / 2, m.y + m.h - 75 + hover);
-                        c.lineTo(m.x + m.w / 2 + 4, m.y + m.h - 67 + hover);
-                        c.lineTo(m.x + m.w / 2 + 10, m.y + m.h - 73 + hover);
-                        c.lineTo(m.x + m.w / 2 + 10, m.y + m.h - 64 + hover);
+                        c.roundRect(hx - 10, hy + 2, 20, 16, [3]);
+                        c.fill(); c.stroke();
+
+                        // Crown base & spikes
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#d35400";
+                        c.beginPath();
+                        c.moveTo(hx - 11, hy);
+                        c.lineTo(hx - 14, hy - 9);
+                        c.lineTo(hx - 6, hy - 4);
+                        c.lineTo(hx, hy - 13);
+                        c.lineTo(hx + 6, hy - 4);
+                        c.lineTo(hx + 14, hy - 9);
+                        c.lineTo(hx + 11, hy);
                         c.closePath();
-                        c.fill();
-                        c.stroke();
+                        c.fill(); c.stroke();
 
                         if (m.flashTimer === 0) {
                             c.fillStyle = "#e74c3c";
                             c.beginPath();
-                            c.arc(m.x + m.w / 2, m.y + m.h - 67 + hover, 2, 0, Math.PI * 2);
+                            c.arc(hx - 14, hy - 9, 1.8, 0, Math.PI * 2);
+                            c.arc(hx, hy - 13, 2, 0, Math.PI * 2);
+                            c.arc(hx + 14, hy - 9, 1.8, 0, Math.PI * 2);
                             c.fill();
-                            c.stroke();
                         }
 
+                        // Glowing Ruby Visor Eyes
                         if (m.flashTimer === 0) {
-                            c.fillStyle = "#f1c40f";
+                            c.fillStyle = "#ff2200";
+                            c.shadowBlur = 10;
+                            c.shadowColor = "#ff2200";
                             c.beginPath();
-                            c.arc(m.x + m.w / 2 - 5, m.y + m.h - 54 + hover, 1.5, 0, Math.PI * 2);
-                            c.arc(m.x + m.w / 2 + 5, m.y + m.h - 54 + hover, 1.5, 0, Math.PI * 2);
+                            c.arc(hx - 4, hy + 10, 1.8, 0, Math.PI * 2);
+                            c.arc(hx + 4, hy + 10, 1.8, 0, Math.PI * 2);
                             c.fill();
-                            c.stroke();
+                            c.shadowBlur = 0;
                         }
-
-                        c.strokeStyle = "#111";
-                        c.lineWidth = 1.5;
-                        c.beginPath();
-                        c.arc(m.x + m.w / 2, m.y + m.h - 48 + hover, 5, 0, Math.PI);
-                        c.stroke();
-
-                        c.fillStyle = "#d35400";
-                        c.beginPath();
-                        c.arc(m.x + m.w / 2 - 15, m.y + m.h - 30 + hover, 10, 0, Math.PI * 2);
-                        c.fill();
-                        c.stroke();
                     } else if (dType === 'mat') {
                         let pulse = Math.sin(Date.now() / 100) * 4;
                         let baseColor = m.flashTimer > 0 ? "#ffffff" : "rgba(46, 204, 113, 0.85)";
