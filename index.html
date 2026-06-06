@@ -538,17 +538,29 @@
                             <span style="color:#3498db; font-weight:bold;">⚔️ Equip: <span id="dk-equip">8</span>/8</span>
                             <span id="dt-equip" style="color:#aaa;">(Full)</span>
                         </div>
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#3498db; margin-bottom:4px; padding:0 2px; font-family: monospace;">
+                            <span>🏆 Highest: Floor <span id="dp-equip">1</span></span>
+                            <span>🏁 Checkpoint: Stage <span id="dc-equip">1</span></span>
+                        </div>
                         <button onclick="enterDungeon('equip')" style="width: 100%; background: #3498db; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Equipment Dungeon</button>
                         
                         <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
                             <span style="color:#f1c40f; font-weight:bold;">💰 Gold: <span id="dk-gold">8</span>/8</span>
                             <span id="dt-gold" style="color:#aaa;">(Full)</span>
                         </div>
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#f1c40f; margin-bottom:4px; padding:0 2px; font-family: monospace;">
+                            <span>🏆 Highest: Floor <span id="dp-gold">1</span></span>
+                            <span>🏁 Checkpoint: Stage <span id="dc-gold">1</span></span>
+                        </div>
                         <button onclick="enterDungeon('gold')" style="width: 100%; background: #f1c40f; color: #111; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Gold Mine Caverns</button>
                         
                         <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
                             <span style="color:#2ecc71; font-weight:bold;">📦 Mats: <span id="dk-mat">8</span>/8</span>
                             <span id="dt-mat" style="color:#aaa;">(Full)</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#2ecc71; margin-bottom:4px; padding:0 2px; font-family: monospace;">
+                            <span>🏆 Highest: Floor <span id="dp-mat">1</span></span>
+                            <span>🏁 Checkpoint: Stage <span id="dc-mat">1</span></span>
                         </div>
                         <button onclick="enterDungeon('mat')" style="width: 100%; background: #2ecc71; color: #111; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Toxic Material Pit</button>
 
@@ -9114,10 +9126,10 @@ function formatStatRangeStr(item, statKey, isPct = false) {
        10. COMBAT RESOLUTION & WAVES AUDIT
        ========================================================================== */
     window.rollPotionDrop = function(isBoss, isRare, silent = false) {
-        // Highly calibrated drop rates to prevent inventory flooding (0.02% common, 0.15% rare, 1.5% boss)
-        let dropChance = 0.0002;
-        if (isRare) dropChance = 0.0015;
-        if (isBoss) dropChance = 0.015;
+        // Highly calibrated drop rates to prevent inventory flooding (0.04% common, 0.30% rare, 2.5% boss)
+        let dropChance = 0.0004;
+        if (isRare) dropChance = 0.003;
+        if (isBoss) dropChance = 0.025;
         
         if (Math.random() >= dropChance) return null;
         
@@ -9898,6 +9910,17 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         if (checkpointWaveEl) {
             checkpointWaveEl.innerText = Math.max(1, Math.floor((playerStats.cruciblePeak || 1) * 0.80));
         }
+
+        // Update Dungeon Peaks & Checkpoints inside the Activities Tab
+        ['equip', 'gold', 'mat'].forEach(k => {
+            let peak = (playerStats.dungeonPeaks && playerStats.dungeonPeaks[k]) ? playerStats.dungeonPeaks[k] : 1;
+            let checkpoint = Math.max(1, Math.floor(peak * 0.90));
+            
+            let dpEl = document.getElementById('dp-' + k);
+            if (dpEl) dpEl.innerText = peak;
+            let dcEl = document.getElementById('dc-' + k);
+            if (dcEl) dcEl.innerText = checkpoint;
+        });
 
         let leaveBtn = document.getElementById('btn-leave-activity');
         if (leaveBtn) {
