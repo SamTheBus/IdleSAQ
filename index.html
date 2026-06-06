@@ -10744,10 +10744,13 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                         mob.x -= (4 + scrollSpeed); mob.isStopped = false; 
                         scrollScenery(scrollSpeed);
                     } else {
-                        mob.isStopped = true; 
-                        if (logicClock % p.idleAttackSpeed === 0) { if (state.autoAttack) window.triggerPlayerSlash(); }
-                        
-                        // Constant scary dark smoke puff leakage from Hooktail's snout (gently rises upwards like real smoke)
+                    mob.isStopped = true; 
+                    if (logicClock % p.idleAttackSpeed === 0) { if (state.autoAttack) window.triggerPlayerSlash(); }
+                    
+                    // If the player's auto-attack defeated the mob, it is now null. Exit early to avoid null-pointer crashes.
+                    if (!mob) return;
+                    
+                    // Constant scary dark smoke puff leakage from Hooktail's snout (gently rises upwards like real smoke)
             if (mob && mob.type === "prestige_boss" && Math.random() < 0.20 && !isGamePaused) {
                 let hoverY = Math.sin(Date.now() / 150) * 6;
                 particles.push({
