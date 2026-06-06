@@ -4319,9 +4319,7 @@ window.onload = function() {
        SET BONUS DEFINITIONS & HELPER SYSTEMS
        ========================================================================== */
     const SET_DEFINITIONS = {
-        const SET_DEFINITIONS = {
         Vanguard: {
-            name: "Vanguard",
             bonuses: [
                 { count: 2, desc: "+5% Attack Power", apply: (p) => { p.atkPctBonus = (p.atkPctBonus || 0) + 0.05; } },
                 { count: 3, desc: "+10% Attack Power, +15 Flat Attack", apply: (p) => { p.atkPctBonus = (p.atkPctBonus || 0) + 0.10; p.atk += 15; } }
