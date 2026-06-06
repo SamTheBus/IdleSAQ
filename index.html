@@ -7538,6 +7538,59 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         }
     }
 
+    function spawnDeathParticles(x, y, mobType) {
+        let count = 15;
+        let colors = ["#2ecc71", "#27ae60", "#a3fd83"]; // Default Slime Green
+        let speed = 4;
+
+        if (mobType === "rift_guardian" || mobType === "void_spectre" || mobType === "void_crawler" || mobType === "void_orb") {
+            count = 45;
+            colors = ["#9b59b6", "#8e44ad", "#e84393", "#110221"];
+            speed = 6;
+        } else if (mobType === "boss" || mobType === "dungeon_boss") {
+            count = 40;
+            colors = ["#e74c3c", "#e67e22", "#f1c40f", "#ffffff"];
+            speed = 7;
+        } else if (mobType === "prestige_boss") {
+            count = 60;
+            colors = ["#d35400", "#ff3300", "#111116", "#ffeaa7"];
+            speed = 8;
+        } else if (mobType === "dungeon_miniboss") {
+            count = 25;
+            colors = ["#1abc9c", "#16a085", "#34495e"];
+            speed = 5;
+        } else {
+            // Apply environment-specific color palettes for normal mobs
+            let tier = getStageTier();
+            if (tier === 1) { // Peak
+                colors = ["#3498db", "#ecf0f1", "#bdc3c7"];
+            } else if (tier === 2) { // Inferno
+                colors = ["#e74c3c", "#e67e22", "#2c0e08"];
+            } else if (tier === 3) { // Swamp
+                colors = ["#27ae60", "#1b4f30", "#9b59b6"];
+            } else if (tier === 4) { // Void
+                colors = ["#8e44ad", "#e84393", "#0d011a"];
+            }
+        }
+
+        for (let i = 0; i < count; i++) {
+            let angle = Math.random() * Math.PI * 2;
+            let velocity = randFloat(1, speed);
+            particles.push({
+                x: x,
+                y: y,
+                vx: Math.cos(angle) * velocity,
+                vy: Math.sin(angle) * velocity - randFloat(1, 3), // Upwards pop
+                radius: randFloat(1.5, 4.5),
+                color: colors[Math.floor(Math.random() * colors.length)],
+                alpha: 1,
+                fade: true,
+                maxLife: randInt(25, 45),
+                life: randInt(25, 45)
+            });
+        }
+    }
+
     function spawnTemperParticles(isSuccess) {
         let colors = isSuccess ? ["#f1c40f", "#2ecc71", "#ffffff"] : ["#7f8c8d", "#c0392b", "#2c3e50"];
         for(let i=0; i<50; i++) { particles.push({ x: canvas.width / 2, y: canvas.height / 2, vx: (Math.random() - 0.5) * 16, vy: (Math.random() - 0.5) * 16, radius: Math.random() * 4 + 1.5, color: colors[Math.floor(Math.random() * colors.length)], alpha: 1, life: isSuccess ? 45 : 30 }); }
