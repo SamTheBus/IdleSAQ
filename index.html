@@ -3282,19 +3282,19 @@ window.onload = function() {
 
             c.restore(); // end tail draw
 
-            // 2. Draw Menacing Volcanic Dragon Leg & Heavy Armored Claws (left side / under chest)
+            // 2. Draw Menacing Volcanic Dragon Leg & Heavy Armored Claws (aligned with shoulder/chest)
             c.save();
             c.strokeStyle = "#000000";
             c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
             c.lineJoin = "round";
 
-            // Thigh Plate (Obsidian scaled shoulder shield)
+            // Thigh Plate (Obsidian scaled shoulder shield shifted +40 right to align under neck chest base)
             c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#111116"; 
             c.beginPath();
-            c.moveTo(38, 32);
-            c.quadraticCurveTo(15, 35, 14, 55); 
-            c.lineTo(28, 62);
-            c.quadraticCurveTo(34, 50, 44, 45); 
+            c.moveTo(78, 32);
+            c.quadraticCurveTo(55, 35, 54, 55); 
+            c.lineTo(68, 62);
+            c.quadraticCurveTo(74, 50, 84, 45); 
             c.closePath();
             c.fill();
             c.stroke();
@@ -3304,18 +3304,18 @@ window.onload = function() {
                 c.strokeStyle = "#ff3300";
                 c.lineWidth = 1.5;
                 c.beginPath();
-                c.moveTo(22, 40);
-                c.lineTo(18, 50);
-                c.lineTo(24, 56);
+                c.moveTo(62, 40);
+                c.lineTo(58, 50);
+                c.lineTo(64, 56);
                 c.stroke();
             }
 
             // Knee Cap Plate with forward-pointing spike
             c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#d35400"; 
             c.beginPath();
-            c.moveTo(14, 55);
-            c.lineTo(2, 60); 
-            c.lineTo(18, 64);
+            c.moveTo(54, 55);
+            c.lineTo(42, 60); 
+            c.lineTo(58, 64);
             c.closePath();
             c.fill();
             c.stroke();
@@ -3323,10 +3323,10 @@ window.onload = function() {
             // Thick Muscular Calf/Shin Section
             c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1b1b22";
             c.beginPath();
-            c.moveTo(18, 62);
-            c.lineTo(16, 76); 
-            c.lineTo(30, 78); 
-            c.lineTo(28, 62);
+            c.moveTo(58, 62);
+            c.lineTo(56, 76); 
+            c.lineTo(70, 78); 
+            c.lineTo(68, 62);
             c.closePath();
             c.fill();
             c.stroke();
@@ -3334,10 +3334,10 @@ window.onload = function() {
             // Heavy Front Claw (planted forward)
             c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#d35400"; 
             c.beginPath();
-            c.moveTo(16, 76); 
-            c.quadraticCurveTo(-2, 74, -10, 84); 
-            c.lineTo(-6, 85);
-            c.quadraticCurveTo(5, 80, 20, 78);
+            c.moveTo(56, 76); 
+            c.quadraticCurveTo(38, 74, 30, 84); 
+            c.lineTo(34, 85);
+            c.quadraticCurveTo(45, 80, 60, 78);
             c.closePath();
             c.fill();
             c.stroke();
@@ -3345,9 +3345,9 @@ window.onload = function() {
             // Front Talon Bone Tip
             c.fillStyle = "#ffeaa7";
             c.beginPath();
-            c.moveTo(-10, 84);
-            c.lineTo(-18, 86); 
-            c.lineTo(-6, 85);
+            c.moveTo(30, 84);
+            c.lineTo(22, 86); 
+            c.lineTo(34, 85);
             c.closePath();
             c.fill();
             c.stroke();
@@ -3355,10 +3355,10 @@ window.onload = function() {
             // Middle Claw (gripping down)
             c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#d35400";
             c.beginPath();
-            c.moveTo(20, 77);
-            c.quadraticCurveTo(10, 81, 6, 85); 
-            c.lineTo(11, 86);
-            c.quadraticCurveTo(18, 82, 24, 78);
+            c.moveTo(60, 77);
+            c.quadraticCurveTo(50, 81, 46, 85); 
+            c.lineTo(51, 86);
+            c.quadraticCurveTo(58, 82, 64, 78);
             c.closePath();
             c.fill();
             c.stroke();
@@ -3366,9 +3366,9 @@ window.onload = function() {
             // Middle Talon Bone Tip
             c.fillStyle = "#ffeaa7";
             c.beginPath();
-            c.moveTo(6, 85);
-            c.lineTo(0, 88); 
-            c.lineTo(11, 86);
+            c.moveTo(46, 85);
+            c.lineTo(40, 88); 
+            c.lineTo(51, 86);
             c.closePath();
             c.fill();
             c.stroke();
@@ -3376,10 +3376,10 @@ window.onload = function() {
             // Heavy Rear Anchor Spur (Heel talon)
             c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#111116";
             c.beginPath();
-            c.moveTo(26, 78);
-            c.quadraticCurveTo(38, 77, 44, 82); 
-            c.lineTo(41, 83);
-            c.quadraticCurveTo(34, 81, 28, 78);
+            c.moveTo(66, 78);
+            c.quadraticCurveTo(78, 77, 84, 82); 
+            c.lineTo(81, 83);
+            c.quadraticCurveTo(74, 81, 68, 78);
             c.closePath();
             c.fill();
             c.stroke();
@@ -3387,9 +3387,9 @@ window.onload = function() {
             // Rear Spur Bone Tip
             c.fillStyle = "#ffeaa7";
             c.beginPath();
-            c.moveTo(44, 82);
-            c.lineTo(49, 84); 
-            c.lineTo(41, 83);
+            c.moveTo(84, 82);
+            c.lineTo(89, 84); 
+            c.lineTo(81, 83);
             c.closePath();
             c.fill();
             c.stroke();
@@ -10533,25 +10533,24 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                         mob.isStopped = true; 
                         if (logicClock % p.idleAttackSpeed === 0) { if (state.autoAttack) window.triggerPlayerSlash(); }
                         
-                        // Constant scary dark smoke puff leakage from Hooktail's snout (drifts up & out, shaped by high-speed cavern draft)
-                            if (mob && mob.type === "prestige_boss" && Math.random() < 0.25 && !isGamePaused) {
-                                let windResistance = 4.5; // Constant high-speed cavern draft
-                                let hoverY = Math.sin(Date.now() / 150) * 6;
-                                particles.push({
-                                    x: mob.x - 38, // Positioned precisely at snout tip
-                                    y: mob.y + 60 + hoverY,
-                                    vx: randFloat(1.0, 2.5) + (windResistance * 0.3), // Drifts backwards trailing behind her charge
-                                    vy: -randFloat(0.8, 1.8), // Billows upward
-                                    gravity: -0.04, // Buoyancy (negative gravity) so the smoke rises
-                                    radius: randFloat(3.5, 6.0),
-                                    growth: 0.12, // Slowly expands as it billows
-                                    color: Math.random() > 0.5 ? "rgba(44, 62, 80, 0.7)" : "rgba(17, 17, 21, 0.7)", // Semitransparent toon ash smoke
-                                    alpha: 0.8,
-                                    fade: true,
-                                    maxLife: 60,
-                                    life: randInt(40, 60)
-                                });
-                            }
+                        // Constant scary dark smoke puff leakage from Hooktail's snout (gently rises upwards like real smoke)
+            if (mob && mob.type === "prestige_boss" && Math.random() < 0.20 && !isGamePaused) {
+                let hoverY = Math.sin(Date.now() / 150) * 6;
+                particles.push({
+                    x: mob.x - 35, // Positioned at her nostril area
+                    y: mob.y + 55 + hoverY,
+                    vx: randFloat(-0.4, 0.2), // Tiny drift forward/backward
+                    vy: -randFloat(1.2, 2.2), // Rises straight up
+                    gravity: -0.06, // Buoyant lift accelerating the smoke upwards
+                    radius: randFloat(3.0, 5.0),
+                    growth: 0.15, // Expands gently as it climbs
+                    color: Math.random() > 0.5 ? "rgba(60, 60, 65, 0.65)" : "rgba(30, 30, 35, 0.65)", // Dark ash smoke
+                    alpha: 0.75,
+                    fade: true,
+                    maxLife: 80,
+                    life: randInt(60, 80)
+                });
+            }
 
                             if (logicClock % 120 === 0 && mob && mob.hp > 0) {
                     // Standard damage resolution
