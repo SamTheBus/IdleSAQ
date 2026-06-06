@@ -4531,19 +4531,8 @@ function getStatBaseRange(item, statKey) {
             max += Math.ceil(2 * stageLevel * rarityMult);
         }
     }
-    else if (statKey === "maxHp") {
-        if (item.type === "overall") {
-            min += 30 * stageLevel;
-            max += 50 * stageLevel;
-        } else if (["chest", "leggings", "helmet"].includes(item.type) && item.baseMaxHp > 0) {
-            min += 10 * stageLevel;
-            max += 20 * stageLevel;
-        }
-        if (item.bonusMaxHp > 0) {
-            min += Math.ceil(3 * stageLevel * rarityMult);
-            max += Math.ceil(8 * stageLevel * rarityMult);
-        }
-    }
+            } else if (["chest", "leggings", "helmet"].includes(item.type) && item.baseMaxHp > 0) {
+
     else if (statKey === "def") {
         if (item.type === "subweapon" && item.subType === "shield") {
             min += 15 * stageLevel;
@@ -4673,10 +4662,19 @@ function getStatBaseRange(item, statKey) {
         
         let tempers = item.temperLevel || 0;
     if (tempers > 0) {
-        if (statKey === "atk") { min += tempers * (isArt ? 5 : 2); max += tempers * (isArt ? 5 : 2); }
-        else if (statKey === "maxHp") { min += tempers * (isArt ? 25 : 10); max += tempers * (isArt ? 25 : 10); }
-        else if (statKey === "def") { min += tempers * (isArt ? 2 : 1); max += tempers * (isArt ? 2 : 1); }
-        else if (statKey === "moveSpeed") { min += tempers; max += tempers; }
+        if (isArt) {
+            if (statKey === "atk") { min += tempers * 5; max += tempers * 5; }
+            else if (statKey === "maxHp") { min += tempers * 30; max += tempers * 30; }
+            else if (statKey === "def") { min += tempers * 3; max += tempers * 3; }
+        } else {
+            let multiplier = 1 + (tempers * 0.04);
+            if (["atk", "maxHp", "def"].includes(statKey)) {
+                min = min * multiplier;
+                max = max * multiplier;
+            }
+        }
+        
+        if (statKey === "moveSpeed") { min += tempers; max += tempers; }
         else if (statKey === "str" || statKey === "dex" || statKey === "int") { min += tempers; max += tempers; }
         else if (statKey === "critChance") { min += tempers * 0.005; max += tempers * 0.005; }
         else if (statKey === "critDamage") { min += tempers * 0.015; max += tempers * 0.015; }
@@ -9086,9 +9084,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 let goldColor = playerStats.coins >= costGold ? "#f1c40f" : "#e74c3c"; let scrapColor = playerScrap >= scrapReqAmount ? "#bdc3c7" : "#e74c3c";
                 
                 previewItem.temperLevel++;
-                    applyTemperUpgrades(previewItem, item.type === "artifact");
-                    
-                    html += `<div style="font-size:11px; margin-bottom:10px; color:#aaa;">Temper Cap: <span style="color:#fff;">${item.temperLevel} / ${maxT}</span></div>`;
+                recalculateItemStats(previewItem);
+                
+                html += `<div style="font-size:11px; margin-bottom:10px; color:#aaa;">Temper Cap: <span style="color:#fff;">${item.temperLevel} / ${maxT}</span></div>`;
                 let pct = (item.temperLevel / maxT) * 100;
                 html += `<div class="forge-progress-bg"><div class="forge-progress-fill" style="width:${pct}%"></div></div>`;
                 html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${costGold.toLocaleString()} Gold Required</div>`;
@@ -9214,6 +9212,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                     * Enchanting will permanently snapshot pre-enchant stats, then select 1 parameter at random to scale by <b>+25%</b>.
                 </div>`;
             } else if (forgeMode === 'temper' && item.temperLevel < getMaxTemper(item.statsRolled, item.type)) {
+                previewItem.temperLevel++;
+                recalculateItemStats(previewItem);
+                
                 previewHtml = `<div style="margin-top:15px; padding:10px; background:#111; border:1px solid #333; border-radius:4px;">
                     <div style="color:#3498db; font-weight:bold; font-size:12px; margin-bottom:8px; border-bottom:1px solid #222; padding-bottom:4px;">Awakening Preview</div>
                     ${generateItemCardHtml(previewItem, item, false)}
