@@ -4674,7 +4674,7 @@ function getStatBaseRange(item, statKey) {
 
     const unscaledStats = ["activeAttackSpeed", "idleAttackSpeed"];
     if (!unscaledStats.includes(statKey)) {
-        let prestigeMult = 1 + ((playerStats.prestigeCount || 0) * 0.10);
+        let prestigeMult = Math.pow(1.067, playerStats.prestigeCount || 0);
         min = min * prestigeMult;
         max = max * prestigeMult;
     }
@@ -4810,16 +4810,20 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             return;
         }
 
-        let upgrades = p.prestigeUpgrades || { bag: 0, gold: 0, exp: 0, drop: 0 };
+        let upgrades = p.prestigeUpgrades || { bag: 0, gold: 0, exp: 0, drop: 0, atk: 0, fort: 0 };
         let bagPts = upgrades.bag || 0;
         let goldPts = upgrades.gold || 0;
         let expPts = upgrades.exp || 0;
         let dropPts = upgrades.drop || 0;
+        let atkPts = upgrades.atk || 0;
+        let fortPts = upgrades.fort || 0;
 
         let bagDisabled = p.prestigePoints < 1 ? "disabled style='opacity:0.5; cursor:not-allowed;'" : "";
         let goldDisabled = p.prestigePoints < 1 ? "disabled style='opacity:0.5; cursor:not-allowed;'" : "";
         let expDisabled = p.prestigePoints < 1 ? "disabled style='opacity:0.5; cursor:not-allowed;'" : "";
         let dropDisabled = p.prestigePoints < 1 ? "disabled style='opacity:0.5; cursor:not-allowed;'" : "";
+        let atkDisabled = (p.prestigePoints < 1 || atkPts >= 10) ? "disabled style='opacity:0.5; cursor:not-allowed;'" : "";
+        let fortDisabled = (p.prestigePoints < 1 || fortPts >= 10) ? "disabled style='opacity:0.5; cursor:not-allowed;'" : "";
 
         // Enforce progression limits: challenge requires reaching at least 85% of lifetime peak stage (minimum floor: Stage 25)
         let requiredStage = Math.max(25, Math.floor((p.lifetimePeakStage || 1) * 0.85));
@@ -4890,6 +4894,26 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                                 <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(dropPts * 5).toLocaleString()}% Drop</span></div>
                             </div>
                             <button class="btn-action" style="margin-top:8px; background:#2ecc71;" ${dropDisabled} onclick="buyPrestigeUpgrade('drop')">Upgrade (1 PP)</button>
+                        </div>
+
+                        <!-- Gladiator's Might -->
+                        <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <strong style="color:#e74c3c; font-size:12px;">🔱 Gladiator's Might</strong>
+                                <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +10% Global Attack power. (Max 10)</div>
+                                <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(atkPts * 10).toLocaleString()}% Atk</span></div>
+                            </div>
+                            <button class="btn-action" style="margin-top:8px; background:#e74c3c;" ${atkDisabled} onclick="buyPrestigeUpgrade('atk')">Upgrade (1 PP)</button>
+                        </div>
+
+                        <!-- Colossal Fortitude -->
+                        <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <strong style="color:#1abc9c; font-size:12px;">🛡️ Colossal Fortitude</strong>
+                                <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +10% Global Max HP and +5% Defense. (Max 10)</div>
+                                <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(fortPts * 10).toLocaleString()}% HP, +${(fortPts * 5).toLocaleString()}% Def</span></div>
+                            </div>
+                            <button class="btn-action" style="margin-top:8px; background:#1abc9c;" ${fortDisabled} onclick="buyPrestigeUpgrade('fort')">Upgrade (1 PP)</button>
                         </div>
                     </div>
                 </div>
@@ -5697,7 +5721,12 @@ function formatStatRangeStr(item, statKey, isPct = false) {
 
                 // Safe Prestige migrations
                 if (playerStats.prestigePoints === undefined) playerStats.prestigePoints = 0;
-                if (playerStats.prestigeUpgrades === undefined) playerStats.prestigeUpgrades = { bag: 0, gold: 0, exp: 0, drop: 0 };
+                if (playerStats.prestigeUpgrades === undefined) {
+                    playerStats.prestigeUpgrades = { bag: 0, gold: 0, exp: 0, drop: 0, atk: 0, fort: 0 };
+                } else {
+                    playerStats.prestigeUpgrades.atk = playerStats.prestigeUpgrades.atk || 0;
+                    playerStats.prestigeUpgrades.fort = playerStats.prestigeUpgrades.fort || 0;
+                }
                 if (playerStats.prestigeCount === undefined) playerStats.prestigeCount = 0;
                 if (playerStats.lifetimePeakStage === undefined) playerStats.lifetimePeakStage = playerStats.maxStage || 1;
                 if (playerStats.isPrestigeBossMode === undefined) playerStats.isPrestigeBossMode = false;
@@ -6065,7 +6094,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             item.noun = nounList ? nounList[Math.floor(Math.random() * nounList.length)] : chosenType.toUpperCase();
         }
 
-        let prestigeMult = 1 + ((playerStats.prestigeCount || 0) * 0.10);
+        let prestigeMult = Math.pow(1.067, playerStats.prestigeCount || 0);
 
         if (isArt) {
             let chosenArt = ARTIFACT_POOL[Math.floor(Math.random() * ARTIFACT_POOL.length)];
@@ -7431,6 +7460,16 @@ function formatStatRangeStr(item, statKey, isPct = false) {
 
         // Apply Aura of Fortune upgrade (+1.5% global drop quality multiplier per level)
         p.qly += (playerStats.globalQLevel || 0) * 0.015;
+
+        // Apply Gladiator's Might (+10% global Attack per point)
+        let prestigeAtkMult = 1.0 + (playerStats.prestigeUpgrades?.atk || 0) * 0.10;
+        p.atk = Math.floor(p.atk * prestigeAtkMult);
+
+        // Apply Colossal Fortitude (+10% global HP and +5% Defense per point)
+        let prestigeHpMult = 1.0 + (playerStats.prestigeUpgrades?.fort || 0) * 0.10;
+        let prestigeDefMult = 1.0 + (playerStats.prestigeUpgrades?.fort || 0) * 0.05;
+        p.maxHp = Math.floor(p.maxHp * prestigeHpMult);
+        p.def = Math.floor(p.def * prestigeDefMult);
 
         return p;
     }
@@ -10677,10 +10716,10 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 }
 
                  if (playerStats.prestigeApproachTimer === 0) {
-                    // Spawn Hooktail based on Option 2 quadratic HP scaling (testing raw HP pool first)
+                    // Spawn Hooktail based on calibrated exponential HP and damage scaling
                     let scaleVal = playerStats.prestigeCount || 0;
-                    let hp = 25000 * Math.pow(1 + 1.5 * scaleVal, 2);
-                    let dmg = 400 * Math.pow(1.28, scaleVal);
+                    let hp = 25000 * Math.pow(1.815, scaleVal);
+                    let dmg = 500 * Math.pow(1.30, scaleVal);
                     let def = 30 + (35 * scaleVal);
                     
                     mob = {
