@@ -4531,8 +4531,19 @@ function getStatBaseRange(item, statKey) {
             max += Math.ceil(2 * stageLevel * rarityMult);
         }
     }
-            } else if (["chest", "leggings", "helmet"].includes(item.type) && item.baseMaxHp > 0) {
-
+    else if (statKey === "maxHp") {
+        if (item.type === "overall") {
+            min += 35 * stageLevel * 1.8;
+            max += 55 * stageLevel * 1.8;
+        } else if (["chest", "leggings", "helmet"].includes(item.type) && item.baseMaxHp > 0) {
+            min += 12 * stageLevel;
+            max += 24 * stageLevel;
+        }
+        if (item.bonusMaxHp > 0) {
+            min += Math.ceil(3 * stageLevel * rarityMult);
+            max += Math.ceil(8 * stageLevel * rarityMult);
+        }
+    }
     else if (statKey === "def") {
         if (item.type === "subweapon" && item.subType === "shield") {
             min += 15 * stageLevel;
