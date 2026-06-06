@@ -3198,62 +3198,66 @@ window.onload = function() {
             c.restore(); // end jaw draw
             c.restore(); // end skull save
 
-            // Draw Muscular Dragon Leg & Spiked Foot Gripping the Ground
+            // Draw Gargantuan Spiked Dragon Tail coiling under her body with a massive jagged blade tip
             c.save();
             c.strokeStyle = "#000000";
             c.lineWidth = 2.4 / Math.max(scaleX, scaleY);
             c.lineJoin = "round";
 
-            // Upper leg/thigh (Charred Obsidian)
-            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#111115";
+            let tailSwayTime = Date.now() / 150;
+            
+            // Draw 6 massive jointed tail segments coiling down and sweeping forward towards the player
+            for (let i = 1; i <= 6; i++) {
+                let segmentSway = Math.sin(tailSwayTime - i * 0.5) * (i * 2.5);
+                // Start from rear of body and sweep down-left
+                let segX = 80 + (i * 8) - (i * i * 1.8) + segmentSway;
+                let segY = 45 + (i * 10) - (i * 1.2);
+                let r = 24 - (i * 2.5); // Tapers down
+
+                // Draw outer segment (charred obsidian black / blood red)
+                c.fillStyle = i % 2 === 0 ? "#111116" : "#4a0a0a";
+                c.beginPath();
+                c.arc(segX, segY, r, 0, Math.PI * 2);
+                c.fill();
+                c.stroke();
+
+                // Draw sharp, menacing spinal spikes on each tail segment
+                c.fillStyle = "#d35400"; // Molten gold spikes
+                c.beginPath();
+                c.moveTo(segX, segY - r);
+                c.lineTo(segX - 3, segY - r - 10);
+                c.lineTo(segX + 4, segY - r - 4);
+                c.closePath();
+                c.fill();
+                c.stroke();
+            }
+
+            // Draw the Enormous Jagged Blade Tip (Thagomizer) on the end of the tail
+            let tipSway = Math.sin(tailSwayTime - 6 * 0.5) * 15;
+            let tipX = 80 + 48 - (36 * 1.8) + tipSway; // approx 63
+            let tipY = 45 + 60 - 7.2; // approx 98
+            
+            c.fillStyle = "#d35400"; // Molten golden blade
             c.beginPath();
-            c.moveTo(35, 45); // Chest/neck junction
-            c.quadraticCurveTo(20, 60, 24, 75); // Knee bend
-            c.lineTo(32, 75);
-            c.quadraticCurveTo(28, 60, 42, 48);
+            c.moveTo(tipX, tipY);
+            // Huge curved scythe tip pointing forward/left to impale the player
+            c.quadraticCurveTo(tipX - 25, tipY + 10, tipX - 35, tipY - 15);
+            c.quadraticCurveTo(tipX - 10, tipY - 5, tipX + 5, tipY - 5);
             c.closePath();
             c.fill();
             c.stroke();
 
-            // Lower foot / talons gripping the ground (Molten Magma Orange scales)
-            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#d35400";
-            c.beginPath();
-            c.moveTo(24, 75); // Ankle joint
-            c.lineTo(12, 82.5); // Front toe tip
-            c.lineTo(16, 82.5);
-            c.lineTo(26, 77);
-            c.lineTo(24, 82.5); // Middle toe tip
-            c.lineTo(28, 82.5);
-            c.lineTo(29, 77);
-            c.lineTo(34, 82.5); // Back toe tip
-            c.lineTo(37, 81.5);
-            c.lineTo(32, 75); // Heel
-            c.closePath();
-            c.fill();
-            c.stroke();
-
-            // Sharp Bone Claws at the tips of the toes
+            // Extra spinal blade on the tip
             c.fillStyle = "#ffeaa7";
-            
-            // Front Claw
             c.beginPath();
-            c.moveTo(12, 82.5);
-            c.lineTo(6, 83.5); // Sharp point
-            c.lineTo(14, 81);
+            c.moveTo(tipX - 15, tipY - 8);
+            c.lineTo(tipX - 25, tipY - 18);
+            c.lineTo(tipX - 10, tipY - 5);
             c.closePath();
             c.fill();
             c.stroke();
 
-            // Middle Claw
-            c.beginPath();
-            c.moveTo(24, 82.5);
-            c.lineTo(21, 84.5); // Sharp point
-            c.lineTo(26, 81);
-            c.closePath();
-            c.fill();
-            c.stroke();
-            
-            c.restore(); // end leg draw
+            c.restore(); // end tail draw
 
             c.restore(); // end master translate & scale
         }
@@ -10139,9 +10143,9 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 logicClock++;
                 return; // freeze normal monster spawns during the charge segment
             } else if (mob) {
-            // Spit flames on a fixed frame frequency (influenced by move speed wind resistance)
+            // Spit flames on a fixed frame frequency (influenced by high-speed cavern draft wind resistance)
             if (logicClock % 150 === 0 && !isGamePaused) {
-                let windResistance = 2 + (p.moveSpeed * 0.05);
+                let windResistance = 4.5; // Constant high-speed cavern draft
                 for (let i = 0; i < 12; i++) {
                     particles.push({
                         x: mob.x,
@@ -10423,9 +10427,9 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                         mob.isStopped = true; 
                         if (logicClock % p.idleAttackSpeed === 0) { if (state.autoAttack) window.triggerPlayerSlash(); }
                         
-                        // Constant scary dark smoke puff leakage from Hooktail's snout (drifts up & out, shaped by player's movement speed)
+                        // Constant scary dark smoke puff leakage from Hooktail's snout (drifts up & out, shaped by high-speed cavern draft)
                             if (mob && mob.type === "prestige_boss" && Math.random() < 0.25 && !isGamePaused) {
-                                let windResistance = 2 + (p.moveSpeed * 0.05);
+                                let windResistance = 4.5; // Constant high-speed cavern draft
                                 let hoverY = Math.sin(Date.now() / 150) * 6;
                                 particles.push({
                                     x: mob.x - 38, // Positioned precisely at snout tip
