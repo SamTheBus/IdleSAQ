@@ -7768,12 +7768,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     }
 
     function getRequiredScrapForTemper(targetLevel, isArtifact) {
-
-    function getRequiredScrapForTemper(targetLevel, isArtifact) {
         if (isArtifact) return "Overlord's Sigil"; if (targetLevel <= 3) return "Monster Soul"; if (targetLevel <= 5) return "Rare Scrap";
         if (targetLevel <= 7) return "Magic Scrap"; if (targetLevel <= 9) return "Epic Scrap"; if (targetLevel <= 12) return "Legendary Scrap"; return "Mythic Scrap";
-    }
-
     function getTemperGoldCost(item) {
         let baseCost = item.type === "artifact" ? 1000 : 100;
         return Math.floor(baseCost * Math.pow(1.5, item.temperLevel) * (item.statsRolled === "UNIQUE" ? 1 : (item.statsRolled + 1)) * (1 + (item.stageLevel * 0.15)));
