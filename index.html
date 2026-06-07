@@ -6384,7 +6384,13 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             window.spawnPurchaseCelebration('alchemy', item.color);
         }
 
-        updateUI(); renderInventory(); renderMysticalShop(); window.saveGame();
+        // Defer UI re-renders to prevent stuck touch points on mobile devices
+        setTimeout(() => {
+            updateUI(); 
+            renderInventory(); 
+            renderMysticalShop(); 
+            window.saveGame();
+        }, 50);
     };
 
     window.useItem = function(itemName) {
@@ -6516,28 +6522,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             consumeUseItem(itemName);
             pushLog(`<span style='color:#f1c40f; font-weight:bold;'>[USE] Consumed Supernal Haste Elixir! Speed cosmically increased for ${Math.floor(finalDuration/60)}s.</span>`);
         }
-        
-        function consumeUseItem(name) {
-            // Philosopher's Catalyst check: 25% chance to spare the elixir
-            if (checkArtifactTrait("philosopher_catalyst") && Math.random() < 0.25) {
-                pushHeaderToast("✨ Elixir Sparing Effect Triggered!", "#2ecc71");
-                pushLog(`<strong style='color:#9b59b6;'>[PHILOSOPHER'S CATALYST]</strong> Sparing check passed! Your ${name} was not consumed.`);
-            } else {
-                inventory.USE[name]--;
-                if (inventory.USE[name] === 0) delete inventory.USE[name];
-            }
-            playerStats.elixirsConsumed = (playerStats.elixirsConsumed || 0) + 1;
-            window.checkAchievements();
-            pushHeaderToast(`Consumed ${name}!`, "#2ecc71");
-        }
-        
-        let pAfter = resolvePlayerStats();
-        playerStats.currentHp = Math.max(1, Math.min(pAfter.maxHp, Math.floor((playerStats.currentHp / pBefore.maxHp) * pAfter.maxHp)));
-        
-        updateUI(); renderInventory(); window.saveGame();
-    };
 
-    window.buyShopItem = function(index) {
+    window.showMarketTooltip = function(e, index) {
         let shopItem = playerStats.shopItems[index];
         if (shopItem.purchased || playerStats.coins < shopItem.cost) return;
 
@@ -6570,7 +6556,15 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             window.spawnPurchaseCelebration('gold', getTierColor(purchasedItem.statsRolled), purchasedItem.statsRolled);
         }
 
-        renderMarketShop(); window.checkAchievements(); updateUI(); renderInventory(); renderForgeTab(); window.saveGame();
+        // Defer UI re-renders to prevent stuck touch points on mobile devices
+        setTimeout(() => {
+            renderMarketShop(); 
+            window.checkAchievements(); 
+            updateUI(); 
+            renderInventory(); 
+            renderForgeTab(); 
+            window.saveGame();
+        }, 50);
     };
 
     window.showMarketTooltip = function(e, index) {
@@ -13475,13 +13469,16 @@ window.buyGoldUpgrade = function(type) {
         window.spawnPurchaseCelebration('alchemy', colors[type]);
     }
     
-    updateUI();
-    renderInventory();
-    renderGoldUpgrades();
-    window.saveGame();
+    // Defer UI re-renders to prevent stuck touch points on mobile devices
+    setTimeout(() => {
+        updateUI();
+        renderInventory();
+        renderGoldUpgrades();
+        window.saveGame();
+    }, 50);
 };
 
-window.loadGame(); 
+window.loadGame();
 updateUI();  
 renderInventory(); 
 updateAudioUI();
