@@ -6516,58 +6516,83 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             playerStats.hastePotionStrength = 2;
             consumeUseItem(itemName);
             pushLog(`<span style='color:#f1c40f; font-weight:bold;'>[USE] Consumed Greater Haste Elixir! Speed significantly increased for ${Math.floor(finalDuration/60)}s.</span>`);
-        } else if (itemName === "Supernal Haste Elixir") {
-            playerStats.hastePotionTimer = finalDuration; 
-            playerStats.hastePotionStrength = 3;
-            consumeUseItem(itemName);
-            pushLog(`<span style='color:#f1c40f; font-weight:bold;'>[USE] Consumed Supernal Haste Elixir! Speed cosmically increased for ${Math.floor(finalDuration/60)}s.</span>`);
-        }
+        else if (itemName === "Supernal Haste Elixir") {
+                playerStats.hastePotionTimer = finalDuration; 
+                playerStats.hastePotionStrength = 3;
+                consumeUseItem(itemName);
+                pushLog(`<span style='color:#f1c40f; font-weight:bold;'>[USE] Consumed Supernal Haste Elixir! Speed cosmically increased for ${Math.floor(finalDuration/60)}s.</span>`);
+            }
+            
+            function consumeUseItem(name) {
+                // Philosopher's Catalyst check: 25% chance to spare the elixir
+                if (checkArtifactTrait("philosopher_catalyst") && Math.random() < 0.25) {
+                    pushHeaderToast("✨ Elixir Sparing Effect Triggered!", "#2ecc71");
+                    pushLog(`<strong style='color:#9b59b6;'>[PHILOSOPHER'S CATALYST]</strong> Sparing check passed! Your ${name} was not consumed.`);
+                } else {
+                    inventory.USE[name]--;
+                    if (inventory.USE[name] === 0) delete inventory.USE[name];
+                }
+                playerStats.elixirsConsumed = (playerStats.elixirsConsumed || 0) + 1;
+                window.checkAchievements();
+                pushHeaderToast(`Consumed ${name}!`, "#2ecc71");
+            }
+            
+            let pAfter = resolvePlayerStats();
+            playerStats.currentHp = Math.max(1, Math.min(pAfter.maxHp, Math.floor((playerStats.currentHp / pBefore.maxHp) * pAfter.maxHp)));
+            
+            // Defer UI re-renders to prevent stuck touch points on mobile devices
+            setTimeout(() => {
+                updateUI(); 
+                renderInventory(); 
+                window.saveGame();
+            }, 50);
+        };
 
-    window.showMarketTooltip = function(e, index) {
-        let shopItem = playerStats.shopItems[index];
-        if (shopItem.purchased || playerStats.coins < shopItem.cost) return;
+        window.buyShopItem = function(index) {
+            let shopItem = playerStats.shopItems[index];
+            if (shopItem.purchased || playerStats.coins < shopItem.cost) return;
 
-        let maxBag = getMaxBagSlots();
-        if (shopItem.type === "artifact") {
-            if (inventory.ARTIFACT.length >= maxBag) { pushHeaderToast(`Artifact Sack Full!`, "#e74c3c"); return; }
-        } else {
-            if (inventory.EQUIP.length >= maxBag) { pushHeaderToast(`Inventory Full!`, "#e74c3c"); return; }
-        }
+            let maxBag = getMaxBagSlots();
+            if (shopItem.type === "artifact") {
+                if (inventory.ARTIFACT.length >= maxBag) { pushHeaderToast(`Artifact Sack Full!`, "#e74c3c"); return; }
+            } else {
+                if (inventory.EQUIP.length >= maxBag) { pushHeaderToast(`Inventory Full!`, "#e74c3c"); return; }
+            }
 
-        playerStats.coins -= shopItem.cost; shopItem.purchased = true;
-        if (playerStats.coins === 0) {
-            playerStats.hasTriggeredExactChange = true;
-        }
-        
-        let purchasedItem = JSON.parse(JSON.stringify(shopItem));
-        purchasedItem.id = idCounter++;
-        delete purchasedItem.cost; delete purchasedItem.purchased; delete purchasedItem.isIOTD;
-        
-        if (purchasedItem.type === "artifact") {
-            inventory.ARTIFACT.push(purchasedItem);
-        } else {
-            inventory.EQUIP.push(purchasedItem);
-        }
-        pushLog(`<strong style='color:#f1c40f;'>[SHOP]</strong> Purchased: <span style='color:${getTierColor(purchasedItem.statsRolled)};'>${purchasedItem.name}</span>`, purchasedItem.id);
-        pushToast(purchasedItem.name, purchasedItem.statsRolled, getTierColor(purchasedItem.statsRolled));
-        
-        // Trigger responsive gold shop purchase burst on canvas
-        if (typeof window.spawnPurchaseCelebration === "function") {
-            window.spawnPurchaseCelebration('gold', getTierColor(purchasedItem.statsRolled), purchasedItem.statsRolled);
-        }
+            playerStats.coins -= shopItem.cost; shopItem.purchased = true;
+            if (playerStats.coins === 0) {
+                playerStats.hasTriggeredExactChange = true;
+            }
+            
+            let purchasedItem = JSON.parse(JSON.stringify(shopItem));
+            purchasedItem.id = idCounter++;
+            delete purchasedItem.cost; delete purchasedItem.purchased; delete purchasedItem.isIOTD;
+            
+            if (purchasedItem.type === "artifact") {
+                inventory.ARTIFACT.push(purchasedItem);
+            } else {
+                inventory.EQUIP.push(purchasedItem);
+            }
+            pushLog(`<strong style='color:#f1c40f;'>[SHOP]</strong> Purchased: <span style='color:${getTierColor(purchasedItem.statsRolled)};'>${purchasedItem.name}</span>`, purchasedItem.id);
+            pushToast(purchasedItem.name, purchasedItem.statsRolled, getTierColor(purchasedItem.statsRolled));
+            
+            // Trigger responsive gold shop purchase burst on canvas
+            if (typeof window.spawnPurchaseCelebration === "function") {
+                window.spawnPurchaseCelebration('gold', getTierColor(purchasedItem.statsRolled), purchasedItem.statsRolled);
+            }
 
-        // Defer UI re-renders to prevent stuck touch points on mobile devices
-        setTimeout(() => {
-            renderMarketShop(); 
-            window.checkAchievements(); 
-            updateUI(); 
-            renderInventory(); 
-            renderForgeTab(); 
-            window.saveGame();
-        }, 50);
-    };
+            // Defer UI re-renders to prevent stuck touch points on mobile devices
+            setTimeout(() => {
+                renderMarketShop(); 
+                window.checkAchievements(); 
+                updateUI(); 
+                renderInventory(); 
+                renderForgeTab(); 
+                window.saveGame();
+            }, 50);
+        };
 
-    window.showMarketTooltip = function(e, index) {
+        window.showMarketTooltip = function(e, index) {
         let item = playerStats.shopItems[index]; if (!item || item.purchased) return;
         let tt = document.getElementById('game-tooltip'); tt.innerHTML = buildGeneralTooltipHtml(item, true);
         tt.style.borderColor = getTierColor(item.statsRolled); tt.style.display = "block"; window.positionTooltip(e, tt);
