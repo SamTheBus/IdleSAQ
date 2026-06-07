@@ -7204,8 +7204,11 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             drop: 0, qly: 0, gold: 0, str: 0, dex: 0, int: 0,
             fairySpawn: 0, rareSpawn: 0, expPct: 0, potDurationPct: 0, potStrengthPct: 0,
             atkPct: 0, maxHpPct: 0, defPct: 0, moveSpeedPct: 0,
-            strPct: 0, dexPct: 0, intPct: 0
+            strPct: 0, dexPct: 0, intPct: 0,
+            idleSpeedPct: 0, activeSpeedPct: 0
         };
+        
+        if (playerStats.unlockedAchievements && window.AchievementsData) {
         
         if (playerStats.unlockedAchievements && window.AchievementsData) {
             playerStats.unlockedAchievements.forEach(id => {
@@ -7283,8 +7286,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         let itemDefPct = 0;
         let itemSpdPct = 0;
 
-        let idleSpeedPct = 0.0;
-        let activeSpeedPct = 0.0;
+        // Initialize speed with unlocked achievement bonuses
+        let idleSpeedPct = 0.0 + (aT.idleSpeedPct || 0);
+        let activeSpeedPct = 0.0 + (aT.activeSpeedPct || 0);
 
         for (let key in equippedSlots) {
             let item = equippedSlots[key];
@@ -13152,11 +13156,11 @@ function engineCycle() {
         // SINGLE TIER ACHIEVEMENTS / VALOR FEATS (isSingleTier: true)
         // ==========================================================================
         { id: "sing_murphys_law", name: "Murphy's Law", icon: "🍀", desc: "Fail a tempering attempt with a success rate of 90% or higher", isSingleTier: true, stats: { qly: 0.05, maxHpPct: 0.03 } },
-        { id: "sing_against_odds", name: "Against All Odds", icon: "🌟", desc: "Obtain a 5★ Mythic item from a standard campaign non-boss monster", isSingleTier: true, stats: { critChance: 0.02, atkPct: 0.03 } },
+        { id: "sing_against_odds", name: "Against All Odds", icon: "🌟", desc: "Obtain a 5★ Mythic item from a standard campaign non-boss monster", isSingleTier: true, stats: { Math_chance: 0.02, atkPct: 0.03 } },
         { id: "sing_lucky_seven", name: "Lucky Seven", icon: "🎲", desc: "Roll a crit, block, and parry all within a 1-second window", isSingleTier: true, stats: { atkPct: 0.05, defPct: 0.05 } },
         { id: "sing_back_brink", name: "Back from the Brink", icon: "🩸", desc: "Trigger Second Wind (Ankh) and successfully defeat that same boss", isSingleTier: true, stats: { maxHpPct: 0.05, defPct: 0.05 } },
         { id: "sing_elemental_conv", name: "Elemental Convergence", icon: "🌀", desc: "Trigger Lightning, Fire, and Frost tome spells simultaneously", isSingleTier: true, stats: { intPct: 0.10, potStrengthPct: 0.05 } },
-        { id: "sing_no_hands", name: "Look Ma, No Hands", icon: "⚔️", desc: "Defeat a boss stage without clicking/pressing space once in that battle", isSingleTier: true, stats: { idleAttackSpeed: -2, expPct: 0.05 } },
+        { id: "sing_no_hands", name: "Look Ma, No Hands", icon: "⚔️", desc: "Defeat a boss stage without clicking/pressing space once in that battle", isSingleTier: true, stats: { idleSpeedPct: 0.05, expPct: 0.05 } },
         { id: "sing_poly_cocktail", name: "Polymorph Cocktail", icon: "🧪", desc: "Have 6 distinct potion/relic buffs active at the same time", isSingleTier: true, stats: { potDurationPct: 0.10, potStrengthPct: 0.05 } },
         { id: "sing_hoarder", name: "Paranoid Hoarder", icon: "🎒", desc: "Fill your equipment bag to maximum capacity with entirely LOCKED gear", isSingleTier: true, stats: { qly: 0.05, gold: 0.05 } },
         { id: "sing_unified_set", name: "Unified Aesthetics", icon: "🎨", desc: "Equip 6 armor/weapon slots from the exact same named Dungeon Set", isSingleTier: true, stats: { atkPct: 0.08, defPct: 0.08 } },
