@@ -6516,12 +6516,12 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             playerStats.hastePotionStrength = 2;
             consumeUseItem(itemName);
             pushLog(`<span style='color:#f1c40f; font-weight:bold;'>[USE] Consumed Greater Haste Elixir! Speed significantly increased for ${Math.floor(finalDuration/60)}s.</span>`);
-        else if (itemName === "Supernal Haste Elixir") {
-                playerStats.hastePotionTimer = finalDuration; 
-                playerStats.hastePotionStrength = 3;
-                consumeUseItem(itemName);
-                pushLog(`<span style='color:#f1c40f; font-weight:bold;'>[USE] Consumed Supernal Haste Elixir! Speed cosmically increased for ${Math.floor(finalDuration/60)}s.</span>`);
-            }
+        } else if (itemName === "Supernal Haste Elixir") {
+            playerStats.hastePotionTimer = finalDuration; 
+            playerStats.hastePotionStrength = 3;
+            consumeUseItem(itemName);
+            pushLog(`<span style='color:#f1c40f; font-weight:bold;'>[USE] Consumed Supernal Haste Elixir! Speed cosmically increased for ${Math.floor(finalDuration/60)}s.</span>`);
+        }
             
             function consumeUseItem(name) {
                 // Philosopher's Catalyst check: 25% chance to spare the elixir
