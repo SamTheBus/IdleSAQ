@@ -7209,8 +7209,6 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         };
         
         if (playerStats.unlockedAchievements && window.AchievementsData) {
-        
-        if (playerStats.unlockedAchievements && window.AchievementsData) {
             playerStats.unlockedAchievements.forEach(id => {
                 let ach = window.AchievementsData.find(a => a.id === id);
                 if (ach && ach.stats) {
