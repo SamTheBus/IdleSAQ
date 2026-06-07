@@ -5626,6 +5626,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 }
                 inventory = parsed.inventory || { EQUIP: [], ARTIFACT: [], ETC: {}, USE: {} };
                 if (!inventory.ARTIFACT) { inventory.ARTIFACT = []; }
+                if (!inventory.ETC) { inventory.ETC = {}; }
+                if (!inventory.USE) { inventory.USE = {}; }
                 
                 // Migrate legacy artifacts that were stored in the EQUIP sack to the ARTIFACT sack
                 if (inventory.EQUIP) {
@@ -5683,8 +5685,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                     playerStats.shopRefreshTime = 0; 
                 }
 
-                 if (!inventory.USE) { inventory.USE = {}; }
-                if (playerStats.frenzyKillCount === undefined) playerStats.frenzyKillCount = 0;
+                 if (playerStats.frenzyKillCount === undefined) playerStats.frenzyKillCount = 0;
 
                 // Legacy Data Migration: Force recalculation of all equipped and bag gear to ensure alignment with active formulas
                 for (let key in equippedSlots) {
@@ -5694,12 +5695,16 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 }
                 if (inventory.EQUIP) {
                     inventory.EQUIP.forEach(item => {
-                        recalculateItemStats(item);
+                        if (item) {
+                            recalculateItemStats(item);
+                        }
                     });
                 }
                 if (inventory.ARTIFACT) {
                     inventory.ARTIFACT.forEach(item => {
-                        recalculateItemStats(item);
+                        if (item) {
+                            recalculateItemStats(item);
+                        }
                     });
                 }
                 if (playerStats.atkPotionTimer === undefined) playerStats.atkPotionTimer = 0;
@@ -6892,8 +6897,21 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        const clickX = ((e.clientX || (e.touches && e.touches[0].clientX)) - rect.left) * scaleX;
-        const clickY = ((e.clientY || (e.touches && e.touches[0].clientY)) - rect.top) * scaleY;
+        
+        // Retrieve client coordinates safely on mobile browsers and hybrid wrappers
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        }
+        
+        // Apply scaling offsets with structural fallbacks
+        const clickX = (clientX !== undefined ? (clientX - rect.left) * scaleX : 0);
+        const clickY = (clientY !== undefined ? (clientY - rect.top) * scaleY : 0);
 
         // Check if user clicked any of the active floating fairies
         let clickedFairy = activeFairies.find(f => {
