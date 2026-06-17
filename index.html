@@ -900,6 +900,13 @@
                         <select id="dev-unique-sel" style="background:#111; color:#fff; border:1px solid #444; padding:4px;">
                             <option value="weapon-staff">🔥 Unique Phoenix Staff</option>
                             <option value="weapon-sword">🩸 Unique Sanguine Reaver</option>
+                            <option value="weapon-singularity">🌌 Void-Sovereign Greatsword</option>
+                            <option value="weapon-maelstrom">🌪️ Maelstrom Gale-Glaive</option>
+                            <option value="shield-aegis">🛡️ Void-Warped Bulwark</option>
+                            <option value="tome-watch">⏳ Chronos Pocket-Watch</option>
+                            <option value="tome-chronicle">📖 Chronicle of past Lives</option>
+                            <option value="boots-warpcore">⚡ Warp-Core Greaves</option>
+                            <option value="helmet-tempest">👑 Crown of Tempests</option>
                             <option value="art-frenzy">Berserker Stone (Frenzy)</option>
                             <option value="art-vampirism">Blood-Soaked Chalice (Vampirism)</option>
                             <option value="art-gold_hoard">Philosopher's Anchor (Gold)</option>
@@ -6036,6 +6043,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     // Trigger soft-wipe and award ascension points
     window.triggerPrestigeAscension = function() {
         isGamePaused = true;
+        // Snapshot historical peak level for Chronicle of the Ascended calculations
+        playerStats.historicalPeakLvl = Math.max(playerStats.historicalPeakLvl || 1, playerStats.level);
         
         // Generate a guaranteed 5★ Mythic item scaled to the campaign stage they achieved prior to resetting
         let stageScale = Math.floor((playerStats.stage - 1) / 10) + 1;
@@ -6886,28 +6895,73 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         let lvl = parseInt(document.getElementById('dev-unique-lvl').value, 10) || 1;
         let maxBag = getMaxBagSlots();
 
-        if (value.startsWith("weapon")) {
+        if (value.startsWith("weapon") || value.startsWith("shield") || value.startsWith("tome") || value.startsWith("boots") || value.startsWith("helmet")) {
             if (inventory.EQUIP.length >= maxBag) { pushHeaderToast("Your inventory is full!", "#e74c3c"); return; }
-            let item = createItemObject("weapon", 5, lvl, 5);
+            
+            let slot = "weapon";
+            if (value.startsWith("shield") || value.startsWith("tome")) slot = "subweapon";
+            else if (value.startsWith("boots")) slot = "boots";
+            else if (value.startsWith("helmet")) slot = "helmet";
+
+            let item = createItemObject(slot, 5, lvl, 5);
+            item.setName = null;
+
             if (value === "weapon-staff") {
                 item.isUniqueStaff = true;
                 item.isUniqueSword = false;
                 item.noun = "Phoenix Staff";
-                item.setName = null;
                 item.name = `🔥 Phoenix Ignition Staff (Lv. ${lvl})`;
                 item.desc = "Launches penetrating fireballs that deal 25% Attack damage (3s Cooldown).";
-            } else {
+            } else if (value === "weapon-sword") {
                 item.isUniqueSword = true;
                 item.isUniqueStaff = false;
                 item.noun = "Sanguine Reaver";
-                item.setName = null;
                 item.name = `🩸 Crimson Sanguine Reaver (Lv. ${lvl})`;
                 item.desc = "Strikes apply stacking Bleed (Max 5). Each stack ticks 4x per second. Striking at max stacks triggers Rupture, dealing 300% weapon damage and siphoning 10% Max HP.";
+            } else if (value === "weapon-singularity") {
+                item.isUniqueSingularity = true;
+                item.noun = "Singularity Greatsword";
+                item.name = `🌌 Void-Sovereign Greatsword (Lv. ${lvl})`;
+                item.desc = "Glows for 7s every 30s. When tapped during this window, enters a 5s state where all damage is stored, multiplied, and detonated as a massive spatial collapse.";
+            } else if (value === "weapon-maelstrom") {
+                item.isUniqueMaelstrom = true;
+                item.noun = "Maelstrom Glaive";
+                item.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${lvl})`;
+                item.desc = "Killing blows cleave 100% of excess damage onto the next enemy. Critical strikes have a 25% chance to project a piercing gale that reduces the stage kill counter.";
+            } else if (value === "shield-aegis") {
+                item.subType = "shield";
+                item.isUniqueAegis = true;
+                item.noun = "Void-Warped Aegis";
+                item.name = `🛡️ Void-Warped Bulwark (Lv. ${lvl})`;
+                item.desc = "Successful blocks trigger a gravity blast dealing damage scaling with your total Defense. Can be absorbed into the Singularity Greatsword's vortex.";
+            } else if (value === "tome-watch") {
+                item.subType = "tome";
+                item.isUniqueWatch = true;
+                item.noun = "Chronos Pocket-Watch";
+                item.name = `⏳ Chronos Dial-Watch (Lv. ${lvl})`;
+                item.desc = "Triggers a 4s Temporal Fracture every 20s. Accelerates your Active/Idle Attack speeds by 15% and slows enemy attack cooldowns by 25%. Retains tome passives.";
+            } else if (value === "tome-chronicle") {
+                item.subType = "tome";
+                item.isUniqueChronicle = true;
+                item.noun = "Chronicle of the Ascended";
+                item.name = `📖 Chronicle of past Lives (Lv. ${lvl})`;
+                item.desc = "While in Campaign below 75% peak level: boosts XP gain by +200% and completely bypasses level locks on all your gear. Disabled inside Dungeons/Crucible.";
+            } else if (value === "boots-warpcore") {
+                item.isUniqueWarpCore = true;
+                item.noun = "Warp-Core Greaves";
+                item.name = `⚡ Warp-Core Greaves (Lv. ${lvl})`;
+                item.desc = "While below 85% of your lifetime Peak Stage: grants a massive +150% movement sprint speed, and each slain minion counts as 2 kills toward clearing stages.";
+            } else if (value === "helmet-tempest") {
+                item.isUniqueTempest = true;
+                item.noun = "Crown of Tempests";
+                item.name = `👑 Crown of crackling Tempests (Lv. ${lvl})`;
+                item.desc = "Taking damage has a 15% chance to call down a thunderbolt dealing 150% Attack power. Non-boss targets struck by the lightning are stunned.";
             }
+
             recalculateItemStats(item);
             item.locked = true;
             inventory.EQUIP.push(item);
-            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Spawned Unique Weapon: ${item.name}</span>`);
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Spawned Unique Item: ${item.name}</span>`);
         } else if (value.startsWith("art")) {
             if (inventory.ARTIFACT.length >= maxBag) { pushHeaderToast("Your Artifact sack is full!", "#e74c3c"); return; }
             let trait = value.substring(4);
@@ -7190,6 +7244,14 @@ window.loadGame = function() {
     window.gainXp = function(amount, silent = false) {
     // Incorporate permanent Prestige EXP boost Multiplier
     let expBonusMult = 1.0 + ((playerStats.prestigeUpgrades?.exp || 0) * 0.10);
+    
+    // UNIQUE: Chronicle of the Ascended - Ancestral Recall Campaign XP boost
+    if (equippedSlots.subweapon && equippedSlots.subweapon.isUniqueChronicle && !playerStats.isDungeonMode && !playerStats.isCrucibleMode) {
+        let historicalPeakLvl = playerStats.historicalPeakLvl || playerStats.level;
+        if (playerStats.level < Math.floor(historicalPeakLvl * 0.75)) {
+            expBonusMult += 2.0; // +200% catch-up bonus
+        }
+    }
     // Incorporate achievement EXP multiplier
     if (playerStats.unlockedAchievements && window.AchievementsData) {
         playerStats.unlockedAchievements.forEach(id => {
@@ -7297,6 +7359,21 @@ window.loadGame = function() {
     }
 
     function recalculateItemStats(item) {
+        // Apply specialized baseline parameters for Unique Items
+        if (item.isUniqueSingularity || item.isUniqueMaelstrom) {
+            item.baseAtk = Math.ceil(3.5 * (item.stageLevel || 1) * Math.pow(1.067, playerStats.prestigeCount || 0));
+        } else if (item.isUniqueAegis) {
+            item.baseDef = Math.ceil(14 * (item.stageLevel || 1) * Math.pow(1.067, playerStats.prestigeCount || 0));
+            item.baseBlock = 0.05 * (item.stageLevel || 1);
+        } else if (item.isUniqueWatch || item.isUniqueChronicle) {
+            item.baseInt = Math.ceil(2.5 * (item.stageLevel || 1) * Math.pow(1.067, playerStats.prestigeCount || 0));
+        } else if (item.isUniqueWarpCore) {
+            item.baseMoveSpeed = Math.ceil(3 * (item.stageLevel || 1) * Math.pow(1.067, playerStats.prestigeCount || 0));
+        } else if (item.isUniqueTempest) {
+            item.baseMaxHp = Math.ceil(20 * (item.stageLevel || 1) * Math.pow(1.067, playerStats.prestigeCount || 0));
+            item.baseDef = Math.ceil(6 * (item.stageLevel || 1) * Math.pow(1.067, playerStats.prestigeCount || 0));
+        }
+
         // 1. Reset parameters to un-tempered base + bonus values
         item.atk = (item.baseAtk || 0) + item.bonusAtk; 
         item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp; 
@@ -7612,25 +7689,73 @@ window.loadGame = function() {
             }
         }
 
-        // Unique Weapons transformation checks (15% Staff, 15% Bleed DoT Sword)
-        if (chosenType === "weapon" && statLinesCount === 5 && !isArt) {
-            let randUnique = Math.random();
-            if (randUnique < 0.15) {
-                item.isUniqueStaff = true;
-                item.noun = "Phoenix Staff";
-                item.setName = null; // No set bonus
-                item.name = `🔥 Phoenix Ignition Staff (Lv. ${stageScale})`;
-                item.desc = "Launches penetrating fireballs that deal 25% Attack damage (3s Cooldown).";
-            } else {
-                item.isUniqueSword = true;
-                item.noun = "Sanguine Reaver";
-                item.setName = null;
-                item.name = `🩸 Crimson Sanguine Reaver (Lv. ${stageScale})`;
-                item.desc = "Strikes apply stacking Bleed (Max 5). Each stack ticks 4x per second. Striking at max stacks triggers Rupture, dealing 300% weapon damage and siphoning 10% Max HP.";
+        // Expanded Unique Items Generation System
+        if (statLinesCount === 5 && !isArt) {
+            let rollUnique = Math.random() < 0.15; // 15% chance for a 5-star roll to become Unique
+            if (rollUnique) {
+                if (chosenType === "weapon") {
+                    let weapons = ["staff", "sword", "singularity", "maelstrom"];
+                    let selected = weapons[Math.floor(Math.random() * weapons.length)];
+                    item.setName = null;
+                    if (selected === "staff") {
+                        item.isUniqueStaff = true;
+                        item.noun = "Phoenix Staff";
+                        item.name = `🔥 Phoenix Ignition Staff (Lv. ${stageScale})`;
+                        item.desc = "Launches penetrating fireballs that deal 25% Attack damage (3s Cooldown).";
+                    } else if (selected === "sword") {
+                        item.isUniqueSword = true;
+                        item.noun = "Sanguine Reaver";
+                        item.name = `🩸 Crimson Sanguine Reaver (Lv. ${stageScale})`;
+                        item.desc = "Strikes apply stacking Bleed (Max 5). Each stack ticks 4x per second. Striking at max stacks triggers Rupture, dealing 300% weapon damage and siphoning 10% Max HP.";
+                    } else if (selected === "singularity") {
+                        item.isUniqueSingularity = true;
+                        item.noun = "Singularity Greatsword";
+                        item.name = `🌌 Void-Sovereign Greatsword (Lv. ${stageScale})`;
+                        item.desc = "Glows for 7s every 30s. When tapped during this window, enters a 5s state where all damage is stored, multiplied, and detonated as a massive spatial collapse.";
+                    } else if (selected === "maelstrom") {
+                        item.isUniqueMaelstrom = true;
+                        item.noun = "Maelstrom Glaive";
+                        item.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${stageScale})`;
+                        item.desc = "Killing blows cleave 100% of excess damage onto the next enemy. Critical strikes have a 25% chance to project a piercing gale that reduces the stage kill counter.";
+                    }
+                } else if (chosenType === "subweapon") {
+                    let subOptions = ["aegis", "watch", "chronicle"];
+                    let selected = subOptions[Math.floor(Math.random() * subOptions.length)];
+                    item.setName = null;
+                    if (selected === "aegis") {
+                        item.subType = "shield";
+                        item.isUniqueAegis = true;
+                        item.noun = "Void-Warped Aegis";
+                        item.name = `🛡️ Void-Warped Bulwark (Lv. ${stageScale})`;
+                        item.desc = "Successful blocks trigger a gravity blast dealing damage scaling with your total Defense. Can be absorbed into the Singularity Greatsword's vortex.";
+                    } else if (selected === "watch") {
+                        item.subType = "tome";
+                        item.isUniqueWatch = true;
+                        item.noun = "Chronos Pocket-Watch";
+                        item.name = `⏳ Chronos Dial-Watch (Lv. ${stageScale})`;
+                        item.desc = "Triggers a 4s Temporal Fracture every 20s. Accelerates your Active/Idle Attack speeds by 15% and slows enemy attack cooldowns by 25%. Retains tome passives.";
+                    } else if (selected === "chronicle") {
+                        item.subType = "tome";
+                        item.isUniqueChronicle = true;
+                        item.noun = "Chronicle of the Ascended";
+                        item.name = `📖 Chronicle of past Lives (Lv. ${stageScale})`;
+                        item.desc = "While in Campaign below 75% peak level: boosts XP gain by +200% and completely bypasses level locks on all your gear. Disabled inside Dungeons/Crucible.";
+                    }
+                } else if (chosenType === "boots") {
+                    item.isUniqueWarpCore = true;
+                    item.noun = "Warp-Core Greaves";
+                    item.name = `⚡ Warp-Core Greaves (Lv. ${stageScale})`;
+                    item.desc = "While below 85% of your lifetime Peak Stage: grants a massive +150% movement sprint speed, and each slain minion counts as 2 kills toward clearing stages.";
+                } else if (chosenType === "helmet") {
+                    item.isUniqueTempest = true;
+                    item.noun = "Crown of Tempests";
+                    item.name = `👑 Crown of crackling Tempests (Lv. ${stageScale})`;
+                    item.desc = "Taking damage has a 15% chance to call down a thunderbolt dealing 150% Attack power. Non-boss targets struck by the lightning are stunned.";
+                }
             }
         }
 
-        if (!item.isUniqueStaff && !item.isUniqueSword) {
+        if (!item.isUniqueStaff && !item.isUniqueSword && !item.isUniqueSingularity && !item.isUniqueMaelstrom && !item.isUniqueAegis && !item.isUniqueWatch && !item.isUniqueChronicle && !item.isUniqueWarpCore && !item.isUniqueTempest) {
             item.name = buildProceduralName(item);
         }
 
@@ -8392,6 +8517,48 @@ window.loadGame = function() {
             clientY = e.changedTouches[0].clientY;
         }
         
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const clickX = (clientX !== undefined ? (clientX - rect.left) * scaleX : 0);
+        const clickY = (clientY !== undefined ? (clientY - rect.top) * scaleY : 0);
+
+        // UNIQUE: Singularity Greatsword Sigil Click check
+        if (equippedSlots.weapon && equippedSlots.weapon.isUniqueSingularity && playerStats.singularityState === "pulsing") {
+            let sigilX = hero.x + 12;
+            let sigilY = hero.y + 15 - 35; // Positioned directly over the helmet
+            let dist = Math.hypot(clickX - sigilX, clickY - sigilY);
+            if (dist < 30) {
+                playerStats.singularityState = "storing";
+                playerStats.singularityTimer = 300; // 5s storage duration
+                playerStats.singularityStoredDmg = 0;
+                pushLog("<span style='color:#e84393; font-weight:bold;'>[SINGULARITY] Gravitational collapse active! Attack with everything you have! All damage is stored and multiplied!</span>");
+                
+                // Spiral vortex particles on activation
+                for (let i = 0; i < 20; i++) {
+                    let angle = (i * Math.PI) / 10;
+                    particles.push({
+                        x: sigilX,
+                        y: sigilY,
+                        vx: Math.cos(angle) * 3,
+                        vy: Math.sin(angle) * 3,
+                        radius: 2,
+                        color: "#e84393",
+                        alpha: 1,
+                        life: 30
+                    });
+                }
+                updateUI();
+                return;
+            }
+        }
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        }
+        
         // Apply scaling offsets with structural fallbacks
         const clickX = (clientX !== undefined ? (clientX - rect.left) * scaleX : 0);
         const clickY = (clientY !== undefined ? (clientY - rect.top) * scaleY : 0);
@@ -9047,6 +9214,12 @@ window.loadGame = function() {
         // Unique Artifact Speed Multipliers
         if (checkArtifactTrait("idle_spd")) idleSpeedPct += 0.35;
         if (checkArtifactTrait("active_spd")) activeSpeedPct += 0.25;
+
+        // UNIQUE: Chronos Pocket-Watch speed up
+        if (equippedSlots.subweapon && equippedSlots.subweapon.isUniqueWatch && playerStats.watchActiveTimer > 0) {
+            idleSpeedPct += 0.15;
+            activeSpeedPct += 0.15;
+        }
         
         if (checkArtifactTrait("cauldron_eternity") && (playerStats.atkPotionTimer > 0 || playerStats.hpPotionTimer > 0 || playerStats.defPotionTimer > 0 || playerStats.hastePotionTimer > 0)) {
             idleSpeedPct += 0.08; // 8% faster
@@ -9068,6 +9241,27 @@ window.loadGame = function() {
         p.maxHp = Math.floor(p.maxHp);
         p.def = Math.floor(p.def);
         p.moveSpeed = parseFloat(p.moveSpeed.toFixed(1));
+
+        // UNIQUE: Warp-Core Greaves Stage catch-up logic
+        if (equippedSlots.boots && equippedSlots.boots.isUniqueWarpCore && !playerStats.isDungeonMode && !playerStats.isCrucibleMode) {
+            let limit = Math.floor((playerStats.lifetimePeakStage || 1) * 0.85);
+            if (playerStats.stage < limit) {
+                p.moveSpeed = parseFloat((p.moveSpeed * 2.50).toFixed(1)); // +150% speed increase
+                playerStats.targetsRequired = 3; // Reduce required kills to 3
+            } else {
+                playerStats.targetsRequired = 5;
+            }
+        } else {
+            playerStats.targetsRequired = 5;
+        }
+
+        // UNIQUE: Chronicle of the Ascended Gear requirements bypass (Campaign only)
+        if (equippedSlots.subweapon && equippedSlots.subweapon.isUniqueChronicle && !playerStats.isDungeonMode && !playerStats.isCrucibleMode) {
+            // Level locked restrictions on equipped gear are skipped
+            playerStats.bypassGearLockActive = true;
+        } else {
+            playerStats.bypassGearLockActive = false;
+        }
 
         // Incorporate permanent Prestige Shop Multipliers (Option A)
         let prestigeGoldBonus = (playerStats.prestigeUpgrades?.gold || 0) * 0.25;
@@ -9393,7 +9587,11 @@ window.loadGame = function() {
                 let visualType = choices[Math.floor(Math.random() * choices.length)];
 
                 // Standard Mob Buffed: Base HP increased to 15, Damage Multiplier to 5.2
-                mob = { x: 750, y: isMelee ? 195 : 210, w: isMelee ? 25 : 30, h: isMelee ? 40 : 25, type: "mob", visualType: visualType, isRare: isRare, isMelee: isMelee, visualTier: tier, hp: Math.floor(15 * scale * hpMult), maxHp: Math.floor(15 * scale * hpMult), damage: Math.floor((1 + (1 * dmgScale)) * 5.2 * dmgMult), flashTimer: 0, isStopped: false, attackCooldown: 90, attackTimer: 90 };
+                let baseSpd = 90;
+                if (equippedSlots.subweapon && equippedSlots.subweapon.isUniqueWatch && playerStats.watchActiveTimer > 0) {
+                    baseSpd = Math.round(baseSpd * 1.33); // Slow enemy hit speed by 25% (takes 33% longer to swing)
+                }
+                mob = { x: 750, y: isMelee ? 195 : 210, w: isMelee ? 25 : 30, h: isMelee ? 40 : 25, type: "mob", visualType: visualType, isRare: isRare, isMelee: isMelee, visualTier: tier, hp: Math.floor(15 * scale * hpMult), maxHp: Math.floor(15 * scale * hpMult), damage: Math.floor((1 + (1 * dmgScale)) * 5.2 * dmgMult), flashTimer: 0, isStopped: false, attackCooldown: baseSpd, attackTimer: baseSpd };
                 if (isRare) {
                     pushLog(`<span style='color:#ffb6c1; font-weight:bold;'>✨ A glowing Rare enemy appears!</span>`);
                     if (p.hasSingularitySet) {
@@ -9403,8 +9601,24 @@ window.loadGame = function() {
                 }
             }
         }
-    }
+        if (mob) mob.id = idCounter++;
 
+        // UNIQUE: Apply Maelstrom overkill cleave pool on entry
+        if (mob && playerStats.maelstromCleavePool && playerStats.maelstromCleavePool > 0) {
+            let cleave = playerStats.maelstromCleavePool;
+            playerStats.maelstromCleavePool = 0; // flush
+            
+            mob.hp -= cleave;
+            mob.flashTimer = 5;
+            spawnDamageEffect(cleave, 'echo', false);
+            effects.push({ x: mob.x, y: mob.y - 12, text: "🌪️ CLEAVED!", color: "#2ecc71", life: 55 });
+            
+            if (mob.hp <= 0) {
+                // Instantly re-clear if the cleave pool exceeds their total health pool
+                setTimeout(() => handleMobDeath(), 50);
+            }
+        }
+    }
     function spawnDeathParticles(x, y, mobType) {
         let count = 15;
         let colors = ["#2ecc71", "#27ae60", "#a3fd83"]; // Default Slime Green
@@ -10521,7 +10735,7 @@ window.loadGame = function() {
 
         // Gated Equipment Level Locks (Attuned by Prestige Heritage)
         let reqLvl = Math.max(1, ((item.stageLevel || 1) - 1) * 5 - (playerStats.prestigeCount || 0) * 2);
-        if (playerStats.level < reqLvl) {
+        if (playerStats.level < reqLvl && !playerStats.bypassGearLockActive) {
             pushHeaderToast(`🔒 Requires Level ${reqLvl} to equip!`, "#e74c3c");
             return;
         }
@@ -11311,6 +11525,15 @@ window.loadGame = function() {
     function handleMobDeath() {
         effects = effects.filter(e => !e.isCumulative);
         let p = resolvePlayerStats(); 
+
+        // UNIQUE: Maelstrom Glaive Overkill Cleave damage carry-over calculation
+        if (equippedSlots.weapon && equippedSlots.weapon.isUniqueMaelstrom && mob) {
+            let overkill = Math.abs(mob.hp); // excess damage below 0
+            if (overkill > 0) {
+                playerStats.maelstromCleavePool = overkill;
+                pushLog(`<strong style='color:#2ecc71;'>[MAELSTROM CLEAVE]</strong> Stored <span style='color:#2ecc71;'>${window.formatNumber(overkill)} overkill damage</span> to unleash on next spawn!`);
+            }
+        }
         let isBoss = (mob.type === "boss" || mob.type === "dungeon_boss" || mob.type === "dungeon_miniboss" || mob.type === "rift_guardian" || mob.type === "prestige_boss");
         
         if (mob && mob.isRare) {
@@ -11816,9 +12039,33 @@ window.loadGame = function() {
                 }
             }
             
-            mob.hp -= finalDamage; mob.flashTimer = 5;
-            spawnDamageEffect(finalDamage, 'slash', isCrit);
-            damageHistory.push({ time: Date.now(), amount: finalDamage });
+            if (playerStats.singularityState === "storing") {
+                playerStats.singularityStoredDmg += finalDamage;
+                mob.flashTimer = 3;
+                effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(finalDamage)} [STORED]`, color: "#8e44ad", life: 45 });
+            } else {
+                if (playerStats.singularityState === "storing") {
+                playerStats.singularityStoredDmg += finalDamage;
+                mob.flashTimer = 3;
+                effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(finalDamage)} [STORED]`, color: "#8e44ad", life: 45 });
+            } else {
+                mob.hp -= finalDamage; mob.flashTimer = 5;
+                spawnDamageEffect(finalDamage, 'slash', isCrit);
+                damageHistory.push({ time: Date.now(), amount: finalDamage });
+            }
+
+            // UNIQUE: Maelstrom Glaive Wind Crescent projectile on critical hit (25% chance)
+            if (equippedSlots.weapon && equippedSlots.weapon.isUniqueMaelstrom && isCrit && Math.random() < 0.25 && mob && mob.hp > 0) {
+                projectiles.push({
+                    x: hero.x + 35,
+                    y: hero.y + 10,
+                    r: 12,
+                    isMaelstromCrescent: true,
+                    hitMobs: [],
+                    pulseOffset: Math.random() * 5
+                });
+                SoundManager.play('swing'); // Swoosh sound
+            }
 
             // Stacking Bleed & Sanguine Rupture on hit
             if (equippedSlots.weapon && equippedSlots.weapon.isUniqueSword) {
@@ -11888,9 +12135,14 @@ window.loadGame = function() {
                 let isDaggerCrit = Math.random() < p.critChance;
                 if (isDaggerCrit) daggerDmg = Math.ceil(daggerDmg * p.critDamage);
                 
-                mob.hp -= daggerDmg;
-                spawnDamageEffect(daggerDmg, 'dagger', isDaggerCrit);
-                damageHistory.push({ time: Date.now(), amount: daggerDmg });
+                if (playerStats.singularityState === "storing") {
+                    playerStats.singularityStoredDmg += daggerDmg;
+                    effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(daggerDmg)} [STORED]`, color: "#8e44ad", life: 45 });
+                } else {
+                    mob.hp -= daggerDmg;
+                    spawnDamageEffect(daggerDmg, 'dagger', isDaggerCrit);
+                    damageHistory.push({ time: Date.now(), amount: daggerDmg });
+                }
             }
 
             // Elemental Tome Spells (20% independent chance each for Lightning, Fire, and Frost)
@@ -11908,9 +12160,14 @@ window.loadGame = function() {
                     let isSpellCrit = Math.random() < p.critChance;
                     if (isSpellCrit) lightningDmg = Math.ceil(lightningDmg * p.critDamage);
                     
-                    mob.hp -= lightningDmg;
-                    spawnDamageEffect(lightningDmg, 'lightning', isSpellCrit);
-                    damageHistory.push({ time: Date.now(), amount: lightningDmg });
+                    if (playerStats.singularityState === "storing") {
+                        playerStats.singularityStoredDmg += lightningDmg;
+                        effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(lightningDmg)} [STORED]`, color: "#8e44ad", life: 45 });
+                    } else {
+                        mob.hp -= lightningDmg;
+                        spawnDamageEffect(lightningDmg, 'lightning', isSpellCrit);
+                        damageHistory.push({ time: Date.now(), amount: lightningDmg });
+                    }
 
                     // Descending crackling lightning bolt particles
                     for (let i = 0; i < 15; i++) {
@@ -11935,9 +12192,14 @@ window.loadGame = function() {
                     let isSpellCrit = Math.random() < p.critChance;
                     if (isSpellCrit) fireDmg = Math.ceil(fireDmg * p.critDamage);
                     
-                    mob.hp -= fireDmg;
-                    spawnDamageEffect(fireDmg, 'fire', isSpellCrit);
-                    damageHistory.push({ time: Date.now(), amount: fireDmg });
+                    if (playerStats.singularityState === "storing") {
+                        playerStats.singularityStoredDmg += fireDmg;
+                        effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(fireDmg)} [STORED]`, color: "#8e44ad", life: 45 });
+                    } else {
+                        mob.hp -= fireDmg;
+                        spawnDamageEffect(fireDmg, 'fire', isSpellCrit);
+                        damageHistory.push({ time: Date.now(), amount: fireDmg });
+                    }
 
                     // Rising flame embers
                     for (let i = 0; i < 15; i++) {
@@ -11962,9 +12224,14 @@ window.loadGame = function() {
                     let isSpellCrit = Math.random() < p.critChance;
                     if (isSpellCrit) frostDmg = Math.ceil(frostDmg * p.critDamage);
                     
-                    mob.hp -= frostDmg;
-                    spawnDamageEffect(frostDmg, 'frost', isSpellCrit);
-                    damageHistory.push({ time: Date.now(), amount: frostDmg });
+                    if (playerStats.singularityState === "storing") {
+                        playerStats.singularityStoredDmg += frostDmg;
+                        effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(frostDmg)} [STORED]`, color: "#8e44ad", life: 45 });
+                    } else {
+                        mob.hp -= frostDmg;
+                        spawnDamageEffect(frostDmg, 'frost', isSpellCrit);
+                        damageHistory.push({ time: Date.now(), amount: frostDmg });
+                    }
 
                     // Radial ice shard burst
                     for (let i = 0; i < 15; i++) {
@@ -12526,6 +12793,25 @@ window.loadGame = function() {
 let now = Date.now();
 let gapMs = now - lastUpdateTime;
 
+// UNIQUE: Chronos Pocket-Watch Time Dilation calculations
+if (equippedSlots.subweapon && equippedSlots.subweapon.isUniqueWatch && !isGamePaused) {
+    playerStats.watchTick = (playerStats.watchTick || 0) + 1;
+    if (playerStats.watchActiveTimer > 0) {
+        playerStats.watchActiveTimer--;
+        if (playerStats.watchActiveTimer === 0) {
+            pushLog("<span style='color:#f1c40f;'>[CHRONOS WATCH] Temporal Fracture collapsed! Speeds normalized.</span>");
+            updateUI();
+        }
+    } else {
+        if (playerStats.watchTick >= 1200) { // 20s cooldown at 60fps
+            playerStats.watchTick = 0;
+            playerStats.watchActiveTimer = 240; // 4s active duration
+            pushLog("<span style='color:#f1c40f; font-weight:bold;'>[CHRONOS WATCH] A Temporal Fracture opened! speeds dilated (+15% speed, -25% enemy speed).</span>");
+            updateUI();
+        }
+    }
+}
+
 // Decoupled physics rendering: visual eye candy updates smoothly while action is paused
 for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0.4; eff.life--; if (eff.life <= 0) effects.splice(i, 1); }
     for (let i = particles.length - 1; i >= 0; i--) { 
@@ -12814,6 +13100,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
         if (playerStats.frenzyTimer > 0) playerStats.frenzyTimer--;
         if (playerStats.adrenalineTimer > 0) playerStats.adrenalineTimer--;
         
+        if (playerStats.tempestCooldown > 0) playerStats.tempestCooldown--;
         if (playerStats.atkPotionTimer > 0) playerStats.atkPotionTimer--;
         if (playerStats.hpPotionTimer > 0) playerStats.hpPotionTimer--;
         if (playerStats.defPotionTimer > 0) playerStats.defPotionTimer--;
@@ -12839,6 +13126,109 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
 
         // Decrement staff skill cooldown
         if (playerStats.fireballCooldown > 0) playerStats.fireballCooldown--;
+
+        // UNIQUE: Singularity Greatsword active loop
+        if (equippedSlots.weapon && equippedSlots.weapon.isUniqueSingularity && !isGamePaused) {
+            if (playerStats.singularityTimer === undefined) playerStats.singularityTimer = 1800; // 30s at 60fps
+            if (playerStats.singularityState === undefined) playerStats.singularityState = "dormant";
+            
+            if (playerStats.singularityState === "dormant") {
+                playerStats.singularityTimer--;
+                if (playerStats.singularityTimer <= 0) {
+                    playerStats.singularityState = "pulsing";
+                    playerStats.singularityTimer = 420; // 7s pulsing window
+                    pushLog("<span style='color:#8e44ad; font-weight:bold;'>[SINGULARITY] Your weapon is pulsating with Void energy! Double-click canvas or tap the Sigil above your head to charge!</span>");
+                    updateUI();
+                }
+            } else if (playerStats.singularityState === "pulsing") {
+                playerStats.singularityTimer--;
+                if (playerStats.singularityTimer <= 0) {
+                    playerStats.singularityState = "dormant";
+                    playerStats.singularityTimer = 1800; // Reset
+                    updateUI();
+                }
+            } else if (playerStats.singularityState === "storing") {
+                playerStats.singularityTimer--;
+                
+                // Spawn gravitational vortex suction particles around the enemy
+                if (mob && Math.random() < 0.6) {
+                    let angle = Math.random() * Math.PI * 2;
+                    let rad = 35 + Math.random() * 20;
+                    particles.push({
+                        x: mob.x + mob.w / 2 + Math.cos(angle) * rad,
+                        y: mob.y + mob.h / 2 + Math.sin(angle) * rad,
+                        vx: -Math.cos(angle) * 2.5,
+                        vy: -Math.sin(angle) * 2.5,
+                        radius: randFloat(1.5, 3.0),
+                        color: "#8e44ad",
+                        alpha: 1,
+                        gravity: 0,
+                        life: 20
+                    });
+                }
+
+                if (playerStats.singularityTimer <= 0 || !mob) {
+                    // DETONATION FRAME
+                    playerStats.singularityState = "dormant";
+                    playerStats.singularityTimer = 1800; // Reset
+                    
+                    if (mob) {
+                        let finalStored = playerStats.singularityStoredDmg || 0;
+                        let shieldLvl = equippedSlots.weapon.stageLevel || 1;
+                        let mult = 1.4 + (shieldLvl * 0.015);
+                        if (mult > 2.25) mult = 2.25; // Hard ceiling cap
+
+                        let finalDetonationDmg = Math.ceil(finalStored * mult);
+                        
+                        // Enforce maximum safety cap of 150% of the enemy's Max HP
+                        let maxCap = Math.ceil(mob.maxHp * 1.5);
+                        if (finalDetonationDmg > maxCap) {
+                            finalDetonationDmg = maxCap;
+                            pushLog("<span style='color:#e74c3c;'>[SINGULARITY] Detonation damage was throttled by the enemy's maximum atmospheric resistance cap.</span>");
+                        }
+
+                        mob.hp -= finalDamage = finalDamage || finalDetonation = finalDamage = finalDetonation = finalDetonationDmg;
+                        mob.flashTimer = 10;
+
+                        spawnDamageEffect(finalDetonationDmg, 'lightning', true);
+                        damageHistory.push({ time: Date.now(), amount: finalDetonationDmg });
+                        effects.push({ x: mob.x, y: mob.y - 15, text: "🌌 VOID EXPLOSION!", color: "#e84393", life: 60 });
+                        
+                        // Screen shake physics trigger
+                        canvas.classList.add('shake');
+                        setTimeout(() => canvas.classList.remove('shake'), 400);
+
+                        SoundManager.play('death'); // Heavy explosion snap
+
+                        // Expansive shockwave ring
+                        beams.push({
+                            x: mob.x + mob.w / 2,
+                            color: "#e84393",
+                            life: 45,
+                            maxLife: 45
+                        });
+
+                        for (let i = 0; i < 40; i++) {
+                            let angle = Math.random() * Math.PI * 2;
+                            let vel = randFloat(4, 9);
+                            particles.push({
+                                x: mob.x + mob.w / 2,
+                                y: mob.y + mob.h / 2,
+                                vx: Math.cos(angle) * vel,
+                                vy: Math.sin(angle) * vel - 1.0,
+                                radius: randFloat(2.5, 5.5),
+                                color: i % 2 === 0 ? "#e84393" : "#8e44ad",
+                                alpha: 1,
+                                life: randInt(20, 40)
+                            });
+                        }
+
+                        if (mob.hp <= 0) handleMobDeath();
+                    }
+                    updateUI();
+                }
+            }
+        }
 
         // Trigger fireball casting check
         if (equippedSlots.weapon && equippedSlots.weapon.isUniqueStaff && playerStats.fireballCooldown <= 0 && mob && mob.hp > 0) {
@@ -12893,11 +13283,47 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             if (mob && mob.hp > 0 && !proj.hitMobs.includes(mob.id)) {
                 let hitBuffer = mob.w / 2;
                 if (proj.x + proj.r > mob.x && proj.x - proj.r < mob.x + mob.w) {
-                    let flameDmg = Math.max(1, Math.ceil(p.atk * 0.25));
-                    
-                    mob.hp -= flameDmg;
-                    mob.flashTimer = 5;
                     proj.hitMobs.push(mob.id); // Secure once-per-spawn hit restriction
+
+                    if (proj.isMaelstromCrescent) {
+                        let windDmg = Math.max(1, Math.ceil(p.atk * 0.50));
+                        
+                        // Execute Singularity storage logic if Greatsword active
+                        if (playerStats.singularityState === "storing") {
+                            playerStats.singularityStoredDmg += windDmg;
+                            effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(windDmg)} [STORED]`, color: "#8e44ad", life: 45 });
+                        } else {
+                            mob.hp -= windDmg;
+                            mob.flashTimer = 5;
+                            spawnDamageEffect(windDmg, 'echo', false);
+                            damageHistory.push({ time: Date.now(), amount: windDmg });
+
+                            // Skip progress count by +1 (Double-kill effect)
+                            if (!playerStats.isDungeonMode && !playerStats.isCrucibleMode && !playerStats.isBossMode && !playerStats.isFarmingLoop) {
+                                playerStats.killCount = Math.min(playerStats.targetsRequired, playerStats.killCount + 1);
+                                effects.push({ x: hero.x + 12, y: hero.y - 12, text: "⏩ PROGRESS SKIP!", color: "#2ecc71", life: 55 });
+                                if (playerStats.killCount >= playerStats.targetsRequired) {
+                                    playerStats.isBossMode = true;
+                                }
+                            }
+                            
+                            if (mob.hp <= 0) handleMobDeath();
+                        }
+                    } else {
+                        let flameDmg = Math.max(1, Math.ceil(p.atk * 0.25));
+                        
+                        // Execute Singularity storage logic if Greatsword active
+                        if (playerStats.singularityState === "storing") {
+                            playerStats.singularityStoredDmg += flameDmg;
+                            effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(flameDmg)} [STORED]`, color: "#8e44ad", life: 45 });
+                        } else {
+                            mob.hp -= flameDmg;
+                            mob.flashTimer = 5;
+                            spawnDamageEffect(flameDmg, 'fire', false);
+                            damageHistory.push({ time: Date.now(), amount: flameDmg });
+                            if (mob.hp <= 0) handleMobDeath();
+                        }
+                    }
 
                     spawnDamageEffect(flameDmg, 'fire', false);
                     damageHistory.push({ time: Date.now(), amount: flameDmg });
@@ -13048,6 +13474,38 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                                     effects.push({ x: hero.x, y: hero.y, text: "🛡️ BLOCKED", color: "#3498db", life: 40 }); 
                                     SoundManager.play('block');
                                     
+                                    // UNIQUE: Void-Warped Aegis gravity blast retaliation
+                                    if (equippedSlots.subweapon && equippedSlots.subweapon.isUniqueAegis && mob && mob.hp > 0) {
+                                        let shieldLvl = equippedSlots.subweapon.stageLevel || 1;
+                                        let blastDmg = Math.ceil(p.def * (1.5 + (shieldLvl * 0.05)));
+                                        
+                                        // Execute Singularity storage logic if Greatsword active
+                                        if (playerStats.singularityState === "storing") {
+                                            playerStats.singularityStoredDmg += blastDmg;
+                                            effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(blastDmg)} [STORED]`, color: "#8e44ad", life: 45 });
+                                        } else {
+                                            mob.hp -= blastDmg;
+                                            mob.flashTimer = 5;
+                                            spawnDamageEffect(blastDmg, 'counter', false);
+                                            damageHistory.push({ time: Date.now(), amount: blastDmg });
+                                            if (mob.hp <= 0) { handleMobDeath(); return; }
+                                        }
+
+                                        // Orbiting defensive shield particles
+                                        for (let i = 0; i < 8; i++) {
+                                            particles.push({
+                                                x: mob.x + mob.w / 2,
+                                                y: mob.y + mob.h / 2,
+                                                vx: randFloat(-3, 3),
+                                                vy: randFloat(-3, 3),
+                                                radius: randFloat(1.5, 3.5),
+                                                color: "#8e44ad",
+                                                alpha: 1,
+                                                life: randInt(15, 25)
+                                            });
+                                        }
+                                    }
+                                    
                                     playerStats.totalDeflections = (playerStats.totalDeflections || 0) + 1;
                                     playerStats.recentBlockTime = Date.now();
                                     playerStats.consecutiveParries = 0; // Reset parry streak
@@ -13089,6 +13547,52 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                                         playerStats.currentHp -= netDamage;
                                         playerStats.damageTakenThisBattle = (playerStats.damageTakenThisBattle || 0) + netDamage;
                                         effects.push({ x: hero.x, y: hero.y, text: "-" + window.formatNumber(netDamage), color: "#e74c3c", life: 40 });
+                                    }
+
+                                    // UNIQUE: Crown of Tempests Static Lightning counter on taking damage
+                                    if (equippedSlots.helmet && equippedSlots.helmet.isUniqueTempest && mob && mob.hp > 0) {
+                                        if (playerStats.tempestCooldown === undefined) playerStats.tempestCooldown = 0;
+                                        if (playerStats.tempestCooldown <= 0) {
+                                            playerStats.tempestCooldown = 60; // 1s internal cooldown
+                                            if (Math.random() < 0.15) { // 15% chance
+                                                let boltDmg = Math.ceil(p.atk * 1.50);
+                                                
+                                                // Execute Singularity storage logic if Greatsword active
+                                                if (playerStats.singularityState === "storing") {
+                                                    playerStats.singularityStoredDmg += boltDmg;
+                                                    effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(boltDmg)} [STORED]`, color: "#8e44ad", life: 45 });
+                                                } else {
+                                                    mob.hp -= boltDmg;
+                                                    mob.flashTimer = 5;
+                                                    spawnDamageEffect(boltDmg, 'lightning', false);
+                                                    damageHistory.push({ time: Date.now(), amount: boltDmg });
+                                                    
+                                                    // Stagger/Stun non-bosses (resets attack timer)
+                                                    let isBoss = (mob.type === "boss" || mob.type === "dungeon_boss" || mob.type === "prestige_boss" || mob.type === "rift_guardian" || mob.type === "aegis_goliath" || mob.type === "chronos_arbitrator" || mob.type === "nexus_overseer");
+                                                    if (!isBoss) {
+                                                        mob.attackTimer = mob.attackCooldown;
+                                                        effects.push({ x: mob.x, y: mob.y - 18, text: "⚡ STUNNED!", color: "#00d2ff", life: 40 });
+                                                    }
+
+                                                    if (mob.hp <= 0) { handleMobDeath(); return; }
+                                                }
+
+                                                // Vertical lightning bolt rendering particles
+                                                SoundManager.play('parry'); // Play lightning snap SFX
+                                                for (let i = 0; i < 15; i++) {
+                                                    particles.push({
+                                                        x: mob.x + mob.w / 2 + randFloat(-5, 5),
+                                                        y: mob.y - 40 + (i * (mob.h + 40) / 15),
+                                                        vx: randFloat(-1.5, 1.5),
+                                                        vy: randFloat(-0.5, 0.5),
+                                                        radius: randFloat(1.5, 3.5),
+                                                        color: "#00d2ff",
+                                                        alpha: 1,
+                                                        life: randInt(12, 22)
+                                                    });
+                                                }
+                                            }
+                                        }
                                     }
                                     if (playerStats.currentHp <= 0) {
                                         if (checkArtifactTrait("second_wind") && !playerStats.usedSecondWind) {
@@ -14027,24 +14531,135 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
 
         if (equippedSlots.subweapon) {
             const subType = equippedSlots.subweapon.subType;
+            let isAegis = equippedSlots.subweapon.isUniqueAegis;
+            let isWatch = equippedSlots.subweapon.isUniqueWatch;
+            let isChronicle = equippedSlots.subweapon.isUniqueChronicle;
+
             if (subType === "shield") {
                 ctx.save();
                 ctx.translate(8, 4 + bounce);
-                ctx.fillStyle = "#7f8c8d";
+                ctx.fillStyle = isAegis ? "#25033c" : "#7f8c8d"; // Cosmic Purple or Iron Gray
                 ctx.beginPath();
                 ctx.moveTo(-6, -8); ctx.lineTo(6, -8); ctx.lineTo(8, 0); ctx.lineTo(0, 10); ctx.lineTo(-8, 0);
                 ctx.closePath();
                 ctx.fill();
                 
                 // Cel-shading black outline
-                ctx.strokeStyle = "#000000";
+                ctx.strokeStyle = isAegis ? "#8e44ad" : "#000000";
                 ctx.lineWidth = penHero + 0.5;
                 ctx.stroke();
 
-                // Inner yellow emblem line
-                ctx.strokeStyle = "#f1c40f";
-                ctx.lineWidth = 1.2;
-                ctx.stroke();
+                if (isAegis) {
+                    // Inner glowing void cross
+                    ctx.strokeStyle = "#e84393";
+                    ctx.lineWidth = 1.8;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -6); ctx.lineTo(0, 6);
+                    ctx.moveTo(-5, 0); ctx.lineTo(5, 0);
+                    ctx.stroke();
+                } else {
+                    ctx.strokeStyle = "#f1c40f";
+                    ctx.lineWidth = 1.2;
+                    ctx.stroke();
+                }
+                ctx.restore();
+
+                // Draw tiny orbiting dark matter singularities around Aegis arm
+                if (isAegis && deathAnimationTimer === 0) {
+                    ctx.save();
+                    ctx.translate(8, 4 + bounce);
+                    let orbitTime = Date.now() / 250;
+                    ctx.fillStyle = "#110221";
+                    ctx.strokeStyle = "#8e44ad";
+                    ctx.lineWidth = 1.0;
+                    
+                    for (let i = 0; i < 2; i++) {
+                        let angle = orbitTime + (i * Math.PI);
+                        let ox = Math.cos(angle) * 14;
+                        let oy = Math.sin(angle) * 6;
+                        ctx.beginPath();
+                        ctx.arc(ox, oy, 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+            } else if (subType === "tome") {
+                ctx.save();
+                let tomeFloat = Math.sin(Date.now() / 200) * 5;
+                ctx.translate(24, -6 + bounce + tomeFloat);
+                ctx.rotate(-Math.PI / 12);
+
+                if (isWatch) {
+                    // Draw Chronos Pocket-Watch
+                    ctx.fillStyle = "#d4af37"; // Golden brass casing
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = 1.8;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // White face
+                    ctx.fillStyle = "#fdf6e2";
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Rotating tiny hands
+                    ctx.strokeStyle = "#111";
+                    ctx.lineWidth = 1.2;
+                    let clockTime = Date.now() / 300;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(Math.cos(clockTime) * 4.5, Math.sin(clockTime) * 4.5);
+                    ctx.stroke();
+                } else if (isChronicle) {
+                    // Draw Chronicle of the Ascended (A floating book with golden runic particles)
+                    ctx.fillStyle = "#111116"; // Abyssal book skin
+                    ctx.strokeStyle = "#f1c40f"; // Golden historical script
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.roundRect(-5, -7, 10, 14, [1.5]);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // White pages edge
+                    ctx.fillStyle = "#fff";
+                    ctx.fillRect(3.5, -6, 1.5, 12);
+
+                    // Golden halo around book
+                    let pulseRad = 12 + Math.sin(Date.now() / 150) * 2;
+                    ctx.strokeStyle = "rgba(241, 196, 15, 0.25)";
+                    ctx.lineWidth = 1.0;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, pulseRad, 0, Math.PI * 2);
+                    ctx.stroke();
+                } else {
+                    // Standard Tome
+                    let auraRadius = 14 + Math.sin(Date.now() / 150) * 4;
+                    let auraGrad = ctx.createRadialGradient(0, -1, 1, 0, -1, auraRadius);
+                    auraGrad.addColorStop(0, "rgba(155, 89, 182, 0.65)"); 
+                    auraGrad.addColorStop(0.5, "rgba(52, 152, 219, 0.25)"); 
+                    auraGrad.addColorStop(1, "rgba(155, 89, 182, 0)"); 
+                    ctx.fillStyle = auraGrad;
+                    ctx.beginPath();
+                    ctx.arc(0, -1, auraRadius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = "#8e44ad";
+                    ctx.beginPath();
+                    ctx.roundRect(-6, -8, 12, 14, [1.5]);
+                    ctx.fill();
+                    ctx.strokeStyle = "#000000"; ctx.lineWidth = penHero; ctx.stroke();
+
+                    ctx.fillStyle = "#f5f5dc";
+                    ctx.beginPath(); ctx.rect(4, -7, 1.5, 12); ctx.fill(); ctx.stroke();
+                    
+                    ctx.fillStyle = "#f1c40f";
+                    ctx.beginPath(); ctx.arc(0, -1, 1.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                }
                 ctx.restore();
             } else if (subType === "dagger") {
                 // Redesigned Stealthy Rogue Parrying Dagger (Obsidian guard & leather shadow hilt)
@@ -14166,6 +14781,39 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
         // Helmet
         ctx.fillStyle = "#bdc3c7"; 
         ctx.beginPath(); ctx.rect(-10, -14 + bounce, 18, 16); ctx.fill(); ctx.stroke();
+
+        // UNIQUE: Crown of Tempests Static Lightning Horns
+        if (equippedSlots.helmet && equippedSlots.helmet.isUniqueTempest && deathAnimationTimer === 0) {
+            ctx.save();
+            ctx.translate(0, -14 + bounce);
+            ctx.strokeStyle = "#00d2ff";
+            ctx.lineWidth = 2.0;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#00d2ff";
+            
+            // Left horn
+            ctx.beginPath();
+            ctx.moveTo(-6, -2);
+            ctx.quadraticCurveTo(-14, -12, -18, -8);
+            ctx.quadraticCurveTo(-10, -5, -4, 0);
+            ctx.stroke();
+            
+            // Right horn
+            ctx.beginPath();
+            ctx.moveTo(6, -2);
+            ctx.quadraticCurveTo(14, -12, 18, -8);
+            ctx.quadraticCurveTo(10, -5, 4, 0);
+            ctx.stroke();
+            ctx.restore();
+        }
+        
+        // Torso armor plate
+        ctx.fillStyle = "#95a5a6"; 
+        ctx.beginPath(); ctx.rect(-8, bounce, 14, 16); ctx.fill(); ctx.stroke();
+        
+        // Helmet
+        ctx.fillStyle = "#bdc3c7"; 
+        ctx.beginPath(); ctx.rect(-10, -14 + bounce, 18, 16); ctx.fill(); ctx.stroke();
         
         // Visor
         ctx.fillStyle = "#2c3e50"; 
@@ -14176,14 +14824,92 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
         ctx.beginPath(); ctx.rect(-5, -20 + bounce, 4, 6); ctx.fill(); ctx.stroke();
         ctx.beginPath(); ctx.rect(-9, -16 + bounce, 8, 4); ctx.fill(); ctx.stroke();
 
-        // Main Weapon (Slash/Staff mechanics)
+        // Main Weapon (Slash/Staff/Uniques mechanics)
         ctx.translate(2, 6 + bounce);
         let isStaff = equippedSlots.weapon && equippedSlots.weapon.isUniqueStaff;
         let isUniqueSword = equippedSlots.weapon && equippedSlots.weapon.isUniqueSword;
+        let isSingularity = equippedSlots.weapon && equippedSlots.weapon.isUniqueSingularity;
+        let isMaelstrom = equippedSlots.weapon && equippedSlots.weapon.isUniqueMaelstrom;
 
-        if (isStaff) {
+        if (isSingularity) {
+            // Draw Void-Sovereign Greatsword (Glowing cosmic claymore)
+            ctx.rotate(-Math.PI / 8);
+            if (hero.slashFrame) {
+                ctx.translate(15, -10); 
+                ctx.rotate(-Math.PI / 2.3); 
+            }
+
+            // Hilt
+            ctx.fillStyle = "#1e1e24";
+            ctx.beginPath(); ctx.rect(-2, -2, 4, 10); ctx.fill(); ctx.stroke();
+
+            // Cosmic Guard (Spiked void wings)
+            ctx.fillStyle = "#110221";
+            ctx.strokeStyle = "#8e44ad";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(-9, 8); ctx.lineTo(9, 8); ctx.lineTo(12, 12); ctx.lineTo(-12, 12);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+
+            // Shimmering Void Blade
+            let singPulse = Math.sin(Date.now() / 120) * 0.15 + 0.85;
+            ctx.fillStyle = `rgba(37, 3, 60, ${singPulse})`;
+            ctx.strokeStyle = "#e84393";
+            ctx.beginPath();
+            ctx.moveTo(-3, 12); ctx.lineTo(-1.5, 42); ctx.lineTo(1.5, 42); ctx.lineTo(3, 12);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+
+            if (hero.slashFrame) {
+                // Purple cosmic swipe trail
+                ctx.fillStyle = "rgba(142, 68, 173, 0.35)"; 
+                ctx.beginPath(); ctx.arc(0, 20, 35, 0, Math.PI/2); ctx.lineTo(0,0); ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = "rgba(232, 67, 147, 0.6)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+        else if (isMaelstrom) {
+            // Draw Maelstrom Gale-Glaive (A green wind-charged polearm)
+            ctx.rotate(-Math.PI / 8);
+            if (hero.slashFrame) {
+                ctx.translate(15, -10); 
+                ctx.rotate(-Math.PI / 2.3); 
+            }
+
+            // Shaft
+            ctx.fillStyle = "#5c503b";
+            ctx.beginPath(); ctx.rect(-1, -6, 2, 44); ctx.fill(); ctx.stroke();
+
+            // Emerald Blade 1 (Top)
+            ctx.fillStyle = "#2ecc71";
+            ctx.beginPath();
+            ctx.moveTo(-4, 30); ctx.lineTo(0, 48); ctx.lineTo(4, 30);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+
+            // Emerald Blade 2 (Bottom)
+            ctx.fillStyle = "#27ae60";
+            ctx.beginPath();
+            ctx.moveTo(-3, -2); ctx.lineTo(0, -12); ctx.lineTo(3, -2);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+
+            if (hero.slashFrame) {
+                // Jade crescent slash trail
+                ctx.fillStyle = "rgba(46, 204, 113, 0.35)"; 
+                ctx.beginPath(); ctx.arc(0, 20, 35, 0, Math.PI/2); ctx.lineTo(0,0); ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = "rgba(39, 174, 96, 0.6)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+        else if (isStaff) {
             // Custom Phoenix Staff Render Design
             ctx.rotate(-Math.PI / 8);
+            if (hero.slashFrame) {
+                ctx.translate(15, -10); 
+                ctx.rotate(-Math.PI / 2.3); 
+            }
 
             // 1. Ebony Shaft (Dark elegant wood)
             ctx.fillStyle = "#1e1e24";
@@ -14192,7 +14918,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.fill();
             ctx.stroke();
 
-            //  golden Winged Crescent Headpiece
+            // 2. golden Winged Crescent Headpiece
             ctx.fillStyle = "#f1c40f";
             ctx.beginPath();
             ctx.moveTo(-7, 30);
@@ -14217,6 +14943,16 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.arc(-1, 33, 1, 0, Math.PI * 2);
             ctx.fill();
 
+            if (hero.slashFrame) {
+                // Flame swipe arc trail
+                ctx.fillStyle = "rgba(230, 126, 34, 0.35)"; 
+                ctx.beginPath(); ctx.arc(0, 20, 35, 0, Math.PI/2); ctx.lineTo(0,0); ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = "rgba(231, 76, 60, 0.6)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
             // 4. Little magical fire particle emission from headpiece
             if (Math.random() < 0.15) {
                 particles.push({
@@ -14231,7 +14967,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 });
             }
         } else if (isUniqueSword) {
-            // Crimson Sanguine Reaver (CORRECTED to remove 'm.flashTimer' crash)
+            // Crimson Sanguine Reaver
             ctx.rotate(-Math.PI / 8);
             if (hero.slashFrame) {
                 ctx.translate(15, -10); 
@@ -14332,7 +15068,36 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 ctx.beginPath(); ctx.rect(-2, 12, 4, 25); ctx.fill(); ctx.stroke();
             }
         }
-        ctx.restore();
+        ctx.restore(); // Restores weapons coordinate space translation
+        
+        // UNIQUE: Render Singularity Greatsword interactive Pulsing Sigil
+        if (equippedSlots.weapon && equippedSlots.weapon.isUniqueSingularity && playerStats.singularityState === "pulsing" && deathAnimationTimer === 0) {
+            ctx.save();
+            ctx.translate(0, -35 + bounce); // Hovering cleanly above the helmet in hero space
+            ctx.rotate(Date.now() / 300);
+            ctx.strokeStyle = "#e84393";
+            ctx.lineWidth = 1.8;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#e84393";
+            
+            // Hollow spinning runic hex-ring
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                let angle = (i * Math.PI) / 3;
+                ctx.lineTo(Math.cos(angle) * 9, Math.sin(angle) * 9);
+            }
+            ctx.closePath();
+            ctx.stroke();
+
+            // Inner core star
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(0, 0, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        ctx.restore(); // Restores master hero positioning translation
 
         // 14. STYLIZED MONSTERS DRAW ROUTINE (CEL-SHADED / TOON STYLED)
         if (mob) {
@@ -14637,7 +15402,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.restore();
         }
 
-        // Draw active Fireballs
+        // Draw active Fireballs & Wind Crescents
         projectiles.forEach(proj => {
             ctx.save();
             ctx.strokeStyle = "#000000";
@@ -14646,11 +15411,46 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             let wavePulse = Math.sin(Date.now() / 80 + proj.pulseOffset) * 2;
             let currentRad = proj.r + wavePulse;
 
-            ctx.fillStyle = "#c0392b";
-            ctx.beginPath();
-            ctx.arc(proj.x, proj.y, currentRad + 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
+            if (proj.isMaelstromCrescent) {
+                // Draw Jade Wind Crescent
+                ctx.fillStyle = "#2ecc71";
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, currentRad, -Math.PI / 3, Math.PI / 3, false);
+                ctx.quadraticCurveTo(proj.x - currentRad / 2, proj.y, proj.x, proj.y - currentRad * Math.sin(Math.PI / 3));
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Bright inner edge
+                ctx.strokeStyle = "#fff";
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = "#c0392b";
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, currentRad + 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = "#e67e22";
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, currentRad, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = "#f1c40f";
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, currentRad * 0.55, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                ctx.arc(proj.x - 2, proj.y - 2, currentRad * 0.25, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        });
 
             ctx.fillStyle = "#e67e22";
             ctx.beginPath();
