@@ -10919,12 +10919,6 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         document.getElementById('hud-hp').innerText = `${formatNumber(playerStats.currentHp)}/${formatNumber(p.maxHp)}`; document.getElementById('hud-coins').innerText = formatNumber(playerStats.coins);
         document.getElementById('hud-bag').innerText = `${inventory.EQUIP.length}/${maxBag} (A:${inventory.ARTIFACT.length})`; document.getElementById('hud-bag').style.color = (inventory.EQUIP.length >= maxBag || inventory.ARTIFACT.length >= maxBag) ? "#e74c3c" : "#2ecc71";
         document.getElementById('btn-bag-count').innerText = inventory.EQUIP.length; document.getElementById('btn-bag-max').innerText = maxBag;
-
-        
-        let maxBag = getMaxBagSlots();
-        document.getElementById('hud-hp').innerText = `${formatNumber(playerStats.currentHp)}/${formatNumber(p.maxHp)}`; document.getElementById('hud-coins').innerText = formatNumber(playerStats.coins);
-        document.getElementById('hud-bag').innerText = `${inventory.EQUIP.length}/${maxBag} (A:${inventory.ARTIFACT.length})`; document.getElementById('hud-bag').style.color = (inventory.EQUIP.length >= maxBag || inventory.ARTIFACT.length >= maxBag) ? "#e74c3c" : "#2ecc71";
-        document.getElementById('btn-bag-count').innerText = inventory.EQUIP.length; document.getElementById('btn-bag-max').innerText = maxBag;
         document.getElementById('stat-crt').innerText = Math.floor(p.critChance * 100) + "%"; document.getElementById('stat-crd').innerText = Math.floor(p.critDamage * 100) + "%";
         document.getElementById('stat-blk').innerText = Math.floor(p.block * 100) + "%"; document.getElementById('stat-pry').innerText = Math.floor(p.parry * 100) + "%";
         document.getElementById('stat-ias').innerText = p.idleAttackSpeed + "f"; document.getElementById('stat-aas').innerText = p.activeAttackSpeed + "f";
