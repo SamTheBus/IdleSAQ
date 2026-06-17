@@ -20,6 +20,12 @@
             --text-dark: #aaa;
         }
 
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+            width: 100%;
+        }
+
         body {
             background-color: var(--bg-main); color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -33,6 +39,7 @@
             width: 100%; max-width: 750px; background: var(--bg-card);
             border: 2px solid var(--border-color); border-radius: 8px; overflow: visible;
             position: relative;
+            box-sizing: border-box;
         }
         
         #top-nav {
@@ -79,7 +86,13 @@
         .tab-content.active { display: block; }
         
         .grid-layout { display: grid; grid-template-columns: 260px 1fr; gap: 12px; }
-        .paper-doll { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+        .paper-doll { 
+            display: grid; 
+            grid-template-columns: repeat(2, minmax(0, 1fr)); 
+            gap: 6px; 
+            width: 100%; 
+            box-sizing: border-box;
+        }
         
         /* ==========================================================================
            2. FORGE OVERHAUL STYLING
@@ -147,6 +160,9 @@
             padding: 6px; font-size: 11px; min-height: 40px; display: flex;
             flex-direction: column; justify-content: center; position: relative;
             cursor: help;
+            min-width: 0;
+            word-wrap: break-word;
+            overflow: hidden;
         }
         .slots-card.equipped { border-style: solid; background: #1b2a35; }
         .slots-card.artifact-slot.equipped { background: #251b35; }
@@ -252,6 +268,25 @@
             .grid-layout, .forge-grid {
                 grid-template-columns: 1fr !important;
                 gap: 16px;
+            }
+
+            .paper-doll {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+            .slots-card {
+                font-size: 9px !important;
+                padding: 4px !important;
+                min-height: 60px !important;
+            }
+            .slots-card strong {
+                font-size: 8.5px !important;
+                display: block;
+                line-height: 1.1;
+                white-space: normal !important;
+            }
+            .slots-card div {
+                font-size: 7.5px !important;
+                line-height: 1.1;
             }
 
             /* Stack Live Drop Columns Vertically to stop text clipping */
