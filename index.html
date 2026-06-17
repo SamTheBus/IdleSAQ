@@ -1014,9 +1014,9 @@
                             <!-- Rift Selection Dropdown -->
                             <div style="font-size:11px; color:#9b59b6; font-weight:bold; margin-bottom:4px; text-align:left;">SELECT TARGET:</div>
                             <select id="rift-hunt-select" style="width:100%; background:#111; color:#fff; border:1px solid #9b59b6; padding:6px; border-radius:4px; font-size:11px; font-weight:bold; margin-bottom:10px; cursor:pointer;">
-                                <option value="guardian">🌌 Tier 1: Rift Guardian (5 Cores)</option>
-                                <option value="chronos">⏳ Tier 2: Chronos Arbitrator (12 Cores / Lv 35+)</option>
-                                <option value="nexus">👾 Tier 3: Nexus Overseer (25 Cores / Lv 45+)</option>
+                                <option value="guardian">🛡️ Aegis Goliath (10 Cores / Lv 30+)</option>
+                                <option value="chronos">⏳ Chronos Arbitrator (10 Cores / Lv 30+)</option>
+                                <option value="nexus">👾 Nexus Overseer (10 Cores / Lv 30+)</option>
                             </select>
                             
                             <button class="btn-action forge" style="background:#9b59b6;" onclick="summonUberBossFromSelect()">Open Reality Rift</button>
@@ -6573,7 +6573,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         recalculateItemStats(item);
     }
 
-     function createItemObject(chosenType, statLinesCount, stageScale, minStars = 0) {
+     function createItemObject(chosenType, statLinesCount, stageScale, minStars = 0, allowedTraits = null) {
         let isArt = (chosenType === "artifact");
         if (!isArt && statLinesCount < minStars) { statLinesCount = minStars; }
         
@@ -6605,7 +6605,12 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         let prestigeMult = Math.pow(1.067, playerStats.prestigeCount || 0);
 
         if (isArt) {
-            let chosenArt = ARTIFACT_POOL[Math.floor(Math.random() * ARTIFACT_POOL.length)];
+            let filterPool = ARTIFACT_POOL;
+            if (allowedTraits && allowedTraits.length > 0) {
+                filterPool = ARTIFACT_POOL.filter(a => allowedTraits.includes(a.trait));
+                if (filterPool.length === 0) filterPool = ARTIFACT_POOL;
+            }
+            let chosenArt = filterPool[Math.floor(Math.random() * filterPool.length)];
             item.name = `⭐ UNIQUE ${chosenArt.name} (Lv. ${stageScale})`; 
             item.trait = chosenArt.trait;
             item.desc = chosenArt.desc; 
@@ -7613,6 +7618,22 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     let allowArtifact = playerStats.isUberBoss && (Math.random() < 0.30); 
     
     let types = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
+    let allowedTraits = null;
+
+    if (playerStats.isUberBoss) {
+        let bossType = playerStats.currentUberBoss || 'guardian';
+        if (bossType === 'guardian') {
+            types = ["chest", "leggings", "overall"];
+            allowedTraits = ["vampirism", "defense", "parry_strike", "second_wind", "golem_stance", "titan_grip", "dodge_buff"];
+        } else if (bossType === 'chronos') {
+            types = ["boots", "helmet"];
+            allowedTraits = ["gold_hoard", "move_speed", "idle_spd", "extend_buffs", "fairy_wealth", "alchemist_alembic", "philosopher_catalyst"];
+        } else if (bossType === 'nexus') {
+            types = ["weapon", "subweapon"];
+            allowedTraits = ["frenzy", "magic_find", "echo_strike", "active_spd", "bag_space", "void_pull", "cauldron_eternity"];
+        }
+    }
+
     let chosenType = allowArtifact ? "artifact" : types[Math.floor(Math.random() * types.length)];
 
     if (chosenType === "artifact") {
@@ -7650,7 +7671,33 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             playerStats.hasTriggeredAgainstOdds = true;
         }
         
-        generateEquipment(chosenType, statLinesCount, stageScale, sourceName, silent, minStars);
+        // Construct the item passing down the dynamic allowed target farm traits
+        let newItem = createItemObject(chosenType, statLinesCount, stageScale, minStars, allowedTraits);
+        
+        if (!silent) {
+            if (newItem.type === "artifact") {
+                pushLog(`<strong style='color:#1abc9c;'>⭐ UNIQUE ARTIFACT DROPPED!</strong> Extracted: <span style='color:#1abc9c;'>${newItem.name}</span>!`, newItem.id);
+            } else if (sourceName === "Gacha") { 
+                pushLog(`<strong style='color:#f1c40f;'>[GACHA]</strong> Dispensed: <span style='color:${getTierColor(newItem.statsRolled)};'>${newItem.name}</span>`, newItem.id); 
+            } else if (sourceName === "Rare") {
+                pushLog(`<strong style='color:#ffb6c1;'>RARE ENEMY KILLED!</strong> Found: <span style='color:${getTierColor(newItem.statsRolled)};'>${newItem.name}</span>`, newItem.id); 
+            } else { 
+                pushLog(`<strong style='color:#ff9f43;'>BOSS KILLED!</strong> Found: <span style='color:${getTierColor(newItem.statsRolled)};'>${newItem.name}</span>`, newItem.id); 
+            }
+        }
+
+        if(!silent) pushToast(newItem.name, newItem.statsRolled, getTierColor(newItem.statsRolled));
+        if (newItem.type === "artifact") {
+            inventory.ARTIFACT.push(newItem);
+        } else {
+            inventory.EQUIP.push(newItem);
+        }
+
+        if (sourceName === "Gacha" && !silent && typeof window.spawnPurchaseCelebration === "function") {
+            window.spawnPurchaseCelebration('gacha', getTierColor(newItem.statsRolled), newItem.statsRolled);
+        }
+
+        if(!silent) { window.checkAchievements(); renderInventory(); renderForgeTab(); updateUI(); }
     }
 
     function rollGachaDrop() {
@@ -8269,22 +8316,18 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             if (playerStats.isBossMode) {
                 if (playerStats.isUberBoss) {
                     let bossType = playerStats.currentUberBoss || 'guardian';
-                    let hpMult = 3.0;
-                    let dmgMult = 6.0;
+                    let hpMult = 10.0;
+                    let dmgMult = 10.0;
                     let speedMult = 100;
-                    let mType = "rift_guardian";
-                    let logText = "You have entered the Aether Rift! **The Nameless Terror** has materialized!";
+                    let mType = "aegis_goliath";
+                    let logText = "**Aegis Goliath, The Iron Sentinel** has materialized from the cracked Aether!";
                     
                     if (bossType === 'chronos') {
-                        hpMult = 8.5; // Tier 2 has 8.5x Boss health scale
-                        dmgMult = 9.0; // 9.0x Damage
-                        speedMult = 90; // Slightly faster attack speed
+                        speedMult = 90;
                         mType = "chronos_arbitrator";
                         logText = "**Chronos Arbitrator** has stepped from the temporal flow!";
                     } else if (bossType === 'nexus') {
-                        hpMult = 20.0; // Tier 3 is a legendary end-game raid boss!
-                        dmgMult = 15.0; // 15.0x Damage
-                        speedMult = 80; // Fast glitching attack speed
+                        speedMult = 80;
                         mType = "nexus_overseer";
                         logText = "**Nexus Overseer** has infected the reality stream!";
                     }
@@ -8711,17 +8754,13 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         }
         if (playerStats.isUberBoss || playerStats.isBossMode) { pushHeaderToast("Already in Boss Combat!", "#e74c3c"); return; }
         
-        let cost = 5;
-        let reqLvl = 1;
-        let bossName = "Enraged Rift Guardian";
+        let cost = 10;
+        let reqLvl = 30;
+        let bossName = "Aegis Goliath, The Iron Sentinel";
         
         if (bossType === 'chronos') {
-            cost = 12;
-            reqLvl = 35;
             bossName = "Chronos Arbitrator, The Timeless God";
         } else if (bossType === 'nexus') {
-            cost = 25;
-            reqLvl = 45;
             bossName = "Nexus Overseer, The Glitch Singularity";
         }
         
@@ -10293,28 +10332,32 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         if (playerStats.isUberBoss) {
             let bossType = playerStats.currentUberBoss || 'guardian';
             if (bossType === 'chronos') {
-                // Tier 2: Chronos Arbitrator Loot Pool
                 addEtcDrop("Gacha Key", 2);
                 addEtcDrop("Eridium Shard", randInt(2, 4));
                 addEtcDrop("Legendary Scrap", randInt(1, 3));
-                if (Math.random() < 0.40) {
-                    rollEquipmentDrop(true, false, 0, false); // Massive 40% flat artifact rate
+                if (Math.random() < 0.35) {
+                    rollEquipmentDrop(true, false, 0, false);
                 }
                 pushLog("<span style='color:#f1c40f; font-weight:bold;'>[VICTORY] Chronos Arbitrator defeated! Salvaged high-tier Temporal components and Gacha Keys.</span>");
                 pushHeaderToast("⏳ Chronos Hunt Successful! +2 Keys", "#f1c40f");
             } else if (bossType === 'nexus') {
-                // Tier 3: Nexus Overseer Loot Pool
-                addEtcDrop("Gacha Key", 3);
+                addEtcDrop("Gacha Key", 2);
                 addEtcDrop("Catalyst Core", 1);
                 addEtcDrop("Mythic Scrap", randInt(1, 2));
-                // Guaranteed 4-star+ Gear Drop (drops Legendary/Mythic weapons or armor)
-                rollEquipmentDrop(true, false, 4, false);
-                pushLog("<span style='color:#ff007f; font-weight:bold;'>[VICTORY] Nexus Overseer purged! Harvested raw Catalyst Cores, Mythic scraps, and Legendary gear!</span>");
+                if (Math.random() < 0.35) {
+                    rollEquipmentDrop(true, false, 0, false);
+                }
+                pushLog("<span style='color:#ff007f; font-weight:bold;'>[VICTORY] Nexus Overseer purged! Harvested raw Catalyst Cores, Mythic scraps, and Legendary weapons!</span>");
                 pushHeaderToast("👾 Nexus Purge Successful! +1 Catalyst Core", "#ff007f");
             } else {
-                // Standard Tier 1 Rift Guardian Loot Pool
-                addEtcDrop("Gacha Key", 1); 
-                pushToast("Gacha Key", null, "#f1c40f", true, 1);
+                addEtcDrop("Gacha Key", 2);
+                addEtcDrop("Eridium Shard", randInt(1, 3));
+                addEtcDrop("Legendary Scrap", randInt(1, 2));
+                if (Math.random() < 0.35) {
+                    rollEquipmentDrop(true, false, 0, false);
+                }
+                pushLog("<span style='color:#3498db; font-weight:bold;'>[VICTORY] Aegis Goliath defeated! Obtained protective plates, Gacha Keys, and Eridium Shards.</span>");
+                pushHeaderToast("🛡️ Aegis Hunt Successful! +2 Keys", "#3498db");
             }
             playerStats.riftGuardiansSlain = (playerStats.riftGuardiansSlain || 0) + 1;
         } else if (mob.type === "boss") {
@@ -13173,8 +13216,9 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             window.drawSingleMob(ctx, mob);
 
             // Only display health bars once the enemy has taken damage (skip for Bosses)
-            if (mob.hp < mob.maxHp && mob.type !== "boss" && mob.type !== "dungeon_boss" && mob.type !== "prestige_boss" && mob.type !== "rift_guardian") {
-                // Floating health bars with trailing white damage-lag effect
+        if (mob.hp < mob.maxHp && mob.type !== "boss" && mob.type !== "dungeon_boss" && mob.type !== "prestige_boss" && mob.type !== "rift_guardian" && mob.type !== "aegis_goliath" && mob.type !== "chronos_arbitrator" && mob.type !== "nexus_overseer") {
+            // Floating health bars with trailing white damage-lag effect
+            let barW = (mob.type === "boss" || mob.type === "dungeon_boss") ? 50 : mob.w;
                 let barW = (mob.type === "boss" || mob.type === "dungeon_boss") ? 50 : mob.w;
                 let barX = (mob.type === "boss" || mob.type === "dungeon_boss") ? mob.x - 7 : mob.x;
                 
@@ -13521,7 +13565,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
         }
 
         // --- CINEMATIC TOP-SCREEN BOSS HP BAR ---
-        if (mob && (mob.type === "boss" || mob.type === "dungeon_boss" || mob.type === "prestige_boss" || mob.type === "rift_guardian" || mob.type === "chronos_arbitrator" || mob.type === "nexus_overseer")) {
+        if (mob && (mob.type === "boss" || mob.type === "dungeon_boss" || mob.type === "prestige_boss" || mob.type === "rift_guardian" || mob.type === "aegis_goliath" || mob.type === "chronos_arbitrator" || mob.type === "nexus_overseer")) {
             ctx.save();
             
             let bossName = "Threat Detected";
@@ -13532,10 +13576,10 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 bossName = "Hooktail, The Scarlet Calamity";
                 barColor = "#e67e22";
                 barGlow = "#f1c40f";
-            } else if (mob.type === "rift_guardian") {
-                bossName = "Enraged Rift Guardian";
-                barColor = "#9b59b6";
-                barGlow = "#e84393";
+            } else if (mob.type === "rift_guardian" || mob.type === "aegis_goliath") {
+                bossName = "Aegis Goliath, The Iron Sentinel";
+                barColor = "#3498db";
+                barGlow = "#2ecc71";
             } else if (mob.type === "chronos_arbitrator") {
                 bossName = "Chronos Arbitrator, The Timeless God";
                 barColor = "#f1c40f";
