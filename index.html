@@ -13291,7 +13291,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                                 }
                             }
                             
-                            if (mob.hp <= 0) handleMobDeath();
+                            if (mob && mob.hp <= 0) handleMobDeath();
                         }
                     } else {
                         let flameDmg = Math.max(1, Math.ceil(p.atk * 0.25));
@@ -13305,7 +13305,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                             mob.flashTimer = 5;
                             spawnDamageEffect(flameDmg, 'fire', false);
                             damageHistory.push({ time: Date.now(), amount: flameDmg });
-                            if (mob.hp <= 0) handleMobDeath();
+                            if (mob && mob.hp <= 0) handleMobDeath();
                         }
                     }
 
@@ -13323,7 +13323,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                         });
                     }
 
-                    if (mob.hp <= 0) handleMobDeath();
+                    if (mob && mob.hp <= 0) handleMobDeath();
                 }
             }
 
@@ -13606,7 +13606,10 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                             }
             }
         }
+
+        if (mob && mob.hp <= 0) handleMobDeath();
     }
+}
 
     /* ==========================================================================
        12. GRAPHICAL RENDERING ENGINE & STYLIZED MODELS (REFINED CEL-SHADING)
