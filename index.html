@@ -13186,8 +13186,12 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
 
         // UNIQUE: Singularity Greatsword active loop
         if (equippedSlots.weapon && equippedSlots.weapon.isUniqueSingularity && !isGamePaused) {
-            if (playerStats.singularityTimer === undefined) playerStats.singularityTimer = 1800; // 30s at 60fps
-            if (playerStats.singularityState === undefined) playerStats.singularityState = "dormant";
+            if (playerStats.singularityTimer === undefined) {
+                playerStats.singularityTimer = 1800; // 30s at 60fps
+            }
+            if (playerStats.singularityState === undefined) {
+                playerStats.singularityState = "dormant";
+            }
             
             if (playerStats.singularityState === "dormant") {
                 playerStats.singularityTimer--;
@@ -13285,6 +13289,10 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                     updateUI();
                 }
             }
+        } else if (!isGamePaused) {
+            // Safely reset timer state if they unequipped the weapon
+            playerStats.singularityState = "dormant";
+            playerStats.singularityTimer = 1800;
         }
 
         // Trigger fireball casting check
@@ -15669,6 +15677,18 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
         if (playerStats.hpPotionTimer > 0) activeBuffsList.push({ icon: "❤️", timer: playerStats.hpPotionTimer, max: potDurationMax, color: "#e74c3c" });
         if (playerStats.defPotionTimer > 0) activeBuffsList.push({ icon: "🛡️", timer: playerStats.defPotionTimer, max: potDurationMax, color: "#3498db" });
         if (playerStats.hastePotionTimer > 0) activeBuffsList.push({ icon: "👟", timer: playerStats.hastePotionTimer, max: potDurationMax, color: "#f1c40f" });
+
+        // Void-Sovereign Greatsword Active States HUD
+        if (equippedSlots.weapon && equippedSlots.weapon.isUniqueSingularity) {
+            if (playerStats.singularityState === "dormant") {
+                activeBuffsList.push({ icon: "🌌", timer: playerStats.singularityTimer || 1800, max: 1800, color: "#5b2c6f" });
+            } else if (playerStats.singularityState === "pulsing") {
+                let blinkColor = Math.floor(Date.now() / 150) % 2 === 0 ? "#ff007f" : "#8e44ad";
+                activeBuffsList.push({ icon: "💫", timer: playerStats.singularityTimer || 420, max: 420, color: blinkColor });
+            } else if (playerStats.singularityState === "storing") {
+                activeBuffsList.push({ icon: "⚛️", timer: playerStats.singularityTimer || 300, max: 300, color: "#e84393" });
+            }
+        }
 
         let startX = 15;
         let startY = 10;
