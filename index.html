@@ -1003,7 +1003,7 @@
                             <button class="btn-action forge" style="background:#f1c40f; color:#111;" onclick="buyGachaCrate()">Dispense Gear</button>
                         </div>
                     </div>
-                    <div class="market-card" style="border-color: #9b59b6;">
+                    <div class="market-card" style="border-color: #9b59b6;" onmouseenter="showAltarTooltip(event)" onmouseleave="hideTooltip()" ontouchstart="showAltarTooltip(event)">
                         <div>
                             <h3 style="margin-top:0; color:#9b59b6; font-size:14px;">🔮 ANCIENT ALTAR</h3>
                             <p style="font-size:11px; color:#aaa; min-height:36px;">Sacrifice Cores to open a Reality Rift and hunt legendary Tiered Rift Bosses.</p>
@@ -1632,21 +1632,20 @@ window.onload = function() {
     const MYSTICAL_STOCK = [
         { name: "SP Reset Scroll", cost: 2500, currency: "Gold", color: "#9b59b6", desc: "Refunds spent Skill Points from the Attribute Matrix." },
         { name: "PP Reset Scroll", cost: 5000, currency: "Gold", color: "#e67e22", desc: "Refunds spent Prestige Points from the Ascension Altar." },
-        { name: "Attack Elixir", cost: 100, currency: "Gold", color: "#2ecc71", desc: "+10% Attack. Base duration: 5 minutes (scales with INT)." },
-        { name: "Greater Attack Elixir", cost: 1000, currency: "Gold", color: "#27ae60", desc: "+20% Attack. Base duration: 5 minutes (scales with INT)." },
-        { name: "Supernal Attack Elixir", cost: 10000, currency: "Gold", color: "#1e824c", desc: "+35% Attack. Base duration: 5 minutes (scales with INT)." },
-        { name: "Vitality Elixir", cost: 100, currency: "Gold", color: "#e74c3c", desc: "+10% Max HP. Base duration: 5 minutes (scales with INT)." },
-        { name: "Greater Vitality Elixir", cost: 1000, currency: "Gold", color: "#c0392b", desc: "+20% Max HP. Base duration: 5 minutes (scales with INT)." },
-        { name: "Supernal Vitality Elixir", cost: 10000, currency: "Gold", color: "#962d22", desc: "+35% Max HP. Base duration: 5 minutes (scales with INT)." },
-        { name: "Armored Elixir", cost: 100, currency: "Gold", color: "#3498db", desc: "+10% Defense. Base duration: 5 minutes (scales with INT)." },
-        { name: "Greater Armored Elixir", cost: 1000, currency: "Gold", color: "#2980b9", desc: "+20% Defense. Base duration: 5 minutes (scales with INT)." },
-        { name: "Supernal Armored Elixir", cost: 10000, currency: "Gold", color: "#1f3a52", desc: "+35% Defense. Base duration: 5 minutes (scales with INT)." },
-        { name: "Haste Elixir", cost: 100, currency: "Gold", color: "#f1c40f", desc: "Boosts Move Speed & Atk CD. Base duration: 5 minutes (scales with INT)." },
-        { name: "Greater Haste Elixir", cost: 1000, currency: "Gold", color: "#f39c12", desc: "Sizable Move & Atk Speed boost. Base duration: 5 minutes (scales with INT)." },
-        { name: "Supernal Haste Elixir", cost: 10000, currency: "Gold", color: "#d35400", desc: "Massive Move & Atk Speed boost. Base duration: 5 minutes (scales with INT)." },
         { name: "Gacha Key", cost: 5, currency: "Luminous Soul", color: "#f1c40f", desc: "Trade 5 rare Luminous Souls for 1 Vending Gacha Key." },
         { name: "Astral Essence", cost: 10, currency: "Luminous Soul", color: "#9b59b6", desc: "Trade 10 rare Luminous Souls for 1 Astral Essence." },
         { name: "Catalyst Core", cost: 15, currency: "Astral Shards", color: "#2ecc71", desc: "Trade 15 Astral Crucible Shards for 1 Catalyst Core." }
+    ];
+
+    const POTION_TRANSMUTATIONS = [
+        { result: "Greater Attack Elixir", req: "Attack Elixir", amount: 3, color: "#27ae60", desc: "Transmute 3x Attack Elixir into 1x Greater Attack Elixir." },
+        { result: "Supernal Attack Elixir", req: "Greater Attack Elixir", amount: 3, color: "#1e824c", desc: "Transmute 3x Greater Attack Elixir into 1x Supernal Attack Elixir." },
+        { result: "Greater Vitality Elixir", req: "Vitality Elixir", amount: 3, color: "#c0392b", desc: "Transmute 3x Vitality Elixir into 1x Greater Vitality Elixir." },
+        { result: "Supernal Vitality Elixir", req: "Greater Vitality Elixir", amount: 3, color: "#962d22", desc: "Transmute 3x Greater Vitality Elixir into 1x Supernal Vitality Elixir." },
+        { result: "Greater Armored Elixir", req: "Armored Elixir", amount: 3, color: "#2980b9", desc: "Transmute 3x Armored Elixir into 1x Greater Armored Elixir." },
+        { result: "Supernal Armored Elixir", req: "Greater Armored Elixir", amount: 3, color: "#1f3a52", desc: "Transmute 3x Greater Armored Elixir into 1x Supernal Armored Elixir." },
+        { result: "Greater Haste Elixir", req: "Haste Elixir", amount: 3, color: "#f39c12", desc: "Transmute 3x Haste Elixir into 1x Greater Haste Elixir." },
+        { result: "Supernal Haste Elixir", req: "Greater Haste Elixir", amount: 3, color: "#d35400", desc: "Transmute 3x Greater Haste Elixir into 1x Supernal Haste Elixir." }
     ];
 
     /* ==========================================================================
@@ -7123,7 +7122,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     function renderMysticalShop() {
         let el = document.getElementById('mystical-shop-list');
         if (!el) return;
-        el.innerHTML = MYSTICAL_STOCK.map((item, index) => {
+        
+        let stockHtml = MYSTICAL_STOCK.map((item, index) => {
             let costColor = "#e74c3c";
             let currencyLabel = "Gold";
             let displayCost = item.cost;
@@ -7137,7 +7137,6 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 costColor = owned >= item.cost ? "#9b59b6" : "#e74c3c";
                 currencyLabel = "Shards";
             } else {
-                // Aligned Economy: Scales with stage gold drops to keep pots meaningful at all stages
                 displayCost = Math.ceil(item.cost * Math.pow(1.08, playerStats.stage));
                 costColor = playerStats.coins >= displayCost ? "#f1c40f" : "#e74c3c";
             }
@@ -7151,7 +7150,78 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 <button class="btn-action" style="background:#9b59b6; color:#fff;" onclick="buyMysticalItem(${index})">Purchase</button>
             </div>`;
         }).join("");
+
+        let transHtml = POTION_TRANSMUTATIONS.map((recipe, index) => {
+            let ownedCount = inventory.USE[recipe.req] || 0;
+            let canAfford = ownedCount >= recipe.amount;
+            let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+            
+            return `<div class="shop-row" style="border-color: ${recipe.color}; background: rgba(155, 89, 182, 0.02); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 8px; cursor: help;" onmouseenter="showTransmuteTooltip(event, ${index})" ontouchstart="showTransmuteTooltip(event, ${index})" onmouseleave="hideTooltip()">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="color:${recipe.color}; font-size:12px;">🧪 Transmute: ${recipe.result}</strong>
+                    <span style="color:${costColor}; font-weight:bold; font-size:11px;">${recipe.amount}x ${recipe.req}</span>
+                </div>
+                <div style="font-size:10px; color:#aaa; margin-bottom:6px;">${recipe.desc} (Owned: ${ownedCount})</div>
+                <button class="btn-action" style="background:${recipe.color}; color:#fff;" ${canAfford ? '' : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="transmutePotion(${index})">Transmute</button>
+            </div>`;
+        }).join("");
+
+        el.innerHTML = stockHtml + transHtml;
     }
+
+    window.transmutePotion = function(index) {
+        let recipe = POTION_TRANSMUTATIONS[index];
+        let ownedCount = inventory.USE[recipe.req] || 0;
+        if (ownedCount < recipe.amount) {
+            pushHeaderToast(`Not enough ${recipe.req}!`, "#e74c3c");
+            return;
+        }
+        
+        inventory.USE[recipe.req] -= recipe.amount;
+        if (inventory.USE[recipe.req] === 0) delete inventory.USE[recipe.req];
+        
+        if (!inventory.USE[recipe.result]) inventory.USE[recipe.result] = 0;
+        inventory.USE[recipe.result]++;
+        
+        pushHeaderToast(`Transmuted: 1x ${recipe.result}!`, "#2ecc71");
+        pushLog(`<strong style='color:#2ecc71;'>[ALCHEMY]</strong> Transmuted: <span style='color:${recipe.color};'>${recipe.result}</span>`);
+        
+        if (typeof window.spawnPurchaseCelebration === "function") {
+            window.spawnPurchaseCelebration('alchemy', recipe.color);
+        }
+
+        setTimeout(() => {
+            updateUI(); 
+            renderInventory(); 
+            renderMysticalShop(); 
+            window.saveGame();
+        }, 50);
+    };
+
+    window.showTransmuteTooltip = function(e, index) {
+        e.stopPropagation();
+        let recipe = POTION_TRANSMUTATIONS[index];
+        if (!recipe) return;
+        
+        let ownedResult = inventory.USE[recipe.result] || 0;
+        let ownedReq = inventory.USE[recipe.req] || 0;
+        let canAfford = ownedReq >= recipe.amount;
+        let reqColor = canAfford ? "#2ecc71" : "#e74c3c";
+        
+        let tt = document.getElementById('game-tooltip');
+        tt.innerHTML = `<div style="padding: 10px; width: 230px; box-sizing: border-box;">
+            <div class="tt-title" style="color:${recipe.color};">🧪 Transmutation Recipe</div>
+            <div class="tt-subtitle">${recipe.result}</div>
+            <div style="color:#ddd; font-size:11px; margin-bottom:6px; white-space:normal; line-height:1.3;">${recipe.desc}</div>
+            <div style="margin-top:8px; border-top: 1px dashed #444; padding-top:6px; font-family:monospace; font-size:10px;">
+                <div class="tt-stat-line" style="color:#aaa;">Result Owned: <strong style="color:#fff;">${ownedResult}</strong></div>
+                <div class="tt-stat-line" style="color:#aaa;">Required Ingredients: <strong style="color:${reqColor};">${ownedReq} / ${recipe.amount} ${recipe.req}</strong></div>
+            </div>
+        </div>`;
+        tt.style.borderColor = recipe.color;
+        tt.style.display = "block";
+        window.positionTooltip(e, tt);
+    };
 
     window.buyMysticalItem = function(index) {
         let item = MYSTICAL_STOCK[index];
@@ -7403,8 +7473,21 @@ function formatStatRangeStr(item, statKey, isPct = false) {
 
         window.showMarketTooltip = function(e, index) {
         let item = playerStats.shopItems[index]; if (!item || item.purchased) return;
-        let tt = document.getElementById('game-tooltip'); tt.innerHTML = buildGeneralTooltipHtml(item, true);
-        tt.style.borderColor = getTierColor(item.statsRolled); tt.style.display = "block"; window.positionTooltip(e, tt);
+        let tt = document.getElementById('game-tooltip');
+        let baseHtml = buildGeneralTooltipHtml(item, true);
+        
+        let goldStr = Math.floor(playerStats.coins).toLocaleString();
+        let costStr = item.cost.toLocaleString();
+        let goldColor = playerStats.coins >= item.cost ? "#2ecc71" : "#e74c3c";
+        
+        let footer = `<div style="background:#0b0f12; border-top:1px solid #333; padding:8px 10px; font-size:10px; font-family:monospace; text-align:center; border-radius: 0 0 6px 6px;">
+            <span style="color:#aaa;">Your Gold:</span> <strong style="color:${goldColor};">${goldStr}</strong> <span style="color:#666;">|</span> <span style="color:#aaa;">Cost:</span> <strong style="color:#f1c40f;">${costStr}</strong>
+        </div>`;
+        
+        tt.innerHTML = `<div style="display:flex; flex-direction:column;">${baseHtml}${footer}</div>`;
+        tt.style.borderColor = getTierColor(item.statsRolled);
+        tt.style.display = "block";
+        window.positionTooltip(e, tt);
     };
 
     window.buildAltarModal = function() {
@@ -9712,9 +9795,90 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         let qly = p.qly + ((playerStats.vendingQLevel || 0) * 0.01);
         let mythic = (0.5 * qly); let leg = (2.0 * qly) - mythic; let epic = (10.0 * qly) - (2.0 * qly); let magic = (30.0 * qly) - (10.0 * qly); let rare = 100 - (30.0 * qly);
 
+        let keysHeld = inventory.ETC["Gacha Key"] || 0;
+
         let tt = document.getElementById('game-tooltip');
-        tt.innerHTML = `<div style="padding: 10px; width: 250px; box-sizing: border-box;"><div class="tt-title" style="color:#f1c40f;">🎰 Vending Machine Rates</div><div class="tt-subtitle">Gacha Rarity Distribution</div><div class="tt-stat-line" style="color:#3498db;">• 1★ Rare: ${Math.max(0, rare).toFixed(2)}%</div><div class="tt-stat-line" style="color:#9b59b6;">• 2★ Magic: ${Math.max(0, magic).toFixed(2)}%</div><div class="tt-stat-line" style="color:#e67e22;">• 3★ Epic: ${Math.max(0, epic).toFixed(2)}%</div><div class="tt-stat-line" style="color:#f1c40f;">• 4★ Legendary: ${Math.max(0, leg).toFixed(2)}%</div><div class="tt-stat-line" style="color:#e74c3c;">• 5★ Mythic: ${Math.max(0, mythic).toFixed(2)}%</div><div class="tt-stat-line" style="color:#1abc9c; margin-top:4px;">• Bonus: 1% flat chance for Unique Artifact!</div><div class="tt-subtitle" style="margin-top:6px; border-top:1px solid #333; padding-top:4px;">Guaranteed 1★ to 5★ gear. Influenced by Drop Quality.</div></div>`;
+        tt.innerHTML = `<div style="padding: 10px; width: 250px; box-sizing: border-box;">
+            <div class="tt-title" style="color:#f1c40f;">🎰 Vending Machine Rates</div>
+            <div class="tt-subtitle">Gacha Rarity Distribution</div>
+            <div class="tt-stat-line" style="color:#3498db;">• 1★ Rare: ${Math.max(0, rare).toFixed(2)}%</div>
+            <div class="tt-stat-line" style="color:#9b59b6;">• 2★ Magic: ${Math.max(0, magic).toFixed(2)}%</div>
+            <div class="tt-stat-line" style="color:#e67e22;">• 3★ Epic: ${Math.max(0, epic).toFixed(2)}%</div>
+            <div class="tt-stat-line" style="color:#f1c40f;">• 4★ Legendary: ${Math.max(0, leg).toFixed(2)}%</div>
+            <div class="tt-stat-line" style="color:#e74c3c;">• 5★ Mythic: ${Math.max(0, mythic).toFixed(2)}%</div>
+            <div class="tt-stat-line" style="color:#1abc9c; margin-top:4px;">• Bonus: 1% flat chance for Unique Artifact!</div>
+            <div class="tt-subtitle" style="margin-top:6px; border-top:1px solid #333; padding-top:4px;">Guaranteed 1★ to 5★ gear. Influenced by Drop Quality.</div>
+            <div style="margin-top:8px; border-top: 1px dashed #444; padding-top:6px; font-family:monospace; font-size:10px;">
+                <div class="tt-stat-line" style="color:#fff;">Your Keys: <strong style="color:${keysHeld >= 1 ? '#2ecc71' : '#e74c3c'};">${keysHeld.toLocaleString()} / 1</strong></div>
+            </div>
+        </div>`;
         tt.style.borderColor = "#f1c40f"; tt.style.display = "block"; window.positionTooltip(e, tt);
+    };
+
+    window.showAltarTooltip = function(e) {
+        e.stopPropagation();
+        let cores = inventory.ETC["Ancient Core"] || 0;
+        let level = playerStats.level || 1;
+        let tt = document.getElementById('game-tooltip');
+        tt.innerHTML = `<div style="padding: 10px; width: 240px; box-sizing: border-box;">
+            <div class="tt-title" style="color:#9b59b6;">🔮 Ancient Altar Summoning</div>
+            <div class="tt-subtitle">Reality Rift Activation requirements</div>
+            <div class="tt-stat-line" style="color:#bdc3c7;">• Required Cores: <span style="color:#f1c40f; font-weight:bold;">10 Cores</span></div>
+            <div class="tt-stat-line" style="color:#bdc3c7;">• Required Level: <span style="color:#2ecc71; font-weight:bold;">Lv 30+</span></div>
+            <div style="margin-top:8px; border-top: 1px dashed #444; padding-top:6px; font-family:monospace; font-size:10px;">
+                <div class="tt-stat-line" style="color:#fff;">Your Cores: <strong style="color:${cores >= 10 ? '#2ecc71' : '#e74c3c'};">${cores} / 10</strong></div>
+                <div class="tt-stat-line" style="color:#fff;">Your Level: <strong style="color:${level >= 30 ? '#2ecc71' : '#e74c3c'};">Lv ${level} / 30</strong></div>
+            </div>
+        </div>`;
+        tt.style.borderColor = "#9b59b6";
+        tt.style.display = "block";
+        window.positionTooltip(e, tt);
+    };
+
+    window.showGoldUpgradeTooltip = function(e, upId) {
+        e.stopPropagation();
+        let p = playerStats;
+        let up;
+        if (upId === 'vending') {
+            up = {
+                name: "🎰 Gacha Calibration",
+                level: p.vendingQLevel || 0,
+                cost: Math.floor(15000 * Math.pow(1.18, p.vendingQLevel || 0)),
+                color: "#f1c40f"
+            };
+        } else if (upId === 'shop') {
+            up = {
+                name: "🛒 Merchant Investment",
+                level: p.shopQLevel || 0,
+                cost: Math.floor(30000 * Math.pow(1.22, p.shopQLevel || 0)),
+                color: "#3498db"
+            };
+        } else if (upId === 'global') {
+            up = {
+                name: "🍀 Aura of Fortune",
+                level: p.globalQLevel || 0,
+                cost: Math.floor(100000 * Math.pow(1.28, p.globalQLevel || 0)),
+                color: "#2ecc71"
+            };
+        }
+        if (!up) return;
+
+        let goldStr = Math.floor(p.coins).toLocaleString();
+        let costStr = up.cost.toLocaleString();
+        let goldColor = p.coins >= up.cost ? "#2ecc71" : "#e74c3c";
+        
+        let tt = document.getElementById('game-tooltip');
+        tt.innerHTML = `<div style="padding: 10px; width: 230px; box-sizing: border-box;">
+            <div class="tt-title" style="color:${up.color};">${up.name}</div>
+            <div class="tt-subtitle">Upgrade Level: ${up.level}</div>
+            <div style="margin-top:8px; border-top: 1px dashed #444; padding-top:6px; font-family:monospace; font-size:10px;">
+                <div class="tt-stat-line" style="color:#aaa;">Your Gold: <strong style="color:${goldColor};">${goldStr}</strong></div>
+                <div class="tt-stat-line" style="color:#aaa;">Upgrade Cost: <strong style="color:#f1c40f;">${costStr}</strong></div>
+            </div>
+        </div>`;
+        tt.style.borderColor = up.color;
+        tt.style.display = "block";
+        window.positionTooltip(e, tt);
     };
     
     window.showBuffTooltip = function(e) {
@@ -14701,7 +14865,7 @@ window.renderGoldUpgrades = function() {
         let costColor = p.coins >= up.cost ? "#f1c40f" : "#e74c3c";
         let bgStyle = hexToRgba(up.color, 0.04);
         let bonusPct = (up.level * (up.id === 'global' ? 1.5 : 1));
-        return `<div class="shop-row" style="border-color: ${up.color}; background: ${bgStyle}; flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 8px;">
+        return `<div class="shop-row" style="border-color: ${up.color}; background: ${bgStyle}; flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 8px; cursor: help;" onmouseenter="showGoldUpgradeTooltip(event, '${up.id}')" onmouseleave="hideTooltip()" ontouchstart="showGoldUpgradeTooltip(event, '${up.id}')">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <strong style="color:${up.color}; font-size:12px;">${up.name} <span style="color:#aaa;">(Lv. ${up.level})</span></strong>
                 <span style="color:${costColor}; font-weight:bold; font-size:11px;">${up.cost.toLocaleString()} Gold</span>
