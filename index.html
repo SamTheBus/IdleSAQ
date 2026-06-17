@@ -731,6 +731,217 @@
             <div id="achievements-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:8px;" onscroll="hideTooltip()" ontouchmove="hideTooltip()"></div>
         </div>
 
+        <!-- Secret Dev Testing Panel Modal -->
+        <div id="dev-modal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); 
+            width:95%; max-width:550px; background:#111; border:2px solid var(--accent-orange); border-radius:8px; 
+            z-index:11000; padding:15px; box-shadow:0 0 30px rgba(0,0,0,0.9); max-height:80vh; overflow-y:auto; overscroll-behavior: contain;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
+                <h3 style="margin:0; color:var(--accent-orange);">🛠️ Developer Testing Panel</h3>
+                <button onclick="document.getElementById('dev-modal').style.display='none'" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 12px; font-weight:bold; cursor:pointer;">Close</button>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 12px;">
+                <button onclick="window.switchDevTab('dev-prog')" class="tab-btn active dev-tab-btn" id="btn-dev-prog" style="font-size:10px; padding: 4px; min-width: 0;">Progress</button>
+                <button onclick="window.switchDevTab('dev-currency')" class="tab-btn dev-tab-btn" id="btn-dev-currency" style="font-size:10px; padding: 4px; min-width: 0;">Currency</button>
+                <button onclick="window.switchDevTab('dev-items')" class="tab-btn dev-tab-btn" id="btn-dev-items" style="font-size:10px; padding: 4px; min-width: 0;">Items</button>
+                <button onclick="window.switchDevTab('dev-cheats')" class="tab-btn dev-tab-btn" id="btn-dev-cheats" style="font-size:10px; padding: 4px; min-width: 0;">Cheats</button>
+            </div>
+
+            <div id="dev-prog" class="dev-tab-content" style="display:block;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <div>
+                        <label style="font-size:11px; color:#aaa;">Hero Level:</label>
+                        <div style="display:flex; gap:4px; margin-top:4px;">
+                            <input type="number" id="dev-level-input" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:4px; border-radius:3px;" value="1">
+                            <button onclick="window.devSetLevel()" class="btn-action" style="background:var(--accent-blue);">SET</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size:11px; color:#aaa;">Skill Points (SP):</label>
+                        <div style="display:flex; gap:4px; margin-top:4px;">
+                            <input type="number" id="dev-sp-input" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:4px; border-radius:3px;" value="0">
+                            <button onclick="window.devSetSP()" class="btn-action" style="background:var(--accent-blue);">SET</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <div>
+                        <label style="font-size:11px; color:#aaa;">Campaign Stage:</label>
+                        <div style="display:flex; gap:4px; margin-top:4px;">
+                            <input type="number" id="dev-stage-input" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:4px; border-radius:3px;" value="1">
+                            <button onclick="window.devSetStage()" class="btn-action" style="background:var(--accent-blue);">SET</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size:11px; color:#aaa;">Max Stage Reached:</label>
+                        <div style="display:flex; gap:4px; margin-top:4px;">
+                            <input type="number" id="dev-maxstage-input" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:4px; border-radius:3px;" value="1">
+                            <button onclick="window.devSetMaxStage()" class="btn-action" style="background:var(--accent-blue);">SET</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dev-currency" class="dev-tab-content" style="display:none;">
+                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-bottom:10px;">
+                    <div style="background:#222; padding:6px; border-radius:4px;">
+                        <div style="font-size:11px; color:#fff; font-weight:bold; margin-bottom:4px;">Gold</div>
+                        <div style="display:flex; gap:4px;">
+                            <input type="number" id="dev-gold-val" value="100000" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                            <button onclick="window.devAddCurrency('gold')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                        </div>
+                    </div>
+                    <div style="background:#222; padding:6px; border-radius:4px;">
+                        <div style="font-size:11px; color:#ffb6c1; font-weight:bold; margin-bottom:4px;">Luminous Souls</div>
+                        <div style="display:flex; gap:4px;">
+                            <input type="number" id="dev-luminous-val" value="50" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                            <button onclick="window.devAddCurrency('luminous')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                        </div>
+                    </div>
+                    <div style="background:#222; padding:6px; border-radius:4px;">
+                        <div style="font-size:11px; color:#fff; font-weight:bold; margin-bottom:4px;">Monster Souls</div>
+                        <div style="display:flex; gap:4px;">
+                            <input type="number" id="dev-monster-val" value="500" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                            <button onclick="window.devAddCurrency('monster')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                        </div>
+                    </div>
+                    <div style="background:#222; padding:6px; border-radius:4px;">
+                        <div style="font-size:11px; color:#8e44ad; font-weight:bold; margin-bottom:4px;">Eridium Shards</div>
+                        <div style="display:flex; gap:4px;">
+                            <input type="number" id="dev-eridium-val" value="20" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                            <button onclick="window.devAddCurrency('eridium')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                        </div>
+                    </div>
+                    <div style="background:#222; padding:6px; border-radius:4px;">
+                        <div style="font-size:11px; color:#9b59b6; font-weight:bold; margin-bottom:4px;">Astral Essence</div>
+                        <div style="display:flex; gap:4px;">
+                            <input type="number" id="dev-astral-val" value="10" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                            <button onclick="window.devAddCurrency('astral')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                        </div>
+                    </div>
+                    <div style="background:#222; padding:6px; border-radius:4px;">
+                        <div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:4px;">Catalyst Cores</div>
+                        <div style="display:flex; gap:4px;">
+                            <input type="number" id="dev-catalyst-val" value="10" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                            <button onclick="window.devAddCurrency('catalyst')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                        </div>
+                    </div>
+                    <div style="background:#222; padding:6px; border-radius:4px;">
+                        <div style="font-size:11px; color:#f1c40f; font-weight:bold; margin-bottom:4px;">Gacha Keys</div>
+                        <div style="display:flex; gap:4px;">
+                            <input type="number" id="dev-gachakeys-val" value="5" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                            <button onclick="window.devAddCurrency('gachakeys')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                        </div>
+                    </div>
+                    <div style="background:#222; padding:6px; border-radius:4px;">
+                        <div style="font-size:11px; color:#9b59b6; font-weight:bold; margin-bottom:4px;">Prestige Points (PP)</div>
+                        <div style="display:flex; gap:4px;">
+                            <input type="number" id="dev-pp-val" value="5" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                            <button onclick="window.devAddCurrency('pp')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dev-items" class="dev-tab-content" style="display:none;">
+                <div style="background:#222; padding:10px; border-radius:5px; margin-bottom:10px;">
+                    <div style="font-size:11px; color:#f1c40f; font-weight:bold; margin-bottom:6px;">Spawn Custom Gear</div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:6px;">
+                        <select id="dev-item-type" style="background:#111; color:#fff; border:1px solid #444; padding:4px;">
+                            <option value="weapon">Weapon</option>
+                            <option value="shield">Shield (Sub)</option>
+                            <option value="dagger">Dagger (Sub)</option>
+                            <option value="tome">Tome (Sub)</option>
+                            <option value="helmet">Helmet</option>
+                            <option value="chest">Chest Armor</option>
+                            <option value="leggings">Leggings</option>
+                            <option value="overall">Overall Suit</option>
+                            <option value="boots">Boots</option>
+                        </select>
+                        <select id="dev-item-rarity" style="background:#111; color:#fff; border:1px solid #444; padding:4px;">
+                            <option value="0">Common (0★)</option>
+                            <option value="1">Rare (1★)</option>
+                            <option value="2">Magic (2★)</option>
+                            <option value="3">Epic (3★)</option>
+                            <option value="4">Legendary (4★)</option>
+                            <option value="5">Mythic (5★)</option>
+                        </select>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:8px;">
+                        <input type="number" id="dev-item-lvl" value="1" placeholder="Stage Level scale" style="background:#111; color:#fff; border:1px solid #444; padding:4px;">
+                        <select id="dev-item-set" style="background:#111; color:#fff; border:1px solid #444; padding:4px;">
+                            <option value="">No Set Synergy</option>
+                            <option value="Vanguard">Vanguard</option>
+                            <option value="Colossus">Colossus</option>
+                            <option value="Bastion">Bastion</option>
+                            <option value="Windrunner">Windrunner</option>
+                            <option value="Wraith">Wraith</option>
+                            <option value="Reaver">Reaver</option>
+                            <option value="Dreadnought">Dreadnought</option>
+                            <option value="Duellist">Duellist</option>
+                            <option value="Scholar">Scholar</option>
+                            <option value="Berserker">Berserker</option>
+                            <option value="Scout">Scout</option>
+                            <option value="Fortune">Fortune</option>
+                            <option value="Mystic">Mystic</option>
+                            <option value="Alchemist">Alchemist</option>
+                            <option value="Midas">Midas' Legacy</option>
+                            <option value="Biohazard">Biohazard</option>
+                            <option value="Warlord">Warlord</option>
+                            <option value="VoidTouched">Void-Touched</option>
+                        </select>
+                    </div>
+                    <button onclick="window.devSpawnGear()" class="btn-action forge" style="background:var(--accent-orange); color:#fff; margin:0;">Spawn Gear</button>
+                </div>
+
+                <div style="background:#222; padding:10px; border-radius:5px;">
+                    <div style="font-size:11px; color:#1abc9c; font-weight:bold; margin-bottom:6px;">Spawn Unique Artifacts & Weapons</div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:8px;">
+                        <select id="dev-unique-sel" style="background:#111; color:#fff; border:1px solid #444; padding:4px;">
+                            <option value="weapon-staff">🔥 Unique Phoenix Staff</option>
+                            <option value="weapon-sword">🩸 Unique Sanguine Reaver</option>
+                            <option value="art-frenzy">Berserker Stone (Frenzy)</option>
+                            <option value="art-vampirism">Blood-Soaked Chalice (Vampirism)</option>
+                            <option value="art-gold_hoard">Philosopher's Anchor (Gold)</option>
+                            <option value="art-magic_find">Gilded Scarab (Magic Find)</option>
+                            <option value="art-move_speed">Windwalker Boots (Speed)</option>
+                            <option value="art-defense">Aegis Core (Defense)</option>
+                            <option value="art-parry_strike">Riposte Gauntlet (Parry Strike)</option>
+                            <option value="art-echo_strike">Phantom Blade (Echo Strike)</option>
+                            <option value="art-idle_spd">Sloth's Blessing (Idle Speed)</option>
+                            <option value="art-active_spd">Zealot's Charm (Active Speed)</option>
+                            <option value="art-dodge_buff">Survivor's Adrenaline</option>
+                            <option value="art-extend_buffs">Chrono Hourglass</option>
+                            <option value="art-bag_space">Dimensional Pouch</option>
+                            <option value="art-second_wind">Phoenix Ankh (Revive)</option>
+                            <option value="art-golem_stance">Golem's Core (Healthy Atk)</option>
+                            <option value="art-fairy_wealth">Fairy Queen's Crown</option>
+                            <option value="art-void_pull">Void Core (Rare Spawn)</option>
+                            <option value="art-titan_grip">Titan's Shield Grip</option>
+                            <option value="art-alchemist_alembic">Alchemist's Alembic</option>
+                            <option value="art-philosopher_catalyst">Philosopher's Catalyst</option>
+                            <option value="art-cauldron_eternity">Cauldron of Eternity</option>
+                        </select>
+                        <input type="number" id="dev-unique-lvl" value="1" placeholder="Stage Level" style="background:#111; color:#fff; border:1px solid #444; padding:4px;">
+                    </div>
+                    <button onclick="window.devSpawnUnique()" class="btn-action forge" style="background:#1abc9c; color:#fff; margin:0;">Spawn Unique/Artifact</button>
+                </div>
+            </div>
+
+            <div id="dev-cheats" class="dev-tab-content" style="display:none;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:10px;">
+                    <button onclick="window.devTriggerBuff('frenzy')" class="btn-action" style="background:#e67e22; padding:8px;">🔥 Max Frenzy (10m)</button>
+                    <button onclick="window.devTriggerBuff('adrenaline')" class="btn-action" style="background:#f1c40f; color:#000; padding:8px;">⚡ Max Adrenaline (10m)</button>
+                    <button onclick="window.devTriggerBuff('potions')" class="btn-action" style="background:#9b59b6; padding:8px;">🧪 All Potions (10m)</button>
+                    <button onclick="window.devHealFull()" class="btn-action" style="background:#2ecc71; padding:8px;">❤️ Fully Heal HP</button>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <button onclick="window.devUnlockAllAchievements()" class="btn-action" style="background:#8e44ad; font-weight:bold; padding:10px;">🏆 Unlock All Trophies / Achievements</button>
+                    <button onclick="window.devToggleGodMode()" id="btn-dev-godmode" class="btn-action un" style="background:#333; color:#aaa; font-weight:bold; padding:10px;">🛡️ God Mode (Invulnerability): OFF</button>
+                </div>
+            </div>
+        </div>
+
         <div id="death-overlay">
             <div id="death-card">
                 <div id="death-header">DEFEATED</div>
@@ -1105,6 +1316,10 @@
             <button onclick="hardResetGame()" class="btn-action un" style="padding:4px 10px; font-weight:bold; font-size:10px;">🚨 Wipe Save</button>
         </div>
         <div id="log-panel-container" style="display:none;">
+            <div style="display: flex; gap: 6px; margin-bottom: 6px; width: 100%;">
+                <input type="text" id="dev-console-input" placeholder="Type a command (e.g., /dev, /gold, /level)..." style="flex: 1; background: #111; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; font-family: monospace; font-size: 11px;" onkeydown="window.handleConsoleInput(event)">
+                <button onclick="window.submitConsoleCommand()" class="btn-action" style="background: var(--accent-orange); padding: 6px 12px; font-weight: bold; font-family: monospace; height: 100%;">EXECUTE</button>
+            </div>
             <div id="log-box"></div>
         </div>
     </div>
@@ -6461,8 +6676,312 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         };
     }
 
-    window.loadGame = function() {
-        let data = localStorage.getItem('idle_game_v11');
+    // ==========================================================================
+    // DEVELOPER CONSOLE & TESTING PANEL ENGINE IMPLEMENTATION
+    // ==========================================================================
+    window.handleConsoleInput = function(event) {
+        if (event.key === 'Enter') {
+            window.submitConsoleCommand();
+        }
+    };
+
+    window.submitConsoleCommand = function() {
+        let inputEl = document.getElementById('dev-console-input');
+        if (!inputEl) return;
+        let cmd = inputEl.value.trim();
+        inputEl.value = "";
+        if (!cmd) return;
+
+        pushLog(`<span style="color:#e67e22; font-family:monospace;">> ${cmd}</span>`);
+
+        if (cmd === "/dev" || cmd === "/debug" || cmd === "/cheat") {
+            document.getElementById('dev-modal').style.display = 'block';
+            window.switchDevTab('dev-prog');
+            pushHeaderToast("🛠️ Developer Testing Panel Opened!", "var(--accent-orange)");
+            return;
+        }
+
+        let args = cmd.split(" ");
+        let mainCmd = args[0].toLowerCase();
+
+        if (mainCmd === "/gold") {
+            let amt = parseInt(args[1], 10) || 100000;
+            playerStats.coins += amt;
+            playerStats.totalGoldEarned = (playerStats.totalGoldEarned || 0) + amt;
+            pushLog(`<span style="color:#2ecc71;">[DEV] Granted ${amt.toLocaleString()} Gold!</span>`);
+            updateUI();
+            window.saveGame();
+        } else if (mainCmd === "/level") {
+            let lvl = parseInt(args[1], 10);
+            if (lvl > 0) {
+                playerStats.level = lvl;
+                playerStats.sp = (playerStats.sp || 0) + 1;
+                playerStats.xp = 0;
+                playerStats.xpReq = Math.floor(250 * Math.pow(1.2, playerStats.level - 1));
+                let p = resolvePlayerStats();
+                playerStats.currentHp = p.maxHp;
+                pushLog(`<span style="color:#2ecc71;">[DEV] Set Level to ${lvl}!</span>`);
+                updateUI();
+                window.saveGame();
+            }
+        } else if (mainCmd === "/sp") {
+            let amt = parseInt(args[1], 10) || 10;
+            playerStats.sp += amt;
+            pushLog(`<span style="color:#2ecc71;">[DEV] Granted ${amt} Skill Points (SP)!</span>`);
+            updateUI();
+            window.saveGame();
+        } else if (mainCmd === "/prestige") {
+            let amt = parseInt(args[1], 10) || 1;
+            playerStats.prestigeCount += amt;
+            playerStats.prestigePoints += amt * 3;
+            pushLog(`<span style="color:#2ecc71;">[DEV] Added ${amt} Prestiges & ${amt*3} PP!</span>`);
+            updateUI();
+            if (typeof renderPrestigeTab === "function") renderPrestigeTab();
+            window.saveGame();
+        } else if (mainCmd === "/keys") {
+            let amt = parseInt(args[1], 10) || 8;
+            playerStats.equipKeys += amt;
+            playerStats.goldKeys += amt;
+            playerStats.matKeys += amt;
+            addEtcDrop("Gacha Key", amt);
+            pushLog(`<span style="color:#2ecc71;">[DEV] Granted +${amt} Keys!</span>`);
+            updateUI();
+            window.saveGame();
+        } else if (mainCmd === "/clear") {
+            logsHistory = [];
+            document.getElementById('log-box').innerHTML = "";
+            pushLog("<span style='color:#aaa;'>Logs cleared.</span>");
+        } else {
+            pushLog(`<span style="color:#e74c3c;">Unknown command. Type /dev to open full Debug GUI panel, or try: /gold, /level, /sp, /prestige, /keys, /clear</span>`);
+        }
+    };
+
+    window.switchDevTab = function(tabId) {
+        document.querySelectorAll('.dev-tab-content').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.dev-tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        let targetEl = document.getElementById(tabId);
+        if (targetEl) targetEl.style.display = 'block';
+        
+        let targetBtn = document.getElementById('btn-' + tabId);
+        if (targetBtn) targetBtn.classList.add('active');
+    };
+
+    window.devSetLevel = function() {
+        let val = parseInt(document.getElementById('dev-level-input').value, 10);
+        if (val > 0) {
+            playerStats.level = val;
+            playerStats.xp = 0;
+            playerStats.xpReq = Math.floor(250 * Math.pow(1.2, playerStats.level - 1));
+            let p = resolvePlayerStats();
+            playerStats.currentHp = p.maxHp;
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Set Level to ${val}!</span>`);
+            updateUI();
+            window.saveGame();
+        }
+    };
+
+    window.devSetSP = function() {
+        let val = parseInt(document.getElementById('dev-sp-input').value, 10);
+        if (val >= 0) {
+            playerStats.sp = val;
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Set SP to ${val}!</span>`);
+            updateUI();
+            window.saveGame();
+        }
+    };
+
+    window.devSetStage = function() {
+        let val = parseInt(document.getElementById('dev-stage-input').value, 10);
+        if (val > 0) {
+            playerStats.stage = val;
+            playerStats.killCount = 0;
+            mob = null;
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Set Stage to ${val}!</span>`);
+            updateUI();
+            window.saveGame();
+        }
+    };
+
+    window.devSetMaxStage = function() {
+        let val = parseInt(document.getElementById('dev-maxstage-input').value, 10);
+        if (val > 0) {
+            playerStats.maxStage = val;
+            playerStats.lifetimePeakStage = Math.max(playerStats.lifetimePeakStage || 1, val);
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Set Max Stage to ${val}!</span>`);
+            updateUI();
+            window.saveGame();
+        }
+    };
+
+    window.devAddCurrency = function(type) {
+        let inputId = `dev-${type}-val`;
+        if (type === 'gachakeys') inputId = 'dev-gachakeys-val';
+        let val = parseInt(document.getElementById(inputId).value, 10) || 0;
+        if (val <= 0) return;
+
+        if (type === 'gold') {
+            playerStats.coins += val;
+            playerStats.totalGoldEarned = (playerStats.totalGoldEarned || 0) + val;
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Added +${val.toLocaleString()} Gold</span>`);
+        } else if (type === 'luminous') {
+            addEtcDrop("Luminous Soul", val);
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Added +${val} Luminous Souls</span>`);
+        } else if (type === 'monster') {
+            addEtcDrop("Monster Soul", val);
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Added +${val} Monster Souls</span>`);
+        } else if (type === 'eridium') {
+            addEtcDrop("Eridium Shard", val);
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Added +${val} Eridium Shards</span>`);
+        } else if (type === 'astral') {
+            addEtcDrop("Astral Essence", val);
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Added +${val} Astral Essence</span>`);
+        } else if (type === 'catalyst') {
+            addEtcDrop("Catalyst Core", val);
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Added +${val} Catalyst Cores</span>`);
+        } else if (type === 'gachakeys') {
+            playerStats.equipKeys = Math.min(8, playerStats.equipKeys + val);
+            playerStats.goldKeys = Math.min(8, playerStats.goldKeys + val);
+            playerStats.matKeys = Math.min(8, playerStats.matKeys + val);
+            addEtcDrop("Gacha Key", val);
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Added +${val} Gacha Keys</span>`);
+        } else if (type === 'pp') {
+            playerStats.prestigePoints += val;
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Added +${val} Prestige Points</span>`);
+            if (typeof renderPrestigeTab === "function") renderPrestigeTab();
+        }
+        updateUI();
+        renderInventory();
+        window.saveGame();
+    };
+
+    window.devSpawnGear = function() {
+        let type = document.getElementById('dev-item-type').value;
+        let rarity = parseInt(document.getElementById('dev-item-rarity').value, 10);
+        let lvl = parseInt(document.getElementById('dev-item-lvl').value, 10) || 1;
+        let setName = document.getElementById('dev-item-set').value;
+
+        let maxBag = getMaxBagSlots();
+        if (inventory.EQUIP.length >= maxBag) {
+            pushHeaderToast("Your inventory is full!", "#e74c3c");
+            return;
+        }
+
+        let item = createItemObject(type, rarity, lvl, rarity);
+        if (setName) {
+            item.setName = setName;
+            item.name = item.name.replace(getTierName(item.statsRolled), `${setName} Set ${getTierName(item.statsRolled)}`);
+        }
+        item.locked = true;
+        inventory.EQUIP.push(item);
+        
+        pushLog(`<span style="color:#2ecc71;">[DEV GUI] Spawned Custom Item: ${item.name}</span>`);
+        renderInventory();
+        updateUI();
+        window.saveGame();
+    };
+
+    window.devSpawnUnique = function() {
+        let value = document.getElementById('dev-unique-sel').value;
+        let lvl = parseInt(document.getElementById('dev-unique-lvl').value, 10) || 1;
+        let maxBag = getMaxBagSlots();
+
+        if (value.startsWith("weapon")) {
+            if (inventory.EQUIP.length >= maxBag) { pushHeaderToast("Your inventory is full!", "#e74c3c"); return; }
+            let item = createItemObject("weapon", 5, lvl, 5);
+            if (value === "weapon-staff") {
+                item.isUniqueStaff = true;
+                item.isUniqueSword = false;
+                item.noun = "Phoenix Staff";
+                item.setName = null;
+                item.name = `🔥 Phoenix Ignition Staff (Lv. ${lvl})`;
+                item.desc = "Launches penetrating fireballs that deal 25% Attack damage (3s Cooldown).";
+            } else {
+                item.isUniqueSword = true;
+                item.isUniqueStaff = false;
+                item.noun = "Sanguine Reaver";
+                item.setName = null;
+                item.name = `🩸 Crimson Sanguine Reaver (Lv. ${lvl})`;
+                item.desc = "Strikes apply stacking Bleed (Max 5). Each stack ticks 4x per second. Striking at max stacks triggers Rupture, dealing 300% weapon damage and siphoning 10% Max HP.";
+            }
+            recalculateItemStats(item);
+            item.locked = true;
+            inventory.EQUIP.push(item);
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Spawned Unique Weapon: ${item.name}</span>`);
+        } else if (value.startsWith("art")) {
+            if (inventory.ARTIFACT.length >= maxBag) { pushHeaderToast("Your Artifact sack is full!", "#e74c3c"); return; }
+            let trait = value.substring(4);
+            let item = createItemObject("artifact", 3, lvl, 0, [trait]);
+            item.locked = true;
+            inventory.ARTIFACT.push(item);
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Spawned Unique Artifact: ${item.name}</span>`);
+        }
+        renderInventory();
+        updateUI();
+        window.saveGame();
+    };
+
+    window.devTriggerBuff = function(type) {
+        let duration = 36000;
+        if (type === 'frenzy') {
+            playerStats.frenzyTimer = duration;
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Triggered Frenzy Mode (10m)</span>`);
+        } else if (type === 'adrenaline') {
+            playerStats.adrenalineTimer = duration;
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Triggered Adrenaline Mode (10m)</span>`);
+        } else if (type === 'potions') {
+            playerStats.atkPotionTimer = duration; playerStats.atkPotionStrength = 0.35;
+            playerStats.hpPotionTimer = duration; playerStats.hpPotionStrength = 0.35;
+            playerStats.defPotionTimer = duration; playerStats.defPotionStrength = 0.35;
+            playerStats.hastePotionTimer = duration; playerStats.hastePotionStrength = 3;
+            pushLog(`<span style="color:#2ecc71;">[DEV GUI] Infused all elixirs at Supernal tier (10m)</span>`);
+        }
+        updateUI();
+    };
+
+    window.devHealFull = function() {
+        let p = resolvePlayerStats();
+        playerStats.currentHp = p.maxHp;
+        pushLog(`<span style="color:#2ecc71;">[DEV GUI] HP fully restored!</span>`);
+        updateUI();
+    };
+
+    window.devUnlockAllAchievements = function() {
+        if (!playerStats.unlockedAchievements) playerStats.unlockedAchievements = [];
+        window.AchievementsData.forEach(ach => {
+            if (!playerStats.unlockedAchievements.includes(ach.id)) {
+                playerStats.unlockedAchievements.push(ach.id);
+            }
+        });
+        window.recalculateAchievementTotals();
+        let p = resolvePlayerStats();
+        playerStats.currentHp = Math.min(playerStats.currentHp, p.maxHp);
+        pushLog(`<span style="color:#2ecc71;">[DEV GUI] Unlocked all achievements/trophies! Permanent bonuses applied!</span>`);
+        updateUI();
+        renderInventory();
+        window.saveGame();
+    };
+
+    window.devToggleGodMode = function() {
+        playerStats.godMode = !playerStats.godMode;
+        let btn = document.getElementById('btn-dev-godmode');
+        if (btn) {
+            if (playerStats.godMode) {
+                btn.innerText = "🛡️ God Mode (Invulnerability): ON";
+                btn.style.background = "#2ecc71";
+                btn.style.color = "#fff";
+                pushLog(`<span style="color:#2ecc71; font-weight:bold;">[DEV GUI] God Mode ENABLED. You cannot take damage.</span>`);
+            } else {
+                btn.innerText = "🛡️ God Mode (Invulnerability): OFF";
+                btn.style.background = "#333";
+                btn.style.color = "#aaa";
+                pushLog(`<span style="color:#e74c3c;">[DEV GUI] God Mode DISABLED.</span>`);
+            }
+        }
+    };
+
+window.loadGame = function() {
+    let data = localStorage.getItem('idle_game_v11');
         if (data) {
             try {
                 let parsed = JSON.parse(data);
@@ -12563,10 +13082,15 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                                         effects.push({ x: hero.x, y: hero.y - 18, text: `🔮 ABSORBED (-${Math.round(p.arcaneBarrier * 100)}%)`, color: "#9b59b6", life: 45 });
                                     }
 
-                                    playerStats.currentHp -= netDamage;
-                                    playerStats.damageTakenThisBattle = (playerStats.damageTakenThisBattle || 0) + netDamage;
-                                    effects.push({ x: hero.x, y: hero.y, text: "-" + window.formatNumber(netDamage), color: "#e74c3c", life: 40 });
-                                    if (playerStats.currentHp <= 0) { 
+                                    if (playerStats.godMode) {
+                                        netDamage = 0;
+                                        effects.push({ x: hero.x, y: hero.y, text: "🛡️ IMMUNE", color: "#3498db", life: 40 });
+                                    } else {
+                                        playerStats.currentHp -= netDamage;
+                                        playerStats.damageTakenThisBattle = (playerStats.damageTakenThisBattle || 0) + netDamage;
+                                        effects.push({ x: hero.x, y: hero.y, text: "-" + window.formatNumber(netDamage), color: "#e74c3c", life: 40 });
+                                    }
+                                    if (playerStats.currentHp <= 0) {
                                         if (checkArtifactTrait("second_wind") && !playerStats.usedSecondWind) {
                                             playerStats.usedSecondWind = true; playerStats.currentHp = Math.floor(p.maxHp * 0.5);
                                             playerStats.ankhTriggeredThisBattle = true;
