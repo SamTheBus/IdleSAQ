@@ -7111,11 +7111,36 @@ function formatStatRangeStr(item, statKey, isPct = false) {
 
     window.buildAltarModal = function() {
         let listEl = document.getElementById('altar-list');
-        listEl.innerHTML = ARTIFACT_POOL.map(art => {
-            return `<div class="bag-item" style="cursor:help; border-left: 3px solid #1abc9c;" onmouseenter="showDummyArtifact(event, '${art.trait}')" ontouchstart="showDummyArtifact(event, '${art.trait}')" onmouseleave="hideTooltip()">
-                    <div><strong style="color:#1abc9c;">⭐ UNIQUE ${art.name}</strong><br><span style="font-size:10px;color:#d2b4de;">Trait: ${art.desc}</span></div>
-                </div>`;
-        }).join("");
+        
+        let aegisArts = ["Blood-Soaked Chalice", "Aegis Core", "Riposte Gauntlet", "Phoenix Ankh", "Golem's Core", "Titan's Shield Grip", "Survivor's Adrenaline"];
+        let chronoArts = ["Philosopher's Anchor", "Windwalker Boots", "Sloth's Blessing", "Chrono Hourglass", "Fairy Queen's Crown", "Alchemist's Alembic", "Philosopher's Catalyst"];
+        let cyberArts = ["Berserker Stone", "Gilded Scarab", "Phantom Blade", "Zealot's Charm", "Dimensional Pouch", "Void Core", "Cauldron of Eternity"];
+        
+        let renderGroup = (title, bossName, itemsType, allowedList, color) => {
+            let filtered = ARTIFACT_POOL.filter(a => allowedList.includes(a.name));
+            let html = `
+                <div style="border: 1px solid ${color}; border-radius:6px; padding:10px; background: rgba(0,0,0,0.4); margin-bottom:12px;">
+                    <div style="color:${color}; font-weight:bold; font-size:13px; margin-bottom:4px; text-transform:uppercase; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+                        <span>🛡️ ${title}</span>
+                        <span style="font-size:10px; color:#aaa; font-weight:normal;">Equip: ${itemsType}</span>
+                    </div>
+                    <div style="font-size:10px; color:#888; font-style:italic; margin-bottom:8px;">Boss Target: ${bossName}</div>
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+            `;
+            html += filtered.map(art => `
+                <div class="bag-item" style="cursor:help; border-left: 3px solid ${color}; margin-bottom:0; background:#18181c; padding:6px 10px;" onmouseenter="showDummyArtifact(event, '${art.trait}')" ontouchstart="showDummyArtifact(event, '${art.trait}')" onmouseleave="hideTooltip()">
+                    <div><strong style="color:${color};">${art.name}</strong><br><span style="font-size:9.5px;color:#aaa;">${art.desc}</span></div>
+                </div>
+            `).join("");
+            html += `</div></div>`;
+            return html;
+        };
+
+        listEl.innerHTML = `
+            ${renderGroup("Aegis Rift Vault", "Aegis Goliath", "Overall / Chest / Leggings", aegisArts, "#3498db")}
+            ${renderGroup("Chrono Rift Vault", "Chronos Arbitrator", "Boots / Helmet", chronoArts, "#f1c40f")}
+            ${renderGroup("Cyber Rift Vault", "Nexus Overseer", "Weapon / Sub-weapon", cyberArts, "#ff007f")}
+        `;
     };
 
     window.showDummyArtifact = function(e, traitId) {
