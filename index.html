@@ -21,7 +21,7 @@
         }
 
         html, body {
-            overflow-x: hidden;
+            overflow-x: clip;
             max-width: 100%;
             width: 100%;
         }
@@ -7772,6 +7772,39 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     /* ==========================================================================
        8. FAIRY CLICK INTERACTION OVERHAUL (PHYSICS SPLASH + LIGHT BEAMS)
        ========================================================================== */
+    function checkAutoSalvage(item, silent = false) {
+        if (!item || item.type === "artifact" || item.statsRolled === "UNIQUE") return false;
+        if (playerStats.autoSalvageThreshold === undefined || playerStats.autoSalvageThreshold < 0) return false;
+        
+        if (item.statsRolled <= playerStats.autoSalvageThreshold) {
+            let rolledTier = item.statsRolled;
+            let scrapName = getScrapYieldName(rolledTier);
+            let yieldAmount = Math.floor(Math.random() * 3) + 1;
+            let activeHarvest = [];
+            
+            addEtcDrop(scrapName, yieldAmount);
+            activeHarvest.push(`x${yieldAmount} ${scrapName}`);
+
+            for (let t = rolledTier - 1; t >= 0; t--) {
+                if (Math.random() < 0.60) {
+                    let lowerYield = Math.floor(Math.random() * 2) + 1;
+                    let lowerName = getScrapYieldName(t);
+                    addEtcDrop(lowerName, lowerYield);
+                    activeHarvest.push(`x${lowerYield} ${lowerName}`);
+                }
+            }
+            
+            playerStats.itemsSalvaged = (playerStats.itemsSalvaged || 0) + 1;
+            
+            if (!silent) {
+                pushLog(`<span style='color:#e74c3c;'>[AUTO-SALVAGE]</span> Automatically deconstructed ${item.name} into: ${activeHarvest.join(", ")}`);
+                pushToast(item.name, item.statsRolled, getTierColor(item.statsRolled), true, 1, `⚡ Auto-Salvaged: <span style="color:#e74c3c;">${item.name}</span>`);
+            }
+            return true;
+        }
+        return false;
+    }
+
     function triggerFairyLoot(targetFairy) {
         let p = resolvePlayerStats();
         let maxBag = getMaxBagSlots();
@@ -7834,12 +7867,6 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             return;
         }
 
-        if (inventory.EQUIP.length >= maxBag) { 
-            pushHeaderToast(`Sacks Full! Soul gathered.`, "#e74c3c"); 
-            addEtcDrop("Monster Soul", 5); 
-            return; 
-        }
-
         let types = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
         let chosenType = types[Math.floor(Math.random() * types.length)];
         
@@ -7858,6 +7885,24 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         let stageScale = Math.floor((activeStage - 1) / 10) + 1; 
         let newItem = createItemObject(chosenType, statLinesCount, stageScale, 0);
         
+        if (checkAutoSalvage(newItem, false)) {
+            beams.push({
+                x: spawnX,
+                color: getTierColor(newItem.statsRolled),
+                life: 35,
+                maxLife: 35
+            });
+            window.checkAchievements();
+            updateUI(); 
+            return;
+        }
+
+        if (inventory.EQUIP.length >= maxBag) { 
+            pushHeaderToast(`Sacks Full! Soul gathered.`, "#e74c3c"); 
+            addEtcDrop("Monster Soul", 5); 
+            return; 
+        }
+
         inventory.EQUIP.push(newItem);
         pushLog(`<strong style='color:#ffb6c1;'>[FAIRY]</strong> Dropped: <span style='color:${getTierColor(newItem.statsRolled)};'>${newItem.name}</span>`, newItem.id);
 
@@ -7880,32 +7925,8 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     function generateEquipment(chosenType, statLinesCount, stageScale, sourceName, silent = false, minStars = 0) {
         let item = createItemObject(chosenType, statLinesCount, stageScale, minStars);
         
-        // Active real-time Auto-Salvage Check to bypass bag limits
-        if (item.type !== "artifact" && playerStats.autoSalvageThreshold !== undefined && playerStats.autoSalvageThreshold >= 0) {
-            if (item.statsRolled <= playerStats.autoSalvageThreshold) {
-                let rolledTier = item.statsRolled;
-                let scrapName = getScrapYieldName(rolledTier);
-                let yieldAmount = Math.floor(Math.random() * 3) + 1;
-                let activeHarvest = [];
-                
-                addEtcDrop(scrapName, yieldAmount);
-                activeHarvest.push(`x${yieldAmount} ${scrapName}`);
-
-                for (let t = rolledTier - 1; t >= 0; t--) {
-                    if (Math.random() < 0.60) {
-                        let lowerYield = Math.floor(Math.random() * 2) + 1;
-                        let lowerName = getScrapYieldName(t);
-                        addEtcDrop(lowerName, lowerYield);
-                        activeHarvest.push(`x${lowerYield} ${lowerName}`);
-                    }
-                }
-                
-                if (!silent) {
-                    pushLog(`<span style='color:#e74c3c;'>[AUTO-SALVAGE]</span> Automatically deconstructed ${item.name} into: ${activeHarvest.join(", ")}`);
-                    pushToast(item.name, item.statsRolled, getTierColor(item.statsRolled), true, 1, `⚡ Auto-Salvaged: <span style="color:#e74c3c;">${item.name}</span>`);
-                }
-                return; // Cease item generation here, preventing bag pollution
-            }
+        if (checkAutoSalvage(item, silent)) {
+            return; // Cease item generation here, preventing bag pollution
         }
         
         if (!silent) {
@@ -7930,6 +7951,100 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         // Trigger dynamic, high-fidelity gacha capsule drop celebration on purchase
         if (sourceName === "Gacha" && !silent && typeof window.spawnPurchaseCelebration === "function") {
             window.spawnPurchaseCelebration('gacha', getTierColor(item.statsRolled), item.statsRolled);
+        }
+
+        if(!silent) { window.checkAchievements(); renderInventory(); renderForgeTab(); updateUI(); }
+    }
+
+    function rollEquipmentDrop(isBossKill, silent = false, minStars = 0, isRareMob = false) {
+        let p = resolvePlayerStats();
+        let maxBag = getMaxBagSlots();
+        let allowArtifact = playerStats.isUberBoss && (Math.random() < 0.30); 
+        
+        let types = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
+        let allowedTraits = null;
+
+        if (playerStats.isUberBoss) {
+            let bossType = playerStats.currentUberBoss || 'guardian';
+            if (bossType === 'guardian') {
+                types = ["chest", "leggings", "overall"];
+                allowedTraits = ["vampirism", "defense", "parry_strike", "second_wind", "golem_stance", "titan_grip", "dodge_buff"];
+            } else if (bossType === 'chronos') {
+                types = ["boots", "helmet"];
+                allowedTraits = ["gold_hoard", "move_speed", "idle_spd", "extend_buffs", "fairy_wealth", "alchemist_alembic", "philosopher_catalyst"];
+            } else if (bossType === 'nexus') {
+                types = ["weapon", "subweapon"];
+                allowedTraits = ["frenzy", "magic_find", "echo_strike", "active_spd", "bag_space", "void_pull", "cauldron_eternity"];
+            }
+        }
+
+        let chosenType = allowArtifact ? "artifact" : types[Math.floor(Math.random() * types.length)];
+
+        let statLinesCount = 0; let luckMultiplier = p.qly; let roll = Math.random() * 100;
+        
+        if (minStars === 1) {
+            if (roll < (0.5 * luckMultiplier)) statLinesCount = 5; else if (roll < (5.0 * luckMultiplier)) statLinesCount = 4;
+            else if (roll < (25.0 * luckMultiplier)) statLinesCount = 3; else if (roll < (60.0 * luckMultiplier)) statLinesCount = 2; else statLinesCount = 1; 
+        } else {
+            if (roll < (0.02 * luckMultiplier)) statLinesCount = 5; else if (roll < (0.18 * luckMultiplier)) statLinesCount = 4;
+            else if (roll < (0.80 * luckMultiplier)) statLinesCount = 3; else if (roll < (4.00 * luckMultiplier)) statLinesCount = 2; 
+            else if (roll < (15.00 * luckMultiplier)) statLinesCount = 1; else statLinesCount = 0;
+        }
+
+        let activeStage = playerStats.stage;
+        if (playerStats.isDungeonMode && playerStats.currentDungeon) {
+            activeStage = playerStats.currentDungeonStage[playerStats.currentDungeon] || 1;
+        }
+        let stageScale = Math.floor((activeStage - 1) / 10) + 1; 
+        let sourceName = isBossKill ? "Boss" : (isRareMob ? "Rare" : "Route");
+        
+        // Against All Odds Check (5★ from standard campaign route non-boss non-rare mob)
+        if (!isBossKill && !isRareMob && !playerStats.isDungeonMode && !playerStats.isCrucibleMode && statLinesCount === 5) {
+            playerStats.hasTriggeredAgainstOdds = true;
+        }
+        
+        // Construct the item passing down the dynamic allowed target farm traits
+        let newItem = createItemObject(chosenType, statLinesCount, stageScale, minStars, allowedTraits);
+
+        // Active real-time Auto-Salvage Check (Evaluated BEFORE checking bags to avoid full bag lock-outs)
+        if (checkAutoSalvage(newItem, silent)) {
+            if(!silent) { window.checkAchievements(); renderInventory(); renderForgeTab(); updateUI(); }
+            return;
+        }
+
+        if (newItem.type === "artifact") {
+            if (inventory.ARTIFACT.length >= maxBag) {
+                if(!silent) { pushHeaderToast(`Artifact Sack Full! Astral Essence gained.`, "#e74c3c"); addEtcDrop("Astral Essence", 1); }
+                return;
+            }
+        } else {
+            if (inventory.EQUIP.length >= maxBag) {
+                if(!silent) { pushHeaderToast(`Bag Full! Soul gained.`, "#e74c3c"); addEtcDrop(isBossKill ? "Ancient Core" : (isRareMob ? "Luminous Soul" : "Monster Soul"), 1); }
+                return;
+            }
+        }
+        
+        if (!silent) {
+            if (newItem.type === "artifact") {
+                pushLog(`<strong style='color:#1abc9c;'>⭐ UNIQUE ARTIFACT DROPPED!</strong> Extracted: <span style='color:#1abc9c;'>${newItem.name}</span>!`, newItem.id);
+            } else if (sourceName === "Gacha") { 
+                pushLog(`<strong style='color:#f1c40f;'>[GACHA]</strong> Dispensed: <span style='color:${getTierColor(newItem.statsRolled)};'>${newItem.name}</span>`, newItem.id); 
+            } else if (sourceName === "Rare") {
+                pushLog(`<strong style='color:#ffb6c1;'>RARE ENEMY KILLED!</strong> Found: <span style='color:${getTierColor(newItem.statsRolled)};'>${newItem.name}</span>`, newItem.id); 
+            } else { 
+                pushLog(`<strong style='color:#ff9f43;'>BOSS KILLED!</strong> Found: <span style='color:${getTierColor(newItem.statsRolled)};'>${newItem.name}</span>`, newItem.id); 
+            }
+        }
+
+        if(!silent) pushToast(newItem.name, newItem.statsRolled, getTierColor(newItem.statsRolled));
+        if (newItem.type === "artifact") {
+            inventory.ARTIFACT.push(newItem);
+        } else {
+            inventory.EQUIP.push(newItem);
+        }
+
+        if (sourceName === "Gacha" && !silent && typeof window.spawnPurchaseCelebration === "function") {
+            window.spawnPurchaseCelebration('gacha', getTierColor(newItem.statsRolled), newItem.statsRolled);
         }
 
         if(!silent) { window.checkAchievements(); renderInventory(); renderForgeTab(); updateUI(); }
