@@ -7603,6 +7603,24 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         else {
             let isArt = slotKey.startsWith("art"); el.className = isArt ? "slots-card artifact-slot equipped" : "slots-card equipped";
             el.style.borderColor = getTierColor(item.statsRolled);
+
+            // Apply glowing border and dark crimson/amber background underlays on Paper Doll
+            let isUniqueWeapon = item.isUniqueSword || item.isUniqueStaff;
+            if (isUniqueWeapon) {
+                if (item.isUniqueSword) {
+                    el.style.background = "linear-gradient(135deg, #2a0000, #050000)";
+                    el.style.borderColor = "#960018";
+                    el.style.boxShadow = "inset 0 0 8px #5c000c, 0 0 10px rgba(150,0,24,0.7)";
+                } else if (item.isUniqueStaff) {
+                    el.style.background = "linear-gradient(135deg, #2a1400, #050200)";
+                    el.style.borderColor = "#e67e22";
+                    el.style.boxShadow = "inset 0 0 8px #853c00, 0 0 10px rgba(230,126,34,0.7)";
+                }
+            } else {
+                el.style.background = "";
+                el.style.boxShadow = "";
+            }
+
             let tierLabel = item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★ ${getTierName(item.statsRolled)}`;
             let temperTag = item.temperLevel > 0 ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>` : "";
 
@@ -9403,9 +9421,23 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 let nameColor = getTierColor(item.statsRolled); let temperTag = item.temperLevel > 0 ? ` [+${item.temperLevel}]` : "";
                 let lockTag = item.locked ? " 🔒" : "";
                 let bgStyle = forgeSelectedItem && forgeSelectedItem.id === item.id ? "background:#1e2a38; border: 1px solid #1abc9c;" : "";
+                
+                // Set Diablo Uber Unique visual profiles in Forge Selection Lists
+                let uniqueStyle = "";
+                let isUniqueWeapon = item.isUniqueSword || item.isUniqueStaff;
+                if (isUniqueWeapon) {
+                    if (item.isUniqueSword) {
+                        uniqueStyle = `background: linear-gradient(135deg, #1f0303, #070000); border: 1px solid #960018; box-shadow: inset 0 0 6px #5c000c, 0 0 8px rgba(150,0,24,0.4);`;
+                    } else if (item.isUniqueStaff) {
+                        uniqueStyle = `background: linear-gradient(135deg, #1c0e00, #070200); border: 1px solid #e67e22; box-shadow: inset 0 0 6px #853c00, 0 0 8px rgba(230,126,34,0.4);`;
+                    }
+                }
+                let finalStyle = bgStyle ? `${bgStyle} ${uniqueStyle}` : uniqueStyle;
+                let inlineStyle = finalStyle ? `style="${finalStyle}"` : "";
+
                 let eqBadge = item.isEquippedSlot ? `<span style="background:#c0392b; color:white; padding:1px 3px; border-radius:2px; font-size:8px;">[EQUIPPED]</span> ` : "";
                 let rarityLabel = isArt ? "UNIQUE" : `${item.statsRolled}★`;
-                return `<div class="bag-item" style="cursor:pointer; ${bgStyle}" onclick="selectForgeItem(${item.id})" onmouseenter="showForgeTooltip(event, ${item.id})" onmouseleave="hideTooltip()" ontouchstart="showForgeTooltip(event, ${item.id})">
+                return `<div class="bag-item" ${inlineStyle} onclick="selectForgeItem(${item.id})" onmouseenter="showForgeTooltip(event, ${item.id})" onmouseleave="hideTooltip()" ontouchstart="showForgeTooltip(event, ${item.id})">
                     <div>${eqBadge}<strong style="color:${nameColor};">${item.name}${temperTag}${lockTag}</strong><br><span style="font-size:10px;color:#aaa;">${item.type.toUpperCase()} | ${rarityLabel}</span></div>
                 </div>`;
             }).join("");
@@ -10599,7 +10631,19 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 }
 
                 let details = item.type === "artifact" ? `<span style="font-size:10px;color:#d2b4de;font-weight:bold;">Trait: ${item.desc}</span>${lockWarning}` : `<span style="font-size:10px;color:#aaa;">Slot: ${typeText} | <span style="color:${nameColor};font-weight:bold;">${tierStr}</span></span>${lockWarning}`;
-                return `<div class="bag-item" onmouseenter="showInventoryTooltip(event, ${item.id})" ontouchstart="showInventoryTooltip(event, ${item.id})" onmouseleave="hideTooltip()">
+                
+                // Set Diablo Uber Unique visual profiles in Sack Lists
+                let uniqueStyle = "";
+                let isUniqueWeapon = item.isUniqueSword || item.isUniqueStaff;
+                if (isUniqueWeapon) {
+                    if (item.isUniqueSword) {
+                        uniqueStyle = `style="background: linear-gradient(135deg, #1f0303, #070000); border: 1px solid #960018; box-shadow: inset 0 0 6px #5c000c, 0 0 8px rgba(150,0,24,0.4);"`;
+                    } else if (item.isUniqueStaff) {
+                        uniqueStyle = `style="background: linear-gradient(135deg, #1c0e00, #070200); border: 1px solid #e67e22; box-shadow: inset 0 0 6px #853c00, 0 0 8px rgba(230,126,34,0.4);"`;
+                    }
+                }
+
+                return `<div class="bag-item" ${uniqueStyle} onmouseenter="showInventoryTooltip(event, ${item.id})" ontouchstart="showInventoryTooltip(event, ${item.id})" onmouseleave="hideTooltip()">
                     <div><strong style="color:${nameColor};">${item.name}${temperTag}${lockTag}</strong>${comparisonBadge}<br>${details}</div>
                     <div style="position:relative; z-index:10; white-space:nowrap;">
                         <button class="btn-action" ${disabledAttr} onclick="equipItem(${item.id})">Equip</button>
