@@ -36,10 +36,22 @@
         }
         
         #top-nav {
+            #top-nav {
             background: #000; padding: 6px 12px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color);
         }
         
-        canvas { display: block; background: #0c0f12; width: 100%; height: auto; border-radius: 0; cursor: pointer; }
+        canvas { 
+            display: block; 
+            background: #0c0f12; 
+            width: 100%; 
+            height: auto; 
+            border-radius: 0; 
+            cursor: pointer; 
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+        }
         
         #control-bar {
             display: flex; justify-content: space-between; align-items: center;
@@ -4218,10 +4230,10 @@ window.onload = function() {
     const isMobile = window.innerWidth <= 600;
     if (isMobile) {
         canvas.width = 420;
-        canvas.height = 250;
+        canvas.height = 320;
     } else {
         canvas.width = 750;
-        canvas.height = 250;
+        canvas.height = 320;
     }
 
     /* ==========================================================================
@@ -4292,7 +4304,7 @@ window.onload = function() {
     let forgeSelectedItem = null;
     let forgeMode = 'temper'; 
 
-    let hero = { x: 40, y: 155, w: 25, h: 35, attackTimer: 0, slashFrame: false };
+    let hero = { x: 40, y: 205, w: 25, h: 35, attackTimer: 0, slashFrame: false };
     let mob = null;
     let effects = [];
     let particles = []; 
@@ -5882,7 +5894,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     for(let i=0; i<12; i++) { 
         bgScenery.push({ 
             x: Math.random() * canvas.width, 
-            y: 180, 
+            y: 230, 
             type: Math.random() > 0.5 ? 'tree' : 'bush', 
             size: Math.random() * 0.5 + 0.5,
             seed: Math.random()
@@ -5892,7 +5904,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         let fgType = Math.random();
         fgScenery.push({ 
             x: Math.random() * canvas.width, 
-            y: 190 + Math.random() * 60, 
+            y: 240 + Math.random() * 60, 
             type: fgType > 0.8 ? 'bush' : (fgType > 0.5 ? 'flower' : 'grass'), 
             size: Math.random() * 0.7 + 0.5, 
             color: flowerColors[Math.floor(Math.random() * flowerColors.length)],
@@ -7676,7 +7688,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             if (playerStats.killCount >= playerStats.targetsRequired) {
                 // Wave Elite Boss
                 let hp = Math.floor(100 * scale);
-                mob = { x: 750, y: 90, w: 45, h: 75, type: "dungeon_boss", isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor((3 + (3 * dmgScale)) * 5.0), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
+                mob = { x: 750, y: 140, w: 45, h: 75, type: "dungeon_boss", isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor((3 + (3 * dmgScale)) * 5.0), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
             } else {
                 // Bespoke Crucible Thematic pool: rift_drifter, star_weaver, or void_wraith
                 let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
@@ -7684,7 +7696,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
                 
                 let hp = Math.floor(18 * scale);
-                mob = { x: 750, y: isFlying ? 95 : 145, w: 25, h: 30, type: "mob", visualType: chosenVisual, isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor((2 + dmgScale) * 4.0), flashTimer: 0, isStopped: false, attackCooldown: 90, attackTimer: 90 };
+                mob = { x: 750, y: isFlying ? 145 : 195, w: 25, h: 30, type: "mob", visualType: chosenVisual, isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor((2 + dmgScale) * 4.0), flashTimer: 0, isStopped: false, attackCooldown: 90, attackTimer: 90 };
             }
             return;
         }
@@ -7707,7 +7719,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             
             if (playerStats.killCount >= playerStats.targetsRequired) {
                 let hp = 70 * scale * hpScale;
-                mob = { x: 750, y: 90, w: 50, h: 90, type: "dungeon_boss", isRare: false, hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor((2.5 + (3 * dmgScale)) * 5.0), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
+                mob = { x: 750, y: 140, w: 50, h: 90, type: "dungeon_boss", isRare: false, hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor((2.5 + (3 * dmgScale)) * 5.0), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
                 
                 // Reset session combat achievement variables
                 playerStats.hasClickedThisBattle = false;
@@ -7730,7 +7742,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 
                 mob = { 
                     x: 750, 
-                    y: isFlying ? 100 : 145, 
+                    y: isFlying ? 150 : 195, 
                     w: 25, 
                     h: 40, 
                     type: "mob", 
@@ -7753,7 +7765,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                     let hp = Math.floor(3 * (60 * scale));
                     let dmg = Math.floor((4 + (3 * dmgScale)) * 6.0);
                     mob = { 
-                        x: 750, y: 65, w: 60, h: 100, 
+                        x: 750, y: 115, w: 60, h: 100, 
                         type: "rift_guardian", 
                         isRare: false, 
                         hp: hp, maxHp: hp, 
@@ -7767,7 +7779,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 } else {
                     // Standard Campaign Boss Buffed: Base HP increased to 60, Damage Multiplier to 5.8
                     let baseBossHp = 60 * scale;
-                    mob = { x: 750, y: 100, w: 40, h: 80, type: "boss", isRare: false, visualTier: tier, hp: Math.floor(baseBossHp), maxHp: Math.floor(baseBossHp), damage: Math.floor((2 + (3 * dmgScale)) * 5.8), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
+                    mob = { x: 750, y: 150, w: 40, h: 80, type: "boss", isRare: false, visualTier: tier, hp: Math.floor(baseBossHp), maxHp: Math.floor(baseBossHp), damage: Math.floor((2 + (3 * dmgScale)) * 5.8), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
                     pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[STAGE BOSS]</span> blocked your transit route!`);
                 }
                 
@@ -7792,7 +7804,7 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 let visualType = choices[Math.floor(Math.random() * choices.length)];
 
                 // Standard Mob Buffed: Base HP increased to 15, Damage Multiplier to 5.2
-                mob = { x: 750, y: isMelee ? 145 : 160, w: isMelee ? 25 : 30, h: isMelee ? 40 : 25, type: "mob", visualType: visualType, isRare: isRare, isMelee: isMelee, visualTier: tier, hp: Math.floor(15 * scale * hpMult), maxHp: Math.floor(15 * scale * hpMult), damage: Math.floor((1 + (1 * dmgScale)) * 5.2 * dmgMult), flashTimer: 0, isStopped: false, attackCooldown: 90, attackTimer: 90 };
+                mob = { x: 750, y: isMelee ? 195 : 210, w: isMelee ? 25 : 30, h: isMelee ? 40 : 25, type: "mob", visualType: visualType, isRare: isRare, isMelee: isMelee, visualTier: tier, hp: Math.floor(15 * scale * hpMult), maxHp: Math.floor(15 * scale * hpMult), damage: Math.floor((1 + (1 * dmgScale)) * 5.2 * dmgMult), flashTimer: 0, isStopped: false, attackCooldown: 90, attackTimer: 90 };
                 if (isRare) {
                     pushLog(`<span style='color:#ffb6c1; font-weight:bold;'>✨ A glowing Rare enemy appears!</span>`);
                     if (p.hasSingularitySet) {
@@ -10793,7 +10805,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                     let def = 30 + (35 * scaleVal);
                     
                     mob = {
-                        x: canvas.width - 230, y: 15, w: 180, h: 160,
+                        x: canvas.width - 230, y: 65, w: 180, h: 160,
                         type: "prestige_boss",
                         isRare: false,
                         hp: Math.floor(hp), maxHp: Math.floor(hp),
@@ -11082,7 +11094,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 activeFairies.push({
                     id: idCounter++,
                     x: -50 - (i * 35), // Spatially offset so they fly in a tidy line
-                    y: 30 + Math.random() * 60,
+                    y: 80 + Math.random() * 60,
                     offset: i * 2, // Desynchronizes wing flutter and hover waves
                     speed: randFloat(1.0, 1.4), // Slightly offset individual velocities
                     color: i === 0 ? "#ffb6c1" : (i === 1 ? "#74b9ff" : (i === 2 ? "#55efc4" : "#ffeaa7")) // Pink, Blue, Green, Yellow neon glows
@@ -11272,33 +11284,33 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
         const penHero = 1.8;        // Player character, weapons, and standard mobs
         const penBoss = 2.4;        // Dungeon bosses and Rift Guardians
 
-        // 1. SKY & BACKGROUND FILL
+        // 1. SKY & BACKGROUND FILL (Shifted down to Y=230)
         if (playerStats.isUberBoss) {
             // Swirling Aether Void Arena Background
-            let skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, 230);
             skyGrad.addColorStop(0, "#0d011a");
             skyGrad.addColorStop(0.5, "#25033c");
             skyGrad.addColorStop(1, "#030005");
             ctx.fillStyle = skyGrad; 
-            ctx.fillRect(0, 0, canvas.width, 180);
+            ctx.fillRect(0, 0, canvas.width, 230);
 
-            // Swirling black hole singularity core in center
+            // Swirling black hole singularity core in center (shifted down)
             let singPulse = 45 + Math.sin(Date.now() / 150) * 10;
-            let singGrad = ctx.createRadialGradient(canvas.width / 2, 80, 5, canvas.width / 2, 80, singPulse);
+            let singGrad = ctx.createRadialGradient(canvas.width / 2, 110, 5, canvas.width / 2, 110, singPulse);
             singGrad.addColorStop(0, "#000000");
             singGrad.addColorStop(0.3, "#e84393");
             singGrad.addColorStop(0.7, "rgba(142, 68, 173, 0.15)");
             singGrad.addColorStop(1, "rgba(0,0,0,0)");
             ctx.fillStyle = singGrad;
             ctx.beginPath();
-            ctx.arc(canvas.width / 2, 80, singPulse, 0, Math.PI * 2);
+            ctx.arc(canvas.width / 2, 110, singPulse, 0, Math.PI * 2);
             ctx.fill();
 
             // Swirling gravitational distortion orbital ring
             ctx.strokeStyle = "rgba(155, 89, 182, 0.45)";
             ctx.lineWidth = 1.5;
             ctx.save();
-            ctx.translate(canvas.width / 2, 80);
+            ctx.translate(canvas.width / 2, 110);
             ctx.rotate(Date.now() / 500);
             ctx.beginPath();
             ctx.ellipse(0, 0, singPulse * 1.6, singPulse * 0.4, 0, 0, Math.PI * 2);
@@ -11306,12 +11318,12 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.restore();
         } else if (playerStats.isPrestigeBossMode) {
             // Gothic Lava Castle Arena Background
-            let skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, 230);
             skyGrad.addColorStop(0, "#0a0302"); // Vaulted castle ceiling shadow
             skyGrad.addColorStop(0.5, "#2d0802"); // Volcanic masonry haze
             skyGrad.addColorStop(1, "#9e2a02"); // Horizon molten under-glow
             ctx.fillStyle = skyGrad; 
-            ctx.fillRect(0, 0, canvas.width, 180);
+            ctx.fillRect(0, 0, canvas.width, 230);
 
             // Draw Massive Gothic Stone Arches and Columns
             ctx.fillStyle = "#0c0302"; 
@@ -11319,9 +11331,9 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.lineWidth = 1.5;
 
             for (let i = 40; i < canvas.width; i += 180) {
-                // Stone Support Pillar
+                // Stone Support Pillar (shifted down)
                 ctx.beginPath();
-                ctx.rect(i, 0, 35, 180);
+                ctx.rect(i, 0, 35, 230);
                 ctx.fill();
                 ctx.stroke();
 
@@ -11340,7 +11352,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.strokeStyle = "#1b1412";
             ctx.lineWidth = 2.5;
             for (let x = 110; x < canvas.width; x += 180) {
-                let chainLength = 60 + Math.sin(Date.now() / 400 + x) * 15; 
+                let chainLength = 90 + Math.sin(Date.now() / 400 + x) * 15; 
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, chainLength);
@@ -11357,49 +11369,49 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             }
 
             // Boiling lava river running behind the stone floor line
-            let lavaHorizonGrad = ctx.createLinearGradient(0, 160, 0, 180);
+            let lavaHorizonGrad = ctx.createLinearGradient(0, 210, 0, 230);
             lavaHorizonGrad.addColorStop(0, "rgba(230, 126, 34, 0)");
             lavaHorizonGrad.addColorStop(0.5, "#e67e22");
             lavaHorizonGrad.addColorStop(1, "#f1c40f");
             ctx.fillStyle = lavaHorizonGrad;
-            ctx.fillRect(0, 160, canvas.width, 20);
+            ctx.fillRect(0, 210, canvas.width, 20);
 
         } else if (playerStats.isCrucibleMode) {
             // Pulsing Astral Cosmic Void
-            let skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, 230);
             skyGrad.addColorStop(0, "#05010c");
             skyGrad.addColorStop(1, "#150221");
             ctx.fillStyle = skyGrad; 
-            ctx.fillRect(0, 0, canvas.width, 180);
+            ctx.fillRect(0, 0, canvas.width, 230);
 
             // Glistening Space dust
             ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
             for (let i = 0; i < 25; i++) {
                 let size = (Math.sin(Date.now() / 200 + i) * 0.5 + 0.5) * 1.5;
-                ctx.fillRect((i * 47) % canvas.width, (i * 13) % 150, size, size);
+                ctx.fillRect((i * 47) % canvas.width, (i * 13) % 190, size, size);
             }
 
             // Pulsing Nebulae Ring (preserves toon ink trace)
             let pulseRad = 65 + Math.sin(Date.now() / 250) * 15;
-            let spaceGlow = ctx.createRadialGradient(canvas.width / 2, 80, 2, canvas.width / 2, 80, pulseRad);
+            let spaceGlow = ctx.createRadialGradient(canvas.width / 2, 110, 2, canvas.width / 2, 110, pulseRad);
             spaceGlow.addColorStop(0, "rgba(155, 89, 182, 0.45)");
             spaceGlow.addColorStop(0.5, "rgba(232, 67, 147, 0.15)");
             spaceGlow.addColorStop(1, "rgba(155, 89, 182, 0)");
             
             ctx.fillStyle = spaceGlow;
             ctx.beginPath();
-            ctx.arc(canvas.width / 2, 80, pulseRad, 0, Math.PI * 2);
+            ctx.arc(canvas.width / 2, 110, pulseRad, 0, Math.PI * 2);
             ctx.fill();
         } else if (playerStats.isDungeonMode) {
-            let caveGrad = ctx.createLinearGradient(0, 0, 0, 180);
+            let caveGrad = ctx.createLinearGradient(0, 0, 0, 230);
             if (playerStats.currentDungeon === 'gold') { caveGrad.addColorStop(0, "#0f0800"); caveGrad.addColorStop(1, "#1d1205"); } 
             else if (playerStats.currentDungeon === 'mat') { caveGrad.addColorStop(0, "#040d08"); caveGrad.addColorStop(1, "#0d2115"); } 
             else { caveGrad.addColorStop(0, "#06070a"); caveGrad.addColorStop(1, "#12181f"); }
-            ctx.fillStyle = caveGrad; ctx.fillRect(0, 0, canvas.width, 180);
+            ctx.fillStyle = caveGrad; ctx.fillRect(0, 0, canvas.width, 230);
 
-            // Cavern backwall structure lines
+            // Cavern backwall structure lines (shifted to Y=230)
             ctx.fillStyle = playerStats.currentDungeon === 'gold' ? "#140a00" : (playerStats.currentDungeon === 'mat' ? "#050f0a" : "#0d1117");
-            ctx.beginPath(); ctx.moveTo(0, 180); ctx.quadraticCurveTo(180, 20, 380, 180); ctx.quadraticCurveTo(580, 10, 800, 180); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(0, 230); ctx.quadraticCurveTo(180, 40, 380, 230); ctx.quadraticCurveTo(580, 20, 800, 230); ctx.fill();
             
             // Backwall Cavern Ink Outline
             ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
@@ -11408,21 +11420,21 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             if (playerStats.currentDungeon === 'gold') {
                 ctx.strokeStyle = "#1b1108"; ctx.lineWidth = 6;
                 for (let i = 100; i < canvas.width; i += 220) {
-                    ctx.beginPath(); ctx.moveTo(i - 40, 180); ctx.lineTo(i - 40, 60); ctx.lineTo(i + 40, 60); ctx.lineTo(i + 40, 180); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(i - 40, 230); ctx.lineTo(i - 40, 90); ctx.lineTo(i + 40, 90); ctx.lineTo(i + 40, 230); ctx.stroke();
                     ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
                 }
             } else if (playerStats.currentDungeon === 'equip') {
                 ctx.strokeStyle = "#1b2126"; ctx.lineWidth = 2;
                 for (let i = 180; i < canvas.width; i += 250) {
-                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.bezierCurveTo(i - 10, 50, i + 15, 100, i, 140); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.bezierCurveTo(i - 10, 70, i + 15, 130, i, 190); ctx.stroke();
                     ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
                     
                     ctx.fillStyle = "#13181c"; 
-                    ctx.beginPath(); ctx.rect(i - 6, 140, 12, 8); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.rect(i - 6, 190, 12, 8); ctx.fill(); ctx.stroke();
                 }
             }
         } else {
-            let skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, 230);
             if (playerStats.isBossMode) { skyGrad.addColorStop(0, "#140618"); skyGrad.addColorStop(1, "#030005"); } 
             else {
                 if (tier===0) { skyGrad.addColorStop(0, "#2c3e50"); skyGrad.addColorStop(1, "#3498db"); }
@@ -11431,147 +11443,168 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 else if (tier===3) { skyGrad.addColorStop(0, "#082113"); skyGrad.addColorStop(1, "#193623"); }
                 else { skyGrad.addColorStop(0, "#070313"); skyGrad.addColorStop(1, "#020005"); }
             }
-            ctx.fillStyle = skyGrad; ctx.fillRect(0, 0, canvas.width, 180);
+            ctx.fillStyle = skyGrad; ctx.fillRect(0, 0, canvas.width, 230);
 
-            // Outdoor Parallax Layers & Skylines
+            // Outdoor Parallax Layers & Skylines (Shifted proportionally by +50px)
             if (tier === 0) {
                 ctx.fillStyle = "rgba(255,255,255,0.06)";
                 let cloudScroll1 = (Date.now() / 250) % (canvas.width + 100) - 50;
                 let cloudScroll2 = (Date.now() / 400 + 300) % (canvas.width + 100) - 50;
                 
-                // Cloud 1 with Ink Trace
-                ctx.beginPath(); ctx.arc(cloudScroll1, 35, 20, 0, Math.PI*2); ctx.arc(cloudScroll1 + 25, 30, 25, 0, Math.PI*2); ctx.arc(cloudScroll1 - 25, 38, 15, 0, Math.PI*2); ctx.fill();
+                // Cloud 1 with Ink Trace (shifted down)
+                ctx.beginPath(); ctx.arc(cloudScroll1, 55, 20, 0, Math.PI*2); ctx.arc(cloudScroll1 + 25, 50, 25, 0, Math.PI*2); ctx.arc(cloudScroll1 - 25, 58, 15, 0, Math.PI*2); ctx.fill();
                 ctx.strokeStyle = "rgba(0, 0, 0, 0.15)"; ctx.lineWidth = penSky; ctx.stroke();
                 
                 // Cloud 2 with Ink Trace
-                ctx.beginPath(); ctx.arc(cloudScroll2, 60, 15, 0, Math.PI*2); ctx.arc(cloudScroll2 + 18, 55, 20, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(cloudScroll2, 80, 15, 0, Math.PI*2); ctx.arc(cloudScroll2 + 18, 75, 20, 0, Math.PI*2); ctx.fill();
                 ctx.stroke();
 
-                // Far Hills
-        ctx.fillStyle = "#1e3d29"; ctx.beginPath(); ctx.moveTo(0, 180); ctx.quadraticCurveTo(100, 110, 220, 180); ctx.quadraticCurveTo(350, 95, 480, 180); ctx.quadraticCurveTo(620, 115, 800, 180); ctx.fill();
-        ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
-        
-        // Near Hills
-        ctx.fillStyle = "#154f2c"; ctx.beginPath(); ctx.moveTo(0, 180); ctx.quadraticCurveTo(150, 130, 320, 180); ctx.quadraticCurveTo(500, 120, 680, 180); ctx.quadraticCurveTo(740, 150, 800, 180); ctx.fill();
-        ctx.stroke();
-    } else if (tier === 1) {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-        for(let i = 0; i < 20; i++) { ctx.fillRect((i * 37) % canvas.width, (i * 13) % 90, 1, 1); }
-        
-        // Jagged Peak Mountains (Background)
-        ctx.fillStyle = "#1c2833"; ctx.beginPath(); 
-        ctx.moveTo(0, 180); 
-        ctx.lineTo(100, 80); 
-        ctx.lineTo(180, 130); 
-        ctx.lineTo(310, 60); 
-        ctx.lineTo(450, 150); 
-        ctx.lineTo(580, 75); 
-        ctx.lineTo(700, 140); 
-        ctx.lineTo(800, 180); 
-        ctx.lineTo(0, 180);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
-        
-        // Background Snowy Caps (Rendered individually with closePath)
-        ctx.fillStyle = "#ecf0f1";
-        ctx.lineWidth = penSky;
-        // Peak 1 cap
-        ctx.beginPath(); ctx.moveTo(100, 80); ctx.lineTo(85, 95); ctx.lineTo(115, 95); ctx.closePath(); ctx.fill(); ctx.stroke();
-        // Peak 2 cap
-        ctx.beginPath(); ctx.moveTo(310, 60); ctx.lineTo(290, 85); ctx.lineTo(330, 85); ctx.closePath(); ctx.fill(); ctx.stroke();
-        // Peak 3 cap
-        ctx.beginPath(); ctx.moveTo(580, 75); ctx.lineTo(565, 90); ctx.lineTo(595, 90); ctx.closePath(); ctx.fill(); ctx.stroke();
-        
-        // Midground Mountains
-        ctx.fillStyle = "#2c3e50"; ctx.beginPath(); 
-        ctx.moveTo(0, 180); 
-        ctx.lineTo(150, 110); 
-        ctx.lineTo(280, 180); 
-        ctx.lineTo(440, 100); 
-        ctx.lineTo(600, 180); 
-        ctx.lineTo(700, 120); 
-        ctx.lineTo(800, 180); 
-        ctx.lineTo(0, 180);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
+                // Far Hills (shifted down)
+                ctx.fillStyle = "#1e3d29"; ctx.beginPath(); ctx.moveTo(0, 230); ctx.quadraticCurveTo(100, 160, 220, 230); ctx.quadraticCurveTo(350, 145, 480, 230); ctx.quadraticCurveTo(620, 165, 800, 230); ctx.fill();
+                ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
+                
+                // Near Hills (shifted down)
+                ctx.fillStyle = "#154f2c"; ctx.beginPath(); ctx.moveTo(0, 230); ctx.quadraticCurveTo(150, 180, 320, 230); ctx.quadraticCurveTo(500, 170, 680, 230); ctx.quadraticCurveTo(740, 200, 800, 230); ctx.fill();
+                ctx.stroke();
+            } else if (tier === 1) {
+                ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+                for(let i = 0; i < 20; i++) { ctx.fillRect((i * 37) % canvas.width, (i * 13) % 130, 1, 1); }
+                
+                // Jagged Peak Mountains (shifted down)
+                ctx.fillStyle = "#1c2833"; ctx.beginPath(); 
+                ctx.moveTo(0, 230); 
+                ctx.lineTo(100, 130); 
+                ctx.lineTo(180, 180); 
+                ctx.lineTo(310, 110); 
+                ctx.lineTo(450, 200); 
+                ctx.lineTo(580, 125); 
+                ctx.lineTo(700, 190); 
+                ctx.lineTo(800, 230); 
+                ctx.lineTo(0, 230);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
+                
+                // Background Snowy Caps (shifted down)
+                ctx.fillStyle = "#ecf0f1";
+                ctx.lineWidth = penSky;
+                ctx.beginPath(); ctx.moveTo(100, 130); ctx.lineTo(85, 145); ctx.lineTo(115, 145); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(310, 110); ctx.lineTo(290, 135); ctx.lineTo(330, 135); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(580, 125); ctx.lineTo(565, 140); ctx.lineTo(595, 140); ctx.closePath(); ctx.fill(); ctx.stroke();
+                
+                // Midground Mountains (shifted down)
+                ctx.fillStyle = "#2c3e50"; ctx.beginPath(); 
+                ctx.moveTo(0, 230); 
+                ctx.lineTo(150, 160); 
+                ctx.lineTo(280, 230); 
+                ctx.lineTo(440, 150); 
+                ctx.lineTo(600, 230); 
+                ctx.lineTo(700, 170); 
+                ctx.lineTo(800, 230); 
+                ctx.lineTo(0, 230);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
 
-        // Midground Snowy Caps (Crisp, cel-shaded caps on the midground mountains as well!)
-        ctx.fillStyle = "#ecf0f1";
-        ctx.lineWidth = penSky;
-        // Midground Peak 1 cap
-        ctx.beginPath(); ctx.moveTo(150, 110); ctx.lineTo(135, 122); ctx.lineTo(165, 122); ctx.closePath(); ctx.fill(); ctx.stroke();
-        // Midground Peak 2 cap
-        ctx.beginPath(); ctx.moveTo(440, 100); ctx.lineTo(420, 115); ctx.lineTo(460, 115); ctx.closePath(); ctx.fill(); ctx.stroke();
-        // Midground Peak 3 cap
-        ctx.beginPath(); ctx.moveTo(700, 120); ctx.lineTo(685, 130); ctx.lineTo(715, 130); ctx.closePath(); ctx.fill(); ctx.stroke();
-    } else if (tier === 2) {
-        ctx.fillStyle = "rgba(230, 126, 34, 0.08)"; ctx.fillRect(0, 0, canvas.width, 180);
-        for (let i = 0; i < 8; i++) {
-                    ctx.fillStyle = "#e67e22"; ctx.fillRect((Date.now() / 15 + i * 90) % (canvas.width + 20) - 10, 160 - ((Date.now() / 8 + i * 43) % 150), 2, 2);
+                ctx.fillStyle = "#ecf0f1";
+                ctx.lineWidth = penSky;
+                ctx.beginPath(); ctx.moveTo(150, 160); ctx.lineTo(135, 172); ctx.lineTo(165, 172); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(440, 150); ctx.lineTo(420, 165); ctx.lineTo(460, 165); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(700, 170); ctx.lineTo(685, 180); ctx.lineTo(715, 180); ctx.closePath(); ctx.fill(); ctx.stroke();
+            } else if (tier === 2) {
+                ctx.fillStyle = "rgba(230, 126, 34, 0.08)"; ctx.fillRect(0, 0, canvas.width, 230);
+                for (let i = 0; i < 8; i++) {
+                    ctx.fillStyle = "#e67e22"; ctx.fillRect((Date.now() / 15 + i * 90) % (canvas.width + 20) - 10, 210 - ((Date.now() / 8 + i * 43) % 150), 2, 2);
                 }
                 
-                // Jagged Obsidian spires
-                ctx.fillStyle = "#200401"; ctx.beginPath(); ctx.moveTo(0, 180); ctx.lineTo(80, 90); ctx.lineTo(120, 115); ctx.lineTo(250, 40); ctx.lineTo(320, 125); ctx.lineTo(500, 50); ctx.lineTo(620, 140); ctx.lineTo(720, 80); ctx.lineTo(800, 180); ctx.fill();
+                // Jagged Obsidian spires (shifted down)
+                ctx.fillStyle = "#200401"; ctx.beginPath(); ctx.moveTo(0, 230); ctx.lineTo(80, 140); ctx.lineTo(120, 165); ctx.lineTo(250, 90); ctx.lineTo(320, 175); ctx.lineTo(500, 100); ctx.lineTo(620, 190); ctx.lineTo(720, 130); ctx.lineTo(800, 230); ctx.fill();
                 ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
                 
-                ctx.strokeStyle = "#e74c3c"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(250, 40); ctx.lineTo(250, 60); ctx.moveTo(500, 50); ctx.lineTo(500, 75); ctx.stroke();
+                ctx.strokeStyle = "#e74c3c"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(250, 90); ctx.lineTo(250, 110); ctx.moveTo(500, 100); ctx.lineTo(500, 125); ctx.stroke();
                 
-                // Volcano mountains (Wide-base, highly jagged sloping volcanic cones)
-            ctx.fillStyle = "#110200"; 
-            ctx.beginPath(); 
-            ctx.moveTo(0, 180); 
-            ctx.lineTo(80, 140);
-            ctx.lineTo(95, 142); // Jagged step
-            ctx.lineTo(140, 115); // Crater left rim
-            ctx.lineTo(160, 115); // Crater right rim
-            ctx.lineTo(210, 150);
-            ctx.lineTo(220, 148);
-            ctx.lineTo(300, 180); 
+                // Volcano mountains (shifted down)
+                ctx.fillStyle = "#110200"; 
+                ctx.beginPath(); 
+                ctx.moveTo(0, 230); 
+                ctx.lineTo(80, 190);
+                ctx.lineTo(95, 192); 
+                ctx.lineTo(140, 165); 
+                ctx.lineTo(160, 165); 
+                ctx.lineTo(210, 200);
+                ctx.lineTo(220, 198);
+                ctx.lineTo(300, 230); 
 
-            ctx.moveTo(300, 180);
-            ctx.lineTo(380, 125);
-            ctx.lineTo(395, 128);
-            ctx.lineTo(440, 105);
-            ctx.lineTo(460, 105);
-            ctx.lineTo(520, 145);
-            ctx.lineTo(650, 180);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
+                ctx.moveTo(300, 230);
+                ctx.lineTo(380, 175);
+                ctx.lineTo(395, 178);
+                ctx.lineTo(440, 155);
+                ctx.lineTo(460, 155);
+                ctx.lineTo(520, 195);
+                ctx.lineTo(650, 230);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
 
-            // Molten lava caps inside background craters
-            ctx.strokeStyle = "#e74c3c";
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(140, 115); ctx.lineTo(160, 115);
-            ctx.moveTo(440, 105); ctx.lineTo(460, 105);
-            ctx.stroke();
+                ctx.strokeStyle = "#e74c3c";
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(140, 165); ctx.lineTo(160, 165);
+                ctx.moveTo(440, 155); ctx.lineTo(460, 155);
+                ctx.stroke();
             } else if (tier === 3) {
-                let mistGrad = ctx.createLinearGradient(0, 120, 0, 180); mistGrad.addColorStop(0, "rgba(39, 174, 96, 0)"); mistGrad.addColorStop(1, "rgba(39, 174, 96, 0.12)");
-                ctx.fillStyle = mistGrad; ctx.fillRect(0, 120, canvas.width, 60);
+                let mistGrad = ctx.createLinearGradient(0, 170, 0, 230); mistGrad.addColorStop(0, "rgba(39, 174, 96, 0)"); mistGrad.addColorStop(1, "rgba(39, 174, 96, 0.12)");
+                ctx.fillStyle = mistGrad; ctx.fillRect(0, 170, canvas.width, 60);
                 
-                // Swamp mounds
-                ctx.fillStyle = "#0c1f13"; ctx.beginPath(); ctx.moveTo(0, 180); ctx.quadraticCurveTo(80, 130, 160, 150); ctx.quadraticCurveTo(240, 125, 340, 160); ctx.quadraticCurveTo(460, 110, 580, 155); ctx.quadraticCurveTo(680, 140, 800, 180); ctx.fill();
+                // Swamp mounds (shifted down)
+                ctx.fillStyle = "#0c1f13"; ctx.beginPath(); ctx.moveTo(0, 230); ctx.quadraticCurveTo(80, 180, 160, 200); ctx.quadraticCurveTo(240, 175, 340, 210); ctx.quadraticCurveTo(460, 160, 580, 205); ctx.quadraticCurveTo(680, 190, 800, 230); ctx.fill();
                 ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
                 
-                ctx.fillStyle = "#07140c"; ctx.beginPath(); ctx.ellipse(50, 120, 80, 50, 0, 0, Math.PI*2); ctx.ellipse(750, 110, 90, 60, 0, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#07140c"; ctx.beginPath(); ctx.ellipse(50, 170, 80, 50, 0, 0, Math.PI*2); ctx.ellipse(750, 160, 90, 60, 0, 0, Math.PI*2); ctx.fill();
                 ctx.stroke();
             } else {
-                let nebula = ctx.createRadialGradient(canvas.width/2, 50, 5, canvas.width/2, 50, 120); nebula.addColorStop(0, "rgba(155, 89, 182, 0.3)"); nebula.addColorStop(1, "rgba(155, 89, 182, 0)");
-                ctx.fillStyle = nebula; ctx.beginPath(); ctx.arc(canvas.width/2, 50, 120, 0, Math.PI*2); ctx.fill();
-                let starPulse = Math.sin(Date.now() / 300) * 0.4 + 0.6; ctx.fillStyle = `rgba(255, 255, 255, ${0.4 * starPulse})`;
-                for (let i = 0; i < 30; i++) { ctx.fillRect((i * 59 + 23) % canvas.width, (i * 29 + 11) % 140, 1.5, 1.5); }
+                // TIER 4: Proper Void Space / Starry Nebula background (Corrected to remove 'm' variable crash & shifted down)
+                let nebula = ctx.createRadialGradient(canvas.width / 2, 100, 5, canvas.width / 2, 100, 120); 
+                nebula.addColorStop(0, "rgba(155, 89, 182, 0.3)"); 
+                nebula.addColorStop(1, "rgba(155, 89, 182, 0)");
+                ctx.fillStyle = nebula; 
+                ctx.beginPath(); 
+                ctx.arc(canvas.width / 2, 100, 120, 0, Math.PI * 2); 
+                ctx.fill();
+
+                let starPulse = Math.sin(Date.now() / 300) * 0.4 + 0.6; 
+                ctx.fillStyle = `rgba(255, 255, 255, ${0.4 * starPulse})`;
+                for (let i = 0; i < 30; i++) { 
+                    ctx.fillRect((i * 59 + 23) % canvas.width, (i * 29 + 11 + 50) % 190, 1.5, 1.5); 
+                }
                 
-                ctx.fillStyle = "#100221"; let hover = Math.sin(Date.now() / 400) * 4;
-                ctx.beginPath(); ctx.moveTo(120, 140 + hover); ctx.lineTo(140, 50 + hover); ctx.lineTo(160, 140 + hover); ctx.lineTo(140, 165 + hover); ctx.closePath(); ctx.fill();
-                ctx.strokeStyle = "#000000"; ctx.lineWidth = penFar; ctx.stroke();
-                
-                ctx.fillStyle = "#0b0116"; ctx.beginPath(); ctx.moveTo(520, 150 - hover); ctx.lineTo(535, 75 - hover); ctx.lineTo(550, 150 - hover); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = "#100221"; 
+                let hover = Math.sin(Date.now() / 400) * 4;
+                ctx.beginPath(); 
+                ctx.moveTo(120, 190 + hover); 
+                ctx.lineTo(140, 100 + hover); 
+                ctx.lineTo(160, 190 + hover); 
+                ctx.lineTo(140, 215 + hover); 
+                ctx.closePath(); 
+                ctx.fill();
+                ctx.strokeStyle = "#000000"; 
+                ctx.lineWidth = penFar; 
                 ctx.stroke();
                 
-                ctx.fillStyle = "#130426"; ctx.beginPath(); ctx.ellipse(320, 120 + hover * 1.5, 45, 12, Math.PI/12, 0, Math.PI*2); ctx.ellipse(650, 90 - hover * 1.2, 35, 10, -Math.PI/8, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#0b0116"; 
+                ctx.beginPath(); 
+                ctx.moveTo(520, 200 - hover); 
+                ctx.lineTo(535, 125 - hover); 
+                ctx.lineTo(550, 200 - hover); 
+                ctx.closePath(); 
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.fillStyle = "#130426"; 
+                ctx.beginPath(); 
+                ctx.ellipse(320, 170 + hover * 1.5, 45, 12, Math.PI / 12, 0, Math.PI * 2); 
+                ctx.ellipse(650, 140 - hover * 1.2, 35, 10, -Math.PI / 8, 0, Math.PI * 2); 
+                ctx.fill();
                 ctx.stroke();
             }
         }
@@ -11613,15 +11646,15 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                         else { ctx.beginPath(); ctx.arc(s.x, h, 2 * (drip/h), 0, Math.PI*2); ctx.fill(); ctx.stroke(); }
                     }
                 } else {
-                    // Ground stalagmites
+                    // Ground stalagmites (shifted to Y=230)
                     let h = 22 + s.seed * 45 * ts;
                     let w = 10 + s.seed * 18 * ts;
                     let color = playerStats.currentDungeon === 'gold' ? "#261a0c" : (playerStats.currentDungeon === 'mat' ? "#121f16" : "#191e24");
                     ctx.fillStyle = color;
-                    ctx.beginPath(); ctx.moveTo(s.x - w/2, 180); ctx.lineTo(s.x, 180 - h); ctx.lineTo(s.x + w/2, 180); ctx.closePath(); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(s.x - w/2, 230); ctx.lineTo(s.x, 230 - h); ctx.lineTo(s.x + w/2, 230); ctx.closePath(); ctx.fill(); ctx.stroke();
                     
                     ctx.strokeStyle = "rgba(255,255,255,0.04)"; ctx.lineWidth = 1;
-                    ctx.beginPath(); ctx.moveTo(s.x, 180 - h); ctx.lineTo(s.x + w/4, 180); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(s.x, 230 - h); ctx.lineTo(s.x + w/4, 230); ctx.stroke();
                 }
             } else {
                 if (s.type === 'tree') {
@@ -11657,53 +11690,53 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                         if (s.seed < 0.5) {
                             // Dead tree
                             ctx.strokeStyle = "#34495e"; ctx.lineWidth = 4 * ts; ctx.beginPath();
-                            ctx.moveTo(tx, 180); ctx.lineTo(tx, ty + 10 * ts);
+                            ctx.moveTo(tx, 230); ctx.lineTo(tx, ty + 10 * ts);
                             ctx.quadraticCurveTo(tx - 10 * ts, ty, tx - 18 * ts, ty - 10 * ts);
                             ctx.moveTo(tx, ty + 15 * ts);
                             ctx.quadraticCurveTo(tx + 8 * ts, ty + 5 * ts, tx + 14 * ts, ty - 5 * ts);
                             ctx.stroke();
                         } else {
                             // Snowy fir
-                            ctx.fillStyle = "#2c3e50"; ctx.beginPath(); ctx.moveTo(tx - 15*ts, 180); ctx.lineTo(tx, ty - 10*ts); ctx.lineTo(tx + 15*ts, 180); ctx.fill(); ctx.stroke();
-                            ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.moveTo(tx - 5*ts, 180); ctx.lineTo(tx + 5*ts, ty + 10*ts); ctx.lineTo(tx + 15*ts, 180); ctx.fill(); ctx.stroke();
+                            ctx.fillStyle = "#2c3e50"; ctx.beginPath(); ctx.moveTo(tx - 15*ts, 230); ctx.lineTo(tx, ty - 10*ts); ctx.lineTo(tx + 15*ts, 230); ctx.fill(); ctx.stroke();
+                            ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.moveTo(tx - 5*ts, 230); ctx.lineTo(tx + 5*ts, ty + 10*ts); ctx.lineTo(tx + 15*ts, 230); ctx.fill(); ctx.stroke();
                         }
                     } else if (tier === 2) { 
                         if (s.seed < 0.5) {
                             // Obsidian Spires
-                            ctx.fillStyle = "#110502"; ctx.beginPath(); ctx.moveTo(tx - 12*ts, 180); ctx.lineTo(tx, ty - 15*ts); ctx.lineTo(tx + 12*ts, 180); ctx.fill(); ctx.stroke();
+                            ctx.fillStyle = "#110502"; ctx.beginPath(); ctx.moveTo(tx - 12*ts, 230); ctx.lineTo(tx, ty - 15*ts); ctx.lineTo(tx + 12*ts, 230); ctx.fill(); ctx.stroke();
                             ctx.fillStyle = "#e67e22"; ctx.beginPath(); ctx.arc(tx, ty - 15*ts, 4*ts, 0, Math.PI*2); ctx.fill(); ctx.stroke();
                         } else {
-                // Volcanic Peaks (Jagged, sloping, craggy volcanic cones with lava crater)
-                ctx.fillStyle = "#210904"; 
-                ctx.beginPath();
-                ctx.moveTo(tx - 32*ts, 180); // Wide base
-                ctx.lineTo(tx - 12*ts, ty + 14*ts);
-                ctx.lineTo(tx - 6*ts, ty + 7*ts); // Craggy indentation
-                ctx.lineTo(tx - 5*ts, ty + 10*ts); // Left rim of crater
-                ctx.lineTo(tx + 5*ts, ty + 10*ts); // Right rim of crater
-                ctx.lineTo(tx + 8*ts, ty + 13*ts);
-                ctx.lineTo(tx + 32*ts, 180); // Wide base
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
+                            // Volcanic Peaks
+                            ctx.fillStyle = "#210904"; 
+                            ctx.beginPath();
+                            ctx.moveTo(tx - 32*ts, 230); 
+                            ctx.lineTo(tx - 12*ts, ty + 14*ts);
+                            ctx.lineTo(tx - 6*ts, ty + 7*ts); 
+                            ctx.lineTo(tx - 5*ts, ty + 10*ts); 
+                            ctx.lineTo(tx + 5*ts, ty + 10*ts); 
+                            ctx.lineTo(tx + 8*ts, ty + 13*ts);
+                            ctx.lineTo(tx + 32*ts, 230); 
+                            ctx.closePath();
+                            ctx.fill();
+                            ctx.stroke();
 
-                // Glowing molten lava crater at the top
-                let pulse = Math.sin(Date.now() / 100 + s.seed * 50) * 2 + 5;
-                ctx.fillStyle = "#e74c3c";
-                ctx.beginPath();
-                ctx.ellipse(tx, ty + 10*ts, pulse*ts, 2.5*ts, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.stroke();
+                            // Glowing molten lava crater at the top
+                            let pulse = Math.sin(Date.now() / 100 + s.seed * 50) * 2 + 5;
+                            ctx.fillStyle = "#e74c3c";
+                            ctx.beginPath();
+                            ctx.ellipse(tx, ty + 10*ts, pulse*ts, 2.5*ts, 0, 0, Math.PI*2);
+                            ctx.fill();
+                            ctx.stroke();
 
-                // Molten lava running down the side as a craggy fissure
-                ctx.strokeStyle = "#e67e22";
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.moveTo(tx, ty + 10*ts);
-                ctx.lineTo(tx - 4*ts, ty + 20*ts);
-                ctx.lineTo(tx - 2*ts, ty + 30*ts);
-                ctx.stroke();
-            }
+                            // Molten lava running down the side as a craggy fissure
+                            ctx.strokeStyle = "#e67e22";
+                            ctx.lineWidth = 1.5;
+                            ctx.beginPath();
+                            ctx.moveTo(tx, ty + 10*ts);
+                            ctx.lineTo(tx - 4*ts, ty + 20*ts);
+                            ctx.lineTo(tx - 2*ts, ty + 30*ts);
+                            ctx.stroke();
+                        }
                     } else if (tier === 3) { 
                         if (s.seed < 0.5) {
                             // Mangrove
@@ -11712,8 +11745,8 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                             ctx.fillStyle = "#1b5e30"; ctx.beginPath(); ctx.ellipse(tx - 6*ts, ty + 5*ts, 15*ts, 10*ts, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
                             
                             ctx.strokeStyle = "#3e321e"; ctx.lineWidth = 3*ts; ctx.beginPath();
-                            ctx.moveTo(tx - 4*ts, 160); ctx.quadraticCurveTo(tx - 12*ts, 170, tx - 18*ts, 180);
-                            ctx.moveTo(tx + 4*ts, 160); ctx.quadraticCurveTo(tx + 12*ts, 170, tx + 18*ts, 180); ctx.stroke();
+                            ctx.moveTo(tx - 4*ts, 210); ctx.quadraticCurveTo(tx - 12*ts, 220, tx - 18*ts, 230);
+                            ctx.moveTo(tx + 4*ts, 210); ctx.quadraticCurveTo(tx + 12*ts, 220, tx + 18*ts, 230); ctx.stroke();
                         } else {
                             // Willow
                             ctx.fillStyle = "#4a3c28"; ctx.beginPath(); ctx.rect(tx - 3*ts, ty, 6*ts, 40*ts); ctx.fill(); ctx.stroke();
@@ -11787,65 +11820,65 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.restore();
         });
 
-        // 3. GROUND FLOOR RENDERING WITH DETAILED TEXTURES
+        // 3. GROUND FLOOR RENDERING WITH DETAILED TEXTURES (Shifted to Y=230)
         ctx.save();
         if (playerStats.isUberBoss) {
             // Shattered mirror cosmic void floor with gravity rift lines
-            let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+            let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
             groundGrad.addColorStop(0, "#05010a");
             groundGrad.addColorStop(1, "#120224");
             ctx.fillStyle = groundGrad; 
-            ctx.fillRect(0, 180, canvas.width, 70);
+            ctx.fillRect(0, 230, canvas.width, 90);
 
             ctx.strokeStyle = "rgba(142, 68, 173, 0.45)"; 
             ctx.lineWidth = 1;
             for (let i = -100; i < canvas.width + 100; i += 50) {
                 let gx = i - (groundScroll % 50);
                 ctx.beginPath(); 
-                ctx.moveTo(gx, 180); 
-                ctx.lineTo(gx - 30, 250); 
+                ctx.moveTo(gx, 230); 
+                ctx.lineTo(gx - 30, 320); 
                 ctx.stroke();
             }
         } else if (playerStats.isPrestigeBossMode) {
             // Dark Obsidian Flagstone Castle Floor with Molten Veins
-            let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+            let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
             groundGrad.addColorStop(0, "#1c1110"); // Charcoal obsidian surface
             groundGrad.addColorStop(1, "#080302"); // Abyssal shadow depths
             ctx.fillStyle = groundGrad; 
-            ctx.fillRect(0, 180, canvas.width, 70);
+            ctx.fillRect(0, 230, canvas.width, 90);
 
             // Draw irregular stone masonry grid seams
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 2;
             
-            // Horizontal tile seams
+            // Horizontal tile seams (shifted)
             ctx.beginPath();
-            ctx.moveTo(0, 180); ctx.lineTo(canvas.width, 180);
-            ctx.moveTo(0, 200); ctx.lineTo(canvas.width, 200);
-            ctx.moveTo(0, 224); ctx.lineTo(canvas.width, 224);
-            ctx.moveTo(0, 248); ctx.lineTo(canvas.width, 248);
+            ctx.moveTo(0, 230); ctx.lineTo(canvas.width, 230);
+            ctx.moveTo(0, 250); ctx.lineTo(canvas.width, 250);
+            ctx.moveTo(0, 274); ctx.lineTo(canvas.width, 274);
+            ctx.moveTo(0, 298); ctx.lineTo(canvas.width, 298);
             ctx.stroke();
 
             // Vertical staggered stone joints
             for (let i = -60; i < canvas.width + 60; i += 80) {
                 let offset = (i - (groundScroll % 80));
                 ctx.beginPath();
-                ctx.moveTo(offset, 180); ctx.lineTo(offset + 5, 200);
-                ctx.moveTo(offset + 40, 200); ctx.lineTo(offset + 45, 224);
-                ctx.moveTo(offset - 10, 224); ctx.lineTo(offset - 5, 250);
+                ctx.moveTo(offset, 230); ctx.lineTo(offset + 5, 250);
+                ctx.moveTo(offset + 40, 250); ctx.lineTo(offset + 45, 274);
+                ctx.moveTo(offset - 10, 274); ctx.lineTo(offset - 5, 320);
                 ctx.stroke();
             }
 
             // Glowing hot orange fissures pulsing through stone cracks
             let fissurePulse = Math.sin(Date.now() / 150) * 0.2 + 0.8;
-            ctx.strokeStyle = `rgba(230, 126, 34, ${fissurePulse})`;
+            ctx.strokeStyle = `rgba(230, 126, 34, ${fissuePulse || fissurePulse})`;
             ctx.lineWidth = 2;
             for (let i = 100; i < canvas.width; i += 180) {
                 let ox = i - (groundScroll % 180);
                 ctx.beginPath();
-                ctx.moveTo(ox, 180);
-                ctx.lineTo(ox + 8, 200);
-                ctx.lineTo(ox - 12, 224);
+                ctx.moveTo(ox, 230);
+                ctx.lineTo(ox + 8, 250);
+                ctx.lineTo(ox - 12, 274);
                 ctx.stroke();
             }
 
@@ -11853,7 +11886,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             if (Math.random() < 0.15) {
                 particles.push({
                     x: Math.random() * canvas.width,
-                    y: 195 + Math.random() * 45,
+                    y: 245 + Math.random() * 45,
                     vx: randFloat(-0.8, 0.8),
                     vy: -randFloat(1.5, 3.5),
                     radius: randFloat(1, 2.5),
@@ -11864,11 +11897,11 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             }
         } else if (playerStats.isCrucibleMode) {
             // Dark levitating cosmic platform floor
-            let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+            let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
             groundGrad.addColorStop(0, "#0a0316"); 
             groundGrad.addColorStop(1, "#030005");
             ctx.fillStyle = groundGrad; 
-            ctx.fillRect(0, 180, canvas.width, 70);
+            ctx.fillRect(0, 230, canvas.width, 90);
 
             // Shimmering void energy grid
             ctx.strokeStyle = "rgba(155, 89, 182, 0.4)"; 
@@ -11876,69 +11909,69 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             for (let i = -100; i < canvas.width + 100; i += 40) {
                 let gx = i - (groundScroll % 40);
                 ctx.beginPath();
-                ctx.moveTo(gx, 180);
-                ctx.lineTo(gx - 20, 250);
+                ctx.moveTo(gx, 230);
+                ctx.lineTo(gx - 20, 320);
                 ctx.stroke();
             }
             ctx.beginPath();
-            ctx.moveTo(0, 195); ctx.lineTo(canvas.width, 195);
-            ctx.moveTo(0, 215); ctx.lineTo(canvas.width, 215);
+            ctx.moveTo(0, 245); ctx.lineTo(canvas.width, 245);
+            ctx.moveTo(0, 265); ctx.lineTo(canvas.width, 265);
             ctx.stroke();
         } else if (playerStats.isDungeonMode) {
             if (playerStats.currentDungeon === 'gold') {
-                let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+                let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
                 groundGrad.addColorStop(0, "#2c1c0a"); groundGrad.addColorStop(1, "#120a03");
-                ctx.fillStyle = groundGrad; ctx.fillRect(0, 180, canvas.width, 70);
+                ctx.fillStyle = groundGrad; ctx.fillRect(0, 230, canvas.width, 90);
                 
                 ctx.strokeStyle = "rgba(241, 196, 15, 0.35)"; ctx.lineWidth = 2;
                 for (let i = -100; i < canvas.width + 100; i += 120) {
                     let gx = i - (groundScroll % 120);
-                    ctx.beginPath(); ctx.moveTo(gx, 200); ctx.quadraticCurveTo(gx + 20, 210, gx + 40, 205); ctx.quadraticCurveTo(gx + 60, 195, gx + 80, 215); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(gx, 250); ctx.quadraticCurveTo(gx + 20, 260, gx + 40, 255); ctx.quadraticCurveTo(gx + 60, 245, gx + 80, 265); ctx.stroke();
                 }
 
                 ctx.fillStyle = "#3e2723"; ctx.strokeStyle = "#5d6d7e"; ctx.lineWidth = 2;
                 for (let i = -60; i < canvas.width + 60; i += 40) {
-                    ctx.fillRect(i - (groundScroll % 40), 215, 8, 20);
+                    ctx.fillRect(i - (groundScroll % 40), 265, 8, 20);
                 }
-                ctx.beginPath(); ctx.moveTo(0, 218); ctx.lineTo(canvas.width, 218); ctx.moveTo(0, 232); ctx.lineTo(canvas.width, 232); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, 268); ctx.lineTo(canvas.width, 268); ctx.moveTo(0, 282); ctx.lineTo(canvas.width, 282); ctx.stroke();
             } else if (playerStats.currentDungeon === 'mat') {
-                let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+                let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
                 groundGrad.addColorStop(0, "#19221c"); groundGrad.addColorStop(1, "#0a0e0b");
-                ctx.fillStyle = groundGrad; ctx.fillRect(0, 180, canvas.width, 70);
+                ctx.fillStyle = groundGrad; ctx.fillRect(0, 230, canvas.width, 90);
                 
                 ctx.strokeStyle = "#0f1511"; ctx.lineWidth = 1.5;
                 for (let i = -120; i < canvas.width + 120; i += 100) {
                     let gx = i - (groundScroll % 100);
-                    ctx.beginPath(); ctx.moveTo(gx, 180); ctx.lineTo(gx - 30, 250); ctx.stroke();
-                    ctx.fillStyle = "#1e2821"; ctx.beginPath(); ctx.arc(gx + 5, 195, 2, 0, Math.PI*2); ctx.arc(gx - 15, 230, 2, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(gx, 230); ctx.lineTo(gx - 30, 320); ctx.stroke();
+                    ctx.fillStyle = "#1e2821"; ctx.beginPath(); ctx.arc(gx + 5, 245, 2, 0, Math.PI*2); ctx.arc(gx - 15, 280, 2, 0, Math.PI*2); ctx.fill();
                 }
 
                 ctx.fillStyle = "rgba(46, 204, 113, 0.3)"; ctx.strokeStyle = "#2ecc71"; ctx.lineWidth = 1;
                 for (let i = -150; i < canvas.width + 150; i += 180) {
                     let gx = i - (groundScroll % 180);
-                    ctx.beginPath(); ctx.ellipse(gx + 40, 212, 35, 12, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.ellipse(gx + 40, 262, 35, 12, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
                     let bubbleOffset = (Date.now() / 15 + gx) % 24;
                     if (bubbleOffset < 12) {
-                        ctx.fillStyle = "rgba(46, 204, 113, 0.55)"; ctx.beginPath(); ctx.arc(gx + 30 + bubbleOffset, 212 - bubbleOffset/4, 2 + bubbleOffset/6, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = "rgba(46, 204, 113, 0.55)"; ctx.beginPath(); ctx.arc(gx + 30 + bubbleOffset, 262 - bubbleOffset/4, 2 + bubbleOffset/6, 0, Math.PI*2); ctx.fill();
                     }
                 }
             } else {
-                let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+                let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
                 groundGrad.addColorStop(0, "#1c2229"); groundGrad.addColorStop(1, "#0c0f13");
-                ctx.fillStyle = groundGrad; ctx.fillRect(0, 180, canvas.width, 70);
+                ctx.fillStyle = groundGrad; ctx.fillRect(0, 230, canvas.width, 90);
                 
                 ctx.strokeStyle = "#10141a"; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(0, 180); ctx.lineTo(canvas.width, 180); ctx.moveTo(0, 202); ctx.lineTo(canvas.width, 202); ctx.moveTo(0, 226); ctx.lineTo(canvas.width, 226); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, 230); ctx.lineTo(canvas.width, 230); ctx.moveTo(0, 252); ctx.lineTo(canvas.width, 252); ctx.moveTo(0, 276); ctx.lineTo(canvas.width, 276); ctx.stroke();
                 for (let i = -100; i < canvas.width + 100; i += 80) {
                     let gx = i - (groundScroll % 80);
-                    ctx.beginPath(); ctx.moveTo(gx, 180); ctx.lineTo(gx, 202); ctx.moveTo(gx + 40, 202); ctx.lineTo(gx + 40, 226); ctx.moveTo(gx + 10, 226); ctx.lineTo(gx + 10, 250); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(gx, 230); ctx.lineTo(gx, 252); ctx.moveTo(gx + 40, 252); ctx.lineTo(gx + 40, 276); ctx.moveTo(gx + 10, 276); ctx.lineTo(gx + 10, 300); ctx.stroke();
                 }
             }
         } else {
             if (tier === 0) {
-                let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+                let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
                 groundGrad.addColorStop(0, "#194d22"); groundGrad.addColorStop(0.15, "#223d1c"); groundGrad.addColorStop(1, "#0c1a0c");
-                ctx.fillStyle = groundGrad; ctx.fillRect(0, 180, canvas.width, 70);
+                ctx.fillStyle = groundGrad; ctx.fillRect(0, 230, canvas.width, 90);
                 
                 // Detailed organic sway grass blades along the horizon
                 ctx.fillStyle = "#1e4d22";
@@ -11947,76 +11980,76 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                     let h = 4 + Math.sin(i * 1.7) * 3;
                     let bend = Math.sin(Date.now() / 300 + i) * 2.5;
                     ctx.beginPath();
-                    ctx.moveTo(gx, 180);
-                    ctx.quadraticCurveTo(gx + bend, 180 - h, gx + bend + 1, 180 - h);
-                    ctx.quadraticCurveTo(gx + 3, 180, gx + 6, 180);
+                    ctx.moveTo(gx, 230);
+                    ctx.quadraticCurveTo(gx + bend, 230 - h, gx + bend + 1, 230 - h);
+                    ctx.quadraticCurveTo(gx + 3, 230, gx + 6, 230);
                     ctx.fill();
                 }
             } else if (tier === 1) {
-                let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+                let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
                 groundGrad.addColorStop(0, "#2c3e50"); groundGrad.addColorStop(1, "#111a24");
-                ctx.fillStyle = groundGrad; ctx.fillRect(0, 180, canvas.width, 70);
+                ctx.fillStyle = groundGrad; ctx.fillRect(0, 230, canvas.width, 90);
 
                 ctx.strokeStyle = "rgba(52, 152, 219, 0.4)"; ctx.shadowColor = "#3498db"; ctx.lineWidth = 1.5;
                 for (let i = -160; i < canvas.width + 160; i += 160) {
                     ctx.save(); let gx = i - (groundScroll % 160);
                     ctx.shadowBlur = Math.sin(Date.now() / 180 + i) * 5 + 5;
-                    ctx.beginPath(); ctx.moveTo(gx, 188); ctx.lineTo(gx + 30, 205); ctx.lineTo(gx + 10, 235); ctx.lineTo(gx + 80, 245); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(gx, 238); ctx.lineTo(gx + 30, 255); ctx.lineTo(gx + 10, 285); ctx.lineTo(gx + 80, 295); ctx.stroke();
                     ctx.restore();
                 }
                 
                 ctx.strokeStyle = "#1a252f"; ctx.lineWidth = 1.5;
                 for (let i = -100; i < canvas.width + 100; i += 100) {
                     let gx = i - (groundScroll % 100);
-                    ctx.beginPath(); ctx.moveTo(gx, 180); ctx.quadraticCurveTo(gx + 50, 210, gx + 100, 180); ctx.moveTo(gx + 20, 210); ctx.lineTo(gx - 30, 250); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(gx, 230); ctx.quadraticCurveTo(gx + 50, 260, gx + 100, 230); ctx.moveTo(gx + 20, 260); ctx.lineTo(gx - 30, 300); ctx.stroke();
                 }
             } else if (tier === 2) {
-                let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+                let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
                 groundGrad.addColorStop(0, "#1a0805"); groundGrad.addColorStop(1, "#080201");
-                ctx.fillStyle = groundGrad; ctx.fillRect(0, 180, canvas.width, 70);
+                ctx.fillStyle = groundGrad; ctx.fillRect(0, 230, canvas.width, 90);
 
                 let pulse = Math.sin(Date.now() / 150) * 0.15 + 0.85;
                 for (let i = -140; i < canvas.width + 140; i += 140) {
                     let gx = i - (groundScroll % 140);
                     ctx.strokeStyle = `rgba(230, 126, 34, ${0.8 * pulse})`; ctx.lineWidth = 4;
-                    ctx.beginPath(); ctx.moveTo(gx, 180); ctx.quadraticCurveTo(gx + 35, 205, gx + 20, 225); ctx.quadraticCurveTo(gx + 5, 245, gx + 70, 250); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(gx, 230); ctx.quadraticCurveTo(gx + 35, 255, gx + 20, 275); ctx.quadraticCurveTo(gx + 5, 295, gx + 70, 300); ctx.stroke();
                     
                     ctx.strokeStyle = `rgba(241, 196, 15, ${0.9 * pulse})`; ctx.lineWidth = 1.5;
-                    ctx.beginPath(); ctx.moveTo(gx, 180); ctx.quadraticCurveTo(gx + 35, 205, gx + 20, 225); ctx.quadraticCurveTo(gx + 5, 245, gx + 70, 250); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(gx, 230); ctx.quadraticCurveTo(gx + 35, 255, gx + 20, 275); ctx.quadraticCurveTo(gx + 5, 295, gx + 70, 300); ctx.stroke();
                 }
             } else if (tier === 3) {
-                let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+                let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
                 groundGrad.addColorStop(0, "#0e1a12"); groundGrad.addColorStop(1, "#050a07");
-                ctx.fillStyle = groundGrad; ctx.fillRect(0, 180, canvas.width, 70);
+                ctx.fillStyle = groundGrad; ctx.fillRect(0, 230, canvas.width, 90);
 
                 ctx.strokeStyle = "#142c1d"; ctx.lineWidth = 3;
                 for (let i = -120; i < canvas.width + 120; i += 90) {
                     let gx = i - (groundScroll % 90);
-                    ctx.beginPath(); ctx.moveTo(gx, 195); ctx.quadraticCurveTo(gx + 40, 210, gx + 80, 198); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(gx, 245); ctx.quadraticCurveTo(gx + 40, 260, gx + 80, 248); ctx.stroke();
                 }
 
                 for (let i = -200; i < canvas.width + 200; i += 220) {
                     let gx = i - (groundScroll % 220); let pop = (Date.now() / 25 + i) % 70;
                     if (pop < 35) {
                         ctx.fillStyle = "#193f26"; ctx.strokeStyle = "#27ae60"; ctx.lineWidth = 1;
-                        ctx.beginPath(); ctx.arc(gx + 60, 220, pop/8, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                        ctx.beginPath(); ctx.arc(gx + 60, 270, pop/8, 0, Math.PI*2); ctx.fill(); ctx.stroke();
                     } else if (pop < 42) {
                         ctx.strokeStyle = "rgba(46, 204, 113, " + (1 - (pop-35)/7) + ")"; ctx.lineWidth = 1.5;
-                        ctx.beginPath(); ctx.ellipse(gx + 60, 220, (pop-35)*3, (pop-35)*1.2, 0, 0, Math.PI*2); ctx.stroke();
+                        ctx.beginPath(); ctx.ellipse(gx + 60, 270, (pop-35)*3, (pop-35)*1.2, 0, 0, Math.PI*2); ctx.stroke();
                     }
                 }
             } else {
-                let groundGrad = ctx.createLinearGradient(0, 180, 0, 250);
+                let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
                 groundGrad.addColorStop(0, "#0a0114"); groundGrad.addColorStop(1, "#030005");
-                ctx.fillStyle = groundGrad; ctx.fillRect(0, 180, canvas.width, 70);
+                ctx.fillStyle = groundGrad; ctx.fillRect(0, 230, canvas.width, 90);
 
                 ctx.strokeStyle = "rgba(155, 89, 182, 0.35)"; ctx.lineWidth = 1;
-                for (let h = 180; h <= 250; h += 14) {
+                for (let h = 230; h <= 320; h += 14) {
                     ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(canvas.width, h); ctx.stroke();
                 }
                 for (let i = -200; i < canvas.width + 200; i += 60) {
                     let gx = i - (groundScroll % 60);
-                    ctx.beginPath(); ctx.moveTo(gx, 180); ctx.lineTo(gx * 1.5 - (canvas.width * 0.25), 250); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(gx, 230); ctx.lineTo(gx * 1.5 - (canvas.width * 0.25), 320); ctx.stroke();
                 }
             }
         }
@@ -12025,8 +12058,8 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
         ctx.strokeStyle = "#000000";
         ctx.lineWidth = 2.0;
         ctx.beginPath();
-        ctx.moveTo(0, 180);
-        ctx.lineTo(canvas.width, 180);
+        ctx.moveTo(0, 230);
+        ctx.lineTo(canvas.width, 230);
         ctx.stroke();
 
         ctx.restore();
@@ -12040,7 +12073,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             beamGrad.addColorStop(0.5, bm.color);
             beamGrad.addColorStop(1, "rgba(255,255,255,0)");
             ctx.fillStyle = beamGrad;
-            ctx.fillRect(bm.x - 25, 0, 50, 180);
+            ctx.fillRect(bm.x - 25, 0, 50, 230);
             ctx.restore();
         });
 
@@ -12164,9 +12197,8 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 ctx.beginPath();
                 ctx.arc(0, -16 - mistCycle, 1.2 + (mistCycle / 3), 0, Math.PI * 2);
                 ctx.fill();
-            }
-            else if (subType === "tome") {
-                    ctx.save();
+            } else if (subType === "tome") {
+                ctx.save();
                 let tomeFloat = Math.sin(Date.now() / 200) * 5;
                 ctx.translate(24, -6 + bounce + tomeFloat);
                 ctx.rotate(-Math.PI / 12);
@@ -12242,7 +12274,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.fill();
             ctx.stroke();
 
-            // 2. Golden Winged Crescent Headpiece
+            //  golden Winged Crescent Headpiece
             ctx.fillStyle = "#f1c40f";
             ctx.beginPath();
             ctx.moveTo(-7, 30);
@@ -12281,7 +12313,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 });
             }
         } else if (isUniqueSword) {
-            // Crimson Sanguine Reaver: Translucent blood blade with glowing gold runes
+            // Crimson Sanguine Reaver (CORRECTED to remove 'm.flashTimer' crash)
             ctx.rotate(-Math.PI / 8);
             if (hero.slashFrame) {
                 ctx.translate(15, -10); 
@@ -12299,7 +12331,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             // 2. Translucent blood blade pulsing in real-time
             let bleedPulse = Math.sin(Date.now() / 100) * 0.15 + 0.85;
             let bladeColor = `rgba(192, 57, 43, ${bleedPulse})`;
-            ctx.fillStyle = m.flashTimer > 0 ? "#ffffff" : bladeColor;
+            ctx.fillStyle = (mob && mob.flashTimer > 0) ? "#ffffff" : bladeColor;
             ctx.strokeStyle = "#960018";
             ctx.lineWidth = 1.5;
             ctx.beginPath();
@@ -12547,7 +12579,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                         ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx - 10*ss, sy - 12*ss); ctx.lineTo(sx + 10*ss, sy - 12*ss); ctx.closePath(); ctx.fill(); ctx.stroke();
                     } else { 
                         ctx.strokeStyle = "#5d6d7e"; ctx.lineWidth = 1.5;
-                        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx - 8*ss, sy - 15*ss); ctx.moveTo(sx, sy); ctx.lineTo(sx + 8*ss, sy - 18*ss); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx - 8*ss, sy - 15*ss); ctx.moveTo(sx, sy); ctx.lineTo(sx + 8*ss, sy - 18*ss); stroke();
                     }
                 } else if (tier === 2) {
                     if (s.type === 'grass') { 
@@ -12584,12 +12616,12 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.restore();
         });
 
-        // 5. Overhauled Gorgeous Revive Effect (Valkyrie divine light pillar + concentric rings + floating embers)
+        // 5. Overhauled Gorgeous Revive Effect (shifted to Y=230)
         if (reviveTimer > 0) {
             ctx.save();
-            let t = (90 - reviveTimer) / 90; // progress from 0 to 1
+            let t = (90 - reviveTimer) / 90; 
             let beamX = hero.x + 12;
-            let groundY = 180;
+            let groundY = 230;
 
             // 5a. Concentric light shockwaves expanding outward along the ground
             ctx.lineWidth = 3 * (1 - t);
@@ -12597,7 +12629,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 let ringProgress = (t + i * 0.25) % 1.0;
                 let ringAlpha = (1 - ringProgress) * 0.8;
                 let radiusX = ringProgress * 120;
-                let radiusY = ringProgress * 25; // elliptical mapping
+                let radiusY = ringProgress * 25; 
                 
                 ctx.strokeStyle = `rgba(241, 196, 15, ${ringAlpha})`;
                 ctx.beginPath();
@@ -12605,8 +12637,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 ctx.stroke();
             }
 
-            // 5b. Sacred Divine Light Pillars (Multiple layered gradients)
-            // Outer soft teal-blue glow
+            // 5b. Sacred Divine Light Pillars
             let outerBeam = ctx.createLinearGradient(beamX - 45, 0, beamX + 45, 0);
             outerBeam.addColorStop(0, "rgba(26, 188, 156, 0)");
             outerBeam.addColorStop(0.5, "rgba(26, 188, 156, " + (0.35 * (1 - t)) + ")");
@@ -12614,7 +12645,6 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.fillStyle = outerBeam;
             ctx.fillRect(beamX - 45, 0, 90, groundY);
 
-            // Inner high-energy golden pillar
             let innerBeam = ctx.createLinearGradient(beamX - 15, 0, beamX + 15, 0);
             innerBeam.addColorStop(0, "rgba(255, 255, 255, 0)");
             innerBeam.addColorStop(0.5, "rgba(255, 243, 176, " + (0.85 * (1 - t)) + ")");
@@ -12636,7 +12666,6 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 ctx.fill();
             }
 
-            // 5d. Divine screen wash (Fades out rapidly in the first 30% of the animation)
             if (t < 0.3) {
                 let flashOpacity = (1 - (t / 0.3)) * 0.5;
                 ctx.fillStyle = `rgba(255, 253, 235, ${flashOpacity})`;
@@ -12647,20 +12676,19 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             reviveTimer--;
         }
 
-         // 5.5. Death Vignette Overlay (Closing darkness centering on the hero)
+        // 5.5. Death Vignette Overlay (Centers correctly on hero Y=205)
         if (deathAnimationTimer > 0) {
             ctx.save();
             let t = (deathMaxFrames - deathAnimationTimer) / deathMaxFrames;
             let centerX = hero.x + 12;
             let centerY = hero.y + 15;
             
-            // Smoothly tightening radial gradient vignette
             let innerRadius = Math.max(10, 200 * (1 - t));
             let outerRadius = Math.max(100, 600 * (1 - t));
             let vignette = ctx.createRadialGradient(centerX, centerY, innerRadius, centerX, centerY, outerRadius);
             
             vignette.addColorStop(0, "rgba(0, 0, 0, 0)");
-            vignette.addColorStop(0.5, "rgba(20, 0, 0, " + (t * 0.60) + ")"); // Deep blood crimson tint midway
+            vignette.addColorStop(0.5, "rgba(20, 0, 0, " + (t * 0.60) + ")"); 
             vignette.addColorStop(1, "rgba(0, 0, 0, " + (t * 0.95) + ")");
             
             ctx.fillStyle = vignette;
@@ -12668,7 +12696,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.restore();
         }
 
-        // Draw active Fireballs (Phoenix Staff Skill)
+        // Draw active Fireballs
         projectiles.forEach(proj => {
             ctx.save();
             ctx.strokeStyle = "#000000";
@@ -12677,21 +12705,18 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             let wavePulse = Math.sin(Date.now() / 80 + proj.pulseOffset) * 2;
             let currentRad = proj.r + wavePulse;
 
-            // 1. Outer deep crimson flame layer
             ctx.fillStyle = "#c0392b";
             ctx.beginPath();
             ctx.arc(proj.x, proj.y, currentRad + 3, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
 
-            // 2. Mid orange flame layer
             ctx.fillStyle = "#e67e22";
             ctx.beginPath();
             ctx.arc(proj.x, proj.y, currentRad, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
 
-            // 3. Inner hot yellow/white core
             ctx.fillStyle = "#f1c40f";
             ctx.beginPath();
             ctx.arc(proj.x, proj.y, currentRad * 0.55, 0, Math.PI * 2);
@@ -12709,7 +12734,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
         // Draw Snowflakes (Tier 1 Outdoors)
         if (getStageTier() === 1 && !playerStats.isDungeonMode) {
             ctx.save();
-            ctx.fillStyle = "rgba(240, 248, 255, 0.85)"; // Styled light ice-blue/white
+            ctx.fillStyle = "rgba(240, 248, 255, 0.85)"; 
             ctx.shadowColor = "#ffffff";
             ctx.shadowBlur = 2;
             snowflakes.forEach(sf => {
@@ -12720,11 +12745,10 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.restore();
         }
 
-        // --- CINEMATIC TOP-SCREEN BOSS HP BAR ---
+        // --- ROW 2: CINEMATIC TOP-SCREEN BOSS HP BAR (Shifted to Y=52 to separate from Row 1) ---
         if (mob && (mob.type === "boss" || mob.type === "dungeon_boss" || mob.type === "prestige_boss" || mob.type === "rift_guardian")) {
             ctx.save();
             
-            // Resolve name and design colors
             let bossName = "Threat Detected";
             let barColor = "#e74c3c";
             let barGlow = "#c0392b";
@@ -12767,9 +12791,8 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             let barW = canvas.width * (canvas.width <= 420 ? 0.75 : 0.55);
             let barH = 14;
             let barX = (canvas.width - barW) / 2;
-            let barY = 24;
+            let barY = 52; // Row 2 Placement
 
-            // 1. Draw outer black container border
             ctx.fillStyle = "#111111";
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 3;
@@ -12782,7 +12805,6 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.fill();
             ctx.stroke();
 
-            // 2. Trailing White Bar (Visual Soft Damage Segment)
             if (mob.trailingHp === undefined) {
                 mob.trailingHp = mob.hp;
             }
@@ -12796,7 +12818,6 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             }
             ctx.fill();
 
-            // 3. Primary Health Bar (Themed Gradient)
             let hpPct = Math.max(0, Math.min(1, mob.hp / mob.maxHp));
             let fillGrad = ctx.createLinearGradient(barX, barY, barX, barY + barH);
             fillGrad.addColorStop(0, barColor);
@@ -12811,23 +12832,19 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             }
             ctx.fill();
 
-            // 4. Centered Name Text above bar
             ctx.font = "bold 11px sans-serif";
             ctx.textAlign = "center";
             ctx.textBaseline = "bottom";
-            
-            // Text Stroke for toon effect
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 3;
             ctx.strokeText(bossName, canvas.width / 2, barY - 4);
-            
             ctx.fillStyle = "#ffffff";
             ctx.fillText(bossName, canvas.width / 2, barY - 4);
             
             ctx.restore();
         }
 
-        // 5.6. Active Buffs HUD Overlay (Toon Styled)
+        // --- ROW 1: ACTIVE BUFFS HUD OVERLAY (Y=10 to 45) ---
         let pStats = resolvePlayerStats();
         let activeBuffsList = [];
         let potDurationMax = 18000 * (1 + pStats.int * 0.01);
@@ -12841,7 +12858,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
         if (playerStats.hastePotionTimer > 0) activeBuffsList.push({ icon: "👟", timer: playerStats.hastePotionTimer, max: potDurationMax, color: "#f1c40f" });
 
         let startX = 15;
-        let startY = 15;
+        let startY = 10;
         let iconSize = 28;
         let spacing = 8;
 
@@ -12855,7 +12872,6 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.lineWidth = 2;
             ctx.beginPath();
             
-            // Legacy-safe rounded rect support
             if (ctx.roundRect) {
                 ctx.roundRect(bx, by, iconSize, iconSize, 4);
             } else {
@@ -12864,7 +12880,6 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.fill();
             ctx.stroke();
 
-            // Draw radial cooldown indicator circle sweep
             let progressPct = Math.min(1, buff.timer / buff.max);
             ctx.beginPath();
             ctx.arc(bx + iconSize / 2, by + iconSize / 2, iconSize / 2 - 2, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * progressPct));
@@ -12872,14 +12887,12 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.lineWidth = 2.5;
             ctx.stroke();
 
-            // Draw centered buff icon
             ctx.fillStyle = "#ffffff";
             ctx.font = "12px sans-serif";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(buff.icon, bx + iconSize / 2, by + iconSize / 2);
 
-            // Draw duration text underneath card
             let secondsLeft = Math.ceil(buff.timer / 60);
             ctx.font = "bold 8px monospace";
             ctx.strokeStyle = "#000000";
@@ -12889,7 +12902,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
             ctx.restore();
         });
 
-        // 6. Active DPS Box (Cel-shaded block)
+        // --- ROW 1: ACTIVE DPS BOX (Y=10 to 42) ---
         let actDps = calculateActiveDps();
         ctx.fillStyle = "#1e1e1e"; 
         ctx.beginPath(); ctx.rect(canvas.width - 150, 10, 140, 32); ctx.fill();
@@ -12909,7 +12922,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
         ctx.strokeText(actDps, canvas.width - 70, 25);
         ctx.fillText(actDps, canvas.width - 70, 25);
 
-        // 7. Dynamic particles & Comic-styled floaters (With heavy dark text outlines)
+        // 7. Dynamic particles & Comic-styled floaters
         particles.forEach(pt => { 
             ctx.save();
             if (pt.alpha !== undefined) ctx.globalAlpha = pt.alpha;
