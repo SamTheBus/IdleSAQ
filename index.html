@@ -12033,11 +12033,6 @@ window.loadGame = function() {
                 mob.flashTimer = 3;
                 effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(finalDamage)} [STORED]`, color: "#8e44ad", life: 45 });
             } else {
-                if (playerStats.singularityState === "storing") {
-                playerStats.singularityStoredDmg += finalDamage;
-                mob.flashTimer = 3;
-                effects.push({ x: mob.x + mob.w / 2, y: mob.y - 10, text: `+${window.formatNumber(finalDamage)} [STORED]`, color: "#8e44ad", life: 45 });
-            } else {
                 mob.hp -= finalDamage; mob.flashTimer = 5;
                 spawnDamageEffect(finalDamage, 'slash', isCrit);
                 damageHistory.push({ time: Date.now(), amount: finalDamage });
@@ -13176,7 +13171,7 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                             pushLog("<span style='color:#e74c3c;'>[SINGULARITY] Detonation damage was throttled by the enemy's maximum atmospheric resistance cap.</span>");
                         }
 
-                        mob.hp -= finalDamage = finalDamage || finalDetonation = finalDamage = finalDetonation = finalDetonationDmg;
+                        mob.hp -= finalDetonationDmg;
                         mob.flashTimer = 10;
 
                         spawnDamageEffect(finalDetonationDmg, 'lightning', true);
@@ -13314,9 +13309,6 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                         }
                     }
 
-                    spawnDamageEffect(flameDmg, 'fire', false);
-                    damageHistory.push({ time: Date.now(), amount: flameDmg });
-                    
                     // Direct impact hit sparks
                     for (let pIdx = 0; pIdx < 6; pIdx++) {
                         particles.push({
@@ -15437,27 +15429,9 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                 ctx.beginPath();
                 ctx.arc(proj.x - 2, proj.y - 2, currentRad * 0.25, 0, Math.PI * 2);
                 ctx.fill();
+
+                ctx.restore();
             }
-            ctx.restore();
-        });
-
-            ctx.fillStyle = "#e67e22";
-            ctx.beginPath();
-            ctx.arc(proj.x, proj.y, currentRad, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = "#f1c40f";
-            ctx.beginPath();
-            ctx.arc(proj.x, proj.y, currentRad * 0.55, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.arc(proj.x - 2, proj.y - 2, currentRad * 0.25, 0, Math.PI * 2);
-            ctx.fill();
-
             ctx.restore();
         });
 
