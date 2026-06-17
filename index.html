@@ -3649,10 +3649,309 @@ window.onload = function() {
 
             c.restore(); // end master translate & scale
         }
-        else if (m.type === "boss" || m.type === "dungeon_boss" || m.type === "chronos_arbitrator" || m.type === "nexus_overseer" || m.type === "rift_guardian") {
+        else if (m.type === "boss" || m.type === "dungeon_boss" || m.type === "chronos_arbitrator" || m.type === "nexus_overseer" || m.type === "rift_guardian" || m.type === "aegis_goliath") {
             c.lineWidth = 2.4;
 
-            if (m.type === "dungeon_boss") {
+            if (m.type === "aegis_goliath") {
+                let hover = Math.sin(Date.now() / 150) * 8;
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2 + hover;
+                
+                c.save();
+                c.translate(cx, cy);
+                
+                // 1. Shrouding Hexagonal Shields (Honeycomb barriers)
+                let barrierCount = 3;
+                for (let i = 0; i < barrierCount; i++) {
+                    let pulseScale = 1.0 + Math.sin(Date.now() / 250 + i * 2) * 0.12;
+                    let rot = (Date.now() / 1200) + (i * Math.PI / 3);
+                    let size = 45 * pulseScale;
+                    c.save();
+                    c.rotate(rot);
+                    c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "rgba(52, 152, 219, 0.45)";
+                    c.lineWidth = 1.5;
+                    c.beginPath();
+                    for (let side = 0; side < 6; side++) {
+                        let angle = (side * Math.PI) / 3;
+                        c.lineTo(Math.cos(angle) * size, Math.sin(angle) * size);
+                    }
+                    c.closePath();
+                    c.stroke();
+                    c.restore();
+                }
+
+                // 2. Hanging Chains
+                c.save();
+                c.strokeStyle = "#2c3e50";
+                c.lineWidth = 2.5;
+                for (let i = -1; i <= 1; i += 2) {
+                    let chainSway = Math.sin(Date.now() / 300 + i * 1.5) * 4;
+                    c.beginPath();
+                    c.moveTo(i * 20, -50);
+                    c.quadraticCurveTo(i * 25, 0, i * 15 + chainSway, 30);
+                    c.stroke();
+                }
+                c.restore();
+
+                // 3. Central Dark Iron Heart Core
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1a1c23";
+                c.strokeStyle = "#000000";
+                c.lineWidth = 2.4;
+                c.beginPath();
+                c.moveTo(0, -18);
+                c.lineTo(16, -18);
+                c.lineTo(22, -4);
+                c.lineTo(0, 24);
+                c.lineTo(-22, -4);
+                c.lineTo(-16, -18);
+                c.closePath();
+                c.fill();
+                c.stroke();
+
+                // 4. Glowing Cyan Runic Crest
+                if (m.flashTimer === 0) {
+                    let pulseRad = 6 + Math.sin(Date.now() / 100) * 1.5;
+                    let runicGlow = c.createRadialGradient(0, -2, 1, 0, -2, pulseRad + 8);
+                    runicGlow.addColorStop(0, "#ffffff");
+                    runicGlow.addColorStop(0.3, "#2ecc71");
+                    runicGlow.addColorStop(0.8, "#3498db");
+                    runicGlow.addColorStop(1, "rgba(0,0,0,0)");
+                    c.fillStyle = runicGlow;
+                    c.beginPath();
+                    c.arc(0, -2, pulseRad + 8, 0, Math.PI * 2);
+                    c.fill();
+
+                    // Inner runic cross details
+                    c.strokeStyle = "#ffffff";
+                    c.lineWidth = 2;
+                    c.beginPath();
+                    c.moveTo(0, -10); c.lineTo(0, 6);
+                    c.moveTo(-7, -2); c.lineTo(7, -2);
+                    c.stroke();
+                }
+
+                // 5. Orbiting Aegis Plates
+                let plateCount = 3;
+                for (let i = 0; i < plateCount; i++) {
+                    let angle = (Date.now() / 300) + (i * Math.PI * 2 / plateCount);
+                    let px = Math.cos(angle) * 35;
+                    let py = Math.sin(angle) * 12; // Flattened ellipse perspective
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#34495e";
+                    c.strokeStyle = "#000000";
+                    c.lineWidth = 1.5;
+                    c.beginPath();
+                    c.roundRect(px - 5, py - 7, 10, 14, [2]);
+                    c.fill();
+                    c.stroke();
+                    
+                    // Tiny glowing center on plates
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = "#2ecc71";
+                        c.beginPath();
+                        c.arc(px, py, 1.8, 0, Math.PI * 2);
+                        c.fill();
+                    }
+                }
+
+                c.restore();
+            }
+            else if (m.type === "chronos_arbitrator") {
+                let hover = Math.sin(Date.now() / 200) * 8;
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2 + hover;
+                
+                c.save();
+                c.translate(cx, cy);
+
+                // Inline helper to draw vector-toothed gears
+                let drawVectorGear = (ctx, x, y, radius, teeth, rot, color) => {
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(rot);
+                    ctx.fillStyle = m.flashTimer > 0 ? "#ffffff" : color;
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = 2.0;
+
+                    // Base gear disk
+                    ctx.beginPath();
+                    ctx.arc(0, 0, radius - 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Gear teeth profiles
+                    for (let i = 0; i < teeth; i++) {
+                        let teethAngle = (i * Math.PI * 2) / teeth;
+                        ctx.save();
+                        ctx.rotate(teethAngle);
+                        ctx.beginPath();
+                        ctx.rect(-3, -radius - 3, 6, 8);
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+
+                    // Inner locking hub
+                    ctx.fillStyle = "#111116";
+                    ctx.beginPath();
+                    ctx.arc(0, 0, radius * 0.35, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f1c40f";
+                    for (let i = 0; i < 4; i++) {
+                        let angle = (i * Math.PI) / 2;
+                        ctx.beginPath();
+                        ctx.arc(Math.cos(angle) * (radius * 0.6), Math.sin(angle) * (radius * 0.6), 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                };
+
+                // Draw secondary interlocking background gears
+                drawVectorGear(c, -35, -28, 22, 10, -(Date.now() / 400), "#7f8c8d"); // Left Iron Gear
+                drawVectorGear(c, 38, 24, 25, 12, (Date.now() / 500) + 0.5, "#d35400"); // Right Copper Gear
+
+                // Draw central giant golden gear
+                drawVectorGear(c, 0, 0, 44, 16, Date.now() / 1500, "#f1c40f"); // Main Brass Gear
+
+                // Ivory Altar Face Mask overlay
+                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#fdf6e2";
+                c.strokeStyle = "#000000";
+                c.lineWidth = 2.4;
+                c.beginPath();
+                c.moveTo(0, -25);
+                c.quadraticCurveTo(-20, -20, -20, 0);
+                c.lineTo(-12, 28);
+                c.lineTo(12, 28);
+                c.lineTo(20, 0);
+                c.quadraticCurveTo(20, -20, 0, -25);
+                c.closePath();
+                c.fill();
+                c.stroke();
+
+                if (m.flashTimer === 0) {
+                    c.strokeStyle = "#1a0f02";
+                    c.lineWidth = 1.5;
+                    c.beginPath();
+                    c.moveTo(-10, -10); c.lineTo(-4, -4); c.lineTo(-8, 2);
+                    c.moveTo(10, -8); c.lineTo(6, -2);
+                    c.stroke();
+
+                    c.fillStyle = "#ffffff";
+                    c.shadowBlur = 8;
+                    c.shadowColor = "#f1c40f";
+                    c.beginPath();
+                    c.arc(-6, -5, 3, 0, Math.PI * 2);
+                    c.arc(6, -5, 3, 0, Math.PI * 2);
+                    c.fill();
+                    c.shadowBlur = 0;
+                }
+
+                // Double sweeping clock hands
+                c.strokeStyle = "#111116";
+                c.lineWidth = 2.5;
+                c.lineCap = "round";
+                
+                let hrAngle = Date.now() / 10000;
+                c.beginPath();
+                c.moveTo(0, 0);
+                c.lineTo(Math.cos(hrAngle) * 15, Math.sin(hrAngle) * 15);
+                ctx.stroke();
+
+                let minAngle = Date.now() / 1800;
+                c.strokeStyle = "#d35400";
+                c.lineWidth = 1.8;
+                c.beginPath();
+                c.moveTo(0, 0);
+                c.lineTo(Math.cos(minAngle) * 22, Math.sin(minAngle) * 22);
+                c.stroke();
+
+                c.restore();
+            }
+            else if (m.type === "nexus_overseer") {
+                let cx = m.x + m.w / 2;
+                let cy = m.y + m.h / 2;
+                
+                let isGlitchedFrame = (Math.sin(Date.now() / 10) > 0.85);
+                let jitterX = isGlitchedFrame ? randFloat(-5, 5) : 0;
+                let jitterY = isGlitchedFrame ? randFloat(-3, 3) : 0;
+                let px = cx + jitterX;
+                let py = cy + jitterY;
+
+                c.save();
+                
+                // Red/Cyan aberrant chromatic echo frame
+                if (isGlitchedFrame && m.flashTimer === 0) {
+                    c.save();
+                    c.translate(px + 4, py - 2);
+                    c.rotate((Date.now() / 600) + 0.1);
+                    c.strokeStyle = "rgba(255, 0, 127, 0.4)";
+                    c.lineWidth = 1.5;
+                    c.strokeRect(-18, -18, 36, 36);
+                    c.restore();
+                }
+
+                c.translate(px, py);
+
+                // Green matrix stream rain fall animation
+                if (m.flashTimer === 0) {
+                    c.fillStyle = "rgba(46, 204, 113, 0.35)";
+                    for (let i = 0; i < 4; i++) {
+                        let colX = -20 + (i * 12);
+                        let colY = ((Date.now() / 5 + i * 15) % 40) - 20;
+                        c.fillRect(colX, colY, 1.2, 8);
+                    }
+                }
+
+                // 3D Orbital Projection scan ring
+                c.save();
+                let ringRot = Date.now() / 1000;
+                c.rotate(Math.PI / 6);
+                c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#00d2ff";
+                c.lineWidth = 1.5;
+                c.beginPath();
+                c.ellipse(0, 0, 32, 10, ringRot, 0, Math.PI * 2);
+                c.stroke();
+                c.restore();
+
+                // Double shifting cyber wireframe boxes (Tesseract)
+                c.rotate(Date.now() / 800);
+                c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#ff007f";
+                c.lineWidth = 2.0;
+                c.strokeRect(-16, -18, 32, 36); // Outer Box
+                
+                c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#00b894";
+                c.lineWidth = 1.5;
+                c.strokeRect(-8, -9, 16, 18); // Inner Box
+
+                // Connecting corner vectors
+                c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "rgba(255, 255, 255, 0.3)";
+                c.beginPath();
+                c.moveTo(-16, -18); c.lineTo(-8, -9);
+                c.moveTo(16, -18); c.lineTo(8, -9);
+                c.moveTo(-16, 18); c.lineTo(-8, 9);
+                c.moveTo(16, 18); c.lineTo(8, 9);
+                c.stroke();
+
+                // Laser scan core eye
+                if (m.flashTimer === 0) {
+                    c.fillStyle = "#ffffff";
+                    c.beginPath();
+                    c.arc(0, 0, 4.5, 0, Math.PI * 2);
+                    c.fill();
+
+                    c.fillStyle = "#ff007f";
+                    c.fillRect(-1, -3, 2, 6);
+                }
+
+                c.restore();
+            }
+            else if (m.type === "dungeon_boss") {
+                let bounce = 0; // Prevent ReferenceError
+                if (m.isCrucible) {
+                    let bounce = Math.sin(Date.now() / 150) * 4;
+                    let coreColor = m.flashTimer > 0 ? "#ffffff" : "#9b59b6";
                 let bounce = 0; // Prevent ReferenceError
                 if (m.isCrucible) {
                     let bounce = Math.sin(Date.now() / 150) * 4;
