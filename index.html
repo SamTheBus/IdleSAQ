@@ -8489,6 +8489,8 @@ window.loadGame = function() {
     window.addEventListener('keydown', function(e) { if (e.code === 'Space' && !spacePressed) { e.preventDefault(); spacePressed = true; window.triggerPlayerSlash(); } });
     window.addEventListener('keyup', function(e) { if (e.code === 'Space') { spacePressed = false; } });
     
+    window.addEventListener('keyup', function(e) { if (e.code === 'Space') { spacePressed = false; } });
+    
     canvas.addEventListener('pointerdown', function(e) { 
         e.preventDefault(); 
         
@@ -8517,9 +8519,6 @@ window.loadGame = function() {
             clientY = e.changedTouches[0].clientY;
         }
         
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
         const clickX = (clientX !== undefined ? (clientX - rect.left) * scaleX : 0);
         const clickY = (clientY !== undefined ? (clientY - rect.top) * scaleY : 0);
 
@@ -8552,16 +8551,6 @@ window.loadGame = function() {
                 return;
             }
         }
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-        } else if (e.changedTouches && e.changedTouches.length > 0) {
-            clientX = e.changedTouches[0].clientX;
-            clientY = e.changedTouches[0].clientY;
-        }
-        
-        // Apply scaling offsets with structural fallbacks
-        const clickX = (clientX !== undefined ? (clientX - rect.left) * scaleX : 0);
-        const clickY = (clientY !== undefined ? (clientY - rect.top) * scaleY : 0);
 
         // Check if user clicked any of the active floating fairies
         let clickedFairy = activeFairies.find(f => {
