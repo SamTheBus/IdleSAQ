@@ -4578,6 +4578,602 @@ window.onload = function() {
                         c.stroke();
                         c.restore();
                     }
+                    else if (m.type === "boss" || m.type === "dungeon_boss" || m.type === "chronos_arbitrator" || m.type === "nexus_overseer" || m.type === "rift_guardian") {
+            c.lineWidth = 2.4;
+
+            if (m.type === "dungeon_boss") {
+                // Dungeon specific visual blocks
+            } else {
+                // Standard campaign Area Bosses & Tiered Raid Hunts
+                let currentTier = t !== undefined ? t : getStageTier();
+                
+                // Route Rift Hunt types to their exact visual drawing loops
+                if (m.type === "rift_guardian") currentTier = 4;
+                if (m.type === "chronos_arbitrator") currentTier = 7;
+                if (m.type === "nexus_overseer") currentTier = 8;
+                
+                let bounce = 0; // Prevent ReferenceError
+                if (currentTier === 0) {
+                    // Background glow layer for Rare targets to immediately signify high-tier spawns
+                    if (m.isRare) {
+                        c.save();
+                        let auraPulse = 1 + Math.sin(Date.now() / 150) * 0.12;
+                        let auraGrad = c.createRadialGradient(
+                            m.x + m.w / 2, m.y + m.h / 2, 2,
+                            m.x + m.w / 2, m.y + m.h / 2, Math.max(m.w, m.h) * 1.15 * auraPulse
+                        );
+                        auraGrad.addColorStop(0, "rgba(241, 196, 15, 0.45)");
+                        auraGrad.addColorStop(0.6, "rgba(230, 126, 34, 0.18)");
+                        auraGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+                        c.fillStyle = auraGrad;
+                        c.beginPath();
+                        c.arc(m.x + m.w / 2, m.y + m.h / 2, Math.max(m.w, m.h) * 1.15 * auraPulse, 0, Math.PI * 2);
+                        c.fill();
+                        c.restore();
+                    }
+
+                    // Wrap with a pivot coordinate space to organic-sway and breathe from the root base
+                    c.save();
+                    let ox = m.x + m.w / 2;
+                    let oy = m.y + m.h;
+                    let sway = Math.sin(Date.now() / 240) * 0.035; 
+                    let breatheW = 1 + Math.sin(Date.now() / 150) * 0.015; 
+                    let breatheH = 1 + Math.cos(Date.now() / 150) * 0.008; 
+                    
+                    c.translate(ox, oy);
+                    c.rotate(sway);
+                    c.scale(breatheW, breatheH);
+                    c.translate(-ox, -oy);
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#a97026";
+                    for (let i = 0; i < 4; i++) {
+                        let rx = m.x + m.w * (0.2 + i * 0.2);
+                        c.beginPath();
+                        c.arc(rx, m.y + m.h, m.w * 0.15, Math.PI, 0);
+                        c.fill();
+                        c.stroke();
+                    }
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#dca04c";
+                    c.beginPath();
+                    c.moveTo(m.x + m.w * 0.3, m.y + m.h * 0.35); 
+                    c.lineTo(m.x + m.w * 0.7, m.y + m.h * 0.35);
+                    c.quadraticCurveTo(m.x + m.w * 0.75, m.y + m.h * 0.7, m.x + m.w * 0.85, m.y + m.h); 
+                    c.lineTo(m.x + m.w * 0.15, m.y + m.h);
+                    c.quadraticCurveTo(m.x + m.w * 0.25, m.y + m.h * 0.7, m.x + m.w * 0.3, m.y + m.h * 0.35); 
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#a97026";
+                    c.beginPath();
+                    c.ellipse(m.x + m.w * 0.72, m.y + m.h * 0.65, m.w * 0.15, m.h * 0.08, -Math.PI / 8, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        c.strokeStyle = "#825010";
+                        c.lineWidth = 1.5;
+                        c.beginPath();
+                        c.ellipse(m.x + m.w * 0.72, m.y + m.h * 0.65, m.w * 0.08, m.h * 0.04, -Math.PI / 8, 0, Math.PI * 2);
+                        c.stroke();
+                    }
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#dca04c";
+                    c.beginPath();
+                    c.roundRect(m.x + m.w * 0.05, m.y + m.h * 0.56, m.w * 0.45, m.h * 0.07, [4]);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#a97026"; 
+                    c.beginPath();
+                    c.roundRect(m.x + m.w * 0.05, m.y + m.h * 0.61, m.w * 0.45, m.h * 0.02, [2]);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = "#301a0d"; 
+                        c.beginPath();
+                        c.ellipse(m.x + m.w * 0.42, m.y + m.h * 0.5, m.w * 0.06, m.h * 0.08, 0, 0, Math.PI * 2);
+                        c.ellipse(m.x + m.w * 0.58, m.y + m.h * 0.5, m.w * 0.06, m.h * 0.08, 0, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                        
+                        c.beginPath();
+                        c.arc(m.x + m.w * 0.5, m.y + m.h * 0.68, m.w * 0.08, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                    }
+
+                    let cx = m.x + m.w / 2;
+                    let cy = m.y + m.h * 0.15;
+                    let r = m.w * 0.8;
+                    
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#4ba337"; 
+                    c.beginPath();
+                    c.arc(cx, cy, r, 0, Math.PI * 2);
+                    c.arc(cx - r * 0.5, cy - r * 0.1, r * 0.8, 0, Math.PI * 2);
+                    c.arc(cx + r * 0.5, cy - r * 0.1, r * 0.8, 0, Math.PI * 2);
+                    c.arc(cx, cy - r * 0.6, r * 0.9, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = "#69c453"; 
+                        c.beginPath();
+                        c.arc(cx, cy, r * 0.8, 0, Math.PI * 2);
+                        c.arc(cx - r * 0.4, cy - r * 0.6, r * 0.6, 0, Math.PI * 2);
+                        c.arc(cx + r * 0.4, cy - r * 0.6, r * 0.6, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                    }
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = "#e74c3c";
+                        if (!m.appleOffsets) {
+                            m.appleOffsets = [];
+                            let count = randInt(4, 8); 
+                            for (let i = 0; i < count; i++) {
+                                let angle = randFloat(0, Math.PI * 2);
+                                let dist = randFloat(0, r * 0.85); 
+                                m.appleOffsets.push({
+                                    dx: Math.cos(angle) * dist,
+                                    dy: Math.sin(angle) * dist - (r * 0.1) 
+                                });
+                            }
+                        }
+                        m.appleOffsets.forEach(ap => {
+                            let appleX = cx + ap.dx;
+                            let appleY = cy + ap.dy;
+
+                            c.beginPath();
+                            c.arc(appleX, appleY, m.w * 0.12, 0, Math.PI * 2);
+                            c.fill();
+                            c.stroke();
+                            
+                            c.strokeStyle = "#4d2e1a";
+                            c.lineWidth = 1.5;
+                            c.beginPath();
+                            c.moveTo(appleX, appleY - m.w * 0.1);
+                            c.lineTo(appleX - 2, appleY - m.w * 0.18);
+                            c.stroke();
+
+                            c.fillStyle = "#ffffff";
+                            c.beginPath();
+                            c.arc(appleX - m.w * 0.04, appleY - m.w * 0.04, m.w * 0.03, 0, Math.PI * 2);
+                            c.fill();
+                            c.fillStyle = "#e74c3c";
+                        });
+                    }
+                    c.restore();
+                } else if (currentTier === 1) {
+                    let bounceOffset = Math.sin(Date.now() / 200) * 3;
+                    let blockColor = m.flashTimer > 0 ? "#ffffff" : "#3b3f46";
+                    let shadowColor = m.flashTimer > 0 ? "#ffffff" : "#1f2126";
+                    let lavaColor = "#ff2200";
+
+                    c.fillStyle = shadowColor;
+                    c.beginPath(); c.rect(m.x + 4, m.y + m.h - 16, m.w - 8, 16); c.fill(); c.stroke();
+                    c.fillStyle = blockColor;
+                    c.beginPath(); c.rect(m.x + 8, m.y + m.h - 14, 12, 14); c.fill(); c.stroke();
+                    c.beginPath(); c.rect(m.x + m.w - 20, m.y + m.h - 14, 12, 14); c.fill(); c.stroke();
+
+                    c.fillStyle = shadowColor;
+                    c.beginPath();
+                    c.roundRect(m.x - 2, m.y + 24 + bounceOffset, m.w + 4, m.h - 40, [10]);
+                    c.fill();
+                    c.stroke();
+                    
+                    c.fillStyle = blockColor;
+                    c.beginPath();
+                    c.roundRect(m.x, m.y + 26 + bounceOffset, m.w, m.h - 44, [8]);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = "#121316";
+                    c.beginPath();
+                    c.roundRect(m.x - 10, m.y + 20 + bounceOffset, 14, 16, [4]);
+                    c.roundRect(m.x + m.w - 4, m.y + 20 + bounceOffset, 14, 16, [4]);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = shadowColor;
+                    c.beginPath();
+                    c.roundRect(m.x + 8, m.y + 4 + bounceOffset, m.w - 16, 22, [6]);
+                    c.fill();
+                    c.stroke();
+                    
+                    c.fillStyle = blockColor;
+                    c.beginPath();
+                    c.roundRect(m.x + 10, m.y + 6 + bounceOffset, m.w - 20, 18, [4]);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                        c.fillStyle = lavaColor;
+                        c.shadowBlur = 15;
+                        c.shadowColor = lavaColor;
+
+                        c.beginPath();
+                        c.moveTo(m.x + 14, m.y + 11 + bounceOffset);
+                        c.lineTo(m.x + 22, m.y + 16 + bounceOffset);
+                        c.lineTo(m.x + 14, m.y + 18 + bounceOffset);
+                        c.closePath();
+                        
+                        c.moveTo(m.x + m.w - 14, m.y + m.h - 14 + bounceOffset);
+                        c.lineTo(m.x + m.w - 22, m.y + m.h - 16 + bounceOffset);
+                        c.lineTo(m.x + m.w - 14, m.y + m.h - 18 + bounceOffset);
+                        c.closePath();
+                        c.fill();
+                        c.stroke();
+                        
+                        c.shadowBlur = 0;
+                    }
+
+                    if (m.flashTimer === 0) {
+                        c.strokeStyle = lavaColor;
+                        c.shadowBlur = 10;
+                        c.shadowColor = lavaColor;
+                        c.lineWidth = 2.5;
+
+                        c.beginPath();
+                        c.moveTo(m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset);
+                        c.lineTo(m.x + 10, m.y + 35 + bounceOffset);
+                        c.moveTo(m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset);
+                        c.lineTo(m.x + m.w - 10, m.y + 35 + bounceOffset);
+                        c.moveTo(m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset);
+                        c.lineTo(m.x + m.w/2, m.y + m.h - 22 + bounceOffset);
+                        c.stroke();
+
+                        let coreGrad = c.createRadialGradient(
+                            m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset, 1,
+                            m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset, 8
+                        );
+                        coreGrad.addColorStop(0, "#ffffff");
+                        coreGrad.addColorStop(0.3, "#ff3b30");
+                        coreGrad.addColorStop(1, "rgba(255, 0, 0, 0)");
+                        c.fillStyle = coreGrad;
+                        c.beginPath();
+                        c.arc(m.x + m.w/2, m.y + m.h/2 + 5 + bounceOffset, 8, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+
+                        c.shadowBlur = 0;
+                    }
+                } // Closes the 'else if (currentTier === 1)' block
+                else {
+                    let currentTier = t !== undefined ? t : getStageTier();
+                    
+                    // Route Rift Hunt types to their exact visual drawing loops
+                    if (m.type === "rift_guardian") currentTier = 4;
+                    if (m.type === "chronos_arbitrator") currentTier = 7;
+                    if (m.type === "nexus_overseer") currentTier = 8;
+
+                    if (currentTier === 2) {
+                        // TIER 2: Revamped Inferno Boss (Brimstone Colossus - Ignis)
+                        let bounce = Math.sin(Date.now() / 150) * 3.5;
+                        let cx = m.x + m.w / 2;
+                        let cy = m.y + m.h / 2 + bounce;
+
+                        // Heavy Jagged Charcoal Obsidian shoulders (curved pauldrons)
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1c1c1f"; // deep charcoal
+                        c.beginPath();
+                        c.moveTo(cx - 28, cy + 30);
+                        c.lineTo(cx - 22, cy - 5);
+                        c.lineTo(cx - 32, cy - 14); // shoulder point
+                        c.lineTo(cx - 10, cy - 10);
+                        c.lineTo(cx, cy); // neck joint
+                        c.lineTo(cx + 10, cy - 10);
+                        c.lineTo(cx + 32, cy - 14); // shoulder point
+                        c.lineTo(cx + 22, cy - 5);
+                        c.lineTo(cx + 28, cy + 30);
+                        c.closePath();
+                        c.fill();
+                        c.stroke();
+
+                        // Glowing magma fissures running down the armor plates
+                        if (m.flashTimer === 0) {
+                            c.strokeStyle = "#d35400";
+                            c.lineWidth = 2;
+                            c.beginPath();
+                            c.moveTo(cx - 20, cy + 10);
+                            c.lineTo(cx - 8, cy + 22);
+                            c.lineTo(cx - 14, cy + 26);
+                            c.moveTo(cx + 20, cy + 10);
+                            c.lineTo(cx + 8, cy + 22);
+                            c.lineTo(cx + 14, cy + 26);
+                            c.stroke();
+                        }
+
+                        // Molten core in the center flaring
+                        if (m.flashTimer === 0) {
+                            let corePulse = 10 + Math.sin(Date.now() / 80) * 3;
+                            let coreGrad = c.createRadialGradient(cx, cy + 16, 2, cx, cy + 16, corePulse);
+                            coreGrad.addColorStop(0, "#ffffff");
+                            coreGrad.addColorStop(0.4, "#f39c12");
+                            coreGrad.addColorStop(1, "rgba(231, 76, 60, 0)");
+                            c.fillStyle = coreGrad;
+                            c.beginPath();
+                            c.arc(cx, cy + 16, corePulse, 0, Math.PI * 2);
+                            c.fill();
+                        }
+
+                        // Giant sulfur-horned helmet
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#2f3238";
+                        c.beginPath();
+                        c.roundRect(cx - 12, cy - 26, 24, 20, [3]);
+                        c.fill();
+                        c.stroke();
+
+                        // Massive curved horns curling up from helmet
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#e67e22";
+                        c.beginPath();
+                        // Left
+                        c.moveTo(cx - 11, cy - 20);
+                        c.quadraticCurveTo(cx - 25, cy - 40, cx - 28, cy - 35);
+                        c.lineTo(cx - 8, cy - 14);
+                        c.closePath();
+                        // Right
+                        c.moveTo(cx + 11, cy - 20);
+                        c.quadraticCurveTo(cx + 25, cy - 40, cx + 28, cy - 35);
+                        c.lineTo(cx + 8, cy - 14);
+                        c.closePath();
+                        c.fill();
+                        c.stroke();
+
+                        // Molten iron visor slit
+                        if (m.flashTimer === 0) {
+                            c.fillStyle = "#ff3b30";
+                            c.beginPath();
+                            c.rect(cx - 8, cy - 18, 16, 3);
+                            c.fill();
+                        }
+                    }
+                    else if (currentTier === 3) {
+                        // TIER 3: Swamp Bog-Colossus Boss (Root-entangled swamp elemental)
+                        let bounce = Math.sin(Date.now() / 170) * 3;
+                        let cx = m.x + m.w / 2;
+                        let cy = m.y + m.h / 2 + bounce;
+
+                        // Tangled wooden root body
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#2d1e12";
+                        c.beginPath();
+                        c.roundRect(cx - 22, cy - 10, 44, 50, [10]);
+                        c.fill();
+                        c.stroke();
+
+                        // Mossy/Leafy swamp shoulders
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#143d1f";
+                        c.beginPath();
+                        c.ellipse(cx - 20, cy - 10, 12, 12, 0, 0, Math.PI*2);
+                        c.ellipse(cx + 20, cy - 10, 12, 12, 0, 0, Math.PI*2);
+                        c.fill();
+                        c.stroke();
+
+                        // Bog face
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1a120a";
+                        c.beginPath();
+                        c.arc(cx, cy - 22, 12, 0, Math.PI*2);
+                        c.fill();
+                        c.stroke();
+
+                        if (m.flashTimer === 0) {
+                            // Glowing toxic green swamp eyes
+                            c.fillStyle = "#2ecc71";
+                            c.beginPath();
+                            c.arc(cx - 4, cy - 22, 2.2, 0, Math.PI*2);
+                            c.arc(cx + 4, cy - 22, 2.2, 0, Math.PI*2);
+                            c.fill();
+                        }
+                    }
+                    else if (currentTier === 4) {
+                        // TIER 4: Void Overseer Boss (Levitating levitational multi-eyed space singularity)
+                        let hover = Math.sin(Date.now() / 140) * 6;
+                        let cx = m.x + m.w / 2;
+                        let cy = m.y + m.h / 2 - 10 + hover;
+
+                        // Swirling cosmic aura backplate
+                        if (m.flashTimer === 0) {
+                            let coreGrad = c.createRadialGradient(cx, cy, 2, cx, cy, 28);
+                            coreGrad.addColorStop(0, "#ffffff");
+                            coreGrad.addColorStop(0.4, "#9b59b6");
+                            coreGrad.addColorStop(1, "rgba(0,0,0,0)");
+                            c.fillStyle = coreGrad;
+                            c.beginPath(); c.arc(cx, cy, 28, 0, Math.PI*2); c.fill();
+                        }
+
+                        // Central obsidian core plate
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#0d011a";
+                        c.beginPath();
+                        c.moveTo(cx, cy - 20);
+                        c.lineTo(cx + 18, cy);
+                        c.lineTo(cx, cy + 20);
+                        c.lineTo(cx - 18, cy);
+                        c.closePath();
+                        c.fill();
+                        c.stroke();
+
+                        if (m.flashTimer === 0) {
+                            // Blinking pink void watch eyes
+                            c.fillStyle = "#ff007f";
+                            c.beginPath();
+                            c.arc(cx, cy, 3.5, 0, Math.PI*2);
+                            c.arc(cx - 8, cy - 8, 1.8, 0, Math.PI*2);
+                            c.arc(cx + 8, cy - 8, 1.8, 0, Math.PI*2);
+                            c.arc(cx - 8, cy + 8, 1.8, 0, Math.PI*2);
+                            c.arc(cx + 8, cy + 8, 1.8, 0, Math.PI*2);
+                            c.fill();
+                        }
+                    }
+                    else if (currentTier === 5) {
+                        // TIER 5: Gilded Clockwork Sphinx (Temporal Sanctorum Campaign Warden)
+                        let bounce = Math.sin(Date.now() / 150) * 4;
+                        let cx = m.x + m.w / 2;
+                        let cy = m.y + m.h / 2 + bounce;
+
+                        // Sphinx lion torso & sand wings
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#dca04c";
+                        c.beginPath();
+                        c.ellipse(cx, cy + 15, 18, 22, 0, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+
+                        // Golden Pharaoh Headdress
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#f1c40f";
+                        c.beginPath();
+                        c.moveTo(cx, cy - 28);
+                        c.lineTo(cx - 18, cy - 10);
+                        c.lineTo(cx - 12, cy + 6);
+                        c.lineTo(cx, cy - 2);
+                        c.lineTo(cx + 12, cy + 6);
+                        c.lineTo(cx + 18, cy - 10);
+                        c.closePath();
+                        c.fill();
+                        c.stroke();
+
+                        // Sphinx Face
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#e5c185";
+                        c.beginPath();
+                        c.roundRect(cx - 8, cy - 18, 16, 18, [3]);
+                        c.fill();
+                        c.stroke();
+
+                        if (m.flashTimer === 0) {
+                            // Blank white glowing eyes
+                            c.fillStyle = "#ffffff";
+                            c.shadowBlur = 6;
+                            c.shadowColor = "#ffffff";
+                            c.beginPath();
+                            c.arc(cx - 3.5, cy - 10, 1.8, 0, Math.PI * 2);
+                            c.arc(cx + 3.5, cy - 10, 1.8, 0, Math.PI * 2);
+                            c.fill();
+                            c.shadowBlur = 0;
+                        }
+                    }
+                    else if (currentTier === 6) {
+                        // TIER 6: Grid Centurion (Cyberspace Nexus Campaign Warden)
+                        let hover = Math.sin(Date.now() / 120) * 6;
+                        let cx = m.x + m.w / 2;
+                        let cy = m.y + m.h / 2 + hover;
+
+                        // Floating neon vector shield
+                        c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#3498db";
+                        c.lineWidth = 1.5;
+                        c.save();
+                        c.translate(cx - 24, cy + 4);
+                        c.rotate(Date.now() / 500);
+                        c.strokeRect(-8, -8, 16, 16);
+                        c.restore();
+
+                        // Visor helmet
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1a1c23";
+                        c.beginPath();
+                        c.roundRect(cx - 12, cy - 18, 24, 22, [4]);
+                        c.fill();
+                        c.stroke();
+
+                        if (m.flashTimer === 0) {
+                            // Visor
+                            c.fillStyle = "#00d2ff";
+                            c.beginPath();
+                            c.rect(cx - 8, cy - 11, 16, 4);
+                            c.fill();
+
+                            // Falling green matrix cape code blocks
+                            c.fillStyle = "rgba(46, 204, 113, 0.65)";
+                            for (let i = 0; i < 3; i++) {
+                                let offset = (i - 1) * 8;
+                                let yProgress = (Date.now() / 6 + i * 20) % 20;
+                                c.fillRect(cx + offset - 1, cy + 4 + yProgress, 2, 8);
+                            }
+                        }
+                    }
+                    else if (currentTier === 7) {
+                        // TIER 7: Chronos Arbitrator (The Clockwork God - exclusive T2 Altar Summon)
+                        let hover = Math.sin(Date.now() / 200) * 8;
+                        let cx = m.x + m.w / 2;
+                        let cy = m.y + m.h / 2 + hover;
+
+                        // Glowing brass gear halo
+                        let gearAngle = Date.now() / 4000;
+                        c.save();
+                        c.translate(cx, cy);
+                        c.rotate(gearAngle);
+                        c.strokeStyle = "#f1c40f";
+                        c.lineWidth = 2.0;
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "rgba(241, 196, 15, 0.08)";
+                        c.beginPath();
+                        c.arc(0, 0, 42, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                        for (let i = 0; i < 8; i++) {
+                            c.rotate(Math.PI / 4);
+                            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#dca04c";
+                            c.beginPath();
+                            c.rect(-5, -50, 10, 10);
+                            c.fill();
+                            c.stroke();
+                        }
+                        c.restore();
+
+                        // Cracked Ivory Mask Plate
+                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#fdf6e2";
+                        c.strokeStyle = "#000000";
+                        c.lineWidth = 2.4;
+                        c.beginPath();
+                        c.moveTo(cx, cy - 25);
+                        c.quadraticCurveTo(cx - 20, cy - 20, cx - 20, cy);
+                        c.lineTo(cx - 12, cy + 28);
+                        c.lineTo(cx + 12, cy + 28);
+                        c.lineTo(cx + 20, cy);
+                        c.quadraticCurveTo(cx + 20, cy - 20, cx, cy - 25);
+                        c.closePath();
+                        c.fill();
+                        c.stroke();
+
+                        if (m.flashTimer === 0) {
+                            // Shimmering cracks
+                            c.strokeStyle = "#1a0f02";
+                            c.lineWidth = 1.5;
+                            c.beginPath();
+                            c.moveTo(cx - 10, cy - 10);
+                            c.lineTo(cx - 4, cy - 4);
+                            c.lineTo(cx - 8, cy + 2);
+                            c.moveTo(cx + 10, cy - 8);
+                            c.lineTo(cx + 6, cy - 2);
+                            c.stroke();
+
+                            // White glowing eyes
+                            c.fillStyle = "#ffffff";
+                            c.shadowBlur = 8;
+                            c.shadowColor = "#ffffff";
+                            c.beginPath();
+                            c.arc(cx - 6, cy - 5, 3, 0, Math.PI * 2);
+                            c.arc(cx + 6, cy - 5, 3, 0, Math.PI * 2);
+                            c.fill();
+                            c.shadowBlur = 0;
+                        }
+
+                        // Golden clock hands sweeping behind mask
+                        c.save();
+                        c.translate(cx, cy);
+                        c.strokeStyle = "#e67e22";
+                        c.lineWidth = 3.0;
+                        c.lineCap = "round";
+                        
+                        let hourAngle = Date.now() / 15000;
+                        c.beginPath();
+                        c.moveTo(0, 0);
+                        c.lineTo(Math.cos(hourAngle) * 16, Math.sin(hourAngle) * 16);
+                        c.stroke();
+                        
+                        let minAngle = Date.now() / 2500;
+                        c.beginPath();
+                        c.moveTo(0, 0);
+                        c.lineTo(Math.cos(minAngle) * 24, Math.sin(minAngle) * 24);
+                        c.stroke();
+                        c.restore();
+                    }
                     else {
                         // TIER 8+: Nexus Overseer (The Glitch Singularity - exclusive T3 Altar Summon)
                         let cx = m.x + m.w / 2;
@@ -4651,8 +5247,8 @@ window.onload = function() {
                             c.fillStyle = "#ff007f";
                             c.fillRect(px - 1.2, py - 4, 2.4, 8);
                         }
-                    }
-                }
+                    } 
+                } 
 
                 if (m.flashTimer === 0) {
                     c.fillStyle = "#ff007f";
