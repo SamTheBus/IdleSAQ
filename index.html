@@ -1348,6 +1348,77 @@ window.onload = function() {
         return `${formatted} ${suffixes[i]}`;
     }
 
+    // Centralized Unique Styling Manager
+    window.getUniqueItemStyle = function(item) {
+        if (!item) return null;
+        let isUnique = item.isUniqueStaff || item.isUniqueSword || item.isUniqueSingularity || item.isUniqueMaelstrom || item.isUniqueAegis || item.isUniqueWatch || item.isUniqueChronicle || item.isUniqueWarpCore || item.isUniqueTempest;
+        if (!isUnique) return null;
+
+        let bg = "";
+        let border = "";
+        let shadow = "";
+        let glow = "";
+        let lore = "";
+
+        if (item.isUniqueSword) {
+            bg = "linear-gradient(135deg, #1f0303, #070000)";
+            border = "#960018";
+            shadow = "#5c000c";
+            glow = "rgba(150,0,24,0.4)";
+            lore = `"Forged in the veins of the first red dragon, this blade sings a silent, thirsty song. It does not merely cut flesh; it harvests the soul's very current."`;
+        } else if (item.isUniqueStaff) {
+            bg = "linear-gradient(135deg, #1c0e00, #070200)";
+            border = "#e67e22";
+            shadow = "#853c00";
+            glow = "rgba(230,126,34,0.4)";
+            lore = `"Born of a feather plucked from the solar phoenix, its core burns with the warmth of a thousand dying suns. Even in the deepest cold of the void, its fire never falters."`;
+        } else if (item.isUniqueSingularity) {
+            bg = "linear-gradient(135deg, #150326, #030008)";
+            border = "#8e44ad";
+            shadow = "#510a74";
+            glow = "rgba(142,68,173,0.4)";
+            lore = `"This colossal blade harbors the core of a collapsed dying star, pulling the surrounding space into a constant state of gravitational collapse."`;
+        } else if (item.isUniqueMaelstrom) {
+            bg = "linear-gradient(135deg, #031d0d, #010803)";
+            border = "#2ecc71";
+            shadow = "#145a32";
+            glow = "rgba(46,204,113,0.4)";
+            lore = `"Whispers of forgotten gales dance along its razor edge, gathering strength with every swing until the wind itself becomes a solid, cutting force."`;
+        } else if (item.isUniqueAegis) {
+            bg = "linear-gradient(135deg, #021a2c, #00080f)";
+            border = "#3498db";
+            shadow = "#1a5276";
+            glow = "rgba(52,152,219,0.4)";
+            lore = `"A shield constructed of hyper-dense matter harvested from the Event Horizon. It bends local gravity fields to completely arrest kinetic impacts."`;
+        } else if (item.isUniqueWatch) {
+            bg = "linear-gradient(135deg, #221c03, #0a0800)";
+            border = "#f1c40f";
+            shadow = "#7d6608";
+            glow = "rgba(241,196,15,0.4)";
+            lore = `"A complex clockwork matrix that acts as a localized anchor in time. It beats in harmony with your lifeline, stretching fractions of seconds."`;
+        } else if (item.isUniqueChronicle) {
+            bg = "linear-gradient(135deg, #1f1b0a, #0b0903)";
+            border = "#f39c12";
+            shadow = "#7e5109";
+            glow = "rgba(243,156,18,0.4)";
+            lore = `"An ancient, soul-bound lexicon recording every rise and fall of your past incarnations. To read its pages is to remember power long forgotten."`;
+        } else if (item.isUniqueWarpCore) {
+            bg = "linear-gradient(135deg, #001a1a, #000707)";
+            border = "#1abc9c";
+            shadow = "#0e6251";
+            glow = "rgba(26,188,156,0.4)";
+            lore = `"Fitted with micro-singularity thrusters that distort spatial geometry directly ahead of your stride, allowing you to cross landscapes in a single heartbeat."`;
+        } else if (item.isUniqueTempest) {
+            bg = "linear-gradient(135deg, #03212c, #000c0f)";
+            border = "#00d2ff";
+            shadow = "#005077";
+            glow = "rgba(0,210,255,0.4)";
+            lore = `"Stolen from the peaks of the Storm-Warden's spire, this circlet channels wild static friction, responding to bodily trauma with localized lightning strikes."`;
+        }
+
+        return { bg, border, shadow, glow, lore };
+    };
+
     // Procedural decoration asset definitions
     const flowerColors = ["#e74c3c", "#9b59b6", "#f1c40f", "#3498db", "#e67e22", "#e84393"];
     
@@ -9319,20 +9390,15 @@ window.loadGame = function() {
             let isArt = slotKey.startsWith("art"); el.className = isArt ? "slots-card artifact-slot equipped" : "slots-card equipped";
             el.style.borderColor = getTierColor(item.statsRolled);
 
-            // Apply glowing border and dark crimson/amber background underlays on Paper Doll
-            let isUniqueWeapon = item.isUniqueSword || item.isUniqueStaff;
-            if (isUniqueWeapon) {
-                if (item.isUniqueSword) {
-                    el.style.background = "linear-gradient(135deg, #2a0000, #050000)";
-                    el.style.borderColor = "#960018";
-                    el.style.boxShadow = "inset 0 0 8px #5c000c, 0 0 10px rgba(150,0,24,0.7)";
-                } else if (item.isUniqueStaff) {
-                    el.style.background = "linear-gradient(135deg, #2a1400, #050200)";
-                    el.style.borderColor = "#e67e22";
-                    el.style.boxShadow = "inset 0 0 8px #853c00, 0 0 10px rgba(230,126,34,0.7)";
-                }
+            // Apply glowing border and colored background underlays on Paper Doll
+            let uniqueStyle = window.getUniqueItemStyle(item);
+            if (uniqueStyle) {
+                el.style.background = uniqueStyle.bg;
+                el.style.borderColor = uniqueStyle.border;
+                el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
             } else {
                 el.style.background = "";
+                el.style.borderColor = "";
                 el.style.boxShadow = "";
             }
 
@@ -10062,24 +10128,8 @@ window.loadGame = function() {
         html += badge;
 
         // Custom variables for Diablo Uber Unique styled framing
-        let isUniqueWeapon = item.isUniqueSword || item.isUniqueStaff;
-        let cardBg = "";
-        let cardBorder = "";
-        let cardShadow = "";
+        let uniqueStyle = window.getUniqueItemStyle(item);
         let runicBadge = `<div style="color: #f1c40f; font-family: monospace; font-weight: 800; font-size: 10px; margin-bottom: 6px; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);">⚡ UBER UNIQUE ⚡</div>`;
-        let loreText = "";
-
-        if (item.isUniqueSword) {
-            cardBg = "linear-gradient(135deg, #1c0000, #070000)";
-            cardBorder = "2px solid #960018";
-            cardShadow = "inset 0 0 20px #5c000c, 0 0 15px rgba(150, 0, 24, 0.6)";
-            loreText = `<i>"Forged in the veins of the first red dragon, this blade sings a silent, thirsty song. It does not merely cut flesh; it harvests the soul's very current."</i>`;
-        } else if (item.isUniqueStaff) {
-            cardBg = "linear-gradient(135deg, #1c0e00, #070200)";
-            cardBorder = "2px solid #e67e22";
-            cardShadow = "inset 0 0 20px #853c00, 0 0 15px rgba(230, 126, 34, 0.6)";
-            loreText = `<i>"Born of a feather plucked from the solar phoenix, its core burns with the warmth of a thousand dying suns. Even in the deepest cold of the void, its fire never falters."</i>`;
-        }
 
         let tierColor = getTierColor(item.statsRolled); let titleColor = item.type === "artifact" ? "#1abc9c" : tierColor;
         let tierName = getTierName(item.statsRolled); let tierDisplay = item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★ ${getTierName(item.statsRolled)}`;
@@ -10215,11 +10265,11 @@ window.loadGame = function() {
         }
 
         // Apply Diablo Uber Unique styled full-card wrappers
-        if (isUniqueWeapon) {
-            if (loreText) {
-                html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;">${loreText}</div>`;
+        if (uniqueStyle) {
+            if (uniqueStyle.lore) {
+                html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
             }
-            html = `<div style="background: ${cardBg}; border: ${cardBorder}; box-shadow: ${cardShadow}; padding: 12px; margin: -10px; border-radius: 4px; box-sizing: border-box; min-width: 250px;">
+            html = `<div style="background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 12px; margin: -10px; border-radius: 4px; box-sizing: border-box; min-width: 250px;">
                 ${runicBadge}
                 ${html}
             </div>`;
@@ -11314,16 +11364,12 @@ window.loadGame = function() {
                 let bgStyle = forgeSelectedItem && forgeSelectedItem.id === item.id ? "background:#1e2a38; border: 1px solid #1abc9c;" : "";
                 
                 // Set Diablo Uber Unique visual profiles in Forge Selection Lists
-                let uniqueStyle = "";
-                let isUniqueWeapon = item.isUniqueSword || item.isUniqueStaff;
-                if (isUniqueWeapon) {
-                    if (item.isUniqueSword) {
-                        uniqueStyle = `background: linear-gradient(135deg, #1f0303, #070000); border: 1px solid #960018; box-shadow: inset 0 0 6px #5c000c, 0 0 8px rgba(150,0,24,0.4);`;
-                    } else if (item.isUniqueStaff) {
-                        uniqueStyle = `background: linear-gradient(135deg, #1c0e00, #070200); border: 1px solid #e67e22; box-shadow: inset 0 0 6px #853c00, 0 0 8px rgba(230,126,34,0.4);`;
-                    }
+                let uniqueStyleStr = "";
+                let uniqueStyle = window.getUniqueItemStyle(item);
+                if (uniqueStyle) {
+                    uniqueStyleStr = `background: ${uniqueStyle.bg}; border: 1px solid ${uniqueStyle.border}; box-shadow: inset 0 0 6px ${uniqueStyle.shadow}, 0 0 8px ${uniqueStyle.glow};`;
                 }
-                let finalStyle = bgStyle ? `${bgStyle} ${uniqueStyle}` : uniqueStyle;
+                let finalStyle = bgStyle ? `${bgStyle} ${uniqueStyleStr}` : uniqueStyleStr;
                 let inlineStyle = finalStyle ? `style="${finalStyle}"` : "";
 
                 let eqBadge = item.isEquippedSlot ? `<span style="background:#c0392b; color:white; padding:1px 3px; border-radius:2px; font-size:8px;">[EQUIPPED]</span> ` : "";
@@ -12601,17 +12647,13 @@ window.loadGame = function() {
                 let details = item.type === "artifact" ? `<span style="font-size:10px;color:#d2b4de;font-weight:bold;">Trait: ${item.desc}</span>${lockWarning}` : `<span style="font-size:10px;color:#aaa;">Slot: ${typeText} | <span style="color:${nameColor};font-weight:bold;">${tierStr}</span></span>${lockWarning}`;
                 
                 // Set Diablo Uber Unique visual profiles in Sack Lists
-                let uniqueStyle = "";
-                let isUniqueWeapon = item.isUniqueSword || item.isUniqueStaff;
-                if (isUniqueWeapon) {
-                    if (item.isUniqueSword) {
-                        uniqueStyle = `style="background: linear-gradient(135deg, #1f0303, #070000); border: 1px solid #960018; box-shadow: inset 0 0 6px #5c000c, 0 0 8px rgba(150,0,24,0.4);"`;
-                    } else if (item.isUniqueStaff) {
-                        uniqueStyle = `style="background: linear-gradient(135deg, #1c0e00, #070200); border: 1px solid #e67e22; box-shadow: inset 0 0 6px #853c00, 0 0 8px rgba(230,126,34,0.4);"`;
-                    }
+                let uniqueStyle = window.getUniqueItemStyle(item);
+                let uniqueStyleStr = "";
+                if (uniqueStyle) {
+                    uniqueStyleStr = `style="background: ${uniqueStyle.bg}; border: 1px solid ${uniqueStyle.border}; box-shadow: inset 0 0 6px ${uniqueStyle.shadow}, 0 0 8px ${uniqueStyle.glow};"`;
                 }
 
-                return `<div class="bag-item" ${uniqueStyle} onmouseenter="showInventoryTooltip(event, ${item.id})" ontouchstart="showInventoryTooltip(event, ${item.id})" onmouseleave="hideTooltip()">
+                return `<div class="bag-item" ${uniqueStyleStr} onmouseenter="showInventoryTooltip(event, ${item.id})" ontouchstart="showInventoryTooltip(event, ${item.id})" onmouseleave="hideTooltip()">
                     <div><strong style="color:${nameColor};">${item.name}${temperTag}${lockTag}</strong>${comparisonBadge}<br>${details}</div>
                     <div style="position:relative; z-index:10; white-space:nowrap;">
                         <button class="btn-action" ${disabledAttr} onclick="equipItem(${item.id})">Equip</button>
