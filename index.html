@@ -626,13 +626,15 @@
 </head>
 <body>
 
-    <div id="game-container">
-        
-        <div id="top-nav">
-            <div style="display: flex; gap: 8px; position: relative;">
-                <div style="position: relative;">
-                    <button onclick="toggleDungeonMenu()" class="nav-btn">🏰 Activities ▼</button>
-                    <div id="dungeon-menu" style="display: none; position: absolute; top: 35px; left: 0; background: #151515; border: 1px solid #444; border-radius: 6px; padding: 12px; width: 260px; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.9);">
+<div id="toast-container"></div>
+
+<div id="game-container">
+
+    <div id="top-nav">
+        <div style="display: flex; gap: 8px; position: relative;">
+            <div style="position: relative;">
+                <button onclick="toggleDungeonMenu()" class="nav-btn">🏰 Activities ▼</button>
+                <div id="dungeon-menu" style="display: none; position: absolute; top: 35px; left: 0; background: #151515; border: 1px solid #444; border-radius: 6px; padding: 12px; width: 260px; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.9);">
                         <div style="color: #f1c40f; font-weight: bold; margin-bottom: 8px; font-size: 14px; text-align:center; border-bottom:1px solid #333; padding-bottom:5px;">🏰 Infinite Dungeons</div>
                         
                         <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
@@ -703,11 +705,10 @@
                     </div>
                 </div>
             </div>
-            <div style="font-size: 11px; color: #475569; font-weight: 800; align-self: center; letter-spacing: 2px; text-transform: uppercase; font-family: monospace; border-left: 2px solid #334155; padding-left: 12px; line-height: 1.2;">SAQ: Slaying & Questing</div>
-        </div>
+        <div style="font-size: 11px; color: #475569; font-weight: 800; align-self: center; letter-spacing: 2px; text-transform: uppercase; font-family: monospace; border-left: 2px solid #334155; padding-left: 12px; line-height: 1.2;">SAQ: Slaying & Questing</div>
+    </div>
 
-        <div id="toast-container"></div>
-        <div id="game-tooltip" class="tooltip-base"></div>
+    <div id="game-tooltip" class="tooltip-base"></div>
         <div id="etc-tooltip" class="tooltip-base"></div>
         <div id="log-item-tooltip" class="tooltip-base"></div>
         <div id="stat-tooltip" class="tooltip-base"></div>
@@ -1167,39 +1168,70 @@
                 <div class="grid-layout">
                     <div style="font-size: 11px; background: #111; padding: 8px; border-radius: 4px; line-height: 1.5;">
                         <h4 style="margin: 0 0 5px 0; color:#e67e22; font-size:12px;">Attributes Matrix</h4>
-                        
-                        <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'str')" ontouchstart="showStatBreakdown(event, 'str')" onmouseleave="hideTooltip()">
-                            <span>💪 STR (Strength): <span id="stat-str" style="font-weight:bold; color:#fff;">5</span></span>
-                            <button class="btn-action sp" onclick="spendSP('spStr')">+</button>
+
+                        <!-- 1. STR -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'str')" ontouchstart="showStatBreakdown(event, 'str')" onmouseleave="hideTooltip()" style="flex:1;">
+                                <span>💪 STR (Strength): <span id="stat-str" style="font-weight:bold; color:#fff;">5</span></span>
+                            </div>
+                            <div style="display:inline-flex; gap:3px; margin-left:8px;">
+                                <button class="btn-action sp" id="btn-minus-spStr" onpointerdown="window.startSPDraftHold(event, 'spStr', -1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onclick="event.stopPropagation();" style="background:#e74c3c; width:18px; height:18px; padding:0; line-height:18px; display:none;">-</button>
+                                <button class="btn-action sp" id="btn-plus-spStr" onpointerdown="window.startSPDraftHold(event, 'spStr', 1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onmouseenter="window.showSPPreview(event, 'spStr')" onmouseleave="window.hideTooltip()" onclick="event.stopPropagation();" style="width:18px; height:18px; padding:0; line-height:18px;">+</button>
+                            </div>
                         </div>
-                        <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'dex')" ontouchstart="showStatBreakdown(event, 'dex')" onmouseleave="hideTooltip()">
-                            <span>🎯 DEX (Dexterity): <span id="stat-dex" style="font-weight:bold; color:#fff;">5</span></span>
-                            <button class="btn-action sp" onclick="spendSP('spDex')">+</button>
+
+                        <!-- 2. DEX -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'dex')" ontouchstart="showStatBreakdown(event, 'dex')" onmouseleave="hideTooltip()" style="flex:1;">
+                                <span>🎯 DEX (Dexterity): <span id="stat-dex" style="font-weight:bold; color:#fff;">5</span></span>
+                            </div>
+                            <div style="display:inline-flex; gap:3px; margin-left:8px;">
+                                <button class="btn-action sp" id="btn-minus-spDex" onpointerdown="window.startSPDraftHold(event, 'spDex', -1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onclick="event.stopPropagation();" style="background:#e74c3c; width:18px; height:18px; padding:0; line-height:18px; display:none;">-</button>
+                                <button class="btn-action sp" id="btn-plus-spDex" onpointerdown="window.startSPDraftHold(event, 'spDex', 1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onmouseenter="window.showSPPreview(event, 'spDex')" onmouseleave="window.hideTooltip()" onclick="event.stopPropagation();" style="width:18px; height:18px; padding:0; line-height:18px;">+</button>
+                            </div>
                         </div>
-                        <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'int')" ontouchstart="showStatBreakdown(event, 'int')" onmouseleave="hideTooltip()">
-                            <span>🧠 INT (Intelligence): <span id="stat-int" style="font-weight:bold; color:#fff;">5</span></span>
-                            <button class="btn-action sp" onclick="spendSP('spInt')">+</button>
+
+                        <!-- 3. INT -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'int')" ontouchstart="showStatBreakdown(event, 'int')" onmouseleave="hideTooltip()" style="flex:1;">
+                                <span>🧠 INT (Intelligence): <span id="stat-int" style="font-weight:bold; color:#fff;">5</span></span>
+                            </div>
+                            <div style="display:inline-flex; gap:3px; margin-left:8px;">
+                                <button class="btn-action sp" id="btn-minus-spInt" onpointerdown="window.startSPDraftHold(event, 'spInt', -1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onclick="event.stopPropagation();" style="background:#e74c3c; width:18px; height:18px; padding:0; line-height:18px; display:none;">-</button>
+                                <button class="btn-action sp" id="btn-plus-spInt" onpointerdown="window.startSPDraftHold(event, 'spInt', 1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onmouseenter="window.showSPPreview(event, 'spInt')" onmouseleave="window.hideTooltip()" onclick="event.stopPropagation();" style="width:18px; height:18px; padding:0; line-height:18px;">+</button>
+                            </div>
                         </div>
                         <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
 
-                        <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'atk')" ontouchstart="showStatBreakdown(event, 'atk')" onmouseleave="hideTooltip()">
-                            <span>⚔️ Attack: <span id="stat-atk" style="font-weight:bold; color:#fff;">10</span></span>
-                            <button class="btn-action sp" onclick="spendSP('spAtk')">+</button>
+                        <!-- 4. ATK -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'atk')" ontouchstart="showStatBreakdown(event, 'atk')" onmouseleave="hideTooltip()" style="flex:1;">
+                                <span>⚔️ Attack: <span id="stat-atk" style="font-weight:bold; color:#fff;">10</span></span>
+                            </div>
                         </div>
-                        <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'maxHp')" ontouchstart="showStatBreakdown(event, 'maxHp')" onmouseleave="hideTooltip()">
-                            <span>❤️ Max HP: <span id="stat-mhp" style="font-weight:bold; color:#fff;">100</span></span>
-                            <button class="btn-action sp" onclick="spendSP('spHp')">+</button>
+
+                        <!-- 5. Max HP -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'maxHp')" ontouchstart="showStatBreakdown(event, 'maxHp')" onmouseleave="hideTooltip()" style="flex:1;">
+                                <span>❤️ Max HP: <span id="stat-mhp" style="font-weight:bold; color:#fff;">100</span></span>
+                            </div>
                         </div>
-                        <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'def')" ontouchstart="showStatBreakdown(event, 'def')" onmouseleave="hideTooltip()">
-                            <span>🛡️ Defense: <span id="stat-def" style="font-weight:bold; color:#fff;">0</span></span>
-                            <button class="btn-action sp" onclick="spendSP('spDef')">+</button>
+
+                        <!-- 6. Defense -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'def')" ontouchstart="showStatBreakdown(event, 'def')" onmouseleave="hideTooltip()" style="flex:1;">
+                                <span>🛡️ Defense: <span id="stat-def" style="font-weight:bold; color:#fff;">0</span></span>
+                            </div>
                         </div>
-                        <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'moveSpeed')" ontouchstart="showStatBreakdown(event, 'moveSpeed')" onmouseleave="hideTooltip()">
-                            <span>👟 Move Speed: <span id="stat-mov" style="font-weight:bold; color:#fff;">10</span></span>
-                            <button class="btn-action sp" onclick="spendSP('spSpd')">+</button>
+
+                        <!-- 7. Move Speed -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'moveSpeed')" ontouchstart="showStatBreakdown(event, 'moveSpeed')" onmouseleave="hideTooltip()" style="flex:1;">
+                                <span>👟 Move Speed: <span id="stat-mov" style="font-weight:bold; color:#fff;">10</span></span>
+                            </div>
                         </div>
                         <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
-                        
+
                         <div class="stat-hover" style="color: #3498db;" onmouseenter="showStatHoverTooltip(event, 'ias')" ontouchstart="showStatHoverTooltip(event, 'ias')" onmouseleave="hideTooltip()">
                             <span>⏱️ Idle Atk Spd: <span id="stat-ias" style="font-weight:bold; color: #fff;">60f</span></span>
                         </div>
@@ -1210,22 +1242,28 @@
                             <span>🔄 Idle DPS: <span id="stat-idps" style="font-weight:bold; color: #fff;">0.0</span></span>
                         </div>
                         <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
-                        
+
                         <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'critChance', true)" ontouchstart="showStatBreakdown(event, 'critChance', true)" onmouseleave="hideTooltip()">
                             <span style="color:#e67e22;">✨ Crit Chance: <span id="stat-crt" style="font-weight:bold; color:#fff;">5%</span></span>
-                            <button class="btn-action sp" id="btn-sp-crit" onclick="spendSP('spCrit')">+</button>
                         </div>
                         <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'critDamage', true)" ontouchstart="showStatBreakdown(event, 'critDamage', true)" onmouseleave="hideTooltip()">
                             <span style="color:#f1c40f;">💥 Crit Multi: <span id="stat-crd" style="font-weight:bold; color:#fff;">150%</span></span>
-                            <button class="btn-action sp" onclick="spendSP('spCritDmg')">+</button>
                         </div>
                         <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'block', true)" ontouchstart="showStatBreakdown(event, 'block', true)" onmouseleave="hideTooltip()">
                             <span style="color:#3498db;">🛡️ Block Rate: <span id="stat-blk" style="font-weight:bold; color:#fff;">0%</span></span>
-                            <button class="btn-action sp" id="btn-sp-block" onclick="spendSP('spBlock')">+</button>
                         </div>
                         <div class="stat-hover" onmouseenter="showStatBreakdown(event, 'parry', true)" ontouchstart="showStatBreakdown(event, 'parry', true)" onmouseleave="hideTooltip()">
                             <span style="color:#e74c3c;">⚡ Parry Rate: <span id="stat-pry" style="font-weight:bold; color:#fff;">0%</span></span>
-                            <button class="btn-action sp" id="btn-sp-parry" onclick="spendSP('spParry')">+</button>
+                        </div>
+                        <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
+
+                        <!-- Real-time Apply / Cancel Actions Drawer -->
+                        <div id="draft-controls-container" style="display:none; margin-top:10px; padding:10px; background:#07090c; border:1px solid var(--accent-orange); border-radius:4px; text-align:center;">
+                            <div style="font-size:10px; color:#aaa; margin-bottom:8px; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">📝 Draft Allocations Pending</div>
+                            <div style="display:flex; gap:8px; justify-content:center;">
+                                <button class="btn-action" style="background:#c0392b; font-weight:bold; padding:6px 12px; font-size:11px;" onclick="window.resetDraft()">Cancel</button>
+                                <button class="btn-action" style="background:#2ecc71; font-weight:bold; padding:6px 12px; font-size:11px;" onclick="window.showSPConfirmationModal()">Apply Changes</button>
+                            </div>
                         </div>
                         <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
 
@@ -1402,6 +1440,64 @@ window.onload = function() {
         const formatted = (num / Math.pow(10, i * 3)).toFixed(2);
         return `${formatted} ${suffixes[i]}`;
     }
+
+    // Custom Modular, Game-Themed Confirmation Overlay System
+    window.showCustomConfirm = function(title, message, confirmText, cancelText, accentColor, onConfirm, onCancel) {
+        let wasPaused = isGamePaused;
+        window.setPauseState(true);
+
+        let overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0'; overlay.style.left = '0';
+        overlay.style.width = '100%'; overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(8, 2, 2, 0.88)';
+        overlay.style.display = 'flex'; overlay.style.justifyContent = 'center'; overlay.style.alignItems = 'center';
+        overlay.style.zIndex = '40000';
+        overlay.style.backdropFilter = 'blur(5px)';
+        overlay.style.animation = 'deathFadeIn 0.25s ease-out';
+
+        let card = document.createElement('div');
+        card.style.background = 'linear-gradient(135deg, #151515, #0a0a0c)';
+        card.style.border = `2px solid ${accentColor}`;
+        card.style.borderRadius = '8px'; card.style.padding = '20px';
+        card.style.width = '90%'; card.style.maxWidth = '400px';
+        card.style.boxShadow = `0 10px 35px rgba(0,0,0,0.95), inset 0 0 15px ${accentColor}25`;
+        card.style.textAlign = 'center';
+        card.style.animation = 'deathCardPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1)';
+
+        card.innerHTML = `
+            <div style="font-size: 16px; font-weight: bold; color: ${accentColor}; letter-spacing: 1.5px; margin-bottom: 8px; text-transform: uppercase;">${title}</div>
+            <div style="height: 1px; background: linear-gradient(90deg, transparent, ${accentColor}, transparent); margin: 8px 0 15px 0;"></div>
+            <div style="font-size: 11.5px; color: #cbd5e1; line-height: 1.55; margin-bottom: 20px; white-space: normal; text-align: center;">${message}</div>
+            <div style="display: flex; gap: 10px;">
+                <button id="custom-confirm-btn-cancel" class="nav-btn" style="flex: 1; justify-content: center; background: #222; border: 1px solid #444; color: #aaa; padding: 10px; font-size:11px; font-weight:bold; border-radius:4px; height: auto;">${cancelText || 'Cancel'}</button>
+                <button id="custom-confirm-btn-commit" class="nav-btn" style="flex: 1; justify-content: center; background: ${accentColor}; border: 1px solid ${accentColor}; color: white; padding: 10px; font-size:11px; font-weight:bold; border-radius:4px; height: auto;">${confirmText || 'Confirm'}</button>
+            </div>
+        `;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        const cleanup = () => {
+            overlay.style.animation = "toastFadeOut 0.18s ease-in forwards";
+            setTimeout(() => {
+                overlay.remove();
+                if (!wasPaused) window.setPauseState(false);
+            }, 170);
+        };
+
+        // Localized queries ensure that overlapping/fading overlays don't block event registrations
+        card.querySelector('#custom-confirm-btn-cancel').onclick = function(e) {
+            e.stopPropagation();
+            cleanup();
+            if (onCancel) onCancel();
+        };
+
+        card.querySelector('#custom-confirm-btn-commit').onclick = function(e) {
+            e.stopPropagation();
+            cleanup();
+            if (onConfirm) onConfirm();
+        };
+    };
 
     // Centralized Unique Styling Manager
     window.getUniqueItemStyle = function(item) {
@@ -5719,25 +5815,28 @@ function getStatBaseRange(item, statKey) {
     let isArt = item.type === "artifact";
     let rarityMult = isArt ? 1.45 : (1 + ((item.statsRolled || 0) * 0.15));
     
+    // Unified Exponential Curve: Gear level increments every 10 stages, so it multiplies by 10 to match enemy math exactly.
+    let expScale = Math.pow(1.06, stageLevel * 10);
+
     let min = 0;
     let max = 0;
-    
+
     if (statKey === "atk") {
         if (item.bonusAtk > 0) {
-            min += Math.ceil(1 * stageLevel * rarityMult);
-            max += Math.ceil(2 * stageLevel * rarityMult);
+            min += Math.ceil(1 * expScale * rarityMult);
+            max += Math.ceil(2 * expScale * rarityMult);
         }
     }
     else if (statKey === "maxHp") {
         if (item.bonusMaxHp > 0) {
-            min += Math.ceil(3 * stageLevel * rarityMult);
-            max += Math.ceil(8 * stageLevel * rarityMult);
+            min += Math.ceil(3 * expScale * rarityMult);
+            max += Math.ceil(8 * expScale * rarityMult);
         }
     }
     else if (statKey === "def") {
         if (item.bonusDef > 0) {
-            min += Math.ceil(1 * stageLevel * rarityMult);
-            max += Math.ceil(2 * stageLevel * rarityMult);
+            min += Math.ceil(1 * expScale * rarityMult);
+            max += Math.ceil(2 * expScale * rarityMult);
         }
     }
     else if (statKey === "moveSpeed") {
@@ -5935,6 +6034,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         if (activeBtn) activeBtn.classList.add('active');
         
         document.getElementById('tab-' + id).classList.add('active');
+        if (id === 'stats') {
+            window.ensureDraftInitialized();
+        }
         if (id === 'forge') renderForgeTab();
         if (id === 'market') {
             refreshMarketShopIfNeeded();
@@ -6133,21 +6235,26 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             return;
         }
 
-        if (!confirm("Are you prepared to face the massive dragon Hooktail? Defeating her will reset campaign peak parameters but award 3 Prestige Points!")) return;
+        window.showCustomConfirm(
+            "Challenge Hooktail",
+            "Are you prepared to face the massive dragon Hooktail? Defeating her will reset campaign peak parameters but award 3 Prestige Points!",
+            "Challenge", "Flee", "#e74c3c",
+            function() {
+                window.saveGame();
 
-        window.saveGame();
+                window.setPauseState(false);
+                playerStats.isPrestigeBossMode = true;
+                playerStats.prestigeApproachTimer = 180; // 3 seconds charging animation (60fps)
+                mob = null;
 
-        window.setPauseState(false);
-        playerStats.isPrestigeBossMode = true;
-        playerStats.prestigeApproachTimer = 180; // 3 seconds charging animation (60fps)
-        mob = null;
-        
-        let p = resolvePlayerStats();
-        playerStats.currentHp = p.maxHp;
+                let p = resolvePlayerStats();
+                playerStats.currentHp = p.maxHp;
 
-        pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[ASCENSION] Challenged Hooktail! Sprinting toward her cavern at high speed...</span>`);
-        updateUI();
-        window.switchTab('gear'); // switch screen to allow the user to see the running animation
+                pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[ASCENSION] Challenged Hooktail! Sprinting toward her cavern at high speed...</span>`);
+                updateUI();
+                window.switchTab('gear');
+            }
+        );
     };
 
     // Trigger soft-wipe and award ascension points
@@ -6301,17 +6408,31 @@ function formatStatRangeStr(item, statKey, isPct = false) {
     };
     
     window.giveSP = function(amount = 10) {
-        playerStats.sp += amount; updateUI(); window.saveGame(); pushHeaderToast(`🛑 DEV CHEAT: +${amount} SP!`, "#e74c3c");
+        playerStats.sp += amount;
+        if (draftAllocations !== null) {
+            draftSP += amount;
+        }
+        updateUI(); window.saveGame(); pushHeaderToast(`🛑 DEV CHEAT: +${amount} SP!`, "#e74c3c");
     };
 
     window.hardResetGame = function() {
-        if (confirm("🚨 WARNING: This will permanently delete your entire save file and progress! Are you absolutely sure you want to start over?")) {
-            if (confirm("THIS CANNOT BE UNDONE! Confirm hard reset?")) {
-                window.removeEventListener('beforeunload', window.saveGame);
-                localStorage.removeItem('idle_game_v11');
-                window.location.reload();
+        window.showCustomConfirm(
+            "🚨 Delete Save File?",
+            "WARNING: This will permanently delete your entire save file and progress! Are you absolutely sure you want to start over?",
+            "Proceed", "Cancel", "#e74c3c",
+            function() {
+                window.showCustomConfirm(
+                    "🚨 Confirm Wipe",
+                    "THIS CANNOT BE UNDONE! Are you 100% sure you want to delete everything?",
+                    "Wipe Everything", "Cancel", "#e74c3c",
+                    function() {
+                        window.removeEventListener('beforeunload', window.saveGame);
+                        localStorage.removeItem('idle_game_v11');
+                        window.location.reload();
+                    }
+                );
             }
-        }
+        );
     };
 
     window.saveGame = function() {
@@ -6398,30 +6519,29 @@ function formatStatRangeStr(item, statKey, isPct = false) {
             // Resolve monster requirement count first to prevent temporal dead zone errors
             let killsNeededForStage = 5 - playerStats.killCount;
 
-            let scale = Math.pow(1.07, currentStage);
-            let dmgScale = Math.pow(1.033, currentStage) * 0.7;
-            let mobHp = 12 * scale;
-            let bossHp = 45 * scale;
-            
+            // Unified Exponential Scaling
+            let expScale = Math.pow(1.06, currentStage);
+            let mobHp = 15 * expScale;
+            let bossHp = 60 * expScale;
+
             // Average blended HP profiles (5 mobs + 1 Boss)
             let blendedMobHp = (1 - p.rareSpawn) * mobHp + p.rareSpawn * (2.5 * mobHp);
             let avgHp = (5 * blendedMobHp + bossHp) / 6;
-            
+
             // TTK Calculations
             let ttk = avgHp / playerDps;
             let cycleTime = ttk + 10.0; // Dynamic combat time + travel buffer
             cycleTime = Math.max(0.5, Math.min(300, cycleTime)); // Performance limits
 
-            // Progressive Survival Audit (Raw Stage Attrition without recovery) using adjusted dmgScale
-            let mobDmg = (1 + dmgScale) * 4.5;
-            let mitigation = Math.min(0.75, p.def / (p.def + 12 + (currentStage * 1.2)));
-            let netMobDmg = Math.max(1, Math.ceil(mobDmg * (1 - mitigation)));
-            
+            // Progressive Survival Audit (Armor Class infinite scaling)
+            let mobDmg = 5.2 * expScale;
+            let netMobDmg = Math.max(1, Math.ceil(mobDmg * (100 / (100 + p.def))));
+
             // Calculate boss fight attrition for this stage
             let bossTtk = bossHp / playerDps;
             let bossHits = Math.floor(bossTtk / 2);
-            let bossDmg = (2 + (3 * dmgScale)) * 5.0;
-            let bossNetDmg = Math.max(1, Math.ceil(bossDmg * (1 - mitigation)));
+            let bossDmg = 20 * expScale;
+            let bossNetDmg = Math.max(1, Math.ceil(bossDmg * (100 / (100 + p.def))));
             let bossDmgTaken = bossHits * bossNetDmg;
             let bossVampHeal = checkArtifactTrait("vampirism") ? Math.min(Math.floor((playerDps * bossTtk) * 0.03), Math.ceil(p.maxHp * 0.05 * (bossTtk * (60 / p.idleAttackSpeed)))) : 0;
             let bossNetDmgTaken = Math.max(0, bossDmgTaken - bossVampHeal);
@@ -6451,11 +6571,10 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 // Normal monster farming rewards
                 for (let k = 0; k < killsNeededForStage; k++) {
                     let isRare = Math.random() < p.rareSpawn;
-                    let baseGold = isRare ? Math.floor((2 + Math.pow(1.08, currentStage) * 0.65) * 4) : Math.floor(2 + Math.pow(1.08, currentStage) * 0.65);
+                    let baseGold = Math.floor(2 * scale * (isRare ? 4 : 1));
                     totalGold += Math.ceil(baseGold * p.gold);
-                    // Standard campaign monster scaling adjustments: 5 base + 5/stage (15 base + 15/stage if Rare)
-                    totalXp += isRare ? (15 + (currentStage * 15)) : (5 + (currentStage * 5));
-                    
+                    totalXp += Math.floor(5 * scale * (isRare ? 3 : 1));
+
                     let dropR = isRare ? 0.005 : 0.001;
                     if (Math.random() < (dropR * p.drop * state.efficiency)) {
                         rollOfflineItem(false, currentStage, isRare);
@@ -6466,12 +6585,11 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                         recordScrapGained(rolledPot, 1);
                     }
                 }
-                    
+
                 // Boss clearance rewards
-                let baseBossGold = Math.floor(15 * Math.pow(1.08, currentStage));
+                let baseBossGold = Math.floor(15 * scale);
                 totalGold += Math.ceil(baseBossGold * p.gold);
-                // Standard campaign boss scaling adjustments: 25 base + 25/stage
-                totalXp += 25 + (currentStage * 25);
+                totalXp += Math.floor(25 * scale);
                 
                 if (Math.random() < (0.01 * p.drop * state.efficiency)) {
                     rollOfflineItem(true, currentStage, false);
@@ -6501,10 +6619,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                     
                     for (let k = 0; k < partialKills; k++) {
                         let isRare = Math.random() < p.rareSpawn;
-                        let baseGold = isRare ? Math.floor((2 + Math.pow(1.08, currentStage) * 0.65) * 4) : Math.floor(2 + Math.pow(1.08, currentStage) * 0.65);
+                        let baseGold = Math.floor(2 * scale * (isRare ? 4 : 1));
                         totalGold += Math.ceil(baseGold * p.gold);
-                        // Standard campaign monster scaling adjustments: 5 base + 5/stage (15 base + 15/stage if Rare)
-                        totalXp += isRare ? (15 + (currentStage * 15)) : (5 + (currentStage * 5));
+                        totalXp += Math.floor(5 * scale * (isRare ? 3 : 1));
                         
                         let dropR = isRare ? 0.005 : 0.001;
                         if (Math.random() < (dropR * p.drop * state.efficiency)) {
@@ -7399,6 +7516,25 @@ window.loadGame = function() {
                     playerStats.xp = 0; 
                     playerStats.sp = 0; 
                 }
+
+                // Migrate & refund any legacy spent secondary SP allocations back to available SP
+                if (playerStats.spAllocations) {
+                    let legacyAllocKeys = ['spHp', 'spAtk', 'spDef', 'spCrit', 'spCritDmg', 'spBlock', 'spParry', 'spSpd'];
+                    let refundedSp = 0;
+                    legacyAllocKeys.forEach(k => {
+                        if (playerStats.spAllocations[k] > 0) {
+                            refundedSp += playerStats.spAllocations[k];
+                            playerStats.spAllocations[k] = 0;
+                        }
+                    });
+                    if (refundedSp > 0) {
+                        playerStats.sp += refundedSp;
+                        setTimeout(() => {
+                            pushLog(`<strong style="color:#2ecc71;">[MIGRATION] Secondary attribute direct spend is discontinued. Refunded ${refundedSp} Skill Points to spend on STR, DEX, or INT!</strong>`);
+                        }, 1000);
+                    }
+                }
+
                 // Recalculate xpReq to dynamically align existing saves to the new 250-base XP curve
                 playerStats.xpReq = Math.floor(250 * Math.pow(1.2, playerStats.level - 1));
                 if (!playerStats.spAllocations) {
@@ -7553,7 +7689,268 @@ window.loadGame = function() {
         
         refreshMarketShopIfNeeded();
     };
-    
+
+    let draftAllocations = null;
+    let draftSP = 0;
+
+    window.ensureDraftInitialized = function() {
+        if (!draftAllocations) {
+            draftAllocations = { ...playerStats.spAllocations };
+            draftSP = playerStats.sp;
+        }
+    };
+
+    window.adjustDraft = function(statKey, amount) {
+        window.ensureDraftInitialized();
+
+        // Hard restriction: Direct allocation is now completely limited to core variables (spStr, spDex, spInt)
+        if (statKey !== 'spStr' && statKey !== 'spDex' && statKey !== 'spInt') {
+            return;
+        }
+
+        if (amount > 0) {
+            if (draftSP <= 0) return;
+            draftSP--;
+            draftAllocations[statKey]++;
+        } else {
+            let committedVal = playerStats.spAllocations[statKey] || 0;
+            if (draftAllocations[statKey] <= committedVal) return;
+
+            draftSP++;
+            draftAllocations[statKey]--;
+        }
+
+        updateUI();
+    };
+
+    let draftHoldTimeout = null;
+
+    window.startSPDraftHold = function(e, statKey, amount) {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+
+        window.adjustDraft(statKey, amount);
+
+        let delay = 350;
+        const minDelay = 40; // High speed drafting since no disk writes occur
+        const accelerationFactor = 0.75;
+
+        function tick() {
+            window.adjustDraft(statKey, amount);
+            delay = Math.max(minDelay, delay * accelerationFactor);
+            draftHoldTimeout = setTimeout(tick, delay);
+        }
+
+        if (draftHoldTimeout) clearTimeout(draftHoldTimeout);
+        draftHoldTimeout = setTimeout(tick, delay);
+    };
+
+    window.stopSPDraftHold = function(e) {
+        if (e) e.stopPropagation();
+        if (draftHoldTimeout) {
+            clearTimeout(draftHoldTimeout);
+            draftHoldTimeout = null;
+        }
+    };
+
+    window.showSPPreview = function(e, statKey) {
+        e.stopPropagation();
+        let tt = document.getElementById('stat-tooltip');
+        if (!tt) return;
+
+        let labelMap = {
+            spHp: "❤️ Max HP", spAtk: "⚔️ Attack", spDef: "🛡️ Defense",
+            spCrit: "✨ Crit Chance", spCritDmg: "💥 Crit Multiplier",
+            spBlock: "🛡️ Block Rate", spParry: "⚡ Parry Rate",
+            spSpd: "👟 Move Speed",
+            spStr: "💪 Strength", spDex: "🎯 Dexterity", spInt: "🧠 Intelligence"
+        };
+
+        let statAllocName = labelMap[statKey] || "Attribute";
+
+        // Temporarily mutate allocations synchronously to capture state changes
+        window.ensureDraftInitialized();
+        draftAllocations[statKey]++;
+        let preview = resolvePlayerStats(true);
+        draftAllocations[statKey]--;
+        let current = resolvePlayerStats(true);
+
+        let html = `<div style="padding: 10px; width: 230px; box-sizing: border-box;">
+            <div class="tt-title" style="color:var(--accent-orange); font-size:12px; margin-bottom:4px; border-bottom:1px solid #333; padding-bottom:2px;">SP Allocation Preview</div>
+            <div class="tt-subtitle" style="color:#aaa; font-style:normal; margin-bottom: 8px;">Allocating 1 SP into <strong>${statAllocName}</strong>:</div>`;
+
+        let diffs = [];
+        let statsToCheck = [
+            { key: "str", label: "💪 STR", isPct: false },
+            { key: "dex", label: "🎯 DEX", isPct: false },
+            { key: "int", label: "🧠 INT", isPct: false },
+            { key: "atk", label: "⚔️ Attack", isPct: false },
+            { key: "maxHp", label: "❤️ Max HP", isPct: false },
+            { key: "def", label: "🛡️ Defense", isPct: false },
+            { key: "moveSpeed", label: "👟 Move Speed", isPct: false },
+            { key: "critChance", label: "✨ Crit Chance", isPct: true },
+            { key: "critDamage", label: "💥 Crit Multi", isPct: true },
+            { key: "block", label: "🛡️ Block Rate", isPct: true },
+            { key: "parry", label: "⚡ Parry Rate", isPct: true }
+        ];
+
+        statsToCheck.forEach(s => {
+            let curVal = current[s.key] || 0;
+            let newVal = preview[s.key] || 0;
+            let diff = newVal - curVal;
+            if (Math.abs(diff) > 0.0001) {
+                let curStr = s.isPct ? Math.round(curVal * 100) + "%" : Math.round(curVal).toLocaleString();
+                let newStr = s.isPct ? Math.round(newVal * 100) + "%" : Math.round(newVal).toLocaleString();
+                let diffStr = s.isPct ? "+" + Math.round(diff * 100) + "%" : "+" + Math.round(diff).toLocaleString();
+                diffs.push(`
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:4px; font-family:monospace;">
+                        <span style="color:#aaa;">${s.label}:</span>
+                        <span>
+                            <span style="color:#7f8c8d;">${curStr}</span> ➔
+                            <strong style="color:#fff;">${newStr}</strong>
+                            <span style="color:#2ecc71; font-weight:bold; margin-left:4px;">(${diffStr})</span>
+                        </span>
+                    </div>
+                `);
+            }
+        });
+
+        if (diffs.length === 0) {
+            html += `<div style="color:#aaa; font-style:italic; font-size:11px; text-align:center;">No noticeable attribute changes.</div>`;
+        } else {
+            html += diffs.join("");
+        }
+
+        html += `</div>`;
+        tt.style.borderColor = "var(--accent-orange)";
+        tt.innerHTML = html;
+        tt.style.display = "block";
+        window.positionTooltip(e, tt);
+    };
+
+    window.showSPConfirmationModal = function() {
+        if (!draftAllocations) return;
+
+        let current = resolvePlayerStats(false);
+        let preview = resolvePlayerStats(true);
+
+        let totalInvested = playerStats.sp - draftSP;
+        if (totalInvested <= 0) return;
+
+        let modal = document.createElement('div');
+        modal.id = 'sp-confirm-modal';
+        modal.style.position = 'fixed'; modal.style.top = '0'; modal.style.left = '0';
+        modal.style.width = '100%'; modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.85)';
+        modal.style.display = 'flex'; modal.style.justifyContent = 'center'; modal.style.alignItems = 'center';
+        modal.style.zIndex = '30000'; modal.style.padding = '15px';
+
+        let diffs = [];
+        let statsToCheck = [
+            { key: "str", label: "💪 Strength", isPct: false },
+            { key: "dex", label: "🎯 Dexterity", isPct: false },
+            { key: "int", label: "🧠 Intelligence", isPct: false },
+            { key: "atk", label: "⚔️ Attack", isPct: false },
+            { key: "maxHp", label: "❤️ Max HP", isPct: false },
+            { key: "def", label: "🛡️ Defense", isPct: false },
+            { key: "moveSpeed", label: "👟 Move Speed", isPct: false },
+            { key: "critChance", label: "✨ Crit Chance", isPct: true },
+            { key: "critDamage", label: "💥 Crit Multiplier", isPct: true },
+            { key: "block", label: "🛡️ Block Rate", isPct: true },
+            { key: "parry", label: "⚡ Parry Rate", isPct: true }
+        ];
+
+        statsToCheck.forEach(s => {
+            let curVal = current[s.key] || 0;
+            let newVal = preview[s.key] || 0;
+            let diff = newVal - curVal;
+            if (Math.abs(diff) > 0.0001) {
+                let curStr = s.isPct ? Math.round(curVal * 100) + "%" : Math.round(curVal).toLocaleString();
+                let newStr = s.isPct ? Math.round(newVal * 100) + "%" : Math.round(newVal).toLocaleString();
+                let diffStr = s.isPct ? "+" + Math.round(diff * 100) + "%" : "+" + Math.round(diff).toLocaleString();
+                diffs.push(`
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:6px; font-family:monospace; background:rgba(255,255,255,0.02); padding:6px 10px; border-radius:4px; border:1px solid #222;">
+                        <span style="color:#aaa; font-weight:bold;">${s.label}:</span>
+                        <span>
+                            <span style="color:#7f8c8d;">${curStr}</span> ➔
+                            <strong style="color:#fff;">${newStr}</strong>
+                            <span style="color:#2ecc71; font-weight:bold; margin-left:6px;">(${diffStr})</span>
+                        </span>
+                    </div>
+                `);
+            }
+        });
+
+        modal.innerHTML = `
+            <div style="background:#1a1a1a; border: 2px solid var(--accent-orange); border-radius: 8px; width:100%; max-width:380px; display:flex; flex-direction:column; box-shadow: 0 10px 30px rgba(0,0,0,0.95); animation: toastFadeIn 0.3s; overflow:hidden;">
+                <div style="background:#0c0f12; border-bottom: 1px solid #333; padding:12px 15px; text-align:center;">
+                    <h3 style="margin:0; color:var(--accent-orange); font-size:15px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">📝 Confirm Stat Allocations</h3>
+                </div>
+                <div style="padding:15px; max-height:60vh; overflow-y:auto; overscroll-behavior:contain;">
+                    <div style="text-align:center; font-size:13px; color:#aaa; margin-bottom:12px;">
+                        You are about to invest <strong style="color:var(--text-gold); font-size:15px;">${totalInvested} Skill Points</strong>.
+                        <div style="font-size: 10px; color: #888; margin-top: 4px;">(Each SP grants 3 points to the chosen attribute)</div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        ${diffs.join("")}
+                    </div>
+                    <div style="margin-top:12px; font-size:10px; color:#7f8c8d; text-align:center; line-height:1.4;">
+                        ⚠️ Once committed, resetting these stats will require spending an SP Reset Scroll.
+                    </div>
+                </div>
+                <div style="background:#0c0f12; border-top: 1px solid #333; padding:12px; display:flex; gap:10px; justify-content:center;">
+                    <button id="btn-sp-confirm-cancel" style="flex:1; background:#c0392b; color:white; border:none; padding:10px; font-weight:bold; border-radius:4px; cursor:pointer;" onclick="document.getElementById('sp-confirm-modal').remove()">Cancel</button>
+                    <button id="btn-sp-confirm-commit" style="flex:1; background:#2ecc71; color:white; border:none; padding:10px; font-weight:bold; border-radius:4px; cursor:pointer;" onclick="window.commitSPDraft()">Confirm & Save</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    };
+
+    window.commitSPDraft = function() {
+        if (!draftAllocations) return;
+
+        let oldMaxHp = resolvePlayerStats(false).maxHp;
+
+        // Permanent commit
+        playerStats.spAllocations = { ...draftAllocations };
+        playerStats.sp = draftSP;
+
+        draftAllocations = null;
+        draftSP = 0;
+
+        let p = resolvePlayerStats();
+        let hpDiff = p.maxHp - oldMaxHp;
+        if (hpDiff > 0) {
+            playerStats.currentHp += hpDiff;
+        }
+        playerStats.currentHp = Math.min(playerStats.currentHp, p.maxHp);
+
+        let modal = document.getElementById('sp-confirm-modal');
+        if (modal) modal.remove();
+
+        pushHeaderToast("🎉 Attributes Committed & Saved!", "#2ecc71");
+        pushLog("<span style='color:#2ecc71; font-weight:bold;'>[STATS] Committed drafted attribute points permanently. Game Saved!</span>");
+
+        updateUI();
+        window.saveGame();
+    };
+
+    window.resetDraft = function() {
+        window.showCustomConfirm(
+            "Discard Changes",
+            "Are you sure you want to discard your pending attribute changes?",
+            "Discard", "Keep Drafting", "#e67e22",
+            function() {
+                draftAllocations = null;
+                draftSP = 0;
+
+                pushHeaderToast("🧹 Draft Discarded", "#aaa");
+                updateUI();
+            }
+        );
+    };
+
     window.gainXp = function(amount, silent = false) {
     // Incorporate permanent Prestige EXP boost Multiplier
     let expBonusMult = 1.0 + ((playerStats.prestigeUpgrades?.exp || 0) * 0.10);
@@ -7586,32 +7983,36 @@ window.loadGame = function() {
         while (playerStats.xp >= playerStats.xpReq) {
             playerStats.xp -= playerStats.xpReq;
             playerStats.level++;
-            playerStats.sp++;
+            playerStats.sp += 3; // +3 SP per level
+            if (draftAllocations !== null) {
+                draftSP += 3; // Keep active draft in sync
+            }
             playerStats.xpReq = Math.floor(playerStats.xpReq * 1.2);
             leveledUp = true;
         }
         if (leveledUp && !silent) {
-            pushLog(`<span style='color:#f1c40f; font-weight:bold;'>⭐ LEVEL UP! You are now Level ${playerStats.level}! +1 SP</span>`);
+            pushLog(`<span style='color:#f1c40f; font-weight:bold;'>⭐ LEVEL UP! You are now Level ${playerStats.level}! +3 SP</span>`);
             pushHeaderToast(`⭐ LEVEL UP! Level ${playerStats.level}`, "#f1c40f");
             let p = resolvePlayerStats();
             playerStats.currentHp = p.maxHp; 
             window.checkAchievements();
         }
+        updateUI();
     };
     
-    window.spendSP = function(statKey) {
+    window.spendSP = function(statKey, shouldSave = true) {
         if (playerStats.sp <= 0) return;
-        
+
         if (statKey === 'spCrit' || statKey === 'spBlock' || statKey === 'spParry') {
             if (playerStats.spAllocations[statKey] >= 40) {
                 pushHeaderToast("Attribute Maxed (20%)!", "#e74c3c"); return;
             }
         }
-        
+
         let oldMaxHp = resolvePlayerStats().maxHp;
         playerStats.sp--;
         playerStats.spAllocations[statKey]++;
-        
+
         let p = resolvePlayerStats();
         // Visceral impact: instantly heal your current health bar by the amount your Max HP expanded
         let hpDiff = p.maxHp - oldMaxHp;
@@ -7619,7 +8020,145 @@ window.loadGame = function() {
             playerStats.currentHp += hpDiff;
         }
         playerStats.currentHp = Math.min(playerStats.currentHp, p.maxHp);
-        updateUI(); window.saveGame();
+        updateUI();
+        if (shouldSave) {
+            window.saveGame();
+        }
+    };
+
+    let spHoldTimeout = null;
+    let didFastDump = false;
+
+    window.startSPHold = function(e, statKey) {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+
+        // Render current preview state instantly
+        window.showSPPreview(e, statKey);
+
+        if (playerStats.sp <= 0) return;
+
+        didFastDump = false;
+
+        // Immediately execute first click transaction with synchronous save
+        window.spendSP(statKey, true);
+        window.showSPPreview(e, statKey);
+
+        let delay = 350; // Initial threshold before holding activates
+        const minDelay = 50; // Speed ceiling cap (20 ticks/sec)
+        const accelerationFactor = 0.78; // Rapidly ramp execution frequency
+
+        function tick() {
+            if (playerStats.sp <= 0) {
+                window.stopSPHold();
+                return;
+            }
+            if (statKey === 'spCrit' || statKey === 'spBlock' || statKey === 'spParry') {
+                if (playerStats.spAllocations[statKey] >= 40) {
+                    window.stopSPHold();
+                    return;
+                }
+            }
+
+            didFastDump = true;
+            window.spendSP(statKey, false); // Suppress saves mid-dump
+            window.showSPPreview(e, statKey); // Update popover values
+
+            delay = Math.max(minDelay, delay * accelerationFactor);
+            spHoldTimeout = setTimeout(tick, delay);
+        }
+
+        if (spHoldTimeout) {
+            clearTimeout(spHoldTimeout);
+        }
+        spHoldTimeout = setTimeout(tick, delay);
+    };
+
+    window.stopSPHold = function(e) {
+        if (e) e.stopPropagation();
+        if (spHoldTimeout) {
+            clearTimeout(spHoldTimeout);
+            spHoldTimeout = null;
+        }
+        // Commit dirty states exactly once upon pointer release
+        if (didFastDump) {
+            didFastDump = false;
+            window.saveGame();
+        }
+    };
+
+    window.showSPPreview = function(e, statKey) {
+        e.stopPropagation();
+        let tt = document.getElementById('stat-tooltip');
+        if (!tt) return;
+
+        let labelMap = {
+            spHp: "❤️ Max HP", spAtk: "⚔️ Attack", spDef: "🛡️ Defense",
+            spCrit: "✨ Crit Chance", spCritDmg: "💥 Crit Multiplier",
+            spBlock: "🛡️ Block Rate", spParry: "⚡ Parry Rate",
+            spSpd: "👟 Move Speed",
+            spStr: "💪 Strength", spDex: "🎯 Dexterity", spInt: "🧠 Intelligence"
+        };
+
+        let statAllocName = labelMap[statKey] || "Attribute";
+
+        // Mutate temporarily to query resolvePlayerStats under future metrics
+        playerStats.spAllocations[statKey]++;
+        let preview = resolvePlayerStats();
+        playerStats.spAllocations[statKey]--;
+        let current = resolvePlayerStats();
+
+        let html = `<div style="padding: 10px; width: 230px; box-sizing: border-box;">
+            <div class="tt-title" style="color:var(--accent-orange); font-size:12px; margin-bottom:4px; border-bottom:1px solid #333; padding-bottom:2px;">SP Allocation Preview</div>
+            <div class="tt-subtitle" style="color:#aaa; font-style:normal; margin-bottom: 8px;">Allocating 1 SP into <strong>${statAllocName}</strong>:</div>`;
+
+        let diffs = [];
+        let statsToCheck = [
+            { key: "str", label: "💪 STR", isPct: false },
+            { key: "dex", label: "🎯 DEX", isPct: false },
+            { key: "int", label: "🧠 INT", isPct: false },
+            { key: "atk", label: "⚔️ Attack", isPct: false },
+            { key: "maxHp", label: "❤️ Max HP", isPct: false },
+            { key: "def", label: "🛡️ Defense", isPct: false },
+            { key: "moveSpeed", label: "👟 Move Speed", isPct: false },
+            { key: "critChance", label: "✨ Crit Chance", isPct: true },
+            { key: "critDamage", label: "💥 Crit Multi", isPct: true },
+            { key: "block", label: "🛡️ Block Rate", isPct: true },
+            { key: "parry", label: "⚡ Parry Rate", isPct: true }
+        ];
+
+        statsToCheck.forEach(s => {
+            let curVal = current[s.key] || 0;
+            let newVal = preview[s.key] || 0;
+            let diff = newVal - curVal;
+            if (Math.abs(diff) > 0.0001) {
+                let curStr = s.isPct ? Math.round(curVal * 100) + "%" : Math.round(curVal).toLocaleString();
+                let newStr = s.isPct ? Math.round(newVal * 100) + "%" : Math.round(newVal).toLocaleString();
+                let diffStr = s.isPct ? "+" + Math.round(diff * 100) + "%" : "+" + Math.round(diff).toLocaleString();
+                diffs.push(`
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:4px; font-family:monospace;">
+                        <span style="color:#aaa;">${s.label}:</span>
+                        <span>
+                            <span style="color:#7f8c8d;">${curStr}</span> ➔
+                            <strong style="color:#fff;">${newStr}</strong>
+                            <span style="color:#2ecc71; font-weight:bold; margin-left:4px;">(${diffStr})</span>
+                        </span>
+                    </div>
+                `);
+            }
+        });
+
+        if (diffs.length === 0) {
+            html += `<div style="color:#aaa; font-style:italic; font-size:11px; text-align:center;">No noticeable attribute changes.</div>`;
+        } else {
+            html += diffs.join("");
+        }
+
+        html += `</div>`;
+        tt.style.borderColor = "var(--accent-orange)";
+        tt.innerHTML = html;
+        tt.style.display = "block";
+        window.positionTooltip(e, tt);
     };
 
     for(let i=0; i<12; i++) { 
@@ -7672,19 +8211,21 @@ window.loadGame = function() {
     }
 
     function recalculateItemStats(item) {
-        // Apply specialized baseline parameters for Unique Items
+        // Apply specialized baseline parameters for Unique Items (Unified Exponential)
+        let expScale = Math.pow(1.06, (item.stageLevel || 1) * 10);
+
         if (item.isUniqueSingularity || item.isUniqueMaelstrom) {
-            item.baseAtk = Math.ceil(3.5 * (item.stageLevel || 1) * Math.pow(1.08, playerStats.prestigeCount || 0));
+            item.baseAtk = Math.ceil(3.5 * expScale * Math.pow(1.08, playerStats.prestigeCount || 0));
         } else if (item.isUniqueAegis) {
-            item.baseDef = Math.ceil(14 * (item.stageLevel || 1) * Math.pow(1.08, playerStats.prestigeCount || 0));
+            item.baseDef = Math.ceil(14 * expScale * Math.pow(1.08, playerStats.prestigeCount || 0));
             item.baseBlock = 0.05 * (item.stageLevel || 1);
         } else if (item.isUniqueWatch || item.isUniqueChronicle) {
-            item.baseInt = Math.ceil(2.5 * (item.stageLevel || 1) * Math.pow(1.08, playerStats.prestigeCount || 0));
+            item.baseInt = Math.ceil(2.5 * (item.stageLevel || 1) * Math.pow(1.08, playerStats.prestigeCount || 0)); // Int stays linear so it doesn't double-exponential
         } else if (item.isUniqueWarpCore) {
-            item.baseMoveSpeed = Math.ceil(3 * (item.stageLevel || 1) * Math.pow(1.08, playerStats.prestigeCount || 0));
+            item.baseMoveSpeed = Math.ceil(3 * (item.stageLevel || 1) * Math.pow(1.08, playerStats.prestigeCount || 0)); // MoveSpeed stays linear
         } else if (item.isUniqueTempest) {
-            item.baseMaxHp = Math.ceil(20 * (item.stageLevel || 1) * Math.pow(1.08, playerStats.prestigeCount || 0));
-            item.baseDef = Math.ceil(6 * (item.stageLevel || 1) * Math.pow(1.08, playerStats.prestigeCount || 0));
+            item.baseMaxHp = Math.ceil(20 * expScale * Math.pow(1.08, playerStats.prestigeCount || 0));
+            item.baseDef = Math.ceil(6 * expScale * Math.pow(1.08, playerStats.prestigeCount || 0));
         }
 
         // 1. Reset parameters to un-tempered base + bonus values
@@ -7796,14 +8337,10 @@ window.loadGame = function() {
         }
 
         let selectedStat = pool[Math.floor(Math.random() * pool.length)];
-        let stageScale = item.stageLevel || 1;
-        let rarityMult = 1 + (item.statsRolled * 0.15);
-        if (item.type === "overall") { rarityMult *= 1.8; }
-        let prestigeMult = 1 + ((playerStats.prestigeCount || 0) * 0.02);
-
-        if (selectedStat === "atk") item.bonusAtk += Math.ceil(randInt(1, 2) * stageScale * rarityMult * prestigeMult); 
-        else if (selectedStat === "maxHp") item.bonusMaxHp += Math.ceil(randInt(3, 8) * stageScale * rarityMult * prestigeMult); 
-        else if (selectedStat === "def") item.bonusDef += Math.ceil(randInt(1, 2) * stageScale * rarityMult * prestigeMult);
+        let expScale = Math.pow(1.06, stageScale * 10);
+        if (selectedStat === "atk") item.bonusAtk += Math.ceil(randInt(1, 2) * expScale * rarityMult * prestigeMult);
+        else if (selectedStat === "maxHp") item.bonusMaxHp += Math.ceil(randInt(3, 8) * expScale * rarityMult * prestigeMult);
+        else if (selectedStat === "def") item.bonusDef += Math.ceil(randInt(1, 2) * expScale * rarityMult * prestigeMult);
         else if (selectedStat === "moveSpeed") item.bonusMoveSpeed += Math.ceil(randInt(1, 2) * stageScale * rarityMult * prestigeMult);
         else if (selectedStat === "critChance") {
             let rolled = randFloat(0.01, 0.025) * Math.sqrt(stageScale) * rarityMult * prestigeMult;
@@ -7926,9 +8463,10 @@ window.loadGame = function() {
             if (pool.length === 0) break;
             let selectedStat = pool.pop();
 
-            if (selectedStat === "atk") item.bonusAtk += Math.ceil(randInt(1, 2) * stageScale * rarityMult * prestigeMult); 
-            else if (selectedStat === "maxHp") item.bonusMaxHp += Math.ceil(randInt(3, 8) * stageScale * rarityMult * prestigeMult); 
-            else if (selectedStat === "def") item.bonusDef += Math.ceil(randInt(1, 2) * stageScale * rarityMult * prestigeMult);
+            let expScale = Math.pow(1.06, stageScale * 10);
+        if (selectedStat === "atk") item.bonusAtk += Math.ceil(randInt(1, 2) * expScale * rarityMult * prestigeMult);
+        else if (selectedStat === "maxHp") item.bonusMaxHp += Math.ceil(randInt(3, 8) * expScale * rarityMult * prestigeMult);
+        else if (selectedStat === "def") item.bonusDef += Math.ceil(randInt(1, 2) * expScale * rarityMult * prestigeMult);
             else if (selectedStat === "moveSpeed") item.bonusMoveSpeed += Math.ceil(randInt(1, 2) * stageScale * rarityMult * prestigeMult);
             else if (selectedStat === "critChance") {
                 let rolled = randFloat(0.01, 0.025) * Math.sqrt(stageScale) * rarityMult * prestigeMult;
@@ -8280,10 +8818,10 @@ window.loadGame = function() {
         
         let pBefore = resolvePlayerStats();
         
-        // Asymptotic potion duration formula: 5 mins standard, scaling with INT up to 20 mins max (4x)
-        let baseBonusDuration = 18000; 
+        // Asymptotic potion duration formula: 5 mins standard, scaling with INT up to 12.5 mins max (2.5x)
+        let baseBonusDuration = 18000;
         let effectiveInt = Math.max(0, pBefore.int - 5);
-        let intBonusMultiplier = 1 + (effectiveInt * 3.0 / (effectiveInt + 300));
+        let intBonusMultiplier = 1 + (effectiveInt * 1.5 / (effectiveInt + 500));
         
         // Apply achievement-based duration rewards
         let achDurationBonus = 1.0;
@@ -8620,62 +9158,67 @@ window.loadGame = function() {
             pushHeaderToast("You are not currently in an activity!", "#e74c3c");
             return;
         }
-        if (!confirm("Are you sure you want to retreat to the Campaign? You will keep your current peaks and earn prorated rewards.")) return;
+        window.showCustomConfirm(
+            "Retreat to Campaign",
+            "Are you sure you want to retreat to the Campaign? You will keep your current progress and earn prorated rewards.",
+            "Retreat", "Stay", "#e74c3c",
+            function() {
+                let p = resolvePlayerStats();
 
-        let p = resolvePlayerStats();
-        
-        if (playerStats.isCrucibleMode) {
-            let finalWave = playerStats.crucibleWave || 1;
-            playerStats.cruciblePeak = Math.max(playerStats.cruciblePeak || 1, finalWave);
-            
-            let startW = playerStats.crucibleStartWave || 1;
-            let gainedShards = 0;
-            let gainedCores = 0;
-            
-            // Prorated active run scaling calculations
-            for (let w = startW; w < finalWave; w++) {
-                gainedShards += Math.ceil(1.5 * (1 + (w * 0.03)));
-                if (w % 10 === 0) {
-                    gainedCores++;
-                } else if (Math.random() < 0.02) { // Adjusted random wave drops to 2% to value Crucible progression
-                    gainedCores++;
+                if (playerStats.isCrucibleMode) {
+                    let finalWave = playerStats.crucibleWave || 1;
+                    playerStats.cruciblePeak = Math.max(playerStats.cruciblePeak || 1, finalWave);
+
+                    let startW = playerStats.crucibleStartWave || 1;
+                    let gainedShards = 0;
+                    let gainedCores = 0;
+
+                    // Prorated active run scaling calculations
+                    for (let w = startW; w < finalWave; w++) {
+                        gainedShards += Math.ceil(1.5 * (1 + (w * 0.03)));
+                        if (w % 10 === 0) {
+                            gainedCores++;
+                        } else if (Math.random() < 0.02) {
+                            gainedCores++;
+                        }
+                    }
+
+                    playerStats.astralShards = (playerStats.astralShards || 0) + gainedShards;
+                    if (gainedCores > 0) addEtcDrop("Catalyst Core", gainedCores);
+
+                    pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE RETREAT] Safely left the Crucible at Wave ${finalWave}. Earned ${gainedShards} Shards and ${gainedCores} Catalyst Cores!</span>`);
+                    pushHeaderToast(`🏃 Crucible Cleared! Wave ${finalWave}`, "#9b59b6");
+
+                    showCrucibleSummaryModal(finalWave, gainedShards, gainedCores);
+                } else if (playerStats.isDungeonMode) {
+                    let dType = playerStats.currentDungeon;
+                    let dStage = playerStats.currentDungeonStage[dType] || 1;
+                    playerStats.dungeonPeaks[dType] = Math.max(playerStats.dungeonPeaks[dType] || 1, dStage);
+
+                    pushLog(`<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON RETREAT] Safely retreated from ${dType.toUpperCase()} Dungeon at Stage ${dStage}.</span>`);
+                    pushHeaderToast(`🏃 Retreated! Stage ${dStage}`, "#8e44ad");
                 }
+
+                playerStats.isDungeonMode = false;
+                playerStats.isCrucibleMode = false;
+                playerStats.currentDungeon = null;
+                mob = null;
+                playerStats.usedSecondWind = false;
+                hero.x = 40;
+
+                playerStats.runKills = 0;
+                playerStats.runGold = 0;
+                playerStats.runXp = 0;
+                playerStats.killedBy = "Unknown Foe";
+                playerStats.killedByMob = null;
+
+                playerStats.currentHp = p.maxHp;
+                window.checkAchievements();
+                updateUI();
+                renderInventory();
+                window.saveGame();
             }
-            
-            playerStats.astralShards = (playerStats.astralShards || 0) + gainedShards;
-            if (gainedCores > 0) addEtcDrop("Catalyst Core", gainedCores);
-            
-            pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE RETREAT] Safely left the Crucible at Wave ${finalWave}. Earned ${gainedShards} Shards and ${gainedCores} Catalyst Cores!</span>`);
-            pushHeaderToast(`🏃 Crucible Cleared! Wave ${finalWave}`, "#9b59b6");
-            
-            showCrucibleSummaryModal(finalWave, gainedShards, gainedCores);
-        } else if (playerStats.isDungeonMode) {
-            let dType = playerStats.currentDungeon;
-            let dStage = playerStats.currentDungeonStage[dType] || 1;
-            playerStats.dungeonPeaks[dType] = Math.max(playerStats.dungeonPeaks[dType] || 1, dStage);
-            
-            pushLog(`<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON RETREAT] Safely retreated from ${dType.toUpperCase()} Dungeon at Stage ${dStage}.</span>`);
-            pushHeaderToast(`🏃 Retreated! Stage ${dStage}`, "#8e44ad");
-        }
-
-        playerStats.isDungeonMode = false;
-        playerStats.isCrucibleMode = false;
-        playerStats.currentDungeon = null;
-        mob = null;
-        playerStats.usedSecondWind = false;
-        hero.x = 40; // Reset hero position from Hooktail's right edge
-        
-        playerStats.runKills = 0;
-        playerStats.runGold = 0;
-        playerStats.runXp = 0;
-        playerStats.killedBy = "Unknown Foe";
-        playerStats.killedByMob = null;
-
-        playerStats.currentHp = p.maxHp;
-        window.checkAchievements();
-        updateUI();
-        renderInventory();
-        window.saveGame();
+        );
     };
     window.enterDungeon = function(type) {
         if (playerStats.isDungeonMode || playerStats.isCrucibleMode || playerStats.isPrestigeBossMode) {
@@ -8693,29 +9236,34 @@ window.loadGame = function() {
         
         let checkpoint = Math.max(1, Math.floor((playerStats.dungeonPeaks[type] || 1) * 0.90));
         
-        if (!confirm(`Spend 1 Key to enter the Infinite ${dNames[type]}? Starting checkpoint: Stage ${checkpoint}`)) return;
-        
-        // Secure previous state prior to loading new parameters
-        saveCurrentActivityPeak();
+        window.showCustomConfirm(
+            "Enter Infinite Dungeon",
+            `Spend 1 Key to enter the Infinite ${dNames[type]}? Starting checkpoint: Stage ${checkpoint}`,
+            "Enter Dungeon", "Cancel", "#8e44ad",
+            function() {
+                // Secure previous state prior to loading new parameters
+                saveCurrentActivityPeak();
 
-        playerStats[countField]--;
-        if (playerStats[countField] === 7) playerStats[timeField] = Date.now() + 3600000;
-        
-        playerStats.isDungeonMode = true; 
-        playerStats.isCrucibleMode = false;
-        playerStats.currentDungeon = type; 
-        playerStats.currentDungeonStage[type] = checkpoint;
-        playerStats.dungeonWave = 1;
-        playerStats.killCount = 0; 
-        playerStats.targetsRequired = 5; 
-        playerStats.isBossMode = false; 
-        playerStats.isUberBoss = false; 
-        mob = null;
-        
-        let p = resolvePlayerStats(); playerStats.currentHp = p.maxHp;
-        
-        pushLog(`<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON] Descended into the Infinite ${dNames[type]} at Stage ${checkpoint}!</span>`);
-        document.getElementById('dungeon-menu').style.display = 'none'; updateUI(); window.saveGame();
+                playerStats[countField]--;
+                if (playerStats[countField] === 7) playerStats[timeField] = Date.now() + 3600000;
+
+                playerStats.isDungeonMode = true;
+                playerStats.isCrucibleMode = false;
+                playerStats.currentDungeon = type;
+                playerStats.currentDungeonStage[type] = checkpoint;
+                playerStats.dungeonWave = 1;
+                playerStats.killCount = 0;
+                playerStats.targetsRequired = 5;
+                playerStats.isBossMode = false;
+                playerStats.isUberBoss = false;
+                mob = null;
+
+                let p = resolvePlayerStats(); playerStats.currentHp = p.maxHp;
+
+                pushLog(`<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON] Descended into the Infinite ${dNames[type]} at Stage ${checkpoint}!</span>`);
+                document.getElementById('dungeon-menu').style.display = 'none'; updateUI(); window.saveGame();
+            }
+        );
     };
 
     window.enterCrucible = function() {
@@ -8727,28 +9275,34 @@ window.loadGame = function() {
         if (souls < 100) { pushHeaderToast("Requires 100 Monster Souls!", "#e74c3c"); return; }
         
         let checkpoint = Math.max(1, Math.floor((playerStats.cruciblePeak || 1) * 0.80));
-        if (!confirm(`Burn 100 Monster Souls to enter the Astral Crucible? Starting checkpoint: Wave ${checkpoint}`)) return;
-        
-        // Secure previous state prior to loading new parameters
-        saveCurrentActivityPeak();
 
-        inventory.ETC["Monster Soul"] -= 100;
-        if (inventory.ETC["Monster Soul"] === 0) delete inventory.ETC["Monster Soul"];
-        
-        playerStats.isCrucibleMode = true;
-        playerStats.isDungeonMode = false;
-        playerStats.crucibleWave = checkpoint;
-        playerStats.crucibleStartWave = checkpoint;
-        playerStats.killCount = 0;
-        playerStats.targetsRequired = 5;
-        playerStats.isBossMode = false;
-        playerStats.isUberBoss = false;
-        mob = null;
-        
-        let p = resolvePlayerStats(); playerStats.currentHp = p.maxHp;
-        
-        pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE] Entered the Astral Crucible at Wave ${checkpoint}! Stand your ground!</span>`);
-        document.getElementById('dungeon-menu').style.display = 'none'; updateUI(); window.saveGame();
+        window.showCustomConfirm(
+            "Enter Astral Crucible",
+            `Burn 100 Monster Souls to enter the Astral Crucible? Starting checkpoint: Wave ${checkpoint}`,
+            "Enter Crucible", "Cancel", "#9b59b6",
+            function() {
+                // Secure previous state prior to loading new parameters
+                saveCurrentActivityPeak();
+
+                inventory.ETC["Monster Soul"] -= 100;
+                if (inventory.ETC["Monster Soul"] === 0) delete inventory.ETC["Monster Soul"];
+
+                playerStats.isCrucibleMode = true;
+                playerStats.isDungeonMode = false;
+                playerStats.crucibleWave = checkpoint;
+                playerStats.crucibleStartWave = checkpoint;
+                playerStats.killCount = 0;
+                playerStats.targetsRequired = 5;
+                playerStats.isBossMode = false;
+                playerStats.isUberBoss = false;
+                mob = null;
+
+                let p = resolvePlayerStats(); playerStats.currentHp = p.maxHp;
+
+                pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE] Entered the Astral Crucible at Wave ${checkpoint}! Stand your ground!</span>`);
+                document.getElementById('dungeon-menu').style.display = 'none'; updateUI(); window.saveGame();
+            }
+        );
     };
 
     window.setPauseState = function(paused) {
@@ -8850,10 +9404,10 @@ window.loadGame = function() {
     window.addEventListener('keydown', function(e) { if (e.code === 'Space' && !spacePressed) { e.preventDefault(); spacePressed = true; window.triggerPlayerSlash(); } });
     window.addEventListener('keyup', function(e) { if (e.code === 'Space') { spacePressed = false; } });
     
-    window.addEventListener('keyup', function(e) { if (e.code === 'Space') { spacePressed = false; } });
-    
-    canvas.addEventListener('pointerdown', function(e) { 
-        e.preventDefault(); 
+    window.isCanvasPressed = false;
+
+    canvas.addEventListener('pointerdown', function(e) {
+        e.preventDefault();
 
         // Tooltip Click-to-Hide Logic
         let gameTooltip = document.getElementById('game-tooltip');
@@ -8865,7 +9419,7 @@ window.loadGame = function() {
 
         // Click track for Look Ma No Hands
         playerStats.hasClickedThisBattle = true;
-        
+
         // Canvas speed-clicking window
         playerStats.canvasClicksWindow = playerStats.canvasClicksWindow || [];
         let clickNow = Date.now();
@@ -8876,7 +9430,7 @@ window.loadGame = function() {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        
+
         // Retrieve client coordinates safely on mobile browsers and hybrid wrappers
         let clientX = e.clientX;
         let clientY = e.clientY;
@@ -8887,7 +9441,7 @@ window.loadGame = function() {
             clientX = e.changedTouches[0].clientX;
             clientY = e.changedTouches[0].clientY;
         }
-        
+
         const clickX = (clientX !== undefined ? (clientX - rect.left) * scaleX : 0);
         const clickY = (clientY !== undefined ? (clientY - rect.top) * scaleY : 0);
 
@@ -8901,7 +9455,7 @@ window.loadGame = function() {
                 playerStats.singularityTimer = 300; // 5s storage duration
                 playerStats.singularityStoredDmg = 0;
                 pushLog("<span style='color:#e84393; font-weight:bold;'>[SINGULARITY] Gravitational collapse active! Attack with everything you have! All damage is stored and multiplied!</span>");
-                
+
                 // Spiral vortex particles on activation
                 for (let i = 0; i < 20; i++) {
                     let angle = (i * Math.PI) / 10;
@@ -8930,8 +9484,14 @@ window.loadGame = function() {
             triggerFairyLoot(clickedFairy);
             return;
         }
-        window.triggerPlayerSlash(); 
+
+        window.isCanvasPressed = true;
+        window.triggerPlayerSlash();
     });
+
+    canvas.addEventListener('pointerup', () => { window.isCanvasPressed = false; });
+    canvas.addEventListener('pointerleave', () => { window.isCanvasPressed = false; });
+    canvas.addEventListener('pointercancel', () => { window.isCanvasPressed = false; });
 
     document.addEventListener('pointerdown', (e) => {
         if (!e.target.closest('#game-tooltip') && !e.target.closest('.bag-item') && !e.target.closest('.slots-card') && !e.target.closest('.stat-hover') && !e.target.closest('.shop-row') && !e.target.closest('#hud-buff')) {
@@ -9322,8 +9882,8 @@ window.loadGame = function() {
         playerStats.cachedAchievementBonusTotals = totals;
     };
 
-    function resolvePlayerStats() {
-        let p = { 
+    function resolvePlayerStats(useDraft = false) {
+        let p = {
             atk: playerStats.baseAtk, maxHp: playerStats.baseMaxHp, def: playerStats.baseDef, moveSpeed: playerStats.baseMoveSpeed,
             idleAttackSpeed: playerStats.baseIdleSpeed, activeAttackSpeed: playerStats.baseActiveSpeed,
             drop: playerStats.baseDrop, qly: playerStats.baseQuality, gold: playerStats.baseGold,
@@ -9331,7 +9891,7 @@ window.loadGame = function() {
             block: playerStats.baseBlock, parry: playerStats.baseParry, rareSpawn: playerStats.baseRareSpawn,
             str: playerStats.baseStr, dex: playerStats.baseDex, int: playerStats.baseInt, fairySpawn: playerStats.baseFairySpawn
         };
-        
+
         if (!playerStats.cachedAchievementBonusTotals) {
             window.recalculateAchievementTotals();
         }
@@ -9363,20 +9923,20 @@ window.loadGame = function() {
         let achDexPct = 1.0 + aT.dexPct;
         let achIntPct = 1.0 + aT.intPct;
 
-        let alloc = playerStats.spAllocations;
+        let alloc = (useDraft && draftAllocations) ? draftAllocations : playerStats.spAllocations;
         
         p.str += (alloc.spStr || 0) * 3;  // +3 Strength per spent SP
         p.dex += (alloc.spDex || 0) * 3;  // +3 Dexterity per spent SP
         p.int += (alloc.spInt || 0) * 3;  // +3 Intelligence per spent SP
 
-        p.maxHp += (alloc.spHp * 50);      // +50 Max HP per spent SP
-        p.atk += (alloc.spAtk * 6);        // +6 Attack per spent SP
-        p.def += (alloc.spDef * 5);        // +5 Defense per spent SP
-        p.critChance += (alloc.spCrit * 0.005);
-        p.critDamage += (alloc.spCritDmg * 0.02);
-        p.block += (alloc.spBlock * 0.005);
-        p.parry += (alloc.spParry * 0.005);
-        p.moveSpeed += (alloc.spSpd * 1);
+        p.maxHp += (alloc.spHp * 50);      // +50 Max HP per spent SP (Legacy, now 0)
+        p.atk += (alloc.spAtk * 6);        // +6 Attack per spent SP (Legacy, now 0)
+        p.def += (alloc.spDef * 5);        // +5 Defense per spent SP (Legacy, now 0)
+        p.critChance += (alloc.spCrit * 0.005); // Legacy, now 0
+        p.critDamage += (alloc.spCritDmg * 0.02); // Legacy, now 0
+        p.block += (alloc.spBlock * 0.005); // Legacy, now 0
+        p.parry += (alloc.spParry * 0.005); // Legacy, now 0
+        p.moveSpeed += (alloc.spSpd * 1); // Legacy, now 0
         
         let itemAtkPct = 0;
         let itemHpPct = 0;
@@ -9499,20 +10059,24 @@ window.loadGame = function() {
         let effectiveDex = Math.max(0, p.dex - 5);
         let effectiveInt = Math.max(0, p.int - 5);
 
-        p.atk += effectiveStr * 1.5;              
-        p.maxHp += effectiveStr * 12;            
+        // Core Attributes now act as Total Multipliers (1% per point) so they scale infinitely!
+        itemAtkPct += effectiveStr * 0.01;
+        itemHpPct += effectiveStr * 0.01;
+        itemDefPct += effectiveInt * 0.01;
 
         // Asymptotic DEX-to-Crit Chance (Ceiling: +30% maximum)
         p.critChance += parseFloat(((effectiveDex * 0.30) / (effectiveDex + 250)).toFixed(4));
         p.critDamage += effectiveDex * 0.01;      // Keep crit damage linear
-        p.moveSpeed += effectiveDex * 0.25;       
+
+        // Asymptotic DEX-to-Move Speed (Ceiling: +20 Move Speed from stats, items & achievements bypass this!)
+        p.moveSpeed += parseFloat(((effectiveDex * 20) / (effectiveDex + 150)).toFixed(1));
 
         // Asymptotic INT-to-Avoidance scaling (Ceiling: +12% maximum each)
         p.block += parseFloat(((effectiveInt * 0.12) / (effectiveInt + 150)).toFixed(4));
         p.parry += parseFloat(((effectiveInt * 0.12) / (effectiveInt + 150)).toFixed(4));
 
-        // INT-to-Fairy Spawn scaling (+5% per 20 effective INT)
-        p.fairySpawn += parseFloat(((effectiveInt / 20) * 0.05).toFixed(4));
+        // Asymptotic INT-to-Fairy Spawn scaling (Ceiling: +150% from stats, items & achievements bypass this!)
+        p.fairySpawn += parseFloat(((effectiveInt * 1.50) / (effectiveInt + 400)).toFixed(4));
 
         // Initialize base Defense scaling with SP and Intelligence allocation
         let flatDef = playerStats.baseDef + (alloc.spDef * 4) + (effectiveInt * 1.0) + setCtx.flatDefBonus;
@@ -9818,31 +10382,28 @@ window.loadGame = function() {
         let p = resolvePlayerStats();
         
         if (playerStats.isCrucibleMode) {
-            let scale = Math.pow(1.085, playerStats.crucibleWave);
-            let dmgScale = Math.pow(1.045, playerStats.crucibleWave); // Moderated exponential damage scaling
+            let scale = Math.pow(1.06, playerStats.crucibleWave);
             if (playerStats.killCount >= playerStats.targetsRequired) {
                 // Wave Elite Boss
-                let hp = Math.floor(100 * scale);
-                mob = { x: 750, y: 140, w: 45, h: 75, type: "dungeon_boss", isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor((3 + (3 * dmgScale)) * 5.0), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
+                let hp = Math.floor(60 * scale);
+                mob = { x: 750, y: 140, w: 45, h: 75, type: "dungeon_boss", isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor(20 * scale), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
             } else {
                 // Bespoke Crucible Thematic pool: rift_drifter, star_weaver, or void_wraith
                 let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
                 let chosenVisual = cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
                 let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
-                
-                let hp = Math.floor(18 * scale);
-                mob = { x: 750, y: isFlying ? 145 : 195, w: 25, h: 30, type: "mob", visualType: chosenVisual, isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor((2 + dmgScale) * 4.0), flashTimer: 0, isStopped: false, attackCooldown: 90, attackTimer: 90 };
+
+                let hp = Math.floor(15 * scale);
+                mob = { x: 750, y: isFlying ? 145 : 195, w: 25, h: 30, type: "mob", visualType: chosenVisual, isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor(5.2 * scale), flashTimer: 0, isStopped: false, attackCooldown: 90, attackTimer: 90 };
             }
             return;
         }
 
         let scale;
-        let dmgScale;
         if (playerStats.isDungeonMode) {
             playerStats.currentDungeonStage = playerStats.currentDungeonStage || { equip: 1, gold: 1, mat: 1 };
             let dStage = playerStats.currentDungeonStage[playerStats.currentDungeon] || 1;
-            scale = Math.pow(1.07, dStage);
-            dmgScale = Math.pow(1.028, dStage) * 0.7; // Softened curve for stable dungeon mitigation scaling
+            scale = Math.pow(1.06, dStage);
         } else {
             let activeStage = playerStats.stage;
             if (playerStats.isUberBoss) {
@@ -9851,18 +10412,16 @@ window.loadGame = function() {
                 let allTime90 = Math.floor((playerStats.lifetimePeakStage || 1) * 0.90);
                 activeStage = Math.max(runPeak, allTime90);
             }
-            scale = Math.pow(1.07, activeStage);
-            // Dynamic exponential scaling: Keeps enemy damage tracking proportionately with health scale
-            dmgScale = Math.pow(1.033, activeStage) * 0.7;
+            scale = Math.pow(1.06, activeStage);
         }
 
         if (playerStats.isDungeonMode) {
-            let hpScale = playerStats.currentDungeon === 'gold' ? 1.5 : 1; 
-            
+            let hpScale = playerStats.currentDungeon === 'gold' ? 1.5 : 1;
+
             if (playerStats.killCount >= playerStats.targetsRequired) {
-                let hp = 70 * scale * hpScale;
-                mob = { x: 750, y: 140, w: 50, h: 90, type: "dungeon_boss", isRare: false, hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor((2.5 + (3 * dmgScale)) * 5.0), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
-                
+                let hp = 60 * scale * hpScale;
+                mob = { x: 750, y: 140, w: 50, h: 90, type: "dungeon_boss", isRare: false, hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor(20 * scale), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
+
                 // Reset session combat achievement variables
                 playerStats.hasClickedThisBattle = false;
                 playerStats.damageTakenThisBattle = 0;
@@ -9878,22 +10437,22 @@ window.loadGame = function() {
                 } else { // Toxic Pit
                     dPool = ["swamp_basilisk", "toxic_fly", "marsh_ghost"];
                 }
-                
+
                 let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
                 let isFlying = ["gargoyle", "toxic_fly", "marsh_ghost", "gilded_wyrmling", "wyrmling"].includes(chosenVisual);
-                
-                mob = { 
-                    x: 750, 
-                    y: isFlying ? 150 : 195, 
-                    w: 25, 
-                    h: 40, 
-                    type: "mob", 
-                    visualType: chosenVisual, 
-                    isRare: false, 
-                    hp: Math.floor(16 * scale * hpScale), 
-                    maxHp: Math.floor(16 * scale * hpScale), 
-                    damage: Math.floor((1.5 + (1 * dmgScale)) * 4.0), 
-                    flashTimer: 0, 
+
+                mob = {
+                    x: 750,
+                    y: isFlying ? 150 : 195,
+                    w: 25,
+                    h: 40,
+                    type: "mob",
+                    visualType: chosenVisual,
+                    isRare: false,
+                    hp: Math.floor(15 * scale * hpScale),
+                    maxHp: Math.floor(15 * scale * hpScale),
+                    damage: Math.floor(5.2 * scale),
+                    flashTimer: 0,
                     isStopped: false,
                     attackCooldown: 90,
                     attackTimer: 90
@@ -9909,7 +10468,7 @@ window.loadGame = function() {
                     let speedMult = 100;
                     let mType = "aegis_goliath";
                     let logText = "**Aegis Goliath, The Iron Sentinel** has materialized from the cracked Aether!";
-                    
+
                     if (bossType === 'chronos') {
                         speedMult = 90;
                         mType = "chronos_arbitrator";
@@ -9921,27 +10480,26 @@ window.loadGame = function() {
                     }
 
                     let hp = Math.floor(hpMult * (60 * scale));
-                    let dmg = Math.floor((4 + (3 * dmgScale)) * dmgMult);
-                    
-                    mob = { 
-                        x: 750, y: 115, w: 60, h: 100, 
-                        type: mType, 
-                        isRare: false, 
-                        hp: hp, maxHp: hp, 
-                        damage: dmg, 
-                        flashTimer: 0, 
+                    let dmg = Math.floor(20 * scale * dmgMult);
+
+                    mob = {
+                        x: 750, y: 115, w: 60, h: 100,
+                        type: mType,
+                        isRare: false,
+                        hp: hp, maxHp: hp,
+                        damage: dmg,
+                        flashTimer: 0,
                         isStopped: false,
                         attackCooldown: speedMult,
                         attackTimer: speedMult
                     };
                     pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[RIFT HUNT]</span> ${logText}`);
                 } else {
-                    // Standard Campaign Boss Buffed: Base HP increased to 60, Damage Multiplier to 5.8
                     let baseBossHp = 60 * scale;
-                    mob = { x: 750, y: 150, w: 40, h: 80, type: "boss", isRare: false, visualTier: tier, hp: Math.floor(baseBossHp), maxHp: Math.floor(baseBossHp), damage: Math.floor((2 + (3 * dmgScale)) * 5.8), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
+                    mob = { x: 750, y: 150, w: 40, h: 80, type: "boss", isRare: false, visualTier: tier, hp: Math.floor(baseBossHp), maxHp: Math.floor(baseBossHp), damage: Math.floor(20 * scale), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
                     pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[STAGE BOSS]</span> blocked your transit route!`);
                 }
-                
+
                 // Reset session combat achievement variables
                 playerStats.hasClickedThisBattle = false;
                 playerStats.damageTakenThisBattle = 0;
@@ -9950,8 +10508,7 @@ window.loadGame = function() {
                 let isMelee = Math.random() > 0.5;
                 let isRare = Math.random() < p.rareSpawn;
                 let hpMult = isRare ? 2.5 : 1; let dmgMult = isRare ? 1.5 : 1;
-                
-                // Refined, high-performance campaign enemy selection pool
+
                 let visualPool = {
                     0: ["slime", "sprout", "thorn_wyrm"],
                     1: ["golem", "wyrmling", "gargoyle"],
@@ -9964,12 +10521,11 @@ window.loadGame = function() {
                 let choices = visualPool[tier] || ["slime"];
                 let visualType = choices[Math.floor(Math.random() * choices.length)];
 
-                // Standard Mob Buffed: Base HP increased to 15, Damage Multiplier to 5.2
                 let baseSpd = 90;
                 if (equippedSlots.subweapon && equippedSlots.subweapon.isUniqueWatch && playerStats.watchActiveTimer > 0) {
-                    baseSpd = Math.round(baseSpd * 1.33); // Slow enemy hit speed by 25% (takes 33% longer to swing)
+                    baseSpd = Math.round(baseSpd * 1.33);
                 }
-                mob = { x: 750, y: isMelee ? 195 : 210, w: isMelee ? 25 : 30, h: isMelee ? 40 : 25, type: "mob", visualType: visualType, isRare: isRare, isMelee: isMelee, visualTier: tier, hp: Math.floor(15 * scale * hpMult), maxHp: Math.floor(15 * scale * hpMult), damage: Math.floor((1 + (1 * dmgScale)) * 5.2 * dmgMult), flashTimer: 0, isStopped: false, attackCooldown: baseSpd, attackTimer: baseSpd };
+                mob = { x: 750, y: isMelee ? 195 : 210, w: isMelee ? 25 : 30, h: isMelee ? 40 : 25, type: "mob", visualType: visualType, isRare: isRare, isMelee: isMelee, visualTier: tier, hp: Math.floor(15 * scale * hpMult), maxHp: Math.floor(15 * scale * hpMult), damage: Math.floor(5.2 * scale * dmgMult), flashTimer: 0, isStopped: false, attackCooldown: baseSpd, attackTimer: baseSpd };
                 if (isRare) {
                     pushLog(`<span style='color:#ffb6c1; font-weight:bold;'>✨ A glowing Rare enemy appears!</span>`);
                     if (p.hasSingularitySet) {
@@ -10278,72 +10834,72 @@ window.loadGame = function() {
         }
         
         let label = maxStars === 0 ? "Common Gear (0★)" : getTierName(maxStars) + " & Under";
-        if (!confirm(`Are you sure you want to bulk salvage ${targetItems.length} unlocked items (${label})?`)) return;
-        
-        let bulkScrapsHarvested = {};
-        function incrementScrap(name, amount) {
-            if (!bulkScrapsHarvested[name]) bulkScrapsHarvested[name] = 0;
-            bulkScrapsHarvested[name] += amount;
-            addEtcDrop(name, amount);
-        }
 
-        targetItems.forEach(item => {
-            let rolledTier = item.statsRolled;
-            let scrapName = getScrapYieldName(rolledTier);
-            let yieldAmount = Math.floor(Math.random() * 3) + 1;
-            
-            incrementScrap(scrapName, yieldAmount);
-
-            // Inherit standard cascading scrap recycling down the tier list
-            for (let t = rolledTier - 1; t >= 0; t--) {
-                if (Math.random() < 0.60) {
-                    let lowerYield = Math.floor(Math.random() * 2) + 1;
-                    let lowerName = getScrapYieldName(t);
-                    incrementScrap(lowerName, lowerYield);
+        window.showCustomConfirm(
+            "Bulk Deconstruct",
+            `Are you sure you want to bulk salvage ${targetItems.length} unlocked items (${label})?`,
+            "Deconstruct", "Cancel", "#e74c3c",
+            function() {
+                let bulkScrapsHarvested = {};
+                function incrementScrap(name, amount) {
+                    if (!bulkScrapsHarvested[name]) bulkScrapsHarvested[name] = 0;
+                    bulkScrapsHarvested[name] += amount;
+                    addEtcDrop(name, amount);
                 }
+
+                targetItems.forEach(item => {
+                    let rolledTier = item.statsRolled;
+                    let scrapName = getScrapYieldName(rolledTier);
+                    let yieldAmount = Math.floor(Math.random() * 3) + 1;
+
+                    incrementScrap(scrapName, yieldAmount);
+
+                    for (let t = rolledTier - 1; t >= 0; t--) {
+                        if (Math.random() < 0.60) {
+                            let lowerYield = Math.floor(Math.random() * 2) + 1;
+                            let lowerName = getScrapYieldName(t);
+                            incrementScrap(lowerName, lowerYield);
+                        }
+                    }
+
+                    if (forgeSelectedItem && forgeSelectedItem.id === item.id) {
+                        forgeSelectedItem = null;
+                    }
+                });
+
+                playerStats.itemsSalvaged = (playerStats.itemsSalvaged || 0) + targetItems.length;
+
+                let targetIds = new Set(targetItems.map(item => item.id));
+                inventory.EQUIP = inventory.EQUIP.filter(item => !targetIds.has(item.id));
+
+                for (let i = 0; i < 45; i++) {
+                    particles.push({
+                        x: canvas.width / 2 + (Math.random() - 0.5) * 120,
+                        y: canvas.height / 2 + (Math.random() - 0.5) * 40,
+                        vx: (Math.random() - 0.5) * 12,
+                        vy: (Math.random() - 0.7) * 9,
+                        radius: Math.random() * 3.5 + 1.5,
+                        color: Math.random() > 0.5 ? "#7f8c8d" : "#e74c3c",
+                        alpha: 1,
+                        life: Math.random() * 30 + 15
+                    });
+                }
+
+                let outputReport = Object.keys(bulkScrapsHarvested).map(k => `x${bulkScrapsHarvested[k]} ${k}`).join(", ");
+
+                pushLog(`<span style='color:#e74c3c;'>[BULK SALVAGE]</span> Dismantled ${targetItems.length} items. Harvested: ${outputReport}`);
+                pushHeaderToast("♻️ Bulk Salvaged " + targetItems.length + " Items!", "#e74c3c");
+
+                let newMaxHp = resolvePlayerStats().maxHp;
+                playerStats.currentHp = Math.min(playerStats.currentHp, newMaxHp);
+
+                window.checkAchievements();
+                updateUI();
+                renderInventory();
+                renderForgeTab();
+                window.saveGame();
             }
-
-            // Remove item from active selection if currently placed on forge anvil
-            if (forgeSelectedItem && forgeSelectedItem.id === item.id) {
-                forgeSelectedItem = null;
-            }
-        });
-
-        playerStats.itemsSalvaged = (playerStats.itemsSalvaged || 0) + targetItems.length;
-
-        // Safe non-blocking batch de-reference of items from EQUIP array (avoiding inline splice shifting anomalies)
-        let targetIds = new Set(targetItems.map(item => item.id));
-        inventory.EQUIP = inventory.EQUIP.filter(item => !targetIds.has(item.id));
-
-        // Spawn a high-feedback visual particle explosion at center screen
-        for (let i = 0; i < 45; i++) {
-            particles.push({
-                x: canvas.width / 2 + (Math.random() - 0.5) * 120,
-                y: canvas.height / 2 + (Math.random() - 0.5) * 40,
-                vx: (Math.random() - 0.5) * 12,
-                vy: (Math.random() - 0.7) * 9,
-                radius: Math.random() * 3.5 + 1.5,
-                color: Math.random() > 0.5 ? "#7f8c8d" : "#e74c3c",
-                alpha: 1,
-                life: Math.random() * 30 + 15
-            });
-        }
-
-        // Format combined harvest output values into a single tidy entry
-        let outputReport = Object.keys(bulkScrapsHarvested).map(k => `x${bulkScrapsHarvested[k]} ${k}`).join(", ");
-        
-        pushLog(`<span style='color:#e74c3c;'>[BULK SALVAGE]</span> Dismantled ${targetItems.length} items. Harvested: ${outputReport}`);
-        pushHeaderToast("♻️ Bulk Salvaged " + targetItems.length + " Items!", "#e74c3c");
-
-        // Recalculate and scale player HP dynamically in case attributes changed
-        let newMaxHp = resolvePlayerStats().maxHp;
-        playerStats.currentHp = Math.min(playerStats.currentHp, newMaxHp);
-
-        window.checkAchievements();
-        updateUI(); 
-        renderInventory(); 
-        renderForgeTab(); 
-        window.saveGame();
+        );
     };
 
     window.buyGachaCrate = function() {
@@ -10393,36 +10949,39 @@ window.loadGame = function() {
         let allTime90 = Math.floor((playerStats.lifetimePeakStage || 1) * 0.90);
         let calculatedBossStage = Math.max(runPeak, allTime90);
 
-        if (!confirm(`Sacrifice ${cost} Ancient Cores to open the Rift for ${bossName}?\n\n⚠️ WARNING: This entity has adapted! It will scale to Stage ${calculatedBossStage} difficulty and drop Peak-level rewards.`)) return;
+        window.showCustomConfirm(
+            "Open Reality Rift",
+            `Sacrifice ${cost} Ancient Cores to open the Rift for ${bossName}?\n\n⚠️ WARNING: This entity has adapted! It will scale to Stage ${calculatedBossStage} difficulty and drop Peak-level rewards.`,
+            "Open Rift", "Cancel", "#9b59b6",
+            function() {
+                inventory.ETC["Ancient Core"] -= cost;
+                if (inventory.ETC["Ancient Core"] === 0) delete inventory.ETC["Ancient Core"];
 
-        inventory.ETC["Ancient Core"] -= cost;
-        if (inventory.ETC["Ancient Core"] === 0) delete inventory.ETC["Ancient Core"];
-        
-        playerStats.isBossMode = true; 
-        playerStats.isFarmingLoop = false; 
-        playerStats.isUberBoss = true; 
-        playerStats.currentUberBoss = bossType; // Track active target
-        mob = null; 
-        
-        let p = resolvePlayerStats(); 
-        playerStats.currentHp = p.maxHp; 
-        
-        pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[ALTAR] A dimensional rift tears open! ${bossName} approaches!</span>`);
-        
-        // Trigger colossal rift tear screen effect (with custom boss color mapping)
-        if (typeof window.spawnPurchaseCelebration === "function") {
-            let rColors = { 'guardian': '#9b59b6', 'chronos': '#f1c40f', 'nexus': '#ff007f' };
-            window.spawnPurchaseCelebration('altar', rColors[bossType] || '#9b59b6', 'UNIQUE');
-        }
+                playerStats.isBossMode = true;
+                playerStats.isFarmingLoop = false;
+                playerStats.isUberBoss = true;
+                playerStats.currentUberBoss = bossType;
+                mob = null;
 
-        // Reset session combat achievement variables
-        playerStats.hasClickedThisBattle = false;
-        playerStats.damageTakenThisBattle = 0;
-        playerStats.ankhTriggeredThisBattle = false;
+                let p = resolvePlayerStats();
+                playerStats.currentHp = p.maxHp;
 
-        updateUI(); 
-        renderInventory(); 
-        window.saveGame();
+                pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[ALTAR] A dimensional rift tears open! ${bossName} approaches!</span>`);
+
+                if (typeof window.spawnPurchaseCelebration === "function") {
+                    let rColors = { 'guardian': '#9b59b6', 'chronos': '#f1c40f', 'nexus': '#ff007f' };
+                    window.spawnPurchaseCelebration('altar', rColors[bossType] || '#9b59b6', 'UNIQUE');
+                }
+
+                playerStats.hasClickedThisBattle = false;
+                playerStats.damageTakenThisBattle = 0;
+                playerStats.ankhTriggeredThisBattle = false;
+
+                updateUI();
+                renderInventory();
+                window.saveGame();
+            }
+        );
     };
 
     function generateItemCardHtml(item, compareEq = null, isCurrentlyEquipped = false) {
@@ -10735,9 +11294,9 @@ window.loadGame = function() {
         let effectiveInt = Math.max(0, p.int - 5);
         
         let map = {
-            'str': { title: "💪 STR (Strength)", base: playerStats.baseStr, lvl: (alloc.spStr || 0) * 3, color: "#fff" },
-            'dex': { title: "🎯 DEX (Dexterity)", base: playerStats.baseDex, lvl: (alloc.spDex || 0) * 3, color: "#fff" },
-            'int': { title: "🧠 INT (Intelligence)", base: playerStats.baseInt, lvl: (alloc.spInt || 0) * 3, color: "#fff" },
+            'str': { title: "💪 STR (Strength)", base: playerStats.baseStr, lvl: (alloc.spStr || 0), color: "#fff" },
+            'dex': { title: "🎯 DEX (Dexterity)", base: playerStats.baseDex, lvl: (alloc.spDex || 0), color: "#fff" },
+            'int': { title: "🧠 INT (Intelligence)", base: playerStats.baseInt, lvl: (alloc.spInt || 0), color: "#fff" },
             'atk': { title: "⚔️ Total Attack", base: playerStats.baseAtk, lvl: alloc.spAtk * 6, color: "#fff" },
             'maxHp': { title: "❤️ Max Health", base: playerStats.baseMaxHp, lvl: alloc.spHp * 45, color: "#fff" },
             'def': { title: "🛡️ Total Defense", base: playerStats.baseDef, lvl: alloc.spDef * 4, color: "#fff" },
@@ -10803,14 +11362,18 @@ window.loadGame = function() {
         if (achPctTotal > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• Achievements (Mult): +${Math.round(achPctTotal * 100)}%</div>`;
         
         // Append core attribute secondary scaling lines to the flat breakdown list
+        let totalVal = data.base + data.lvl + gearTotal + artTotal;
         if (statKey === 'atk' && effectiveStr > 0) {
-            html += `<div class="tt-stat-line" style="color:#e67e22;">• Strength Scaling (STR): +${(effectiveStr * 1.5)}</div>`;
+            html += `<div class="tt-stat-line" style="color:#e67e22;">• Strength Scaling (STR): +${Math.floor(totalVal * (effectiveStr * 0.01))}</div>`;
+            html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${effectiveStr}% Multiplier)</div>`;
         }
         if (statKey === 'maxHp' && effectiveStr > 0) {
-            html += `<div class="tt-stat-line" style="color:#e67e22;">• Strength Scaling (STR): +${(effectiveStr * 10)}</div>`;
+            html += `<div class="tt-stat-line" style="color:#e67e22;">• Strength Scaling (STR): +${Math.floor(totalVal * (effectiveStr * 0.01))}</div>`;
+            html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${effectiveStr}% Multiplier)</div>`;
         }
         if (statKey === 'def' && effectiveInt > 0) {
-            html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): +${(effectiveInt * 0.75).toFixed(1)}</div>`;
+            html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): +${Math.floor(totalVal * (effectiveInt * 0.01))}</div>`;
+            html += `<div class="tt-stat-line" style="color:#9b59b6; font-style:italic;">  (+${effectiveInt}% Multiplier)</div>`;
         }
         if (statKey === 'moveSpeed' && effectiveDex > 0) {
             html += `<div class="tt-stat-line" style="color:#3498db;">• Dexterity Scaling (DEX): +${(effectiveDex * 0.25).toFixed(1)}</div>`;
@@ -10843,11 +11406,10 @@ window.loadGame = function() {
         }
 
         // Append live mathematical scaling contributions for core attributes (STR, DEX, INT)
-        let totalVal = data.base + data.lvl + gearTotal + artTotal;
         if (statKey === 'str') {
             html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
-            html += `<div class="tt-stat-line" style="color:#2ecc71;">• ⚔️ Attack: +${Math.floor(totalVal * 1.5)}</div>`;
-            html += `<div class="tt-stat-line" style="color:#e74c3c;">• ❤️ Max HP: +${Math.floor(totalVal * 12)}</div>`;
+            html += `<div class="tt-stat-line" style="color:#2ecc71;">• ⚔️ Attack: +${Math.max(0, totalVal - 5)}% Multiplier</div>`;
+            html += `<div class="tt-stat-line" style="color:#e74c3c;">• ❤️ Max HP: +${Math.max(0, totalVal - 5)}% Multiplier</div>`;
         } else if (statKey === 'dex') {
             html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
             html += `<div class="tt-stat-line" style="color:#e67e22;">• ✨ Crit Chance: +${(totalVal * 0.2).toFixed(1)}%</div>`;
@@ -10857,7 +11419,7 @@ window.loadGame = function() {
             html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
             html += `<div class="tt-stat-line" style="color:#3498db;">• 🛡️ Block Rate: +${(totalVal * 0.2).toFixed(1)}%</div>`;
             html += `<div class="tt-stat-line" style="color:#e74c3c;">• ⚡ Parry Rate: +${(totalVal * 0.2).toFixed(1)}%</div>`;
-            html += `<div class="tt-stat-line" style="color:#2ecc71;">• 🛡️ Defense: +${(totalVal * 1.0).toFixed(1)}</div>`;
+            html += `<div class="tt-stat-line" style="color:#2ecc71;">• 🛡️ Defense: +${Math.max(0, totalVal - 5)}% Multiplier</div>`;
             html += `<div class="tt-stat-line" style="color:#9b59b6;">• 🧪 Potion Dur: +${Math.floor(totalVal)}%</div>`;
         }
         
@@ -11633,12 +12195,13 @@ window.loadGame = function() {
 
         let newProp = eligiblePool[Math.floor(Math.random() * eligiblePool.length)];
         let stageScale = item.stageLevel || 1;
+        let expScale = Math.pow(1.06, stageScale * 10);
         let rarityMult = 1 + (item.statsRolled * 0.15);
         let rolledValue = 0;
 
-        if (newProp === "bonusAtk") rolledValue = Math.ceil(randInt(1, 2) * stageScale * rarityMult);
-        else if (newProp === "bonusMaxHp") rolledValue = Math.ceil(randInt(3, 8) * stageScale * rarityMult);
-        else if (newProp === "bonusDef") rolledValue = Math.ceil(randInt(1, 2) * stageScale * rarityMult);
+        if (newProp === "bonusAtk") rolledValue = Math.ceil(randInt(1, 2) * expScale * rarityMult);
+        else if (newProp === "bonusMaxHp") rolledValue = Math.ceil(randInt(3, 8) * expScale * rarityMult);
+        else if (newProp === "bonusDef") rolledValue = Math.ceil(randInt(1, 2) * expScale * rarityMult);
         else if (newProp === "bonusMoveSpeed") rolledValue = Math.ceil(randInt(1, 2) * stageScale * rarityMult);
         else if (newProp === "bonusCritChance") rolledValue = parseFloat(Math.min(0.20, randFloat(0.01, 0.025) * Math.sqrt(stageScale) * rarityMult).toFixed(4));
         else if (newProp === "bonusCritDamage") rolledValue = parseFloat((randFloat(0.03, 0.06) * Math.sqrt(stageScale) * rarityMult).toFixed(4));
@@ -12024,21 +12587,21 @@ window.loadGame = function() {
         
         let xpYield = 0;
             let scaleVal = playerStats.isDungeonMode ? (playerStats.currentDungeonStage[playerStats.currentDungeon] || 1) : playerStats.stage;
-            
+            if (playerStats.isCrucibleMode) scaleVal = playerStats.crucibleWave;
+
+            let expScale = Math.pow(1.06, scaleVal);
+
             if (playerStats.isCrucibleMode) {
-                // Slower wave XP progression: 10 base + 5% exponential growth
-                xpYield = Math.floor(10 * Math.pow(1.05, playerStats.crucibleWave));
+                xpYield = Math.floor(10 * expScale);
             } else if (playerStats.isDungeonMode) {
-                // Dungeon common/boss scaling adjustments: 15 base + 5% exponential growth (x5 for Bosses)
-                xpYield = mob.type === "dungeon_boss" ? Math.floor(75 * Math.pow(1.05, scaleVal)) : Math.floor(15 * Math.pow(1.05, scaleVal));
+                xpYield = Math.floor((mob.type === "dungeon_boss" ? 25 : 5) * expScale);
             } else {
-                // Standard campaign monster scaling adjustments: 5 base + 5% exponential (Rare x3, Boss x5)
-                let baseExp = Math.floor(5 * Math.pow(1.05, scaleVal));
+                let baseExp = Math.floor(5 * expScale);
                 xpYield = isBoss ? baseExp * 5 : (mob.isRare ? baseExp * 3 : baseExp);
             }
             gainXp(xpYield);
-        
-        let baseCoin = isBoss ? Math.floor(15 * Math.pow(1.08, scaleVal)) : Math.floor(2 + Math.pow(1.08, scaleVal) * 0.65);
+
+        let baseCoin = isBoss ? Math.floor(15 * expScale) : Math.floor(2 * expScale);
         if (playerStats.isCrucibleMode) baseCoin = 0; // Crucible awards survival stats on death summary
 
         if (playerStats.isDungeonMode && playerStats.currentDungeon === 'gold') {
@@ -12710,10 +13273,21 @@ window.loadGame = function() {
 
     /* ==========================================================================
        11. REAL-TIME AUDIT & LIVE VALUE RENDERERS
-       ========================================================================== */
+       ========================================================================= */
     function updateUI() {
-        let p = resolvePlayerStats(); 
-        
+        let hasDraftChanges = false;
+        if (draftAllocations) {
+            for (let k in draftAllocations) {
+                if (draftAllocations[k] !== playerStats.spAllocations[k]) {
+                    hasDraftChanges = true;
+                    break;
+                }
+            }
+        }
+
+        // Live Attribute Matrix updates inside stats tab using draft
+        let p = resolvePlayerStats(hasDraftChanges);
+
         // Dynamic DOM bindings for Core Attributes & Matrix stats
         document.getElementById('stat-str').innerText = p.str.toLocaleString();
         document.getElementById('stat-dex').innerText = p.dex.toLocaleString();
@@ -12722,10 +13296,10 @@ window.loadGame = function() {
         document.getElementById('stat-mhp').innerText = formatNumber(p.maxHp);
         document.getElementById('stat-def').innerText = formatNumber(p.def);
         document.getElementById('stat-mov').innerText = formatNumber(p.moveSpeed);
-        
+
         document.getElementById('char-level').innerText = playerStats.level.toLocaleString();
-        document.getElementById('char-sp').innerText = playerStats.sp.toLocaleString();
-        
+        document.getElementById('char-sp').innerText = (draftAllocations !== null ? draftSP : playerStats.sp).toLocaleString();
+
         let maxStageEl = document.getElementById('char-maxstage');
         if (maxStageEl) {
             maxStageEl.innerText = (playerStats.maxStage || 1).toLocaleString();
@@ -12736,17 +13310,41 @@ window.loadGame = function() {
         if (countEl) countEl.innerText = playerStats.prestigeCount || 0;
         let peakEl = document.getElementById('char-lifetime-peak');
         if (peakEl) peakEl.innerText = playerStats.lifetimePeakStage || playerStats.maxStage || 1;
-        
+
         document.getElementById('char-xp-text').innerText = `${playerStats.xp.toLocaleString()} / ${playerStats.xpReq.toLocaleString()}`;
         document.getElementById('char-xp-fill').style.width = `${Math.min(100, (playerStats.xp / playerStats.xpReq) * 100)}%`;
-        
-        let alloc = playerStats.spAllocations;
-        document.querySelectorAll('.btn-action.sp').forEach(btn => {
-            btn.style.display = playerStats.sp > 0 ? "inline-block" : "none";
-        });
-        let cBtn = document.getElementById('btn-sp-crit'); if (cBtn && alloc.spCrit >= 40) cBtn.style.display = "none";
-        let bBtn = document.getElementById('btn-sp-block'); if (bBtn && alloc.spBlock >= 40) bBtn.style.display = "none";
-        let pBtn = document.getElementById('btn-sp-parry'); if (pBtn && alloc.spParry >= 40) pBtn.style.display = "none";
+
+        let alloc = draftAllocations || playerStats.spAllocations;
+        let currentSp = draftAllocations !== null ? draftSP : playerStats.sp;
+
+        // Toggle visibility of Apply/Cancel changes bar
+        let draftBar = document.getElementById('draft-controls-container');
+        if (draftBar) {
+            draftBar.style.display = hasDraftChanges ? "block" : "none";
+        }
+
+        // Manage custom dynamic states for draft buttons
+        const updateSPButtonStates = () => {
+            let statsKeys = {
+                spStr: 'spStr', spDex: 'spDex', spInt: 'spInt'
+            };
+
+            for (let allocKey in statsKeys) {
+                let plusBtn = document.getElementById('btn-plus-' + allocKey);
+                let minusBtn = document.getElementById('btn-minus-' + allocKey);
+
+                if (plusBtn) {
+                    plusBtn.style.display = (currentSp > 0) ? "inline-block" : "none";
+                }
+
+                if (minusBtn) {
+                    let committedVal = playerStats.spAllocations[allocKey] || 0;
+                    let draftVal = alloc[allocKey] || 0;
+                    minusBtn.style.display = (draftVal > committedVal) ? "inline-block" : "none";
+                }
+            }
+        };
+        updateSPButtonStates();
 
         let progressEl = document.getElementById('hud-progress');
         if (playerStats.isCrucibleMode) {
@@ -13482,6 +14080,11 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
         p = resolvePlayerStats(); 
         let scrollSpeed = 2 + (p.moveSpeed * 0.05);
 
+        // Continuous Hold-To-Attack Evaluation
+        if (spacePressed || window.isCanvasPressed) {
+            window.triggerPlayerSlash();
+        }
+
         if (hero.attackTimer > 0) hero.attackTimer--; hero.slashFrame = (hero.attackTimer > 0 && hero.attackTimer < (p.activeAttackSpeed/2));
         
         if (mob && mob.flashTimer > 0) mob.flashTimer--; 
@@ -13963,10 +14566,9 @@ for (let i = effects.length - 1; i >= 0; i--) { let eff = effects[i]; eff.y -= 0
                                 }
                                 else {
                                     playerStats.consecutiveParries = 0; // Reset parry streak on direct hit
-                                    // Soft-Ceiling Diminishing Returns Mitigation Formula (Capped asymptotically at 75% max)
-                                    let effStage = playerStats.isDungeonMode ? Math.max(1, Math.floor((playerStats.maxStage || 1) * 0.85)) : playerStats.stage;
-                                    let mitigation = Math.min(0.75, p.def / (p.def + 12 + (effStage * 1.2)));
-                                    let netDamage = Math.max(1, Math.ceil(mob.damage * (1 - mitigation)));
+
+                                    // Unified Armor Class Formula (Infinite Scaling Effective HP)
+                                    let netDamage = Math.max(1, Math.ceil(mob.damage * (100 / (100 + p.def))));
                                     
                                     const subType = equippedSlots.subweapon ? equippedSlots.subweapon.subType : null;
                                     if (playerStats.daggerParryStagger && subType === "dagger") {
