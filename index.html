@@ -2191,6 +2191,12 @@ window.onload = function() {
         renderInventory();
     };
 
+    window.addUseDrop = function(itemName, amount = 1) {
+        if (!inventory.USE[itemName]) { inventory.USE[itemName] = 0; }
+        inventory.USE[itemName] += amount;
+        renderInventory();
+    };
+
     window.toggleLock = function(id) {
         let item = inventory.EQUIP.find(i => i.id === id) || (inventory.ARTIFACT && inventory.ARTIFACT.find(i => i.id === id));
         if (!item) {
@@ -6479,7 +6485,19 @@ function formatStatRangeStr(item, statKey, isPct = false) {
         function recordScrapGained(name, amount) {
             if (!scrapsGainedMap[name]) scrapsGainedMap[name] = 0;
             scrapsGainedMap[name] += amount;
-            addEtcDrop(name, amount);
+            
+            const useItems = [
+                "Attack Elixir", "Greater Attack Elixir", "Supernal Attack Elixir",
+                "Vitality Elixir", "Greater Vitality Elixir", "Supernal Vitality Elixir",
+                "Armored Elixir", "Greater Armored Elixir", "Supernal Armored Elixir",
+                "Haste Elixir", "Greater Haste Elixir", "Supernal Haste Elixir",
+                "SP Reset Scroll", "PP Reset Scroll"
+            ];
+            if (useItems.includes(name)) {
+                window.addUseDrop(name, amount);
+            } else {
+                window.addEtcDrop(name, amount);
+            }
         }
 
         let maxBag = getMaxBagSlots();
@@ -6571,9 +6589,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 // Normal monster farming rewards
                 for (let k = 0; k < killsNeededForStage; k++) {
                     let isRare = Math.random() < p.rareSpawn;
-                    let baseGold = Math.floor(2 * scale * (isRare ? 4 : 1));
+                    let baseGold = Math.floor(2 * expScale * (isRare ? 4 : 1));
                     totalGold += Math.ceil(baseGold * p.gold);
-                    totalXp += Math.floor(5 * scale * (isRare ? 3 : 1));
+                    totalXp += Math.floor(5 * expScale * (isRare ? 3 : 1));
 
                     let dropR = isRare ? 0.005 : 0.001;
                     if (Math.random() < (dropR * p.drop * state.efficiency)) {
@@ -6587,9 +6605,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                 }
 
                 // Boss clearance rewards
-                let baseBossGold = Math.floor(15 * scale);
+                let baseBossGold = Math.floor(15 * expScale);
                 totalGold += Math.ceil(baseBossGold * p.gold);
-                totalXp += Math.floor(25 * scale);
+                totalXp += Math.floor(25 * expScale);
                 
                 if (Math.random() < (0.01 * p.drop * state.efficiency)) {
                     rollOfflineItem(true, currentStage, false);
@@ -6619,9 +6637,9 @@ function formatStatRangeStr(item, statKey, isPct = false) {
                     
                     for (let k = 0; k < partialKills; k++) {
                         let isRare = Math.random() < p.rareSpawn;
-                        let baseGold = Math.floor(2 * scale * (isRare ? 4 : 1));
+                        let baseGold = Math.floor(2 * expScale * (isRare ? 4 : 1));
                         totalGold += Math.ceil(baseGold * p.gold);
-                        totalXp += Math.floor(5 * scale * (isRare ? 3 : 1));
+                        totalXp += Math.floor(5 * expScale * (isRare ? 3 : 1));
                         
                         let dropR = isRare ? 0.005 : 0.001;
                         if (Math.random() < (dropR * p.drop * state.efficiency)) {
@@ -7475,13 +7493,29 @@ window.loadGame = function() {
                     playerStats.autoSalvageThreshold = -1;
                 }
                 inventory = parsed.inventory || { EQUIP: [], ARTIFACT: [], ETC: {}, USE: {} };
-                if (!inventory.ARTIFACT) { inventory.ARTIFACT = []; }
-                if (!inventory.ETC) { inventory.ETC = {}; }
-                if (!inventory.USE) { inventory.USE = {}; }
-                
-                // Migrate legacy artifacts that were stored in the EQUIP sack to the ARTIFACT sack
-                if (inventory.EQUIP) {
-                    for (let i = inventory.EQUIP.length - 1; i >= 0; i--) {
+                    if (!inventory.ARTIFACT) { inventory.ARTIFACT = []; }
+                    if (!inventory.ETC) { inventory.ETC = {}; }
+                    if (!inventory.USE) { inventory.USE = {}; }
+                    
+                    // Migrate legacy potions/scrolls from ETC to USE if they exist
+                    const useItemsList = [
+                        "Attack Elixir", "Greater Attack Elixir", "Supernal Attack Elixir",
+                        "Vitality Elixir", "Greater Vitality Elixir", "Supernal Vitality Elixir",
+                        "Armored Elixir", "Greater Armored Elixir", "Supernal Armored Elixir",
+                        "Haste Elixir", "Greater Haste Elixir", "Supernal Haste Elixir",
+                        "SP Reset Scroll", "PP Reset Scroll"
+                    ];
+                    useItemsList.forEach(item => {
+                        if (inventory.ETC && inventory.ETC[item]) {
+                            if (!inventory.USE) inventory.USE = {};
+                            inventory.USE[item] = (inventory.USE[item] || 0) + inventory.ETC[item];
+                            delete inventory.ETC[item];
+                        }
+                    });
+
+                    // Migrate legacy artifacts that were stored in the EQUIP sack to the ARTIFACT sack
+                    if (inventory.EQUIP) {
+                        for (let i = inventory.EQUIP.length - 1; i >= 0; i--) {
                         if (inventory.EQUIP[i] && inventory.EQUIP[i].type === "artifact") {
                             inventory.ARTIFACT.push(inventory.EQUIP[i]);
                             inventory.EQUIP.splice(i, 1);
@@ -11458,6 +11492,23 @@ window.loadGame = function() {
         tt.innerHTML = html; tt.style.display = "block"; window.positionTooltip(e, tt);
     };
 
+    const useDex = {
+        "SP Reset Scroll": { desc: "Refunds spent Skill Points from the Attribute Matrix.", color: "#9b59b6" },
+        "PP Reset Scroll": { desc: "Refunds spent Prestige Points from the Ascension Altar.", color: "#e67e22" },
+        "Attack Elixir": { desc: "Increases Attack Power by +10% for 5 minutes (scales with INT).", color: "#2ecc71" },
+        "Greater Attack Elixir": { desc: "Increases Attack Power by +20% for 5 minutes (scales with INT).", color: "#27ae60" },
+        "Supernal Attack Elixir": { desc: "Increases Attack Power by +35% for 5 minutes (scales with INT).", color: "#1e824c" },
+        "Vitality Elixir": { desc: "Increases Max HP by +10% for 5 minutes (scales with INT).", color: "#e74c3c" },
+        "Greater Vitality Elixir": { desc: "Increases Max HP by +20% for 5 minutes (scales with INT).", color: "#c0392b" },
+        "Supernal Vitality Elixir": { desc: "Increases Max HP by +35% for 5 minutes (scales with INT).", color: "#962d22" },
+        "Armored Elixir": { desc: "Increases Defense by +10% for 5 minutes (scales with INT).", color: "#3498db" },
+        "Greater Armored Elixir": { desc: "Increases Defense by +20% for 5 minutes (scales with INT).", color: "#2980b9" },
+        "Supernal Armored Elixir": { desc: "Increases Defense by +35% for 5 minutes (scales with INT).", color: "#1f3a52" },
+        "Haste Elixir": { desc: "Increases movement speed and attack recovery (reduces delay frames) for 5 minutes (scales with INT).", color: "#f1c40f" },
+        "Greater Haste Elixir": { desc: "Significantly increases movement speed and attack recovery for 5 minutes (scales with INT).", color: "#f39c12" },
+        "Supernal Haste Elixir": { desc: "Cosmically increases movement speed and attack recovery for 5 minutes (scales with INT).", color: "#d35400" }
+    };
+
     window.showEtcTooltip = function(e, keyName) {
         e.stopPropagation(); let tt = document.getElementById('etc-tooltip'); let desc = etcDex[keyName] || "Unknown material.";
         tt.innerHTML = `<div style="padding: 10px; width: 200px; box-sizing: border-box;"><div class="tt-title" style="color:#bdc3c7;">📦 ${keyName}</div><div style="color:#aaa; font-size:11px;">${desc}</div></div>`;
@@ -11467,9 +11518,20 @@ window.loadGame = function() {
     window.showUseTooltip = function(e, keyName) {
         e.stopPropagation();
         let tt = document.getElementById('etc-tooltip');
-        let stockItem = MYSTICAL_STOCK.find(item => item.name === keyName);
-        let desc = stockItem ? stockItem.desc : "Consumable item.";
-        let color = stockItem ? stockItem.color : "#bdc3c7";
+        
+        let desc = "Consumable item.";
+        let color = "#bdc3c7";
+        
+        if (useDex[keyName]) {
+            desc = useDex[keyName].desc;
+            color = useDex[keyName].color;
+        } else {
+            let stockItem = MYSTICAL_STOCK.find(item => item.name === keyName);
+            if (stockItem) {
+                desc = stockItem.desc;
+                color = stockItem.color || "#bdc3c7";
+            }
+        }
         
         tt.innerHTML = `<div style="padding: 10px; width: 220px; box-sizing: border-box;"><div class="tt-title" style="color:${color};">🧪 ${keyName}</div><div style="color:#aaa; font-size:11px; white-space:normal; line-height:1.4;">${desc}</div></div>`;
         tt.style.borderColor = color;
