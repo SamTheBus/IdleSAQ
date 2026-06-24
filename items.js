@@ -266,29 +266,36 @@ window.renderForgeTab = function() {
             }
         }
     } else if (window.forgeMode === 'tier') {
-            if (item.statsRolled >= 5) {
-                html += `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 20px 0;">MAXIMUM RARITY REACHED</div>`;
-            } else {
-                let currentStars = item.statsRolled;
-                let costGold = (currentStars + 1) * 2500;
-                let scrapReqAmount = currentStars + 1;
-                let playerScrap = window.inventory.ETC["Eridium Shard"] || 0;
+                if (item.statsRolled >= 5) {
+                    html += `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 20px 0;">MAXIMUM RARITY REACHED</div>`;
+                } else {
+                    let currentStars = item.statsRolled;
+                    let targetStars = currentStars + 1;
+                    let costGold = targetStars * 2500;
+                    let shardReq = targetStars;
+                    let scrapReqAmount = targetStars * 5; // e.g. 5 for Rare, 10 for Magic, 15 for Epic, 20 for Leg, 25 for Mythic
+                    let targetScrapName = window.getScrapYieldName(targetStars);
 
-                let goldColor = window.playerStats.coins >= costGold ? "#f1c40f" : "#e74c3c";
-                let scrapColor = playerScrap >= scrapReqAmount ? "#8e44ad" : "#e74c3c";
+                    let playerShards = window.inventory.ETC["Eridium Shard"] || 0;
+                    let playerScraps = window.inventory.ETC[targetScrapName] || 0;
 
-                previewItem.statsRolled++;
-                window.scaleItemBonusStats(previewItem, currentStars, previewItem.statsRolled);
-                window.recalculateItemStats(previewItem);
+                    let goldColor = window.playerStats.coins >= costGold ? "#f1c40f" : "#e74c3c";
+                    let shardColor = playerShards >= shardReq ? "#8e44ad" : "#e74c3c";
+                    let scrapColor = playerScraps >= scrapReqAmount ? "#3498db" : "#e74c3c";
 
-                // Fetch correctly generated item property comparative differences for Tier Up
-                let diffLines = window.getForgeDiffLines(item, previewItem);
+                    previewItem.statsRolled++;
+                    window.scaleItemBonusStats(previewItem, currentStars, previewItem.statsRolled);
+                    window.recalculateItemStats(previewItem);
 
-                html += `<div style="font-size:11px; margin-bottom:15px; color:#aaa;">Rarity Transition: <span style="color:#fff;">${currentStars}★</span> ➔ <span style="color:#f1c40f;">${currentStars+1}★</span></div>`;
-                html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
-                html += `<div style="font-size:11px; color:${scrapColor}; margin-bottom:10px;">• ${scrapReqAmount.toLocaleString()}x Eridium Shard (Owned: ${playerScrap.toLocaleString()})</div>`;
-                html += `<div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:15px;">✨ 100% Awakening Guaranteed</div>`;
-                html += `<button class="forge-anvil-button" style="width:100%; border-color:#e67e22;" ${(window.playerStats.coins >= costGold) && (playerScrap >= scrapReqAmount) ? '' : 'disabled'} onclick="window.temperItem()">Awaken Rarity</button>`;
+                    // Fetch correctly generated item property comparative differences for Tier Up
+                    let diffLines = window.getForgeDiffLines(item, previewItem);
+
+                    html += `<div style="font-size:11px; margin-bottom:15px; color:#aaa;">Rarity Transition: <span style="color:#fff;">${currentStars}★</span> ➔ <span style="color:#f1c40f;">${targetStars}★</span></div>`;
+                    html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
+                    html += `<div style="font-size:11px; color:${shardColor}; margin-bottom:3px;">• ${shardReq}x Eridium Shard (Owned: ${playerShards})</div>`;
+                    html += `<div style="font-size:11px; color:${scrapColor}; margin-bottom:10px;">• ${scrapReqAmount}x ${targetScrapName} (Owned: ${playerScraps})</div>`;
+                    html += `<div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:15px;">✨ 100% Awakening Guaranteed</div>`;
+                    html += `<button class="forge-anvil-button" style="width:100%; border-color:#e67e22;" ${(window.playerStats.coins >= costGold) && (playerShards >= shardReq) && (playerScraps >= scrapReqAmount) ? '' : 'disabled'} onclick="window.temperItem()">Awaken Rarity</button>`;
 
                 previewHtml = `
                     <div style="margin-top:15px; padding:12px; background:#111; border:1px solid #e67e22; border-radius:6px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
@@ -1530,29 +1537,38 @@ window.temperItem = function() {
             if (typeof window.spawnTemperParticles === "function") window.spawnTemperParticles(false);
         }
     } else if (window.forgeMode === 'tier') {
-        if (window.forgeSelectedItem.statsRolled >= 5) return;
-        let currentStars = window.forgeSelectedItem.statsRolled;
-        let costGold = (currentStars + 1) * 2500;
-        let scrapReqAmount = currentStars + 1;
-        let playerScrap = window.inventory.ETC["Eridium Shard"] || 0;
+            if (window.forgeSelectedItem.statsRolled >= 5) return;
+            let currentStars = window.forgeSelectedItem.statsRolled;
+            let targetStars = currentStars + 1;
+            let costGold = targetStars * 2500;
+            let shardReq = targetStars;
+            let scrapReqAmount = targetStars * 5;
+            let targetScrapName = window.getScrapYieldName(targetStars);
 
-        if (window.playerStats.coins < costGold) { if(typeof window.pushLog==="function") window.pushLog(`<span style='color:#e74c3c;'>Not enough Gold to Tier Up!</span>`); return; }
-        if (playerScrap < scrapReqAmount) { if(typeof window.pushLog==="function") window.pushLog(`<span style='color:#e74c3c;'>Not enough Eridium Shards!</span>`); return; }
+            let playerShards = window.inventory.ETC["Eridium Shard"] || 0;
+            let playerScraps = window.inventory.ETC[targetScrapName] || 0;
 
-        window.playerStats.coins -= costGold;
-        window.inventory.ETC["Eridium Shard"] -= scrapReqAmount;
-        if (window.inventory.ETC["Eridium Shard"] === 0) delete window.inventory.ETC["Eridium Shard"];
+            if (window.playerStats.coins < costGold) { if(typeof window.pushLog==="function") window.pushLog(`<span style='color:#e74c3c;'>Not enough Gold to Tier Up!</span>`); return; }
+            if (playerShards < shardReq) { if(typeof window.pushLog==="function") window.pushLog(`<span style='color:#e74c3c;'>Not enough Eridium Shards!</span>`); return; }
+            if (playerScraps < scrapReqAmount) { if(typeof window.pushLog==="function") window.pushLog(`<span style='color:#e74c3c;'>Not enough ${targetScrapName}!</span>`); return; }
 
-        window.scaleItemBonusStats(window.forgeSelectedItem, currentStars, currentStars + 1);
+            window.playerStats.coins -= costGold;
+            window.inventory.ETC["Eridium Shard"] -= shardReq;
+            if (window.inventory.ETC["Eridium Shard"] === 0) delete window.inventory.ETC["Eridium Shard"];
 
-        window.forgeSelectedItem.statsRolled++;
-        window.addRandomStatLineToItem(window.forgeSelectedItem);
-        window.forgeSelectedItem.name = window.buildProceduralName(window.forgeSelectedItem);
+            window.inventory.ETC[targetScrapName] -= scrapReqAmount;
+            if (window.inventory.ETC[targetScrapName] === 0) delete window.inventory.ETC[targetScrapName];
 
-        if (typeof window.pushLog === "function") window.pushLog(`<span style='color:#e67e22;'>[FORGE]</span> Successfully Tiered Up ${window.forgeSelectedItem.name} to ${window.forgeSelectedItem.statsRolled}★!`);
-        if (typeof window.pushHeaderToast === "function") window.pushHeaderToast("⭐ Tier Up! " + window.forgeSelectedItem.statsRolled + "★", "#e67e22");
-        if (typeof window.spawnTemperParticles === "function") window.spawnTemperParticles(true);
-    }
+            window.scaleItemBonusStats(window.forgeSelectedItem, currentStars, targetStars);
+
+            window.forgeSelectedItem.statsRolled++;
+            window.addRandomStatLineToItem(window.forgeSelectedItem);
+            window.forgeSelectedItem.name = window.buildProceduralName(window.forgeSelectedItem);
+
+            if (typeof window.pushLog === "function") window.pushLog(`<span style='color:#e67e22;'>[FORGE]</span> Successfully Tiered Up ${window.forgeSelectedItem.name} to ${window.forgeSelectedItem.statsRolled}★!`);
+            if (typeof window.pushHeaderToast === "function") window.pushHeaderToast("⭐ Tier Up! " + window.forgeSelectedItem.statsRolled + "★", "#e67e22");
+            if (typeof window.spawnTemperParticles === "function") window.spawnTemperParticles(true);
+        }
 
     if (typeof window.updateUI === "function") window.updateUI();
     if (typeof window.renderInventory === "function") window.renderInventory();

@@ -57,7 +57,7 @@
                         <span style="color:#aaa;">Wave <span id="crucible-checkpoint-wave">1</span></span>
                     </div>
                     <button onclick="window.enterCrucible()" style="width: 100%; background: #9b59b6; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">Enter Astral Crucible</button>
-                    <button onclick="window.showCurrentRatesModal()" style="width: 100%; background: #2c3e50; color: white; border: 1px solid #444; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; transition: background 0.15s;">📊 View Depth Drop Rates</button>
+                    <button onclick="window.showCurrentRatesModal()" style="width: 100%; background: #2c3e50; color: white; border: 1px solid #444; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; transition: background 0.15s;">📊 View Drop Rates</button>
                 </div>
             </div>
 
@@ -390,20 +390,30 @@
     </div>
 
     <!-- Consolidated Console Panel (Combines Actions and Stats side-by-side) -->
-    <div id="control-bar" style="display: grid; grid-template-columns: 1.42fr 0.88fr; gap: 10px; background: #0c0e13; border-bottom: 2px solid #1e293b; padding: 6px 12px; align-items: center;">
+    <div id="control-bar" style="display: grid; grid-template-columns: 1.45fr 0.85fr; gap: 10px; background: #0c0e13; border-bottom: 2px solid #1e293b; padding: 6px 12px; align-items: center;">
 
         <!-- Live Stat Cards (Left Side) -->
         <div class="stats-hud-inline" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
-            <div class="hud-stat-card"><span style="color:#cbd5e1;">💰 Gold:</span> <strong id="hud-coins" style="color:#f1c40f; display:block; font-size:12px; margin-top:2px;">0</strong></div>
-            <div class="hud-stat-card">
-                <span style="color:#cbd5e1;">🗺️ Stage: <span id="hud-stage-peak" style="color:#2ecc71; font-size:9px; font-weight:bold;">(Peak 1)</span></span>
-                <strong style="color:#3498db; display:block; font-size:12px; margin-top:2px;">
-                    <span id="hud-stage">1</span>
-                    <span id="hud-progress" style="color:#94a3b8; font-size:9.5px; font-weight:normal;">(0/5)</span>
-                </strong>
+            <div class="hud-stat-card" style="border-color: rgba(231, 76, 60, 0.15);">
+                <span style="color:#cbd5e1; font-size:9.5px;">❤️ Player HP</span>
+                <strong id="hud-hp" style="color:#e74c3c; display:block; font-size:13px; margin-top:2px;">0 / 0</strong>
+                <span id="hud-hp-pct" style="color:#94a3b8; font-size:9px; font-weight:normal; display:block; margin-top:1px;">100.0%</span>
             </div>
-            <div class="hud-stat-card"><span style="color:#cbd5e1;">💥 Live DPS:</span> <strong id="hud-dps" style="color:#e74c3c; display:block; font-size:12px; margin-top:2px;">0.0</strong></div>
-            <div class="hud-stat-card" style="border-color:#1e293b;"><span style="color:#cbd5e1;">❤️ HP:</span> <strong id="hud-hp" style="color:#e74c3c; display:block; font-size:12px; margin-top:2px;">0 / 0</strong></div>
+            <div class="hud-stat-card" style="border-color: rgba(52, 152, 219, 0.15);">
+                <span id="hud-stage-label" style="color:#cbd5e1; font-size:9.5px;">🗺️ Stage</span>
+                <strong id="hud-stage" style="color:#3498db; display:block; font-size:13px; margin-top:2px;">1</strong>
+                <span id="hud-stage-sub" style="color:#94a3b8; font-size:9px; font-weight:normal; display:block; margin-top:1px;">(0/5) • Peak 1</span>
+            </div>
+            <div class="hud-stat-card" style="border-color: rgba(241, 196, 15, 0.15);">
+                <span style="color:#cbd5e1; font-size:9.5px;">💰 Gold</span>
+                <strong id="hud-coins" style="color:#f1c40f; display:block; font-size:13px; margin-top:2px;">0</strong>
+                <span style="color:#94a3b8; font-size:9px; font-weight:normal; display:block; margin-top:1px;">Active Balance</span>
+            </div>
+            <div class="hud-stat-card" style="border-color: rgba(230, 126, 34, 0.15);">
+                <span style="color:#cbd5e1; font-size:9.5px;">💥 Live DPS</span>
+                <strong id="hud-dps" style="color:#e67e22; display:block; font-size:13px; margin-top:2px;">0.0</strong>
+                <span style="color:#94a3b8; font-size:9px; font-weight:normal; display:block; margin-top:1px;">Combat Tracker</span>
+            </div>
         </div>
 
         <!-- Action Toggles (Right Side) -->
@@ -435,6 +445,7 @@
             <button class="tab-btn" onclick="window.switchTab('inv')">Sack</button>
             <button class="tab-btn" onclick="window.switchTab('forge')">Forge</button>
             <button class="tab-btn" onclick="window.switchTab('market')">Market</button>
+            <button class="tab-btn" onclick="window.switchTab('prestige')">Prestige</button>
         </div>
 
         <!-- Unified Hero / Equipment & Stats Tab -->

@@ -575,18 +575,38 @@ window.onload = function() {
     }
 
     window.loadGame();
-    window.updateStickyCanvasStyle();
+        window.updateStickyCanvasStyle();
 
-    // Warm user gesture activation for Web Audio Context
-    const initAudio = () => {
-        window.SoundManager.init();
-        window.removeEventListener('mousedown', initAudio);
-        window.removeEventListener('touchstart', initAudio);
-        window.removeEventListener('keydown', initAudio);
-    };
-    window.addEventListener('mousedown', initAudio);
-    window.addEventListener('touchstart', initAudio);
-    window.addEventListener('keydown', initAudio);
+        // Block pointer event leaks and click-through propagation on tooltips
+        const preventTooltipLeaks = (id) => {
+            let el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('pointerdown', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    window.hideTooltip();
+                });
+                el.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    window.hideTooltip();
+                });
+            }
+        };
+        preventTooltipLeaks('game-tooltip');
+        preventTooltipLeaks('etc-tooltip');
+        preventTooltipLeaks('stat-tooltip');
+
+        // Warm user gesture activation for Web Audio Context
+        const initAudio = () => {
+            window.SoundManager.init();
+            window.removeEventListener('mousedown', initAudio);
+            window.removeEventListener('touchstart', initAudio);
+            window.removeEventListener('keydown', initAudio);
+        };
+        window.addEventListener('mousedown', initAudio);
+        window.addEventListener('touchstart', initAudio);
+        window.addEventListener('keydown', initAudio);
 
     // Seed procedural foliage if not populated
     const flowerColors = ["#e74c3c", "#9b59b6", "#f1c40f", "#3498db", "#e67e22", "#e84393"];
@@ -613,8 +633,21 @@ window.onload = function() {
     }
 
     // Input Listeners
-    window.addEventListener('keydown', function(e) { if (e.code === 'Space' && !window.spacePressed) { e.preventDefault(); window.spacePressed = true; window.triggerPlayerSlash(); } });
-    window.addEventListener('keyup', function(e) { if (e.code === 'Space') { window.spacePressed = false; } });
+        window.addEventListener('keydown', function(e) { if (e.code === 'Space' && !window.spacePressed) { e.preventDefault(); window.spacePressed = true; window.triggerPlayerSlash(); } });
+        window.addEventListener('keyup', function(e) { if (e.code === 'Space') { window.spacePressed = false; } });
+
+        // Lock Tooltip Listeners (Star Quality locks)
+        const attachRatesListeners = (id, lockType) => {
+            let el = document.getElementById(id);
+            if (el) {
+                el.style.cursor = 'help';
+                el.addEventListener('mouseenter', (e) => window.showRatesLockTooltip(e, lockType));
+                el.addEventListener('mouseleave', () => window.hideTooltip());
+                el.addEventListener('touchstart', (e) => window.showRatesLockTooltip(e, lockType));
+            }
+        };
+        attachRatesListeners('star-rate-4', 'star4');
+        attachRatesListeners('star-rate-5', 'star5');
 
     window.isCanvasPressed = false;
     canvas.addEventListener('pointerdown', function(e) {
@@ -666,20 +699,36 @@ window.onload = function() {
     });
 
     canvas.addEventListener('pointerup', () => { window.isCanvasPressed = false; });
-    canvas.addEventListener('pointerleave', () => { window.isCanvasPressed = false; });
-    canvas.addEventListener('pointercancel', () => { window.isCanvasPressed = false; });
+        canvas.addEventListener('pointerleave', () => { window.isCanvasPressed = false; });
+        canvas.addEventListener('pointercancel', () => { window.isCanvasPressed = false; });
 
-    document.addEventListener('pointerdown', (e) => {
-        if (!e.target.closest('#game-tooltip') && !e.target.closest('.bag-item') && !e.target.closest('.slots-card') && !e.target.closest('.stat-hover') && !e.target.closest('.shop-row') && !e.target.closest('#hud-buff')) {
-            window.hideTooltip();
-        }
-        let achModal = document.getElementById('achievements-modal');
-        if (achModal && achModal.style.display === 'block') {
-            if (!e.target.closest('#achievements-modal') && !e.target.closest('#btn-achievements')) { achModal.style.display = 'none'; window.hideTooltip(); }
-        }
-    });
+        document.addEventListener('pointerdown', (e) => {
+            if (!e.target.closest('#game-tooltip') && !e.target.closest('.bag-item') && !e.target.closest('.slots-card') && !e.target.closest('.stat-hover') && !e.target.closest('.shop-row') && !e.target.closest('#hud-buff')) {
+                window.hideTooltip();
+            }
+            let achModal = document.getElementById('achievements-modal');
+            if (achModal && achModal.style.display === 'block') {
+                if (!e.target.closest('#achievements-modal') && !e.target.closest('#btn-achievements')) { achModal.style.display = 'none'; window.hideTooltip(); }
+            }
 
-    requestAnimationFrame(engineCycle);
+            // Auto-close Activities dropdown menu if clicking outside of it
+            let dungMenu = document.getElementById('dungeon-menu');
+            if (dungMenu && dungMenu.style.display === 'block') {
+                if (!e.target.closest('#dungeon-menu') && !e.target.closest('button[onclick*="toggleDungeonMenu"]')) {
+                    dungMenu.style.display = 'none';
+                }
+            }
+
+            // Auto-close Sound menu if clicking outside of it
+            let audioMenu = document.getElementById('audio-menu');
+            if (audioMenu && audioMenu.style.display === 'block') {
+                if (!e.target.closest('#audio-menu') && !e.target.closest('button[onclick*="toggleAudioMenu"]')) {
+                    audioMenu.style.display = 'none';
+                }
+            }
+        });
+
+        requestAnimationFrame(engineCycle);
     window.updateUI();
 };
 
@@ -1902,20 +1951,20 @@ window.processEnemySpawn = function() {    // 2. BACKGROUND SCENERY & VEGETATION
                 }
 
     if (window.playerStats.isDungeonMode) {
-        let hpScale = window.playerStats.currentDungeon === 'gold' ? 1.5 : 1;
+            let hpScale = window.playerStats.currentDungeon === 'gold' ? 1.5 : 1;
 
-        if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-            let hp = 60 * scale * hpScale;
-            window.mob = { x: 750, y: 140, w: 50, h: 90, type: "dungeon_boss", isRare: false, hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor(20 * scale), def: Math.floor(6.0 * scale), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
-            window.playerStats.hasClickedThisBattle = false; window.playerStats.damageTakenThisBattle = 0; window.playerStats.ankhTriggeredThisBattle = false;
-        } else {
-            let dType = window.playerStats.currentDungeon || 'gold';
-            let dPool = [];
-            if (dType === 'equip') dPool = ["golem", "gargoyle", "wyrmling"];
-            else if (dType === 'gold') dPool = ["gold_slime", "gold_golem", "gilded_wyrmling"];
-            else dPool = ["swamp_basilisk", "toxic_fly", "marsh_ghost"];
+            if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
+                let hp = 60 * scale * hpScale;
+                window.mob = { x: 750, y: 140, w: 50, h: 90, type: "dungeon_boss", isRare: false, hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor(20 * scale), def: Math.floor(6.0 * scale), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
+                window.playerStats.hasClickedThisBattle = false; window.playerStats.damageTakenThisBattle = 0; window.playerStats.ankhTriggeredThisBattle = false;
+            } else {
+                let dType = window.playerStats.currentDungeon || 'gold';
+                let dPool = [];
+                if (dType === 'equip') dPool = ["golem", "gargoyle", "wyrmling"];
+                else if (dType === 'gold') dPool = ["coin_elemental", "hoard_mimic", "gilded_scuttler"];
+                else dPool = ["swamp_basilisk", "toxic_fly", "marsh_ghost"];
 
-            let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
+                let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
             let isFlying = ["gargoyle", "toxic_fly", "marsh_ghost", "gilded_wyrmling", "wyrmling"].includes(chosenVisual);
 
             window.mob = {
