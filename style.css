@@ -260,6 +260,7 @@ canvas {
     border-bottom: 1px solid #333;
     user-select: none;
     -webkit-user-select: none;
+    touch-action: none; /* Prevents mobile browser pull-to-refresh gestures when dragging */
 }
 
 .draggable-content {

@@ -747,14 +747,14 @@ window.resolvePlayerStats = function(useDraft = false) {
     if (window.checkArtifactTrait("alchemist_alembic")) potStrengthMultiplier += 0.30;
 
     if (window.playerStats.atkPotionTimer > 0) p.atk = Math.ceil(p.atk * (1 + (window.playerStats.atkPotionStrength || 0.10) * potStrengthMultiplier));
-    if (window.playerStats.hpPotionTimer > 0) p.maxHp = Math.ceil(p.maxHp * (1 + (window.playerStats.hpPotionStrength || 0.10) * potStrengthMultiplier));
-    if (window.playerStats.defPotionTimer > 0) p.def = Math.ceil(p.def * (1 + (window.playerStats.defPotionStrength || 0.10) * potStrengthMultiplier));
+        if (window.playerStats.hpPotionTimer > 0) p.maxHp = Math.ceil(p.maxHp * (1 + (window.playerStats.hpPotionStrength || 0.10) * potStrengthMultiplier));
+        if (window.playerStats.defPotionTimer > 0) p.def = Math.ceil(p.def * (1 + (window.playerStats.defPotionStrength || 0.10) * potStrengthMultiplier));
 
-    if (window.playerStats.hastePotionTimer > 0) {
-        let tier = window.playerStats.hastePotionStrength || 1;
-        p.moveSpeed += Math.ceil(3 * tier * potStrengthMultiplier);
-        activeSpeedPct += 0.10 * tier * potStrengthMultiplier; idleSpeedPct += 0.10 * tier * potStrengthMultiplier;
-    }
+        if (window.playerStats.hastePotionTimer > 0) {
+            let tier = window.playerStats.hastePotionStrength || 1;
+            p.moveSpeed += Math.ceil(3 * tier * potStrengthMultiplier);
+            activeSpeedPct += 0.10 * tier * potStrengthMultiplier; idleSpeedPct += 0.10 * tier * potStrengthMultiplier;
+        }
 
     if (window.checkArtifactTrait("move_speed")) p.moveSpeed += 10;
     if (window.checkArtifactTrait("gold_hoard")) p.gold += 0.50;

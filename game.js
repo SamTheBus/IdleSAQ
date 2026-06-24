@@ -1672,11 +1672,14 @@ window.handleMobDeath = function() {
                 if (window.mob.type === "dungeon_boss") {
                     if (Math.random() < 0.05) { if (typeof window.rollEquipmentDrop === "function") window.rollEquipmentDrop(true, false, 1, false); } else if (Math.random() < 0.20) { if (typeof window.rollEquipmentDrop === "function") window.rollEquipmentDrop(true, false, 0, false); }
                     // Balanced unique artifact tempering speed by adjusting Overlord's Sigil rate to 20%
-                    if (Math.random() < 0.20) { if (typeof window.addEtcDrop === "function") window.addEtcDrop("Overlord's Sigil", 1); if (typeof window.pushToast === "function") window.pushToast("Overlord's Sigil", null, "#1abc9c", true, 1); }
-                } else {
-                    if (Math.random() < 0.01) { if (typeof window.rollEquipmentDrop === "function") window.rollEquipmentDrop(false, false, 0, false); }
-                }
-            } else if (window.playerStats.currentDungeon === 'mat') {
+                    if (Math.random() < 0.05) {
+                                            if (typeof window.addEtcDrop === "function") window.addEtcDrop("Overlord's Sigil", 1);
+                                            if (typeof window.pushToast === "function") window.pushToast("Overlord's Sigil", null, "#1abc9c", true, 1);
+                                        }
+                                    } else {
+                                        if (Math.random() < 0.01) { if (typeof window.rollEquipmentDrop === "function") window.rollEquipmentDrop(false, false, 0, false); }
+                                    }
+                                } else if (window.playerStats.currentDungeon === 'mat') {
                             let dStage = window.playerStats.currentDungeonStage['mat'] || 1;
                             if (window.mob.type === "dungeon_boss") {
                                 // Soft progression depth-based calculations replacing hard dungeon floor gates
@@ -2456,10 +2459,8 @@ window.rollPotionDrop = function(isBoss, isRare, silent = false) {
 
     if (Math.random() >= dropChance) return null;
 
-    let tierRoll = Math.random() * 100;
+    // Wild targets only drop basic (lowest tier) elixirs
     let tierPrefix = "";
-    if (tierRoll < 2) tierPrefix = "Supernal ";
-    else if (tierRoll < 15) tierPrefix = "Greater ";
 
     const types = ["Attack Elixir", "Vitality Elixir", "Armored Elixir", "Haste Elixir"];
     let chosenType = tierPrefix + types[Math.floor(Math.random() * types.length)];

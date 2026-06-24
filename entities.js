@@ -2284,7 +2284,7 @@ window.draw = function() {
 
     // 10. BUFF ICONS & DPS HUD
     let pStats = window.resolvePlayerStats(); let activeBuffsList = [];
-    let potDurationMax = 18000 * (1 + pStats.int * 0.01); let normalBuffMax = window.checkArtifactTrait("extend_buffs") ? 900 : 600;
+    let potDurationMax = 18000 * (1 + pStats.int * 0.001); let normalBuffMax = window.checkArtifactTrait("extend_buffs") ? 900 : 600;
 
     if (window.playerStats.frenzyTimer > 0) activeBuffsList.push({ icon: "🔥", timer: window.playerStats.frenzyTimer, max: normalBuffMax, color: "#e67e22" });
     if (window.playerStats.adrenalineTimer > 0) activeBuffsList.push({ icon: "⚡", timer: window.playerStats.adrenalineTimer, max: normalBuffMax, color: "#f1c40f" });

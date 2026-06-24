@@ -897,12 +897,12 @@ if (statKey === 'atk' && window.playerStats.atkPotionTimer > 0) gearTotal += Mat
         html += `<div class="tt-stat-line" style="color:#f1c40f;">• Crit Multi: +${(totalVal * 1.0).toFixed(1)}%</div>`;
         html += `<div class="tt-stat-line" style="color:#3498db;">• Move Speed: +${(totalVal * 0.25).toFixed(1)}</div>`;
     } else if (statKey === 'int') {
-        html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
-        html += `<div class="tt-stat-line" style="color:#3498db;">• Block Rate: +${(totalVal * 0.2).toFixed(1)}%</div>`;
-        html += `<div class="tt-stat-line" style="color:#e74c3c;">• Parry Rate: +${(totalVal * 0.2).toFixed(1)}%</div>`;
-        html += `<div class="tt-stat-line" style="color:#2ecc71;">• Defense: +${Math.max(0, totalVal - 5)}% Multiplier</div>`;
-        html += `<div class="tt-stat-line" style="color:#9b59b6;">• Potion Dur: +${Math.floor(totalVal)}%</div>`;
-    }
+            html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
+            html += `<div class="tt-stat-line" style="color:#3498db;">• Block Rate: +${(totalVal * 0.2).toFixed(1)}%</div>`;
+            html += `<div class="tt-stat-line" style="color:#e74c3c;">• Parry Rate: +${(totalVal * 0.2).toFixed(1)}%</div>`;
+            html += `<div class="tt-stat-line" style="color:#2ecc71;">• Defense: +Math.max(0, totalVal - 5)% Multiplier</div>`;
+            html += `<div class="tt-stat-line" style="color:#9b59b6;">• Potion Dur: +${(totalVal * 0.1).toFixed(1)}%</div>`;
+        }
 
     html += `</div>`;
     tt.style.borderColor = data.color; tt.innerHTML = html; tt.style.display = "block";
@@ -1602,9 +1602,11 @@ window.renderInventory = function() {
                 let uniqueStyle = window.getUniqueItemStyle(item);
                 let uniqueStyleStr = uniqueStyle ? `style="background: ${uniqueStyle.bg}; border: 1px solid ${uniqueStyle.border}; box-shadow: inset 0 0 6px ${uniqueStyle.shadow}, 0 0 8px ${uniqueStyle.glow};"` : "";
 
-                return `<div class="bag-item" ${uniqueStyleStr} onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
-                    <div><strong style="color:${nameColor};">${item.name}${temperTag}${lockTag}</strong>${comparisonBadge}<br>${details}</div>
-                    <div style="position:relative; z-index:10; white-space:nowrap;">
+                return `<div class="bag-item" ${uniqueStyleStr}>
+                    <div style="flex:1; cursor:help; text-align:left;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
+                        <strong style="color:${nameColor};">${item.name}${temperTag}${lockTag}</strong>${comparisonBadge}<br>${details}
+                    </div>
+                    <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
                         <button class="btn-action" ${disabledAttr} onclick="window.equipItem(${item.id})">Equip</button>
                         <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
                         <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})">Salvage</button>
@@ -1631,9 +1633,11 @@ window.renderInventory = function() {
                     disabledAttr = "disabled style='opacity:0.5; cursor:not-allowed;'";
                 }
                 let details = `<span style="font-size:10px;color:#d2b4de;font-weight:bold;">Trait: ${item.desc}</span>${lockWarning}`;
-                return `<div class="bag-item" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
-                    <div><strong style="color:${nameColor};">${item.name}${lockTag}</strong><br>${details}</div>
-                    <div style="position:relative; z-index:10; white-space:nowrap;">
+                return `<div class="bag-item">
+                    <div style="flex:1; cursor:help; text-align:left;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
+                        <strong style="color:${nameColor};">${item.name}${lockTag}</strong><br>${details}
+                    </div>
+                    <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
                         <button class="btn-action" ${disabledAttr} onclick="window.equipItem(${item.id})">Equip</button>
                         <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
                         <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})">Salvage</button>
@@ -1644,82 +1648,84 @@ window.renderInventory = function() {
     }
 
     // 3. Materials Sacks
-        const getEtcIconHtml = (key) => {
-            let bg = "rgba(170, 170, 170, 0.12)";
-            let border = "#444";
-            let icon = "📦";
+    const getEtcIconHtml = (key) => {
+        let bg = "rgba(170, 170, 170, 0.12)";
+        let border = "#444";
+        let icon = "📦";
 
-            if (key === "Eridium Shard") { bg = "rgba(155, 89, 182, 0.25)"; border = "#9b59b6"; icon = "🔮"; }
-            else if (key === "Gacha Key") { bg = "rgba(241, 196, 15, 0.25)"; border = "#f1c40f"; icon = "🔑"; }
-            else if (key === "Ancient Core") { bg = "rgba(231, 76, 60, 0.25)"; border = "#e74c3c"; icon = "🔴"; }
-            else if (key === "Overlord's Sigil") { bg = "rgba(26, 188, 156, 0.25)"; border = "#1abc9c"; icon = "🔱"; }
-            else if (key === "Astral Essence") { bg = "rgba(142, 68, 173, 0.25)"; border = "#8e44ad"; icon = "🌌"; }
-            else if (key === "Mythic Scrap") { bg = "rgba(231, 76, 60, 0.25)"; border = "#e74c3c"; icon = "🟥"; }
-            else if (key === "Legendary Scrap") { bg = "rgba(241, 196, 15, 0.25)"; border = "#f1c40f"; icon = "🟨"; }
-            else if (key === "Epic Scrap") { bg = "rgba(230, 126, 34, 0.25)"; border = "#e67e22"; icon = "🟧"; }
-            else if (key === "Magic Scrap") { bg = "rgba(155, 89, 182, 0.25)"; border = "#9b59b6"; icon = "🟪"; }
-            else if (key === "Rare Scrap") { bg = "rgba(52, 152, 219, 0.25)"; border = "#3498db"; icon = "🟦"; }
-            else if (key === "Luminous Soul") { bg = "rgba(255, 182, 193, 0.25)"; border = "#ffb6c1"; icon = "💖"; }
-            else if (key === "Monster Soul") { bg = "rgba(170, 170, 170, 0.25)"; border = "#888"; icon = "💀"; }
-            else if (key === "Catalyst Core") { bg = "rgba(46, 204, 113, 0.25)"; border = "#2ecc71"; icon = "💚"; }
+        if (key === "Eridium Shard") { bg = "rgba(155, 89, 182, 0.25)"; border = "#9b59b6"; icon = "🔮"; }
+        else if (key === "Gacha Key") { bg = "rgba(241, 196, 15, 0.25)"; border = "#f1c40f"; icon = "🔑"; }
+        else if (key === "Ancient Core") { bg = "rgba(231, 76, 60, 0.25)"; border = "#e74c3c"; icon = "🔴"; }
+        else if (key === "Overlord's Sigil") { bg = "rgba(26, 188, 156, 0.25)"; border = "#1abc9c"; icon = "🔱"; }
+        else if (key === "Astral Essence") { bg = "rgba(142, 68, 173, 0.25)"; border = "#8e44ad"; icon = "🌌"; }
+        else if (key === "Mythic Scrap") { bg = "rgba(231, 76, 60, 0.25)"; border = "#e74c3c"; icon = "🟥"; }
+        else if (key === "Legendary Scrap") { bg = "rgba(241, 196, 15, 0.25)"; border = "#f1c40f"; icon = "🟨"; }
+        else if (key === "Epic Scrap") { bg = "rgba(230, 126, 34, 0.25)"; border = "#e67e22"; icon = "🟧"; }
+        else if (key === "Magic Scrap") { bg = "rgba(155, 89, 182, 0.25)"; border = "#9b59b6"; icon = "🟪"; }
+        else if (key === "Rare Scrap") { bg = "rgba(52, 152, 219, 0.25)"; border = "#3498db"; icon = "🟦"; }
+        else if (key === "Luminous Soul") { bg = "rgba(255, 182, 193, 0.25)"; border = "#ffb6c1"; icon = "💖"; }
+        else if (key === "Monster Soul") { bg = "rgba(170, 170, 170, 0.25)"; border = "#888"; icon = "💀"; }
+        else if (key === "Catalyst Core") { bg = "rgba(46, 204, 113, 0.25)"; border = "#2ecc71"; icon = "💚"; }
 
-            return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; margin-right: 12px; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${icon}</span>`;
-        };
-
-        const getUseIconHtml = (key) => {
-            let bg = "rgba(170, 170, 170, 0.12)";
-            let border = "#444";
-            let icon = "🍶";
-
-            if (key === "SP Reset Scroll") { bg = "rgba(155, 89, 182, 0.25)"; border = "#9b59b6"; icon = "📜"; }
-            else if (key === "PP Reset Scroll") { bg = "rgba(230, 126, 34, 0.25)"; border = "#e67e22"; icon = "📜"; }
-            else if (key.includes("Attack")) { bg = "rgba(46, 204, 113, 0.25)"; border = "#2ecc71"; icon = "🧪"; }
-            else if (key.includes("Vitality")) { bg = "rgba(231, 76, 60, 0.25)"; border = "#e74c3c"; icon = "🧪"; }
-            else if (key.includes("Armored")) { bg = "rgba(52, 152, 219, 0.25)"; border = "#3498db"; icon = "🧪"; }
-            else if (key.includes("Haste")) { bg = "rgba(241, 196, 15, 0.25)"; border = "#f1c40f"; icon = "🧪"; }
-
-            return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; margin-right: 12px; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${icon}</span>`;
-        };
-
-        let etcBox = document.getElementById('bag-etc');
-                let etcKeys = Object.keys(window.inventory.ETC).filter(k => window.inventory.ETC[k] > 0);
-                if (etcKeys.length === 0) { etcBox.innerHTML = "<div style='color:#666;text-align:center;padding-top:40px;'>No materials collected.</div>"; }
-                else {
-                    etcBox.innerHTML = etcKeys.map(key => {
-                        let escapedKey = key.replace(/'/g, "\\'");
-                        return `
-                        <div class="bag-item" style="cursor:help; display:flex; align-items:center; justify-content:space-between; padding:6px 12px;" onmouseenter="window.showEtcTooltip(event, '${escapedKey}')" ontouchstart="window.showEtcTooltip(event, '${escapedKey}')" onmouseleave="window.hideTooltip()">
-                            <div style="display:flex; align-items:center;">
-                                ${getEtcIconHtml(key)}
-                                <span>${key}</span>
-                            </div>
-                            <strong>x${window.inventory.ETC[key]}</strong>
-                        </div>
-                        `;
-                    }).join("");
-                }
-
-        // 4. Usable Potions Sack
-        let useBox = document.getElementById('bag-use');
-        if (useBox) {
-            let useKeys = Object.keys(window.inventory.USE || {}).filter(k => window.inventory.USE[k] > 0);
-            if (useKeys.length === 0) { useBox.innerHTML = "<div style='color:#666;text-align:center;padding-top:40px;'>No usable items. Purchase potions/scrolls at the Market!</div>"; }
-            else {
-                useBox.innerHTML = useKeys.map(key => {
-                    let count = window.inventory.USE[key];
-                    return `
-                        <div class="bag-item" style="cursor:help; display:flex; align-items:center; justify-content:space-between; padding:6px 12px;" onmouseenter="window.showUseTooltip(event, '${key}')" ontouchstart="window.showUseTooltip(event, '${key}')" onmouseleave="window.hideTooltip()">
-                            <div style="display:flex; align-items:center;">
-                                ${getUseIconHtml(key)}
-                                <div><strong>${key}</strong><br><span style="font-size:10px; color:#aaa;">Qty: ${count}</span></div>
-                            </div>
-                            <div style="position:relative; z-index:10;"><button class="btn-action" style="background:#2ecc71;" onclick="window.useItem('${key}')">Consume</button></div>
-                        </div>
-                    `;
-                }).join("");
-            }
-        }
+        return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; margin-right: 12px; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${icon}</span>`;
     };
+
+    const getUseIconHtml = (key) => {
+        let bg = "rgba(170, 170, 170, 0.12)";
+        let border = "#444";
+        let icon = "🍶";
+
+        if (key === "SP Reset Scroll") { bg = "rgba(155, 89, 182, 0.25)"; border = "#9b59b6"; icon = "📜"; }
+        else if (key === "PP Reset Scroll") { bg = "rgba(230, 126, 34, 0.25)"; border = "#e67e22"; icon = "📜"; }
+        else if (key.includes("Attack")) { bg = "rgba(46, 204, 113, 0.25)"; border = "#2ecc71"; icon = "🧪"; }
+        else if (key.includes("Vitality")) { bg = "rgba(231, 76, 60, 0.25)"; border = "#e74c3c"; icon = "🧪"; }
+        else if (key.includes("Armored")) { bg = "rgba(52, 152, 219, 0.25)"; border = "#3498db"; icon = "🧪"; }
+        else if (key.includes("Haste")) { bg = "rgba(241, 196, 15, 0.25)"; border = "#f1c40f"; icon = "🧪"; }
+
+        return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; margin-right: 12px; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${icon}</span>`;
+    };
+
+    let etcBox = document.getElementById('bag-etc');
+    let etcKeys = Object.keys(window.inventory.ETC).filter(k => window.inventory.ETC[k] > 0);
+    if (etcKeys.length === 0) { etcBox.innerHTML = "<div style='color:#666;text-align:center;padding-top:40px;'>No materials collected.</div>"; }
+    else {
+        etcBox.innerHTML = etcKeys.map(key => {
+            let escapedKey = key.replace(/'/g, "\\'");
+            return `
+            <div class="bag-item" style="cursor:help; display:flex; align-items:center; justify-content:space-between; padding:6px 12px;" onmouseenter="window.showEtcTooltip(event, '${escapedKey}')" ontouchstart="window.showEtcTooltip(event, '${escapedKey}')" onmouseleave="window.hideTooltip()">
+                <div style="display:flex; align-items:center;">
+                    ${getEtcIconHtml(key)}
+                    <span>${key}</span>
+                </div>
+                <strong>x${window.inventory.ETC[key]}</strong>
+            </div>
+            `;
+        }).join("");
+    }
+
+    // 4. Usable Potions Sack
+    let useBox = document.getElementById('bag-use');
+    if (useBox) {
+        let useKeys = Object.keys(window.inventory.USE || {}).filter(k => window.inventory.USE[k] > 0);
+        if (useKeys.length === 0) { useBox.innerHTML = "<div style='color:#666;text-align:center;padding-top:40px;'>No usable items. Purchase potions/scrolls at the Market!</div>"; }
+        else {
+            useBox.innerHTML = useKeys.map(key => {
+                let count = window.inventory.USE[key];
+                return `
+                    <div class="bag-item" style="display:flex; align-items:center; justify-content:space-between; padding:6px 12px;">
+                        <div style="display:flex; align-items:center; flex:1; cursor:help; text-align:left;" onmouseenter="window.showUseTooltip(event, '${key}')" ontouchstart="window.showUseTooltip(event, '${key}')" onmouseleave="window.hideTooltip()">
+                            ${getUseIconHtml(key)}
+                            <div><strong>${key}</strong><br><span style="font-size:10px; color:#aaa;">Qty: ${count}</span></div>
+                        </div>
+                        <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
+                            <button class="btn-action" style="background:#2ecc71;" onclick="window.useItem('${key}')">Consume</button>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+    }
+};
 
 window.hideTooltip = function() {
     ['game-tooltip', 'etc-tooltip', 'stat-tooltip', 'log-item-tooltip'].forEach(id => {
@@ -3101,12 +3107,12 @@ window.updateArchitectRanges = function() {
                                     <div style="background:#111; border:1px solid #333; border-radius:4px; padding:8px; margin-bottom:8px;">
                                         <div style="color:#3498db; font-weight:bold; font-size:11px; margin-bottom:4px; border-bottom:1px solid #222; padding-bottom:3px; display:flex; justify-content:space-between;">
                                             <span>⚔️ Equip Dungeon (Floor ${equipFloor})</span>
-                                        </div>
-                                        <div style="font-family:monospace; font-size:10px; display:flex; flex-direction:column; gap:2px;">
-                                            <div style="display:flex; justify-content:space-between;">
-                                                <span>🔱 Overlord Sigil (Boss):</span>
-                                                <strong style="color:#1abc9c;">20.000%</strong>
-                                            </div>
+                                                                    </div>
+                                                                    <div style="font-family:monospace; font-size:10px; display:flex; flex-direction:column; gap:2px;">
+                                                                        <div style="display:flex; justify-content:space-between;">
+                                                                            <span>🔱 Overlord's Sigil (Boss):</span>
+                                                                            <strong style="color:#1abc9c;">5.000%</strong>
+                                                                        </div>
                                             <div style="display:flex; justify-content:space-between;">
                                                 <span>🛡️ High Tier Equip (Boss):</span>
                                                 <strong style="color:#2ecc71;">25.000%</strong>
