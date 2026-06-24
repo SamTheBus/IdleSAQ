@@ -30,16 +30,21 @@ window.updateUI = function() {
     let p = window.resolvePlayerStats(hasDraftChanges);
 
     // 1. Hud overlays
-    setText('hud-stage', window.playerStats.stage);
-    setText('hud-progress', `(${window.playerStats.killCount}/${window.playerStats.targetsRequired})`);
-    setText('hud-coins', window.formatNumber(window.playerStats.coins));
+        setText('hud-stage', window.playerStats.stage);
+        setText('hud-progress', `(${window.playerStats.killCount}/${window.playerStats.targetsRequired})`);
+        setText('hud-coins', window.formatNumber(window.playerStats.coins));
 
-    // Update real-time DPS in bottom HUD bar
-    let actDps = window.calculateActiveDps ? window.calculateActiveDps() : "0.0";
-    setText('hud-dps', actDps);
+        // Update real-time DPS in bottom HUD bar
+        let actDps = window.calculateActiveDps ? window.calculateActiveDps() : "0.0";
+        setText('hud-dps', actDps);
 
-    let maxBag = window.getMaxBagSlots();
-    let bagEl = document.getElementById('hud-bag');
+        // Update player HP in HUD bar
+        let maxHp = p.maxHp;
+        let curHp = window.playerStats.currentHp;
+        setText('hud-hp', `${window.formatNumber(curHp)} / ${window.formatNumber(maxHp)}`);
+
+        let maxBag = window.getMaxBagSlots();
+        let bagEl = document.getElementById('hud-bag');
     if (bagEl) {
         bagEl.innerText = `${window.inventory.EQUIP.length}/${maxBag} (A:${window.inventory.ARTIFACT.length})`;
         bagEl.style.color = (window.inventory.EQUIP.length >= maxBag || window.inventory.ARTIFACT.length >= maxBag) ? "#e74c3c" : "#2ecc71";
@@ -1559,7 +1564,13 @@ window.renderPaperDoll = function() {
                 el.innerHTML = `<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${s.join(" ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
             }
         } else {
-            el.className = "slots-card"; el.innerHTML = `<i>[Empty ${slot.toUpperCase()}]</i>`; el.style.background = ""; el.style.borderColor = ""; el.style.boxShadow = "";
+            el.className = "slots-card";
+            let displaySlotName = slot.toUpperCase();
+            if (slot === "art1") displaySlotName = "ARTIFACT 1";
+            else if (slot === "art2") displaySlotName = "ARTIFACT 2";
+            else if (slot === "art3") displaySlotName = "ARTIFACT 3";
+            el.innerHTML = `<i>[Empty ${displaySlotName}]</i>`;
+            el.style.background = ""; el.style.borderColor = ""; el.style.boxShadow = "";
         }
     });
 };
@@ -1979,17 +1990,17 @@ window.generateItemCardHtml = function(item, compareItem = null, isEquipped = fa
 
     // --- COMPARISON PANEL NET CHANGE RESOLUTION ---
     if (compareItem) {
-        html += `<div style="font-weight:bold; color:#3498db; margin-top:8px; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Net Change:</div>`;
-        let hasDiffs = false;
-        let statsList = [
-            { key: "atk", icon: "⚔️" }, { key: "maxHp", icon: "❤️" }, { key: "def", icon: "🛡️" }, { key: "moveSpeed", icon: "👟" },
-            { key: "str", icon: "💪" }, { key: "dex", icon: "🎯" }, { key: "int", icon: "🧠" },
-            { key: "critChance", isPct: true, icon: "✨" }, { key: "critDamage", isPct: true, icon: "💥" },
-            { key: "block", isPct: true, icon: "🛡️" }, { key: "parry", isPct: true, icon: "⚡" },
-            { key: "activeAttackSpeed", icon: "⚡", inverseGood: true }, { key: "idleAttackSpeed", icon: "⏱️", inverseGood: true }
-        ];
+            html += `<div style="font-weight:bold; color:#3498db; margin-top:8px; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Net Change:</div>`;
+            let hasDiffs = false;
+            let statsList = [
+                { key: "atk", icon: "⚔️" }, { key: "maxHp", icon: "❤️" }, { key: "def", icon: "🛡️" }, { key: "moveSpeed", icon: "👟" },
+                { key: "str", icon: "💪" }, { key: "dex", icon: "🎯" }, { key: "int", icon: "🧠" },
+                { key: "critChance", isPct: true, icon: "✨" }, { key: "critDamage", isPct: true, icon: "💥" },
+                { key: "block", isPct: true, icon: "🛡️" }, { key: "parry", isPct: true, icon: "⚡" },
+                { key: "activeAttackSpeed", icon: "⚡", isPct: true }, { key: "idleAttackSpeed", icon: "⏱️", isPct: true }
+            ];
 
-        statsList.forEach(s => {
+            statsList.forEach(s => {
             let val = item[s.key] || 0;
             let eqVal = compareItem[s.key] || 0;
             let diff = val - eqVal;

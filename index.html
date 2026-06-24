@@ -390,11 +390,12 @@
     </div>
 
     <!-- Consolidated Console Panel (Combines Actions and Stats side-by-side) -->
-    <div id="control-bar" style="display: grid; grid-template-columns: 1.25fr 1.05fr; gap: 10px; background: #0c0e13; border-bottom: 2px solid #1e293b; padding: 6px 12px; align-items: center;">
+    <div id="control-bar" style="display: grid; grid-template-columns: 1.42fr 0.88fr; gap: 10px; background: #0c0e13; border-bottom: 2px solid #1e293b; padding: 6px 12px; align-items: center;">
 
         <!-- Live Stat Cards (Left Side) -->
-        <div class="stats-hud-inline" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
-            <div class="hud-stat-card"><span style="color:#cbd5e1;">💰 Coins:</span> <strong id="hud-coins" style="color:#f1c40f; display:block; font-size:12px; margin-top:2px;">0</strong></div>
+        <div class="stats-hud-inline" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+            <div class="hud-stat-card" style="border-color:#1e293b;"><span style="color:#cbd5e1;">❤️ HP:</span> <strong id="hud-hp" style="color:#e74c3c; display:block; font-size:12px; margin-top:2px;">0 / 0</strong></div>
+            <div class="hud-stat-card"><span style="color:#cbd5e1;">💰 Gold:</span> <strong id="hud-coins" style="color:#f1c40f; display:block; font-size:12px; margin-top:2px;">0</strong></div>
             <div class="hud-stat-card"><span style="color:#cbd5e1;">🗺️ Stage:</span> <strong id="hud-stage" style="color:#3498db; display:block; font-size:12px; margin-top:2px;">1 <span id="hud-progress" style="color:#94a3b8; font-size:9.5px;">(0/5)</span></strong></div>
             <div class="hud-stat-card"><span style="color:#cbd5e1;">💥 Live DPS:</span> <strong id="hud-dps" style="color:#e74c3c; display:block; font-size:12px; margin-top:2px;">0.0</strong></div>
         </div>
@@ -444,7 +445,7 @@
                     <div id="slot-chest" class="slots-card" onclick="window.openEquipSwapWindow(event, 'chest')" onmouseenter="window.showSlotTooltip(event, 'chest')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'chest')"><i>[Empty Chest Armor]</i></div>
                     <div id="slot-subweapon" class="slots-card" onclick="window.openEquipSwapWindow(event, 'subweapon')" onmouseenter="window.showSlotTooltip(event, 'subweapon')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'subweapon')"><i>[Empty Sub-weapon]</i></div>
 
-                    <!-- Row 3: Leggings & Overall Suit (Clustered directly below chest for locked-slot proximity) -->
+                    <!-- Row 3: Leggings & Overall Suit (Clustered adjacent to torso components to keep locked items close!) -->
                     <div id="slot-leggings" class="slots-card" onclick="window.openEquipSwapWindow(event, 'leggings')" onmouseenter="window.showSlotTooltip(event, 'leggings')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'leggings')"><i>[Empty Leggings]</i></div>
                     <div id="slot-overall" class="slots-card" onclick="window.openEquipSwapWindow(event, 'overall')" onmouseenter="window.showSlotTooltip(event, 'overall')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'overall')"><i>[Empty Overall Suit]</i></div>
 
