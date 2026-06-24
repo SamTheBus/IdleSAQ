@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Idle SAQ: Slaying and Questing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Portable Notification Toasts -->
+<div id="toast-container"></div>
+
+<div id="game-container">
+
+    <!-- Top Navigation Bar -->
+    <div id="top-nav">
+        <div style="display: flex; gap: 8px; position: relative;">
+            <div style="position: relative;">
+                <button onclick="window.toggleDungeonMenu()" class="nav-btn">🏰 Activities ▼</button>
+                <div id="dungeon-menu" style="display: none; position: absolute; top: 35px; left: 0; background: #151515; border: 1px solid #444; border-radius: 6px; padding: 12px; width: 260px; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.9);">
+                    <div style="color: #f1c40f; font-weight: bold; margin-bottom: 8px; font-size: 14px; text-align:center; border-bottom:1px solid #333; padding-bottom:5px;">🏰 Infinite Dungeons</div>
+                    
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
+                        <span style="color:#3498db; font-weight:bold;">⚔️ Equip: <span id="dk-equip">3</span>/3</span>
+                        <span id="dt-equip" style="color:#aaa;">(Full)</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:10px; color:#3498db; margin-bottom:4px; padding:0 2px; font-family: monospace;">
+                        <span>🏆 Highest: Floor <span id="dp-equip">1</span></span>
+                        <span>🏁 Checkpoint: Stage <span id="dc-equip">1</span></span>
+                    </div>
+                    <button onclick="window.enterDungeon('equip')" style="width: 100%; background: #3498db; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Equipment Dungeon</button>
+                    
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
+                        <span style="color:#f1c40f; font-weight:bold;">💰 Gold: <span id="dk-gold">3</span>/3</span>
+                        <span id="dt-gold" style="color:#aaa;">(Full)</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:10px; color:#f1c40f; margin-bottom:4px; padding:0 2px; font-family: monospace;">
+                        <span>🏆 Highest: Floor <span id="dp-gold">1</span></span>
+                        <span>🏁 Checkpoint: Stage <span id="dc-gold">1</span></span>
+                    </div>
+                    <button onclick="window.enterDungeon('gold')" style="width: 100%; background: #f1c40f; color: #111; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Gold Mine Caverns</button>
+                    
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
+                        <span style="color:#2ecc71; font-weight:bold;">📦 Mats: <span id="dk-mat">3</span>/3</span>
+                        <span id="dt-mat" style="color:#aaa;">(Full)</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:10px; color:#2ecc71; margin-bottom:4px; padding:0 2px; font-family: monospace;">
+                        <span>🏆 Highest: Floor <span id="dp-mat">1</span></span>
+                        <span>🏁 Checkpoint: Stage <span id="dc-mat">1</span></span>
+                    </div>
+                    <button onclick="window.enterDungeon('mat')" style="width: 100%; background: #2ecc71; color: #111; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; margin-bottom:12px;">Enter Toxic Material Pit</button>
+
+                    <div style="color: #9b59b6; font-weight: bold; margin-top: 8px; margin-bottom: 8px; font-size: 14px; text-align:center; border-top:1px solid #333; padding-top:5px;">🔮 Wave Survival Crucible</div>
+                    <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:4px; align-items:center;">
+                        <span style="color:#9b59b6; font-weight:bold;">🏆 Peak Wave:</span>
+                        <span style="color:#aaa;"><span id="crucible-peak-wave">1</span></span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:4px; align-items:center;">
+                        <span style="color:#9b59b6; font-weight:bold;">🏁 Start Checkpoint:</span>
+                        <span style="color:#aaa;">Wave <span id="crucible-checkpoint-wave">1</span></span>
+                    </div>
+                    <button onclick="window.enterCrucible()" style="width: 100%; background: #9b59b6; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">Enter Astral Crucible</button>
+                </div>
+            </div>
+            
+            <div style="position: relative;">
+                <button onclick="window.toggleAudioMenu()" class="nav-btn">🔊 Sound ▼</button>
+                <div id="audio-menu" style="display: none; position: absolute; top: 35px; left: 0; background: #151515; border: 1px solid #444; border-radius: 6px; padding: 12px; width: 220px; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.9);">
+                    <div style="color: #f1c40f; font-weight: bold; margin-bottom: 10px; font-size: 14px; text-align:center; border-bottom:1px solid #333; padding-bottom:5px;">🔊 Sound Control</div>
+                    
+                    <div style="margin-bottom: 10px;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                            <label for="slider-vol-master" style="color:#aaa;">Master Vol:</label>
+                            <span id="vol-master-label" style="color:#3498db; font-weight:bold;">50%</span>
+                        </div>
+                        <input type="range" id="slider-vol-master" min="0" max="1" step="0.05" value="0.5" oninput="window.changeVolume('master', this.value)" style="width: 100%; background:#333; outline:none; height:4px; border-radius:2px; appearance:none; cursor:pointer;">
+                    </div>
+                    
+                    <div style="margin-bottom: 12px;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                            <label for="slider-vol-sfx" style="color:#aaa;">SFX Vol:</label>
+                            <span id="vol-sfx-label" style="color:#2ecc71; font-weight:bold;">80%</span>
+                        </div>
+                        <input type="range" id="slider-vol-sfx" min="0" max="1" step="0.05" value="0.8" oninput="window.changeVolume('sfx', this.value)" style="width: 100%; background:#333; outline:none; height:4px; border-radius:2px; appearance:none; cursor:pointer;">
+                    </div>
+                    
+                    <button id="btn-audio-mute" onclick="window.toggleMute()" style="width: 100%; background: #c0392b; color: white; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; transition: background 0.2s;">Mute Audio</button>
+                </div>
+            </div>
+        </div>
+        <div style="font-size: 11px; color: #475569; font-weight: 800; align-self: center; letter-spacing: 2px; text-transform: uppercase; font-family: monospace; border-left: 2px solid #334155; padding-left: 12px; line-height: 1.2;">SAQ: Slaying & Questing</div>
+    </div>
+
+    <!-- Interface Tooltips -->
+    <div id="game-tooltip" class="tooltip-base"></div>
+    <div id="etc-tooltip" class="tooltip-base"></div>
+    <div id="log-item-tooltip" class="tooltip-base"></div>
+    <div id="stat-tooltip" class="tooltip-base"></div>
+        
+    <!-- Artifacts Database Portal -->
+    <div id="altar-modal">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
+            <h3 style="margin:0; color:#1abc9c;">🔮 Artifact Database</h3>
+            <button onclick="document.getElementById('altar-modal').style.display='none'" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 12px; font-weight:bold; cursor:pointer;">Close</button>
+        </div>
+        <div style="color:#aaa; font-size:11px; margin-bottom:12px;">Tap any artifact to view its unique trait details and base parameters. All artifacts now drop with 3 randomized stat lines!</div>
+        <div id="altar-list" style="display:flex; flex-direction:column; gap:8px;" onscroll="window.hideTooltip()" ontouchmove="window.hideTooltip()"></div>
+    </div>
+
+    <!-- Trophies & Milestones Portal -->
+    <div id="achievements-modal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); 
+        width:90%; max-width:500px; background:#111; border:2px solid var(--accent-purple); border-radius:8px; 
+        z-index:11000; padding:15px; box-shadow:0 0 30px rgba(0,0,0,0.9); max-height:80vh; overflow-y:auto; overscroll-behavior: contain;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
+            <h3 style="margin:0; color:#f1c40f;">🏆 Trophies & Milestones</h3>
+            <button onclick="window.toggleAchievements()" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 12px; font-weight:bold; cursor:pointer;">Close</button>
+        </div>
+        <div style="color:#aaa; font-size:11px; margin-bottom:12px;">Complete milestone challenges to earn permanent stat bonuses. Hover or tap an achievement to view its progress and rewards.</div>
+        <div id="achievements-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:8px;" onscroll="window.hideTooltip()" ontouchmove="window.hideTooltip()"></div>
+    </div>
+
+    <!-- Developer Console Panel -->
+    <div id="dev-modal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); 
+        width:95%; max-width:550px; background:#111; border:2px solid var(--accent-orange); border-radius:8px; 
+        z-index:11000; padding:15px; box-shadow:0 0 30px rgba(0,0,0,0.9); max-height:80vh; overflow-y:auto; overscroll-behavior: contain;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
+            <h3 style="margin:0; color:var(--accent-orange);">🛠️ Developer Testing Panel</h3>
+            <button onclick="document.getElementById('dev-modal').style.display='none'" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 12px; font-weight:bold; cursor:pointer;">Close</button>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 12px;">
+            <button onclick="window.switchDevTab('dev-prog')" class="tab-btn active dev-tab-btn" id="btn-dev-prog" style="font-size:10px; padding: 4px; min-width: 0;">Progress</button>
+            <button onclick="window.switchDevTab('dev-currency')" class="tab-btn dev-tab-btn" id="btn-dev-currency" style="font-size:10px; padding: 4px; min-width: 0;">Currency</button>
+            <button onclick="window.switchDevTab('dev-items'); window.buildDevArchitectUI();" class="tab-btn dev-tab-btn" id="btn-dev-items" style="font-size:10px; padding: 4px; min-width: 0;">Items</button>
+            <button onclick="window.switchDevTab('dev-cheats')" class="tab-btn dev-tab-btn" id="btn-dev-cheats" style="font-size:10px; padding: 4px; min-width: 0;">Cheats</button>
+        </div>
+
+        <div id="dev-prog" class="dev-tab-content" style="display:block;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                <div>
+                    <label for="dev-level-input" style="font-size:11px; color:#aaa;">Hero Level:</label>
+                    <div style="display:flex; gap:4px; margin-top:4px;">
+                        <input type="number" id="dev-level-input" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:4px; border-radius:3px;" value="1">
+                        <button onclick="window.devSetLevel()" class="btn-action" style="background:var(--accent-blue);">SET</button>
+                    </div>
+                </div>
+                <div>
+                    <label for="dev-sp-input" style="font-size:11px; color:#aaa;">Skill Points (SP):</label>
+                    <div style="display:flex; gap:4px; margin-top:4px;">
+                        <input type="number" id="dev-sp-input" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:4px; border-radius:3px;" value="0">
+                        <button onclick="window.devSetSP()" class="btn-action" style="background:var(--accent-blue);">SET</button>
+                    </div>
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                <div>
+                    <label for="dev-stage-input" style="font-size:11px; color:#aaa;">Campaign Stage:</label>
+                    <div style="display:flex; gap:4px; margin-top:4px;">
+                        <input type="number" id="dev-stage-input" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:4px; border-radius:3px;" value="1">
+                        <button onclick="window.devSetStage()" class="btn-action" style="background:var(--accent-blue);">SET</button>
+                    </div>
+                </div>
+                <div>
+                    <label for="dev-maxstage-input" style="font-size:11px; color:#aaa;">Max Stage Reached:</label>
+                    <div style="display:flex; gap:4px; margin-top:4px;">
+                        <input type="number" id="dev-maxstage-input" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:4px; border-radius:3px;" value="1">
+                        <button onclick="window.devSetMaxStage()" class="btn-action" style="background:var(--accent-blue);">SET</button>
+                    </div>
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                <div>
+                    <label for="dev-prestige-input" style="font-size:11px; color:#aaa;">Total Ascensions (Prestige):</label>
+                    <div style="display:flex; gap:4px; margin-top:4px;">
+                        <input type="number" id="dev-prestige-input" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:4px; border-radius:3px;" value="0">
+                        <button onclick="window.devSetPrestige()" class="btn-action" style="background:var(--accent-blue);">SET</button>
+                    </div>
+                </div>
+                <div>
+                    <label for="dev-pp-input" style="font-size:11px; color:#aaa;">Prestige Points (PP):</label>
+                    <div style="display:flex; gap:4px; margin-top:4px;">
+                        <input type="number" id="dev-pp-input" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:4px; border-radius:3px;" value="0">
+                        <button onclick="window.devSetPP()" class="btn-action" style="background:var(--accent-blue);">SET</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dev-currency" class="dev-tab-content" style="display:none;">
+            <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-bottom:10px;">
+                <div style="background:#222; padding:6px; border-radius:4px;">
+                    <label for="dev-gold-val" style="display:block; font-size:11px; color:#fff; font-weight:bold; margin-bottom:4px;">Gold</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" id="dev-gold-val" value="100000" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                        <button onclick="window.devAddCurrency('gold')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                    </div>
+                </div>
+                <div style="background:#222; padding:6px; border-radius:4px;">
+                    <label for="dev-luminous-val" style="display:block; font-size:11px; color:#ffb6c1; font-weight:bold; margin-bottom:4px;">Luminous Souls</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" id="dev-luminous-val" value="50" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                        <button onclick="window.devAddCurrency('luminous')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                    </div>
+                </div>
+                <div style="background:#222; padding:6px; border-radius:4px;">
+                    <label for="dev-monster-val" style="display:block; font-size:11px; color:#fff; font-weight:bold; margin-bottom:4px;">Monster Souls</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" id="dev-monster-val" value="500" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                        <button onclick="window.devAddCurrency('monster')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                    </div>
+                </div>
+                <div style="background:#222; padding:6px; border-radius:4px;">
+                    <label for="dev-eridium-val" style="display:block; font-size:11px; color:#8e44ad; font-weight:bold; margin-bottom:4px;">Eridium Shards</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" id="dev-eridium-val" value="20" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                        <button onclick="window.devAddCurrency('eridium')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                    </div>
+                </div>
+                <div style="background:#222; padding:6px; border-radius:4px;">
+                    <label for="dev-astral-val" style="display:block; font-size:11px; color:#9b59b6; font-weight:bold; margin-bottom:4px;">Astral Essence</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" id="dev-astral-val" value="10" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                        <button onclick="window.devAddCurrency('astral')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                    </div>
+                </div>
+                <div style="background:#222; padding:6px; border-radius:4px;">
+                    <label for="dev-catalyst-val" style="display:block; font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:4px;">Catalyst Cores</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" id="dev-catalyst-val" value="10" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                        <button onclick="window.devAddCurrency('catalyst')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                    </div>
+                </div>
+                <div style="background:#222; padding:6px; border-radius:4px;">
+                    <label for="dev-gachakeys-val" style="display:block; font-size:11px; color:#f1c40f; font-weight:bold; margin-bottom:4px;">Gacha Keys</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" id="dev-gachakeys-val" value="5" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                        <button onclick="window.devAddCurrency('gachakeys')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                    </div>
+                </div>
+                <div style="background:#222; padding:6px; border-radius:4px;">
+                    <label for="dev-pp-val" style="display:block; font-size:11px; color:#9b59b6; font-weight:bold; margin-bottom:4px;">Prestige Points (PP)</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" id="dev-pp-val" value="5" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:2px;">
+                        <button onclick="window.devAddCurrency('pp')" class="btn-action" style="background:var(--accent-green);">+ADD</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dev-items" class="dev-tab-content" style="display:none;">
+            <div style="background:#222; padding:10px; border-radius:5px; margin-bottom:10px;">
+                <div style="font-size:11px; color:#3498db; font-weight:bold; margin-bottom:6px;">Quick Rarity Spawner (Random Type)</div>
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; margin-bottom:8px;">
+                    <button onclick="window.devQuickSpawn(0)" class="btn-action" style="background:#888;">Common (0★)</button>
+                    <button onclick="window.devQuickSpawn(1)" class="btn-action" style="background:#3498db;">Rare (1★)</button>
+                    <button onclick="window.devQuickSpawn(2)" class="btn-action" style="background:#9b59b6;">Magic (2★)</button>
+                    <button onclick="window.devQuickSpawn(3)" class="btn-action" style="background:#e67e22;">Epic (3★)</button>
+                    <button onclick="window.devQuickSpawn(4)" class="btn-action" style="background:#f1c40f; color:#000;">Legendary (4★)</button>
+                    <button onclick="window.devQuickSpawn(5)" class="btn-action" style="background:#e74c3c;">Mythic (5★)</button>
+                </div>
+                <button onclick="window.devQuickSpawn('UNIQUE')" class="btn-action forge" style="background:#1abc9c; margin:0;">Spawn Random Unique Artifact</button>
+            </div>
+
+            <div style="background:#222; padding:10px; border-radius:5px; margin-bottom:10px;">
+                <div style="font-size:11px; color:#f1c40f; font-weight:bold; margin-bottom:6px;">Spawn Custom Gear</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:6px;">
+                    <label for="dev-item-type" style="display:none;">Item Type</label>
+                    <select id="dev-item-type" style="background:#111; color:#fff; border:1px solid #444; padding:4px;" onchange="window.updateArchitectRanges()">
+                        <option value="weapon">Weapon</option>
+                        <option value="shield">Shield (Sub)</option>
+                        <option value="dagger">Dagger (Sub)</option>
+                        <option value="tome">Tome (Sub)</option>
+                        <option value="helmet">Helmet</option>
+                        <option value="chest">Chest Armor</option>
+                        <option value="leggings">Leggings</option>
+                        <option value="overall">Overall Suit</option>
+                        <option value="boots">Boots</option>
+                    </select>
+                    <label for="dev-item-rarity" style="display:none;">Item Rarity</label>
+                    <select id="dev-item-rarity" style="background:#111; color:#fff; border:1px solid #444; padding:4px;" onchange="window.updateArchitectRanges()">
+                        <option value="0">Common (0★)</option>
+                        <option value="1">Rare (1★)</option>
+                        <option value="2">Magic (2★)</option>
+                        <option value="3">Epic (3★)</option>
+                        <option value="4">Legendary (4★)</option>
+                        <option value="5">Mythic (5★)</option>
+                    </select>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom:8px;">
+                    <div>
+                        <label style="display:block; font-size:9px; color:#aaa; margin-bottom:2px;">Item Level</label>
+                        <input type="number" id="dev-item-lvl" value="1" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:4px;" oninput="window.updateArchitectRanges()">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:9px; color:#aaa; margin-bottom:2px;">Set Override</label>
+                        <select id="dev-item-set" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:4px;">
+                            <option value="">None</option>
+                            <option value="Vanguard">Vanguard</option>
+                            <option value="Colossus">Colossus</option>
+                            <option value="Bastion">Bastion</option>
+                            <option value="Windrunner">Windrunner</option>
+                            <option value="Wraith">Wraith</option>
+                            <option value="Reaver">Reaver</option>
+                            <option value="Dreadnought">Dreadnought</option>
+                            <option value="Duellist">Duellist</option>
+                            <option value="Scholar">Scholar</option>
+                            <option value="Berserker">Berserker</option>
+                            <option value="Scout">Scout</option>
+                            <option value="Fortune">Fortune</option>
+                            <option value="Mystic">Mystic</option>
+                            <option value="Alchemist">Alchemist</option>
+                            <option value="Midas">Midas' Legacy</option>
+                            <option value="Biohazard">Biohazard</option>
+                            <option value="Warlord">Warlord</option>
+                            <option value="VoidTouched">Void-Touched</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:9px; color:#aaa; margin-bottom:2px;">Spawn Prestige</label>
+                        <input type="number" id="dev-item-prestige" value="0" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:4px;">
+                    </div>
+                </div>
+                <button onclick="window.devSpawnGear()" class="btn-action forge" style="background:var(--accent-orange); color:#fff; margin:0;">Spawn Gear</button>
+            </div>
+
+            <div style="background:#222; padding:10px; border-radius:5px; margin-bottom:10px;">
+                <div style="font-size:11px; color:#e84393; font-weight:bold; margin-bottom:6px;">🛠️ Granular Item Architect</div>
+                <p style="font-size:9px; color:#aaa; margin-bottom:8px;">Manually define up to 5 stat lines and their exact values.</p>
+                <div id="dev-architect-lines" style="display:flex; flex-direction:column; gap:4px; margin-bottom:8px;">
+                    <!-- Populated dynamically by UI scripts -->
+                </div>
+                <button onclick="window.devSpawnArchitectGear()" class="btn-action forge" style="background:#e84393; color:#fff; margin:0;">Architect & Spawn Gear</button>
+            </div>
+
+            <div style="background:#222; padding:10px; border-radius:5px;">
+                <div style="font-size:11px; color:#1abc9c; font-weight:bold; margin-bottom:6px;">Spawn Unique Artifacts & Weapons</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:8px;">
+                    <label for="dev-unique-sel" style="display:none;">Unique/Artifact Selection</label>
+                    <select id="dev-unique-sel" style="background:#111; color:#fff; border:1px solid #444; padding:4px;">
+                        <option value="weapon-staff">🔥 Unique Phoenix Staff</option>
+                        <option value="weapon-sword">🩸 Unique Sanguine Reaver</option>
+                        <option value="weapon-singularity">🌌 Void-Sovereign Greatsword</option>
+                        <option value="weapon-maelstrom">🌪️ Maelstrom Gale-Glaive</option>
+                        <option value="shield-aegis">🛡️ Void-Warped Bulwark</option>
+                        <option value="tome-watch">⏳ Chronos Pocket-Watch</option>
+                        <option value="tome-chronicle">📖 Chronicle of past Lives</option>
+                        <option value="boots-warpcore">⚡ Warp-Core Greaves</option>
+                        <option value="helmet-tempest">👑 Crown of Tempests</option>
+                        <option value="art-frenzy">Berserker Stone (Frenzy)</option>
+                        <option value="art-vampirism">Blood-Soaked Chalice (Vampirism)</option>
+                        <option value="art-gold_hoard">Philosopher's Anchor (Gold)</option>
+                        <option value="art-magic_find">Gilded Scarab (Magic Find)</option>
+                        <option value="art-move_speed">Windwalker Boots (Speed)</option>
+                        <option value="art-defense">Aegis Core (Defense)</option>
+                        <option value="art-parry_strike">Riposte Gauntlet (Parry Strike)</option>
+                        <option value="art-echo_strike">Phantom Blade (Echo Strike)</option>
+                        <option value="art-idle_spd">Sloth's Blessing (Idle Speed)</option>
+                        <option value="art-active_spd">Zealot's Charm (Active Speed)</option>
+                        <option value="art-dodge_buff">Survivor's Adrenaline</option>
+                        <option value="art-extend_buffs">Chrono Hourglass</option>
+                        <option value="art-bag_space">Dimensional Pouch</option>
+                        <option value="art-second_wind">Phoenix Ankh (Revive)</option>
+                        <option value="art-golem_stance">Golem's Core (Healthy Atk)</option>
+                        <option value="art-fairy_wealth">Fairy Queen's Crown</option>
+                        <option value="art-void_pull">Void Core (Rare Spawn)</option>
+                        <option value="art-titan_grip">Titan's Shield Grip</option>
+                        <option value="art-alchemist_alembic">Alchemist's Alembic</option>
+                        <option value="art-philosopher_catalyst">Philosopher's Catalyst</option>
+                        <option value="art-cauldron_eternity">Cauldron of Eternity</option>
+                    </select>
+                    <label for="dev-unique-lvl" style="display:none;">Unique/Artifact Level</label>
+                    <input type="number" id="dev-unique-lvl" value="1" placeholder="Stage Level" style="background:#111; color:#fff; border:1px solid #444; padding:4px;">
+                </div>
+                <button onclick="window.devSpawnUnique()" class="btn-action forge" style="background:#1abc9c; color:#fff; margin:0;">Spawn Unique/Artifact</button>
+            </div>
+        </div>
+
+        <div id="dev-cheats" class="dev-tab-content" style="display:none;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:10px;">
+                <button onclick="window.devTriggerBuff('frenzy')" class="btn-action" style="background:#e67e22; padding:8px;">🔥 Max Frenzy (10m)</button>
+                <button onclick="window.devTriggerBuff('adrenaline')" class="btn-action" style="background:#f1c40f; color:#000; padding:8px;">⚡ Max Adrenaline (10m)</button>
+                <button onclick="window.devTriggerBuff('potions')" class="btn-action" style="background:#9b59b6; padding:8px;">🧪 All Potions (10m)</button>
+                <button onclick="window.devHealFull()" class="btn-action" style="background:#2ecc71; padding:8px;">❤️ Fully Heal HP</button>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <button onclick="window.devUnlockAllAchievements()" class="btn-action" style="background:#8e44ad; font-weight:bold; padding:10px;">🏆 Unlock All Trophies / Achievements</button>
+                <button onclick="window.devToggleGodMode()" id="btn-dev-godmode" class="btn-action un" style="background:#333; color:#aaa; font-weight:bold; padding:10px;">🛡️ God Mode (Invulnerability): OFF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Defeated Card Overlay -->
+    <div id="death-overlay">
+        <div id="death-card">
+            <div id="death-header">DEFEATED</div>
+            <div id="death-divider"></div>
+            <div id="death-quote">"The path to glory is paved with countless falls."</div>
+            
+            <div class="death-section-title">⚔️ Fatal Encounter</div>
+            <div class="death-stats-grid">
+                <div class="death-stat-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80px; overflow: hidden; padding: 2px;">
+                    <span class="death-stat-label" style="margin-bottom: 2px;">Nemesis</span>
+                    <canvas id="death-enemy-canvas" width="60" height="60" style="background: rgba(0,0,0,0.5); border: 1px solid #781c1c; border-radius: 4px; display: block;"></canvas>
+                </div>
+                <div class="death-stat-box">
+                    <span class="death-stat-label">Peak Stage</span>
+                    <span class="death-stat-val" id="death-stat-peak">Stage 1</span>
+                </div>
+                <div class="death-stat-box">
+                    <span class="death-stat-label">Retreat Safe</span>
+                    <span class="death-stat-val" id="death-stat-retreat" style="color: #2ecc71;">Stage 1</span>
+                </div>
+            </div>
+
+            <div class="death-section-title">📊 Spoils from this Attempt</div>
+            <div class="death-stats-grid">
+                <div class="death-stat-box">
+                    <span class="death-stat-label">Slain</span>
+                    <span class="death-stat-val" id="death-stat-kills" style="color: #ffffff;">0</span>
+                </div>
+                <div class="death-stat-box">
+                    <span class="death-stat-label">Run Gold</span>
+                    <span class="death-stat-val" id="death-stat-run-gold" style="color: #f1c40f;">+0</span>
+                </div>
+                <div class="death-stat-box">
+                    <span class="death-stat-label">Run XP</span>
+                    <span class="death-stat-val" id="death-stat-run-xp" style="color: #9b59b6;">+0</span>
+                </div>
+            </div>
+
+            <div id="death-tip-container">
+                <strong style="color: #e74c3c; display: block; margin-bottom: 4px;">💡 HOOR'S ADVICE:</strong>
+                <span id="death-tip-text">Optimize your attributes to better match this environment.</span>
+            </div>
+
+            <div id="death-respawn-timer-container" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; gap: 8px;">
+                <div style="position: relative; width: 44px; height: 44px;">
+                    <svg width="44" height="44" viewBox="0 0 44 44" style="transform: rotate(-90deg);">
+                        <circle cx="22" cy="22" r="18" fill="none" stroke="#2a1212" stroke-width="3"></circle>
+                        <circle id="death-respawn-spinner" cx="22" cy="22" r="18" fill="none" stroke="#e74c3c" stroke-width="3" stroke-dasharray="113.1" stroke-dashoffset="0" style="transition: stroke-dashoffset 0.1s linear;"></circle>
+                    </svg>
+                    <div id="death-respawn-timer-text" style="position: absolute; top: 0; left: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-family: monospace; font-weight: bold; color: #fff;">10</div>
+                </div>
+                <span style="font-size: 11px; color: #dca7a7; font-family: monospace;">Reclaiming automatically in <span id="death-timer-seconds">10</span>s...</span>
+            </div>
+
+            <button id="death-respawn-btn" onclick="window.respawnHero()">Arise & Reclaim</button>
+        </div>
+    </div>
+
+    <!-- Gameplay Action Control Panel -->
+    <div id="control-bar">
+        <div style="color: #aaa;">Spacebar or Click Canvas to Slash!</div>
+        <div style="display: flex; gap: 8px;">
+            <button id="btn-leave-activity" class="btn-toggle" onclick="window.leaveActivity()" style="background: #c0392b; display: none; opacity: 1; border-color: #f1c40f;">🏃 Leave</button>
+            <button id="btn-achievements" class="btn-toggle" onclick="window.toggleAchievements()" style="background: #8e44ad; opacity: 1;">🏆 Trophies</button>
+            <button id="btn-pause" class="btn-toggle" onclick="window.togglePause()" style="background: #34495e;">▶️ Pause</button>
+            <button id="toggle-sticky" class="btn-toggle active" onclick="window.toggleStickyCanvas()">Sticky Cam: ON</button>
+            <button id="toggle-auto" class="btn-toggle active" onclick="window.toggleAuto()">Auto: ON</button>
+        </div>
+    </div>
+
+    <!-- Stats HUD Dashboard overlay -->
+    <div class="stats-hud">
+        <div>Stage <span id="hud-stage" style="color:#3498db;">1</span></div>
+        <div><span id="hud-progress" style="color:#f1c40f;">0/5</span></div>
+        <div style="cursor:help;" onmouseenter="window.showBuffTooltip(event)" ontouchstart="window.showBuffTooltip(event)" onmouseleave="window.hideTooltip()">Buff: <span id="hud-buff" style="color:#aaa;">None</span></div>
+        <div>Bag: <span id="hud-bag" style="color:#2ecc71;">0/20</span></div>
+        <div>HP: <span id="hud-hp" style="color:#e74c3c;">100/100</span></div>
+        <div>💰: <span id="hud-coins" style="color:#f1c40f;">0</span></div>
+    </div>
+    
+    <!-- Game World Canvas -->
+    <canvas id="gameCanvas" width="750" height="250"></canvas>
+    
+    <!-- Tabulated Control Centers -->
+    <div id="menu-panel">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="window.switchTab('gear')">Equipment</button>
+            <button class="tab-btn" onclick="window.switchTab('inv')">Sacks</button>
+            <button class="tab-btn" onclick="window.switchTab('stats')">Stats</button>
+            <button class="tab-btn" onclick="window.switchTab('forge')">Forge</button>
+            <button class="tab-btn" onclick="window.switchTab('market')">Market</button>
+            <button class="tab-btn" onclick="window.switchTab('prestige')">Prestige</button>
+        </div>
+
+        <!-- Gear / Paperdoll Tab -->
+        <div id="tab-gear" class="tab-content active" onscroll="window.hideTooltip()" ontouchmove="window.hideTooltip()">
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <button id="btn-rechallenge" class="btn-pulse" style="color:white; width:100%; max-width:300px; padding:10px; margin-bottom:12px; border-radius:4px; font-weight:bold; cursor:pointer; display:none;" onclick="window.rechallengeBoss()">⚔️ RECHALLENGE STAGE</button>
+                <div class="paper-doll">
+                    <div id="slot-weapon" class="slots-card" onmouseenter="window.showSlotTooltip(event, 'weapon')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'weapon')"><i>[Empty Weapon]</i></div>
+                    <div id="slot-subweapon" class="slots-card" onmouseenter="window.showSlotTooltip(event, 'subweapon')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'subweapon')"><i>[Empty Sub-weapon]</i></div>
+                    <div id="slot-helmet" class="slots-card" onmouseenter="window.showSlotTooltip(event, 'helmet')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'helmet')"><i>[Empty Helmet]</i></div>
+                    <div id="slot-chest" class="slots-card" onmouseenter="window.showSlotTooltip(event, 'chest')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'chest')"><i>[Empty Chest Armor]</i></div>
+                    <div id="slot-leggings" class="slots-card" onmouseenter="window.showSlotTooltip(event, 'leggings')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'leggings')"><i>[Empty Leggings]</i></div>
+                    <div id="slot-overall" class="slots-card" onmouseenter="window.showSlotTooltip(event, 'overall')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'overall')"><i>[Empty Overall Suit]</i></div>
+                    <div id="slot-boots" class="slots-card" onmouseenter="window.showSlotTooltip(event, 'boots')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'boots')"><i>[Empty Boots]</i></div>
+                    <div id="slot-art1" class="slots-card artifact-slot" onmouseenter="window.showSlotTooltip(event, 'art1')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'art1')"><i>[Artifact Slot 1]</i></div>
+                    <div id="slot-art2" class="slots-card artifact-slot" onmouseenter="window.showSlotTooltip(event, 'art2')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'art2')"><i>[Artifact Slot 2]</i></div>
+                    <div id="slot-art3" class="slots-card artifact-slot" onmouseenter="window.showSlotTooltip(event, 'art3')" onmouseleave="window.hideTooltip()" ontouchstart="window.showSlotTooltip(event, 'art3')"><i>[Artifact Slot 3]</i></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Inventory Sack Tab -->
+        <div id="tab-inv" class="tab-content">
+            <div class="sub-tabs">
+                <button id="sub-tab-eq" class="sub-tab-btn active" onclick="window.switchSubTab('EQUIP')">Equipment (<span id="btn-bag-count">0</span>/<span id="btn-bag-max">20</span>)</button>
+                <button id="sub-tab-art" class="sub-tab-btn" onclick="window.switchSubTab('ART')">Artifacts (<span id="btn-art-count">0</span>/<span id="btn-art-max">20</span>)</button>
+                <button id="sub-tab-etc" class="sub-tab-btn" onclick="window.switchSubTab('ETC')">ETC Items</button>
+                <button id="sub-tab-use" class="sub-tab-btn" onclick="window.switchSubTab('USE')">Use Items</button>
+            </div>
+            
+            <!-- Dynamic Bulk Salvage & Active Auto-Salvage Controls -->
+            <div id="bulk-salvage-bar" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; background: #151515; padding: 8px; border-radius: 4px; border: 1px dashed #444;">
+                <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                    <label for="bulk-salvage-rarity" style="font-size: 11px; font-weight: bold; color: #e74c3c; white-space: nowrap;">♻️ BULK SALVAGE:</label>
+                    <select id="bulk-salvage-rarity" style="flex: 1; background: #222; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-size: 11px;">
+                        <option value="0">Common Gear (0★)</option>
+                        <option value="1">Rare & Under (1★)</option>
+                        <option value="2">Magic & Under (2★)</option>
+                        <option value="3">Epic & Under (3★)</option>
+                    </select>
+                    <button class="btn-action un" onclick="window.triggerBulkSalvage()" style="font-size: 11px; padding: 4px 8px; font-weight: bold;">Deconstruct</button>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; width: 100%; border-top: 1px dashed #333; padding-top: 6px;">
+                    <label for="auto-salvage-setting" style="font-size: 11px; font-weight: bold; color: #2ecc71; white-space: nowrap;">⚡ AUTO-SALVAGE:</label>
+                    <select id="auto-salvage-setting" onchange="window.changeAutoSalvage(this.value)" style="flex: 1; background: #222; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-size: 11px;">
+                        <option value="-1">None (Keep All Drops)</option>
+                        <option value="0">Common Gear (0★)</option>
+                        <option value="1">Rare & Under (1★)</option>
+                        <option value="2">Magic & Under (2★)</option>
+                        <option value="3">Epic & Under (3★)</option>
+                    </select>
+                </div>
+            </div>
+            <div id="bag-equip" class="bag-container" onscroll="window.hideTooltip()" ontouchmove="window.hideTooltip()"></div>
+            <div id="bag-art" class="bag-container" style="display:none;" onscroll="window.hideTooltip()" ontouchmove="window.hideTooltip()"></div>
+            <div id="bag-etc" class="bag-container" style="display:none;" onscroll="window.hideTooltip()" ontouchmove="window.hideTooltip()"></div>
+            <div id="bag-use" class="bag-container" style="display:none;" onscroll="window.hideTooltip()" ontouchmove="window.hideTooltip()"></div>
+        </div>
+
+        <!-- Attribute Matrix & Stats Tab -->
+        <div id="tab-stats" class="tab-content" onscroll="window.hideTooltip()" ontouchmove="window.hideTooltip()">
+            <div style="background: #151515; padding: 12px; border: 1px solid #9b59b6; border-radius: 4px; margin-bottom: 12px; font-size:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                    <h3 style="margin:0; color:#9b59b6; font-size:14px;">Character Level: <span id="char-level" style="color:#fff;">1</span></h3>
+                    <span style="color:#f1c40f; font-weight:bold;">SP Available: <span id="char-sp">0</span></span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom: 8px;">
+                    <span style="color:#aaa;">Max Stage Reached: <span id="char-maxstage" style="color:#f1c40f; font-weight:bold;">1</span></span>
+                    <span id="char-prestige-display" style="color:#9b59b6; font-weight:bold;">Total Ascensions: <span id="char-prestige-count">0</span></span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:#aaa; margin-bottom:2px;">
+                    <span>XP: <span id="char-xp-text">0 / 100</span></span>
+                    <span id="char-lifetime-stage-display">Lifetime Peak: Stage <span id="char-lifetime-peak">1</span></span>
+                </div>
+                <div class="xp-bar-container"><div id="char-xp-fill" class="xp-bar-fill"></div></div>
+            </div>
+
+            <div class="grid-layout">
+                <div style="font-size: 11px; background: #111; padding: 8px; border-radius: 4px; line-height: 1.5;">
+                    <h4 style="margin: 0 0 5px 0; color:#e67e22; font-size:12px;">Attributes Matrix</h4>
+
+                    <!-- 1. STR -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'str')" ontouchstart="window.showStatBreakdown(event, 'str')" onmouseleave="window.hideTooltip()" style="flex:1;">
+                            <span>💪 STR (Strength): <span id="stat-str" style="font-weight:bold; color:#fff;">5</span></span>
+                        </div>
+                        <div style="display:inline-flex; gap:3px; margin-left:8px;">
+                            <button class="btn-action sp" id="btn-minus-spStr" onpointerdown="window.startSPDraftHold(event, 'spStr', -1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onclick="event.stopPropagation();" style="background:#e74c3c; width:18px; height:18px; padding:0; line-height:18px; display:none;">-</button>
+                            <button class="btn-action sp" id="btn-plus-spStr" onpointerdown="window.startSPDraftHold(event, 'spStr', 1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onmouseenter="window.showSPPreview(event, 'spStr')" onmouseleave="window.hideTooltip()" onclick="event.stopPropagation();" style="width:18px; height:18px; padding:0; line-height:18px;">+</button>
+                        </div>
+                    </div>
+
+                    <!-- 2. DEX -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'dex')" ontouchstart="window.showStatBreakdown(event, 'dex')" onmouseleave="window.hideTooltip()" style="flex:1;">
+                            <span>🎯 DEX (Dexterity): <span id="stat-dex" style="font-weight:bold; color:#fff;">5</span></span>
+                        </div>
+                        <div style="display:inline-flex; gap:3px; margin-left:8px;">
+                            <button class="btn-action sp" id="btn-minus-spDex" onpointerdown="window.startSPDraftHold(event, 'spDex', -1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onclick="event.stopPropagation();" style="background:#e74c3c; width:18px; height:18px; padding:0; line-height:18px; display:none;">-</button>
+                            <button class="btn-action sp" id="btn-plus-spDex" onpointerdown="window.startSPDraftHold(event, 'spDex', 1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onmouseenter="window.showSPPreview(event, 'spDex')" onmouseleave="window.hideTooltip()" onclick="event.stopPropagation();" style="width:18px; height:18px; padding:0; line-height:18px;">+</button>
+                        </div>
+                    </div>
+
+                    <!-- 3. INT -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'int')" ontouchstart="window.showStatBreakdown(event, 'int')" onmouseleave="window.hideTooltip()" style="flex:1;">
+                            <span>🧠 INT (Intelligence): <span id="stat-int" style="font-weight:bold; color:#fff;">5</span></span>
+                        </div>
+                        <div style="display:inline-flex; gap:3px; margin-left:8px;">
+                            <button class="btn-action sp" id="btn-minus-spInt" onpointerdown="window.startSPDraftHold(event, 'spInt', -1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onclick="event.stopPropagation();" style="background:#e74c3c; width:18px; height:18px; padding:0; line-height:18px; display:none;">-</button>
+                            <button class="btn-action sp" id="btn-plus-spInt" onpointerdown="window.startSPDraftHold(event, 'spInt', 1)" onpointerup="window.stopSPDraftHold(event)" onpointerleave="window.stopSPDraftHold(event)" onmouseenter="window.showSPPreview(event, 'spInt')" onmouseleave="window.hideTooltip()" onclick="event.stopPropagation();" style="width:18px; height:18px; padding:0; line-height:18px;">+</button>
+                        </div>
+                    </div>
+                    <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
+
+                    <!-- 4. ATK -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'atk')" ontouchstart="window.showStatBreakdown(event, 'atk')" onmouseleave="window.hideTooltip()" style="flex:1;">
+                            <span>⚔️ Attack: <span id="stat-atk" style="font-weight:bold; color:#fff;">10</span></span>
+                        </div>
+                    </div>
+
+                    <!-- 5. Max HP -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'maxHp')" ontouchstart="window.showStatBreakdown(event, 'maxHp')" onmouseleave="window.hideTooltip()" style="flex:1;">
+                            <span>❤️ Max HP: <span id="stat-mhp" style="font-weight:bold; color:#fff;">100</span></span>
+                        </div>
+                    </div>
+
+                    <!-- 6. Defense -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'def')" ontouchstart="window.showStatBreakdown(event, 'def')" onmouseleave="window.hideTooltip()" style="flex:1;">
+                            <span>🛡️ Defense: <span id="stat-def" style="font-weight:bold; color:#fff;">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- 7. Move Speed -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'moveSpeed')" ontouchstart="window.showStatBreakdown(event, 'moveSpeed')" onmouseleave="window.hideTooltip()" style="flex:1;">
+                            <span>👟 Move Speed: <span id="stat-mov" style="font-weight:bold; color:#fff;">10</span></span>
+                        </div>
+                    </div>
+                    <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
+
+                    <div class="stat-hover" style="color: #3498db;" onmouseenter="window.showStatHoverTooltip(event, 'ias')" ontouchstart="window.showStatHoverTooltip(event, 'ias')" onmouseleave="window.hideTooltip()">
+                        <span>⏱️ Idle Atk Spd: <span id="stat-ias" style="font-weight:bold; color: #fff;">60f</span></span>
+                    </div>
+                    <div class="stat-hover" style="color: #e74c3c;" onmouseenter="window.showStatHoverTooltip(event, 'aas')" ontouchstart="window.showStatHoverTooltip(event, 'aas')" onmouseleave="window.hideTooltip()">
+                        <span>⚡ Active Atk Spd: <span id="stat-aas" style="font-weight:bold; color: #fff;">15f</span></span>
+                    </div>
+                    <div class="stat-hover" style="color: #9b59b6;" onmouseenter="window.showStatHoverTooltip(event, 'idps')" ontouchstart="window.showStatHoverTooltip(event, 'idps')" onmouseleave="window.hideTooltip()">
+                        <span>🔄 Idle DPS: <span id="stat-idps" style="font-weight:bold; color: #fff;">0.0</span></span>
+                    </div>
+                    <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
+
+                    <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'critChance', true)" ontouchstart="window.showStatBreakdown(event, 'critChance', true)" onmouseleave="window.hideTooltip()">
+                        <span style="color:#e67e22;">✨ Crit Chance: <span id="stat-crt" style="font-weight:bold; color:#fff;">5%</span></span>
+                    </div>
+                    <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'critDamage', true)" ontouchstart="window.showStatBreakdown(event, 'critDamage', true)" onmouseleave="window.hideTooltip()">
+                        <span style="color:#f1c40f;">💥 Crit Multi: <span id="stat-crd" style="font-weight:bold; color:#fff;">150%</span></span>
+                    </div>
+                    <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'block', true)" ontouchstart="window.showStatBreakdown(event, 'block', true)" onmouseleave="window.hideTooltip()">
+                        <span style="color:#3498db;">🛡️ Block Rate: <span id="stat-blk" style="font-weight:bold; color:#fff;">0%</span></span>
+                    </div>
+                    <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'parry', true)" ontouchstart="window.showStatBreakdown(event, 'parry', true)" onmouseleave="window.hideTooltip()">
+                        <span style="color:#e74c3c;">⚡ Parry Rate: <span id="stat-pry" style="font-weight:bold; color:#fff;">0%</span></span>
+                    </div>
+                    <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
+
+                    <!-- SP drafting Actions drawer -->
+                    <div id="draft-controls-container" style="display:none; margin-top:10px; padding:10px; background:#07090c; border:1px solid var(--accent-orange); border-radius:4px; text-align:center;">
+                        <div style="font-size:10px; color:#aaa; margin-bottom:8px; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">📝 Draft Allocations Pending</div>
+                        <div style="display:flex; gap:8px; justify-content:center;">
+                            <button class="btn-action" style="background:#c0392b; font-weight:bold; padding:6px 12px; font-size:11px;" onclick="window.resetDraft()">Cancel</button>
+                            <button class="btn-action" style="background:#2ecc71; font-weight:bold; padding:6px 12px; font-size:11px;" onclick="window.showSPConfirmationModal()">Apply Changes</button>
+                        </div>
+                    </div>
+                    <div style="margin: 4px 0; border-bottom: 1px dashed #333;"></div>
+
+                    <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'rareSpawn', true)" ontouchstart="window.showStatBreakdown(event, 'rareSpawn', true)" onmouseleave="window.hideTooltip()">
+                        <span style="color:#ffb6c1;">✨ Rare Spawn Rate: <span id="stat-rar" style="font-weight:bold; color:#fff;">1%</span></span>
+                    </div>
+                    <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'fairySpawn', true)" ontouchstart="window.showStatBreakdown(event, 'fairySpawn', true)" onmouseleave="window.hideTooltip()">
+                        <span style="color:#ffb6c1;">🧚 Fairy Spawn Mod: <span id="stat-fai" style="font-weight:bold; color:#fff;">100%</span></span>
+                    </div>
+                    <div class="stat-hover" style="color: #2ecc71;" onmouseenter="window.showStatHoverTooltip(event, 'drp')" ontouchstart="window.showStatHoverTooltip(event, 'drp')" onmouseleave="window.hideTooltip()">
+                        <span>🍀 Drop Rate Mod: <span id="stat-drp" style="font-weight:bold; color:#fff;">+0%</span></span>
+                    </div>
+                    <div class="stat-hover" style="color: #9b59b6;" onmouseenter="window.showStatHoverTooltip(event, 'qly')" ontouchstart="window.showStatHoverTooltip(event, 'qly')" onmouseleave="window.hideTooltip()">
+                        <span>💎 Drop Quality Mod: <span id="stat-qly" style="font-weight:bold; color:#fff;">+0%</span></span>
+                    </div>
+                    <div class="stat-hover" onmouseenter="window.showStatBreakdown(event, 'gold', true)" ontouchstart="window.showStatBreakdown(event, 'gold', true)" onmouseleave="window.hideTooltip()">
+                        <span style="color:#f1c40f;">🟡 Gold Multiplier: <span id="stat-gld" style="font-weight:bold; color:#fff;">x1.0</span></span>
+                    </div>
+                    <div style="margin: 6px 0; border-bottom: 1px dashed #333;"></div>
+                    <div style="color: #f1c40f; font-weight: bold; margin-bottom: 4px; font-size: 11px;">✨ Active Set Synergies</div>
+                    <div id="active-sets-list" style="color: #aaa; font-size: 10px; line-height: 1.4;">No active set synergies.</div>
+                </div>
+                
+                <div style="font-size: 11px; background: #151515; padding: 12px; border: 1px solid #444; border-radius: 4px; box-sizing: border-box;">
+                    <h3 style="margin-top:0; color:#3498db; font-size:14px; border-bottom:1px solid #333; padding-bottom:4px;">Live Drop Analytics</h3>
+                    <div class="live-drop-cols">
+                        <div style="width:48%;">
+                            <div style="color:#2ecc71; font-weight:bold; margin-bottom:4px;">Entity Drop Chances</div>
+                            <div>Standard Mob: <span id="live-rate-mob" style="color:#fff;">4.5%</span></div>
+                            <div>Rare Mob: <span id="live-rate-rare" style="color:#fff;">15.0%</span></div>
+                            <div>Stage Boss: <span id="live-rate-boss" style="color:#fff;">25.0%</span></div>
+                            <div>Dung. Miniboss: <span id="live-rate-dmini" style="color:#fff;">30.0%</span></div>
+                            <div>Boss Core: <span id="live-rate-acore" style="color:#fff;">40.0%</span></div>
+                            <div style="color:#1abc9c; font-weight:bold;">Special Quantities</div>
+                            <div>Ancient Core: <span id="live-qty-acore" style="color:#fff;">0</span></div>
+                            <div>Eridium Shard: <span id="live-qty-eshard" style="color:#fff;">0</span></div>
+                            <div>Astral Essence: <span id="live-qty-astral" style="color:#fff;">0</span></div>
+                            <div>Keys Held: <span id="live-qty-keys" style="color:#fff;">0</span></div>
+                        </div>
+                        <div style="width:48%;">
+                            <div style="color:#f1c40f; font-weight:bold; margin-bottom:4px;">Star Rarity Chances</div>
+                            <div>1★ Rare: <span id="star-rate-1" style="color:#fff;">0%</span></div>
+                            <div>2★ Magic: <span id="star-rate-2" style="color:#fff;">0%</span></div>
+                            <div>3★ Epic: <span id="star-rate-3" style="color:#fff;">0%</span></div>
+                            <div>4★ Legendary: <span id="star-rate-4" style="color:#fff;">0%</span></div>
+                            <div>5★ Mythic: <span id="star-rate-5" style="color:#fff;">0%</span></div>
+                            <div style="margin-top:6px; color:#ffb6c1; font-weight:bold;">Sacks Audit</div>
+                            <div>Souls Harvested: <span id="live-qty-souls" style="color:#fff;">0</span></div>
+                            <div>Scraps Total: <span id="live-qty-scraps" style="color:#fff;">0</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cumulative Trophy Bonuses HUD summary -->
+                    <div style="margin-top: 12px; border-top: 2px solid #333; padding-top: 10px;">
+                        <h4 style="margin: 0 0 6px 0; color: #f1c40f; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">🏆 Cumulative Trophy Bonuses</h4>
+                        <div id="trophy-bonuses-summary" style="font-size: 10px; color: #aaa; background: #0c0f12; padding: 8px; border-radius: 4px; border: 1px solid #222; line-height: 1.45; max-height: 160px; overflow-y: auto;">
+                            <!-- Populated dynamically by updateUI() -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Forge / Crafting Tab -->
+        <div id="tab-forge" class="tab-content" onscroll="window.hideTooltip()" ontouchmove="window.hideTooltip()">
+            <div id="forge-station-container" style="margin-bottom:12px; display:flex; align-items:center; gap:8px; background:#1a1d20; padding:6px; border-radius:4px; border:1px solid #333;">
+                <label for="forge-station-select" style="font-size:11px; font-weight:bold; color:#e67e22; white-space:nowrap;">🔨 FORGING POST:</label>
+                <select id="forge-station-select" onchange="window.switchForgeStation(this.value)" style="flex:1; background:#111; color:#fff; border:1px solid #e67e22; padding:4px 6px; border-radius:4px; font-weight:bold; font-size:11px;">
+                    <option value="blacksmith">🛡️ Blacksmith Station (Temper / Level / Tier)</option>
+                    <option value="enchanter">🔮 Mystical Enchanter (Infuse / Purge)</option>
+                </select>
+            </div>
+            <div id="blacksmith-modes" style="display:flex; gap:5px; margin-bottom:10px;">
+                <button id="btn-mode-temper" class="btn-toggle active" style="flex:1; background:#2980b9; padding:6px 2px; font-size:11px;" onclick="window.setForgeMode('temper')">Mode: TEMPER</button>
+                <button id="btn-mode-reforge" class="btn-toggle" style="flex:1; background:transparent; padding:6px 2px; font-size:11px;" onclick="window.setForgeMode('reforge')">Mode: REFORGE STAT</button>
+                <button id="btn-mode-tier" class="btn-toggle" style="flex:1; background:transparent; padding:6px 2px; font-size:11px;" onclick="window.setForgeMode('tier')">Mode: TIER UP</button>
+                <button id="btn-mode-set" class="btn-toggle" style="flex:1; background:transparent; padding:6px 2px; font-size:11px;" onclick="window.setForgeMode('set')">Mode: RE-ROLL SET</button>
+            </div>
+            <div id="enchanter-modes" style="display:none; gap:5px; margin-bottom:10px;">
+                <button id="btn-mode-enchant" class="btn-toggle" style="flex:1; background:transparent; padding:6px 2px; font-size:11px;" onclick="window.setForgeMode('enchant')">Mode: ENCHANT</button>
+                <button id="btn-mode-reset-enchant" class="btn-toggle" style="flex:1; background:transparent; padding:6px 2px; font-size:11px;" onclick="window.setForgeMode('reset_enchant')">Mode: RESET ENCHANTS</button>
+            </div>
+            <div class="forge-grid">
+                <div class="forge-card" id="forge-details"></div>
+                <div class="bag-container" id="forge-list" style="height: auto; min-height: 250px;"></div>
+            </div>
+        </div>
+
+        <!-- Market / Gacha / Altar Tab -->
+        <div id="tab-market" class="tab-content" onscroll="window.hideTooltip()" ontouchmove="window.hideTooltip()">
+            <div class="market-grid">
+                <div class="market-card" style="border-color: #f1c40f;" onmouseenter="window.showGachaTooltip(event)" onmouseleave="window.hideTooltip()" ontouchstart="window.showGachaTooltip(event)">
+                    <div>
+                        <h3 style="margin-top:0; color:#f1c40f; font-size:14px;">🎰 VENDING MACHINE</h3>
+                        <p style="font-size:11px; color:#aaa; min-height:36px;">Roll a guaranteed random 1-5★ piece of standard gear.</p>
+                    </div>
+                    <div>
+                        <div style="font-weight:bold; color:#2ecc71; margin-bottom:10px; font-size:13px;">Cost: 1 Gacha Key</div>
+                        <button class="btn-action" style="background:#f1c40f; color:#111; width:100%; font-weight:bold;" onclick="window.buyGachaCrate()">Dispense Gear</button>
+                    </div>
+                </div>
+                <div class="market-card" style="border-color: #9b59b6;" onmouseenter="window.showAltarTooltip(event)" onmouseleave="window.hideTooltip()" ontouchstart="window.showAltarTooltip(event)">
+                    <div>
+                        <h3 style="margin-top:0; color:#9b59b6; font-size:14px;">🔮 ANCIENT ALTAR</h3>
+                        <p style="font-size:11px; color:#aaa; min-height:36px;">Sacrifice Cores to open a Reality Rift and hunt legendary Tiered Rift Bosses.</p>
+                    </div>
+                    <div>
+                        <button class="btn-action" style="background:#2c3e50; border: 1px solid #9b59b6; margin-bottom: 8px; width:100%; font-weight:bold;" onclick="document.getElementById('altar-modal').style.display='block'; window.buildAltarModal();">View Artifact Pool</button>
+                        
+                        <!-- Rift Selection Dropdown -->
+                        <label for="rift-hunt-select" style="display:block; font-size:11px; color:#9b59b6; font-weight:bold; margin-bottom:4px; text-align:left;">SELECT TARGET:</label>
+                        <select id="rift-hunt-select" style="width:100%; background:#111; color:#fff; border:1px solid #9b59b6; padding:6px; border-radius:4px; font-size:11px; font-weight:bold; margin-bottom:10px; cursor:pointer;">
+                            <option value="guardian">🛡️ Aegis Goliath (10 Cores / Lv 30+)</option>
+                            <option value="chronos">⏳ Chronos Arbitrator (10 Cores / Lv 30+)</option>
+                            <option value="nexus">👾 Nexus Overseer (10 Cores / Lv 30+)</option>
+                        </select>
+                        
+                        <button class="btn-action" style="background:#9b59b6; width:100%; font-weight:bold;" onclick="window.summonUberBossFromSelect()">Open Reality Rift</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; border-top: 2px solid #333; padding-top: 10px;">
+                <h3 style="margin:0 0 8px 0; color:#2ecc71; font-size:14px;">🪙 GOLD QUALITY SINKS</h3>
+                <div id="gold-upgrades-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:8px;"></div>
+            </div>
+
+            <div style="margin-top: 15px; border-top: 2px solid #333; padding-top: 10px;">
+                <h3 style="margin:0 0 8px 0; color:#9b59b6; font-size:14px;">🔮 MYSTICAL ALCHEMY SHOP</h3>
+                <div id="mystical-shop-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:8px;"></div>
+            </div>
+
+            <div style="margin-top: 15px; border-top: 2px solid #333; padding-top: 10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <h3 style="margin:0; color:#f1c40f; font-size:14px;">🛒 GOLD SHOP</h3>
+                    <span id="market-timer" style="font-size:11px; color:#aaa;">Refreshes in: 30:00</span>
+                </div>
+                <div id="gold-shop-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+            </div>
+        </div>
+
+        <!-- Prestige / Altar of Ascension Tab -->
+        <div id="tab-prestige" class="tab-content" onscroll="window.hideTooltip()" ontouchmove="window.hideTooltip()">
+            <!-- Populated dynamically via ui.js / window.renderPrestigeTab() -->
+        </div>
+    </div>
+</div>
+
+<!-- Collapsible Logs and Reset Terminal Footer -->
+<div style="width: 100%; max-width: 750px; margin: 10px auto 0 auto; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; padding: 10px; box-sizing: border-box;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <button onclick="window.toggleLogPanel()" style="background:#2c3e50; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px; transition: background 0.2s;">📜 Toggle Battle Logs</button>
+        <button onclick="window.hardResetGame()" class="btn-action un" style="padding:4px 10px; font-weight:bold; font-size:10px;">🚨 Wipe Save</button>
+    </div>
+    <div id="log-panel-container" style="display:none;">
+        <div style="display: flex; gap: 6px; margin-bottom: 6px; width: 100%;">
+            <label for="dev-console-input" style="display:none;">Developer Console Command</label>
+            <input type="text" id="dev-console-input" placeholder="Type a command (e.g., /dev, /gold, /level)..." style="flex: 1; background: #111; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; font-family: monospace; font-size: 11px;" onkeydown="window.handleConsoleInput(event)">
+            <button onclick="window.submitConsoleCommand()" class="btn-action" style="background: var(--accent-orange); padding: 6px 12px; font-weight: bold; font-family: monospace; height: 100%;">EXECUTE</button>
+        </div>
+        <div id="log-box"></div>
+    </div>
+</div>
+
+<!-- Core Modular JavaScript Hierarchy Load Sequence -->
+<script src="data.js"></script>
+<script src="audio.js"></script>
+<script src="items.js"></script>
+<script src="entities.js"></script>
+<script src="ui.js"></script>
+<script src="game.js"></script>
+
+</body>
+</html>
