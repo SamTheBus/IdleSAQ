@@ -29,22 +29,53 @@ window.updateUI = function() {
 
     let p = window.resolvePlayerStats(hasDraftChanges);
 
-    // 1. Hud overlays
+        // 1. Hud overlays
         setText('hud-stage', window.playerStats.stage);
         setText('hud-progress', `(${window.playerStats.killCount}/${window.playerStats.targetsRequired})`);
         setText('hud-coins', window.formatNumber(window.playerStats.coins));
+        setText('hud-stage-peak', `(Peak ${window.playerStats.maxStage || 1})`);
 
         // Update real-time DPS in bottom HUD bar
-        let actDps = window.calculateActiveDps ? window.calculateActiveDps() : "0.0";
-        setText('hud-dps', actDps);
+            let actDps = window.calculateActiveDps ? window.calculateActiveDps() : "0.0";
+            setText('hud-dps', actDps);
 
-        // Update player HP in HUD bar
-        let maxHp = p.maxHp;
-        let curHp = window.playerStats.currentHp;
-        setText('hud-hp', `${window.formatNumber(curHp)} / ${window.formatNumber(maxHp)}`);
+            // Update player HP in HUD bar
+            let maxHp = p.maxHp;
+            let curHp = window.playerStats.currentHp;
+            setText('hud-hp', `${window.formatNumber(curHp)} / ${window.formatNumber(maxHp)}`);
 
-        let maxBag = window.getMaxBagSlots();
-        let bagEl = document.getElementById('hud-bag');
+            // Dynamically toggle Leave Activity button based on state
+            let leaveBtn = document.getElementById('btn-leave-activity');
+            if (leaveBtn) {
+                if (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) {
+                    leaveBtn.style.display = "inline-block";
+                } else {
+                    leaveBtn.style.display = "none";
+                }
+            }
+
+            // Update Dungeon Peaks & Checkpoints in Activities Menu
+            if (window.playerStats.dungeonPeaks) {
+                let eqPeak = window.playerStats.dungeonPeaks.equip || 1;
+                let goPeak = window.playerStats.dungeonPeaks.gold || 1;
+                let maPeak = window.playerStats.dungeonPeaks.mat || 1;
+
+                window.setText('dp-equip', eqPeak);
+                window.setText('dp-gold', goPeak);
+                window.setText('dp-mat', maPeak);
+
+                window.setText('dc-equip', Math.max(1, Math.floor(eqPeak * 0.90)));
+                window.setText('dc-gold', Math.max(1, Math.floor(goPeak * 0.90)));
+                window.setText('dc-mat', Math.max(1, Math.floor(maPeak * 0.90)));
+            }
+
+            // Update Crucible Peak & Checkpoint in Activities Menu
+            let cPeak = window.playerStats.cruciblePeak || 1;
+            window.setText('crucible-peak-wave', cPeak);
+            window.setText('crucible-checkpoint-wave', Math.max(1, Math.floor(cPeak * 0.80)));
+
+            let maxBag = window.getMaxBagSlots();
+            let bagEl = document.getElementById('hud-bag');
     if (bagEl) {
         bagEl.innerText = `${window.inventory.EQUIP.length}/${maxBag} (A:${window.inventory.ARTIFACT.length})`;
         bagEl.style.color = (window.inventory.EQUIP.length >= maxBag || window.inventory.ARTIFACT.length >= maxBag) ? "#e74c3c" : "#2ecc71";
