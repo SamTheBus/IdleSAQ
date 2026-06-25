@@ -165,26 +165,30 @@ window.spawnDamageEffect = function(amount, type, isCrit) {
 
     if (type !== 'slash') hitText = `${icons[type]} ${hitText}`;
 
-    let offsetX = window.randFloat(-22, 22);
-    let offsetY = window.randFloat(-30, 5);
+    let offsetX = window.randFloat(-40, 40);
+        let offsetY = window.randFloat(-50, 15);
 
-    window.effects.push({
-        x: window.mob.x + window.mob.w / 2 + offsetX, y: window.mob.y + offsetY, text: hitText, color: hitColor, life: 40
-    });
-
-    let existingTotal = window.effects.find(e => e.isCumulative && e.life > 0);
-    if (existingTotal) {
-        existingTotal.amount += amount;
-        existingTotal.text = `TOTAL: ${window.formatNumber(existingTotal.amount)}`;
-        existingTotal.life = 55;
-        existingTotal.x = window.mob.x + window.mob.w / 2 - 25;
-        existingTotal.y = window.mob.y - 25;
-    } else {
         window.effects.push({
-            x: window.mob.x + window.mob.w / 2 - 25, y: window.mob.y - 25,
-            text: `TOTAL: ${window.formatNumber(amount)}`, color: "#f1c40f", life: 55, isCumulative: true, amount: amount
+            x: window.mob.x + window.mob.w / 2 + offsetX, y: window.mob.y + offsetY,
+            vx: window.randFloat(-1.2, 1.2),
+            vy: window.randFloat(-1.5, -0.6),
+            text: hitText, color: hitColor, life: 40
         });
-    }
+
+        let existingTotal = window.effects.find(e => e.isCumulative && e.life > 0);
+        if (existingTotal) {
+            existingTotal.amount += amount;
+            existingTotal.text = `TOTAL: ${window.formatNumber(existingTotal.amount)}`;
+            existingTotal.life = 55;
+            existingTotal.x = window.mob.x + window.mob.w / 2 - 25;
+            existingTotal.y = window.mob.y - 25;
+        } else {
+            window.effects.push({
+                x: window.mob.x + window.mob.w / 2 - 25, y: window.mob.y - 25,
+                vx: 0, vy: -0.4,
+                text: `TOTAL: ${window.formatNumber(amount)}`, color: "#f1c40f", life: 55, isCumulative: true, amount: amount
+            });
+        }
 };
 
 window.renderNemesisPreview = function(mobData) {

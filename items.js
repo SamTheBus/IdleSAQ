@@ -1155,13 +1155,17 @@ window.salvageItem = function(id) {
     }
 
     if (isEquipped) {
-        window.equippedSlots[slotToClear] = null;
-    } else if (isArtifactSack) {
-        window.inventory.ARTIFACT.splice(window.inventory.ARTIFACT.indexOf(item), 1);
-    } else {
-        window.inventory.EQUIP.splice(window.inventory.EQUIP.indexOf(item), 1);
-    }
-    window.playerStats.itemsSalvaged = (window.playerStats.itemsSalvaged || 0) + 1;
+            window.equippedSlots[slotToClear] = null;
+        } else if (isArtifactSack) {
+            window.inventory.ARTIFACT.splice(window.inventory.ARTIFACT.indexOf(item), 1);
+        } else {
+            window.inventory.EQUIP.splice(window.inventory.EQUIP.indexOf(item), 1);
+        }
+        window.playerStats.itemsSalvaged = (window.playerStats.itemsSalvaged || 0) + 1;
+
+        if (typeof window.progressMission === "function") {
+            window.progressMission('salvage', 1);
+        }
 
     let rolledTier = item.statsRolled;
     let scrapsGained = [];
@@ -1432,8 +1436,12 @@ window.triggerBulkSalvage = function() {
 
                 window.playerStats.itemsSalvaged = (window.playerStats.itemsSalvaged || 0) + targetItems.length;
 
-                let targetIds = new Set(targetItems.map(item => item.id));
-                window.inventory.EQUIP = window.inventory.EQUIP.filter(item => !targetIds.has(item.id));
+                                if (typeof window.progressMission === "function") {
+                                    window.progressMission('salvage', targetItems.length);
+                                }
+
+                                let targetIds = new Set(targetItems.map(item => item.id));
+                                window.inventory.EQUIP = window.inventory.EQUIP.filter(item => !targetIds.has(item.id));
 
                 let cvs = document.getElementById('gameCanvas');
                 let w = cvs ? cvs.width : 750;

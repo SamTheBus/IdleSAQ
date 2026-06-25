@@ -3,7 +3,8 @@
    initial global state, and system utility functions.
    ========================================================================= */
 
-window.GAME_VERSION = 0.4; // Pre-release Alpha 0.4.0 // Increment this whenever you push a new release
+window.GAME_VERSION = 0.5; // Pre-release Alpha 0.5.0 // Increment this whenever you push a new release
+
 
 
 // --- SYSTEM UTILS ---
@@ -599,8 +600,8 @@ window.getItemSetName = function(item) {
 
 window.getMaxBagSlots = function() {
     let base = window.checkArtifactTrait("bag_space") ? 50 : 20;
-    let prestige = (window.playerStats.prestigeUpgrades && window.playerStats.prestigeUpgrades.bag || 0) * 10;
-    return base + prestige;
+    let missionBag = (window.playerStats.missionUpgrades && window.playerStats.missionUpgrades.bag || 0) * 10;
+    return base + missionBag;
 };
 
 window.getTierName = function(stars) {
@@ -952,6 +953,7 @@ window.playerStats = {
         ankhTriggeredThisBattle: false,
         dailyMissions: [],
         weeklyMissions: [],
+        dailyRerollsDone: 0, // Reset daily at 12:00 AM PST/PDT
         lastDailyResetTime: 0,
         lastWeeklyResetTime: 0,
         dailyRewardClaimed: false,
@@ -961,18 +963,21 @@ window.playerStats = {
     // --- PROCEDURAL MISSION & QUEST SYSTEM ---
 
     window.generateDailyMissions = function() {
-            let pool = [
-                { type: "kills", label: "Slay monsters", targetBase: 300, mult: 10, unit: "monsters", treat: "Monster Soul", treatQty: 80 },
-                { type: "rares", label: "Slay rare spawns", targetBase: 5, mult: 1, unit: "rares", treat: "Luminous Soul", treatQty: 3 },
-                { type: "gold", label: "Collect Gold", targetBase: 2500, stageScale: true, unit: "Gold", treat: "Rare Scrap", treatQty: 15 },
-                { type: "fairies", label: "Catch wild fairies", targetBase: 8, mult: 1, unit: "fairies", treat: "Luminous Soul", treatQty: 3 },
-                { type: "tempers", label: "Successfully temper gear", targetBase: 1, mult: 1, unit: "tempers", treat: "Magic Scrap", treatQty: 8 },
-                { type: "reforges", label: "Reforge gear modifiers", targetBase: 2, mult: 1, unit: "reforges", treat: "Catalyst Core", treatQty: 1 },
-                { type: "dungeons", label: "Clear Dungeon floors", targetBase: 5, mult: 1, unit: "floors", treat: "Epic Scrap", treatQty: 6 }
-            ];
+        let pool = [
+            { type: "kills", label: "Slay monsters", targetBase: 300, mult: 10, unit: "monsters", treat: "Monster Soul", treatQty: 80 },
+            { type: "rares", label: "Slay rare spawns", targetBase: 5, mult: 1, unit: "rares", treat: "Luminous Soul", treatQty: 3 },
+            { type: "gold", label: "Collect Gold", targetBase: 2500, stageScale: true, unit: "Gold", treat: "Rare Scrap", treatQty: 15 },
+            { type: "fairies", label: "Catch wild fairies", targetBase: 8, mult: 1, unit: "fairies", treat: "Luminous Soul", treatQty: 3 },
+            { type: "tempers", label: "Successfully temper gear", targetBase: 1, mult: 1, unit: "tempers", treat: "Magic Scrap", treatQty: 8 },
+            { type: "reforges", label: "Reforge gear modifiers", targetBase: 2, mult: 1, unit: "reforges", treat: "Catalyst Core", treatQty: 1 },
+            { type: "dungeons", label: "Clear Dungeon floors", targetBase: 5, mult: 1, unit: "floors", treat: "Epic Scrap", treatQty: 6 },
+            { type: "salvage", label: "Salvage gear items", targetBase: 15, mult: 1, unit: "items", treat: "Rare Scrap", treatQty: 12 },
+            { type: "elixirs", label: "Consume active elixirs", targetBase: 3, mult: 1, unit: "elixirs", treat: "Monster Soul", treatQty: 60 },
+            { type: "active_clicks", label: "Manually click canvas", targetBase: 250, mult: 1, unit: "clicks", treat: "Luminous Soul", treatQty: 2 }
+        ];
 
-        pool.sort(() => Math.random() - 0.5);
-        let selected = pool.slice(0, 6);
+    pool.sort(() => Math.random() - 0.5);
+    let selected = pool.slice(0, 6);
 
         let stage = window.playerStats.stage || 1;
         window.playerStats.dailyMissions = selected.map((m, idx) => {
@@ -1054,12 +1059,13 @@ window.playerStats = {
 
             // Check Daily reset against absolute Pacific date string
             if (!window.playerStats.lastDailyResetDayStr || window.playerStats.lastDailyResetDayStr !== currentDayStr) {
-                window.generateDailyMissions();
-                window.playerStats.lastDailyResetDayStr = currentDayStr;
-                window.playerStats.lastDailyResetTime = now;
-                window.playerStats.dailyRewardClaimed = false;
-                if (typeof window.pushLog === "function") window.pushLog("<span style='color:#2ecc71; font-weight:bold;'>📅 [SYSTEM] Daily Board refreshed! Reset at 12:00 AM PST/PDT. Complete all 6 for a grand treat.</span>");
-            }
+                            window.generateDailyMissions();
+                            window.playerStats.lastDailyResetDayStr = currentDayStr;
+                            window.playerStats.lastDailyResetTime = now;
+                            window.playerStats.dailyRewardClaimed = false;
+                            window.playerStats.dailyRerollsDone = 0; // Reset active re-roll tracker daily
+                            if (typeof window.pushLog === "function") window.pushLog("<span style='color:#2ecc71; font-weight:bold;'>📅 [SYSTEM] Daily Board refreshed! Reset at 12:00 AM PST/PDT. Complete at least 5 for a grand treat!</span>");
+                        }
 
             // Check Weekly reset (Monday 12:00 AM PST/PDT)
             let dayOfWeek = ptDate.getDay(); // 0 is Sunday, 1 is Monday...

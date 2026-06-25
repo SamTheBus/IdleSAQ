@@ -497,15 +497,27 @@ window.loadGame = function() {
                         if (window.playerStats.qlyPotionStrength === undefined) window.playerStats.qlyPotionStrength = 0.50;
 
             if (window.playerStats.unlockedAchievements === undefined) window.playerStats.unlockedAchievements = [];
-            if (window.playerStats.totalGoldEarned === undefined) window.playerStats.totalGoldEarned = window.playerStats.coins || 0;
-            if (window.playerStats.totalTempers === undefined) window.playerStats.totalTempers = 0;
-            if (window.playerStats.totalEnchants === undefined) window.playerStats.totalEnchants = 0;
-            if (window.playerStats.riftGuardiansSlain === undefined) window.playerStats.riftGuardiansSlain = 0;
-            if (window.playerStats.elixirsConsumed === undefined) window.playerStats.elixirsConsumed = 0;
-            if (window.playerStats.itemsSalvaged === undefined) window.playerStats.itemsSalvaged = 0;
-            if (window.playerStats.volumeMaster === undefined) window.playerStats.volumeMaster = 0.5;
-                        if (window.playerStats.volumeSFX === undefined) window.playerStats.volumeSFX = 0.8;
-                        if (window.playerStats.mute === undefined) window.playerStats.mute = false;
+                        if (window.playerStats.totalGoldEarned === undefined) window.playerStats.totalGoldEarned = window.playerStats.coins || 0;
+                        if (window.playerStats.totalTempers === undefined) window.playerStats.totalTempers = 0;
+                        if (window.playerStats.totalEnchants === undefined) window.playerStats.totalEnchants = 0;
+                        if (window.playerStats.riftGuardiansSlain === undefined) window.playerStats.riftGuardiansSlain = 0;
+                        if (window.playerStats.elixirsConsumed === undefined) window.playerStats.elixirsConsumed = 0;
+                        if (window.playerStats.itemsSalvaged === undefined) window.playerStats.itemsSalvaged = 0;
+                        if (window.playerStats.volumeMaster === undefined) window.playerStats.volumeMaster = 0.5;
+                                    if (window.playerStats.volumeSFX === undefined) window.playerStats.volumeSFX = 0.8;
+                                    if (window.playerStats.mute === undefined) window.playerStats.mute = false;
+
+                                    // Save-state migration: Move Prestige satchel upgrades to Mission Shop and refund spent Prestige Points (10 PP per level)
+                                    if (window.playerStats.prestigeUpgrades && window.playerStats.prestigeUpgrades.bag > 0) {
+                                        let refundedPP = window.playerStats.prestigeUpgrades.bag * 10;
+                                        window.playerStats.prestigePoints = (window.playerStats.prestigePoints || 0) + refundedPP;
+
+                                        // Seed and add Prestige levels straight into mission upgrades
+                                        window.playerStats.missionUpgrades = window.playerStats.missionUpgrades || { gold: 0, atk: 0, hp: 0, bag: 0 };
+                                        window.playerStats.missionUpgrades.bag = (window.playerStats.missionUpgrades.bag || 0) + window.playerStats.prestigeUpgrades.bag;
+
+                                        window.playerStats.prestigeUpgrades.bag = 0;
+                                    }
 
                         // Re-index Gacha history rolls inside memory database
                         if (window.playerStats.gachaHistory) {
@@ -515,15 +527,22 @@ window.loadGame = function() {
                         }
 
             if (window.playerStats.prestigePoints === undefined) window.playerStats.prestigePoints = 0;
-                        if (window.playerStats.prestigeUpgrades === undefined) {
-                            window.playerStats.prestigeUpgrades = { bag: 0, gold: 0, exp: 0, drop: 0, atk: 0, fort: 0, fairy: 0 };
-                        } else {
-                            window.playerStats.prestigeUpgrades.atk = window.playerStats.prestigeUpgrades.atk || 0;
-                            window.playerStats.prestigeUpgrades.fort = window.playerStats.prestigeUpgrades.fort || 0;
-                            window.playerStats.prestigeUpgrades.fairy = window.playerStats.prestigeUpgrades.fairy || 0;
-                        }
-                        if (window.playerStats.missionTokens === undefined) window.playerStats.missionTokens = 0;
-                        if (window.playerStats.missionUpgrades === undefined) window.playerStats.missionUpgrades = { gold: 0, atk: 0, hp: 0 };
+                                                if (window.playerStats.prestigeUpgrades === undefined) {
+                                                    window.playerStats.prestigeUpgrades = { bag: 0, gold: 0, exp: 0, drop: 0, atk: 0, fort: 0, fairy: 0 };
+                                                } else {
+                                                    window.playerStats.prestigeUpgrades.atk = window.playerStats.prestigeUpgrades.atk || 0;
+                                                    window.playerStats.prestigeUpgrades.fort = window.playerStats.prestigeUpgrades.fort || 0;
+                                                    window.playerStats.prestigeUpgrades.fairy = window.playerStats.prestigeUpgrades.fairy || 0;
+                                                }
+                                                if (window.playerStats.missionTokens === undefined) window.playerStats.missionTokens = 0;
+                                                if (window.playerStats.missionUpgrades === undefined) {
+                                                    window.playerStats.missionUpgrades = { gold: 0, atk: 0, hp: 0, bag: 0 };
+                                                } else {
+                                                    window.playerStats.missionUpgrades.gold = window.playerStats.missionUpgrades.gold || 0;
+                                                    window.playerStats.missionUpgrades.atk = window.playerStats.missionUpgrades.atk || 0;
+                                                    window.playerStats.missionUpgrades.hp = window.playerStats.missionUpgrades.hp || 0;
+                                                    window.playerStats.missionUpgrades.bag = window.playerStats.missionUpgrades.bag || 0;
+                                                }
             if (window.playerStats.prestigeCount === undefined) window.playerStats.prestigeCount = 0;
                         if (window.playerStats.lifetimePeakStage === undefined) window.playerStats.lifetimePeakStage = window.playerStats.maxStage || 1;
                         if (window.playerStats.highestRiftLevel === undefined) window.playerStats.highestRiftLevel = 0;
@@ -537,6 +556,7 @@ window.loadGame = function() {
                         if (window.playerStats.vendingPity === undefined) window.playerStats.vendingPity = 0;
                         if (window.playerStats.shopQLevel === undefined) window.playerStats.shopQLevel = 0;
                         if (window.playerStats.globalQLevel === undefined) window.playerStats.globalQLevel = 0;
+                        if (window.playerStats.dailyRerollsDone === undefined) window.playerStats.dailyRerollsDone = 0;
             if (window.playerStats.fairiesClicked === undefined) window.playerStats.fairiesClicked = 0;
             if (window.playerStats.deathCount === undefined) window.playerStats.deathCount = 0;
             if (window.playerStats.stickyCanvas === undefined) window.playerStats.stickyCanvas = true;
@@ -774,8 +794,11 @@ window.onload = function() {
         if (clickedFairy) { window.triggerFairyLoot(clickedFairy); return; }
 
         window.isCanvasPressed = true;
-        window.triggerPlayerSlash();
-    });
+            window.triggerPlayerSlash();
+            if (typeof window.progressMission === "function") {
+                window.progressMission('active_clicks', 1);
+            }
+        });
 
     canvas.addEventListener('pointerup', () => { window.isCanvasPressed = false; });
         canvas.addEventListener('pointerleave', () => { window.isCanvasPressed = false; });
@@ -878,7 +901,13 @@ function update() {
         }
     }
 
-    for (let i = window.effects.length - 1; i >= 0; i--) { let eff = window.effects[i]; eff.y -= 0.4; eff.life--; if (eff.life <= 0) window.effects.splice(i, 1); }
+    for (let i = window.effects.length - 1; i >= 0; i--) {
+            let eff = window.effects[i];
+            eff.x += eff.vx !== undefined ? eff.vx : 0;
+            eff.y += eff.vy !== undefined ? eff.vy : -0.4;
+            eff.life--;
+            if (eff.life <= 0) window.effects.splice(i, 1);
+        }
     for (let i = window.particles.length - 1; i >= 0; i--) {
         let pt = window.particles[i];
         pt.x += pt.vx; pt.y += pt.vy;
@@ -2413,11 +2442,15 @@ window.useItem = function(itemName) {
             window.playerStats.dropPotionTimer = finalDuration; window.playerStats.dropPotionStrength = itemName.includes("Supernal") ? 1.0 : (itemName.includes("Greater") ? 0.50 : 0.25);
             consumeUseItem(itemName); window.pushLog(`<span style='color:#2ecc71; font-weight:bold;'>[USE] Consumed ${itemName}! Drop rate boosted for ${Math.floor(finalDuration/60)}s.</span>`);
         } else if (itemName.includes("Quality Elixir")) {
-            window.playerStats.qlyPotionTimer = finalDuration; window.playerStats.qlyPotionStrength = itemName.includes("Supernal") ? 0.50 : (itemName.includes("Greater") ? 0.25 : 0.12);
-            consumeUseItem(itemName); window.pushLog(`<span style='color:#e84393; font-weight:bold;'>[USE] Consumed ${itemName}! Drop Quality boosted for ${Math.floor(finalDuration/60)}s.</span>`);
-        }
+                window.playerStats.qlyPotionTimer = finalDuration; window.playerStats.qlyPotionStrength = itemName.includes("Supernal") ? 0.50 : (itemName.includes("Greater") ? 0.25 : 0.12);
+                consumeUseItem(itemName); window.pushLog(`<span style='color:#e84393; font-weight:bold;'>[USE] Consumed ${itemName}! Drop Quality boosted for ${Math.floor(finalDuration/60)}s.</span>`);
+            }
 
-        let pAfter = window.resolvePlayerStats();
+            if (typeof window.progressMission === "function" && itemName.includes("Elixir")) {
+                window.progressMission('elixirs', 1);
+            }
+
+            let pAfter = window.resolvePlayerStats();
         window.playerStats.currentHp = Math.max(1, Math.min(pAfter.maxHp, Math.floor((window.playerStats.currentHp / pBefore.maxHp) * pAfter.maxHp)));
     window.playerStats.currentHp = Math.max(1, Math.min(pAfter.maxHp, Math.floor((window.playerStats.currentHp / pBefore.maxHp) * pAfter.maxHp)));
     setTimeout(() => { window.updateUI(); window.renderInventory(); window.saveGame(); }, 50);

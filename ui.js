@@ -1556,17 +1556,9 @@ window.showStatBreakdown = function(e, statKey, isPct = false) {
                                                                                                       <span style="background:#9b59b6; color:#fff; font-weight:bold; font-size:11px; padding:3px 10px; border-radius:10px; box-shadow: 0 0 8px rgba(155, 89, 182, 0.3);">PP Available: <span id="prestige-points-qty">${p.prestigePoints.toLocaleString()}</span></span>
                                                                                                   </div>
                                                                                                   <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                                                                                                      <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
-                                                                                                          <div>
-                                                                                                              <strong style="color:#3498db; font-size:12px;">🎒 Dimensional Satchel</strong>
-                                                                                                              <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +10 permanent backpack slots to carry more gear.</div>
-                                                                                                              <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(bagPts * 10).toLocaleString()} slots</span></div>
-                                                                                                          </div>
-                                                                                                          ${getUpgradeButtonHtml('bag', bagPts, '#3498db')}
-                                                                                                      </div>
-                                                                                                      <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
-                                                                                                          <div>
-                                                                                                              <strong style="color:#f1c40f; font-size:12px;">🟡 Midas' Legacy</strong>
+                                                                                                                                                                                                    <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
+                                                                                                                                                                                                        <div>
+                                                                                                                                                                                                            <strong style="color:#f1c40f; font-size:12px;">🟡 Midas' Legacy</strong>
                                                                                                               <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +25% Global Gold multiplier.</div>
                                                                                                               <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(goldPts * 25).toLocaleString()}% Gold</span></div>
                                                                                                           </div>
@@ -2866,6 +2858,92 @@ window.toggleFullscreen = function() {
     } else {
         document.exitFullscreen();
     }
+};
+
+window.rerollDailyMission = function(missionId) {
+    let mList = window.playerStats.dailyMissions;
+    if (!mList) return;
+    let mIndex = mList.findIndex(x => x.id === missionId);
+    if (mIndex === -1) return;
+    let targetMission = mList[mIndex];
+
+    if (targetMission.completed || targetMission.claimed) {
+        window.pushHeaderToast("❌ Cannot re-roll a completed task!", "#e74c3c");
+        return;
+    }
+
+    let rerollsDone = window.playerStats.dailyRerollsDone || 0;
+    if (rerollsDone >= 2) {
+        window.pushHeaderToast("❌ Locked: Maximum daily re-rolls reached!", "#e74c3c");
+        return;
+    }
+
+    let soulsCost = rerollsDone === 0 ? 0 : 50;
+    let ownedSouls = window.inventory.ETC["Monster Soul"] || 0;
+
+    if (soulsCost > 0 && ownedSouls < soulsCost) {
+        window.pushHeaderToast("❌ Requires 50 Monster Souls!", "#e74c3c");
+        return;
+    }
+
+    // Full 10-piece daily catalog
+    let pool = [
+        { type: "kills", label: "Slay monsters", targetBase: 300, mult: 10, unit: "monsters", treat: "Monster Soul", treatQty: 80 },
+        { type: "rares", label: "Slay rare spawns", targetBase: 5, mult: 1, unit: "rares", treat: "Luminous Soul", treatQty: 3 },
+        { type: "gold", label: "Collect Gold", targetBase: 2500, stageScale: true, unit: "Gold", treat: "Rare Scrap", treatQty: 15 },
+        { type: "fairies", label: "Catch wild fairies", targetBase: 8, mult: 1, unit: "fairies", treat: "Luminous Soul", treatQty: 3 },
+        { type: "tempers", label: "Successfully temper gear", targetBase: 1, mult: 1, unit: "tempers", treat: "Magic Scrap", treatQty: 8 },
+        { type: "reforges", label: "Reforge gear modifiers", targetBase: 2, mult: 1, unit: "reforges", treat: "Catalyst Core", treatQty: 1 },
+        { type: "dungeons", label: "Clear Dungeon floors", targetBase: 5, mult: 1, unit: "floors", treat: "Epic Scrap", treatQty: 6 },
+        { type: "salvage", label: "Salvage gear items", targetBase: 15, mult: 1, unit: "items", treat: "Rare Scrap", treatQty: 12 },
+        { type: "elixirs", label: "Consume active elixirs", targetBase: 3, mult: 1, unit: "elixirs", treat: "Monster Soul", treatQty: 60 },
+        { type: "active_clicks", label: "Manually click canvas", targetBase: 250, mult: 1, unit: "clicks", treat: "Luminous Soul", treatQty: 2 }
+    ];
+
+    // Filter out duplicate active tasks
+    let activeTypes = mList.map(x => x.type);
+    let eligiblePool = pool.filter(p => !activeTypes.includes(p.type));
+
+    if (eligiblePool.length === 0) {
+        window.pushHeaderToast("No alternate tasks available!", "#e74c3c");
+        return;
+    }
+
+    let newSelect = eligiblePool[Math.floor(Math.random() * eligiblePool.length)];
+    let stage = window.playerStats.stage || 1;
+    let finalTarget = newSelect.targetBase;
+    if (newSelect.stageScale) {
+        finalTarget = Math.ceil(newSelect.targetBase * Math.pow(1.045, stage));
+    }
+
+    // Apply currency adjustments
+    if (soulsCost > 0) {
+        window.inventory.ETC["Monster Soul"] -= soulsCost;
+        if (window.inventory.ETC["Monster Soul"] === 0) delete window.inventory.ETC["Monster Soul"];
+    }
+
+    window.playerStats.dailyRerollsDone++;
+
+    // Replace inline parameters with the new selection
+    mList[mIndex] = {
+        id: targetMission.id,
+        type: newSelect.type,
+        desc: `${newSelect.label} (${finalTarget.toLocaleString()} ${newSelect.unit})`,
+        current: 0,
+        target: finalTarget,
+        treat: newSelect.treat,
+        treatQty: newSelect.treatQty,
+        completed: false,
+        claimed: false
+    };
+
+    window.pushHeaderToast("🔄 Mission Re-rolled!", "#2ecc71");
+    window.SoundManager.play('swing');
+
+    window.updateUI();
+    window.renderMissionsWindow();
+    window.renderInventory();
+    window.saveGame();
 };
 
 window.forceCacheClear = function() {
@@ -4475,27 +4553,29 @@ window.updateArchitectRanges = function() {
                                 };
 
                                 window.buyMissionUpgrade = function(type) {
-                                    let p = window.playerStats;
-                                    p.missionUpgrades = p.missionUpgrades || { gold: 0, atk: 0, hp: 0 };
-                                    let curLevel = p.missionUpgrades[type] || 0;
-                                    let baseCost = type === 'gold' ? 5 : 8;
-                                    let scalingFactor = type === 'gold' ? 3 : 4;
-                                    let cost = baseCost + curLevel * scalingFactor;
+                                                    let p = window.playerStats;
+                                                    p.missionUpgrades = p.missionUpgrades || { gold: 0, atk: 0, hp: 0, bag: 0 };
+                                                    let curLevel = p.missionUpgrades[type] || 0;
+                                                    let baseCost = type === 'gold' ? 5 : (type === 'bag' ? 4 : 8);
+                                                    let scalingFactor = type === 'gold' ? 3 : (type === 'bag' ? 3 : 4);
+                                                    let cost = baseCost + curLevel * scalingFactor;
 
-                                    if ((p.missionTokens || 0) < cost) {
-                                        window.pushHeaderToast("❌ Insufficient Mission Tokens!", "#e74c3c");
-                                        return;
-                                    }
+                                                    if ((p.missionTokens || 0) < cost) {
+                                                        window.pushHeaderToast("❌ Insufficient Mission Tokens!", "#e74c3c");
+                                                        return;
+                                                    }
 
-                                    p.missionTokens -= cost;
-                                    p.missionUpgrades[type]++;
-                                    window.pushHeaderToast(`🎉 Upgraded Mission ${type.toUpperCase()} to Lv. ${p.missionUpgrades[type]}!`, "#2ecc71");
+                                                    p.missionTokens -= cost;
+                                                    p.missionUpgrades[type]++;
 
-                                    window.SoundManager.play('spell');
-                                    window.updateUI();
-                                    window.renderMissionsWindow();
-                                    window.saveGame();
-                                };
+                                                    let label = type === 'bag' ? "Satchel" : type.toUpperCase();
+                                                    window.pushHeaderToast(`🎉 Upgraded Mission ${label} to Lv. ${p.missionUpgrades[type]}!`, "#2ecc71");
+
+                                                    window.SoundManager.play('spell');
+                                                    window.updateUI();
+                                                    window.renderMissionsWindow();
+                                                    window.saveGame();
+                                                };
 
                                 window.buyMissionItem = function(itemName, cost) {
                                                     let p = window.playerStats;
@@ -4575,10 +4655,13 @@ window.updateArchitectRanges = function() {
                                     let missions = isWeekly ? window.playerStats.weeklyMissions : window.playerStats.dailyMissions;
                                     if (!missions) return;
 
-                                    let allDone = missions.every(m => m.completed);
                                     let alreadyClaimed = isWeekly ? window.playerStats.weeklyRewardClaimed : window.playerStats.dailyRewardClaimed;
+                                    if (alreadyClaimed) return;
 
-                                    if (!allDone || alreadyClaimed) return;
+                                    let completedCount = missions.filter(m => m.completed).length;
+                                    let requiredCount = isWeekly ? 3 : 5; // 3/3 for Weekly board, 5/6 for Daily board
+
+                                    if (completedCount < requiredCount) return;
 
                                     if (isWeekly) {
                                         window.playerStats.weeklyRewardClaimed = true;
@@ -4666,45 +4749,56 @@ window.updateArchitectRanges = function() {
                                         let weeklyMasterClaimed = window.playerStats.weeklyRewardClaimed;
 
                                         let getMissionRowHtml = (m, isWeekly) => {
-                                            let pct = (m.current / m.target) * 100;
-                                            let btnHtml = "";
-                                            if (m.claimed) {
-                                                btnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
-                                            } else if (m.completed) {
-                                                btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
-                                            } else {
-                                                btnHtml = `<span style="color:#888; font-size:10px; font-family:monospace;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
-                                            }
+                                                                                    let pct = (m.current / m.target) * 100;
+                                                                                    let btnHtml = "";
+                                                                                    let rerollBtnHtml = "";
 
-                                            let rewardText = `+${m.treatQty} ${m.treat}`;
-                                            if (m.potionAward) {
-                                                rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
-                                            }
+                                                                                    if (m.claimed) {
+                                                                                        btnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
+                                                                                    } else if (m.completed) {
+                                                                                        btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
+                                                                                    } else {
+                                                                                        btnHtml = `<span style="color:#888; font-size:10px; font-family:monospace;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
 
-                                            return `
-                                                <div style="background:#111; border:1px solid #2d3748; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px;">
-                                                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                                                        <strong style="font-size:11px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${m.desc}</strong>
-                                                        ${btnHtml}
-                                                    </div>
-                                                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#aaa; margin-top:2px;">
-                                                        <span>Reward: <span style="color:#f1c40f;">${rewardText}</span></span>
-                                                    </div>
-                                                    <div style="width:100%; height:4px; background:#222; border-radius:2px; overflow:hidden; border:1px solid #333; margin-top:2px;">
-                                                        <div style="width:${pct}%; height:100%; background:${isWeekly ? '#9b59b6' : '#2ecc71'};"></div>
-                                                    </div>
-                                                </div>
-                                            `;
-                                        };
+                                                                                        // Dynamic single-mission Re-roll system
+                                                                                        if (!isWeekly) {
+                                                                                            let rerollsDone = window.playerStats.dailyRerollsDone || 0;
+                                                                                            if (rerollsDone < 2) {
+                                                                                                let costLabel = rerollsDone === 0 ? "🔄 Free" : "🔄 50 Souls";
+                                                                                                rerollBtnHtml = `<button onclick="window.rerollDailyMission('${m.id}')" class="btn-action" style="padding:2px 5px; font-size:8.5px; margin-left:6px; background:#4b5563; font-family:monospace; line-height:1;" title="Re-roll Daily Mission (${rerollsDone === 0 ? 'Free' : 'Costs 50 Monster Souls'})">${costLabel}</button>`;
+                                                                                            }
+                                                                                        }
+                                                                                    }
 
-                                        let dailyMasterBtnHtml = "";
-                                        if (dailyMasterClaimed) {
-                                            dailyMasterBtnHtml = `<button class="btn-action" style="background:#333; color:#777; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Grand Treat Claimed ✓</button>`;
-                                        } else if (dailyDoneCount === 6) {
-                                            dailyMasterBtnHtml = `<button class="btn-action btn-pulse" style="width:100%; font-size:10.5px;" onclick="window.claimMasterMissionReward(false)">🎁 Claim Daily Grand Treat!</button>`;
-                                        } else {
-                                            dailyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Complete all 6 (${dailyDoneCount}/6)</button>`;
-                                        }
+                                                                                    let rewardText = `+${m.treatQty} ${m.treat}`;
+                                                                                    if (m.potionAward) {
+                                                                                        rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
+                                                                                    }
+
+                                                                                    return `
+                                                                                        <div style="background:#111; border:1px solid #2d3748; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px;">
+                                                                                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                                                                                <strong style="font-size:11px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">${m.desc}</strong>
+                                                                                                <div style="display:flex; align-items:center;">${btnHtml}${rerollBtnHtml}</div>
+                                                                                            </div>
+                                                                                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#aaa; margin-top:2px;">
+                                                                                                <span>Reward: <span style="color:#f1c40f;">${rewardText}</span></span>
+                                                                                            </div>
+                                                                                            <div style="width:100%; height:4px; background:#222; border-radius:2px; overflow:hidden; border:1px solid #333; margin-top:2px;">
+                                                                                                <div style="width:${pct}%; height:100%; background:${isWeekly ? '#9b59b6' : '#2ecc71'};"></div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    `;
+                                                                                };
+
+                                                                                let dailyMasterBtnHtml = "";
+                                                                                if (dailyMasterClaimed) {
+                                                                                    dailyMasterBtnHtml = `<button class="btn-action" style="background:#333; color:#777; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Grand Treat Claimed ✓</button>`;
+                                                                                } else if (dailyDoneCount >= 5) {
+                                                                                    dailyMasterBtnHtml = `<button class="btn-action btn-pulse" style="width:100%; font-size:10.5px;" onclick="window.claimMasterMissionReward(false)">🎁 Claim Daily Grand Treat!</button>`;
+                                                                                } else {
+                                                                                    dailyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Complete at least 5 (${dailyDoneCount}/5)</button>`;
+                                                                                }
 
                                         let weeklyMasterBtnHtml = "";
                                         let scalingPPText = 2 + Math.floor(window.playerStats.prestigeCount / 5);
@@ -4720,11 +4814,11 @@ window.updateArchitectRanges = function() {
                                             } else if (weeklyDoneCount === 3) {
                                                 weeklyMasterBtnHtml = `<button class="btn-action btn-pulse" style="width:100%; font-size:10.5px; background:#9b59b6; border-color:#8e44ad;" onclick="window.claimMasterMissionReward(true)">🎁 Claim Weekly Grand Treat!</button>`;
                                             } else {
-                                                weeklyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Complete all 3 (${weeklyDoneCount}/3)</button>`;
-                                            }
-                                        }
+                                                                                            weeklyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Complete all 3 (${weeklyDoneCount}/3)</button>`;
+                                                                                                                                                                                    }
+                                                                                                                                    }
 
-                                        let weekliesCardHtml = "";
+                                                                                                                                    let weekliesCardHtml = "";
                                         if (window.playerStats.prestigeCount === 0) {
                                             weekliesCardHtml = `
                                                 <div style="border:1px solid #444; border-radius:6px; padding:12px; background:rgba(0,0,0,0.4); text-align:center; color:#aaa; font-size:11px; font-style:italic;">
@@ -4760,10 +4854,10 @@ window.updateArchitectRanges = function() {
                                                     ${dailies.map(m => getMissionRowHtml(m, false)).join("")}
                                                 </div>
                                                 <div style="margin-top:10px;">
-                                                    ${dailyMasterBtnHtml}
-                                                    ${dailyMasterClaimed ? '' : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:4px;">Grand treat: 1x Gacha Key, 1x Catalyst Core, 2x Eridium Shards</div>`}
-                                                </div>
-                                            </div>
+                                                                                                    ${dailyMasterBtnHtml}
+                                                                                                    ${dailyMasterClaimed ? '' : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:4px;">Grand treat: 1x Gacha Key, 1x Catalyst Core, 2x Eridium Shards (Only requires 5/6 completed!)</div>`}
+                                                                                                </div>
+                                                                                            </div>
 
                                             <!-- WEEKLY MISSIONS PANEL -->
                                             ${weekliesCardHtml}
@@ -4786,23 +4880,39 @@ window.updateArchitectRanges = function() {
                                         let canAffordAtk = tokenBalance >= costAtk;
                                         let canAffordHp = tokenBalance >= costHp;
 
-                                        contentHtml = `
-                                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                                <div style="background:#111; border:1px solid #2ecc71; border-radius:6px; padding:10px;">
-                                                    <strong style="color:#2ecc71; font-size:12px; display:block; margin-bottom:4px;">🎖️ PERMANENT GUILD UPGRADES</strong>
-                                                    <span style="font-size:9.5px; color:#aaa; display:block; margin-bottom:8px; line-height:1.4;">These bonuses persist permanently and are NOT reset upon Prestige Ascension.</span>
+                                        let lvlBag = p.missionUpgrades.bag || 0;
+                                                                            let costBag = 4 + lvlBag * 3;
+                                                                            let canAffordBag = tokenBalance >= costBag;
 
-                                                    <!-- Gold % Upgrade -->
-                                                    <div style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
-                                                        <div>
-                                                            <strong style="color:#f1c40f; font-size:11px;">Midas Training</strong>
-                                                            <div style="font-size:9px; color:#aaa;">+5% permanent Gold Multiplier</div>
-                                                            <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlGold} (Current: +${lvlGold * 5}%)</span>
-                                                        </div>
-                                                        <button class="btn-action" style="background:#f1c40f; color:#000; font-size:10px; padding:4px 8px;" ${canAffordGold ? '' : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('gold')">
-                                                            Cost: ${costGold}
-                                                        </button>
-                                                    </div>
+                                                                            contentHtml = `
+                                                                                <div style="display:flex; flex-direction:column; gap:8px;">
+                                                                                    <div style="background:#111; border:1px solid #2ecc71; border-radius:6px; padding:10px;">
+                                                                                        <strong style="color:#2ecc71; font-size:12px; display:block; margin-bottom:4px;">🎖️ PERMANENT GUILD UPGRADES</strong>
+                                                                                        <span style="font-size:9.5px; color:#aaa; display:block; margin-bottom:8px; line-height:1.4;">These bonuses persist permanently and are NOT reset upon Prestige Ascension.</span>
+
+                                                                                        <!-- Bag Space Upgrade -->
+                                                                                        <div style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                                                                                            <div>
+                                                                                                <strong style="color:#3498db; font-size:11px;">Dimensional Satchel</strong>
+                                                                                                <div style="font-size:9px; color:#aaa;">+10 permanent equipment and artifact sack slots</div>
+                                                                                                <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlBag} (Current: +${lvlBag * 10} slots)</span>
+                                                                                            </div>
+                                                                                            <button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:4px 8px;" ${canAffordBag ? '' : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('bag')">
+                                                                                                Cost: ${costBag}
+                                                                                            </button>
+                                                                                        </div>
+
+                                                                                        <!-- Gold % Upgrade -->
+                                                                                        <div style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                                                                                            <div>
+                                                                                                <strong style="color:#f1c40f; font-size:11px;">Midas Training</strong>
+                                                                                                <div style="font-size:9px; color:#aaa;">+5% permanent Gold Multiplier</div>
+                                                                                                <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlGold} (Current: +${lvlGold * 5}%)</span>
+                                                                                            </div>
+                                                                                            <button class="btn-action" style="background:#f1c40f; color:#000; font-size:10px; padding:4px 8px;" ${canAffordGold ? '' : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('gold')">
+                                                                                                Cost: ${costGold}
+                                                                                            </button>
+                                                                                        </div>
 
                                                     <!-- Attack % Upgrade -->
                                                     <div style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
