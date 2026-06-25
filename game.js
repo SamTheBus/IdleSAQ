@@ -750,13 +750,12 @@ window.onload = function() {
         attachRatesListeners('star-rate-5', 'star5');
 
     window.isCanvasPressed = false;
-    canvas.addEventListener('pointerdown', function(e) {
-        e.preventDefault();
-        let gameTooltip = document.getElementById('game-tooltip');
-        let etcTooltip = document.getElementById('etc-tooltip');
-        if (gameTooltip.style.display === "block" || etcTooltip.style.display === "block") {
-            window.hideTooltip(); return;
-        }
+        canvas.addEventListener('pointerdown', function(e) {
+            let gameTooltip = document.getElementById('game-tooltip');
+            let etcTooltip = document.getElementById('etc-tooltip');
+            if (gameTooltip.style.display === "block" || etcTooltip.style.display === "block") {
+                window.hideTooltip(); return;
+            }
 
         window.playerStats.hasClickedThisBattle = true;
         window.playerStats.canvasClicksWindow = window.playerStats.canvasClicksWindow || [];
