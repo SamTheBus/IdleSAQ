@@ -633,16 +633,22 @@ window.onload = function() {
     window.ctx = ctx;
 
     window.adjustCanvasDimensions();
-    window.addEventListener('resize', () => {
-        window.adjustCanvasDimensions();
-        if (typeof window.updateUI === "function") window.updateUI();
-    });
-    window.addEventListener('orientationchange', () => {
-        window.adjustCanvasDimensions();
-        if (typeof window.updateUI === "function") window.updateUI();
-    });
+        // Allow dynamic mobile chrome (address bar / viewport height) to settle
+        setTimeout(() => {
+            window.adjustCanvasDimensions();
+            if (typeof window.updateUI === "function") window.updateUI();
+        }, 50);
 
-    window.loadGame();
+        window.addEventListener('resize', () => {
+            window.adjustCanvasDimensions();
+            if (typeof window.updateUI === "function") window.updateUI();
+        });
+        window.addEventListener('orientationchange', () => {
+            window.adjustCanvasDimensions();
+            if (typeof window.updateUI === "function") window.updateUI();
+        });
+
+        window.loadGame();
         window.updateStickyCanvasStyle();
 
         // Block pointer event leaks and click-through propagation on tooltips
