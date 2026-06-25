@@ -147,30 +147,46 @@ canvas {
 /* --- TABS SYSTEM --- */
 .tabs {
     display: flex;
-    gap: 4px;
-    margin-bottom: 12px;
+    gap: 6px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
 }
 
 .tab-btn {
     flex: 1;
-    background: #333333;
-    color: var(--text-dark);
-    border: none;
-    padding: 10px 4px; /* More padding for larger text targets */
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    color: #94a3b8;
+    border: 1px solid #334155;
+    padding: 10px 4px;
     cursor: pointer;
     font-weight: bold;
-    border-radius: 4px;
-    font-size: 12px; /* Upscaled */
+    border-radius: 6px;
+    font-size: 12px;
     min-width: 15%;
-    transition: background 0.2s, color 0.2s;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    outline: none;
+}
+
+.tab-btn:hover {
+    color: #f1f5f9;
+    border-color: #475569;
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.tab-btn:active {
+    transform: translateY(0);
 }
 
 .tab-btn.active {
-    background: var(--accent-orange);
-    color: white;
+    background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+    color: #f8fafc;
+    border-color: var(--accent-orange);
+    box-shadow: inset 0 -3px 0 var(--accent-orange), 0 4px 12px rgba(230, 126, 34, 0.15); /* Tactile bottom border accent */
 }
 
 /* --- PANEL DISPLAY --- */
@@ -463,15 +479,41 @@ canvas {
     box-shadow: 0 0 12px rgba(59, 130, 246, 0.35);
 }
 
-.sub-tabs { display: flex; gap: 5px; margin-bottom: 8px; flex-wrap: wrap; }
-.sub-tab-btn {
-    flex: 1; background: #444; color: #ccc; border: none; padding: 6px 10px;
-    font-size: 11px; border-radius: 3px; cursor: pointer; font-weight: bold;
-    text-align: center;
+.sub-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
 }
+
+.sub-tab-btn {
+    flex: 1;
+    background: #090b0e;
+    color: #94a3b8;
+    border: 1px solid #1e293b;
+    padding: 6px 10px;
+    font-size: 11px;
+    border-radius: 20px; /* Modern capsule-pill shape */
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.2s ease-in-out;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    outline: none;
+}
+
+.sub-tab-btn:hover {
+    color: #f1f5f9;
+    border-color: #334155;
+    background: #11141a;
+}
+
 .sub-tab-btn.active {
-    background: var(--accent-blue);
-    color: white;
+    background: rgba(52, 152, 219, 0.1); /* Subtle glowing overlay */
+    color: #ffffff;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.25);
 }
 
 /* --- PULSE & GLOW EFFECTS --- */
@@ -669,21 +711,31 @@ canvas {
     overscroll-behavior: contain;
 }
 
+#global-xp-header {
+    background: linear-gradient(180deg, #0d1117 0%, #070a0f 100%) !important;
+    padding: 8px 16px !important;
+    border-bottom: 1px solid #1e293b !important;
+    font-size: 11px !important;
+    font-family: monospace !important;
+}
+
 .xp-bar-container {
-    background: #333333;
+    background: #090b0e !important;
     width: 100%;
-    height: 10px;
-    border-radius: 5px;
+    height: 6px !important;
+    border-radius: 10px !important;
     margin-top: 5px;
     overflow: hidden;
     position: relative;
+    border: 1px solid #1e293b !important;
 }
 
 .xp-bar-fill {
-    background: var(--accent-purple);
+    background: linear-gradient(90deg, #8b5cf6, #d946ef) !important;
     height: 100%;
     width: 0%;
-    transition: width 0.3s;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.45);
 }
 
 /* --- DEATH AND COLLAPSE GRAPHICS --- */

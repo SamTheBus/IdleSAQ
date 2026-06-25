@@ -62,9 +62,9 @@
             </div>
 
             <!-- Elevated Glowing Top Panel Action Toggles -->
-            <button id="btn-missions-top" class="nav-btn" onclick="window.toggleMissions()" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #34d399; box-shadow: 0 0 10px rgba(16, 185, 129, 0.45); font-weight: bold;">📅 Missions</button>
-            <button id="btn-achievements-top" class="nav-btn" onclick="window.toggleAchievements()" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-color: #a78bfa; box-shadow: 0 0 10px rgba(139, 92, 246, 0.45); font-weight: bold;">🏆 Trophies</button>
-            <button id="btn-settings-top" class="nav-btn" onclick="window.toggleSettings()" style="background: linear-gradient(135deg, #4b5563, #1f2937); border-color: #6b7280; font-weight: bold;">⚙️ Settings</button>
+            <button id="btn-missions-top" class="nav-btn" onclick="window.toggleMissions()">📅 Missions</button>
+            <button id="btn-achievements-top" class="nav-btn" onclick="window.toggleAchievements()">🏆 Trophies</button>
+            <button id="btn-settings-top" class="nav-btn" onclick="window.toggleSettings()">⚙️ Settings</button>
         </div>
         <div class="brand-title">SAQ: Slaying & Questing</div>
     </div>
@@ -455,12 +455,12 @@
     <canvas id="gameCanvas" width="750" height="320"></canvas>
 
     <!-- Global Progress Bar (Level & XP always visible on top of every tab) -->
-    <div id="global-xp-header" style="background:#151515; padding: 6px 12px; border-bottom: 1px solid #333; font-size: 11px; font-family: monospace;">
+    <div id="global-xp-header">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
             <span style="font-weight:bold; color:#fff;">Level <span id="char-level">1</span></span>
             <span style="color:#aaa;">XP: <span id="char-xp-text">0 / 100</span></span>
         </div>
-        <div class="xp-bar-container" style="height: 6px; margin: 0;"><div id="char-xp-fill" class="xp-bar-fill"></div></div>
+        <div class="xp-bar-container"><div id="char-xp-fill" class="xp-bar-fill"></div></div>
     </div>
 
     <!-- Tabulated Control Centers -->
