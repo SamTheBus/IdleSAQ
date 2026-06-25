@@ -885,28 +885,82 @@ window.showStatBreakdown = function(e, statKey, isPct = false) {
         }
 
         let intScaleTotal = 0;
-        let prestigeTotal = 0;
-        if (statKey === 'fairySpawn') {
-            intScaleTotal = effectiveInt * 0.001;
-            prestigeTotal = (window.playerStats.prestigeUpgrades?.fairy || 0) * 0.05;
-        }
+                let prestigeTotal = 0;
+                if (statKey === 'fairySpawn') {
+                    intScaleTotal = effectiveInt * 0.001;
+                    prestigeTotal = (window.playerStats.prestigeUpgrades?.fairy || 0) * 0.05;
+                }
 
-        let formatVal = (v) => isPct ? `+${Math.floor(v*100)}%` : `+${v.toLocaleString()}`;
-        if (statKey === 'gold') formatVal = (v) => `+${v.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                // Calculate Set Bonuses for Tooltip Breakdown
+                let setCounts = {};
+                const eligibleSetSlots = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
+                let overallAdoptedSet = null;
+                if (window.equippedSlots.overall) {
+                    overallAdoptedSet = (window.equippedSlots.helmet && window.getItemSetName(window.equippedSlots.helmet)) ||
+                                        (window.equippedSlots.boots && window.getItemSetName(window.equippedSlots.boots)) ||
+                                        (window.equippedSlots.weapon && window.getItemSetName(window.equippedSlots.weapon)) || null;
+                }
+                eligibleSetSlots.forEach(slot => {
+                    let item = window.equippedSlots[slot];
+                    if (item) {
+                        let setName = window.getItemSetName(item);
+                        if (slot === "overall" && overallAdoptedSet) setName = overallAdoptedSet;
+                        if (setName) setCounts[setName] = (setCounts[setName] || 0) + (slot === "overall" ? 2 : 1);
+                    }
+                });
 
-        let html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;">
-            <div class="tt-title" style="color:${data.color};">${data.title} Breakdown</div>
-            <div class="tt-stat-line" style="color:#aaa;">• Base Entity: ${formatVal(data.base).replace('+','')}</div>`;
+                let setCtx = {
+                    atk: 0, maxHp: 0, moveSpeed: 0,
+                    idleSpeedPct: 0, activeSpeedPct: 0,
+                    critChance: 0, critDamage: 0, block: 0, parry: 0,
+                    atkPctBonus: 0, maxHpPctBonus: 0, defPctBonus: 0, flatDefBonus: 0,
+                    str: 0, dex: 0, int: 0,
+                    gold: 0, drop: 0, qly: 0,
+                    rareSpawn: 0,
+                    hasCorrosiveSet: false, hasShatterSet: false, hasSingularitySet: false
+                };
+                for (let setName in setCounts) {
+                    let count = setCounts[setName]; let setDef = window.SET_DEFINITIONS[setName];
+                    if (setDef) setDef.bonuses.forEach(b => { if (count >= b.count) b.apply(setCtx); });
+                }
 
-        if (data.lvl > 0) html += `<div class="tt-stat-line" style="color:#3498db;">• Level Stats (SP): ${formatVal(data.lvl)}</div>`;
-        if (gearTotal > 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• Equipment / Elixirs: ${formatVal(gearTotal)}</div>`;
-        if (artTotal > 0) html += `<div class="tt-stat-line" style="color:#9b59b6;">• Artifacts: ${formatVal(artTotal)}</div>`;
-        if (achTotal > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• Achievements (Flat): ${formatVal(achTotal)}</div>`;
-        if (achPctTotal > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• Achievements (Mult): +${Math.round(achPctTotal * 100)}%</div>`;
-        if (prestigeTotal > 0) html += `<div class="tt-stat-line" style="color:#8e44ad;">• Prestige Upgrades: ${formatVal(prestigeTotal)}</div>`;
-        if (intScaleTotal > 0) html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): ${formatVal(intScaleTotal)}</div>`;
+                let setFlatBonus = 0;
+                let setPctBonus = 0;
 
-        let totalVal = data.base + data.lvl + gearTotal + artTotal + achTotal + intScaleTotal + prestigeTotal;
+                if (statKey === 'atk') { setFlatBonus = setCtx.atk; setPctBonus = setCtx.atkPctBonus; }
+                else if (statKey === 'maxHp') { setFlatBonus = setCtx.maxHp; setPctBonus = setCtx.maxHpPctBonus; }
+                else if (statKey === 'def') { setFlatBonus = setCtx.flatDefBonus; setPctBonus = setCtx.defPctBonus; }
+                else if (statKey === 'moveSpeed') { setFlatBonus = setCtx.moveSpeed; }
+                else if (statKey === 'str') { setFlatBonus = setCtx.str; }
+                else if (statKey === 'dex') { setFlatBonus = setCtx.dex; }
+                else if (statKey === 'int') { setFlatBonus = setCtx.int; }
+                else if (statKey === 'critChance') { setPctBonus = setCtx.critChance; }
+                else if (statKey === 'critDamage') { setPctBonus = setCtx.critDamage; }
+                else if (statKey === 'block') { setPctBonus = setCtx.block; }
+                else if (statKey === 'parry') { setPctBonus = setCtx.parry; }
+                else if (statKey === 'gold') { setPctBonus = setCtx.gold; }
+                else if (statKey === 'dropRate') { setPctBonus = setCtx.drop; }
+                else if (statKey === 'quality') { setPctBonus = setCtx.qly; }
+                else if (statKey === 'rareSpawn') { setPctBonus = setCtx.rareSpawn; }
+
+                let formatVal = (v) => isPct ? `+${Math.floor(v*100)}%` : `+${v.toLocaleString()}`;
+                if (statKey === 'gold') formatVal = (v) => `+${v.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+                let html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;">
+                    <div class="tt-title" style="color:${data.color};">${data.title} Breakdown</div>
+                    <div class="tt-stat-line" style="color:#aaa;">• Base Entity: ${formatVal(data.base).replace('+','')}</div>`;
+
+                if (data.lvl > 0) html += `<div class="tt-stat-line" style="color:#3498db;">• Level Stats (SP): ${formatVal(data.lvl)}</div>`;
+                if (gearTotal > 0) html += `<div class="tt-stat-line" style="color:#2ecc71;">• Equipment / Elixirs: ${formatVal(gearTotal)}</div>`;
+                if (artTotal > 0) html += `<div class="tt-stat-line" style="color:#9b59b6;">• Artifacts: ${formatVal(artTotal)}</div>`;
+                if (achTotal > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• Achievements (Flat): ${formatVal(achTotal)}</div>`;
+                if (achPctTotal > 0) html += `<div class="tt-stat-line" style="color:#f1c40f;">• Achievements (Mult): +${Math.round(achPctTotal * 100)}%</div>`;
+                if (setFlatBonus > 0) html += `<div class="tt-stat-line" style="color:#e67e22;">• Set Bonuses (Flat): ${formatVal(setFlatBonus)}</div>`;
+                if (setPctBonus > 0) html += `<div class="tt-stat-line" style="color:#e67e22;">• Set Bonuses (Mult): +${Math.round(setPctBonus * 100)}%</div>`;
+                if (prestigeTotal > 0) html += `<div class="tt-stat-line" style="color:#8e44ad;">• Prestige Upgrades: ${formatVal(prestigeTotal)}</div>`;
+                if (intScaleTotal > 0) html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): ${formatVal(intScaleTotal)}</div>`;
+
+                let totalVal = data.base + data.lvl + gearTotal + artTotal + achTotal + intScaleTotal + prestigeTotal + setFlatBonus;
     if (statKey === 'atk' && effectiveStr > 0) {
         html += `<div class="tt-stat-line" style="color:#e67e22;">• Strength Scaling (STR): +${Math.floor(totalVal * (effectiveStr * 0.01))}</div>`;
         html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${effectiveStr}% Multiplier)</div>`;

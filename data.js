@@ -694,17 +694,37 @@ window.resolvePlayerStats = function(useDraft = false) {
         }
     });
 
-    let setCtx = { atk: 0, maxHp: 0, moveSpeed: 0, idleSpeedPct: 0, activeSpeedPct: 0, critChance: 0, critDamage: 0, block: 0, parry: 0, atkPctBonus: 0, maxHpPctBonus: 0, defPctBonus: 0, flatDefBonus: 0 };
-    for (let setName in setCounts) {
-        let count = setCounts[setName]; let setDef = window.SET_DEFINITIONS[setName];
-        if (setDef) setDef.bonuses.forEach(b => { if (count >= b.count) b.apply(setCtx); });
-    }
+    let setCtx = {
+            atk: 0, maxHp: 0, moveSpeed: 0,
+            idleSpeedPct: 0, activeSpeedPct: 0,
+            critChance: 0, critDamage: 0, block: 0, parry: 0,
+            atkPctBonus: 0, maxHpPctBonus: 0, defPctBonus: 0, flatDefBonus: 0,
+            str: 0, dex: 0, int: 0,
+            gold: 0, drop: 0, qly: 0,
+            rareSpawn: 0,
+            hasCorrosiveSet: false, hasShatterSet: false, hasSingularitySet: false
+        };
+        for (let setName in setCounts) {
+            let count = setCounts[setName]; let setDef = window.SET_DEFINITIONS[setName];
+            if (setDef) setDef.bonuses.forEach(b => { if (count >= b.count) b.apply(setCtx); });
+        }
 
-    p.atk += setCtx.atk; p.maxHp += setCtx.maxHp; p.moveSpeed += setCtx.moveSpeed;
-    idleSpeedPct += setCtx.idleSpeedPct; activeSpeedPct += setCtx.activeSpeedPct;
-    p.critChance += setCtx.critChance; p.critDamage += setCtx.critDamage; p.block += setCtx.block; p.parry += setCtx.parry;
+        p.atk += setCtx.atk; p.maxHp += setCtx.maxHp; p.moveSpeed += setCtx.moveSpeed;
+        idleSpeedPct += setCtx.idleSpeedPct; activeSpeedPct += setCtx.activeSpeedPct;
+        p.critChance += setCtx.critChance; p.critDamage += setCtx.critDamage; p.block += setCtx.block; p.parry += setCtx.parry;
 
-    achAtkPct += setCtx.atkPctBonus; achMaxHpPct += setCtx.maxHpPctBonus;
+        p.str += setCtx.str;
+        p.dex += setCtx.dex;
+        p.int += setCtx.int;
+        p.gold += setCtx.gold;
+        p.drop += setCtx.drop;
+        p.qly += setCtx.qly;
+        p.rareSpawn += setCtx.rareSpawn;
+        p.hasCorrosiveSet = setCtx.hasCorrosiveSet;
+        p.hasShatterSet = setCtx.hasShatterSet;
+        p.hasSingularitySet = setCtx.hasSingularitySet;
+
+        achAtkPct += setCtx.atkPctBonus; achMaxHpPct += setCtx.maxHpPctBonus;
     p.str = Math.floor(p.str * achStrPct); p.dex = Math.floor(p.dex * achDexPct); p.int = Math.floor(p.int * achIntPct);
 
     let effectiveStr = Math.max(0, p.str - 5); let effectiveDex = Math.max(0, p.dex - 5); let effectiveInt = Math.max(0, p.int - 5);
