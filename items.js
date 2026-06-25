@@ -1136,68 +1136,105 @@ window.getStatBaseRange = function (item, statKey) {
   }
 
   let tempers = item.temperLevel || 0;
-  if (tempers > 0) {
-    if (isArt) {
-      if (statKey === "atk") {
-        min += tempers * 5;
-        max += tempers * 5;
-      } else if (statKey === "maxHp") {
-        min += tempers * 30;
-        max += tempers * 30;
-      } else if (statKey === "def") {
-        min += tempers * 3;
-        max += tempers * 3;
-      }
-    } else {
-            if (
-              [
-                "atk",
-                "maxHp",
-                "def",
-                "str",
-                "dex",
-                "int",
-                "activeAttackSpeed",
-                "idleAttackSpeed",
-              ].includes(statKey)
-            ) {
-              let multiplier = 1 + tempers * 0.08;
-              min *= multiplier;
-              max *= multiplier;
-            }
-      if (statKey === "moveSpeed") {
-        min += tempers;
-        max += tempers;
-      } else if (statKey === "str" || statKey === "dex" || statKey === "int") {
-        min += tempers;
-        max += tempers;
-      } else if (statKey === "critChance") {
-        min += tempers * 0.005;
-        max += tempers * 0.005;
-      } else if (statKey === "critDamage") {
-        min += tempers * 0.015;
-        max += tempers * 0.015;
-      } else if (statKey === "block") {
-        min += tempers * 0.005;
-        max += tempers * 0.005;
-      } else if (statKey === "parry") {
-        min += tempers * 0.005;
-        max += tempers * 0.005;
-      } else if (statKey === "dropRate") {
-        min += tempers * 0.01;
-        max += tempers * 0.01;
-      } else if (statKey === "quality") {
-        min += tempers * 0.005;
-        max += tempers * 0.005;
-      } else if (statKey === "goldMulti") {
-        min += tempers * 0.01;
-        max += tempers * 0.01;
-      } else if (statKey === "fairySpawn") {
-        min += tempers * 0.01;
-        max += tempers * 0.01;
+    if (tempers > 0) {
+      if (isArt) {
+        let artMultiplier = Math.pow(1.15, tempers);
+        min *= artMultiplier;
+        max *= artMultiplier;
+
+        if (statKey === "atk") {
+          min += tempers * 15;
+          max += tempers * 15;
+        } else if (statKey === "maxHp") {
+          min += tempers * 100;
+          max += tempers * 100;
+        } else if (statKey === "def") {
+          min += tempers * 10;
+          max += tempers * 10;
+        } else if (["str", "dex", "int"].includes(statKey)) {
+          min += tempers * 3;
+          max += tempers * 3;
+        } else if (statKey === "goldMulti") {
+          min += tempers * 0.05;
+          max += tempers * 0.05;
+        } else if (statKey === "dropRate") {
+          min += tempers * 0.03;
+          max += tempers * 0.03;
+        } else if (statKey === "quality") {
+          min += tempers * 0.02;
+          max += tempers * 0.02;
+        } else if (statKey === "fairySpawn") {
+          min += tempers * 0.02;
+          max += tempers * 0.02;
+        } else if (statKey === "rareSpawn") {
+          min += tempers * 0.01;
+          max += tempers * 0.01;
+        } else if (statKey === "critChance") {
+          min += tempers * 0.01;
+          max += tempers * 0.01;
+        } else if (["parry", "block"].includes(statKey)) {
+          min += tempers * 0.005;
+          max += tempers * 0.005;
+        } else if (["idleAttackSpeed", "activeAttackSpeed"].includes(statKey)) {
+          min += tempers * 0.03;
+          max += tempers * 0.03;
+        } else if (statKey === "moveSpeed") {
+          min += tempers;
+          max += tempers;
+        } else if (statKey === "critDamage") {
+          min += tempers * 0.025;
+          max += tempers * 0.025;
+        }
+      } else {
+        if (
+          [
+            "atk",
+            "maxHp",
+            "def",
+            "str",
+            "dex",
+            "int",
+            "activeAttackSpeed",
+            "idleAttackSpeed",
+          ].includes(statKey)
+        ) {
+          let multiplier = 1 + tempers * 0.08;
+          min *= multiplier;
+          max *= multiplier;
+        }
+        if (statKey === "moveSpeed") {
+          min += tempers;
+          max += tempers;
+        } else if (statKey === "str" || statKey === "dex" || statKey === "int") {
+          min += tempers;
+          max += tempers;
+        } else if (statKey === "critChance") {
+          min += tempers * 0.005;
+          max += tempers * 0.005;
+        } else if (statKey === "critDamage") {
+          min += tempers * 0.015;
+          max += tempers * 0.015;
+        } else if (statKey === "block") {
+          min += tempers * 0.005;
+          max += tempers * 0.005;
+        } else if (statKey === "parry") {
+          min += tempers * 0.005;
+          max += tempers * 0.005;
+        } else if (statKey === "dropRate") {
+          min += tempers * 0.01;
+          max += tempers * 0.01;
+        } else if (statKey === "quality") {
+          min += tempers * 0.005;
+          max += tempers * 0.005;
+        } else if (statKey === "goldMulti") {
+          min += tempers * 0.01;
+          max += tempers * 0.01;
+        } else if (statKey === "fairySpawn") {
+          min += tempers * 0.01;
+          max += tempers * 0.01;
+        }
       }
     }
-  }
 
   if (item.enchantments && item.enchantments[statKey]) {
     let count = item.enchantments[statKey];
@@ -1417,15 +1454,29 @@ window.recalculateItemStats = function (item) {
   let tempers = item.temperLevel || 0;
     if (tempers > 0) {
       let isArt = item.type === "artifact";
-      let multiplier = 1 + tempers * 0.08;
       if (isArt) {
-        item.atk += tempers * 5;
-        item.maxHp += tempers * 30;
-        item.def += tempers * 3;
-        item.str += tempers;
-        item.dex += tempers;
-        item.int += tempers;
+        let artMultiplier = Math.pow(1.15, tempers);
+        item.atk = Math.round(item.atk * artMultiplier) + tempers * 15;
+        item.maxHp = Math.round(item.maxHp * artMultiplier) + tempers * 100;
+        item.def = Math.round(item.def * artMultiplier) + tempers * 10;
+        item.str = Math.round(item.str * artMultiplier) + tempers * 3;
+        item.dex = Math.round(item.dex * artMultiplier) + tempers * 3;
+        item.int = Math.round(item.int * artMultiplier) + tempers * 3;
+
+        if (item.goldMulti > 0) item.goldMulti = parseFloat((item.goldMulti + tempers * 0.05).toFixed(4));
+        if (item.dropRate > 0) item.dropRate = parseFloat((item.dropRate + tempers * 0.03).toFixed(4));
+        if (item.quality > 0) item.quality = parseFloat((item.quality + tempers * 0.02).toFixed(4));
+        if (item.fairySpawn > 0) item.fairySpawn = parseFloat((item.fairySpawn + tempers * 0.02).toFixed(4));
+        if (item.rareSpawn > 0) item.rareSpawn = parseFloat((item.rareSpawn + tempers * 0.01).toFixed(4));
+        if (item.critChance > 0) item.critChance = parseFloat((item.critChance + tempers * 0.01).toFixed(4));
+        if (item.parry > 0) item.parry = parseFloat((item.parry + tempers * 0.005).toFixed(4));
+        if (item.block > 0) item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
+        if (item.idleAttackSpeed > 0) item.idleAttackSpeed = parseFloat((item.idleAttackSpeed + tempers * 0.03).toFixed(4));
+        if (item.activeAttackSpeed > 0) item.activeAttackSpeed = parseFloat((item.activeAttackSpeed + tempers * 0.03).toFixed(4));
+        if (item.moveSpeed > 0) item.moveSpeed += tempers;
+        if (item.critDamage > 0) item.critDamage = parseFloat((item.critDamage + tempers * 0.025).toFixed(4));
       } else {
+        let multiplier = 1 + tempers * 0.08;
         // Scale internal base parameter properties once (no double-scaling!)
         if (item.baseAtk > 0)
           item.baseAtk = Math.round(item.baseAtk * multiplier);
@@ -1444,43 +1495,43 @@ window.recalculateItemStats = function (item) {
         if (item.str > 0) item.str = Math.round(item.str * multiplier);
         if (item.dex > 0) item.dex = Math.round(item.dex * multiplier);
         if (item.int > 0) item.int = Math.round(item.int * multiplier);
-      }
 
-      if (item.moveSpeed > 0) item.moveSpeed += tempers;
-      if (item.critChance > 0)
-        item.critChance = parseFloat(
-          (item.critChance + tempers * 0.005).toFixed(4),
-        );
-      if (item.critDamage > 0)
-        item.critDamage = parseFloat(
-          (item.critDamage + tempers * 0.015).toFixed(4),
-        );
-      if (item.block > 0)
-        item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
-      if (item.parry > 0)
-        item.parry = parseFloat((item.parry + tempers * 0.005).toFixed(4));
-      if (item.dropRate > 0)
-        item.dropRate = parseFloat((item.dropRate + tempers * 0.01).toFixed(4));
-      if (item.quality > 0)
-        item.quality = parseFloat((item.quality + tempers * 0.005).toFixed(4));
-      if (item.goldMulti > 0)
-        item.goldMulti = parseFloat((item.goldMulti + tempers * 0.01).toFixed(4));
-      if (item.rareSpawn > 0)
-        item.rareSpawn = parseFloat(
-          (item.rareSpawn + tempers * 0.001).toFixed(4),
-        );
-      if (item.fairySpawn > 0)
-        item.fairySpawn = parseFloat(
-          (item.fairySpawn + tempers * 0.01).toFixed(4),
-        );
-      if (item.activeAttackSpeed > 0)
-        item.activeAttackSpeed = parseFloat(
-          (item.bonusActiveSpeed * (1 + tempers * 0.08)).toFixed(4),
-        );
-      if (item.idleAttackSpeed > 0)
-        item.idleAttackSpeed = parseFloat(
-          (item.bonusIdleSpeed * (1 + tempers * 0.08)).toFixed(4),
-        );
+        if (item.moveSpeed > 0) item.moveSpeed += tempers;
+        if (item.critChance > 0)
+          item.critChance = parseFloat(
+            (item.critChance + tempers * 0.005).toFixed(4),
+          );
+        if (item.critDamage > 0)
+          item.critDamage = parseFloat(
+            (item.critDamage + tempers * 0.015).toFixed(4),
+          );
+        if (item.block > 0)
+          item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
+        if (item.parry > 0)
+          item.parry = parseFloat((item.parry + tempers * 0.005).toFixed(4));
+        if (item.dropRate > 0)
+          item.dropRate = parseFloat((item.dropRate + tempers * 0.01).toFixed(4));
+        if (item.quality > 0)
+          item.quality = parseFloat((item.quality + tempers * 0.005).toFixed(4));
+        if (item.goldMulti > 0)
+          item.goldMulti = parseFloat((item.goldMulti + tempers * 0.01).toFixed(4));
+        if (item.rareSpawn > 0)
+          item.rareSpawn = parseFloat(
+            (item.rareSpawn + tempers * 0.001).toFixed(4),
+          );
+        if (item.fairySpawn > 0)
+          item.fairySpawn = parseFloat(
+            (item.fairySpawn + tempers * 0.01).toFixed(4),
+          );
+        if (item.activeAttackSpeed > 0)
+          item.activeAttackSpeed = parseFloat(
+            (item.bonusActiveSpeed * (1 + tempers * 0.08)).toFixed(4),
+          );
+        if (item.idleAttackSpeed > 0)
+          item.idleAttackSpeed = parseFloat(
+            (item.bonusIdleSpeed * (1 + tempers * 0.08)).toFixed(4),
+          );
+      }
     }
 
   if (item.enchantments) {
@@ -2009,7 +2060,8 @@ window.getRequiredScrapForTemper = function (item) {
     "Legendary Scrap",
     "Mythic Scrap",
   ];
-  return scraps[item.statsRolled] || "Monster Soul";
+  let tierIndex = item.temperLevel || 0;
+  return scraps[tierIndex] || "Mythic Scrap";
 };
 
 window.getRequiredScrapAmountForTemper = function (item) {
@@ -2023,9 +2075,10 @@ window.getRequiredScrapAmountForTemper = function (item) {
     return 3;
   }
 
-  // Scales linearly based on target temper level and item level brackets (1 + stage / 15)
   let stageScaleFactor = 1 + Math.floor((item.stageLevel || 1) / 15);
-  return targetLevel * 5 * stageScaleFactor;
+  const baseAmounts = [50, 20, 10, 5, 3, 1];
+  let baseAmount = baseAmounts[item.temperLevel] || 1;
+  return baseAmount * stageScaleFactor;
 };
 
 window.getTemperGoldCost = function (item) {
