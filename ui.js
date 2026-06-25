@@ -238,22 +238,55 @@ window.getUseIconHtml = function (key) {
   };
 
   if (key === "SP Reset Scroll") {
-    bg = "rgba(155, 89, 182, 0.25)";
-    border = "#9b59b6";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_Scroll_SP" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#fdf6e2" />
-                    <stop offset="100%" stop-color="#d5dbdb" />
-                </linearGradient>
-            </defs>
-            <path d="M6 10 L26 6 L26 22 L6 26 Z" fill="url(#grad_Scroll_SP)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <rect x="13" y="11" width="6" height="11" transform="rotate(-11 16 16)" fill="#9b59b6" stroke="#000" stroke-width="1.5" />
-            <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
-            <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
-        </svg>`;
-  } else if (key === "PP Reset Scroll") {
+      bg = "rgba(155, 89, 182, 0.25)";
+      border = "#9b59b6";
+      svgContent = `
+          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
+              <defs>
+                  <linearGradient id="grad_Scroll_SP" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#fdf6e2" />
+                      <stop offset="100%" stop-color="#d5dbdb" />
+                  </linearGradient>
+              </defs>
+              <path d="M6 10 L26 6 L26 22 L6 26 Z" fill="url(#grad_Scroll_SP)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+              <rect x="13" y="11" width="6" height="11" transform="rotate(-11 16 16)" fill="#9b59b6" stroke="#000" stroke-width="1.5" />
+              <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
+              <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
+          </svg>`;
+    } else if (key === "Guild Reward Sack") {
+      bg = "rgba(241, 196, 15, 0.25)";
+      border = "#f1c40f";
+      svgContent = `
+          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
+              <defs>
+                  <linearGradient id="grad_RewardSack" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#f1c40f" />
+                      <stop offset="100%" stop-color="#d35400" />
+                  </linearGradient>
+              </defs>
+              <path d="M16 8 C10 8, 6 11, 6 18 C6 25, 10 29, 16 29 C22 29, 26 25, 26 18 C26 11, 22 8, 16 8 Z" fill="url(#grad_RewardSack)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+              <ellipse cx="16" cy="10" rx="5" ry="1.8" fill="#d35400" stroke="#000" stroke-width="1.5" />
+              <path d="M14 10 L10 14 M18 10 L22 14" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round"/>
+              <polygon points="16,13 18,17 22,17 19,20 20,24 16,22 12,24 13,20 10,17 14,17" fill="#fff" opacity="0.9" stroke="#000" stroke-width="0.8"/>
+          </svg>`;
+    } else if (key === "Guild Weekly Sack") {
+      bg = "rgba(155, 89, 182, 0.25)";
+      border = "#9b59b6";
+      svgContent = `
+          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
+              <defs>
+                  <linearGradient id="grad_WeeklySack" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#9b59b6" />
+                      <stop offset="100%" stop-color="#3a045c" />
+                  </linearGradient>
+              </defs>
+              <path d="M16 8 C10 8, 6 11, 6 18 C6 25, 10 29, 16 29 C22 29, 26 25, 26 18 C26 11, 22 8, 16 8 Z" fill="url(#grad_WeeklySack)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+              <ellipse cx="16" cy="10" rx="5" ry="1.8" fill="#3a045c" stroke="#000" stroke-width="1.5" />
+              <path d="M14 10 L10 14 M18 10 L22 14" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="16" cy="18" r="4.5" fill="#f1c40f" stroke="#000" stroke-width="1"/>
+              <path d="M16 15.5 L16 20.5 M13.5 18 L18.5 18" stroke="#3a045c" stroke-width="1" stroke-linecap="round"/>
+          </svg>`;
+    } else if (key === "PP Reset Scroll") {
     bg = "rgba(230, 126, 34, 0.25)";
     border = "#e67e22";
     svgContent = `
@@ -7306,10 +7339,6 @@ window.claimMissionReward = function (missionId, isWeekly = false) {
   if (!m || !m.completed || m.claimed) return;
 
   m.claimed = true;
-
-  // Award 1 Mission Point (Token) per claimed mission
-  window.playerStats.missionTokens =
-    (window.playerStats.missionTokens || 0) + 1;
 
   if (typeof window.addEtcDrop === "function") {
     if (m.treat === "Gold") {
