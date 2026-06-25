@@ -163,16 +163,18 @@ window.applyOfflineGains = function(offlineMs) {
 
             let killsNeededForStage = 5 - window.playerStats.killCount;
 
-                                    // Smooth out post-wall base acceleration to prevent runaway super-exponential cliffs
-                                    let growthRate = 1.045 + ((currentStage * 0.04) / (currentStage + 200));
-                                    let expScale = Math.pow(growthRate, currentStage);
+                                                // Smooth out post-wall base acceleration to prevent runaway super-exponential cliffs
+                                                let growthRate = 1.045 + ((currentStage * 0.04) / (currentStage + 200));
+                                                let expScale = Math.pow(growthRate, currentStage);
 
-                        let mobHp = 15 * expScale;
-            let bossHp = 60 * expScale;
-            let mobDef = Math.floor(1.2 * expScale);
-            let bossDef = Math.floor(6.0 * expScale);
+                                    let rawMobDef = 1.2 * expScale;
+                                    let rawBossDef = 6.0 * expScale;
+                                    let mobHp = 15 * expScale * (1 + rawMobDef / 100);
+                                    let bossHp = 60 * expScale * (1 + rawBossDef / 100);
+                                    let mobDef = 0;
+                                    let bossDef = 0;
 
-            let blendedMobHp = (1 - p.rareSpawn) * mobHp + p.rareSpawn * (2.5 * mobHp);
+                        let blendedMobHp = (1 - p.rareSpawn) * mobHp + p.rareSpawn * (2.5 * mobHp);
             let blendedMobDef = (1 - p.rareSpawn) * mobDef + p.rareSpawn * (1.5 * mobDef);
 
             // Mitigate player offline DPS curves smoothly against average mob/boss defenses
@@ -749,62 +751,83 @@ window.onload = function() {
         attachRatesListeners('star-rate-4', 'star4');
         attachRatesListeners('star-rate-5', 'star5');
 
-    window.isCanvasPressed = false;
-        canvas.addEventListener('pointerdown', function(e) {
-            let gameTooltip = document.getElementById('game-tooltip');
-            let etcTooltip = document.getElementById('etc-tooltip');
-            if (gameTooltip.style.display === "block" || etcTooltip.style.display === "block") {
-                window.hideTooltip(); return;
-            }
-
-        window.playerStats.hasClickedThisBattle = true;
-        window.playerStats.canvasClicksWindow = window.playerStats.canvasClicksWindow || [];
-        let clickNow = Date.now();
-        window.playerStats.canvasClicksWindow.push(clickNow);
-        window.playerStats.canvasClicksWindow = window.playerStats.canvasClicksWindow.filter(t => clickNow - t <= 10000);
-        window.playerStats.maxCanvasClicksInWindow = Math.max(window.playerStats.maxCanvasClicksInWindow || 0, window.playerStats.canvasClicksWindow.length);
-
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;
-        let clientX = e.clientX; let clientY = e.clientY;
-        if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
-        else if (e.changedTouches && e.changedTouches.length > 0) { clientX = e.changedTouches[0].clientX; clientY = e.changedTouches[0].clientY; }
-
-        const clickX = (clientX !== undefined ? (clientX - rect.left) * scaleX : 0);
-        const clickY = (clientY !== undefined ? (clientY - rect.top) * scaleY : 0);
-
-        if (window.equippedSlots.weapon && window.equippedSlots.weapon.isUniqueSingularity && window.playerStats.singularityState === "pulsing") {
-            let sigilX = window.hero.x + 12; let sigilY = window.hero.y + 15 - 35;
-            let dist = Math.hypot(clickX - sigilX, clickY - sigilY);
-            if (dist < 30) {
-                window.playerStats.singularityState = "storing"; window.playerStats.singularityTimer = 300; window.playerStats.singularityStoredDmg = 0;
-                window.pushLog("<span style='color:#e84393; font-weight:bold;'>[SINGULARITY] Gravitational collapse active! Attack with everything you have! All damage is stored and multiplied!</span>");
-                for (let i = 0; i < 20; i++) {
-                    let angle = (i * Math.PI) / 10;
-                    window.particles.push({ x: sigilX, y: sigilY, vx: Math.cos(angle) * 3, vy: Math.sin(angle) * 3, radius: 2, color: "#e84393", alpha: 1, life: 30 });
+    window.activeCanvasPointers = window.activeCanvasPointers || new Set();
+        window.isCanvasPressed = false;
+            canvas.addEventListener('pointerdown', function(e) {
+                let gameTooltip = document.getElementById('game-tooltip');
+                let etcTooltip = document.getElementById('etc-tooltip');
+                if (gameTooltip.style.display === "block" || etcTooltip.style.display === "block") {
+                    window.hideTooltip(); return;
                 }
-                window.updateUI(); return;
+
+            window.playerStats.hasClickedThisBattle = true;
+            window.playerStats.canvasClicksWindow = window.playerStats.canvasClicksWindow || [];
+            let clickNow = Date.now();
+            window.playerStats.canvasClicksWindow.push(clickNow);
+            window.playerStats.canvasClicksWindow = window.playerStats.canvasClicksWindow.filter(t => clickNow - t <= 10000);
+            window.playerStats.maxCanvasClicksInWindow = Math.max(window.playerStats.maxCanvasClicksInWindow || 0, window.playerStats.canvasClicksWindow.length);
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;
+            let clientX = e.clientX; let clientY = e.clientY;
+            if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+            else if (e.changedTouches && e.changedTouches.length > 0) { clientX = e.changedTouches[0].clientX; clientY = e.changedTouches[0].clientY; }
+
+            const clickX = (clientX !== undefined ? (clientX - rect.left) * scaleX : 0);
+            const clickY = (clientY !== undefined ? (clientY - rect.top) * scaleY : 0);
+
+            if (window.equippedSlots.weapon && window.equippedSlots.weapon.isUniqueSingularity && window.playerStats.singularityState === "pulsing") {
+                let sigilX = window.hero.x + 12; let sigilY = window.hero.y + 15 - 35;
+                let dist = Math.hypot(clickX - sigilX, clickY - sigilY);
+                if (dist < 30) {
+                    window.playerStats.singularityState = "storing"; window.playerStats.singularityTimer = 300; window.playerStats.singularityStoredDmg = 0;
+                    window.pushLog("<span style='color:#e84393; font-weight:bold;'>[SINGULARITY] Gravitational collapse active! Attack with everything you have! All damage is stored and multiplied!</span>");
+                    for (let i = 0; i < 20; i++) {
+                        let angle = (i * Math.PI) / 10;
+                        window.particles.push({ x: sigilX, y: sigilY, vx: Math.cos(angle) * 3, vy: Math.sin(angle) * 3, radius: 2, color: "#e84393", alpha: 1, life: 30 });
+                    }
+                    window.updateUI(); return;
+                }
             }
-        }
 
-        let clickedFairy = window.activeFairies.find(f => {
-            let hover = Math.sin(Date.now() / 200 + f.offset) * 10;
-            return Math.hypot(clickX - f.x, clickY - (f.y + hover)) < 40;
-        });
-        if (clickedFairy) { window.triggerFairyLoot(clickedFairy); return; }
+            let clickedFairy = window.activeFairies.find(f => {
+                let hover = Math.sin(Date.now() / 200 + f.offset) * 10;
+                return Math.hypot(clickX - f.x, clickY - (f.y + hover)) < 40;
+            });
+            if (clickedFairy) { window.triggerFairyLoot(clickedFairy); return; }
 
-        window.isCanvasPressed = true;
-            window.triggerPlayerSlash();
-            if (typeof window.progressMission === "function") {
-                window.progressMission('active_clicks', 1);
-            }
-        });
+            window.activeCanvasPointers.add(e.pointerId);
+            window.isCanvasPressed = true;
+                window.triggerPlayerSlash();
+                if (typeof window.progressMission === "function") {
+                    window.progressMission('active_clicks', 1);
+                }
+            });
 
-    canvas.addEventListener('pointerup', () => { window.isCanvasPressed = false; });
-        canvas.addEventListener('pointerleave', () => { window.isCanvasPressed = false; });
-        canvas.addEventListener('pointercancel', () => { window.isCanvasPressed = false; });
+        window.addEventListener('pointerup', (e) => {
+                try {
+                    canvas.releasePointerCapture(e.pointerId);
+                } catch (err) {}
+                window.activeCanvasPointers.delete(e.pointerId);
+                if (window.activeCanvasPointers.size === 0) {
+                    window.isCanvasPressed = false;
+                }
+            });
+            window.addEventListener('pointercancel', (e) => {
+                try {
+                    canvas.releasePointerCapture(e.pointerId);
+                } catch (err) {}
+                window.activeCanvasPointers.delete(e.pointerId);
+                if (window.activeCanvasPointers.size === 0) {
+                    window.isCanvasPressed = false;
+                }
+            });
+            window.addEventListener('blur', () => {
+                window.activeCanvasPointers.clear();
+                window.isCanvasPressed = false;
+            });
 
-        document.addEventListener('pointerdown', (e) => {
+                document.addEventListener('pointerdown', (e) => {
             if (!e.target.closest('#game-tooltip') && !e.target.closest('.bag-item') && !e.target.closest('.slots-card') && !e.target.closest('.stat-hover') && !e.target.closest('.shop-row') && !e.target.closest('#hud-buff')) {
                 window.hideTooltip();
             }
@@ -2142,15 +2165,17 @@ window.processEnemySpawn = function() {    // 2. BACKGROUND SCENERY & VEGETATION
         let growthRate = 1.06 + (cWave * 0.00015);
         let scale = Math.pow(growthRate, cWave);
         if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-            let hp = Math.floor(60 * scale);
-            window.mob = { x: 750, y: 140, w: 45, h: 75, type: "dungeon_boss", isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor(20 * scale), def: Math.floor(6.0 * scale), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
+            let rawDef = 6.0 * scale;
+            let hp = Math.floor(60 * scale * (1 + rawDef / 100));
+            window.mob = { x: 750, y: 140, w: 45, h: 75, type: "dungeon_boss", isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor(20 * scale), def: 0, flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
         } else {
             let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
             let chosenVisual = cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
             let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
 
-            let hp = Math.floor(15 * scale);
-            window.mob = { x: 750, y: isFlying ? 145 : 195, w: 25, h: 30, type: "mob", visualType: chosenVisual, isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor(5.2 * scale), def: Math.floor(1.2 * scale), flashTimer: 0, isStopped: false, attackCooldown: 90, attackTimer: 90 };
+            let rawDef = 1.2 * scale;
+            let hp = Math.floor(15 * scale * (1 + rawDef / 100));
+            window.mob = { x: 750, y: isFlying ? 145 : 195, w: 25, h: 30, type: "mob", visualType: chosenVisual, isCrucible: true, isRare: false, hp: hp, maxHp: hp, damage: Math.floor(5.2 * scale), def: 0, flashTimer: 0, isStopped: false, attackCooldown: 90, attackTimer: 90 };
         }
         return;
     }
@@ -2176,73 +2201,80 @@ window.processEnemySpawn = function() {    // 2. BACKGROUND SCENERY & VEGETATION
                     }
 
     if (window.playerStats.isDungeonMode) {
-            let hpScale = window.playerStats.currentDungeon === 'gold' ? 1.5 : 1;
+                let hpScale = window.playerStats.currentDungeon === 'gold' ? 1.5 : 1;
 
-            if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-                let hp = 60 * scale * hpScale;
-                window.mob = { x: 750, y: 140, w: 50, h: 90, type: "dungeon_boss", isRare: false, hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor(20 * scale), def: Math.floor(6.0 * scale), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
+                if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
+                    let rawDef = 6.0 * scale;
+                    let hp = 60 * scale * hpScale * (1 + rawDef / 100);
+                    window.mob = { x: 750, y: 140, w: 50, h: 90, type: "dungeon_boss", isRare: false, hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor(20 * scale), def: 0, flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
+                    window.playerStats.hasClickedThisBattle = false; window.playerStats.damageTakenThisBattle = 0; window.playerStats.ankhTriggeredThisBattle = false;
+                } else {
+                    let dType = window.playerStats.currentDungeon || 'gold';
+                    let dPool = [];
+                    if (dType === 'equip') dPool = ["golem", "gargoyle", "wyrmling"];
+                    else if (dType === 'gold') dPool = ["coin_elemental", "hoard_mimic", "gilded_scuttler"];
+                    else dPool = ["swamp_basilisk", "toxic_fly", "marsh_ghost"];
+
+                    let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
+                let isFlying = ["gargoyle", "toxic_fly", "marsh_ghost", "gilded_wyrmling", "wyrmling"].includes(chosenVisual);
+
+                let rawDef = 1.2 * scale;
+                let hp = 15 * scale * hpScale * (1 + rawDef / 100);
+                window.mob = {
+                    x: 750, y: isFlying ? 150 : 195, w: 25, h: 40, type: "mob", visualType: chosenVisual, isRare: false,
+                    hp: Math.floor(hp), maxHp: Math.floor(hp), damage: Math.floor(5.2 * scale), def: 0,
+                    flashTimer: 0, isStopped: false, attackCooldown: 90, attackTimer: 90
+                };
+            }
+        } else {
+            let tier = window.getStageTier();
+            if (window.playerStats.isBossMode) {
+                if (window.playerStats.isUberBoss) {
+                    let bossType = window.playerStats.currentUberBoss || 'guardian';
+                    let hpMult = 10.0; let dmgMult = 10.0; let speedMult = 100;
+                    let mType = "aegis_goliath"; let logText = "**Aegis Goliath, The Iron Sentinel** has materialized from the cracked Aether!";
+
+                    if (bossType === 'chronos') { speedMult = 90; mType = "chronos_arbitrator"; logText = "**Chronos Arbitrator** has stepped from the temporal flow!"; }
+                                    else if (bossType === 'nexus') { speedMult = 80; mType = "nexus_overseer"; logText = "**Nexus Overseer** has infected the reality stream!"; }
+
+                                    let riftLvl = window.playerStats.activeRiftLevel || 1;
+                                    let equivalentStage = 50 + riftLvl * 10;
+                                    let riftGrowthRate = 1.045 + ((equivalentStage * 0.04) / (equivalentStage + 200));
+                                    let riftScale = Math.pow(riftGrowthRate, equivalentStage);
+
+                                    let rawDef = 8.0 * riftScale;
+                                    let hp = Math.floor(hpMult * (60 * riftScale) * (1 + rawDef / 100)); let dmg = Math.floor(20 * riftScale * dmgMult);
+                                    window.mob = {
+                                        x: 750, y: 115, w: 60, h: 100, type: mType, isRare: false,
+                                        hp: hp, maxHp: hp, damage: dmg, def: 0, flashTimer: 0, isStopped: false, attackCooldown: speedMult, attackTimer: speedMult
+                                    };
+                    window.pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[RIFT HUNT]</span> ${logText}`);
+                } else {
+                    let rawDef = 6.0 * scale;
+                    let baseBossHp = 60 * scale * (1 + rawDef / 100);
+                    window.mob = { x: 750, y: 150, w: 40, h: 80, type: "boss", isRare: false, visualTier: tier, hp: Math.floor(baseBossHp), maxHp: Math.floor(baseBossHp), damage: Math.floor(20 * scale), def: 0, flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
+                    window.pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[STAGE BOSS]</span> blocked your transit route!`);
+                }
                 window.playerStats.hasClickedThisBattle = false; window.playerStats.damageTakenThisBattle = 0; window.playerStats.ankhTriggeredThisBattle = false;
             } else {
-                let dType = window.playerStats.currentDungeon || 'gold';
-                let dPool = [];
-                if (dType === 'equip') dPool = ["golem", "gargoyle", "wyrmling"];
-                else if (dType === 'gold') dPool = ["coin_elemental", "hoard_mimic", "gilded_scuttler"];
-                else dPool = ["swamp_basilisk", "toxic_fly", "marsh_ghost"];
+                let isMelee = Math.random() > 0.5; let isRare = Math.random() < p.rareSpawn;
+                let hpMult = isRare ? 2.5 : 1; let dmgMult = isRare ? 1.5 : 1;
 
-                let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
-            let isFlying = ["gargoyle", "toxic_fly", "marsh_ghost", "gilded_wyrmling", "wyrmling"].includes(chosenVisual);
+                let visualPool = {
+                    0: ["slime", "sprout", "thorn_wyrm"], 1: ["golem", "wyrmling", "gargoyle"],
+                    2: ["magma_elemental", "lava_serpent", "hell_bat"], 3: ["marsh_ghost", "swamp_basilisk", "toxic_fly"],
+                    4: ["void_orb", "void_crawler", "void_spectre"], 5: ["clockwork_scarab", "temporal_watcher", "clockwork_drone"],
+                    6: ["neon_spider", "cyber_wraith", "wireframe_orb"]
+                };
+                let choices = visualPool[tier] || ["slime"];
+                let visualType = choices[Math.floor(Math.random() * choices.length)];
 
-            window.mob = {
-                x: 750, y: isFlying ? 150 : 195, w: 25, h: 40, type: "mob", visualType: chosenVisual, isRare: false,
-                hp: Math.floor(15 * scale * hpScale), maxHp: Math.floor(15 * scale * hpScale), damage: Math.floor(5.2 * scale), def: Math.floor(1.2 * scale),
-                flashTimer: 0, isStopped: false, attackCooldown: 90, attackTimer: 90
-            };
-        }
-    } else {
-        let tier = window.getStageTier();
-        if (window.playerStats.isBossMode) {
-            if (window.playerStats.isUberBoss) {
-                let bossType = window.playerStats.currentUberBoss || 'guardian';
-                let hpMult = 10.0; let dmgMult = 10.0; let speedMult = 100;
-                let mType = "aegis_goliath"; let logText = "**Aegis Goliath, The Iron Sentinel** has materialized from the cracked Aether!";
+                let baseSpd = 90;
+                if (window.equippedSlots.subweapon && window.equippedSlots.subweapon.isUniqueWatch && window.playerStats.watchActiveTimer > 0) baseSpd = Math.round(baseSpd * 1.33);
 
-                if (bossType === 'chronos') { speedMult = 90; mType = "chronos_arbitrator"; logText = "**Chronos Arbitrator** has stepped from the temporal flow!"; }
-                                else if (bossType === 'nexus') { speedMult = 80; mType = "nexus_overseer"; logText = "**Nexus Overseer** has infected the reality stream!"; }
-
-                                let riftLvl = window.playerStats.activeRiftLevel || 1;
-                                let equivalentStage = 50 + riftLvl * 10;
-                                let riftGrowthRate = 1.045 + ((equivalentStage * 0.04) / (equivalentStage + 200));
-                                let riftScale = Math.pow(riftGrowthRate, equivalentStage);
-
-                                let hp = Math.floor(hpMult * (60 * riftScale)); let dmg = Math.floor(20 * riftScale * dmgMult);
-                                window.mob = {
-                                    x: 750, y: 115, w: 60, h: 100, type: mType, isRare: false,
-                                    hp: hp, maxHp: hp, damage: dmg, def: Math.floor(8.0 * riftScale), flashTimer: 0, isStopped: false, attackCooldown: speedMult, attackTimer: speedMult
-                                };
-                window.pushLog(`<span style='color:#9b59b6; font-weight:bold;'>[RIFT HUNT]</span> ${logText}`);
-            } else {
-                let baseBossHp = 60 * scale;
-                window.mob = { x: 750, y: 150, w: 40, h: 80, type: "boss", isRare: false, visualTier: tier, hp: Math.floor(baseBossHp), maxHp: Math.floor(baseBossHp), damage: Math.floor(20 * scale), def: Math.floor(6.0 * scale), flashTimer: 0, isStopped: false, attackCooldown: 100, attackTimer: 100 };
-                window.pushLog(`<span style='color:#e74c3c; font-weight:bold;'>[STAGE BOSS]</span> blocked your transit route!`);
-            }
-            window.playerStats.hasClickedThisBattle = false; window.playerStats.damageTakenThisBattle = 0; window.playerStats.ankhTriggeredThisBattle = false;
-        } else {
-            let isMelee = Math.random() > 0.5; let isRare = Math.random() < p.rareSpawn;
-            let hpMult = isRare ? 2.5 : 1; let dmgMult = isRare ? 1.5 : 1;
-
-            let visualPool = {
-                0: ["slime", "sprout", "thorn_wyrm"], 1: ["golem", "wyrmling", "gargoyle"],
-                2: ["magma_elemental", "lava_serpent", "hell_bat"], 3: ["marsh_ghost", "swamp_basilisk", "toxic_fly"],
-                4: ["void_orb", "void_crawler", "void_spectre"], 5: ["clockwork_scarab", "temporal_watcher", "clockwork_drone"],
-                6: ["neon_spider", "cyber_wraith", "wireframe_orb"]
-            };
-            let choices = visualPool[tier] || ["slime"];
-            let visualType = choices[Math.floor(Math.random() * choices.length)];
-
-            let baseSpd = 90;
-            if (window.equippedSlots.subweapon && window.equippedSlots.subweapon.isUniqueWatch && window.playerStats.watchActiveTimer > 0) baseSpd = Math.round(baseSpd * 1.33);
-
-            window.mob = { x: 750, y: isMelee ? 195 : 210, w: isMelee ? 25 : 30, h: isMelee ? 40 : 25, type: "mob", visualType: visualType, isRare: isRare, isMelee: isMelee, visualTier: tier, hp: Math.floor(15 * scale * hpMult), maxHp: Math.floor(15 * scale * hpMult), damage: Math.floor(5.2 * scale * dmgMult), def: Math.floor(1.2 * scale * (isRare ? 1.5 : 1)), flashTimer: 0, isStopped: false, attackCooldown: baseSpd, attackTimer: baseSpd };
+                let rawDef = 1.2 * scale * (isRare ? 1.5 : 1);
+                let hp = Math.floor(15 * scale * hpMult * (1 + rawDef / 100));
+                window.mob = { x: 750, y: isMelee ? 195 : 210, w: isMelee ? 25 : 30, h: isMelee ? 40 : 25, type: "mob", visualType: visualType, isRare: isRare, isMelee: isMelee, visualTier: tier, hp: hp, maxHp: hp, damage: Math.floor(5.2 * scale * dmgMult), def: 0, flashTimer: 0, isStopped: false, attackCooldown: baseSpd, attackTimer: baseSpd };
 
             if (isRare) {
                 window.pushLog(`<span style='color:#ffb6c1; font-weight:bold;'>✨ A glowing Rare enemy appears!</span>`);

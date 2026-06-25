@@ -102,6 +102,7 @@ canvas {
     border-bottom: 2px solid #1f242d;
     cursor: pointer;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+    touch-action: none; /* Prevents canvas touch drag gestures from locking the viewport scroll */
 }
 
 /* --- STATS HUD OVERLAY --- */
