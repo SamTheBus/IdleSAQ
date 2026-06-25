@@ -3,7 +3,7 @@
    initial global state, and system utility functions.
    ========================================================================= */
 
-window.GAME_VERSION = 0.82; // Pre-release Alpha 0.8.2 // Increment this whenever you push a new release
+window.GAME_VERSION = 0.84; // Pre-release Alpha 0.8.4 // Increment this whenever you push a new release
 
 // --- SYSTEM UTILS ---
 
@@ -183,6 +183,14 @@ window.etcDex = {
 };
 
 window.useDex = {
+  "Guild Reward Sack": {
+    desc: "Standardised Guild Reward. Consume to initiate untying. Guarantees 1 MP and rolls daily loot with consecutive extra item chances!",
+    color: "#f1c40f",
+  },
+  "Guild Weekly Sack": {
+    desc: "Venerable Weekly Guild Reward. Consume to break the seal. Guarantees 3 MP, 1x Ancient Core, 1x Overlord's Sigil, 1x Eridium Shard, and 3x Legendary Scraps!",
+    color: "#9b59b6",
+  },
   "SP Reset Scroll": {
     desc: "Refunds spent Skill Points from the Attribute Matrix.",
     color: "#9b59b6",
@@ -4005,91 +4013,57 @@ window.generateDailyMissions = function () {
       type: "kills",
       label: "Slay monsters",
       targetBase: 300,
-      mult: 10,
       unit: "monsters",
-      treat: "Monster Soul",
-      treatQty: 80,
     },
-    {
-      type: "rares",
-      label: "Slay rare spawns",
-      targetBase: 5,
-      mult: 1,
-      unit: "rares",
-      treat: "Luminous Soul",
-      treatQty: 3,
-    },
+    { type: "rares", label: "Slay rare spawns", targetBase: 5, unit: "rares" },
     {
       type: "gold",
       label: "Collect Gold",
       targetBase: 2500,
       stageScale: true,
       unit: "Gold",
-      treat: "Rare Scrap",
-      treatQty: 15,
     },
     {
       type: "fairies",
       label: "Catch wild fairies",
       targetBase: 8,
-      mult: 1,
       unit: "fairies",
-      treat: "Luminous Soul",
-      treatQty: 3,
     },
     {
       type: "tempers",
       label: "Successfully temper gear",
       targetBase: 1,
-      mult: 1,
       unit: "tempers",
-      treat: "Magic Scrap",
-      treatQty: 8,
     },
     {
       type: "reforges",
       label: "Reforge gear modifiers",
       targetBase: 2,
-      mult: 1,
       unit: "reforges",
-      treat: "Catalyst Core",
-      treatQty: 1,
     },
     {
       type: "dungeons",
       label: "Clear Dungeon floors",
       targetBase: 5,
-      mult: 1,
       unit: "floors",
-      treat: "Epic Scrap",
-      treatQty: 6,
     },
     {
       type: "salvage",
       label: "Salvage gear items",
       targetBase: 15,
-      mult: 1,
       unit: "items",
-      treat: "Rare Scrap",
-      treatQty: 12,
     },
     {
       type: "elixirs",
       label: "Consume active elixirs",
       targetBase: 3,
-      mult: 1,
       unit: "elixirs",
-      treat: "Monster Soul",
-      treatQty: 60,
     },
     {
       type: "active_clicks",
       label: "Manually click canvas",
       targetBase: 250,
-      mult: 1,
       unit: "clicks",
-      treat: "Luminous Soul",
-      treatQty: 2,
     },
   ];
 
@@ -4108,8 +4082,8 @@ window.generateDailyMissions = function () {
       desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
       current: 0,
       target: target,
-      treat: m.treat,
-      treatQty: m.treatQty,
+      treat: "Guild Reward Sack",
+      treatQty: 1,
       completed: false,
       claimed: false,
     };
@@ -4123,16 +4097,12 @@ window.generateWeeklyMissions = function () {
       label: "Slay Rift Guardians",
       targetBase: 3,
       unit: "guardians",
-      treat: "Gacha Key",
-      treatQty: 1,
     },
     {
       type: "dungeons",
       label: "Ascend Dungeon floors",
       targetBase: 15,
       unit: "floors",
-      treat: "Eridium Shard",
-      treatQty: 5,
     },
     {
       type: "gold",
@@ -4140,24 +4110,18 @@ window.generateWeeklyMissions = function () {
       targetBase: 15000,
       stageScale: true,
       unit: "Gold",
-      treat: "Legendary Scrap",
-      treatQty: 5,
     },
     {
       type: "kills",
       label: "Execute massive purges",
       targetBase: 1500,
       unit: "enemies",
-      treat: "Mythic Scrap",
-      treatQty: 2,
     },
     {
       type: "tempers",
       label: "Master blacksmithing",
       targetBase: 15,
       unit: "tempers",
-      treat: "Catalyst Core",
-      treatQty: 3,
     },
   ];
 
@@ -4171,32 +4135,14 @@ window.generateWeeklyMissions = function () {
     if (m.stageScale) {
       target = Math.ceil(m.targetBase * Math.pow(1.045, peakStage));
     }
-    // User request: 3 potions per potion-themed weekly rewards
-    let treatName = m.treat;
-    let treatQty = m.treatQty;
-    if (idx === 0) {
-      treatName = "Gacha Key";
-      treatQty = 1;
-      m.potionAward = "Supernal Attack Elixir";
-    } else if (idx === 1) {
-      treatName = "Prestige Point";
-      treatQty = 1;
-      m.potionAward = "Supernal Vitality Elixir";
-    } else {
-      treatName = "Epic Gear Piece"; // Resolved as random high-tier equip
-      treatQty = 1;
-      m.potionAward = "Supernal Armored Elixir";
-    }
-
     return {
       id: `weekly_${idx + 1}`,
       type: m.type,
       desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
       current: 0,
       target: target,
-      treat: treatName,
-      treatQty: treatQty,
-      potionAward: m.potionAward,
+      treat: "Guild Weekly Sack",
+      treatQty: 1,
       completed: false,
       claimed: false,
     };

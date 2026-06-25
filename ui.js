@@ -1812,7 +1812,6 @@ window.showSPConfirmationModal = function () {
 
 window.commitSPDraft = function () {
   if (!window.draftAllocations) return;
-  let oldMaxHp = window.resolvePlayerStats(false).maxHp;
 
   window.playerStats.spAllocations = { ...window.draftAllocations };
   window.playerStats.sp = window.draftSP;
@@ -1820,8 +1819,6 @@ window.commitSPDraft = function () {
   window.draftSP = 0;
 
   let p = window.resolvePlayerStats();
-  let hpDiff = p.maxHp - oldMaxHp;
-  if (hpDiff > 0) window.playerStats.currentHp += hpDiff;
   window.playerStats.currentHp = Math.min(
     window.playerStats.currentHp,
     p.maxHp,
@@ -5301,6 +5298,33 @@ window.submitConsoleCommand = function () {
           `<span style="color:#e74c3c;">Usage: /mup [bag|gold|atk|hp] [level]</span>`,
         );
     }
+  } else if (mainCmd === "/sack" || mainCmd === "/sacks") {
+    let type = args[1] ? args[1].toLowerCase() : "all";
+    let amt = parseInt(args[2], 10) || 1;
+    if (type === "daily") {
+      window.addUseDrop("Guild Reward Sack", amt);
+      window.pushLog(
+        `<span style="color:#2ecc71;">[DEV] Added +${amt} Guild Reward Sack(s)!</span>`,
+      );
+    } else if (type === "weekly") {
+      window.addUseDrop("Guild Weekly Sack", amt);
+      window.pushLog(
+        `<span style="color:#2ecc71;">[DEV] Added +${amt} Guild Weekly Sack(s)!</span>`,
+      );
+    } else {
+      window.addUseDrop("Guild Reward Sack", amt);
+      window.addUseDrop("Guild Weekly Sack", amt);
+      window.pushLog(
+        `<span style="color:#2ecc71;">[DEV] Added +${amt} of each Guild Sack!</span>`,
+      );
+    }
+    window.updateUI();
+  } else if (
+    mainCmd === "/quests" ||
+    mainCmd === "/refresh" ||
+    mainCmd === "/resetquests"
+  ) {
+    window.devRefreshQuests();
   } else if (mainCmd === "/clear") {
     window.logsHistory = [];
     let logBox = document.getElementById("log-box");
@@ -7238,6 +7262,12 @@ window.buyMissionItem = function (itemName, cost) {
     window.addEtcDrop("Catalyst Core", 1);
   } else if (itemName === "Astral Essence") {
     window.addEtcDrop("Astral Essence", 1);
+  } else if (itemName === "Eridium Shard") {
+    window.addEtcDrop("Eridium Shard", 1);
+  } else if (itemName === "Ancient Core") {
+    window.addEtcDrop("Ancient Core", 1);
+  } else if (itemName === "Overlord's Sigil") {
+    window.addEtcDrop("Overlord's Sigil", 1);
   } else if (itemName === "Double XP Potion") {
     window.addUseDrop("Double XP Potion", 1);
   } else if (itemName === "Double Drop Potion") {
@@ -7636,10 +7666,37 @@ window.renderMissionsWindow = function () {
                                                 </div>
 
                                                 <div style="background:#111; border:1px solid #3498db; border-radius:6px; padding:10px;">
-                                                    <strong style="color:#3498db; font-size:12px; display:block; margin-bottom:8px;">💎 CONSUMABLES & REAGENTS</strong>
+                                                                                                    <strong style="color:#3498db; font-size:12px; display:block; margin-bottom:8px;">💎 CONSUMABLES & REAGENTS</strong>
 
-                                                    <!-- Gacha Key -->
-                                                                                        <div style="background:#07030b; border:1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                                                                                    <!-- Eridium Shard -->
+                                                                                                    <div style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                                                                                        <div>
+                                                                                                            <strong style="color:#8e44ad; font-size:10.5px;">🔮 Eridium Shard</strong>
+                                                                                                            <div style="font-size:9px; color:#aaa;">Awaken equipment star ratings (rarities)</div>
+                                                                                                        </div>
+                                                                                                        <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Eridium Shard', 4)">Buy (4 MP)</button>
+                                                                                                    </div>
+
+                                                                                                    <!-- Ancient Core -->
+                                                                                                    <div style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                                                                                        <div>
+                                                                                                            <strong style="color:#e74c3c; font-size:10.5px;">🔴 Ancient Core</strong>
+                                                                                                            <div style="font-size:9px; color:#aaa;">Activate the Altar of Rifts</div>
+                                                                                                        </div>
+                                                                                                        <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 5 ? "" : "disabled"} onclick="window.buyMissionItem('Ancient Core', 5)">Buy (5 MP)</button>
+                                                                                                    </div>
+
+                                                                                                    <!-- Overlord's Sigil -->
+                                                                                                    <div style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                                                                                        <div>
+                                                                                                            <strong style="color:#1abc9c; font-size:10.5px;">🔱 Overlord's Sigil</strong>
+                                                                                                            <div style="font-size:9px; color:#aaa;">Material required for unique artifact tempering</div>
+                                                                                                        </div>
+                                                                                                        <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 6 ? "" : "disabled"} onclick="window.buyMissionItem('Overlord\\'s Sigil', 6)">Buy (6 MP)</button>
+                                                                                                    </div>
+
+                                                                                                    <!-- Gacha Key -->
+                                                                                                                                        <div style="background:#07030b; border:1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                                                                                             <div>
                                                                                                 <strong style="color:#f1c40f; font-size:10.5px;">🔑 Gacha Key</strong>
                                                                                                 <div style="font-size:9px; color:#aaa;">Roll standard vending crate</div>
@@ -7972,4 +8029,350 @@ window.updateGachaRecentList = function () {
                                 `;
     })
     .join("");
+};
+
+// --- UNBOXING ANIMATIONS AND ENGAGING REWARD FLOWS ---
+
+window.openGuildRewardSack = function () {
+  let owned = window.inventory.USE["Guild Reward Sack"] || 0;
+  if (owned <= 0) return;
+
+  // Consume 1 Guild Reward Sack
+  window.inventory.USE["Guild Reward Sack"]--;
+  if (window.inventory.USE["Guild Reward Sack"] === 0) {
+    delete window.inventory.USE["Guild Reward Sack"];
+  }
+
+  // Play opening sound
+  window.SoundManager.play("fairy");
+  window.setPauseState(true);
+
+  // Determine rewards (Standardized Daily MP and randomized pool rolls)
+  window.playerStats.missionTokens =
+    (window.playerStats.missionTokens || 0) + 1;
+
+  const sackPool = [
+    {
+      name: "Monster Soul",
+      qty: 75,
+      weight: 30,
+      color: "#888888",
+      type: "etc",
+    },
+    {
+      name: "Luminous Soul",
+      qty: 2,
+      weight: 15,
+      color: "#ffb6c1",
+      type: "etc",
+    },
+    { name: "Rare Scrap", qty: 10, weight: 15, color: "#3498db", type: "etc" },
+    { name: "Magic Scrap", qty: 6, weight: 12, color: "#9b59b6", type: "etc" },
+    { name: "Epic Scrap", qty: 3, weight: 8, color: "#e67e22", type: "etc" },
+    { name: "Attack Elixir", qty: 1, weight: 6, color: "#2ecc71", type: "use" },
+    {
+      name: "Vitality Elixir",
+      qty: 1,
+      weight: 6,
+      color: "#e74c3c",
+      type: "use",
+    },
+    {
+      name: "Armored Elixir",
+      qty: 1,
+      weight: 6,
+      color: "#3498db",
+      type: "use",
+    },
+    { name: "Haste Elixir", qty: 1, weight: 6, color: "#f1c40f", type: "use" },
+    { name: "Ancient Core", qty: 1, weight: 2, color: "#e74c3c", type: "etc" },
+    {
+      name: "Overlord's Sigil",
+      qty: 1,
+      weight: 2,
+      color: "#1abc9c",
+      type: "etc",
+    },
+    { name: "Eridium Shard", qty: 1, weight: 2, color: "#8e44ad", type: "etc" },
+  ];
+
+  function rollFromPool() {
+    let totalWeight = sackPool.reduce((sum, item) => sum + item.weight, 0);
+    let r = Math.random() * totalWeight;
+    let accumulated = 0;
+    for (let item of sackPool) {
+      accumulated += item.weight;
+      if (r <= accumulated) return item;
+    }
+    return sackPool[0];
+  }
+
+  let receivedRewards = [];
+
+  // Roll 1: 100% chance
+  let reward1 = rollFromPool();
+  receivedRewards.push(reward1);
+
+  // Roll 2: 20% chance
+  let hasRoll2 = Math.random() < 0.2;
+  if (hasRoll2) {
+    let reward2 = rollFromPool();
+    receivedRewards.push(reward2);
+
+    // Roll 3: 5% chance (only if Roll 2 succeeds)
+    let hasRoll3 = Math.random() < 0.05;
+    if (hasRoll3) {
+      let reward3 = rollFromPool();
+      receivedRewards.push(reward3);
+    }
+  }
+
+  // Credit rewards
+  receivedRewards.forEach((r) => {
+    if (r.type === "use") {
+      window.addUseDrop(r.name, r.qty);
+    } else {
+      window.addEtcDrop(r.name, r.qty);
+    }
+  });
+
+  // Create cool opening overlay card
+  let overlay = document.createElement("div");
+  overlay.id = "sack-opening-overlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundColor = "rgba(0,0,0,0.9)";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = "45000";
+  overlay.style.backdropFilter = "blur(8px)";
+  document.body.appendChild(overlay);
+
+  // Spawn nice canvas particles on the screen
+  let cvs = document.getElementById("gameCanvas");
+  let w = cvs ? cvs.width : 750;
+  let h = cvs ? cvs.height : 250;
+  for (let i = 0; i < 40; i++) {
+    let angle = Math.random() * Math.PI * 2;
+    let vel = window.randFloat(3, 8);
+    window.particles.push({
+      x: w / 2,
+      y: h / 2,
+      vx: Math.cos(angle) * vel,
+      vy: Math.sin(angle) * vel - 2,
+      radius: window.randFloat(2, 5),
+      color: receivedRewards[0].color,
+      alpha: 1,
+      life: window.randInt(30, 50),
+    });
+  }
+
+  overlay.innerHTML = `
+    <div style="text-align:center; color:white; animation: toastFadeIn 0.3s ease-out;">
+      <div id="sack-anim-bag" style="font-size: 80px; margin-bottom: 20px; animation: cabinetRattle 0.5s ease-in-out infinite;">🎒</div>
+      <div style="font-size: 16px; font-weight: bold; color:#f1c40f; letter-spacing: 2px;">UNTYING SACK...</div>
+    </div>
+  `;
+
+  setTimeout(() => {
+    let listHtml = receivedRewards
+      .map((r) => {
+        let icon =
+          r.type === "use"
+            ? window.getUseIconHtml(r.name)
+            : window.getEtcIconHtml(r.name);
+        icon = icon.replace("margin-right: 12px;", "margin-right: 8px;");
+        return `
+        <div style="background:#111; border:1px solid #333; border-left: 3px solid ${r.color}; border-radius:4px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <div style="display:flex; align-items:center;">
+            ${icon}
+            <strong style="color:${r.color}; font-size:12.5px;">${r.name}</strong>
+          </div>
+          <strong style="color:#fff; font-size:13px; font-family:monospace;">+${r.qty}</strong>
+        </div>
+      `;
+      })
+      .join("");
+
+    overlay.innerHTML = `
+      <div style="background:#1a1a1a; border:2px solid #f1c40f; border-radius:8px; width:90%; max-width:380px; box-shadow:0 10px 30px rgba(0,0,0,0.95); animation: toastFadeIn 0.3s ease-out; overflow:hidden;">
+        <div style="background:#0b0f12; border-bottom:1px solid #333; padding:12px 15px; text-align:center;">
+          <h3 style="margin:0; color:#f1c40f; font-size:15px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">🎒 SACK OPENED!</h3>
+        </div>
+        <div style="padding:15px;">
+          <div style="background:#111; border:1px solid #222; border-radius:6px; padding:8px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <div style="display:flex; align-items:center;">
+              <span style="background:rgba(241,196,15,0.1); border:1px solid #f1c40f; border-radius:4px; padding:4px; display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:16px;">🎖️</span>
+              <strong style="color:#f1c40f; font-size:12.5px; margin-left:8px;">Mission Tokens</strong>
+            </div>
+            <strong style="color:#fff; font-size:13px; font-family:monospace;">+1 MP</strong>
+          </div>
+
+          <div style="font-size:10px; color:#aaa; font-weight:bold; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">📦 Additional Loot Yield:</div>
+          <div style="max-height: 200px; overflow-y:auto; overscroll-behavior:contain;">
+            ${listHtml}
+          </div>
+        </div>
+        <div style="background:#0b0f12; border-top:1px solid #333; padding:12px; text-align:center;">
+          <button onclick="document.getElementById('sack-opening-overlay').remove(); window.setPauseState(false); window.updateUI(); window.renderInventory();" style="background:#f1c40f; color:#000; border:none; padding:10px; font-weight:bold; font-size:12px; border-radius:4px; cursor:pointer; width:100%;">Claim Loot</button>
+        </div>
+      </div>
+    `;
+  }, 1000);
+};
+
+window.openGuildWeeklySack = function () {
+  let owned = window.inventory.USE["Guild Weekly Sack"] || 0;
+  if (owned <= 0) return;
+
+  // Consume 1 Guild Weekly Sack
+  window.inventory.USE["Guild Weekly Sack"]--;
+  if (window.inventory.USE["Guild Weekly Sack"] === 0) {
+    delete window.inventory.USE["Guild Weekly Sack"];
+  }
+
+  // Play opening sound
+  window.SoundManager.play("revive");
+  window.setPauseState(true);
+
+  // Determine rewards (Guaranteed high value MP, Core, Sigil, Shard, and Scraps!)
+  window.playerStats.missionTokens =
+    (window.playerStats.missionTokens || 0) + 3;
+
+  let receivedRewards = [
+    { name: "Ancient Core", qty: 1, color: "#e74c3c", type: "etc" },
+    { name: "Overlord's Sigil", qty: 1, color: "#1abc9c", type: "etc" },
+    { name: "Eridium Shard", qty: 1, color: "#8e44ad", type: "etc" },
+    { name: "Legendary Scrap", qty: 3, color: "#f1c40f", type: "etc" },
+  ];
+
+  // Credit rewards
+  receivedRewards.forEach((r) => {
+    if (r.type === "use") {
+      window.addUseDrop(r.name, r.qty);
+    } else {
+      window.addEtcDrop(r.name, r.qty);
+    }
+  });
+
+  // Create cool opening overlay card
+  let overlay = document.createElement("div");
+  overlay.id = "sack-opening-overlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundColor = "rgba(0,0,0,0.9)";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = "45000";
+  overlay.style.backdropFilter = "blur(8px)";
+  document.body.appendChild(overlay);
+
+  // Spawn nice canvas particles on the screen
+  let cvs = document.getElementById("gameCanvas");
+  let w = cvs ? cvs.width : 750;
+  let h = cvs ? cvs.height : 250;
+  for (let i = 0; i < 60; i++) {
+    let angle = Math.random() * Math.PI * 2;
+    let vel = window.randFloat(4, 10);
+    window.particles.push({
+      x: w / 2,
+      y: h / 2,
+      vx: Math.cos(angle) * vel,
+      vy: Math.sin(angle) * vel - 2,
+      radius: window.randFloat(2.5, 6),
+      color: "#9b59b6",
+      alpha: 1,
+      life: window.randInt(40, 60),
+    });
+  }
+
+  // Draw the animation phase first
+  overlay.innerHTML = `
+    <div style="text-align:center; color:white; animation: toastFadeIn 0.3s ease-out;">
+      <div id="sack-anim-bag" style="font-size: 80px; margin-bottom: 20px; animation: cabinetRattle 0.5s ease-in-out infinite;">💼</div>
+      <div style="font-size: 16px; font-weight: bold; color:#9b59b6; letter-spacing: 2px;">BREAKING SEAL OF THE ASCENDED...</div>
+    </div>
+  `;
+
+  setTimeout(() => {
+    let listHtml = receivedRewards
+      .map((r) => {
+        let icon =
+          r.type === "use"
+            ? window.getUseIconHtml(r.name)
+            : window.getEtcIconHtml(r.name);
+        icon = icon.replace("margin-right: 12px;", "margin-right: 8px;");
+        return `
+        <div style="background:#111; border:1px solid #333; border-left: 3px solid ${r.color}; border-radius:4px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <div style="display:flex; align-items:center;">
+            ${icon}
+            <strong style="color:${r.color}; font-size:12.5px;">${r.name}</strong>
+          </div>
+          <strong style="color:#fff; font-size:13px; font-family:monospace;">+${r.qty}</strong>
+        </div>
+      `;
+      })
+      .join("");
+
+    overlay.innerHTML = `
+          <div style="background:#1a1a1a; border:2px solid #9b59b6; border-radius:8px; width:90%; max-width:380px; box-shadow:0 10px 30px rgba(0,0,0,0.95); animation: toastFadeIn 0.3s ease-out; overflow:hidden;">
+            <div style="background:#0b0f12; border-bottom:1px solid #333; padding:12px 15px; text-align:center;">
+              <h3 style="margin:0; color:#9b59b6; font-size:15px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">💼 WEEKLY SACK OPENED!</h3>
+            </div>
+            <div style="padding:15px;">
+              <div style="background:#111; border:1px solid #222; border-radius:6px; padding:8px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                <div style="display:flex; align-items:center;">
+                  <span style="background:rgba(155,89,182,0.1); border:1px solid #9b59b6; border-radius:4px; padding:4px; display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:16px;">🎖️</span>
+                  <strong style="color:#9b59b6; font-size:12.5px; margin-left:8px;">Mission Tokens</strong>
+                </div>
+                <strong style="color:#fff; font-size:13px; font-family:monospace;">+3 MP</strong>
+              </div>
+
+              <div style="font-size:10px; color:#aaa; font-weight:bold; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">📦 Guaranteed Relic Yields:</div>
+              <div style="max-height: 200px; overflow-y:auto; overscroll-behavior:contain;">
+                ${listHtml}
+              </div>
+            </div>
+            <div style="background:#0b0f12; border-top:1px solid #333; padding:12px; text-align:center;">
+              <button onclick="document.getElementById('sack-opening-overlay').remove(); window.setPauseState(false); window.updateUI(); window.renderInventory();" style="background:#9b59b6; color:#fff; border:none; padding:10px; font-weight:bold; font-size:12px; border-radius:4px; cursor:pointer; width:100%;">Claim Relics</button>
+            </div>
+          </div>
+        `;
+  }, 1000);
+};
+
+window.devRefreshQuests = function () {
+  window.generateDailyMissions();
+  if (window.playerStats.prestigeCount > 0) {
+    window.generateWeeklyMissions();
+  }
+  window.playerStats.dailyRewardClaimed = false;
+  window.playerStats.weeklyRewardClaimed = false;
+  window.playerStats.dailyRerollsDone = 0;
+  window.pushHeaderToast("📋 Force Quests Refreshed!", "#2ecc71");
+  window.pushLog(
+    "<span style='color:#2ecc71;'>[DEV] Force-refreshed Daily and Weekly Quest Boards.</span>",
+  );
+  window.updateUI();
+  if (document.getElementById("missions-draggable-window")) {
+    window.renderMissionsWindow();
+  }
+};
+
+window.devGiveSacks = function () {
+  window.addUseDrop("Guild Reward Sack", 5);
+  window.addUseDrop("Guild Weekly Sack", 5);
+  window.pushHeaderToast("🎒 Added 5x Daily & 5x Weekly Sacks!", "#f1c40f");
+  window.pushLog(
+    "<span style='color:#2ecc71;'>[DEV] Granted 5x Guild Reward Sacks and 5x Guild Weekly Sacks.</span>",
+  );
+  window.updateUI();
 };

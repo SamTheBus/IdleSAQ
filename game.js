@@ -343,15 +343,14 @@ window.applyOfflineGains = function (offlineMs) {
         if (rolledBossPot) recordScrapGained(rolledBossPot, 1);
       }
 
-      // Soft progression depth-based calculations replacing hard stage gates
+      // Decoupled flat rare drops to prevent hyper-inflation at high levels
       let offlineDepthQ = window.getDepthQualityMultiplier(currentStage);
-      let offlineShardChance = 0.0015 * (offlineDepthQ - 1.5);
-      let offlineKeyChance = 0.0003 * (offlineDepthQ - 1.0);
-
-      if (offlineDepthQ > 1.5 && Math.random() < offlineShardChance)
-        recordScrapGained("Eridium Shard", 1);
-      if (offlineDepthQ > 1.0 && Math.random() < offlineKeyChance)
-        recordScrapGained("Gacha Key", 1);
+      if (offlineDepthQ > 1.0) {
+        if (Math.random() < 0.0005) recordScrapGained("Ancient Core", 1);
+        if (Math.random() < 0.0004) recordScrapGained("Overlord's Sigil", 1);
+        if (Math.random() < 0.0004) recordScrapGained("Eridium Shard", 1);
+        if (Math.random() < 0.0003) recordScrapGained("Gacha Key", 1);
+      }
 
       currentStage++;
       stagesGained++;
@@ -3298,43 +3297,50 @@ window.handleMobDeath = function () {
     if (typeof window.progressMission === "function")
       window.progressMission("rifts", 1);
   } else if (window.mob.type === "boss") {
-    // Soft-scaling drops for normal Campaign Bosses based on stage progression
     let activeStage = window.playerStats.stage;
-    let currentLvlMult = 1.0 + activeStage / 300; // Gradual scaling
-
-    let shardDropChance = 0.005 * currentStageMultiplier(activeStage);
-    let keyDropChance =
-      activeStage >= 50 ? 0.0003 * currentStageMultiplier(activeStage) : 0.0;
-
-    function currentStageMultiplier(stage) {
-      return window.getDepthQualityMultiplier(stage) - 1.0;
-    }
-
-    if (Math.random() < shardDropChance) {
-      if (typeof window.addEtcDrop === "function")
-        window.addEtcDrop("Eridium Shard", 1);
-      if (typeof window.pushToast === "function")
-        window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
-    }
-    if (keyDropChance > 0 && Math.random() < keyDropChance) {
-      if (typeof window.addEtcDrop === "function")
-        window.addEtcDrop("Gacha Key", 1);
-      if (typeof window.pushToast === "function")
-        window.pushToast("Gacha Key", null, "#f1c40f", true, 1);
-    }
-
-    // Progression-Locked Campaign Boss Ancient Core drop (Flat 1.0% above 80% peak stage)
     let peakLimit = Math.floor(
       (window.playerStats.lifetimePeakStage || 1) * 0.8,
     );
+
+    // Standardized flat drop rates (keeps Sigils/Cores/Shards rare and consistent)
     if (activeStage >= peakLimit) {
-      let coreDropChance = 0.01;
-      if (Math.random() < coreDropChance) {
-        if (typeof window.addEtcDrop === "function")
-          window.addEtcDrop("Ancient Core", 1);
-        if (typeof window.pushToast === "function")
-          window.pushToast("Ancient Core", null, "#e74c3c", true, 1);
+      if (Math.random() < 0.01) {
+        window.addEtcDrop("Ancient Core", 1);
+        window.pushToast("Ancient Core", null, "#e74c3c", true, 1);
       }
+      if (Math.random() < 0.005) {
+        window.addEtcDrop("Overlord's Sigil", 1);
+        window.pushToast("Overlord's Sigil", null, "#1abc9c", true, 1);
+      }
+    }
+    if (activeStage >= 18 && Math.random() < 0.005) {
+      window.addEtcDrop("Eridium Shard", 1);
+      window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
+    }
+    if (
+      activeStage >= 50 &&
+      Math.random() <
+        0.0003 * (window.getDepthQualityMultiplier(activeStage) - 1.0)
+    ) {
+      window.addEtcDrop("Gacha Key", 1);
+      window.pushToast("Gacha Key", null, "#f1c40f", true, 1);
+    }
+  } else if (
+    window.playerStats.isDungeonMode &&
+    window.mob.type === "dungeon_boss"
+  ) {
+    // Standardized flat drops for Dungeon Bosses
+    if (Math.random() < 0.02) {
+      window.addEtcDrop("Ancient Core", 1);
+      window.pushToast("Ancient Core", null, "#e74c3c", true, 1);
+    }
+    if (Math.random() < 0.015) {
+      window.addEtcDrop("Overlord's Sigil", 1);
+      window.pushToast("Overlord's Sigil", null, "#1abc9c", true, 1);
+    }
+    if (Math.random() < 0.015) {
+      window.addEtcDrop("Eridium Shard", 1);
+      window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
     }
   } else if (!isBoss && !window.playerStats.isDungeonMode) {
     if (Math.random() < (window.mob.isRare ? 0.08 : 0.03)) {
@@ -3349,19 +3355,25 @@ window.handleMobDeath = function () {
         life: 70,
       });
     }
-    // Progression-Locked Campaign Rare Spawn Ancient Core drop (Flat 0.5% above 80% peak stage)
+    // Progression-Locked Campaign Rare Spawn Ancient Core / Sigil / Shard drops (Flat rare)
     if (window.mob && window.mob.isRare) {
+      let activeStage = window.playerStats.stage;
       let peakLimit = Math.floor(
         (window.playerStats.lifetimePeakStage || 1) * 0.8,
       );
-      if (window.playerStats.stage >= peakLimit) {
-        let rareCoreChance = 0.005;
-        if (Math.random() < rareCoreChance) {
-          if (typeof window.addEtcDrop === "function")
-            window.addEtcDrop("Ancient Core", 1);
-          if (typeof window.pushToast === "function")
-            window.pushToast("Ancient Core", null, "#e74c3c", true, 1);
+      if (activeStage >= peakLimit) {
+        if (Math.random() < 0.005) {
+          window.addEtcDrop("Ancient Core", 1);
+          window.pushToast("Ancient Core", null, "#e74c3c", true, 1);
         }
+        if (Math.random() < 0.0025) {
+          window.addEtcDrop("Overlord's Sigil", 1);
+          window.pushToast("Overlord's Sigil", null, "#1abc9c", true, 1);
+        }
+      }
+      if (activeStage >= 18 && Math.random() < 0.0025) {
+        window.addEtcDrop("Eridium Shard", 1);
+        window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
       }
     }
   }
@@ -3984,6 +3996,20 @@ window.respawnHero = function () {
 window.useItem = function (itemName) {
   if (!window.inventory.USE[itemName] || window.inventory.USE[itemName] <= 0)
     return;
+
+  if (itemName === "Guild Reward Sack") {
+    if (typeof window.openGuildRewardSack === "function") {
+      window.openGuildRewardSack();
+    }
+    return;
+  }
+  if (itemName === "Guild Weekly Sack") {
+    if (typeof window.openGuildWeeklySack === "function") {
+      window.openGuildWeeklySack();
+    }
+    return;
+  }
+
   let pBefore = window.resolvePlayerStats();
   let baseBonusDuration = 18000;
   let effectiveInt = Math.max(0, pBefore.int - 5);
@@ -4167,19 +4193,9 @@ window.useItem = function (itemName) {
   }
 
   let pAfter = window.resolvePlayerStats();
-  window.playerStats.currentHp = Math.max(
-    1,
-    Math.min(
-      pAfter.maxHp,
-      Math.floor((window.playerStats.currentHp / pBefore.maxHp) * pAfter.maxHp),
-    ),
-  );
-  window.playerStats.currentHp = Math.max(
-    1,
-    Math.min(
-      pAfter.maxHp,
-      Math.floor((window.playerStats.currentHp / pBefore.maxHp) * pAfter.maxHp),
-    ),
+  window.playerStats.currentHp = Math.min(
+    window.playerStats.currentHp,
+    pAfter.maxHp,
   );
   setTimeout(() => {
     window.updateUI();
