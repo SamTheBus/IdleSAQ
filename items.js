@@ -467,31 +467,33 @@ window.createItemObject = function(chosenType, statLinesCount, stageScale, minSt
     }
 
     let prestigeMult = Math.pow(1.08, window.playerStats.prestigeCount || 0);
-        let expScale = Math.pow(stageScale, 2.4);
+            let expScale = Math.pow(stageScale, 2.4);
 
-    // Apply baseline attribute values matching slot configurations (Slot-Specific Base Stats)
-    if (!isArt) {
-        if (chosenType === "weapon") {
-            item.baseAtk = Math.ceil(1.5 * expScale * prestigeMult);
-        } else if (chosenType === "chest" || chosenType === "overall") {
-            item.baseDef = Math.ceil(2.0 * expScale * prestigeMult);
-            item.baseMaxHp = Math.ceil(10.0 * expScale * prestigeMult);
-        } else if (chosenType === "helmet" || chosenType === "leggings") {
-            item.baseDef = Math.ceil(1.0 * expScale * prestigeMult);
-            item.baseMaxHp = Math.ceil(5.0 * expScale * prestigeMult);
-        } else if (chosenType === "boots") {
-            item.baseDef = Math.ceil(0.5 * expScale * prestigeMult);
-            item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
-        } else if (chosenType === "subweapon") {
-            if (item.subType === "shield") {
-                item.baseDef = Math.ceil(1.5 * expScale * prestigeMult);
-            } else if (item.subType === "dagger") {
-                item.baseAtk = Math.ceil(0.8 * expScale * prestigeMult);
-            } else if (item.subType === "tome") {
-                item.baseInt = Math.ceil(1.5 * stageScale * prestigeMult);
+        // Apply baseline attribute values matching slot configurations (Slot-Specific Base Stats)
+        if (!isArt) {
+            let baseRarityMult = 1.0 + (statLinesCount * 0.30); // Apply same base rarity multiplier immediately on drop
+            if (chosenType === "weapon") {
+                item.baseAtk = Math.ceil(1.5 * expScale * prestigeMult * baseRarityMult);
+            } else if (chosenType === "chest" || chosenType === "overall") {
+                let overallMult = chosenType === "overall" ? 1.8 : 1.0;
+                item.baseDef = Math.ceil(2.0 * expScale * prestigeMult * baseRarityMult * overallMult);
+                item.baseMaxHp = Math.ceil(10.0 * expScale * prestigeMult * baseRarityMult * overallMult);
+            } else if (chosenType === "helmet" || chosenType === "leggings") {
+                item.baseDef = Math.ceil(1.0 * expScale * prestigeMult * baseRarityMult);
+                item.baseMaxHp = Math.ceil(5.0 * expScale * prestigeMult * baseRarityMult);
+            } else if (chosenType === "boots") {
+                item.baseDef = Math.ceil(0.5 * expScale * prestigeMult * baseRarityMult);
+                item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
+            } else if (chosenType === "subweapon") {
+                if (item.subType === "shield") {
+                    item.baseDef = Math.ceil(1.5 * expScale * prestigeMult * baseRarityMult);
+                } else if (item.subType === "dagger") {
+                    item.baseAtk = Math.ceil(0.8 * expScale * prestigeMult * baseRarityMult);
+                } else if (item.subType === "tome") {
+                    item.baseInt = Math.ceil(1.5 * stageScale * prestigeMult * baseRarityMult);
+                }
             }
         }
-    }
 
     if (isArt) {
         let filterPool = window.ARTIFACT_POOL;
@@ -851,53 +853,43 @@ window.recalculateItemStats = function(item) {
         }
     }
 
-    // Scale base properties directly inside calculations to ensure tooltip consistency
-    let tempers = item.temperLevel || 0;
-    if (tempers > 0 && item.type !== "artifact") {
-        let multiplier = 1 + (tempers * 0.04);
-        if (item.baseAtk > 0) item.baseAtk = Math.round(item.baseAtk * multiplier);
-        if (item.baseDef > 0) item.baseDef = Math.round(item.baseDef * multiplier);
-        if (item.baseMaxHp > 0) item.baseMaxHp = Math.round(item.baseMaxHp * multiplier);
-        if (item.baseInt > 0) item.baseInt = Math.round(item.baseInt * multiplier);
-    }
+    // Sum combined totals using standard base values
+        item.atk = (item.baseAtk || 0) + item.bonusAtk;
+        item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
+        item.def = (item.baseDef || 0) + item.bonusDef;
+        item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
+        item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
+        item.critDamage = (item.baseCritDamage || 0) + item.bonusCritDamage;
+        item.block = (item.baseBlock || 0) + item.bonusBlock;
+        item.parry = (item.baseParry || 0) + item.bonusParry;
+        item.activeAttackSpeed = (item.baseActiveSpeed || 0) + item.bonusActiveSpeed;
+        item.idleAttackSpeed = (item.baseIdleSpeed || 0) + item.bonusIdleSpeed;
+        item.str = (item.baseStr || 0) + item.bonusStr;
+        item.dex = (item.baseDex || 0) + item.bonusDex;
+        item.int = (item.baseInt || 0) + item.bonusInt;
 
-    // Sum combined totals first using the base unscaled values
-                item.atk = (item.baseAtk || 0) + item.bonusAtk;
-                item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
-                item.def = (item.baseDef || 0) + item.bonusDef;
-                item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
-                item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
-                item.critDamage = (item.baseCritDamage || 0) + item.bonusCritDamage;
-                item.block = (item.baseBlock || 0) + item.bonusBlock;
-                item.parry = (item.baseParry || 0) + item.bonusParry;
-                item.activeAttackSpeed = (item.baseActiveSpeed || 0) + item.bonusActiveSpeed;
-                item.idleAttackSpeed = (item.baseIdleSpeed || 0) + item.bonusIdleSpeed;
-                item.str = (item.baseStr || 0) + item.bonusStr;
-                item.dex = (item.baseDex || 0) + item.bonusDex;
-                item.int = (item.baseInt || 0) + item.bonusInt;
+        let tempers = item.temperLevel || 0;
+        if (tempers > 0) {
+            let isArt = item.type === "artifact";
+            let multiplier = 1 + (tempers * 0.04);
+            if (isArt) {
+                item.atk += tempers * 5; item.maxHp += tempers * 30; item.def += tempers * 3;
+                item.str += tempers; item.dex += tempers; item.int += tempers;
+            } else {
+                // Scale internal base parameter properties once (no double-scaling!)
+                if (item.baseAtk > 0) item.baseAtk = Math.round(item.baseAtk * multiplier);
+                if (item.baseDef > 0) item.baseDef = Math.round(item.baseDef * multiplier);
+                if (item.baseMaxHp > 0) item.baseMaxHp = Math.round(item.baseMaxHp * multiplier);
+                if (item.baseInt > 0) item.baseInt = Math.round(item.baseInt * multiplier);
 
-                if (tempers > 0) {
-                    let isArt = item.type === "artifact";
-                    if (isArt) {
-                        item.atk += tempers * 5; item.maxHp += tempers * 30; item.def += tempers * 3;
-                        item.str += tempers; item.dex += tempers; item.int += tempers;
-                    } else {
-                        let multiplier = 1 + (tempers * 0.04);
-
-                        // Scale internal base parameter properties once to avoid double-scaling
-                        if (item.baseAtk > 0) item.baseAtk = Math.round(item.baseAtk * multiplier);
-                        if (item.baseDef > 0) item.baseDef = Math.round(item.baseDef * multiplier);
-                        if (item.baseMaxHp > 0) item.baseMaxHp = Math.round(item.baseMaxHp * multiplier);
-                        if (item.baseInt > 0) item.baseInt = Math.round(item.baseInt * multiplier);
-
-                        // Scale combined totals once (including bonus components)
-                        if (item.atk > 0 || item.type === "weapon") item.atk = Math.round(item.atk * multiplier);
-                        if (item.maxHp > 0) item.maxHp = Math.round(item.maxHp * multiplier);
-                        if (item.def > 0) item.def = Math.round(item.def * multiplier);
-                        if (item.str > 0) item.str = Math.round(item.str * multiplier);
-                        if (item.dex > 0) item.dex = Math.round(item.dex * multiplier);
-                        if (item.int > 0) item.int = Math.round(item.int * multiplier);
-                    }
+                // Scale combined totals once (including bonus components)
+                if (item.atk > 0 || item.type === "weapon") item.atk = Math.round(item.atk * multiplier);
+                if (item.maxHp > 0) item.maxHp = Math.round(item.maxHp * multiplier);
+                if (item.def > 0) item.def = Math.round(item.def * multiplier);
+                if (item.str > 0) item.str = Math.round(item.str * multiplier);
+                if (item.dex > 0) item.dex = Math.round(item.dex * multiplier);
+                if (item.int > 0) item.int = Math.round(item.int * multiplier);
+            }
 
         if (item.moveSpeed > 0) item.moveSpeed += tempers;
                 if (item.critChance > 0) item.critChance = parseFloat((item.critChance + tempers * 0.005).toFixed(4));

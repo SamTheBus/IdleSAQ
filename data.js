@@ -3,7 +3,7 @@
    initial global state, and system utility functions.
    ========================================================================= */
 
-window.GAME_VERSION = 0.76; // Pre-release Alpha 0.7.6 // Increment this whenever you push a new release
+window.GAME_VERSION = 0.78; // Pre-release Alpha 0.7.8 // Increment this whenever you push a new release
 
 
 

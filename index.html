@@ -481,72 +481,112 @@
     <!-- Tabulated Control Centers -->
     <div id="menu-panel">
         <div class="tabs">
-            <!-- 1. HERO TAB: Knight Helm with glowing gold crest -->
+            <!-- 1. HERO TAB: Knight Shield and Broadsword (Metallic Silver & Blue Glow) -->
             <button class="tab-btn active" onclick="window.switchTab('hero')" style="display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-                <svg width="20" height="20" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 3px rgba(241,196,15,0.45));">
+                <svg width="20" height="20" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 4px rgba(52,152,219,0.55));">
                     <defs>
-                        <linearGradient id="grad_helm" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#bdc3c7"/><stop offset="100%" stop-color="#2c3e50"/></linearGradient>
-                        <linearGradient id="grad_crest" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#d35400"/><stop offset="100%" stop-color="#f1c40f"/></linearGradient>
+                        <linearGradient id="blade_grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#ffffff"/><stop offset="50%" stop-color="#bdc3c7"/><stop offset="100%" stop-color="#7f8c8d"/>
+                        </linearGradient>
                     </defs>
-                    <path d="M16 2 Q14 8, 11 11 M16 2 Q18 8, 21 11" stroke="url(#grad_crest)" stroke-width="3" fill="none"/>
-                    <path d="M16 2 C16 2, 7 8, 7 17 C7 24, 11 28, 16 28 C21 28, 25 24, 25 17 C25 8, 16 2, 16 2 Z" fill="url(#grad_helm)" stroke="#111" stroke-width="2"/>
-                    <polygon points="12,12 20,12 16,18" fill="#111" stroke="#00d2ff" stroke-width="1"/>
-                    <path d="M10 20 L22 20" stroke="#f1c40f" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Knight Shield Backing -->
+                    <path d="M6 6 Q16 4, 26 6 Q25 18, 16 28 Q7 18, 6 6 Z" fill="#2c3e50" stroke="#111" stroke-width="2"/>
+                    <!-- Broadsword Forefront -->
+                    <path d="M16 4 L18 8 L18 20 L14 20 L14 8 Z" fill="url(#blade_grad)" stroke="#111" stroke-width="1.2"/>
+                    <line x1="16" y1="4" x2="16" y2="20" stroke="#7f8c8d" stroke-width="1"/>
+                    <rect x="11" y="20" width="10" height="2.5" rx="0.5" fill="#f1c40f" stroke="#111" stroke-width="1.2"/>
+                    <rect x="14.5" y="22.5" width="3" height="4" fill="#34495e" stroke="#111" stroke-width="1"/>
+                    <circle cx="16" cy="27.5" r="1.5" fill="#f1c40f" stroke="#111" stroke-width="1"/>
                 </svg>
                 Hero
             </button>
 
-            <!-- 2. SACK TAB: Deep-pocketed violet runic backpack -->
+            <!-- 2. SACK TAB: Drawstring Burlap Loot Pouch with Purple Spell Patch -->
             <button class="tab-btn" onclick="window.switchTab('inv')" style="display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-                <svg width="20" height="20" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 3px rgba(155,89,182,0.45));">
+                <svg width="20" height="20" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 4px rgba(155,89,182,0.55));">
                     <defs>
-                        <linearGradient id="grad_sack" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9b59b6"/><stop offset="100%" stop-color="#4a154b"/></linearGradient>
+                        <linearGradient id="sack_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#d35400"/><stop offset="100%" stop-color="#873600"/>
+                        </linearGradient>
                     </defs>
-                    <rect x="6" y="10" width="20" height="16" rx="4" fill="url(#grad_sack)" stroke="#111" stroke-width="2"/>
-                    <path d="M10 10 C10 6, 22 6, 22 10" fill="none" stroke="#7f8c8d" stroke-width="2.5"/>
-                    <path d="M16 10 L16 18 M12 14 L20 14" stroke="#f1c40f" stroke-width="1.5"/>
-                    <rect x="11" y="21" width="10" height="5" rx="1" fill="#1a0221" stroke="#111" stroke-width="1.5"/>
+                    <!-- Drawstring sack pouch body -->
+                    <path d="M16 12 C10 12, 5 15, 5 21 C5 26, 9 29, 16 29 C23 29, 27 26, 27 21 C27 15, 22 12, 16 12 Z" fill="url(#sack_grad)" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+                    <ellipse cx="16" cy="11.5" rx="5.5" ry="2.2" fill="#e67e22" stroke="#111" stroke-width="1.5"/>
+                    <path d="M12 11.5 Q16 13.5, 20 10.5 M10 13 Q16 14.5, 22 12.5" fill="none" stroke="#f1c40f" stroke-width="2.2" stroke-linecap="round"/>
+                    <rect x="12" y="16" width="8" height="8" fill="#8e44ad" opacity="0.9" rx="1.5" stroke="#111" stroke-width="1.2"/>
+                    <path d="M16 18 L16 22 M14 20 L18 20" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
                 </svg>
                 Sack
             </button>
 
-            <!-- 3. FORGE TAB: Heavy blacksmith anvil with fiery coal core -->
+            <!-- 3. FORGE TAB: Blacksmith Heavy Horn Anvil with molten orange heat core -->
             <button class="tab-btn" onclick="window.switchTab('forge')" style="display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-                <svg width="20" height="20" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 3px rgba(230,126,34,0.45));">
+                <svg width="20" height="20" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 4px rgba(230,126,34,0.55));">
                     <defs>
-                        <linearGradient id="grad_anvil" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4e545c"/><stop offset="100%" stop-color="#1f242d"/></linearGradient>
-                        <radialGradient id="grad_fire" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffd700"/><stop offset="50%" stop-color="#ff5500"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>
+                        <linearGradient id="iron_grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#566573"/><stop offset="100%" stop-color="#2c3e50"/>
+                        </linearGradient>
                     </defs>
-                    <path d="M5 24 L27 24 L24 16 L29 12 L16 12 L14 16 Z" fill="url(#grad_anvil)" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
-                    <rect x="8" y="24" width="16" height="4" fill="#333" stroke="#111" stroke-width="1.5"/>
-                    <circle cx="16" cy="18" r="5" fill="url(#grad_fire)"/>
-                    <line x1="16" y1="14" x2="16" y2="20" stroke="#ff3300" stroke-width="2"/>
+                    <!-- Heavy cast base block -->
+                    <polygon points="9,25 23,25 21,19 11,19" fill="url(#iron_grad)" stroke="#111" stroke-width="1.8"/>
+                    <path d="M6 25 L26 25 L28 29 L4 29 Z" fill="#1b2631" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+                    <!-- Curved Horn and main striking block -->
+                    <path d="M3 13 L23 13 Q29 13, 30 10.5 L24 9 L6 9 Z" fill="url(#iron_grad)" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+                    <rect x="11.5" y="13" width="9" height="6" fill="url(#iron_grad)" stroke="#111" stroke-width="1.8"/>
+                    <!-- Ember heat core -->
+                    <circle cx="16" cy="11" r="3.2" fill="#ff5500" style="animation: pulseBtn 1s infinite;"/>
                 </svg>
                 Forge
             </button>
 
-            <!-- 4. MARKET TAB: Retro neon shopping chest overflowing with gems -->
+            <!-- 4. MARKET TAB: Medieval Merchant Stall with red and white striped awning -->
             <button class="tab-btn" onclick="window.switchTab('market')" style="display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-                <svg width="20" height="20" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 3px rgba(52,152,219,0.45));">
+                <svg width="20" height="20" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 4px rgba(46,204,113,0.55));">
                     <defs>
-                        <linearGradient id="grad_market" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#b7950b"/></linearGradient>
+                        <linearGradient id="awning_stripes" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#e74c3c"/>
+                            <stop offset="25%" stop-color="#e74c3c"/>
+                            <stop offset="25%" stop-color="#ffffff"/>
+                            <stop offset="50%" stop-color="#ffffff"/>
+                            <stop offset="50%" stop-color="#e74c3c"/>
+                            <stop offset="75%" stop-color="#e74c3c"/>
+                            <stop offset="75%" stop-color="#ffffff"/>
+                            <stop offset="100%" stop-color="#ffffff"/>
+                        </linearGradient>
                     </defs>
-                    <path d="M6 10 H26 L22 22 H10 Z" fill="#2c3e50" stroke="#3498db" stroke-width="2" stroke-linejoin="round"/>
-                    <circle cx="11" cy="25" r="3" fill="url(#grad_market)" stroke="#111" stroke-width="1.5"/>
-                    <circle cx="21" cy="25" r="3" fill="url(#grad_market)" stroke="#111" stroke-width="1.5"/>
-                    <path d="M4 10 L8 4 L24 4 L28 10 Z" fill="none" stroke="#2ecc71" stroke-width="1.5"/>
+                    <!-- Counter base -->
+                    <rect x="5" y="17" width="22" height="9" rx="1.5" fill="#873600" stroke="#111" stroke-width="1.8"/>
+                    <!-- Supports -->
+                    <line x1="8" y1="17" x2="8" y2="9" stroke="#111" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="24" y1="17" x2="24" y2="9" stroke="#111" stroke-width="1.8" stroke-linecap="round"/>
+                    <!-- Roof Awning -->
+                    <path d="M4 9 L28 9 L25 4 L7 4 Z" fill="url(#awning_stripes)" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+                    <!-- Displayed potion jar -->
+                    <circle cx="16" cy="15" r="2.8" fill="#e74c3c" stroke="#111" stroke-width="1.2"/>
+                    <rect x="15" y="11" width="2" height="2" fill="#fff" stroke="#111" stroke-width="0.8"/>
                 </svg>
                 Market
             </button>
 
-            <!-- 5. PRESTIGE TAB: Majestic ascending crimson dragon wings -->
+            <!-- 5. PRESTIGE TAB: Radiant Golden Crown of Ascension with embedded Ruby jewels -->
             <button class="tab-btn" onclick="window.switchTab('prestige')" style="display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-                <svg width="20" height="20" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 3px rgba(231,76,60,0.45));">
+                <svg width="20" height="20" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 4px rgba(231,76,60,0.55));">
                     <defs>
-                        <linearGradient id="grad_dragon" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#780016"/><stop offset="100%" stop-color="#ff3300"/></linearGradient>
+                        <linearGradient id="imperial_gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffeaa7"/><stop offset="50%" stop-color="#f1c40f"/><stop offset="100%" stop-color="#b7950b"/>
+                        </linearGradient>
                     </defs>
-                    <path d="M16 4 Q10 10, 4 14 Q14 16, 16 28 Q18 16, 28 14 Q22 10, 16 4 Z" fill="url(#grad_dragon)" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
-                    <circle cx="16" cy="14" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="1"/>
+                    <!-- Imperial purple velvet lining -->
+                    <path d="M7 21 C7 21, 10 15, 16 15 C22 15, 25 21, 25 21 Z" fill="#8e44ad" stroke="#111" stroke-width="1.2"/>
+                    <!-- Golden Peaks and points -->
+                    <path d="M5 21 L8 10 L12 16 L16 7 L20 16 L24 10 L27 21 Z" fill="url(#imperial_gold)" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+                    <!-- Base band -->
+                    <rect x="5" y="21" width="22" height="4.5" rx="1" fill="url(#imperial_gold)" stroke="#111" stroke-width="1.8"/>
+                    <!-- Embedded rubies -->
+                    <circle cx="16" cy="7" r="2.0" fill="#e74c3c" stroke="#111" stroke-width="0.8"/>
+                    <circle cx="8" cy="10" r="1.5" fill="#3498db" stroke="#111" stroke-width="0.8"/>
+                    <circle cx="24" cy="10" r="1.5" fill="#3498db" stroke="#111" stroke-width="0.8"/>
+                    <circle cx="16" cy="23.2" r="1.2" fill="#e74c3c"/>
                 </svg>
                 Prestige
             </button>

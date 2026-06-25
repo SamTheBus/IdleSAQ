@@ -372,118 +372,234 @@ window.getUseIconHtml = function(key) {
         return `🔮`;
     };
 
+    window.getBossIconHtml = function(bossType) {
+        if (bossType === "guardian") {
+            return `
+            <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(52, 152, 219, 0.45));">
+                <defs>
+                    <linearGradient id="g_goliath" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#34495e"/><stop offset="100%" stop-color="#1a252f"/></linearGradient>
+                    <radialGradient id="g_core" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff"/><stop offset="40%" stop-color="#00d2ff"/><stop offset="100%" stop-color="#003755"/></radialGradient>
+                </defs>
+                <path d="M32 4 L52 14 L46 44 L32 58 L18 44 L12 14 Z" fill="url(#g_goliath)" stroke="#00d2ff" stroke-width="2.5" stroke-linejoin="round" />
+                <circle cx="32" cy="30" r="10" fill="url(#g_core)" stroke="#fff" stroke-width="1.5" />
+                <polygon points="26,24 20,22 24,28" fill="#e74c3c" />
+                <polygon points="38,24 44,22 40,28" fill="#e74c3c" />
+            </svg>`;
+        } else if (bossType === "chronos") {
+            return `
+            <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(241, 196, 15, 0.45));">
+                <defs><linearGradient id="g_chron" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#b7950b"/></linearGradient></defs>
+                <circle cx="32" cy="32" r="24" fill="none" stroke="url(#g_chron)" stroke-width="3" />
+                <g stroke="url(#g_chron)" stroke-width="3" stroke-linecap="round"><line x1="32" y1="4" x2="32" y2="8" /><line x1="32" y1="56" x2="32" y2="60" /><line x1="4" y1="32" x2="8" y2="32" /><line x1="56" y1="32" x2="60" y2="32" /></g>
+                <circle cx="32" cy="32" r="16" fill="#111" stroke="url(#g_chron)" stroke-width="1.5" />
+                <line x1="32" y1="32" x2="32" y2="20" stroke="#fff" stroke-width="2" stroke-linecap="round" />
+                <line x1="32" y1="32" x2="40" y2="32" stroke="#e67e22" stroke-width="1.5" stroke-linecap="round" />
+            </svg>`;
+        } else if (bossType === "nexus") {
+            return `
+            <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(255, 0, 127, 0.45));">
+                <defs><linearGradient id="g_nex" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff007f"/><stop offset="100%" stop-color="#00d2ff"/></linearGradient></defs>
+                <rect x="14" y="14" width="36" height="36" fill="none" stroke="url(#g_nex)" stroke-width="2" />
+                <rect x="20" y="20" width="24" height="24" fill="none" stroke="#00b894" stroke-width="1.5" />
+                <circle cx="32" cy="32" r="4" fill="#fff" stroke="#ff007f" stroke-width="1" />
+            </svg>`;
+        }
+        return `🔮`;
+    };
+
     window.getArtifactIconHtml = function(trait, size = 24) {
         let svg = "";
         if (trait === "frenzy") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_frenzy" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff4d4d"/><stop offset="100%" stop-color="#780016"/></linearGradient></defs>
-                <rect x="6" y="6" width="20" height="20" rx="4" fill="url(#g_frenzy)" stroke="#000" stroke-width="1.5"/>
-                <path d="M12 12 L20 12 L16 18 Z" fill="#fff" stroke="#000" stroke-width="1"/>
-                <path d="M10 20 L22 20" stroke="#ff3333" stroke-width="2" stroke-linecap="round"/>
+                <defs><radialGradient id="g_frenzy" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff5555"/><stop offset="100%" stop-color="#4a0008"/></radialGradient></defs>
+                <rect x="3" y="3" width="26" height="26" rx="6" fill="url(#g_frenzy)" stroke="#111" stroke-width="1.8"/>
+                <path d="M16 6 L12 16 L20 18 L16 26" fill="none" stroke="#f1c40f" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" style="filter: drop-shadow(0 0 3px #ff3300);"/>
+                <circle cx="16" cy="16" r="3" fill="#ffffff" stroke="#ff3333" stroke-width="1"/>
             </svg>`;
         } else if (trait === "vampirism") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_vamp" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#800000"/><stop offset="100%" stop-color="#ff1a1a"/></linearGradient></defs>
-                <path d="M10 6 L22 6 L22 14 C22 19, 16 22, 16 22 C16 22, 10 19, 10 14 Z" fill="#d4af37" stroke="#000" stroke-width="1.5"/>
-                <path d="M11 7 L21 7 L21 12 C21 14, 11 14, 11 12 Z" fill="url(#g_vamp)"/>
-                <line x1="16" y1="22" x2="16" y2="28" stroke="#d4af37" stroke-width="2"/>
-                <line x1="12" y1="28" x2="20" y2="28" stroke="#d4af37" stroke-width="3" stroke-linecap="round"/>
+                <defs>
+                    <linearGradient id="g_gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff59d"/><stop offset="50%" stop-color="#f1c40f"/><stop offset="100%" stop-color="#9a7d0a"/></linearGradient>
+                    <radialGradient id="g_blood" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff4d4d"/><stop offset="100%" stop-color="#7a0010"/></radialGradient>
+                </defs>
+                <path d="M8 6 L24 6 L22 16 C22 22, 16 24, 16 24 C16 24, 10 22, 10 16 Z" fill="url(#g_gold)" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M9.5 8 L22.5 8 C21 13, 11 13, 9.5 8 Z" fill="url(#g_blood)" stroke="#111" stroke-width="1"/>
+                <line x1="16" y1="24" x2="16" y2="28" stroke="url(#g_gold)" stroke-width="3" stroke-linecap="round"/>
+                <path d="M9 28 L23 28 Q16 31, 9 28 Z" fill="url(#g_gold)" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/>
             </svg>`;
         } else if (trait === "gold_hoard") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="10" fill="#ffd700" stroke="#000" stroke-width="1.5"/>
-                <circle cx="16" cy="16" r="5" fill="#111" stroke="#000" stroke-width="1.5"/>
+                <defs><linearGradient id="g_bronze" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffd54f"/><stop offset="100%" stop-color="#a77c00"/></linearGradient></defs>
+                <circle cx="16" cy="8" r="4.5" fill="none" stroke="url(#g_bronze)" stroke-width="2.5"/>
+                <line x1="16" y1="11" x2="16" y2="25" stroke="url(#g_bronze)" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="9" y1="15" x2="23" y2="15" stroke="url(#g_bronze)" stroke-width="3" stroke-linecap="round"/>
+                <path d="M7 20 C7 27, 25 27, 25 20" fill="none" stroke="url(#g_bronze)" stroke-width="3.5" stroke-linecap="round"/>
+                <polygon points="7,19 4,22 9,21" fill="url(#g_bronze)" stroke="#111" stroke-width="1"/>
+                <polygon points="25,19 28,22 23,21" fill="url(#g_bronze)" stroke="#111" stroke-width="1"/>
             </svg>`;
         } else if (trait === "magic_find") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="10" fill="#2ecc71" stroke="#000" stroke-width="1.5"/>
-                <path d="M16 10 L20 18 L12 18 Z" fill="#f1c40f" stroke="#000" stroke-width="1"/>
+                <defs>
+                    <linearGradient id="g_sc_gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff1a8"/><stop offset="100%" stop-color="#d4af37"/></linearGradient>
+                    <linearGradient id="g_sc_emerald" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#55efc4"/><stop offset="100%" stop-color="#00b894"/></linearGradient>
+                </defs>
+                <ellipse cx="16" cy="18" rx="8" ry="10" fill="url(#g_sc_gold)" stroke="#111" stroke-width="2"/>
+                <circle cx="16" cy="10" r="4.2" fill="url(#g_sc_gold)" stroke="#111" stroke-width="1.8"/>
+                <line x1="16" y1="10" x2="16" y2="28" stroke="#111" stroke-width="1.8"/>
+                <rect x="13.2" y="13.5" width="5.6" height="8.5" rx="1.5" fill="url(#g_sc_emerald)" stroke="#111" stroke-width="1"/>
+                <path d="M8 14 Q3 15, 6 9.5 M24 14 Q29 15, 26 9.5 M7 21 Q3 23, 5 27 M25 21 Q29 23, 27 27" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/>
             </svg>`;
         } else if (trait === "move_speed") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M8 24 L14 10 L24 16 L18 26 Z" fill="#3498db" stroke="#000" stroke-width="1.5"/>
-                <path d="M6 16 L12 12" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                <defs>
+                    <linearGradient id="g_silver_metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#7f8c8d"/></linearGradient>
+                    <linearGradient id="g_sky_wings" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#81ecec"/><stop offset="100%" stop-color="#0984e3"/></linearGradient>
+                </defs>
+                <!-- Heavy metallic winged greave -->
+                <path d="M10 24 L15 9 L24 15 L19 26 Z" fill="url(#g_silver_metal)" stroke="#111" stroke-width="1.8"/>
+                <path d="M5 14 C5 10, 11 8, 14 15 C11 15, 7 13, 5 14 Z" fill="url(#g_sky_wings)" stroke="#111" stroke-width="1.2"/>
+                <path d="M3 18 C3 14, 9 12, 12 19 C9 19, 5 17, 3 18 Z" fill="url(#g_sky_wings)" stroke="#111" stroke-width="1.2"/>
             </svg>`;
         } else if (trait === "defense") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M16 4 L26 10 L22 24 L16 28 L10 24 L6 10 Z" fill="#34495e" stroke="#000" stroke-width="1.5"/>
-                <path d="M16 7 L22 11 L19 21 L16 24 L13 21 L10 11 Z" fill="#5d6d7e"/>
+                <defs>
+                    <linearGradient id="g_cob_inner" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#4ba3e3"/><stop offset="100%" stop-color="#1c304a"/></linearGradient>
+                </defs>
+                <!-- Cobalt shield matrix -->
+                <path d="M16 3 L27 9 L23 23 L16 29 L9 23 L5 9 Z" fill="url(#g_cob_inner)" stroke="#111" stroke-width="2.2" stroke-linejoin="round"/>
+                <path d="M16 7 L23 11 L20 20 L16 25 L12 20 L9 11 Z" fill="none" stroke="#fff" opacity="0.3" stroke-width="1.8"/>
+                <circle cx="16" cy="15" r="3.2" fill="#fff" style="filter: drop-shadow(0 0 4px #fff);"/>
             </svg>`;
         } else if (trait === "parry_strike") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M6 10 L16 6 L26 10 L24 22 L16 28 L8 22 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.5"/>
-                <path d="M12 14 L20 14 M16 10 L16 22" stroke="#e74c3c" stroke-width="2" stroke-linecap="round"/>
+                <defs><linearGradient id="g_riposte" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#555555"/></linearGradient></defs>
+                <!-- Heavy counter gauntlet -->
+                <path d="M7 10 L16 5 L25 10 L23 22 L16 28 L9 22 Z" fill="url(#g_riposte)" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+                <line x1="8" y1="14" x2="24" y2="14" stroke="#c0392b" stroke-width="3" stroke-linecap="round"/>
+                <path d="M16 10 L16 22" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+                <path d="M16 10 L16 22" stroke="#fff" stroke-width="1" stroke-linecap="round"/>
             </svg>`;
         } else if (trait === "echo_strike") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M8 24 L24 8 L26 10 L10 26 Z" fill="#00d2ff" stroke="#000" stroke-width="1.5"/>
-                <path d="M12 28 L28 12" stroke="rgba(0, 210, 255, 0.4)" stroke-width="2"/>
+                <defs>
+                    <linearGradient id="g_blue_echo" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#020d1a"/><stop offset="100%" stop-color="#00ffcc"/></linearGradient>
+                </defs>
+                <!-- Translucent phantom twin blades -->
+                <path d="M4 28 L24 8 L28 12 L8 32 Z" fill="url(#g_blue_echo)" stroke="rgba(0, 255, 204, 0.4)" stroke-width="1.5" style="opacity:0.45;"/>
+                <path d="M8 24 L24 8 L28 12 L12 28 Z" fill="url(#g_blue_echo)" stroke="#111" stroke-width="1.8"/>
+                <path d="M12 28 L28 12" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
             </svg>`;
         } else if (trait === "idle_spd") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="10" fill="#2c3e50" stroke="#000" stroke-width="1.5"/>
-                <line x1="16" y1="16" x2="16" y2="10" stroke="#e67e22" stroke-width="2" stroke-linecap="round"/>
-                <line x1="16" y1="16" x2="22" y2="16" stroke="#f1c40f" stroke-width="1.5" stroke-linecap="round"/>
+                <defs><linearGradient id="g_obsid" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2c3e50"/><stop offset="100%" stop-color="#07090c"/></linearGradient></defs>
+                <!-- Clockwork suspended inside obsidian ring -->
+                <circle cx="16" cy="16" r="11" fill="url(#g_obsid)" stroke="#ffd700" stroke-width="2.2"/>
+                <circle cx="16" cy="16" r="8" fill="none" stroke="#e67e22" stroke-width="1" stroke-dasharray="3 3"/>
+                <line x1="16" y1="16" x2="16" y2="9.5" stroke="#f1c40f" stroke-width="2.2" stroke-linecap="round"/>
+                <line x1="16" y1="16" x2="21.5" y2="16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
             </svg>`;
         } else if (trait === "active_spd") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M19 3 L7 17 L15 17 L11 29 L27 13 L17 13 Z" fill="#f1c40f" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
+                <defs>
+                    <linearGradient id="g_fever_flare" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff9a6"/><stop offset="50%" stop-color="#f39c12"/><stop offset="100%" stop-color="#d35400"/></linearGradient>
+                </defs>
+                <!-- Sun-spiked active crest -->
+                <path d="M16 2 L20 10 L28 10 L22 16 L25 24 L16 19 L7 24 L10 16 L4 10 L12 10 Z" fill="url(#g_fever_flare)" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+                <circle cx="16" cy="13.5" r="4.2" fill="#fff" opacity="0.3"/>
             </svg>`;
         } else if (trait === "dodge_buff") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <rect x="13" y="4" width="6" height="24" rx="2" fill="#2ecc71" stroke="#000" stroke-width="1.5"/>
-                <line x1="11" y1="12" x2="21" y2="12" stroke="#000" stroke-width="1.5"/>
+                <defs>
+                    <linearGradient id="g_adrenaline_core" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#2ecc71"/><stop offset="100%" stop-color="#145a32"/></linearGradient>
+                </defs>
+                <!-- Emerald adrenaline injector -->
+                <rect x="11.5" y="4" width="9" height="22" rx="4.5" fill="url(#g_adrenaline_core)" stroke="#111" stroke-width="1.8"/>
+                <rect x="13.5" y="7" width="5" height="16" fill="#fff" opacity="0.25"/>
+                <line x1="10" y1="12" x2="22" y2="12" stroke="#111" stroke-width="2"/>
+                <line x1="10" y1="18" x2="22" y2="18" stroke="#111" stroke-width="2"/>
+                <line x1="16" y1="26" x2="16" y2="29" stroke="#bdc3c7" stroke-width="2.5" stroke-linecap="round"/>
             </svg>`;
         } else if (trait === "extend_buffs") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M8 6 L24 6 L16 16 Z M16 16 L8 26 L24 26 Z" fill="#e67e22" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
+                <defs>
+                    <linearGradient id="g_chrono_glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffeaa7"/><stop offset="100%" stop-color="#d35400"/></linearGradient>
+                </defs>
+                <!-- Glowing starry hourglass -->
+                <path d="M7 6 L25 6 L16 16 Z" fill="url(#g_chrono_glass)" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="M16 16 L7 26 L25 26 Z" fill="url(#g_chrono_glass)" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+                <circle cx="16" cy="11" r="2.2" fill="#fff" style="filter: drop-shadow(0 0 3px #fff);"/>
+                <path d="M13 23 Q16 18, 19 23 Z" fill="#fff" opacity="0.8"/>
             </svg>`;
         } else if (trait === "bag_space") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <rect x="7" y="10" width="18" height="16" rx="3" fill="#8e44ad" stroke="#000" stroke-width="1.5"/>
-                <path d="M11 10 C11 6, 21 6, 21 10" fill="none" stroke="#000" stroke-width="2"/>
+                <defs><linearGradient id="g_dim_bag" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a29bfe"/><stop offset="100%" stop-color="#6c5ce7"/></linearGradient></defs>
+                <!-- Violet runic satchel -->
+                <rect x="6.5" y="11" width="19" height="15" rx="3.5" fill="url(#g_dim_bag)" stroke="#111" stroke-width="1.8"/>
+                <path d="M11.5 11 C11.5 6, 20.5 6, 20.5 11" fill="none" stroke="#111" stroke-width="2.2"/>
+                <circle cx="16" cy="18.5" r="3" fill="#111" stroke="#fff" stroke-width="1.2"/>
             </svg>`;
         } else if (trait === "second_wind") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="11" r="5" fill="#f1c40f" stroke="#000" stroke-width="1.5"/>
-                <path d="M12 16 L20 16 L16 28 Z" fill="#ffd700" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
+                <defs><linearGradient id="g_solar_ankh" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff7675"/><stop offset="100%" stop-color="#d63031"/></linearGradient></defs>
+                <!-- Radiant solar sun-ankh -->
+                <circle cx="16" cy="10" r="5" fill="none" stroke="url(#g_solar_ankh)" stroke-width="2.5" style="filter: drop-shadow(0 0 3px #ff3300);"/>
+                <path d="M11 15.5 L21 15.5 L16 28.5 Z" fill="url(#g_solar_ankh)" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
             </svg>`;
         } else if (trait === "golem_stance") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <polygon points="16,4 28,12 28,24 16,28 4,24 4,12" fill="#7f8c8d" stroke="#000" stroke-width="1.5"/>
+                <defs><linearGradient id="g_granite" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#95a5a6"/><stop offset="100%" stop-color="#34495e"/></linearGradient></defs>
+                <!-- Runic stone core -->
+                <polygon points="16,3 27,10.5 27,23.5 16,29 5,23.5 5,10.5" fill="url(#g_granite)" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M16 7 L23 11 L23 19 M9 19 L9 11 L16 7" fill="none" stroke="#e74c3c" stroke-width="1.8" style="filter: drop-shadow(0 0 2px #ff2200);"/>
             </svg>`;
         } else if (trait === "fairy_wealth") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="10" fill="#ffb6c1" stroke="#000" stroke-width="1.5"/>
-                <path d="M16 10 L20 18 L12 18 Z" fill="#f1c40f" stroke="#000" stroke-width="1"/>
+                <defs><linearGradient id="g_pixie" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff9ff3"/><stop offset="100%" stop-color="#f368e0"/></linearGradient></defs>
+                <!-- Flower Crown with gems -->
+                <circle cx="16" cy="16" r="10" fill="none" stroke="url(#g_pixie)" stroke-width="2.8"/>
+                <path d="M12 9 Q16 3, 20 9 M9 16 Q16 23, 23 16" fill="none" stroke="#fff" opacity="0.65" stroke-width="1.8" stroke-linecap="round"/>
+                <circle cx="16" cy="16" r="3.2" fill="#ffd700" stroke="#111" stroke-width="1.2"/>
             </svg>`;
         } else if (trait === "void_pull") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="10" fill="#110221" stroke="#8e44ad" stroke-width="2"/>
-                <circle cx="16" cy="16" r="5" fill="#e84393"/>
+                <!-- Space singularity pulling light -->
+                <circle cx="16" cy="16" r="11" fill="#0c001a" stroke="#8e44ad" stroke-width="2.2" style="filter: drop-shadow(0 0 5px #8e44ad);"/>
+                <circle cx="16" cy="16" r="5" fill="#ff007f" style="filter: drop-shadow(0 0 4px #ff007f);"/>
             </svg>`;
         } else if (trait === "titan_grip") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <rect x="8" y="10" width="16" height="12" rx="3" fill="#34495e" stroke="#000" stroke-width="1.5"/>
-                <path d="M12 6 C12 6, 20 6, 20 10" fill="none" stroke="#000" stroke-width="2"/>
+                <defs><linearGradient id="g_rivets" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#bdc3c7"/><stop offset="100%" stop-color="#2c3e50"/></linearGradient></defs>
+                <!-- Heavy gauntlet built with rivets -->
+                <rect x="8.5" y="11" width="15" height="11.5" rx="3" fill="url(#g_rivets)" stroke="#111" stroke-width="1.8"/>
+                <path d="M11 11 C11 5, 21 5, 21 11" fill="none" stroke="#ffd700" stroke-width="2.2"/>
+                <circle cx="11.5" cy="16.5" r="1" fill="#fff"/><circle cx="20.5" cy="16.5" r="1" fill="#fff"/>
             </svg>`;
         } else if (trait === "alchemist_alembic") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="20" r="8" fill="#1abc9c" stroke="#000" stroke-width="1.5"/>
-                <rect x="14" y="6" width="4" height="6" fill="#bdc3c7" stroke="#000" stroke-width="1.5"/>
+                <defs><linearGradient id="g_chem" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#1abc9c"/><stop offset="100%" stop-color="#a3fd83"/></linearGradient></defs>
+                <!-- Copper distillation beaker with heat glows -->
+                <circle cx="16" cy="19.5" r="8.2" fill="url(#g_chem)" stroke="#111" stroke-width="1.8"/>
+                <rect x="14.5" y="6.5" width="3" height="6.5" fill="#bdc3c7" stroke="#111" stroke-width="1.2"/>
+                <path d="M12 21 C12 21, 14 24, 16 24 C18 24, 20 21, 20 21" fill="none" stroke="#fff" opacity="0.4" stroke-width="1.2"/>
             </svg>`;
         } else if (trait === "philosopher_catalyst") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <polygon points="16,4 28,26 4,26" fill="#2ecc71" stroke="#000" stroke-width="1.5"/>
+                <defs><linearGradient id="g_catalyst" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2ecc71"/><stop offset="100%" stop-color="#27ae60"/></linearGradient></defs>
+                <!-- Jade triangular talisman -->
+                <polygon points="16,3.5 27.5,25 4.5,25" fill="url(#g_catalyst)" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+                <circle cx="16" cy="17.8" r="4.2" fill="#fff" stroke="#111" stroke-width="1.2" style="filter: drop-shadow(0 0 3px #fff);"/>
             </svg>`;
         } else if (trait === "cauldron_eternity") {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M8 10 C8 10, 4 24, 16 26 C16 26, 28 24, 28 10 Z" fill="#2c3e50" stroke="#000" stroke-width="1.5"/>
-                <ellipse cx="16" cy="10" rx="10" ry="3" fill="#9b59b6" stroke="#000" stroke-width="1.5"/>
+                <defs><linearGradient id="g_cauld_purple" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#3a045c"/><stop offset="100%" stop-color="#9b59b6"/></linearGradient></defs>
+                <!-- Boiling iron cauldron of starlight broth -->
+                <path d="M8 10.5 C8 10.5, 4 23, 16 25.5 C28 23, 24 10.5, 24 10.5 Z" fill="#1b212c" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+                <ellipse cx="16" cy="10.5" rx="10" ry="2.8" fill="url(#g_cauld_purple)" stroke="#111" stroke-width="1.8"/>
+                <circle cx="12" cy="10" r="1.2" fill="#fff" opacity="0.6"/><circle cx="18" cy="11" r="1.5" fill="#fff" opacity="0.8"/>
             </svg>`;
         } else {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="10" fill="#7f8c8d" stroke="#000" stroke-width="1.5"/>
+                <circle cx="16" cy="16" r="10" fill="#7f8c8d" stroke="#111" stroke-width="1.5"/>
             </svg>`;
         }
         return `<span style="display:inline-flex; align-items:center; justify-content:center; width:${size}px; height:${size}px; background:#111; border:1px solid #444; border-radius:4px; padding:2px; box-shadow:inset 0 0 4px #000;">${svg}</span>`;
@@ -493,46 +609,71 @@ window.getUseIconHtml = function(key) {
         let svg = "";
         if (item.isUniqueStaff) {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <line x1="8" y1="24" x2="24" y2="8" stroke="#853c00" stroke-width="2.5" stroke-linecap="round"/>
-                <circle cx="24" cy="8" r="5" fill="#e67e22" stroke="#000" stroke-width="1.5"/>
-                <path d="M22 6 L26 10" stroke="#fff" stroke-width="1"/>
+                <defs><linearGradient id="u_staff_ruby" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#e67e22"/></linearGradient></defs>
+                <!-- Gold-coiled staff with ruby solar gem -->
+                <line x1="6" y1="26" x2="26" y2="6" stroke="#853c00" stroke-width="3" stroke-linecap="round"/>
+                <line x1="6" y1="26" x2="26" y2="6" stroke="url(#u_staff_ruby)" stroke-width="1" stroke-linecap="round" style="opacity:0.4;"/>
+                <circle cx="26" cy="6" r="5.2" fill="#e74c3c" stroke="#111" stroke-width="1.5" style="filter: drop-shadow(0 0 4px #e74c3c);"/>
+                <circle cx="25" cy="5" r="1.2" fill="#fff"/>
             </svg>`;
         } else if (item.isUniqueSword) {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M6 26 L26 6 L28 8 L8 28 Z" fill="#960018" stroke="#000" stroke-width="1.5"/>
-                <path d="M5 27 L9 25" stroke="#000" stroke-width="2"/>
+                <defs><linearGradient id="u_reaver" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#3a0202"/><stop offset="100%" stop-color="#ff0000"/></linearGradient></defs>
+                <!-- Red Damascus blade with bleeding runs -->
+                <path d="M5 27 L25 7 L27 9 L7 29 Z" fill="url(#u_reaver)" stroke="#111" stroke-width="1.8"/>
+                <line x1="8" y1="24" x2="24" y2="8" stroke="#ff3333" stroke-width="1"/>
+                <rect x="3.5" y="25" width="7" height="3.5" rx="0.5" fill="#f1c40f" stroke="#111" stroke-width="1.2" transform="rotate(45 7 27)"/>
             </svg>`;
         } else if (item.isUniqueSingularity) {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M6 26 L26 6 L28 8 L8 28 Z" fill="#150326" stroke="#8e44ad" stroke-width="1.5"/>
-                <circle cx="26" cy="6" r="3" fill="#e84393"/>
+                <defs><linearGradient id="u_sing_purple" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#0b0116"/><stop offset="100%" stop-color="#8e44ad"/></linearGradient></defs>
+                <!-- Star Core sword -->
+                <path d="M5 27 L25 7 L27 9 L7 29 Z" fill="url(#u_sing_purple)" stroke="#111" stroke-width="1.8"/>
+                <circle cx="26" cy="6" r="4" fill="#ff007f" style="filter: drop-shadow(0 0 4px #ff007f);"/>
             </svg>`;
         } else if (item.isUniqueMaelstrom) {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M8 24 L24 8 Q28 14, 20 20 Z" fill="#2ecc71" stroke="#000" stroke-width="1.5"/>
+                <defs><linearGradient id="u_mael" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#55efc4"/><stop offset="100%" stop-color="#00b894"/></linearGradient></defs>
+                <!-- Curved tempest polearm -->
+                <line x1="6" y1="26" x2="26" y2="6" stroke="#2c3e50" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M22 10 Q28 6, 28 4 Q25 4, 18 8 Z" fill="url(#u_mael)" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/>
             </svg>`;
         } else if (item.isUniqueAegis) {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M16 4 L26 10 L22 24 L16 28 L10 24 L6 10 Z" fill="#021a2c" stroke="#3498db" stroke-width="1.5"/>
+                <defs><linearGradient id="u_aegis_blue" x1="0" y1="0" x2="0" y2="100%"><stop offset="0%" stop-color="#0984e3"/><stop offset="100%" stop-color="#1b1c1e"/></linearGradient></defs>
+                <!-- Heavy event horizon barrier shield -->
+                <path d="M16 3 L27 9 L23 23 L16 29 L9 23 L5 9 Z" fill="url(#u_aegis_blue)" stroke="#3498db" stroke-width="2" stroke-linejoin="round" style="filter: drop-shadow(0 0 3px #3498db);"/>
+                <circle cx="16" cy="16" r="3.2" fill="#fff" opacity="0.8"/>
             </svg>`;
         } else if (item.isUniqueWatch) {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="10" fill="#221c03" stroke="#f1c40f" stroke-width="1.5"/>
-                <line x1="16" y1="16" x2="16" y2="10" stroke="#fff" stroke-width="1.5"/>
-                <line x1="16" y1="16" x2="20" y2="16" stroke="#fff" stroke-width="1"/>
+                <defs><linearGradient id="u_watch_dial" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#d5dbdb"/></linearGradient></defs>
+                <!-- Temporal dial pocket-watch -->
+                <circle cx="16" cy="16" r="10" fill="#221c03" stroke="#f1c40f" stroke-width="1.8"/>
+                <circle cx="16" cy="16" r="7.5" fill="url(#u_watch_dial)" stroke="#111" stroke-width="1"/>
+                <line x1="16" y1="16" x2="16" y2="10.5" stroke="#111" stroke-width="1.8" stroke-linecap="round"/>
+                <line x1="16" y1="16" x2="20" y2="16" stroke="#c0392b" stroke-width="1.2" stroke-linecap="round"/>
             </svg>`;
         } else if (item.isUniqueChronicle) {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <rect x="8" y="6" width="16" height="20" rx="2" fill="#1f1b0a" stroke="#f39c12" stroke-width="1.5"/>
-                <line x1="12" y1="10" x2="20" y2="10" stroke="#aaa" stroke-width="1"/>
+                <defs><linearGradient id="u_chron" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fdf6e2"/><stop offset="100%" stop-color="#d5dbdb"/></linearGradient></defs>
+                <!-- Leather bound lexicon with gold inlays -->
+                <rect x="7.5" y="5" width="17" height="22" rx="2.5" fill="#2c1d11" stroke="#ffd700" stroke-width="1.8" style="filter: drop-shadow(0 0 3px #f1c40f);"/>
+                <rect x="11.5" y="8" width="9" height="16" fill="url(#u_chron)" stroke="#111" stroke-width="1"/>
             </svg>`;
         } else if (item.isUniqueWarpCore) {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M10 24 L14 10 L22 16 L18 26 Z" fill="#001a1a" stroke="#1abc9c" stroke-width="1.5"/>
+                <defs><linearGradient id="u_core_teal" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#002b2b"/><stop offset="100%" stop-color="#1abc9c"/></linearGradient></defs>
+                <!-- High tech spatial thruster boots -->
+                <path d="M8 23 L14 8 L22 14 L16 27 Z" fill="url(#u_core_teal)" stroke="#111" stroke-width="1.8"/>
+                <rect x="10" y="16" width="3" height="5" rx="0.5" fill="#fff" style="filter: drop-shadow(0 0 3px #00ffcc);"/>
             </svg>`;
         } else if (item.isUniqueTempest) {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <path d="M8 20 L16 6 L24 20 Z" fill="#03212c" stroke="#00d2ff" stroke-width="1.5"/>
+                <defs><linearGradient id="u_tempest_crown" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a0f0ff"/><stop offset="100%" stop-color="#0080b0"/></linearGradient></defs>
+                <!-- Spiked lightning thunder crown -->
+                <path d="M6 21 L10 7 L14 15 L16 4 L18 15 L22 7 L26 21 Z" fill="url(#u_tempest_crown)" stroke="#111" stroke-width="1.8" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px #00d2ff);"/>
+                <rect x="6" y="21" width="20" height="4" fill="url(#u_tempest_crown)" stroke="#111" stroke-width="1.8"/>
             </svg>`;
         } else {
             svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
@@ -540,7 +681,9 @@ window.getUseIconHtml = function(key) {
             </svg>`;
         }
         return `<span style="display:inline-flex; align-items:center; justify-content:center; width:${size}px; height:${size}px; background:#111; border:1px solid #444; border-radius:4px; padding:3px; box-shadow:inset 0 0 6px #000;">${svg}</span>`;
-                };
+    };
+
+    window.draftAllocations = null;
 
         window.hexToRgba = function(hex, alpha) {
             if (!hex || hex.charAt(0) !== '#') return `rgba(155, 89, 182, ${alpha})`;
@@ -571,7 +714,10 @@ window.riftBossesMetadata = [
             { name: "Aegis Core", trait: "defense" },
             { name: "Phoenix Ankh", trait: "second_wind" },
             { name: "Golem's Core", trait: "golem_stance" },
-            { name: "Titan's Shield Grip", trait: "titan_grip" }
+            { name: "Titan's Shield Grip", trait: "titan_grip" },
+            { name: "Blood-Soaked Chalice", trait: "vampirism" },
+            { name: "Riposte Gauntlet", trait: "parry_strike" },
+            { name: "Survivor's Adrenaline", trait: "dodge_buff" }
         ],
         hpMult: 10.0, dmgMult: 10.0, defMult: 8.0, speed: 100
     },
@@ -586,7 +732,10 @@ window.riftBossesMetadata = [
             { name: "Chrono Hourglass", trait: "extend_buffs" },
             { name: "Sloth's Blessing", trait: "idle_spd" },
             { name: "Windwalker Boots", trait: "move_speed" },
-            { name: "Philosopher's Anchor", trait: "gold_hoard" }
+            { name: "Philosopher's Anchor", trait: "gold_hoard" },
+            { name: "Fairy Queen's Crown", trait: "fairy_wealth" },
+            { name: "Alchemist's Alembic", trait: "alchemist_alembic" },
+            { name: "Philosopher's Catalyst", trait: "philosopher_catalyst" }
         ],
         hpMult: 10.0, dmgMult: 10.0, defMult: 8.0, speed: 90
     },
@@ -602,7 +751,9 @@ window.riftBossesMetadata = [
             { name: "Gilded Scarab", trait: "magic_find" },
             { name: "Phantom Blade", trait: "echo_strike" },
             { name: "Void Core", trait: "void_pull" },
-            { name: "Cauldron of Eternity", trait: "cauldron_eternity" }
+            { name: "Cauldron of Eternity", trait: "cauldron_eternity" },
+            { name: "Zealot's Charm", trait: "active_spd" },
+            { name: "Dimensional Pouch", trait: "bag_space" }
         ],
         hpMult: 10.0, dmgMult: 10.0, defMult: 8.0, speed: 80
     }
@@ -3778,6 +3929,17 @@ window.toggleAchievements = function() {
         window.buildAchievementsModal();
         modal.style.display = 'block';
         window.recalculateAchievementTotals();
+
+        // Smooth auto-scroll to the next unviewed achievement
+        if (window.playerStats.unviewedAchievements && window.playerStats.unviewedAchievements.length > 0) {
+            let firstUnviewedId = window.playerStats.unviewedAchievements[0];
+            setTimeout(() => {
+                let cardEl = document.getElementById(`ach-card-${firstUnviewedId}`);
+                if (cardEl) {
+                    cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 180);
+        }
     } else {
         modal.style.display = 'none';
         window.hideTooltip();
@@ -3810,12 +3972,14 @@ window.buildAchievementsModal = function() {
             : "border-color: #333; opacity: 0.5; filter: grayscale(100%); color: #7f8c8d;";
         let iconDisplay = unlocked ? ach.icon : "🔒";
 
-        let glowStyle = isUnviewed ? "animation: glowGold 1.5s infinite; border-color: #f1c40f !important;" : "";
+        let glowStyle = isUnviewed ? "animation: glowGold 1.5s infinite; border-color: #f1c40f !important; position: relative;" : "position: relative;";
+        let newRibbon = isUnviewed ? `<span class="badge-exclamation" style="position: absolute; top: -1px; right: -1px; background: #f1c40f; color: #111; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 0 4px 0 4px; text-transform: uppercase; box-shadow: 0 0 8px #f1c40f; letter-spacing: 0.5px;">NEW</span>` : "";
 
         return `<div id="ach-card-${ach.id}" class="bag-item" style="cursor:help; display:flex; flex-direction:row; justify-content:flex-start; align-items:center; gap:10px; ${borderStyle} ${glowStyle} padding:8px;"
             onmouseenter="window.showAchievementTooltip(event, '${ach.id}'); window.viewAchievement('${ach.id}');"
             ontouchstart="window.showAchievementTooltip(event, '${ach.id}'); window.viewAchievement('${ach.id}');"
             onmouseleave="window.hideTooltip()">
+            ${newRibbon}
             <span style="font-size:22px; width:30px; text-align:center;">${iconDisplay}</span>
             <div style="flex:1; text-align:left;">
                 <strong style="color:${unlocked ? '#f1c40f' : '#666'}; font-size:12px;">${ach.name}</strong>
