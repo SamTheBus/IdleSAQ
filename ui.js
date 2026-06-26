@@ -3,6 +3,41 @@
    tooltips, and modal displays.
    ========================================================================= */
 
+window.getBossIconHtml = function (bossType) {
+  if (bossType === "guardian") {
+    return `
+            <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(52, 152, 219, 0.45));">
+                <defs>
+                    <linearGradient id="g_goliath" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#34495e"/><stop offset="100%" stop-color="#1a252f"/></linearGradient>
+                    <radialGradient id="g_core" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff"/><stop offset="40%" stop-color="#00d2ff"/><stop offset="100%" stop-color="#003755"/></radialGradient>
+                </defs>
+                <path d="M32 4 L52 14 L46 44 L32 58 L18 44 L12 14 Z" fill="url(#g_goliath)" stroke="#00d2ff" stroke-width="2.5" stroke-linejoin="round" />
+                <circle cx="32" cy="30" r="10" fill="url(#g_core)" stroke="#fff" stroke-width="1.5" />
+                <polygon points="26,24 20,22 24,28" fill="#e74c3c" />
+                <polygon points="38,24 44,22 40,28" fill="#e74c3c" />
+            </svg>`;
+  } else if (bossType === "chronos") {
+    return `
+            <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(241, 196, 15, 0.45));">
+                <defs><linearGradient id="g_chron" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#b7950b"/></linearGradient></defs>
+                <circle cx="32" cy="32" r="24" fill="none" stroke="url(#g_chron)" stroke-width="3" />
+                <g stroke="url(#g_chron)" stroke-width="3" stroke-linecap="round"><line x1="32" y1="4" x2="32" y2="8" /><line x1="32" y1="56" x2="32" y2="60" /><line x1="4" y1="32" x2="8" y2="32" /><line x1="56" y1="32" x2="60" y2="32" /></g>
+                <circle cx="32" cy="32" r="16" fill="#111" stroke="url(#g_chron)" stroke-width="1.5" />
+                <line x1="32" y1="32" x2="32" y2="20" stroke="#fff" stroke-width="2" stroke-linecap="round" />
+                <line x1="32" y1="32" x2="40" y2="32" stroke="#e67e22" stroke-width="1.5" stroke-linecap="round" />
+            </svg>`;
+  } else if (bossType === "nexus") {
+    return `
+            <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(255, 0, 127, 0.45));">
+                <defs><linearGradient id="g_nex" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff007f"/><stop offset="100%" stop-color="#00d2ff"/></linearGradient></defs>
+                <rect x="14" y="14" width="36" height="36" fill="none" stroke="url(#g_nex)" stroke-width="2" />
+                <rect x="20" y="20" width="24" height="24" fill="none" stroke="#00b894" stroke-width="1.5" />
+                <circle cx="32" cy="32" r="4" fill="#fff" stroke="#ff007f" stroke-width="1" />
+            </svg>`;
+  }
+  return `🔮`;
+};
+
 window.getEtcIconHtml = function (key) {
   let bg = "rgba(170, 170, 170, 0.12)";
   let border = "#444";
@@ -238,9 +273,9 @@ window.getUseIconHtml = function (key) {
   };
 
   if (key === "SP Reset Scroll") {
-      bg = "rgba(155, 89, 182, 0.25)";
-      border = "#9b59b6";
-      svgContent = `
+    bg = "rgba(155, 89, 182, 0.25)";
+    border = "#9b59b6";
+    svgContent = `
           <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
               <defs>
                   <linearGradient id="grad_Scroll_SP" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -253,10 +288,10 @@ window.getUseIconHtml = function (key) {
               <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
               <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
           </svg>`;
-    } else if (key === "Guild Reward Sack") {
-      bg = "rgba(241, 196, 15, 0.25)";
-      border = "#f1c40f";
-      svgContent = `
+  } else if (key === "Guild Reward Sack") {
+    bg = "rgba(241, 196, 15, 0.25)";
+    border = "#f1c40f";
+    svgContent = `
           <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
               <defs>
                   <linearGradient id="grad_RewardSack" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -269,10 +304,10 @@ window.getUseIconHtml = function (key) {
               <path d="M14 10 L10 14 M18 10 L22 14" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round"/>
               <polygon points="16,13 18,17 22,17 19,20 20,24 16,22 12,24 13,20 10,17 14,17" fill="#fff" opacity="0.9" stroke="#000" stroke-width="0.8"/>
           </svg>`;
-    } else if (key === "Guild Weekly Sack") {
-      bg = "rgba(155, 89, 182, 0.25)";
-      border = "#9b59b6";
-      svgContent = `
+  } else if (key === "Guild Weekly Sack") {
+    bg = "rgba(155, 89, 182, 0.25)";
+    border = "#9b59b6";
+    svgContent = `
           <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
               <defs>
                   <linearGradient id="grad_WeeklySack" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -286,7 +321,7 @@ window.getUseIconHtml = function (key) {
               <circle cx="16" cy="18" r="4.5" fill="#f1c40f" stroke="#000" stroke-width="1"/>
               <path d="M16 15.5 L16 20.5 M13.5 18 L18.5 18" stroke="#3a045c" stroke-width="1" stroke-linecap="round"/>
           </svg>`;
-    } else if (key === "PP Reset Scroll") {
+  } else if (key === "PP Reset Scroll") {
     bg = "rgba(230, 126, 34, 0.25)";
     border = "#e67e22";
     svgContent = `
@@ -404,41 +439,6 @@ window.getBossIconHtml = function (bossType) {
                 <line x1="50" y1="50" x2="44" y2="44" stroke="url(#nexus_neon)" stroke-width="1.5" />
                 <circle cx="32" cy="32" r="5" fill="#fff" stroke="#ff007f" stroke-width="1" />
                 <circle cx="32" cy="32" r="2" fill="#000" />
-            </svg>`;
-  }
-  return `🔮`;
-};
-
-window.getBossIconHtml = function (bossType) {
-  if (bossType === "guardian") {
-    return `
-            <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(52, 152, 219, 0.45));">
-                <defs>
-                    <linearGradient id="g_goliath" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#34495e"/><stop offset="100%" stop-color="#1a252f"/></linearGradient>
-                    <radialGradient id="g_core" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff"/><stop offset="40%" stop-color="#00d2ff"/><stop offset="100%" stop-color="#003755"/></radialGradient>
-                </defs>
-                <path d="M32 4 L52 14 L46 44 L32 58 L18 44 L12 14 Z" fill="url(#g_goliath)" stroke="#00d2ff" stroke-width="2.5" stroke-linejoin="round" />
-                <circle cx="32" cy="30" r="10" fill="url(#g_core)" stroke="#fff" stroke-width="1.5" />
-                <polygon points="26,24 20,22 24,28" fill="#e74c3c" />
-                <polygon points="38,24 44,22 40,28" fill="#e74c3c" />
-            </svg>`;
-  } else if (bossType === "chronos") {
-    return `
-            <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(241, 196, 15, 0.45));">
-                <defs><linearGradient id="g_chron" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#b7950b"/></linearGradient></defs>
-                <circle cx="32" cy="32" r="24" fill="none" stroke="url(#g_chron)" stroke-width="3" />
-                <g stroke="url(#g_chron)" stroke-width="3" stroke-linecap="round"><line x1="32" y1="4" x2="32" y2="8" /><line x1="32" y1="56" x2="32" y2="60" /><line x1="4" y1="32" x2="8" y2="32" /><line x1="56" y1="32" x2="60" y2="32" /></g>
-                <circle cx="32" cy="32" r="16" fill="#111" stroke="url(#g_chron)" stroke-width="1.5" />
-                <line x1="32" y1="32" x2="32" y2="20" stroke="#fff" stroke-width="2" stroke-linecap="round" />
-                <line x1="32" y1="32" x2="40" y2="32" stroke="#e67e22" stroke-width="1.5" stroke-linecap="round" />
-            </svg>`;
-  } else if (bossType === "nexus") {
-    return `
-            <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(255, 0, 127, 0.45));">
-                <defs><linearGradient id="g_nex" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff007f"/><stop offset="100%" stop-color="#00d2ff"/></linearGradient></defs>
-                <rect x="14" y="14" width="36" height="36" fill="none" stroke="url(#g_nex)" stroke-width="2" />
-                <rect x="20" y="20" width="24" height="24" fill="none" stroke="#00b894" stroke-width="1.5" />
-                <circle cx="32" cy="32" r="4" fill="#fff" stroke="#ff007f" stroke-width="1" />
             </svg>`;
   }
   return `🔮`;
@@ -896,7 +896,7 @@ window.renderRiftConsole = function () {
             </div>
         `;
   } else {
-      levelSelectorHtml = `
+    levelSelectorHtml = `
               <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; cursor:help;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})">
                   <div>
                       <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER / LEVEL: ⓘ</strong>
@@ -909,7 +909,7 @@ window.renderRiftConsole = function () {
                   </div>
               </div>
           `;
-    }
+  }
 
   let slidesHtml = window.riftBossesMetadata
     .map((boss, idx) => {
@@ -1270,16 +1270,23 @@ window.updateUI = function () {
     "char-sp",
     window.draftAllocations !== null ? window.draftSP : window.playerStats.sp,
   );
+
+  let xpPct = (window.playerStats.xp / window.playerStats.xpReq) * 100;
   setText(
     "char-xp-text",
-    `${window.formatNumber(window.playerStats.xp)} / ${window.formatNumber(window.playerStats.xpReq)}`,
+    `${window.formatNumber(window.playerStats.xp)} / ${window.formatNumber(window.playerStats.xpReq)} (${xpPct.toFixed(1)}%)`,
   );
 
   const xpFill = document.getElementById("char-xp-fill");
-  if (xpFill)
-    xpFill.style.width =
-      Math.min(100, (window.playerStats.xp / window.playerStats.xpReq) * 100) +
-      "%";
+  if (xpFill) {
+    xpFill.style.width = Math.min(100, xpPct) + "%";
+    // Dynamically pulse the bar's glow once the user crosses the 90% threshold
+    if (xpPct >= 90) {
+      xpFill.style.boxShadow = "0 0 12px #d946ef, 0 0 4px #8b5cf6";
+    } else {
+      xpFill.style.boxShadow = "0 0 8px rgba(139, 92, 246, 0.45)";
+    }
+  }
 
   // 3. Core attributes matrix
   setText("stat-str", p.str);
@@ -1430,22 +1437,10 @@ window.updateUI = function () {
     "overall",
     "boots",
   ];
-  let overallAdoptedSet = null;
-  if (window.equippedSlots.overall) {
-    overallAdoptedSet =
-      (window.equippedSlots.helmet &&
-        window.getItemSetName(window.equippedSlots.helmet)) ||
-      (window.equippedSlots.boots &&
-        window.getItemSetName(window.equippedSlots.boots)) ||
-      (window.equippedSlots.weapon &&
-        window.getItemSetName(window.equippedSlots.weapon)) ||
-      null;
-  }
   checkSetSlots.forEach((slot) => {
     let item = window.equippedSlots[slot];
     if (item) {
       let sName = window.getItemSetName(item);
-      if (slot === "overall" && overallAdoptedSet) sName = overallAdoptedSet;
       if (sName)
         activeSetCounts[sName] =
           (activeSetCounts[sName] || 0) + (slot === "overall" ? 2 : 1);
@@ -1537,10 +1532,16 @@ window.updateUI = function () {
   }
 
   // Update Vending Subtab variables if active
-      let gachaSec = document.getElementById("market-sec-gacha");
-      if (gachaSec && gachaSec.style.display !== "none") {
-          window.setText("gachapon-lvl-display", window.playerStats.vendingQLevel || 0);
-          window.setText("gacha-key-count-lbl", window.inventory.ETC["Gacha Key"] || 0);
+  let gachaSec = document.getElementById("market-sec-gacha");
+  if (gachaSec && gachaSec.style.display !== "none") {
+    window.setText(
+      "gachapon-lvl-display",
+      window.playerStats.vendingQLevel || 0,
+    );
+    window.setText(
+      "gacha-key-count-lbl",
+      window.inventory.ETC["Gacha Key"] || 0,
+    );
     window.updateGachaRecentList();
     window.renderGachaShowcaseMarquee();
 
@@ -1556,7 +1557,10 @@ window.updateUI = function () {
       (0.8 * luckMultiplier - (chance5 + chance4)).toFixed(2) + "%",
     );
     window.setText("vending-rate-2", (3.2 * luckMultiplier).toFixed(2) + "%");
-    window.setText("vending-rate-1", (11.0 * luckMultiplier).toFixed(2) + "%");
+    window.setText(
+      "vending-rate-1",
+      (100 - 4.0 * luckMultiplier).toFixed(2) + "%",
+    );
   }
 
   // Refresh Gacha Pity Elements if present
@@ -2409,42 +2413,42 @@ window.showStatBreakdown = function (e, statKey, isPct = false) {
   let effectiveInt = Math.max(0, p.int - 5);
 
   let map = {
-      str: {
-        title: "💪 STR (Strength)",
-        base: window.playerStats.baseStr,
-        lvl: (alloc.spStr || 0) * 3,
-        color: "#fff",
-      },
-      dex: {
-        title: "🎯 DEX (Dexterity)",
-        base: window.playerStats.baseDex,
-        lvl: (alloc.spDex || 0) * 3,
-        color: "#fff",
-      },
-      int: {
-        title: "🧠 INT (Intelligence)",
-        base: window.playerStats.baseInt,
-        lvl: (alloc.spInt || 0) * 3,
-        color: "#fff",
-      },
-      atk: {
-        title: "⚔️ Total Attack",
-        base: window.playerStats.baseAtk,
-        lvl: alloc.spAtk * 6,
-        color: "#fff",
-      },
-      maxHp: {
-        title: "❤️ Max Health",
-        base: window.playerStats.baseMaxHp,
-        lvl: alloc.spHp * 50,
-        color: "#fff",
-      },
-      def: {
-        title: "🛡️ Total Defense",
-        base: window.playerStats.baseDef,
-        lvl: alloc.spDef * 5,
-        color: "#fff",
-      },
+    str: {
+      title: "💪 STR (Strength)",
+      base: window.playerStats.baseStr,
+      lvl: (alloc.spStr || 0) * 3,
+      color: "#fff",
+    },
+    dex: {
+      title: "🎯 DEX (Dexterity)",
+      base: window.playerStats.baseDex,
+      lvl: (alloc.spDex || 0) * 3,
+      color: "#fff",
+    },
+    int: {
+      title: "🧠 INT (Intelligence)",
+      base: window.playerStats.baseInt,
+      lvl: (alloc.spInt || 0) * 3,
+      color: "#fff",
+    },
+    atk: {
+      title: "⚔️ Total Attack",
+      base: window.playerStats.baseAtk,
+      lvl: alloc.spAtk * 6,
+      color: "#fff",
+    },
+    maxHp: {
+      title: "❤️ Max Health",
+      base: window.playerStats.baseMaxHp,
+      lvl: alloc.spHp * 50,
+      color: "#fff",
+    },
+    def: {
+      title: "🛡️ Total Defense",
+      base: window.playerStats.baseDef,
+      lvl: alloc.spDef * 5,
+      color: "#fff",
+    },
     moveSpeed: {
       title: "👟 Move Speed",
       base: window.playerStats.baseMoveSpeed,
@@ -2667,83 +2671,83 @@ window.showStatBreakdown = function (e, statKey, isPct = false) {
     html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): ${formatVal(intScaleTotal)}</div>`;
 
   let totalVal =
-      data.base +
-      data.lvl +
-      gearTotal +
-      artTotal +
-      achTotal +
-      intScaleTotal +
-      prestigeTotal +
-      setFlatBonus;
-    if (statKey === "atk" && effectiveStr > 0) {
-          let actualDmgAdded = Math.floor(totalVal * (effectiveStr * 0.003));
-          html += `<div class="tt-stat-line" style="color:#e67e22;">• Strength Scaling (STR): +${actualDmgAdded} Damage</div>`;
-          html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
-        }
-        if (statKey === "maxHp" && effectiveStr > 0) {
-              let hpBonus = Math.floor(totalVal * (effectiveStr * 0.003));
-              html += `<div class="tt-stat-line" style="color:#e74c3c;">• Strength Scaling (STR): +${hpBonus.toLocaleString()} HP</div>`;
-              html += `<div class="tt-stat-line" style="color:#e74c3c; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
-            }
-            if (statKey === "def" && effectiveInt > 0) {
-          let logarithmicIntPct = Math.log10(effectiveInt + 1) * 0.15;
-          html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): +${Math.floor(totalVal * logarithmicIntPct)} Defense</div>`;
-          html += `<div class="tt-stat-line" style="color:#9b59b6; font-style:italic;">  (+${(logarithmicIntPct * 100).toFixed(1)}% Multiplier)</div>`;
-        }
-        if (statKey === "moveSpeed" && effectiveDex > 0) {
-      let scaleVal = (effectiveDex * 20) / (effectiveDex + 150);
-      html += `<div class="tt-stat-line" style="color:#3498db;">• Dexterity Scaling (DEX): +${scaleVal.toFixed(1)} Speed</div>`;
-    }
-    if (statKey === "critChance" && effectiveDex > 0) {
-      let scaleVal = (effectiveDex * 0.3) / (effectiveDex + 250);
-      html += `<div class="tt-stat-line" style="color:#3498db;">• Dexterity Scaling (DEX): +${(scaleVal * 100).toFixed(1)}%</div>`;
-    }
-    if (statKey === "critDamage" && effectiveDex > 0) {
-      let scaleVal = effectiveDex * 0.003;
-      html += `<div class="tt-stat-line" style="color:#3498db;">• Dexterity Scaling (DEX): +${(scaleVal * 100).toFixed(1)}%</div>`;
-    }
-    if (statKey === "block" && effectiveInt > 0) {
-      let scaleVal = (effectiveInt * 0.12) / (effectiveInt + 150);
-      html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): +${(scaleVal * 100).toFixed(1)}%</div>`;
-    }
-    if (statKey === "parry" && effectiveInt > 0) {
-      let scaleVal = (effectiveInt * 0.12) / (effectiveInt + 150);
-      html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): +${(scaleVal * 100).toFixed(1)}%</div>`;
-    }
-    if (statKey === "critChance" || statKey === "critDamage") {
-      if (window.playerStats.frenzyTimer > 0)
-        html += `<div class="tt-stat-line" style="color:#e67e22; font-weight:bold; margin-top:5px;">• FRENZY BUFF ACTIVE!</div>`;
-    }
-    if (statKey === "block" || statKey === "parry") {
-      let rawSum = statKey === "block" ? p.rawBlock : p.rawParry;
-      html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Asymptotic Diminishing Returns:</div>`;
-      html += `<div class="tt-stat-line" style="color:#aaa;">• Raw Accumulated Sum: <strong style="color:#fff;">${Math.round(rawSum * 100)}%</strong></div>`;
-      html += `<div class="tt-stat-line" style="color:#2ecc71;">• Effective Avoidance: <strong style="color:#2ecc71;">${Math.floor(p[statKey] * 100)}%</strong></div>`;
-    }
-    if (statKey === "str") {
-      let effStr = Math.max(0, totalVal - 5);
-      html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
-      html += `<div class="tt-stat-line" style="color:#2ecc71;">• Attack Multiplier: +${(effStr * 0.3).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#e74c3c;">• Max HP Multiplier: +${(effStr * 0.3).toFixed(1)}%</div>`;
-    } else if (statKey === "dex") {
-      let effDex = Math.max(0, totalVal - 5);
-      let critChScale = (effDex * 0.3) / (effDex + 250);
-      let moveSpdScale = (effDex * 20) / (effDex + 150);
-      html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
-      html += `<div class="tt-stat-line" style="color:#e67e22;">• Crit Chance: +${(critChScale * 100).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#f1c40f;">• Crit Multiplier: +${(effDex * 0.3).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#3498db;">• Move Speed Boost: +${moveSpdScale.toFixed(1)}</div>`;
-    } else if (statKey === "int") {
-      let effInt = Math.max(0, totalVal - 5);
-      let blockChScale = (effInt * 0.12) / (effInt + 150);
-      let intDefPct = Math.log10(effInt + 1) * 0.15;
-      let potDurScale = effInt * 0.0001;
-      html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
-      html += `<div class="tt-stat-line" style="color:#3498db;">• Block Rate Boost: +${(blockChScale * 100).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#e74c3c;">• Parry Rate Boost: +${(blockChScale * 100).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#2ecc71;">• Defense Multiplier: +${(intDefPct * 100).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#9b59b6;">• Potion Duration: +${potDurScale.toFixed(4)}%</div>`;
-    }
+    data.base +
+    data.lvl +
+    gearTotal +
+    artTotal +
+    achTotal +
+    intScaleTotal +
+    prestigeTotal +
+    setFlatBonus;
+  if (statKey === "atk" && effectiveStr > 0) {
+    let actualDmgAdded = Math.floor(totalVal * (effectiveStr * 0.003));
+    html += `<div class="tt-stat-line" style="color:#e67e22;">• Strength Scaling (STR): +${actualDmgAdded} Damage</div>`;
+    html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
+  }
+  if (statKey === "maxHp" && effectiveStr > 0) {
+    let hpBonus = Math.floor(totalVal * (effectiveStr * 0.003));
+    html += `<div class="tt-stat-line" style="color:#e74c3c;">• Strength Scaling (STR): +${hpBonus.toLocaleString()} HP</div>`;
+    html += `<div class="tt-stat-line" style="color:#e74c3c; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
+  }
+  if (statKey === "def" && effectiveInt > 0) {
+    let logarithmicIntPct = Math.log10(effectiveInt + 1) * 0.15;
+    html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): +${Math.floor(totalVal * logarithmicIntPct)} Defense</div>`;
+    html += `<div class="tt-stat-line" style="color:#9b59b6; font-style:italic;">  (+${(logarithmicIntPct * 100).toFixed(1)}% Multiplier)</div>`;
+  }
+  if (statKey === "moveSpeed" && effectiveDex > 0) {
+    let scaleVal = (effectiveDex * 20) / (effectiveDex + 150);
+    html += `<div class="tt-stat-line" style="color:#3498db;">• Dexterity Scaling (DEX): +${scaleVal.toFixed(1)} Speed</div>`;
+  }
+  if (statKey === "critChance" && effectiveDex > 0) {
+    let scaleVal = (effectiveDex * 0.3) / (effectiveDex + 250);
+    html += `<div class="tt-stat-line" style="color:#3498db;">• Dexterity Scaling (DEX): +${(scaleVal * 100).toFixed(1)}%</div>`;
+  }
+  if (statKey === "critDamage" && effectiveDex > 0) {
+    let scaleVal = effectiveDex * 0.003;
+    html += `<div class="tt-stat-line" style="color:#3498db;">• Dexterity Scaling (DEX): +${(scaleVal * 100).toFixed(1)}%</div>`;
+  }
+  if (statKey === "block" && effectiveInt > 0) {
+    let scaleVal = (effectiveInt * 0.12) / (effectiveInt + 150);
+    html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): +${(scaleVal * 100).toFixed(1)}%</div>`;
+  }
+  if (statKey === "parry" && effectiveInt > 0) {
+    let scaleVal = (effectiveInt * 0.12) / (effectiveInt + 150);
+    html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): +${(scaleVal * 100).toFixed(1)}%</div>`;
+  }
+  if (statKey === "critChance" || statKey === "critDamage") {
+    if (window.playerStats.frenzyTimer > 0)
+      html += `<div class="tt-stat-line" style="color:#e67e22; font-weight:bold; margin-top:5px;">• FRENZY BUFF ACTIVE!</div>`;
+  }
+  if (statKey === "block" || statKey === "parry") {
+    let rawSum = statKey === "block" ? p.rawBlock : p.rawParry;
+    html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Asymptotic Diminishing Returns:</div>`;
+    html += `<div class="tt-stat-line" style="color:#aaa;">• Raw Accumulated Sum: <strong style="color:#fff;">${Math.round(rawSum * 100)}%</strong></div>`;
+    html += `<div class="tt-stat-line" style="color:#2ecc71;">• Effective Avoidance: <strong style="color:#2ecc71;">${Math.floor(p[statKey] * 100)}%</strong></div>`;
+  }
+  if (statKey === "str") {
+    let effStr = Math.max(0, totalVal - 5);
+    html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
+    html += `<div class="tt-stat-line" style="color:#2ecc71;">• Attack Multiplier: +${(effStr * 0.3).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#e74c3c;">• Max HP Multiplier: +${(effStr * 0.3).toFixed(1)}%</div>`;
+  } else if (statKey === "dex") {
+    let effDex = Math.max(0, totalVal - 5);
+    let critChScale = (effDex * 0.3) / (effDex + 250);
+    let moveSpdScale = (effDex * 20) / (effDex + 150);
+    html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
+    html += `<div class="tt-stat-line" style="color:#e67e22;">• Crit Chance: +${(critChScale * 100).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#f1c40f;">• Crit Multiplier: +${(effDex * 0.3).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#3498db;">• Move Speed Boost: +${moveSpdScale.toFixed(1)}</div>`;
+  } else if (statKey === "int") {
+    let effInt = Math.max(0, totalVal - 5);
+    let blockChScale = (effInt * 0.12) / (effInt + 150);
+    let intDefPct = Math.log10(effInt + 1) * 0.15;
+    let potDurScale = effInt * 0.0001;
+    html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
+    html += `<div class="tt-stat-line" style="color:#3498db;">• Block Rate Boost: +${(blockChScale * 100).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#e74c3c;">• Parry Rate Boost: +${(blockChScale * 100).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#2ecc71;">• Defense Multiplier: +${(intDefPct * 100).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#9b59b6;">• Potion Duration: +${potDurScale.toFixed(4)}%</div>`;
+  }
 
   html += `</div>`;
   tt.style.borderColor = data.color;
@@ -2901,24 +2905,49 @@ window.getPrestigeUpgradeCost = function (type, currentLevel) {
   return currentLevel + 1; // Uncapped linear cost progression (1 PP, 2 PP, 3 PP...)
 };
 
+window.changePrestigeBossStage = function (direction) {
+  let p = window.playerStats;
+  let maxS = p.maxStage || 80;
+  if (maxS < 80) maxS = 80;
+
+  let newStage = (p.selectedPrestigeStage || 80) + direction;
+  if (newStage < 80) newStage = 80;
+  if (newStage > maxS) newStage = maxS;
+
+  p.selectedPrestigeStage = newStage;
+  window.renderPrestigeTab();
+};
+
 window.renderPrestigeTab = function () {
   let el = document.getElementById("tab-prestige");
   if (!el) return;
 
   let p = window.playerStats;
   if (p.level < 25 && (p.prestigeCount || 0) === 0) {
+    let progressPct = Math.min(100, (p.level / 25) * 100);
     el.innerHTML = `
-                                                   <div style="text-align:center; padding: 40px 15px; background: #151515; border: 2px dashed #8e44ad; border-radius: 6px; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);">
-                                                       <div style="font-size: 40px; margin-bottom: 15px;">🔒</div>
-                                                       <h3 style="margin:0 0 10px 0; color:#9b59b6; letter-spacing:1px; text-transform:uppercase;">Altar of Ascension</h3>
-                                                       <p style="font-size:11px; color:#aaa; max-width: 320px; margin: 0 auto 15px auto; line-height: 1.5;">
-                                                           Only legendary heroes of Level 25 or above may unlock the secrets of permanent Ascension. Keep questing to awaken your true potential!
-                                                       </p>
-                                                       <div style="font-size: 13px; font-weight: bold; color: #fff;">
-                                                           Current Level: <span style="color:#e74c3c;">${p.level}</span> / <span style="color:#2ecc71;">25</span>
-                                                       </div>
-                                                   </div>
-                                               `;
+        <div style="text-align:center; padding: 40px 20px; background: linear-gradient(135deg, #0e051d 0%, #030109 100%); border: 2px solid #8e44ad; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(142, 68, 173, 0.22); max-width: 440px; margin: 0 auto; animation: toastFadeIn 0.3s ease-out;">
+            <div style="margin-bottom: 20px;">
+                <svg width="72" height="72" viewBox="0 0 64 64" style="display:inline-block; filter: drop-shadow(0 0 10px #8e44ad);">
+                    <circle cx="32" cy="32" r="28" fill="none" stroke="#9b59b6" stroke-width="2" stroke-dasharray="4 4" />
+                    <path d="M20 28 L20 22 C20 15, 24 12, 32 12 C40 12, 44 15, 44 22 L44 28" fill="none" stroke="#9b59b6" stroke-width="3" stroke-linecap="round" />
+                    <rect x="16" y="26" width="32" height="24" rx="4" fill="#0c0515" stroke="#9b59b6" stroke-width="3" />
+                    <path d="M32 33 L32 40" stroke="#ff007f" stroke-width="3" stroke-linecap="round" />
+                    <circle cx="32" cy="33" r="2" fill="#ff007f" />
+                </svg>
+            </div>
+            <h3 style="margin:0 0 10px 0; color:#df9ffb; font-size:15px; font-weight:bold; letter-spacing:2px; text-transform:uppercase; text-shadow: 0 0 10px rgba(155, 89, 182, 0.55);">Celestial Seal Active</h3>
+            <p style="font-size:11px; color:#a29bfe; max-width: 320px; margin: 0 auto 15px auto; line-height: 1.5; white-space:normal;">
+                The Altar of Ascension is protected by an ancient cosmic seal. Reach <strong style="color:#ffd700;">Level 25</strong> to break the seal and unlock permanent multipliers!
+            </p>
+            <div style="width:100%; max-width:260px; margin: 0 auto 8px auto; background:#111; height:8px; border-radius:4px; overflow:hidden; border:1px solid #333; position:relative;">
+                <div style="width:${progressPct}%; height:100%; background:linear-gradient(90deg, #9b59b6, #e84393); box-shadow:0 0 8px #9b59b6; transition: width 0.4s ease;"></div>
+            </div>
+            <div style="font-size: 11.5px; font-weight: bold; color: #f1f5f9; font-family: monospace;">
+                Progress: <span style="color:#e74c3c;">Lv ${p.level}</span> / <span style="color:#2ecc71;">25</span> (${progressPct.toFixed(0)}%)
+            </div>
+        </div>
+    `;
     return;
   }
 
@@ -2931,7 +2960,6 @@ window.renderPrestigeTab = function () {
     fort: 0,
     fairy: 0,
   };
-  let bagPts = upgrades.bag || 0;
   let goldPts = upgrades.gold || 0;
   let expPts = upgrades.exp || 0;
   let dropPts = upgrades.drop || 0;
@@ -2939,95 +2967,163 @@ window.renderPrestigeTab = function () {
   let fortPts = upgrades.fort || 0;
   let fairyPts = upgrades.fairy || 0;
 
-  let getUpgradeButtonHtml = (type, pts, color) => {
+  // Render Left Column: Hooktail Battle Console with Level Selector
+  let maxS = p.maxStage || 80;
+  if (maxS < 80) maxS = 80;
+  if (p.selectedPrestigeStage === undefined) p.selectedPrestigeStage = maxS;
+  p.selectedPrestigeStage = Math.max(
+    80,
+    Math.min(maxS, p.selectedPrestigeStage),
+  );
+
+  let activeStage = p.selectedPrestigeStage;
+  let growthRate = 1.045 + (activeStage * 0.04) / (activeStage + 200);
+  let scale = Math.pow(growthRate, activeStage);
+
+  let hpVal = Math.floor(600 * scale);
+  let dmgVal = Math.floor(6 * scale);
+  let defVal = Math.floor(80 + (activeStage - 80) * 1.5);
+
+  // Projected Victory Rewards (Prorated scaling based on selected challenge tier)
+  let basePoints = 3;
+  let bonusPoints = Math.floor(p.prestigeCount / 4);
+  let pushBonus = Math.max(0, Math.floor((activeStage - 80) / 10));
+  let totalPP = Math.min(10, basePoints + bonusPoints) + pushBonus;
+
+  let rewardMultiplier = activeStage / 80;
+  let estCores = Math.round(4 * rewardMultiplier);
+  let estShards = Math.round(11 * rewardMultiplier);
+
+  let challengeBtnHtml = "";
+  if (p.level < 25) {
+    challengeBtnHtml = `<button class="btn-action" style="background:#333; color:#777; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #444; cursor:not-allowed;" disabled>🔒 Level 25 Required</button>`;
+  } else if (p.maxStage < 80) {
+    challengeBtnHtml = `<button class="btn-action" style="background:#2c1a1a; color:#e74c3c; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #781c1c; cursor:not-allowed;" disabled>🔒 Reach Stage 80 (Peak: ${p.maxStage})</button>`;
+  } else {
+    challengeBtnHtml = `
+      <button class="btn-action btn-pulse" style="background:#e74c3c; color:white; width:100%; padding:12px; font-weight:bold; font-size:11.5px; border:1px solid #f1c40f; text-shadow:0 1px 2px #000; box-shadow:0 4px 12px rgba(231,76,60,0.35); text-transform:uppercase; letter-spacing:0.5px;" onclick="window.challengeHooktail()">
+          Challenge Hooktail
+      </button>
+    `;
+  }
+
+  let getUpgradeCardHtml = (
+    type,
+    label,
+    icon,
+    currentText,
+    bonusDesc,
+    pts,
+    color,
+  ) => {
     let cost = window.getPrestigeUpgradeCost(type, pts);
-    let disabled =
-      p.prestigePoints < cost
-        ? "disabled style='opacity:0.5; cursor:not-allowed;'"
-        : "";
+    let canAfford = p.prestigePoints >= cost;
+    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+    let bgStyle = window.hexToRgba(color, 0.04);
     let fontColor =
-      color === "#f1c40f" || color === "#ffb6c1" ? "#000" : "#fff";
-    return `<button class="btn-action" style="margin-top:8px; background:${color}; color:${fontColor}; font-weight:bold;" ${disabled} onclick="window.buyPrestigeUpgrade('${type}')">Upgrade (${cost} PP)</button>`;
+      color === "#f1c40f" || color === "#ffb6c1" ? "#111" : "#fff";
+
+    return `
+      <div class="shop-row" style="border-color:${color}; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:4px; padding:10px; margin-bottom:0; cursor:help;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong style="color:${color}; font-size:11.5px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${pts})</span></strong>
+              <span style="color:${costColor}; font-weight:bold; font-size:11px;">${cost} PP</span>
+          </div>
+          <div style="font-size:9.5px; color:#aaa; line-height:1.35; margin-bottom:6px;">${bonusDesc} <br>Currently: <span style="color:#fff; font-weight:bold;">${currentText}</span></div>
+          <button class="btn-action" style="background:${color}; color:${fontColor}; font-weight:bold; font-size:10px; padding:4px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.buyPrestigeUpgrade('${type}')">Upgrade</button>
+      </div>
+    `;
   };
 
-  // Stage 80 on first run, Stage 1 onwards after first prestige
-    let requiredStage = window.playerStats.prestigeCount === 0 ? 80 : 1;
-    let challengeBtnHtml = "";
-    if (p.level < 25)
-      challengeBtnHtml = `<button class="btn-action" style="background:#333; color:#777; border: 1px solid #444; font-weight:bold; font-size:12px; padding:8px 24px; border-radius:4px; cursor:not-allowed;" disabled>🔒 Requires Level 25 to Re-Challenge</button>`;
-    else if (p.stage < requiredStage)
-      challengeBtnHtml = `<button class="btn-action" style="background:#2c1a1a; color:#e74c3c; border: 1px solid #781c1c; font-weight:bold; font-size:11px; padding:8px 16px; border-radius:4px; cursor:not-allowed;" disabled>🔒 Push to Stage ${requiredStage} (Current: ${p.stage})</button>`;
-    else
-          challengeBtnHtml = `<button class="btn-action" style="background:#e74c3c; color:white; font-weight:bold; font-size:12px; padding:8px 24px; border-radius:4px; cursor:pointer;" onclick="window.challengeHooktail()">Challenge Prestige Boss</button>`;
-
   el.innerHTML = `
-                                                                                          <div style="display:flex; flex-direction:column; gap:12px;">
-                                                                                              <div style="background: linear-gradient(135deg, #1f0505, #050000); border: 2px solid #e74c3c; border-radius: 6px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
-                                                                                                  <h3 style="margin: 0 0 6px 0; color: #e74c3c; font-size:15px; letter-spacing:1px; text-transform:uppercase; text-shadow: 0 0 10px rgba(231, 76, 60, 0.4);">🔥 CHALLENGE HOOKTAIL</h3>
-                                                                                                  <p style="font-size: 11px; color: #aaa; margin: 0 auto 12px auto; max-width: 440px; line-height: 1.45;">
-                                                                                                      Sacrifice your campaign peaks. Enter the dragon's lair! Defeating **Hooktail** soft-wipes your level and campaign progress, but rewards you with <span style="color:#f1c40f; font-weight:bold;">3 Prestige Points</span> to purchase massive permanent upgrades.
-                                                                                                  </p>
-                                                                                                  ${challengeBtnHtml}
-                                                                                              </div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
 
-                                                                                              <div style="background:#151515; border: 1px solid #333; border-radius:6px; padding:12px;">
-                                                                                                  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:8px; margin-bottom:10px;">
-                                                                                                      <h4 style="margin:0; color:#f1c40f; font-size:13px; text-transform:uppercase;">✨ PERMANENT ASCENSION ALTAR</h4>
-                                                                                                      <span style="background:#9b59b6; color:#fff; font-weight:bold; font-size:11px; padding:3px 10px; border-radius:10px; box-shadow: 0 0 8px rgba(155, 89, 182, 0.3);">PP Available: <span id="prestige-points-qty">${p.prestigePoints.toLocaleString()}</span></span>
-                                                                                                  </div>
-                                                                                                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                                                                                                                                                                                                    <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
-                                                                                                                                                                                                        <div>
-                                                                                                                                                                                                            <strong style="color:#f1c40f; font-size:12px;">🟡 Midas' Legacy</strong>
-                                                                                                              <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +25% Global Gold multiplier.</div>
-                                                                                                              <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(goldPts * 25).toLocaleString()}% Gold</span></div>
-                                                                                                          </div>
-                                                                                                          ${getUpgradeButtonHtml("gold", goldPts, "#f1c40f")}
-                                                                                                      </div>
-                                                                                                      <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
-                                                                                                          <div>
-                                                                                                              <strong style="color:#9b59b6; font-size:12px;">🧠 Ancient Wisdom</strong>
-                                                                                                              <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +10% Global EXP rate to level back up faster.</div>
-                                                                                                              <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(expPts * 10).toLocaleString()}% EXP</span></div>
-                                                                                                          </div>
-                                                                                                          ${getUpgradeButtonHtml("exp", expPts, "#9b59b6")}
-                                                                                                      </div>
-                                                                                                      <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
-                                                                                                          <div>
-                                                                                                              <strong style="color:#2ecc71; font-size:12px;">🍀 Cosmic Fortune</strong>
-                                                                                                              <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +5% Global Drop Rate.</div>
-                                                                                                              <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(dropPts * 5).toLocaleString()}% Drop</span></div>
-                                                                                                          </div>
-                                                                                                          ${getUpgradeButtonHtml("drop", dropPts, "#2ecc71")}
-                                                                                                      </div>
-                                                                                                      <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
-                                                                                                          <div>
-                                                                                                              <strong style="color:#e74c3c; font-size:12px;">🔱 Gladiator's Might</strong>
-                                                                                                              <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +12% Compounding Global Attack power.</div>
-                                                                                                              <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">x${Math.pow(1.12, atkPts).toFixed(2)} Mult</span></div>
-                                                                                                          </div>
-                                                                                                          ${getUpgradeButtonHtml("atk", atkPts, "#e74c3c")}
-                                                                                                      </div>
-                                                                                                      <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
-                                                                                                          <div>
-                                                                                                              <strong style="color:#1abc9c; font-size:12px;">🛡️ Colossal Fortitude</strong>
-                                                                                                              <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +10% Global HP and +5% Defense (Compounding).</div>
-                                                                                                              <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">x${Math.pow(1.1, fortPts).toFixed(2)} HP, x${Math.pow(1.05, fortPts).toFixed(2)} Def</span></div>
-                                                                                                          </div>
-                                                                                                          ${getUpgradeButtonHtml("fort", fortPts, "#1abc9c")}
-                                                                                                      </div>
-                                                                                                      <div style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
-                                                                                                          <div>
-                                                                                                              <strong style="color:#ffb6c1; font-size:12px;">🧚 Aetheric Beacon</strong>
-                                                                                                              <div style="font-size:10px; color:#aaa; margin:3px 0 6px 0;">Adds +5% Multi-Fairy Spawn chance per level.</div>
-                                                                                                              <div style="font-size:11px; font-weight:bold; color:#fff;">Current: <span style="color:#2ecc71;">+${(fairyPts * 5).toLocaleString()}% Spawn</span></div>
-                                                                                                          </div>
-                                                                                                          ${getUpgradeButtonHtml("fairy", fairyPts, "#ffb6c1")}
-                                                                                                      </div>
-                                                                                                  </div>
-                                                                                              </div>
-                                                                                          </div>
-                                                                                      `;
+        <!-- LEFT COLUMN: BOSS BATTLE CONSOLE -->
+                <div class="market-card" style="border-color:#e74c3c; background:linear-gradient(135deg, #180505 0%, #050000 100%); text-align:left; padding:12px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.7); display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #4a1111; padding-bottom:6px; margin-bottom:8px;">
+                            <h3 style="margin:0; color:#e74c3c; font-size:13px; text-transform:uppercase; letter-spacing:1px; text-shadow:0 0 10px rgba(231,76,60,0.35); text-align:center; width:100%;">🐉 The Scarlet Summons</h3>
+                        </div>
+
+                        <!-- Menacing Hooktail Emblem -->
+                <div style="margin: 10px 0; text-align:center;">
+                    <svg width="68" height="68" viewBox="0 0 64 64" style="display:inline-block; filter: drop-shadow(0 0 8px rgba(231, 76, 60, 0.55));">
+                        <defs>
+                            <linearGradient id="hooktail_emblem_grad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#ff7675" />
+                                <stop offset="100%" stop-color="#5a0e0e" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Dragon Skull Horn Shape -->
+                        <path d="M32 6 L44 26 L52 14 L42 35 L32 54 L22 35 L12 14 L20 26 Z" fill="url(#hooktail_emblem_grad)" stroke="#000000" stroke-width="2" stroke-linejoin="round" />
+                        <circle cx="23" cy="28" r="3.2" fill="#fff" style="filter: drop-shadow(0 0 4px #ff0000);" />
+                        <circle cx="41" cy="28" r="3.2" fill="#fff" style="filter: drop-shadow(0 0 4px #ff0000);" />
+                    </svg>
+                </div>
+
+                <!-- Challenge Tier Selector Slider -->
+                <div style="background:rgba(15,7,7,0.85); border:1px solid #5a0e0e; border-radius:6px; padding:10px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <div>
+                            <strong style="color:#ff7675; font-size:11px; text-transform:uppercase;">Challenge Tier Level:</strong>
+                            <span style="font-size:9.5px; color:#aaa; display:block;">Limits: Stage 80 to Peak ${maxS}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <button class="btn-action" style="padding:2px 8px; background:#5a0e0e;" ${p.maxStage < 80 ? "disabled" : ""} onclick="window.changePrestigeBossStage(-1)">-</button>
+                            <strong style="font-size:13px; font-family:monospace; color:#fff; min-width:28px; text-align:center;">${activeStage}</strong>
+                            <button class="btn-action" style="padding:2px 8px; background:#5a0e0e;" ${p.maxStage < 80 ? "disabled" : ""} onclick="window.changePrestigeBossStage(1)">+</button>
+                        </div>
+                    </div>
+                    <!-- Slider Control -->
+                    <input type="range" min="80" max="${maxS}" value="${activeStage}" step="1" ${p.maxStage < 80 ? "disabled" : ""} oninput="window.changePrestigeBossStage(parseInt(this.value, 10) - window.playerStats.selectedPrestigeStage)" style="width:100%; height:4px; accent-color:#e74c3c; cursor:pointer;" />
+                </div>
+
+                <!-- Forecasted Boss Stats -->
+                <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:4px; padding:8px; margin-bottom:10px; font-family:monospace; font-size:9.5px;">
+                    <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">📊 Forecasted Boss Parameters:</div>
+                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; text-align:center;">
+                        <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #4a1111;"><span>Life</span><strong style="color:#ff7675; display:block; margin-top:2px;">${window.formatNumber(hpVal)}</strong></div>
+                        <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #4a1111;"><span>Attack</span><strong style="color:#ff7675; display:block; margin-top:2px;">${window.formatNumber(dmgVal)}</strong></div>
+                        <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #4a1111;"><span>Armor</span><strong style="color:#ff7675; display:block; margin-top:2px;">${window.formatNumber(defVal)}</strong></div>
+                    </div>
+                </div>
+
+                <!-- Projected Victory Loot Payouts -->
+                <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:4px; padding:8px; margin-bottom:12px; font-family:monospace; font-size:9.5px;">
+                    <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">💎 Projected Ascension Loot:</div>
+                    <div style="display:flex; flex-direction:column; gap:2px; padding:2px;">
+                        <div style="display:flex; justify-content:space-between;"><span>✨ Prestige Points (PP):</span><strong style="color:#f1c40f;">+${totalPP} PP</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>🔋 Catalyst Cores:</span><strong style="color:#2ecc71;">~ ${estCores}</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>🔮 Eridium Shards:</span><strong style="color:#8e44ad;">~ ${estShards}</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:auto;">
+                ${challengeBtnHtml}
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: ASCENSION ALTAR CARDS -->
+                <div class="market-card" style="border-color:#9b59b6; background:#111; text-align:left; padding:12px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.7); display:flex; flex-direction:column;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:6px; margin-bottom:10px;">
+                        <h3 style="margin:0; color:#9b59b6; font-size:13px; text-transform:uppercase; letter-spacing:1px; text-shadow:0 0 10px rgba(155, 89, 182, 0.35);">✨ Altar of Ascension</h3>
+                        <span style="background:rgba(155, 89, 182, 0.15); border:1px solid #9b59b6; color:#df9ffb; font-size:10px; font-weight:bold; padding:2px 10px; border-radius:10px; font-family:monospace;" id="prestige-points-qty">PP: ${p.prestigePoints.toLocaleString()}</span>
+                    </div>
+
+                    <!-- Scroll box replaced with elegant, space-filling responsive dual-column grid -->
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:6px; flex:1; align-content:start;" onscroll="window.hideTooltip()">
+                        ${getUpgradeCardHtml("gold", "Midas' Legacy", "🟡", `+${(goldPts * 25).toLocaleString()}%`, "Increases campaign gold drops by +25% per level.", goldPts, "#f1c40f")}
+                        ${getUpgradeCardHtml("exp", "Ancient Wisdom", "🧠", `+${(expPts * 10).toLocaleString()}%`, "Increases all experience gained by +10% per level.", expPts, "#9b59b6")}
+                        ${getUpgradeCardHtml("drop", "Cosmic Fortune", "🍀", `+${(dropPts * 5).toLocaleString()}%`, "Increases global item drop rates by +5% per level.", dropPts, "#2ecc71")}
+                        ${getUpgradeCardHtml("atk", "Gladiator's Might", "🔱", `x${Math.pow(1.12, atkPts).toFixed(2)}`, "Compounding multiplier to all hero Attack power (+12% per level).", atkPts, "#e74c3c")}
+                        ${getUpgradeCardHtml("fort", "Colossal Fortitude", "🛡️", `x${Math.pow(1.1, fortPts).toFixed(2)} HP / x${Math.pow(1.05, fortPts).toFixed(2)} Def`, "Compounding +10% HP and +5% Defense multiplier per level.", fortPts, "#1abc9c")}
+                        ${getUpgradeCardHtml("fairy", "Aetheric Beacon", "🧚", `+${(fairyPts * 5).toLocaleString()}%`, "Adds a compounding +5% multi-fairy wild spawn rate.", fairyPts, "#ffb6c1")}
+                    </div>
+                </div>
+
+    </div>
+  `;
 };
 
 window.buyPrestigeUpgrade = function (type) {
@@ -3040,22 +3136,41 @@ window.buyPrestigeUpgrade = function (type) {
     return;
   }
 
-  window.playerStats.prestigePoints -= cost;
-  window.playerStats.prestigeUpgrades[type] = currentLevel + 1;
+  let upgradeNames = {
+    gold: "Midas' Legacy",
+    exp: "Ancient Wisdom",
+    drop: "Cosmic Fortune",
+    atk: "Gladiator's Might",
+    fort: "Colossal Fortitude",
+    fairy: "Aetheric Beacon",
+  };
+  let upgradeLabel = upgradeNames[type] || type;
 
-  if (typeof window.pushHeaderToast === "function")
-    window.pushHeaderToast("🎉 Permanent Upgrade Acquired!", "#9b59b6");
+  window.showCustomConfirm(
+    "Ascension Upgrade",
+    `Are you sure you want to purchase <strong>${upgradeLabel}</strong> level ${currentLevel + 1} for <strong>${cost} PP</strong>?`,
+    "Confirm Purchase",
+    "Cancel",
+    "#9b59b6",
+    function () {
+      window.playerStats.prestigePoints -= cost;
+      window.playerStats.prestigeUpgrades[type] = currentLevel + 1;
 
-  let p = window.resolvePlayerStats();
-  window.playerStats.currentHp = Math.min(
-    window.playerStats.currentHp,
-    p.maxHp,
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast("🎉 Permanent Upgrade Acquired!", "#9b59b6");
+
+      let p = window.resolvePlayerStats();
+      window.playerStats.currentHp = Math.min(
+        window.playerStats.currentHp,
+        p.maxHp,
+      );
+
+      window.updateUI();
+      window.renderPrestigeTab();
+      window.renderInventory();
+      window.saveGame();
+    },
   );
-
-  window.updateUI();
-  window.renderPrestigeTab();
-  window.renderInventory();
-  window.saveGame();
 };
 
 window.challengeHooktail = function () {
@@ -3064,11 +3179,11 @@ window.challengeHooktail = function () {
     return;
   }
 
-  // Hooktail Stage requirements
+  // Hooktail Stage requirements - check peak run stage (maxStage) instead of current stage
   let requiredStage = window.playerStats.prestigeCount === 0 ? 80 : 1;
-  if (window.playerStats.stage < requiredStage) {
+  if (window.playerStats.maxStage < requiredStage) {
     window.pushHeaderToast(
-      `Requires Campaign Stage ${requiredStage} to challenge Hooktail!`,
+      `Requires Campaign Peak Stage ${requiredStage} to challenge Hooktail!`,
       "#e74c3c",
     );
     return;
@@ -3117,12 +3232,15 @@ window.triggerPrestigeAscension = function () {
     window.playerStats.level,
   );
 
-  // Rebalance: Award Catalyst Cores, Eridium Shards, and crafting materials instead of gear items
-  let awardedCores = window.randInt(3, 5);
-  let awardedShards = window.randInt(8, 15);
-  let awardedEpic = window.randInt(10, 15);
-  let awardedLeg = window.randInt(5, 10);
-  let awardedMythic = window.randInt(2, 5);
+  let activeStage = window.playerStats.selectedPrestigeStage || 80;
+  let rewardMultiplier = activeStage / 80;
+
+  // Rebalance: Award Catalyst Cores, Eridium Shards, and crafting materials instead of gear items (scaling proportionally to fight tier)
+  let awardedCores = Math.round(window.randInt(3, 5) * rewardMultiplier);
+  let awardedShards = Math.round(window.randInt(8, 15) * rewardMultiplier);
+  let awardedEpic = Math.round(window.randInt(10, 15) * rewardMultiplier);
+  let awardedLeg = Math.round(window.randInt(5, 10) * rewardMultiplier);
+  let awardedMythic = Math.round(window.randInt(2, 5) * rewardMultiplier);
 
   if (typeof window.addEtcDrop === "function") {
     window.addEtcDrop("Catalyst Core", awardedCores);
@@ -3132,9 +3250,12 @@ window.triggerPrestigeAscension = function () {
     window.addEtcDrop("Mythic Scrap", awardedMythic);
   }
 
+  // Calculate Points: Base, Prestige Level Bonus, and Uncapped Deep Push Bonus! (based on selected fight challenge stage)
   let basePoints = 3;
   let bonusPoints = Math.floor(window.playerStats.prestigeCount / 4);
-  let totalAwarded = Math.min(10, basePoints + bonusPoints);
+  let pushBonus = Math.max(0, Math.floor((activeStage - 80) / 10));
+  let totalAwarded = Math.min(10, basePoints + bonusPoints) + pushBonus;
+
   window.playerStats.prestigePoints += totalAwarded;
   window.playerStats.prestigeCount++;
 
@@ -3198,6 +3319,10 @@ window.triggerPrestigeAscension = function () {
                                                                                           <div style="background:#0b0f12; border:1px solid #e74c3c; border-radius:6px; padding:15px; margin-bottom:20px;">
                                                                                               <div style="font-size:11px; color:#aaa; margin-bottom:4px;">REWARDS EARNED:</div>
                                                                                               <div style="font-size:20px; color:#f1c40f; font-weight:bold; margin-bottom:6px;">✨ +${totalAwarded} Prestige Points</div>
+                                                                                              <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-bottom:12px; line-height:1.3; text-align:left; background:rgba(0,0,0,0.35); padding:6px; border:1px dashed #333;">
+                                                                                                  • Base & Rank Award: <strong style="color:#fff;">+${Math.min(10, basePoints + bonusPoints)} PP</strong><br>
+                                                                                                  • Deep Push Bonus (Stage ${currentStage}): <strong style="color:#2ecc71;">+${pushBonus} PP</strong> (1 per 10 stages over 80)
+                                                                                              </div>
                                                                                               <div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">🔋 Catalyst Cores: +${awardedCores}</div>
                                                                                               <div style="font-size:11px; color:#8e44ad; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">🔮 Eridium Shards: +${awardedShards}</div>
                                                                                               <div style="font-size:11px; color:#e67e22; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">🟧 Epic Scraps: +${awardedEpic}</div>
@@ -3508,7 +3633,7 @@ window.showDummyArtifact = function (e, traitId) {
   let artDef = window.ARTIFACT_POOL.find((a) => a.trait === traitId);
   let dummy = {
     id: "dummy",
-    name: "⭐ UNIQUE " + artDef.name + " (Lv. 1)",
+    name: artDef.name + " (Lv. 1)",
     type: "artifact",
     statsRolled: "UNIQUE",
     temperLevel: 0,
@@ -3588,14 +3713,14 @@ window.showStatHoverTooltip = function (e, key) {
     html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;"><div class="tt-title" style="color:#2ecc71;">🍀 Drop Rate Modifier</div><div style="color:#aaa; font-size:11px;">Current Multiplier: x${(p.drop * eff).toFixed(2)} ${eff > 1.0 ? "(Manual Play Bonus Active)" : ""}<br><br><b>Exact Chances:</b><br>• Standard Mob Drop: ${(4.5 * p.drop * eff).toFixed(2)}%<br>• Rare Mob Drop: ${(15.0 * p.drop * eff).toFixed(2)}%<br>• Boss Drop: ${(25.0 * p.drop * eff).toFixed(2)}%<br>• Dungeon Mob: ${(10.0 * p.drop * eff).toFixed(2)}%</div></div>`;
     tt.style.borderColor = "#2ecc71";
   } else if (key === "qly") {
-      html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;"><div class="tt-title" style="color:#9b59b6;">💎 Drop Quality Modifier</div><div style="color:#aaa; font-size:11px;">Current Multiplier: x${p.qly.toFixed(2)}<br><br>Increases the probability that an item drop will roll with more bonus modifier lines (higher star rating).</div></div>`;
-      tt.style.borderColor = "#9b59b6";
-    } else if (key === "idps") {
-      let effMultiplier = 1 + p.critChance * (p.critDamage - 1);
-      let idps = p.atk * effMultiplier * (60 / p.idleAttackSpeed);
-      html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;"><div class="tt-title" style="color:#e67e22;">🔄 Idle DPS</div><div style="color:#aaa; font-size:11px;">Current Idle Damage/Sec: ${idps.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}<br><br>Represents your average damage output per second when idle (incorporates Attack, Attack Speed, Crit Chance, and Crit Multipliers).</div></div>`;
-      tt.style.borderColor = "#e67e22";
-    } else if (key === "xpr") {
+    html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;"><div class="tt-title" style="color:#9b59b6;">💎 Drop Quality Modifier</div><div style="color:#aaa; font-size:11px;">Current Multiplier: x${p.qly.toFixed(2)}<br><br>Increases the probability that an item drop will roll with more bonus modifier lines (higher star rating).</div></div>`;
+    tt.style.borderColor = "#9b59b6";
+  } else if (key === "idps") {
+    let effMultiplier = 1 + p.critChance * (p.critDamage - 1);
+    let idps = p.atk * effMultiplier * (60 / p.idleAttackSpeed);
+    html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;"><div class="tt-title" style="color:#e67e22;">🔄 Idle DPS</div><div style="color:#aaa; font-size:11px;">Current Idle Damage/Sec: ${idps.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}<br><br>Represents your average damage output per second when idle (incorporates Attack, Attack Speed, Crit Chance, and Crit Multipliers).</div></div>`;
+    tt.style.borderColor = "#e67e22";
+  } else if (key === "xpr") {
     html = `<div style="padding: 10px; width: 220px; box-sizing: border-box;"><div class="tt-title" style="color:#a855f7;">🧠 XP Rate Multiplier</div><div style="color:#aaa; font-size:11px;">Current Multiplier: x${p.xpRate.toFixed(2)}<br><br>Multiplies all acquired experience from routing, bosses, and dungeons.<br><br><b>Boosted by:</b><br>• Prestige upgrades (+10% per level)<br>• Active XP potions / elixirs<br>• Chronicle of Past Lives Unique Tome<br>• Unlocked Achievements</div></div>`;
     tt.style.borderColor = "#a855f7";
   } else if (key === "bar") {
@@ -3713,31 +3838,31 @@ window.renderPaperDoll = function () {
         if (item.int > 0) s.push(`🧠I:${item.int}`);
 
         let setLabelHtml = "";
-                let setName = window.getItemSetName(item);
-                if (setName) {
-                  let matchingCount = 0;
-                  const setSlots = [
-                    "weapon",
-                    "subweapon",
-                    "helmet",
-                    "chest",
-                    "leggings",
-                    "overall",
-                    "boots",
-                  ];
-                  setSlots.forEach((sKey) => {
-                    let eqItem = window.equippedSlots[sKey];
-                    if (eqItem) {
-                      let eqSetName = window.getItemSetName(eqItem);
-                      if (eqSetName === setName)
-                        matchingCount += sKey === "overall" ? 2 : 1;
-                    }
-                  });
-                  if (matchingCount >= 2) {
-                    let displayCount = Math.min(3, matchingCount);
-                    setLabelHtml = `<div style="font-size:8px; color:#2ecc71; font-weight:bold; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;">✨ ${setName} Set (${displayCount}/3)</div>`;
-                  }
-                }
+        let setName = window.getItemSetName(item);
+        if (setName) {
+          let matchingCount = 0;
+          const setSlots = [
+            "weapon",
+            "subweapon",
+            "helmet",
+            "chest",
+            "leggings",
+            "overall",
+            "boots",
+          ];
+          setSlots.forEach((sKey) => {
+            let eqItem = window.equippedSlots[sKey];
+            if (eqItem) {
+              let eqSetName = window.getItemSetName(eqItem);
+              if (eqSetName === setName)
+                matchingCount += sKey === "overall" ? 2 : 1;
+            }
+          });
+          if (matchingCount >= 2) {
+            let displayCount = Math.min(3, matchingCount);
+            setLabelHtml = `<div style="font-size:8px; color:#2ecc71; font-weight:bold; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;">✨ ${setName} Set (${displayCount}/3)</div>`;
+          }
+        }
         el.innerHTML = `${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${s.join(" ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
       }
     } else {
@@ -3758,44 +3883,44 @@ window.renderInventory = function () {
   let maxBag = window.getMaxBagSlots();
 
   // 1. Equip Sack
-    let eqBox = document.getElementById("bag-equip");
-    if (eqBox) {
-      if (window.inventory.EQUIP.length === 0) {
-        eqBox.innerHTML =
-          "<div style='color:#666;text-align:center;padding-top:40px;'>No equipment in sack.</div>";
-      } else {
-        eqBox.innerHTML = window.inventory.EQUIP.map((item) => {
-          let nameColor = window.getTierColor(item.statsRolled);
-          let tierStr =
-            item.statsRolled === "UNIQUE"
-              ? "UNIQUE"
-              : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
-          let temperTag =
-            item.temperLevel > 0
-              ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
-              : "";
-          let lockTag = item.locked ? " 🔒" : "";
-          let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
-          let lockIcon = item.locked ? "🔒" : "🔓";
-          let typeText = item.type.toUpperCase();
-          if (item.type === "subweapon" && item.subType) {
-            typeText = `${item.type.toUpperCase()} (${item.subType.toUpperCase()})`;
-          }
-          let comparisonBadge = window.getComparisonDeltaBadge(item);
-          let reqLvl = 1;
-          if ((item.stageLevel || 1) >= 3) {
-            reqLvl = Math.max(
-              1,
-              ((item.stageLevel || 1) - 2) * 5 -
-                (window.playerStats.prestigeCount || 0) * 5,
-            );
-          }
-          let lockWarning = "";
-          let disabledAttr = "";
-          if (window.playerStats.level < reqLvl) {
-            lockWarning = ` <span style="color:#e74c3c; font-weight:bold; font-size:10px;">[Req. Lv ${reqLvl}]</span>`;
-            disabledAttr = "disabled style='opacity:0.5; cursor:not-allowed;'";
-          }
+  let eqBox = document.getElementById("bag-equip");
+  if (eqBox) {
+    if (window.inventory.EQUIP.length === 0) {
+      eqBox.innerHTML =
+        "<div style='color:#666;text-align:center;padding-top:40px;'>No equipment in sack.</div>";
+    } else {
+      eqBox.innerHTML = window.inventory.EQUIP.map((item) => {
+        let nameColor = window.getTierColor(item.statsRolled);
+        let tierStr =
+          item.statsRolled === "UNIQUE"
+            ? "UNIQUE"
+            : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
+        let temperTag =
+          item.temperLevel > 0
+            ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
+            : "";
+        let lockTag = item.locked ? " 🔒" : "";
+        let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
+        let lockIcon = item.locked ? "🔒" : "🔓";
+        let typeText = item.type.toUpperCase();
+        if (item.type === "subweapon" && item.subType) {
+          typeText = `${item.type.toUpperCase()} (${item.subType.toUpperCase()})`;
+        }
+        let comparisonBadge = window.getComparisonDeltaBadge(item);
+        let reqLvl = 1;
+        if ((item.stageLevel || 1) >= 3) {
+          reqLvl = Math.max(
+            1,
+            ((item.stageLevel || 1) - 2) * 5 -
+              (window.playerStats.prestigeCount || 0) * 5,
+          );
+        }
+        let lockWarning = "";
+        let disabledAttr = "";
+        if (window.playerStats.level < reqLvl) {
+          lockWarning = ` <span style="color:#e74c3c; font-weight:bold; font-size:10px;">[Req. Lv ${reqLvl}]</span>`;
+          disabledAttr = "disabled style='opacity:0.5; cursor:not-allowed;'";
+        }
         let details = `<span style="font-size:10px;color:#aaa;">Slot: ${typeText} | <span style="color:${nameColor};font-weight:bold;">${tierStr}</span></span>${lockWarning}`;
         let uniqueStyle = window.getUniqueItemStyle(item);
         let uniqueStyleStr = uniqueStyle
@@ -3835,31 +3960,31 @@ window.renderInventory = function () {
   }
 
   // 2. Artifact Sack
-    let artBox = document.getElementById("bag-art");
-    if (artBox) {
-      if (window.inventory.ARTIFACT.length === 0) {
-        artBox.innerHTML =
-          "<div style='color:#666;text-align:center;padding-top:40px;'>No artifacts in sack.</div>";
-      } else {
-        artBox.innerHTML = window.inventory.ARTIFACT.map((item) => {
-          let nameColor = window.getTierColor(item.statsRolled);
-          let lockTag = item.locked ? " 🔒" : "";
-          let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
-          let lockIcon = item.locked ? "🔒" : "🔓";
-          let reqLvl = 1;
-          if ((item.stageLevel || 1) >= 3) {
-            reqLvl = Math.max(
-              1,
-              ((item.stageLevel || 1) - 2) * 5 -
-                (window.playerStats.prestigeCount || 0) * 5,
-            );
-          }
-          let lockWarning = "";
-          let disabledAttr = "";
-          if (window.playerStats.level < reqLvl) {
-            lockWarning = ` <span style="color:#e74c3c; font-weight:bold; font-size:10px;">[Req. Lv ${reqLvl}]</span>`;
-            disabledAttr = "disabled style='opacity:0.5; cursor:not-allowed;'";
-          }
+  let artBox = document.getElementById("bag-art");
+  if (artBox) {
+    if (window.inventory.ARTIFACT.length === 0) {
+      artBox.innerHTML =
+        "<div style='color:#666;text-align:center;padding-top:40px;'>No artifacts in sack.</div>";
+    } else {
+      artBox.innerHTML = window.inventory.ARTIFACT.map((item) => {
+        let nameColor = window.getTierColor(item.statsRolled);
+        let lockTag = item.locked ? " 🔒" : "";
+        let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
+        let lockIcon = item.locked ? "🔒" : "🔓";
+        let reqLvl = 1;
+        if ((item.stageLevel || 1) >= 3) {
+          reqLvl = Math.max(
+            1,
+            ((item.stageLevel || 1) - 2) * 5 -
+              (window.playerStats.prestigeCount || 0) * 5,
+          );
+        }
+        let lockWarning = "";
+        let disabledAttr = "";
+        if (window.playerStats.level < reqLvl) {
+          lockWarning = ` <span style="color:#e74c3c; font-weight:bold; font-size:10px;">[Req. Lv ${reqLvl}]</span>`;
+          disabledAttr = "disabled style='opacity:0.5; cursor:not-allowed;'";
+        }
         let details = `<span style="font-size:10px;color:#d2b4de;font-weight:bold;">Trait: ${item.desc}</span>${lockWarning}`;
         let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center;">${window.getArtifactIconHtml(item.trait, 28)}</div>`;
 
@@ -4214,24 +4339,20 @@ window.generateItemCardHtml = function (
   let badge = isEquipped
     ? `
         <div style="
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: #fff;
-            font-size: 8px;
+            font-size: 9px;
             font-weight: 800;
-            padding: 2.5px 12px;
+            padding: 4px;
             border-radius: 4px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            box-shadow: 0 0 12px rgba(231, 76, 60, 0.8), inset 0 1px 0 rgba(255,255,255,0.3);
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
             border: 1px solid #ff4d4d;
-            z-index: 1000;
-            white-space: nowrap;
             text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-            animation: pulseBtn 2.2s infinite;
+            text-align: center;
+            margin-bottom: 8px;
+            white-space: nowrap;
         ">
             Currently Equipped
         </div>
@@ -4263,26 +4384,26 @@ window.generateItemCardHtml = function (
 
   let tierColor = window.getTierColor(item.statsRolled);
   let titleColor = item.type === "artifact" ? "#1abc9c" : tierColor;
-    let labelDisplay = item.type.toUpperCase();
-    if (item.type === "subweapon" && item.subType) {
-      labelDisplay = `SUBWEAPON (${item.subType.toUpperCase()})`;
-    }
-    let reqLvl = 1;
-    if ((item.stageLevel || 1) >= 3) {
-      reqLvl = Math.max(
-        1,
-        ((item.stageLevel || 1) - 2) * 5 -
-          (window.playerStats.prestigeCount || 0) * 5,
-      );
-    }
-    let subtitle =
-      item.type === "artifact"
-        ? "Unique Boss Trophy Slot"
-        : `${labelDisplay} | <span style="color:${tierColor}; font-weight:bold;">${tierStrDisplay(item)}</span>`;
-    if (reqLvl > 1) {
-      let reqColor = window.playerStats.level >= reqLvl ? "#2ecc71" : "#e74c3c";
-      subtitle += `<br><span style="color:${reqColor}; font-weight:bold;">Required Level: ${reqLvl}</span>`;
-    }
+  let labelDisplay = item.type.toUpperCase();
+  if (item.type === "subweapon" && item.subType) {
+    labelDisplay = `SUBWEAPON (${item.subType.toUpperCase()})`;
+  }
+  let reqLvl = 1;
+  if ((item.stageLevel || 1) >= 3) {
+    reqLvl = Math.max(
+      1,
+      ((item.stageLevel || 1) - 2) * 5 -
+        (window.playerStats.prestigeCount || 0) * 5,
+    );
+  }
+  let subtitle =
+    item.type === "artifact"
+      ? "Unique Boss Trophy Slot"
+      : `${labelDisplay} | <span style="color:${tierColor}; font-weight:bold;">${tierStrDisplay(item)}</span>`;
+  if (reqLvl > 1) {
+    let reqColor = window.playerStats.level >= reqLvl ? "#2ecc71" : "#e74c3c";
+    subtitle += `<br><span style="color:${reqColor}; font-weight:bold;">Required Level: ${reqLvl}</span>`;
+  }
   let temperTag =
     item.temperLevel > 0
       ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
@@ -4486,29 +4607,29 @@ window.generateItemCardHtml = function (
     }
 
     let setName = window.getItemSetName ? window.getItemSetName(item) : null;
-        if (setName && window.SET_DEFINITIONS[setName]) {
-          let setDef = window.SET_DEFINITIONS[setName];
-          let currentEquippedCount = 0;
-          const eligibleSetSlots = [
-            "weapon",
-            "subweapon",
-            "helmet",
-            "chest",
-            "leggings",
-            "overall",
-            "boots",
-          ];
+    if (setName && window.SET_DEFINITIONS[setName]) {
+      let setDef = window.SET_DEFINITIONS[setName];
+      let currentEquippedCount = 0;
+      const eligibleSetSlots = [
+        "weapon",
+        "subweapon",
+        "helmet",
+        "chest",
+        "leggings",
+        "overall",
+        "boots",
+      ];
 
-          eligibleSetSlots.forEach((slot) => {
-                  let eqItem = window.equippedSlots[slot];
-                  if (eqItem) {
-                    let eqSetName = window.getItemSetName(eqItem);
-                    if (eqSetName === setName)
-                      currentEquippedCount += (slot === "overall" ? 2 : 1);
-                  }
-                });
+      eligibleSetSlots.forEach((slot) => {
+        let eqItem = window.equippedSlots[slot];
+        if (eqItem) {
+          let eqSetName = window.getItemSetName(eqItem);
+          if (eqSetName === setName)
+            currentEquippedCount += slot === "overall" ? 2 : 1;
+        }
+      });
 
-          html += `<div style="margin-top:10px; padding-top:6px; border-top:1px dashed #555;">`;
+      html += `<div style="margin-top:10px; padding-top:6px; border-top:1px dashed #555;">`;
       let displayCount = Math.min(3, currentEquippedCount);
       html += `<div style="font-weight:bold; color:#f1c40f; font-size:10px;">🌟 SET: ${setDef.name} (${displayCount}/3 equipped)</div>`;
       setDef.bonuses.forEach((b) => {
@@ -4646,7 +4767,7 @@ function getCombinedEquippedTorso() {
     baseMoveSpeed: (chest?.baseMoveSpeed || 0) + (leggings?.baseMoveSpeed || 0),
     baseBlock: (chest?.baseBlock || 0) + (leggings?.baseBlock || 0),
     baseParry: (chest?.baseParry || 0) + (leggings?.baseParry || 0),
-    baseInt: (chest?.baseInt || 0) + (leggings?.baseInt || 0)
+    baseInt: (chest?.baseInt || 0) + (leggings?.baseInt || 0),
   };
 }
 
@@ -5113,17 +5234,17 @@ window.rerollDailyMission = function (missionId) {
   window.playerStats.dailyRerollsDone++;
 
   // Replace inline parameters with the new selection while ensuring Daily Sacks are preserved
-    mList[mIndex] = {
-      id: targetMission.id,
-      type: newSelect.type,
-      desc: `${newSelect.label} (${finalTarget.toLocaleString()} ${newSelect.unit})`,
-      current: 0,
-      target: finalTarget,
-      treat: "Guild Reward Sack",
-      treatQty: 1,
-      completed: false,
-      claimed: false,
-    };
+  mList[mIndex] = {
+    id: targetMission.id,
+    type: newSelect.type,
+    desc: `${newSelect.label} (${finalTarget.toLocaleString()} ${newSelect.unit})`,
+    current: 0,
+    target: finalTarget,
+    treat: "Guild Reward Sack",
+    treatQty: 1,
+    completed: false,
+    claimed: false,
+  };
 
   window.pushHeaderToast("🔄 Mission Re-rolled!", "#2ecc71");
   window.SoundManager.play("swing");
@@ -6417,6 +6538,7 @@ window.showCurrentRatesModal = function () {
     win.style.top = "50px";
   }
 
+  let p = window.resolvePlayerStats();
   let nowStage = window.playerStats.stage || 1;
   let campDepthQ = window.getDepthQualityMultiplier(nowStage);
   let campShardChance = 0.005 * (campDepthQ - 1.0);
@@ -6432,15 +6554,61 @@ window.showCurrentRatesModal = function () {
 
   let cruciblePeak = window.playerStats.cruciblePeak || 1;
 
+  // Equipment Drop Chances (Chances of rolling each star quality based on active Drop Quality stats)
+  let luckMultiplier = p.qly;
+  let chance5 = luckMultiplier >= 2.0 ? 0.02 * luckMultiplier : 0;
+  let chance4 = luckMultiplier >= 1.5 ? 0.16 * luckMultiplier : 0;
+  let chance3 = 0.8 * luckMultiplier - (chance5 + chance4);
+  let chance2 = 3.2 * luckMultiplier;
+  let chance1 = 11.0 * luckMultiplier;
+  let chance0 = Math.max(
+    0,
+    100 - (chance5 + chance4 + chance3 + chance2 + chance1),
+  );
+
   win.innerHTML = `
                         <div class="draggable-header" id="rates-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
-                            <span>📊 Activity Drop Rates</span>
+                            <span>📊 Live Drop Analytics</span>
                             <button onclick="document.getElementById('rates-draggable-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
                         </div>
                         <div class="draggable-content" style="max-height: 380px;">
                             <p style="font-size:10px; color:#aaa; margin: 0 0 10px 0; line-height:1.4;">
                                 Drag this window anywhere. Rates adapt to your current Campaign/Dungeon progression. Hover locks to view details.
                             </p>
+
+                            <!-- LIVE QUALITY AFFIXES CHANCES -->
+                            <div style="background:#111; border:1px solid #ff007f; border-radius:4px; padding:8px; margin-bottom:8px;">
+                                <div style="color:#ff007f; font-weight:bold; font-size:11px; margin-bottom:4px; border-bottom:1px solid #222; padding-bottom:3px; display:flex; justify-content:space-between;">
+                                    <span>⚙️ Active Drop Quality chances</span>
+                                    <span style="color:#888; font-family:monospace;">Qly: ${p.qly.toFixed(2)}x</span>
+                                </div>
+                                <div style="font-family:monospace; font-size:10px; display:flex; flex-direction:column; gap:2px;">
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <span>🟥 5★ Mythic Quality:</span>
+                                        <strong style="color:${chance5 > 0 ? "#e74c3c" : "#7f8c8d"};">${chance5 > 0 ? chance5.toFixed(2) + "%" : "🔒 locked (Req. 2.00x Qly)"}</strong>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <span>🟨 4★ Legendary Quality:</span>
+                                        <strong style="color:${chance4 > 0 ? "#f1c40f" : "#7f8c8d"};">${chance4 > 0 ? chance4.toFixed(2) + "%" : "🔒 locked (Req. 1.50x Qly)"}</strong>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <span>🟧 3★ Epic Quality:</span>
+                                        <strong style="color:#e67e22;">${chance3.toFixed(2)}%</strong>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <span>🟪 2★ Magic Quality:</span>
+                                        <strong style="color:#9b59b6;">${chance2.toFixed(2)}%</strong>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <span>🟦 1★ Rare Quality:</span>
+                                        <strong style="color:#3498db;">${chance1.toFixed(2)}%</strong>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <span>⬜ 0★ Common Quality:</span>
+                                        <strong style="color:#fff;">${chance0.toFixed(2)}%</strong>
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- CAMPAIGN -->
                             <div style="background:#111; border:1px solid #333; border-radius:4px; padding:8px; margin-bottom:8px;">
@@ -6742,11 +6910,11 @@ window.showRiftRewardBreakdownTooltip = function (e, lvl) {
 
   let coresMin = Math.floor(lvl / 5);
   let coresMax = coresMin;
-  if ((lvl % 5) > 0) coresMax++;
+  if (lvl % 5 > 0) coresMax++;
 
   let essenceMin = Math.floor(lvl / 6);
   let essenceMax = essenceMin;
-  if ((lvl % 6) > 0) essenceMax++;
+  if (lvl % 6 > 0) essenceMax++;
 
   let legendary = Math.floor(lvl / 2);
   let mythic = Math.floor(lvl / 3);
@@ -6860,7 +7028,7 @@ window.renderAltarTab = function () {
                             </div>
                         `;
   } else {
-      lvlSelectorHtml = `
+    lvlSelectorHtml = `
                               <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; cursor:help;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})">
                                   <div>
                                       <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER / LEVEL: ⓘ</strong>
@@ -6873,7 +7041,7 @@ window.renderAltarTab = function () {
                                   </div>
                               </div>
                           `;
-    }
+  }
 
   let slidesHtml = window.riftBossesMetadata
     .map((boss, idx) => {
@@ -7395,38 +7563,163 @@ window.buyMissionItem = function (itemName, cost) {
   let p = window.playerStats;
   if ((p.missionTokens || 0) < cost) {
     window.pushHeaderToast(
-      `❌ Insufficient Mission Tokens! Requires ${cost}.`,
+      `❌ Insufficient Mission Points! Requires ${cost} MP.`,
       "#e74c3c",
     );
     return;
   }
 
   p.missionTokens -= cost;
-  if (itemName === "Gacha Key") {
+  let normName = itemName.replace(/['\\’]/g, "").trim();
+  if (normName === "Gacha Key") {
     window.addEtcDrop("Gacha Key", 1);
-  } else if (itemName === "Catalyst Core") {
+  } else if (normName === "Catalyst Core") {
     window.addEtcDrop("Catalyst Core", 1);
-  } else if (itemName === "Astral Essence") {
+  } else if (normName === "Astral Essence") {
     window.addEtcDrop("Astral Essence", 1);
-  } else if (itemName === "Eridium Shard") {
+  } else if (normName === "Eridium Shard") {
     window.addEtcDrop("Eridium Shard", 1);
-  } else if (itemName === "Ancient Core") {
+  } else if (normName === "Ancient Core") {
     window.addEtcDrop("Ancient Core", 1);
-  } else if (itemName === "Overlord's Sigil") {
+  } else if (normName === "Overlords Sigil") {
     window.addEtcDrop("Overlord's Sigil", 1);
-  } else if (itemName === "Double XP Potion") {
-    window.addUseDrop("Double XP Potion", 1);
-  } else if (itemName === "Double Drop Potion") {
-    window.addUseDrop("Double Drop Potion", 1);
-  } else if (itemName === "Drop Quality Potion") {
-    window.addUseDrop("Drop Quality Potion", 1);
+  } else if (normName === "Double XP Elixir") {
+    window.addUseDrop("Double XP Elixir", 1);
+  } else if (normName === "Double Drop Elixir") {
+    window.addUseDrop("Double Drop Elixir", 1);
+  } else if (normName === "Drop Quality Elixir") {
+    window.addUseDrop("Drop Quality Elixir", 1);
   }
 
-  window.pushHeaderToast(`🛒 Purchased ${itemName}!`, "#2ecc71");
+  let finalName = itemName;
+  if (normName === "Overlords Sigil") finalName = "Overlord's Sigil";
+
+  window.pushHeaderToast(`🛒 Purchased ${finalName}!`, "#2ecc71");
   window.SoundManager.play("fairy");
   window.updateUI();
   window.renderMissionsWindow();
   window.saveGame();
+};
+
+window.showMissionShopUpgradeTooltip = function (e, upId) {
+  e.stopPropagation();
+  let tt = document.getElementById("game-tooltip");
+  if (!tt) return;
+
+  let title = "";
+  let desc = "";
+  let currentLevel = window.playerStats.missionUpgrades[upId] || 0;
+  let color = "#2ecc71";
+
+  if (upId === "bag") {
+    title = "🎒 Dimensional Satchel";
+    let cost = 4 + currentLevel * 3;
+    desc = `Each upgrade level permanently expands your maximum equipment and artifact sack capacity by <strong style="color:#3498db;">+10 slots</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 10} Slots)</strong><br>• Cost: <strong style="color:#f1c40f;">${cost} MP</strong>`;
+    color = "#3498db";
+  } else if (upId === "gold") {
+    title = "💰 Midas Training";
+    desc = `Permanently increases your Global Gold Multiplier by <strong style="color:#f1c40f;">+5%</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 5}%)</strong><br>• Cost: <strong style="color:#f1c40f;">5 MP</strong>`;
+    color = "#f1c40f";
+  } else if (upId === "atk") {
+    title = "⚔️ Gladiator Mastery";
+    desc = `Permanently increases your Global Attack Power by <strong style="color:#e74c3c;">+2%</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 2}%)</strong><br>• Cost: <strong style="color:#f1c40f;">5 MP</strong>`;
+    color = "#e74c3c";
+  } else if (upId === "hp") {
+    title = "❤️ Iron Constitution";
+    desc = `Permanently increases your Global Max HP by <strong style="color:#3498db;">+3%</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 3}%)</strong><br>• Cost: <strong style="color:#f1c40f;">5 MP</strong>`;
+    color = "#3498db";
+  }
+
+  tt.innerHTML = `
+    <div style="padding: 10px; width: 220px; box-sizing: border-box;">
+        <div class="tt-title" style="color:${color};">${title}</div>
+        <div style="color:#aaa; font-size:11px; white-space:normal; line-height:1.4; margin-top:6px;">${desc}</div>
+    </div>
+  `;
+  tt.style.borderColor = color;
+  tt.style.display = "block";
+  window.positionTooltip(e, tt);
+};
+
+window.showMissionShopItemTooltip = function (e, itemName) {
+  e.stopPropagation();
+  let tt = document.getElementById("game-tooltip");
+  if (!tt) return;
+
+  let desc = "";
+  let color = "#bdc3c7";
+  let cost = 0;
+
+  // Immunize tooltip from quote-escaping browser quirks
+  let normalizedName = itemName.replace(/['\\’]/g, "").trim();
+
+  if (normalizedName === "Eridium Shard") {
+    desc =
+      "A glowing, alien fragment used in the Forge to Tier Up an item's Star Rarity.";
+    color = "#8e44ad";
+    cost = 4;
+  } else if (normalizedName === "Ancient Core") {
+    desc = "Sacrifice at the Altar to summon a Guardian.";
+    color = "#e74c3c";
+    cost = 2;
+  } else if (normalizedName === "Overlords Sigil") {
+    desc = "Material required to temper Unique Artifacts at the Forge.";
+    color = "#1abc9c";
+    cost = 6;
+  } else if (normalizedName === "Gacha Key") {
+    desc =
+      "Used at the Vending Machine to dispense a guaranteed random equipment piece.";
+    color = "#f1c40f";
+    cost = 4;
+  } else if (normalizedName === "Catalyst Core") {
+    desc =
+      "Spent at the Forge to re-roll and lock select weapon and armor attributes.";
+    color = "#2ecc71";
+    cost = 3;
+  } else if (normalizedName === "Astral Essence") {
+    desc =
+      "A pulsing, cosmic residue extracted by salvaging Unique Artifacts. Spent at the Forge to imbed powerful enchantments.";
+    color = "#9b59b6";
+    cost = 4;
+  } else if (normalizedName === "Double XP Elixir") {
+    desc =
+      "Doubles all acquired experience gains (+100% EXP) for 5 minutes (scales with INT).";
+    color = "#a855f7";
+    cost = 3;
+  } else if (normalizedName === "Double Drop Elixir") {
+    desc =
+      "Doubles current drop rate multiplier (+100%) for 5 minutes (scales with INT).";
+    color = "#2ecc71";
+    cost = 4;
+  } else if (normalizedName === "Drop Quality Elixir") {
+    desc =
+      "Boosts item drop quality checks by +50% for 5 minutes (scales with INT).";
+    color = "#3b82f6";
+    cost = 5;
+  }
+
+  // Preserve correct format strings for UI outputs
+  let finalName = itemName;
+  if (normalizedName === "Overlords Sigil") finalName = "Overlord's Sigil";
+
+  let iconHtml = finalName.includes("Elixir")
+    ? window.getUseIconHtml(finalName)
+    : window.getEtcIconHtml(finalName);
+  iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 8px;");
+
+  tt.innerHTML = `
+    <div style="padding: 10px; width: 220px; box-sizing: border-box;">
+        <div class="tt-title" style="color:${color}; display:flex; align-items:center; gap:8px;">${iconHtml}<span>${finalName}</span></div>
+        <div style="color:#aaa; font-size:11px; white-space:normal; line-height:1.4; margin-top:8px;">
+            ${desc}<br><br>
+            • Cost: <strong style="color:#f1c40f;">${cost} MP</strong><br>
+            • Owned: <strong style="color:#fff;">${(window.inventory.ETC[finalName] || window.inventory.USE[finalName] || 0).toLocaleString()}</strong>
+        </div>
+    </div>
+  `;
+  tt.style.borderColor = color;
+  tt.style.display = "block";
+  window.positionTooltip(e, tt);
 };
 
 window.claimMissionReward = function (missionId, isWeekly = false) {
@@ -7628,33 +7921,33 @@ window.renderMissionsWindow = function () {
     let weeklyMasterClaimed = window.playerStats.weeklyRewardClaimed;
 
     let getMissionRowHtml = (m, isWeekly) => {
-          let pct = (m.current / m.target) * 100;
-          let btnHtml = "";
-          let rerollBtnHtml = "";
+      let pct = (m.current / m.target) * 100;
+      let btnHtml = "";
+      let rerollBtnHtml = "";
 
-          if (m.claimed) {
-            btnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
-          } else if (m.completed) {
-            btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
-          } else {
-            btnHtml = `<span style="color:#888; font-size:10px; font-family:monospace;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
+      if (m.claimed) {
+        btnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
+      } else if (m.completed) {
+        btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
+      } else {
+        btnHtml = `<span style="color:#888; font-size:10px; font-family:monospace;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
 
-            // Dynamic single-mission Re-roll system
-            if (!isWeekly) {
-              let rerollsDone = window.playerStats.dailyRerollsDone || 0;
-              if (rerollsDone < 2) {
-                let costLabel = rerollsDone === 0 ? "🔄 Free" : "🔄 50 Souls";
-                rerollBtnHtml = `<button onclick="window.rerollDailyMission('${m.id}')" class="btn-action" style="padding:2px 5px; font-size:8.5px; margin-left:6px; background:#4b5563; font-family:monospace; line-height:1;" title="Re-roll Daily Mission (${rerollsDone === 0 ? "Free" : "Costs 50 Monster Souls"})">${costLabel}</button>`;
-              }
-            }
+        // Dynamic single-mission Re-roll system
+        if (!isWeekly) {
+          let rerollsDone = window.playerStats.dailyRerollsDone || 0;
+          if (rerollsDone < 2) {
+            let costLabel = rerollsDone === 0 ? "🔄 Free" : "🔄 50 Souls";
+            rerollBtnHtml = `<button onclick="window.rerollDailyMission('${m.id}')" class="btn-action" style="padding:2px 5px; font-size:8.5px; margin-left:6px; background:#4b5563; font-family:monospace; line-height:1;" title="Re-roll Daily Mission (${rerollsDone === 0 ? "Free" : "Costs 50 Monster Souls"})">${costLabel}</button>`;
           }
+        }
+      }
 
-          let rewardText = `+${m.treatQty} ${m.treat}`;
-          if (m.potionAward) {
-            rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
-          }
+      let rewardText = `+${m.treatQty} ${m.treat}`;
+      if (m.potionAward) {
+        rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
+      }
 
-          return `
+      return `
                                                                                             <div style="background:#111; border:1px solid #2d3748; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px;">
                                                                                                 <div style="display:flex; justify-content:space-between; align-items:center;">
                                                                                                     <strong style="font-size:11px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px; cursor:help;" onmouseenter="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" ontouchstart="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" onmouseleave="window.hideTooltip()">${m.desc}</strong>
@@ -7668,7 +7961,7 @@ window.renderMissionsWindow = function () {
                                                                                                 </div>
                                                                                             </div>
                                                                                         `;
-        };
+    };
 
     let dailyMasterBtnHtml = "";
     if (dailyMasterClaimed) {
@@ -7747,162 +8040,200 @@ window.renderMissionsWindow = function () {
     p.missionUpgrades = p.missionUpgrades || { gold: 0, atk: 0, hp: 0 };
 
     let lvlGold = p.missionUpgrades.gold || 0;
-                let costGold = 5; // Flat cost
-                let canAffordGold = tokenBalance >= costGold;
+    let costGold = 5; // Flat cost
+    let canAffordGold = tokenBalance >= costGold;
 
-                let lvlAtk = p.missionUpgrades.atk || 0;
-                let costAtk = 5; // Flat cost (down from 8)
-                let canAffordAtk = tokenBalance >= costAtk;
+    let lvlAtk = p.missionUpgrades.atk || 0;
+    let costAtk = 5; // Flat cost (down from 8)
+    let canAffordAtk = tokenBalance >= costAtk;
 
-                let lvlHp = p.missionUpgrades.hp || 0;
-                let costHp = 5; // Flat cost (down from 8)
-                let canAffordHp = tokenBalance >= costHp;
+    let lvlHp = p.missionUpgrades.hp || 0;
+    let costHp = 5; // Flat cost (down from 8)
+    let canAffordHp = tokenBalance >= costHp;
 
-                let lvlBag = p.missionUpgrades.bag || 0;
-                let costBag = 4 + lvlBag * 3; // Scaling cost: 4, 7, 10, 13...
-                let canAffordBag = tokenBalance >= costBag;
+    let lvlBag = p.missionUpgrades.bag || 0;
+    let costBag = 4 + lvlBag * 3; // Scaling cost: 4, 7, 10, 13...
+    let canAffordBag = tokenBalance >= costBag;
 
-        contentHtml = `
+    contentHtml = `
                                                                                 <div style="display:flex; flex-direction:column; gap:8px;">
                                                                                     <div style="background:#111; border:1px solid #2ecc71; border-radius:6px; padding:10px;">
                                                                                         <strong style="color:#2ecc71; font-size:12px; display:block; margin-bottom:4px;">🎖️ PERMANENT GUILD UPGRADES</strong>
                                                                                         <span style="font-size:9.5px; color:#aaa; display:block; margin-bottom:8px; line-height:1.4;">These bonuses persist permanently and are NOT reset upon Prestige Ascension.</span>
 
                                                                                         <!-- Bag Space Upgrade -->
-                                                                                        <div style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
-                                                                                            <div>
-                                                                                                <strong style="color:#3498db; font-size:11px;">Dimensional Satchel</strong>
-                                                                                                <div style="font-size:9px; color:#aaa;">+10 permanent equipment and artifact sack slots</div>
-                                                                                                <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlBag} (Current: +${lvlBag * 10} slots)</span>
-                                                                                            </div>
-                                                                                            <button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:4px 8px;" ${canAffordBag ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('bag')">
-                                                                                                Cost: ${costBag}
-                                                                                            </button>
-                                                                                        </div>
+                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; cursor:help;"
+                                                                                                                                                                                     onmouseenter="window.showMissionShopUpgradeTooltip(event, 'bag')"
+                                                                                                                                                                                     ontouchstart="window.showMissionShopUpgradeTooltip(event, 'bag')"
+                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
+                                                                                                                                                                                    <div>
+                                                                                                                                                                                        <strong style="color:#3498db; font-size:11px;">Dimensional Satchel</strong>
+                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">+10 permanent equipment and artifact slots</div>
+                                                                                                                                                                                        <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlBag} (Current: +${lvlBag * 10} slots)</span>
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                    <button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:4px 8px;" ${canAffordBag ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('bag')">
+                                                                                                                                                                                        Cost: ${costBag}
+                                                                                                                                                                                    </button>
+                                                                                                                                                                                </div>
 
-                                                                                        <!-- Gold % Upgrade -->
-                                                                                        <div style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
-                                                                                            <div>
-                                                                                                <strong style="color:#f1c40f; font-size:11px;">Midas Training</strong>
-                                                                                                <div style="font-size:9px; color:#aaa;">+5% permanent Gold Multiplier</div>
-                                                                                                <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlGold} (Current: +${lvlGold * 5}%)</span>
-                                                                                            </div>
-                                                                                            <button class="btn-action" style="background:#f1c40f; color:#000; font-size:10px; padding:4px 8px;" ${canAffordGold ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('gold')">
-                                                                                                Cost: ${costGold}
-                                                                                            </button>
-                                                                                        </div>
+                                                                                                                                                                                <!-- Gold % Upgrade -->
+                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; cursor:help;"
+                                                                                                                                                                                     onmouseenter="window.showMissionShopUpgradeTooltip(event, 'gold')"
+                                                                                                                                                                                     ontouchstart="window.showMissionShopUpgradeTooltip(event, 'gold')"
+                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
+                                                                                                                                                                                    <div>
+                                                                                                                                                                                        <strong style="color:#f1c40f; font-size:11px;">Midas Training</strong>
+                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">+5% permanent Gold Multiplier</div>
+                                                                                                                                                                                        <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlGold} (Current: +${lvlGold * 5}%)</span>
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                    <button class="btn-action" style="background:#f1c40f; color:#000; font-size:10px; padding:4px 8px;" ${canAffordGold ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('gold')">
+                                                                                                                                                                                        Cost: ${costGold}
+                                                                                                                                                                                    </button>
+                                                                                                                                                                                </div>
 
-                                                    <!-- Attack % Upgrade -->
-                                                    <div style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
-                                                        <div>
-                                                            <strong style="color:#e74c3c; font-size:11px;">Gladiator Mastery</strong>
-                                                            <div style="font-size:9px; color:#aaa;">+2% permanent Attack power</div>
-                                                            <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlAtk} (Current: +${lvlAtk * 2}%)</span>
-                                                        </div>
-                                                        <button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:4px 8px;" ${canAffordAtk ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('atk')">
-                                                            Cost: ${costAtk}
-                                                        </button>
-                                                    </div>
+                                                                                                                                            <!-- Attack % Upgrade -->
+                                                                                                                                            <div class="shop-row" style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; cursor:help;"
+                                                                                                                                                 onmouseenter="window.showMissionShopUpgradeTooltip(event, 'atk')"
+                                                                                                                                                 ontouchstart="window.showMissionShopUpgradeTooltip(event, 'atk')"
+                                                                                                                                                 onmouseleave="window.hideTooltip()">
+                                                                                                                                                <div>
+                                                                                                                                                    <strong style="color:#e74c3c; font-size:11px;">Gladiator Mastery</strong>
+                                                                                                                                                    <div style="font-size:9px; color:#aaa;">+2% permanent Attack power</div>
+                                                                                                                                                    <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlAtk} (Current: +${lvlAtk * 2}%)</span>
+                                                                                                                                                </div>
+                                                                                                                                                <button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:4px 8px;" ${canAffordAtk ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('atk')">
+                                                                                                                                                    Cost: ${costAtk}
+                                                                                                                                                </button>
+                                                                                                                                            </div>
 
-                                                    <!-- HP % Upgrade -->
-                                                    <div style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
-                                                        <div>
-                                                            <strong style="color:#3498db; font-size:11px;">Iron Constitution</strong>
-                                                            <div style="font-size:9px; color:#aaa;">+3% permanent Max HP</div>
-                                                            <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlHp} (Current: +${lvlHp * 3}%)</span>
-                                                        </div>
-                                                        <button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:4px 8px;" ${canAffordHp ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('hp')">
-                                                            Cost: ${costHp}
-                                                        </button>
-                                                    </div>
-                                                </div>
+                                                                                                                                            <!-- HP % Upgrade -->
+                                                                                                                                            <div class="shop-row" style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; cursor:help;"
+                                                                                                                                                 onmouseenter="window.showMissionShopUpgradeTooltip(event, 'hp')"
+                                                                                                                                                 ontouchstart="window.showMissionShopUpgradeTooltip(event, 'hp')"
+                                                                                                                                                 onmouseleave="window.hideTooltip()">
+                                                                                                                                                <div>
+                                                                                                                                                    <strong style="color:#3498db; font-size:11px;">Iron Constitution</strong>
+                                                                                                                                                    <div style="font-size:9px; color:#aaa;">+3% permanent Max HP</div>
+                                                                                                                                                    <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlHp} (Current: +${lvlHp * 3}%)</span>
+                                                                                                                                                </div>
+                                                                                                                                                <button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:4px 8px;" ${canAffordHp ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('hp')">
+                                                                                                                                                    Cost: ${costHp}
+                                                                                                                                                </button>
+                                                                                                                                            </div>
+                                                                                                                                        </div>
 
-                                                <div style="background:#111; border:1px solid #3498db; border-radius:6px; padding:10px;">
-                                                                                                    <strong style="color:#3498db; font-size:12px; display:block; margin-bottom:8px;">💎 CONSUMABLES & REAGENTS</strong>
+                                                                                                                                        <div style="background:#111; border:1px solid #3498db; border-radius:6px; padding:10px;">
+                                                                                                                                                                                            <strong style="color:#3498db; font-size:12px; display:block; margin-bottom:8px;">💎 CONSUMABLES & REAGENTS</strong>
 
-                                                                                                    <!-- Eridium Shard -->
-                                                                                                    <div style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                                                                                                        <div>
-                                                                                                            <strong style="color:#8e44ad; font-size:10.5px;">🔮 Eridium Shard</strong>
-                                                                                                            <div style="font-size:9px; color:#aaa;">Awaken equipment star ratings (rarities)</div>
-                                                                                                        </div>
-                                                                                                        <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Eridium Shard', 4)">Buy (4 MP)</button>
-                                                                                                    </div>
+                                                                                                                                                                                            <!-- Eridium Shard -->
+                                                                                                                                                                                            <div class="shop-row" style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
+                                                                                                                                                                                                 onmouseenter="window.showMissionShopItemTooltip(event, 'Eridium Shard')"
+                                                                                                                                                                                                 ontouchstart="window.showMissionShopItemTooltip(event, 'Eridium Shard')"
+                                                                                                                                                                                                 onmouseleave="window.hideTooltip()">
+                                                                                                                                                                                                <div>
+                                                                                                                                                                                                    <strong style="color:#8e44ad; font-size:10.5px;">🔮 Eridium Shard</strong>
+                                                                                                                                                                                                    <div style="font-size:9px; color:#aaa;">Awaken equipment star ratings (rarities)</div>
+                                                                                                                                                                                                </div>
+                                                                                                                                                                                                <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Eridium Shard', 4)">Buy (4 MP)</button>
+                                                                                                                                                                                            </div>
 
-                                                                                                    <!-- Ancient Core -->
-                                                                                                    <div style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                                                                                                        <div>
-                                                                                                            <strong style="color:#e74c3c; font-size:10.5px;">🔴 Ancient Core</strong>
-                                                                                                            <div style="font-size:9px; color:#aaa;">Activate the Altar of Rifts</div>
-                                                                                                        </div>
-                                                                                                        <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 3 ? "" : "disabled"} onclick="window.buyMissionItem('Ancient Core', 2)">Buy (2 MP)</button>
-                                                                                                    </div>
+                                                                                                                                                                                            <!-- Ancient Core -->
+                                                                                                                                                                                            <div class="shop-row" style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
+                                                                                                                                                                                                 onmouseenter="window.showMissionShopItemTooltip(event, 'Ancient Core')"
+                                                                                                                                                                                                 ontouchstart="window.showMissionShopItemTooltip(event, 'Ancient Core')"
+                                                                                                                                                                                                 onmouseleave="window.hideTooltip()">
+                                                                                                                                                                                                <div>
+                                                                                                                                                                                                    <strong style="color:#e74c3c; font-size:10.5px;">🔴 Ancient Core</strong>
+                                                                                                                                                                                                    <div style="font-size:9px; color:#aaa;">Activate the Altar of Rifts</div>
+                                                                                                                                                                                                </div>
+                                                                                                                                                                                                <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 2 ? "" : "disabled"} onclick="window.buyMissionItem('Ancient Core', 2)">Buy (2 MP)</button>
+                                                                                                                                                                                            </div>
 
-                                                                                                    <!-- Overlord's Sigil -->
-                                                                                                    <div style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                                                                                                        <div>
-                                                                                                            <strong style="color:#1abc9c; font-size:10.5px;">🔱 Overlord's Sigil</strong>
-                                                                                                            <div style="font-size:9px; color:#aaa;">Material required for unique artifact tempering</div>
-                                                                                                        </div>
-                                                                                                        <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 6 ? "" : "disabled"} onclick="window.buyMissionItem('Overlord\\'s Sigil', 6)">Buy (6 MP)</button>
-                                                                                                    </div>
+                                                                                                                                                                                            <!-- Overlord's Sigil -->
+                                                                                                                                                                                                                                                                                            <div class="shop-row" style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
+                                                                                                                                                                                                                                                                                                 onmouseenter="window.showMissionShopItemTooltip(event, 'Overlords Sigil')"
+                                                                                                                                                                                                                                                                                                 ontouchstart="window.showMissionShopItemTooltip(event, 'Overlords Sigil')"
+                                                                                                                                                                                                                                                                                                 onmouseleave="window.hideTooltip()">
+                                                                                                                                                                                                                                                                                                <div>
+                                                                                                                                                                                                                                                                                                    <strong style="color:#1abc9c; font-size:10.5px;">🔱 Overlord's Sigil</strong>
+                                                                                                                                                                                                                                                                                                    <div style="font-size:9px; color:#aaa;">Material required for unique artifact tempering</div>
+                                                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                                                                <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 6 ? "" : "disabled"} onclick="window.buyMissionItem('Overlords Sigil', 6)">Buy (6 MP)</button>
+                                                                                                                                                                                                                                                                                            </div>
 
-                                                                                                    <!-- Gacha Key -->
-                                                                                                                                        <div style="background:#07030b; border:1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                                                                                            <div>
-                                                                                                <strong style="color:#f1c40f; font-size:10.5px;">🔑 Gacha Key</strong>
-                                                                                                <div style="font-size:9px; color:#aaa;">Roll standard vending crate</div>
-                                                                                            </div>
-                                                                                            <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 2 ? "" : "disabled"} onclick="window.buyMissionItem('Gacha Key', 4)">Buy (4 MP)</button>
+                                                                                                                                                                                            <!-- Gacha Key -->
+                                                                                                                                                                                            <div class="shop-row" style="background:#07030b; border:1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
+                                                                                                                                                                                                 onmouseenter="window.showMissionShopItemTooltip(event, 'Gacha Key')"
+                                                                                                                                                                                                 ontouchstart="window.showMissionShopItemTooltip(event, 'Gacha Key')"
+                                                                                                                                                                                                 onmouseleave="window.hideTooltip()">
+                                                                                                                                                                                    <div>
+                                                                                                                                                                                        <strong style="color:#f1c40f; font-size:10.5px;">🔑 Gacha Key</strong>
+                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Roll standard vending crate</div>
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Gacha Key', 4)">Buy (4 MP)</button>
+                                                                                                                                                                                </div>
 
-                                                                                        </div>
+                                                                                                                                                                                <!-- Catalyst Core -->
+                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
+                                                                                                                                                                                     onmouseenter="window.showMissionShopItemTooltip(event, 'Catalyst Core')"
+                                                                                                                                                                                     ontouchstart="window.showMissionShopItemTooltip(event, 'Catalyst Core')"
+                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
+                                                                                                                                                                                    <div>
+                                                                                                                                                                                        <strong style="color:#2ecc71; font-size:10.5px;">🔋 Catalyst Core</strong>
+                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Lock & re-roll item properties</div>
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 3 ? "" : "disabled"} onclick="window.buyMissionItem('Catalyst Core', 3)">Buy (3 MP)</button>
+                                                                                                                                                                                </div>
 
-                                                                                        <!-- Catalyst Core -->
-                                                                                        <div style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                                                                                            <div>
-                                                                                                <strong style="color:#2ecc71; font-size:10.5px;">🔋 Catalyst Core</strong>
-                                                                                                <div style="font-size:9px; color:#aaa;">Lock & re-roll item properties</div>
-                                                                                            </div>
-                                                                                            <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 3 ? "" : "disabled"} onclick="window.buyMissionItem('Catalyst Core', 3)">Buy (3 MP)</button>
-                                                                                        </div>
+                                                                                                                                                                                <!-- Astral Essence -->
+                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
+                                                                                                                                                                                     onmouseenter="window.showMissionShopItemTooltip(event, 'Astral Essence')"
+                                                                                                                                                                                     ontouchstart="window.showMissionShopItemTooltip(event, 'Astral Essence')"
+                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
+                                                                                                                                                                                    <div>
+                                                                                                                                                                                        <strong style="color:#9b59b6; font-size:10.5px;">🌌 Astral Essence</strong>
+                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Infuse powerful gear enchantments</div>
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Astral Essence', 4)">Buy (4 MP)</button>
+                                                                                                                                                                                </div>
 
-                                                                                        <!-- Astral Essence -->
-                                                                                        <div style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                                                                                            <div>
-                                                                                                <strong style="color:#9b59b6; font-size:10.5px;">🌌 Astral Essence</strong>
-                                                                                                <div style="font-size:9px; color:#aaa;">Infuse powerful gear enchantments</div>
-                                                                                            </div>
-                                                                                            <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Astral Essence', 4)">Buy (4 MP)</button>
-                                                                                        </div>
+                                                                                                                                                                                <!-- Double XP Elixir -->
+                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border:1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
+                                                                                                                                                                                     onmouseenter="window.showMissionShopItemTooltip(event, 'Double XP Elixir')"
+                                                                                                                                                                                     ontouchstart="window.showMissionShopItemTooltip(event, 'Double XP Elixir')"
+                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
+                                                                                                                                                                                    <div>
+                                                                                                                                                                                        <strong style="color:#a855f7; font-size:10.5px;">🧪 Double XP Elixir</strong>
+                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Doubles monster EXP gains (+100% EXP)</div>
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 3 ? "" : "disabled"} onclick="window.buyMissionItem('Double XP Elixir', 3)">Buy (3 MP)</button>
+                                                                                                                                                                                </div>
 
-                                                                                        <!-- Double XP Potion -->
-                                                                                        <div style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                                                                                            <div>
-                                                                                                <strong style="color:#a855f7; font-size:10.5px;">🧪 Double XP Elixir</strong>
-                                                                                                <div style="font-size:9px; color:#aaa;">Doubles monster EXP gains (+100% EXP)</div>
-                                                                                            </div>
-                                                                                            <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 3 ? "" : "disabled"} onclick="window.buyMissionItem('Double XP Potion', 3)">Buy (3 MP)</button>
-                                                                                        </div>
+                                                                                                                                                                                <!-- Double Drop Elixir -->
+                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border:1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
+                                                                                                                                                                                     onmouseenter="window.showMissionShopItemTooltip(event, 'Double Drop Elixir')"
+                                                                                                                                                                                     ontouchstart="window.showMissionShopItemTooltip(event, 'Double Drop Elixir')"
+                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
+                                                                                                                                                                                    <div>
+                                                                                                                                                                                        <strong style="color:#22c55e; font-size:10.5px;">🧪 Double Drop Elixir</strong>
+                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Doubles global drop rate modifier (+100%)</div>
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Double Drop Elixir', 4)">Buy (4 MP)</button>
+                                                                                                                                                                                </div>
 
-                                                                                        <!-- Double Drop Potion -->
-                                                                                        <div style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                                                                                            <div>
-                                                                                                <strong style="color:#22c55e; font-size:10.5px;">🧪 Double Drop Elixir</strong>
-                                                                                                <div style="font-size:9px; color:#aaa;">Doubles global drop rate modifier (+100%)</div>
-                                                                                            </div>
-                                                                                            <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Double Drop Potion', 4)">Buy (4 MP)</button>
-                                                                                        </div>
-
-                                                                                        <!-- Drop Quality Potion -->
-                                                                                        <div style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
-                                                                                            <div>
-                                                                                                <strong style="color:#3b82f6; font-size:10.5px;">🧪 Drop Quality Elixir</strong>
-                                                                                                <div style="font-size:9px; color:#aaa;">Boosts drop quality checks (+50% Qly)</div>
-                                                                                            </div>
-                                                                                            <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 5 ? "" : "disabled"} onclick="window.buyMissionItem('Drop Quality Potion', 5)">Buy (5 MP)</button>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
+                                                                                                                                                                                <!-- Drop Quality Elixir -->
+                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border:1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; cursor:help;"
+                                                                                                                                                                                     onmouseenter="window.showMissionShopItemTooltip(event, 'Drop Quality Elixir')"
+                                                                                                                                                                                     ontouchstart="window.showMissionShopItemTooltip(event, 'Drop Quality Elixir')"
+                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
+                                                                                                                                                                                    <div>
+                                                                                                                                                                                        <strong style="color:#3b82f6; font-size:10.5px;">🧪 Drop Quality Elixir</strong>
+                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Boosts drop quality checks (+50% Qly)</div>
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 5 ? "" : "disabled"} onclick="window.buyMissionItem('Drop Quality Elixir', 5)">Buy (5 MP)</button>
+                                                                                                                                                                                </div>
+                                                                                                                                                                            </div>
+                                                                                                                                                                        </div>
                                                                             `;
   }
 
@@ -8179,14 +8510,14 @@ window.updateGachaRecentList = function () {
 // --- UNBOXING ANIMATIONS AND ENGAGING REWARD FLOWS ---
 
 window.openGuildRewardSack = function () {
-    let owned = window.inventory.USE["Guild Reward Sack"] || 0; // Keep this
-    if (owned <= 0) return;
+  let owned = window.inventory.USE["Guild Reward Sack"] || 0; // Keep this
+  if (owned <= 0) return;
 
-    let maxBag = window.getMaxBagSlots();
-    if (window.inventory.EQUIP.length >= maxBag) {
-        window.pushHeaderToast("❌ Equipment bag is full!", "#e74c3c");
-        return;
-    }
+  let maxBag = window.getMaxBagSlots();
+  if (window.inventory.EQUIP.length >= maxBag) {
+    window.pushHeaderToast("❌ Equipment bag is full!", "#e74c3c");
+    return;
+  }
 
   // Consume 1 Guild Reward Sack
   window.inventory.USE["Guild Reward Sack"]--;
@@ -8395,23 +8726,33 @@ window.openGuildWeeklySack = function () {
     (window.playerStats.missionTokens || 0) + 3;
 
   let receivedRewards = [
-      { name: "Ancient Core", qty: 1, color: "#e74c3c", type: "etc" },
-      { name: "Overlord's Sigil", qty: 1, color: "#1abc9c", type: "etc" },
-      { name: "Eridium Shard", qty: 1, color: "#8e44ad", type: "etc" },
-      { name: "Legendary Scrap", qty: 3, color: "#f1c40f", type: "etc" },
-    ];
+    { name: "Ancient Core", qty: 1, color: "#e74c3c", type: "etc" },
+    { name: "Overlord's Sigil", qty: 1, color: "#1abc9c", type: "etc" },
+    { name: "Eridium Shard", qty: 1, color: "#8e44ad", type: "etc" },
+    { name: "Legendary Scrap", qty: 3, color: "#f1c40f", type: "etc" },
+  ];
 
-    // 5% chance for a random Artifact
-    if (Math.random() < 0.05) {
-        let art = window.createItemObject("artifact", 3, window.playerStats.lifetimePeakStage || 1, 0);
-        window.inventory.ARTIFACT.push(art);
-        receivedRewards.push({ name: art.name, qty: 1, color: "#1abc9c", type: "etc" });
-    }
-
-    receivedRewards.forEach((r) => {
-      if (r.type === "use") window.addUseDrop(r.name, r.qty);
-      else window.addEtcDrop(r.name, r.qty);
+  // 5% chance for a random Artifact
+  if (Math.random() < 0.05) {
+    let art = window.createItemObject(
+      "artifact",
+      3,
+      window.playerStats.lifetimePeakStage || 1,
+      0,
+    );
+    window.inventory.ARTIFACT.push(art);
+    receivedRewards.push({
+      name: art.name,
+      qty: 1,
+      color: "#1abc9c",
+      type: "etc",
     });
+  }
+
+  receivedRewards.forEach((r) => {
+    if (r.type === "use") window.addUseDrop(r.name, r.qty);
+    else window.addEtcDrop(r.name, r.qty);
+  });
 
   // Credit rewards
   receivedRewards.forEach((r) => {

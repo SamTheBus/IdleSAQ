@@ -3,7 +3,7 @@
    initial global state, and system utility functions.
    ========================================================================= */
 
-window.GAME_VERSION = 0.92; // Pre-release Alpha 0.9.2 // Increment this whenever you push a new release
+window.GAME_VERSION = 0.93; // Pre-release Alpha 0.9.3 // Increment this whenever you push a new release
 
 // --- SYSTEM UTILS ---
 
@@ -158,15 +158,15 @@ window.etcDex = {
   "Eridium Shard":
     "A glowing, alien fragment used in the Forge to Tier Up an item's Star Rarity.",
   "Gacha Key":
-    "Guaranteed drop from Rift Guardians. Used at the Vending Machine for a gear roll.",
+    "Guaranteed drop from Guardians. Used at the Vending Machine for a gear roll.",
   "Ancient Core":
-    "Rare drop from Stage Bosses. Sacrifice 10 at the Ancient Altar to summon a Rift Guardian.",
+    "Rare drop from Stage Bosses. Sacrifice 1 at the Altar to summon a Guardian.",
   "Overlord's Sigil":
-    "Guaranteed drop from the Equipment Dungeon Overlord. Used to temper Unique Artifacts.",
+    "Guaranteed drop from the Equipment Dungeon Overlord. Used to temper Unique Artifacts at the Forge.",
   "Astral Essence":
     "A pulsing, cosmic residue extracted by salvaging Unique Artifacts. Exceedingly rare.",
   "Catalyst Core":
-    "Earned in the Crucible or bought from the Alchemy Shop. Spent at the Blacksmith post to re-roll and lock select weapon and armor attributes.",
+    "Earned in the Crucible or bought from the Alchemy Shop. Spent at the Forge to re-roll and lock select weapon and armor attributes.",
   "Monster Soul":
     "A dark, swirling essence harvested from fallen standard monsters. Spent for basic forging and trades.",
   "Luminous Soul":
@@ -247,16 +247,16 @@ window.useDex = {
     desc: "Increases movement speed and attack recovery (reduces delay frames) by +35% for 5 minutes (scales with INT).",
     color: "#d35400",
   },
-  "Double XP Potion": {
+  "Double XP Elixir": {
     desc: "Doubles all acquired experience gains (+100% EXP) for 5 minutes (scales with INT).",
     color: "#a855f7",
   },
-  "Double Drop Potion": {
+  "Double Drop Elixir": {
     desc: "Doubles current drop rate multiplier (+100%) for 5 minutes (scales with INT).",
     color: "#22c55e",
   },
-  "Drop Quality Potion": {
-    desc: "Boosts item drop quality checks by +25% for 5 minutes (scales with INT).",
+  "Drop Quality Elixir": {
+    desc: "Boosts item drop quality checks by +50% for 5 minutes (scales with INT).",
     color: "#3b82f6",
   },
 };
@@ -2821,13 +2821,13 @@ window.AchievementsData = [
     stats: { parry: 0.02, block: 0.02, defPct: 0.05 },
   },
   {
-      id: "sing_overkill",
-      name: "Overkill",
-      icon: "💥",
-      desc: "Deal a critical hit that exceeds a route monster's max HP by 1,000,000%+",
-      isSingleTier: true,
-      stats: { critDamage: 0.15, atkPct: 0.05 },
-    },
+    id: "sing_overkill",
+    name: "Overkill",
+    icon: "💥",
+    desc: "Deal a critical hit that exceeds a route monster's max HP by 1,000,000%+",
+    isSingleTier: true,
+    stats: { critDamage: 0.15, atkPct: 0.05 },
+  },
   {
     id: "sing_speedrun",
     name: "Speedrunner's Delight",
@@ -3485,24 +3485,24 @@ window.resolvePlayerStats = function (useDraft = false) {
     itemAtkPct += 0.2;
 
   let setCounts = {};
-    const eligibleSetSlots = [
-      "weapon",
-      "subweapon",
-      "helmet",
-      "chest",
-      "leggings",
-      "overall",
-      "boots",
-    ];
-    eligibleSetSlots.forEach((slot) => {
-      let item = window.equippedSlots[slot];
-      if (item) {
-        let setName = window.getItemSetName(item);
-        if (setName)
-          setCounts[setName] =
-            (setCounts[setName] || 0) + (slot === "overall" ? 2 : 1);
-      }
-    });
+  const eligibleSetSlots = [
+    "weapon",
+    "subweapon",
+    "helmet",
+    "chest",
+    "leggings",
+    "overall",
+    "boots",
+  ];
+  eligibleSetSlots.forEach((slot) => {
+    let item = window.equippedSlots[slot];
+    if (item) {
+      let setName = window.getItemSetName(item);
+      if (setName)
+        setCounts[setName] =
+          (setCounts[setName] || 0) + (slot === "overall" ? 2 : 1);
+    }
+  });
 
   let setCtx = {
     atk: 0,
@@ -3759,9 +3759,14 @@ window.resolvePlayerStats = function (useDraft = false) {
   let prestigeGoldBonus =
     (window.playerStats.prestigeUpgrades?.gold || 0) * 0.25;
   p.gold += prestigeGoldBonus;
+
   let prestigeDropBonus =
     (window.playerStats.prestigeUpgrades?.drop || 0) * 0.05;
   p.drop += prestigeDropBonus;
+
+  let prestigeExpBonus = (window.playerStats.prestigeUpgrades?.exp || 0) * 0.1;
+  p.xpRate += prestigeExpBonus;
+
   let prestigeFairyBonus =
     (window.playerStats.prestigeUpgrades?.fairy || 0) * 0.05;
   p.fairySpawn += prestigeFairyBonus;
@@ -3833,7 +3838,6 @@ window.resolvePlayerStats = function (useDraft = false) {
     1.12,
     window.playerStats.prestigeUpgrades?.atk || 0,
   );
-  p.atk = Math.floor(p.atk * prestigeAtkMult);
   let prestigeHpMult = Math.pow(
     1.1,
     window.playerStats.prestigeUpgrades?.fort || 0,
@@ -3846,9 +3850,10 @@ window.resolvePlayerStats = function (useDraft = false) {
   // Apply Mission Shop Attack and Health multipliers
   let missionAtkMult =
     1.0 + (window.playerStats.missionUpgrades?.atk || 0) * 0.02;
-  p.atk = Math.floor(p.atk * missionAtkMult);
   let missionHpMult =
     1.0 + (window.playerStats.missionUpgrades?.hp || 0) * 0.03;
+
+  p.atk = Math.floor(p.atk * prestigeAtkMult * missionAtkMult);
   p.maxHp = Math.floor(p.maxHp * prestigeHpMult * missionHpMult);
   p.def = Math.floor(p.def * prestigeDefMult);
 
@@ -4033,6 +4038,7 @@ window.playerStats = {
   dailyRewardClaimed: false,
   weeklyRewardClaimed: false,
   unviewedAchievements: [],
+  selectedPrestigeStage: 80, // Default selected Hooktail challenge tier level
 };
 
 // --- PROCEDURAL MISSION & QUEST SYSTEM ---

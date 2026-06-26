@@ -256,28 +256,28 @@ window.spawnDamageEffect = function (amount, type, isCrit) {
     window.mob.type === "chronos_arbitrator" ||
     window.mob.type === "nexus_overseer";
   if (isBoss && amount >= window.mob.maxHp * 0.6) {
-      const funnyPhrases = [
-        "OUCH!!",
-        "OW!!!",
-        "OWWY!!",
-        "OOF",
-        "MY SPINE!!",
-        "NOT THE FACE!!",
-        "STOP IT!!",
-        "BRUH!!!",
-        "REALLY?!",
-        "HELP!!",
-        "BOB SAGET!!",
-        "WTF?!",
-        "RUDE!!",
-        "EMOTIONAL DAMAGE",
-        "MY LEG!",
-        "STOP HITTING ME"
-      ];
-      window.mob.funnyText =
-        funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)];
-      window.mob.funnyTextTimer = 60;
-    }
+    const funnyPhrases = [
+      "OUCH!!",
+      "OW!!!",
+      "OWWY!!",
+      "OOF",
+      "MY SPINE!!",
+      "NOT THE FACE!!",
+      "STOP IT!!",
+      "BRUH!!!",
+      "REALLY?!",
+      "HELP!!",
+      "BOB SAGET!!",
+      "WTF?!",
+      "RUDE!!",
+      "EMOTIONAL DAMAGE",
+      "MY LEG!",
+      "STOP HITTING ME",
+    ];
+    window.mob.funnyText =
+      funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)];
+    window.mob.funnyTextTimer = 60;
+  }
 
   let hitColor = "#ecf0f1";
   let hitText = window.formatNumber(amount);
@@ -946,7 +946,7 @@ window.drawSingleMob = function (c, m) {
         c.lineTo(sx + 3, sy);
         c.lineTo(sx, sy + 4);
         c.lineTo(sx - 3, sy);
-        ctx.closePath();
+        c.closePath();
         c.fill();
         c.stroke();
       }
@@ -6447,21 +6447,20 @@ window.draw = function () {
     ctx.fill();
 
     if (window.mob.funnyTextTimer > 0 && window.mob.funnyText) {
-          ctx.save();
-          ctx.translate(barX + barW / 2, barY + barH / 2);
-          ctx.rotate(-0.06); // Slight slant/tilt for action-comic aesthetic
-          ctx.font = "900 12px 'Impact', 'Arial Black', sans-serif";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = 3.5;
-          ctx.lineJoin = "miter";
-          ctx.miterLimit = 2;
-          ctx.strokeText(window.mob.funnyText.toUpperCase(), 0, 0);
-          ctx.fillStyle = "#ffd700"; // Iconic Borderlands high-contrast gold/yellow
-          ctx.fillText(window.mob.funnyText.toUpperCase(), 0, 0);
-          ctx.restore();
-        }
+      ctx.save();
+      ctx.translate(barX + barW / 2, barY + barH / 2);
+      // Removed rotation to match straight retro arcade aesthetic
+      ctx.font = "900 13px 'Arial Black', 'Impact', sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 3.5;
+      ctx.lineJoin = "round";
+      ctx.strokeText(window.mob.funnyText.toUpperCase(), 0, 0);
+      ctx.fillStyle = "#ffffff"; // Solid white fill to match the reference style
+      ctx.fillText(window.mob.funnyText.toUpperCase(), 0, 0);
+      ctx.restore();
+    }
 
     ctx.font = "bold 11px sans-serif";
     ctx.textAlign = "center";

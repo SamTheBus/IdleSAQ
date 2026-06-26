@@ -670,7 +670,7 @@ window.createItemObject = function (
       : chosenType.toUpperCase();
   }
 
-  let prestigeMult = Math.pow(1.08, window.playerStats.prestigeCount || 0);
+  let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
   // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
   let expScale = Math.pow(1.58, stageScale);
   let hpDefExpScale = Math.pow(1.56, stageScale);
@@ -726,7 +726,7 @@ window.createItemObject = function (
       if (filterPool.length === 0) filterPool = window.ARTIFACT_POOL;
     }
     let chosenArt = filterPool[Math.floor(Math.random() * filterPool.length)];
-    item.name = `⭐ UNIQUE ${chosenArt.name} (Lv. ${stageScale})`;
+    item.name = `${chosenArt.name} (Lv. ${stageScale})`;
     item.trait = chosenArt.trait;
     item.desc = chosenArt.desc;
     item.breakdown = chosenArt.breakdown;
@@ -1059,8 +1059,8 @@ window.getStatBaseRange = function (item, statKey) {
   let stageLevel = item.stageLevel || 1;
   let isArt = item.type === "artifact";
   let rarityMult = isArt ? 1.45 : 1 + (item.statsRolled || 0) * 0.15;
-  let expScale = Math.pow(stageLevel, 2.4);
-  let hpDefExpScale = Math.pow(stageLevel, 2.2);
+  let expScale = Math.pow(1.58, stageLevel);
+  let hpDefExpScale = Math.pow(1.56, stageLevel);
 
   let min = 0;
   let max = 0;
@@ -1130,7 +1130,7 @@ window.getStatBaseRange = function (item, statKey) {
 
   const unscaledStats = ["activeAttackSpeed", "idleAttackSpeed"];
   if (!unscaledStats.includes(statKey)) {
-    let prestigeMult = Math.pow(1.08, window.playerStats.prestigeCount || 0);
+    let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
     min *= prestigeMult;
     max *= prestigeMult;
   }
@@ -1343,7 +1343,7 @@ window.recalculateItemStats = function (item) {
   let expScale = Math.pow(1.58, item.stageLevel || 1);
   let hpDefExpScale = Math.pow(1.56, item.stageLevel || 1);
   let prestigeCount = window.playerStats.prestigeCount || 0;
-  let prestigeMult = Math.pow(1.08, prestigeCount);
+  let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
 
   // Dynamic base scaling transitions for standard slot configurations
   if (item.type !== "artifact" && item.statsRolled !== "UNIQUE") {
@@ -1412,27 +1412,17 @@ window.recalculateItemStats = function (item) {
   } else {
     // Recalculate unique item specific base structures
     if (item.isUniqueSingularity || item.isUniqueMaelstrom) {
-      item.baseAtk = Math.ceil(3.5 * expScale * Math.pow(1.08, prestigeCount));
+      item.baseAtk = Math.ceil(3.5 * expScale * prestigeMult);
     } else if (item.isUniqueAegis) {
-      item.baseDef = Math.ceil(
-        10 * hpDefExpScale * Math.pow(1.08, prestigeCount),
-      );
+      item.baseDef = Math.ceil(10 * hpDefExpScale * prestigeMult);
       item.baseBlock = 0.05 * (item.stageLevel || 1);
     } else if (item.isUniqueWatch || item.isUniqueChronicle) {
-      item.baseInt = Math.ceil(
-        2.5 * (item.stageLevel || 1) * Math.pow(1.08, prestigeCount),
-      );
+      item.baseInt = Math.ceil(2.5 * (item.stageLevel || 1) * prestigeMult);
     } else if (item.isUniqueWarpCore) {
-      item.baseMoveSpeed = Math.ceil(
-        3 * (item.stageLevel || 1) * Math.pow(1.08, prestigeCount),
-      );
+      item.baseMoveSpeed = Math.ceil(3 * (item.stageLevel || 1) * prestigeMult);
     } else if (item.isUniqueTempest) {
-      item.baseMaxHp = Math.ceil(
-        12 * hpDefExpScale * Math.pow(1.08, prestigeCount),
-      );
-      item.baseDef = Math.ceil(
-        4 * hpDefExpScale * Math.pow(1.08, prestigeCount),
-      );
+      item.baseMaxHp = Math.ceil(12 * hpDefExpScale * prestigeMult);
+      item.baseDef = Math.ceil(4 * hpDefExpScale * prestigeMult);
     }
   }
 
@@ -3030,13 +3020,14 @@ window.rollGachaCrateItem = function () {
     delete window.inventory.ETC["Gacha Key"];
 
   // --- PITY COUNTER ENGINE ---
-    window.playerStats.vendingPity = (window.playerStats.vendingPity || 0) + 1;
-    let isPityTriggered = false;
+  window.playerStats.vendingPity = (window.playerStats.vendingPity || 0) + 1;
+  let isPityTriggered = false;
 
-    if (window.playerStats.vendingPity >= 50) { // Increased from 20 to 50
-      isPityTriggered = true;
-      window.playerStats.vendingPity = 0; // Reset pity
-    }
+  if (window.playerStats.vendingPity >= 50) {
+    // Increased from 20 to 50
+    isPityTriggered = true;
+    window.playerStats.vendingPity = 0; // Reset pity
+  }
 
   let statLinesCount = 1;
   if (isPityTriggered) {

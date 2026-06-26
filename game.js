@@ -876,6 +876,12 @@ window.loadGame = function () {
       if (window.playerStats.activeRiftLevel === undefined)
         window.playerStats.activeRiftLevel = 1;
 
+      if (window.playerStats.selectedPrestigeStage === undefined)
+        window.playerStats.selectedPrestigeStage = Math.max(
+          80,
+          window.playerStats.maxStage || 80,
+        );
+
       window.playerStats.isPrestigeBossMode = false;
       window.playerStats.prestigeApproachTimer = 0;
 
@@ -1513,32 +1519,6 @@ function update() {
       });
     }
   }
-
-  // Spawn floating swamp spores in the Forest environment (Tier 0)
-  if (
-    window.getStageTier() === 0 &&
-    !window.playerStats.isDungeonMode &&
-    !window.playerStats.isCrucibleMode &&
-    !window.playerStats.isPrestigeBossMode &&
-    !window.isGamePaused
-  ) {
-    if (Math.random() < 0.08 && window.particles.length < 250) {
-      window.particles.push({
-        x: Math.random() * canvas.width,
-        y: 220 + Math.random() * 80,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: -window.randFloat(0.25, 0.65),
-        radius: window.randFloat(0.8, 1.8),
-        color:
-          Math.random() > 0.5
-            ? "rgba(46, 204, 113, 0.55)"
-            : "rgba(0, 255, 136, 0.4)",
-        alpha: 1.0,
-        gravity: -0.01, // Float upward slowly
-        life: window.randInt(60, 110),
-      });
-    }
-  }
   for (let i = window.snowflakes.length - 1; i >= 0; i--) {
     let sf = window.snowflakes[i];
     sf.y += sf.speed;
@@ -2027,13 +2007,14 @@ function update() {
       });
     }
     if (window.playerStats.prestigeApproachTimer === 0) {
-      let scaleVal = window.playerStats.prestigeCount || 0;
+      let activeStage = window.playerStats.selectedPrestigeStage || 80; // Scales to selector stage
+      let growthRate = 1.045 + (activeStage * 0.04) / (activeStage + 200);
+      let scale = Math.pow(growthRate, activeStage);
 
-      // Rebalanced Hooktail curves to make Ascension a formidable, high-stakes endgame check
-      // Perfectly tuned for Stage 80-100 first-wall, scaling progressively faster
-      let hp = 50000 * Math.pow(1.85, scaleVal);
-      let dmg = 500 * Math.pow(1.35, scaleVal);
-      let def = 80 + 60 * scaleVal;
+      // Hooktail scales dynamically based on the selected Stage level, creating a high-risk high-reward choice
+      let hp = 600 * scale;
+      let dmg = 6 * scale;
+      let def = 80 + (activeStage - 80) * 1.5;
 
       window.mob = {
         x: canvas.width - 230,
@@ -2052,7 +2033,7 @@ function update() {
         attackTimer: 75,
       };
       window.pushLog(
-        `<span style='color:#e74c3c; font-weight:bold;'>[ASCENSION] HOOKTAIL APPEARS! Slay her to Ascend!</span>`,
+        `<span style='color:#e74c3c; font-weight:bold;'>[ASCENSION] HOOKTAIL APPEARS! (Current Stage: ${activeStage} • Power Scale: ${scale.toFixed(1)}x) Slay her to Ascend!</span>`,
       );
     }
     window.logicClock++;
@@ -2476,16 +2457,16 @@ window.executeHitCalculations = function () {
 
     // Peak single-hit check
     window.playerStats.peakSingleHit = Math.max(
-          window.playerStats.peakSingleHit || 0,
-          finalDamage,
-        );
-        if (isCrit) {
-          window.playerStats.recentCritTime = Date.now();
-          // Overkill check (deals critical hit exceeding mob's maximum HP by 1,000,000%)
-          if (finalDamage >= window.mob.maxHp * 10000) {
-            window.playerStats.hasTriggeredOverkill = true;
-          }
-        }
+      window.playerStats.peakSingleHit || 0,
+      finalDamage,
+    );
+    if (isCrit) {
+      window.playerStats.recentCritTime = Date.now();
+      // Overkill check (deals critical hit exceeding mob's maximum HP by 1,000,000%)
+      if (finalDamage >= window.mob.maxHp * 10000) {
+        window.playerStats.hasTriggeredOverkill = true;
+      }
+    }
     if (typeof window.checkAchievements === "function") {
       window.checkAchievements();
     }
@@ -4046,6 +4027,30 @@ window.useItem = function (itemName) {
     window.pushHeaderToast("🔮 Prestige Points Reset Successfully!", "#e67e22");
     if (typeof window.renderPrestigeTab === "function")
       window.renderPrestigeTab();
+  } else if (itemName === "Double XP Elixir") {
+    window.playerStats.xpPotionTimer =
+      (window.playerStats.xpPotionTimer || 0) + finalDuration;
+    window.playerStats.xpPotionStrength = 1.0;
+    consumeUseItem(itemName);
+    window.pushLog(
+      `<span style='color:#a855f7; font-weight:bold;'>[USE] Consumed ${itemName}! EXP gain rates boosted by +${Math.floor(finalDuration / 60)}s.</span>`,
+    );
+  } else if (itemName === "Double Drop Elixir") {
+    window.playerStats.dropPotionTimer =
+      (window.playerStats.dropPotionTimer || 0) + finalDuration;
+    window.playerStats.dropPotionStrength = 1.0;
+    consumeUseItem(itemName);
+    window.pushLog(
+      `<span style='color:#2ecc71; font-weight:bold;'>[USE] Consumed ${itemName}! Drop rate boosted by +${Math.floor(finalDuration / 60)}s.</span>`,
+    );
+  } else if (itemName === "Drop Quality Elixir") {
+    window.playerStats.qlyPotionTimer =
+      (window.playerStats.qlyPotionTimer || 0) + finalDuration;
+    window.playerStats.qlyPotionStrength = 0.5;
+    consumeUseItem(itemName);
+    window.pushLog(
+      `<span style='color:#3b82f6; font-weight:bold;'>[USE] Consumed ${itemName}! Drop Quality boosted by +${Math.floor(finalDuration / 60)}s.</span>`,
+    );
   } else if (itemName.includes("Attack Elixir")) {
     if (
       window.playerStats.atkPotionTimer > 0 &&
@@ -4103,42 +4108,6 @@ window.useItem = function (itemName) {
     consumeUseItem(itemName);
     window.pushLog(
       `<span style='color:#f1c40f; font-weight:bold;'>[USE] Consumed ${itemName}! Speed boosted by +${Math.floor(finalDuration / 60)}s.</span>`,
-    );
-  } else if (itemName.includes("XP Elixir")) {
-    window.playerStats.xpPotionTimer =
-      (window.playerStats.xpPotionTimer || 0) + finalDuration;
-    window.playerStats.xpPotionStrength = itemName.includes("Supernal")
-      ? 1.0
-      : itemName.includes("Greater")
-        ? 0.5
-        : 0.25;
-    consumeUseItem(itemName);
-    window.pushLog(
-      `<span style='color:#9b59b6; font-weight:bold;'>[USE] Consumed ${itemName}! EXP gain rates boosted by +${Math.floor(finalDuration / 60)}s.</span>`,
-    );
-  } else if (itemName.includes("Drop Elixir")) {
-    window.playerStats.dropPotionTimer =
-      (window.playerStats.dropPotionTimer || 0) + finalDuration;
-    window.playerStats.dropPotionStrength = itemName.includes("Supernal")
-      ? 1.0
-      : itemName.includes("Greater")
-        ? 0.5
-        : 0.25;
-    consumeUseItem(itemName);
-    window.pushLog(
-      `<span style='color:#2ecc71; font-weight:bold;'>[USE] Consumed ${itemName}! Drop rate boosted by +${Math.floor(finalDuration / 60)}s.</span>`,
-    );
-  } else if (itemName.includes("Quality Elixir")) {
-    window.playerStats.qlyPotionTimer =
-      (window.playerStats.qlyPotionTimer || 0) + finalDuration;
-    window.playerStats.qlyPotionStrength = itemName.includes("Supernal")
-      ? 0.5
-      : itemName.includes("Greater")
-        ? 0.25
-        : 0.12;
-    consumeUseItem(itemName);
-    window.pushLog(
-      `<span style='color:#e84393; font-weight:bold;'>[USE] Consumed ${itemName}! Drop Quality boosted by +${Math.floor(finalDuration / 60)}s.</span>`,
     );
   }
 
