@@ -6715,6 +6715,44 @@ window.showRatesLockTooltip = function (e, lockType) {
   window.positionTooltip(e, tt);
 };
 
+window.showMissionTooltip = function (e, missionId, isWeekly) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  let tt = document.getElementById("game-tooltip");
+  if (!tt) return;
+
+  let missions = isWeekly
+    ? window.playerStats.weeklyMissions
+    : window.playerStats.dailyMissions;
+  if (!missions) return;
+  let m = missions.find((x) => x.id === missionId);
+  if (!m) return;
+
+  let pct = (m.current / m.target) * 100;
+  let color = isWeekly ? "#9b59b6" : "#2ecc71";
+  let typeLabel = isWeekly ? "Weekly Board" : "Daily Board";
+
+  let rewardText = `+${m.treatQty} ${m.treat}`;
+  if (m.potionAward) {
+    rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
+  }
+
+  let html = `
+    <div style="padding: 10px; width: 230px; box-sizing: border-box;">
+        <div class="tt-title" style="color:${color};">${typeLabel} Objective</div>
+        <div style="color:#fff; font-size:11.5px; font-weight:bold; margin-bottom:6px; white-space:normal; line-height:1.45;">${m.desc}</div>
+        <div style="margin-top:6px; border-top:1px dashed #444; padding-top:6px; font-family:monospace; font-size:10px; line-height:1.4;">
+            <div class="tt-stat-line" style="color:#aaa;">Progress: <strong style="color:#fff;">${m.current.toLocaleString()} / ${m.target.toLocaleString()} (${Math.min(100, pct).toFixed(1)}%)</strong></div>
+            <div class="tt-stat-line" style="color:#aaa;">Reward: <strong style="color:#f1c40f;">${rewardText}</strong> & <strong style="color:#2ecc71;">+1 MP</strong></div>
+        </div>
+    </div>
+  `;
+
+  tt.style.borderColor = color;
+  tt.innerHTML = html;
+  tt.style.display = "block";
+  window.positionTooltip(e, tt);
+};
+
 window.showRiftRewardBreakdownTooltip = function (e, lvl) {
   if (e && e.stopPropagation) e.stopPropagation();
   let tt = document.getElementById("game-tooltip");
@@ -7616,47 +7654,47 @@ window.renderMissionsWindow = function () {
     let weeklyMasterClaimed = window.playerStats.weeklyRewardClaimed;
 
     let getMissionRowHtml = (m, isWeekly) => {
-      let pct = (m.current / m.target) * 100;
-      let btnHtml = "";
-      let rerollBtnHtml = "";
+          let pct = (m.current / m.target) * 100;
+          let btnHtml = "";
+          let rerollBtnHtml = "";
 
-      if (m.claimed) {
-        btnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
-      } else if (m.completed) {
-        btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
-      } else {
-        btnHtml = `<span style="color:#888; font-size:10px; font-family:monospace;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
+          if (m.claimed) {
+            btnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
+          } else if (m.completed) {
+            btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
+          } else {
+            btnHtml = `<span style="color:#888; font-size:10px; font-family:monospace;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
 
-        // Dynamic single-mission Re-roll system
-        if (!isWeekly) {
-          let rerollsDone = window.playerStats.dailyRerollsDone || 0;
-          if (rerollsDone < 2) {
-            let costLabel = rerollsDone === 0 ? "🔄 Free" : "🔄 50 Souls";
-            rerollBtnHtml = `<button onclick="window.rerollDailyMission('${m.id}')" class="btn-action" style="padding:2px 5px; font-size:8.5px; margin-left:6px; background:#4b5563; font-family:monospace; line-height:1;" title="Re-roll Daily Mission (${rerollsDone === 0 ? "Free" : "Costs 50 Monster Souls"})">${costLabel}</button>`;
+            // Dynamic single-mission Re-roll system
+            if (!isWeekly) {
+              let rerollsDone = window.playerStats.dailyRerollsDone || 0;
+              if (rerollsDone < 2) {
+                let costLabel = rerollsDone === 0 ? "🔄 Free" : "🔄 50 Souls";
+                rerollBtnHtml = `<button onclick="window.rerollDailyMission('${m.id}')" class="btn-action" style="padding:2px 5px; font-size:8.5px; margin-left:6px; background:#4b5563; font-family:monospace; line-height:1;" title="Re-roll Daily Mission (${rerollsDone === 0 ? "Free" : "Costs 50 Monster Souls"})">${costLabel}</button>`;
+              }
+            }
           }
-        }
-      }
 
-      let rewardText = `+${m.treatQty} ${m.treat}`;
-      if (m.potionAward) {
-        rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
-      }
+          let rewardText = `+${m.treatQty} ${m.treat}`;
+          if (m.potionAward) {
+            rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
+          }
 
-      return `
-                                                                                        <div style="background:#111; border:1px solid #2d3748; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px;">
-                                                                                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                                                                                <strong style="font-size:11px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">${m.desc}</strong>
-                                                                                                <div style="display:flex; align-items:center;">${btnHtml}${rerollBtnHtml}</div>
+          return `
+                                                                                            <div style="background:#111; border:1px solid #2d3748; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px;">
+                                                                                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                                                                                    <strong style="font-size:11px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px; cursor:help;" onmouseenter="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" ontouchstart="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" onmouseleave="window.hideTooltip()">${m.desc}</strong>
+                                                                                                    <div style="display:flex; align-items:center;">${btnHtml}${rerollBtnHtml}</div>
+                                                                                                </div>
+                                                                                                <div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#aaa; margin-top:2px;">
+                                                                                                    <span>Reward: <span style="color:#f1c40f;">${rewardText}</span></span>
+                                                                                                </div>
+                                                                                                <div style="width:100%; height:4px; background:#222; border-radius:2px; overflow:hidden; border:1px solid #333; margin-top:2px;">
+                                                                                                    <div style="width:${pct}%; height:100%; background:${isWeekly ? "#9b59b6" : "#2ecc71"};"></div>
+                                                                                                </div>
                                                                                             </div>
-                                                                                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#aaa; margin-top:2px;">
-                                                                                                <span>Reward: <span style="color:#f1c40f;">${rewardText}</span></span>
-                                                                                            </div>
-                                                                                            <div style="width:100%; height:4px; background:#222; border-radius:2px; overflow:hidden; border:1px solid #333; margin-top:2px;">
-                                                                                                <div style="width:${pct}%; height:100%; background:${isWeekly ? "#9b59b6" : "#2ecc71"};"></div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    `;
-    };
+                                                                                        `;
+        };
 
     let dailyMasterBtnHtml = "";
     if (dailyMasterClaimed) {
