@@ -7,8 +7,18 @@ let canvas, ctx;
 
 // --- SYSTEM FUNCTIONS ---
 
-// Define your local computer's IP address where the Fastify server is running
-window.GAME_SERVER_URL = 'http://192.168.0.37:3000';
+// Automatically detect if the game is running locally (development) or natively (Capacitor)
+window.detectGameServer = function () {
+  const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const isCapacitor = window.location.protocol === 'capacitor:';
+
+  if (isLocalHost || isCapacitor) {
+    return 'http://192.168.0.37:3000';
+  }
+  return null; // Gracefully disables network saves on public browsers (like GitHub Pages)
+};
+
+window.GAME_SERVER_URL = window.detectGameServer();
 
 // Generate or retrieve a persistent unique guest ID for local testing
 window.getGameUserId = function () {
@@ -37,6 +47,10 @@ window.saveGame = function () {
   localStorage.setItem("idle_game_v11", serializedData);
 
   // 2. Perform a non-blocking asynchronous cloud save push to your Fastify server
+  if (!window.GAME_SERVER_URL) {
+    return; // Bypass network save silently on public web previews (like GitHub Pages)
+  }
+
   const userId = window.getGameUserId();
   fetch(`${window.GAME_SERVER_URL}/api/save`, {
     method: 'POST',
@@ -1056,6 +1070,10 @@ window.loadGameAndSyncCloud = function () {
     } catch (e) {
       console.error("Local save load failed", e);
     }
+  }
+
+  if (!window.GAME_SERVER_URL) {
+    return; // Bypass network fetch silently on public web previews (like GitHub Pages)
   }
 
   const userId = window.getGameUserId();
