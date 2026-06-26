@@ -7774,17 +7774,20 @@ window.renderMissionsWindow = function () {
     p.missionUpgrades = p.missionUpgrades || { gold: 0, atk: 0, hp: 0 };
 
     let lvlGold = p.missionUpgrades.gold || 0;
-        let costGold = 2; // Flat 2 MP
+            let costGold = 2;
+            let canAffordGold = tokenBalance >= costGold;
 
-        let lvlAtk = p.missionUpgrades.atk || 0;
-        let costAtk = 2; // Flat 2 MP
+            let lvlAtk = p.missionUpgrades.atk || 0;
+            let costAtk = 2;
+            let canAffordAtk = tokenBalance >= costAtk;
 
-        let lvlHp = p.missionUpgrades.hp || 0;
-        let costHp = 2; // Flat 2 MP
+            let lvlHp = p.missionUpgrades.hp || 0;
+            let costHp = 2;
+            let canAffordHp = tokenBalance >= costHp;
 
-        let lvlBag = p.missionUpgrades.bag || 0;
-        let costBag = 2; // Flat 2 MP
-    let canAffordBag = tokenBalance >= costBag;
+            let lvlBag = p.missionUpgrades.bag || 0;
+            let costBag = 2;
+            let canAffordBag = tokenBalance >= costBag;
 
     contentHtml = `
                                                                                 <div style="display:flex; flex-direction:column; gap:8px;">
