@@ -39,6 +39,7 @@ body {
     Roboto,
     sans-serif;
   overflow-x: clip; /* Replaced hidden with clip to allow position: sticky to function */
+  overflow-y: scroll !important; /* Locks scrollbar track on-screen to stabilize horizontal width */
   font-size: 13.5px; /* Upscaled global root size */
 }
 
@@ -155,14 +156,15 @@ canvas {
 
 /* --- TABS SYSTEM --- */
 .tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* Enforces 5 perfectly equal columns */
   gap: 6px;
   margin-bottom: 14px;
-  flex-wrap: wrap;
 }
 
 .tab-btn {
-  flex: 1;
+  flex: 1 1 0px; /* Distribute container width exactly equally from 0 base */
+  min-width: 0;   /* Override any minimum content sizing */
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
   color: #94a3b8;
   border: 1px solid #334155;
@@ -171,8 +173,7 @@ canvas {
   font-weight: bold;
   border-radius: 6px;
   font-size: 12px;
-  min-width: 15%;
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s ease-in-out;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   position: relative;
@@ -183,12 +184,11 @@ canvas {
 .tab-btn:hover {
   color: #f1f5f9;
   border-color: #475569;
-  transform: translateY(-1.5px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .tab-btn:active {
-  transform: translateY(0);
+  background: #1e293b;
 }
 
 .tab-btn.active {
@@ -253,7 +253,7 @@ canvas {
   font-size: 11.5px !important; /* Nested Trophy Bonuses */
 }
 
-@media (max-width: 600px) {
+@media (max-width: 580px) {
   .hero-tab-layout {
     grid-template-columns: 1fr;
   }
@@ -501,14 +501,15 @@ canvas {
 }
 
 .sub-tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Enforces 4 perfectly equal columns */
   gap: 6px;
   margin-bottom: 10px;
-  flex-wrap: wrap;
 }
 
 .sub-tab-btn {
-  flex: 1;
+  flex: 1 1 0px; /* Keep sub-tabs exactly uniform when bag counts change */
+  min-width: 0;   /* Prevent text content-scaling shifts */
   background: #090b0e;
   color: #94a3b8;
   border: 1px solid #1e293b;
@@ -518,7 +519,7 @@ canvas {
   cursor: pointer;
   font-weight: bold;
   text-align: center;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.15s ease-in-out;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   outline: none;
@@ -1052,7 +1053,7 @@ canvas {
 /* ==========================================================================
    14. VIEWPORT RESPONSIVENESS & RESPONSIVE BREAKPOINTS
    ========================================================================= */
-@media (max-width: 600px) {
+@media (max-width: 580px) {
   body {
     padding: 6px;
     font-size: 12px; /* Cascades cleanly to mobile */
@@ -1251,7 +1252,7 @@ canvas {
 }
 
 /* --- DASHBOARD MOBILE RESPONSIVENESS --- */
-@media (max-width: 600px) {
+@media (max-width: 580px) {
   #control-bar {
     grid-template-columns: 1fr !important;
     gap: 8px !important;

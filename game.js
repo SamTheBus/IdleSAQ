@@ -1138,7 +1138,7 @@ window.adjustCanvasDimensions = function () {
   if (!cvs) return;
   const isLandscapeMobile =
     window.innerHeight <= 550 && window.innerWidth > window.innerHeight;
-  const isMobile = window.innerWidth <= 600;
+  const isMobile = window.innerWidth <= 580; // Lowered breakpoint to prevent scrollbar layout toggling
 
   if (isLandscapeMobile) {
     cvs.width = 480;

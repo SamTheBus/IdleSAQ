@@ -2058,59 +2058,60 @@
     <div
             id="global-xp-header"
             style="
-          background: linear-gradient(180deg, #0e121a 0%, #06080d 100%);
-          border-bottom: 1.5px solid #1e293b;
-          padding: 10px 16px;
-        "
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, #0e121a 0%, #06081d 100%);
+      border-bottom: 1.5px solid #1e293b;
+      padding: 10px 16px;
+    "
+    >
+    <span
+            style="
+            font-weight: 800;
+            color: #f1f5f9;
+            font-size: 10.5px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+          "
+    >Hero Level
+          <span
+                  id="char-level"
+                  style="
+              color: #d946ef;
+              text-shadow: 0 0 6px rgba(217, 70, 239, 0.65);
+              font-weight: 950;
+            "
+          >1</span
+          ><span id="equipped-title"
+                 style="margin-left: 6px; font-weight: 950; text-transform: uppercase; text-shadow: 0 0 6px rgba(255, 0, 127, 0.65); display: inline-flex; align-items: center; vertical-align: middle;"></span></span
     >
         <span
-                style="
-                font-weight: 800;
-                color: #f1f5f9;
-                font-size: 10.5px;
-                letter-spacing: 0.5px;
-                text-transform: uppercase;
-              "
-        >Hero Level
-              <span
-                      id="char-level"
-                      style="
-                  color: #d946ef;
-                  text-shadow: 0 0 6px rgba(217, 70, 239, 0.65);
-                  font-weight: 950;
-                "
-              >1</span
-              ><span id="equipped-title" style="margin-left: 6px; font-weight: 950; text-transform: uppercase; text-shadow: 0 0 6px rgba(255, 0, 127, 0.65); display: inline-flex; align-items: center; vertical-align: middle;"></span></span
+                style="color: #94a3b8; font-weight: 600; font-size: 10px; font-family: monospace;"
+                id="char-xp-text"
+        >0 / 100 (0.0%)</span
         >
-            </div>
-            <div style="text-align: right; font-family: monospace">
-            <span
-                    style="color: #94a3b8; font-weight: 600; font-size: 10px"
-                    id="char-xp-text"
-            >0 / 100 (0.0%)</span
-            >
-            </div>
-        </div>
-        <div
-                class="xp-bar-container"
-                style="
+    </div>
+    <div
+            class="xp-bar-container"
+            style="
             background: #040609 !important;
             border: 1px solid #111827 !important;
             height: 7px !important;
             border-radius: 10px !important;
             margin-top: 4px;
+            margin-bottom: 14px !important;
           "
-        >
-            <div
-                    id="char-xp-fill"
-                    class="xp-bar-fill"
-                    style="
+    >
+        <div
+                id="char-xp-fill"
+                class="xp-bar-fill"
+                style="
               background: linear-gradient(90deg, #8b5cf6, #d946ef) !important;
               height: 100%;
               transition: width 0.35s ease;
             "
-            ></div>
-        </div>
+        ></div>
     </div>
 
     <!-- Tabulated Control Centers -->
