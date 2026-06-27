@@ -4056,18 +4056,19 @@ window.playerStats = {
   dailyRewardClaimed: false,
   weeklyRewardClaimed: false,
   unviewedAchievements: [],
-    selectedPrestigeStage: 80, // Default selected Hooktail challenge tier level
-    unlockedTitles: ["hoors_beta_boi"],
-    equippedTitle: "hoors_beta_boi",
+    selectedPrestigeStage: 80,
+    unlockedTitles: [],
+    equippedTitle: null,
   };
 
   // --- CLIENT-SIDE TITLE DATABASE ---
   window.TITLES_DATA = {
     "hoors_beta_boi": {
       name: "Hoor's Beta Boi",
-      desc: "A prestigious badge of honor for Hoor's silly lil testers.",
+      desc: "A prestigious badge of honor for Hoor's elite close-circle testers.",
       color: "#ff007f", // Hot Neon Pink
-      stats: { drop: 0.50, qly: 0.50 }
+      stats: { drop: 0.50, qly: 0.50 },
+      icon: `<svg width="14" height="14" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 3px; filter: drop-shadow(0 0 4px #ff007f);"><polygon points="5,0 11,0 11,6 8,4 5,6" fill="#ff007f" /><polygon points="6,0 10,0 10,6 8,4.5 6,6" fill="#d946ef" /><circle cx="8" cy="9" r="4.5" fill="#f1c40f" stroke="#000" stroke-width="0.8" /><polygon points="8,7 8.5,8.5 10,8.7 8.8,9.7 9.2,11 8,10.2 6.8,11 7.2,9.7 6,8.7 7.5,8.5" fill="#fff" /></svg>`
     }
   };
 

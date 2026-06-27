@@ -1062,18 +1062,19 @@ canvas {
     padding: 6px 8px !important;
   }
   #top-nav > div {
-    width: 100% !important;
-    justify-content: space-between !important;
-    display: flex !important;
-    gap: 4px !important;
-  }
-  .nav-btn {
-    padding: 4px 6px !important;
-    font-size: 10px !important;
-    gap: 2px !important;
-    flex: 1 !important;
-    justify-content: center !important;
-  }
+                  width: 100% !important;
+                  justify-content: space-between !important;
+                  display: flex !important;
+                  gap: 4px !important;
+                  flex-wrap: wrap !important;
+                }
+                .nav-btn {
+                  padding: 4px 6px !important;
+                  font-size: 10px !important;
+                  gap: 2px !important;
+                  flex: 1 1 calc(33.333% - 4px) !important;
+                  justify-content: center !important;
+                }
   .nav-btn svg {
     width: 11px !important;
     height: 11px !important;

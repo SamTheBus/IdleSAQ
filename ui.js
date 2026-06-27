@@ -418,11 +418,11 @@ window.getUseIconHtml = function (key) {
               <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
               <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
           </svg>`;
-  } else if (key === "Guild Reward Sack") {
-    bg = "rgba(241, 196, 15, 0.25)";
-    border = "#f1c40f";
-    svgContent = `
-          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
+  } else if (key === "Guild Reward Sack" || key === "Daily Reward Sack") {
+      bg = "rgba(241, 196, 15, 0.25)";
+      border = "#f1c40f";
+      svgContent = `
+            <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
               <defs>
                   <linearGradient id="grad_RewardSack" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stop-color="#f1c40f" />
@@ -1400,16 +1400,16 @@ window.updateUI = function () {
     setText("char-level", window.playerStats.level);
 
     let titleEl = document.getElementById("equipped-title");
-    if (titleEl) {
-      let activeTitle = window.playerStats.equippedTitle;
-      if (activeTitle && window.TITLES_DATA[activeTitle]) {
-        let tData = window.TITLES_DATA[activeTitle];
-        titleEl.innerText = ` [${tData.name}]`;
-        titleEl.style.color = tData.color || "#ff007f";
-      } else {
-        titleEl.innerText = "";
+      if (titleEl) {
+        let activeTitle = window.playerStats.equippedTitle;
+        if (activeTitle && window.TITLES_DATA[activeTitle]) {
+          let tData = window.TITLES_DATA[activeTitle];
+          let iconHtml = tData.icon || "";
+          titleEl.innerHTML = ` ${iconHtml}<span style="color: ${tData.color || '#ff007f'};">[${tData.name}]</span>`;
+        } else {
+          titleEl.innerHTML = "";
+        }
       }
-    }
 
     setText(
       "char-sp",
@@ -9322,19 +9322,34 @@ window.renderMailboxItems = function (mailbox) {
     }
 
     if (mail.rewards.use) {
-      Object.keys(mail.rewards.use).forEach(k => {
-        let iconHtml = typeof window.getUseIconHtml === "function" ? window.getUseIconHtml(k) : "🧪";
-        iconHtml = iconHtml.replace('width: 32px; height: 32px;', 'width: 22px; height: 22px; padding: 2px; margin-right: 6px;');
-        iconHtml = iconHtml.replace('margin-right: 12px;', 'margin-right: 6px;');
+          Object.keys(mail.rewards.use).forEach(k => {
+            let iconHtml = typeof window.getUseIconHtml === "function" ? window.getUseIconHtml(k) : "🧪";
+            iconHtml = iconHtml.replace('width: 32px; height: 32px;', 'width: 22px; height: 22px; padding: 2px; margin-right: 6px;');
+            iconHtml = iconHtml.replace('margin-right: 12px;', 'margin-right: 6px;');
 
-        rewardsHtml += `
-          <div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.015); border:1px solid #374151; padding:3px 8px; border-radius:4px; font-family:monospace; font-size:10px; color:#fff; font-weight:bold;">
-              ${iconHtml}
-              <span>+${mail.rewards.use[k]} ${k}</span>
-          </div>
-        `;
-      });
-    }
+            rewardsHtml += `
+              <div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.015); border:1px solid #374151; padding:3px 8px; border-radius:4px; font-family:monospace; font-size:10px; color:#fff; font-weight:bold;">
+                  ${iconHtml}
+                  <span>+${mail.rewards.use[k]} ${k}</span>
+              </div>
+            `;
+          });
+        }
+
+        if (mail.rewards.title) {
+          let tKey = mail.rewards.title;
+          let tData = window.TITLES_DATA[tKey];
+          if (tData) {
+            let iconHtml = tData.icon || "";
+            let inlineIcon = iconHtml.replace('width="14" height="14"', 'width="12" height="12"').replace('margin-right: 3px;', 'margin-right: 4px;');
+            rewardsHtml += `
+              <div style="display:inline-flex; align-items:center; background:rgba(255,0,127,0.06); border:1px solid #ff007f; padding:3px 8px; border-radius:4px; font-family:monospace; font-size:10px; color:#fff; font-weight:bold; box-shadow:0 0 6px rgba(255,0,127,0.15);">
+                  ${inlineIcon}
+                  <span style="color:#ffb6c1;">Title: [${tData.name}]</span>
+              </div>
+            `;
+          }
+        }
 
     return `
       <div class="bag-item" style="border-left: 3px solid #e74c3c; background:#181c22; padding:8px 12px; margin-bottom:0; display:flex; flex-direction:column; gap:4px; text-align:left; cursor:default;">
@@ -9381,13 +9396,23 @@ window.claimMailReward = function (mailId) {
       }
 
       // 3. Claim Consumables
-      if (rewards.use) {
-        Object.keys(rewards.use).forEach(k => {
-          if (typeof window.addUseDrop === "function") {
-            window.addUseDrop(k, rewards.use[k]);
-          }
-        });
-      }
+            if (rewards.use) {
+              Object.keys(rewards.use).forEach(k => {
+                if (typeof window.addUseDrop === "function") {
+                  window.addUseDrop(k, rewards.use[k]);
+                }
+              });
+            }
+
+            // 4. Claim Custom Title
+            if (rewards.title) {
+              let tKey = rewards.title;
+              window.playerStats.unlockedTitles = window.playerStats.unlockedTitles || [];
+              if (!window.playerStats.unlockedTitles.includes(tKey)) {
+                window.playerStats.unlockedTitles.push(tKey);
+              }
+              window.playerStats.equippedTitle = tKey; // Auto-equip it!
+            }
 
       // Visual / Audio Feedback
       if (typeof window.spawnPurchaseCelebration === "function") {

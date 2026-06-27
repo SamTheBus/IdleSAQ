@@ -935,11 +935,11 @@ window.applySaveStatePayload = function (parsed) {
           );
 
         if (window.playerStats.unlockedTitles === undefined) {
-          window.playerStats.unlockedTitles = ["hoors_beta_boi"];
-        }
-        if (window.playerStats.equippedTitle === undefined) {
-          window.playerStats.equippedTitle = "hoors_beta_boi";
-        }
+              window.playerStats.unlockedTitles = [];
+            }
+            if (window.playerStats.equippedTitle === undefined) {
+              window.playerStats.equippedTitle = null;
+            }
 
         window.playerStats.isPrestigeBossMode = false;
         window.playerStats.prestigeApproachTimer = 0;
