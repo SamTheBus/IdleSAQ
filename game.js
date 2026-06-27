@@ -57,24 +57,35 @@ window.saveGame = function () {
   }
 
   const userId = window.getGameUserId();
-  fetch(`${window.GAME_SERVER_URL}/api/save`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, saveData }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        console.log("☁️ Cloud Backup Successful!");
-      } else {
-        console.warn("⚠️ Cloud Sync Warning:", data.error);
-      }
+    if (typeof window.updateSyncStatus === "function") {
+      window.updateSyncStatus("syncing");
+    }
+    fetch(`${window.GAME_SERVER_URL}/api/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, saveData }),
     })
-    .catch((err) => {
-      // Gracefully fail silently in background console logs if player is offline
-      console.log("📡 Server offline or unreachable. Local save preserved.");
-    });
-};
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          console.log("☁️ Cloud Backup Successful!");
+          if (typeof window.updateSyncStatus === "function") {
+            window.updateSyncStatus("connected");
+          }
+        } else {
+          console.warn("⚠️ Cloud Sync Warning:", data.error);
+          if (typeof window.updateSyncStatus === "function") {
+            window.updateSyncStatus("offline");
+          }
+        }
+      })
+      .catch((err) => {
+        console.log("📡 Server offline or unreachable. Local save preserved.");
+        if (typeof window.updateSyncStatus === "function") {
+          window.updateSyncStatus("offline");
+        }
+      });
+  };
 
 window.getDepthQualityMultiplier = function (depth) {
   // Asymptotically scales from 1.0 at depth 0, up to a 10.0x maximum ceiling at infinite depth
@@ -1155,34 +1166,47 @@ window.loadGameAndSyncCloud = function () {
   }
 
   const userId = window.getGameUserId();
-  fetch(`${window.GAME_SERVER_URL}/api/load`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success && data.saveData) {
-        let cloudTime = data.timestamp || 0;
-        let localTime = (localParsed && localParsed.lastSaveTime) || 0;
-
-        if (cloudTime > localTime) {
-          console.log("☁️ Newer Cloud Save found! Syncing state...");
-          window.applySaveStatePayload(data.saveData);
-          if (typeof window.updateUI === "function") window.updateUI();
-          if (typeof window.renderInventory === "function")
-            window.renderInventory();
-          localStorage.setItem("idle_game_v11", JSON.stringify(data.saveData));
-        } else {
-          console.log("📱 Local progress is up to date.");
-        }
-      }
+    if (typeof window.updateSyncStatus === "function") {
+      window.updateSyncStatus("syncing");
+    }
+    fetch(`${window.GAME_SERVER_URL}/api/load`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
     })
-    .catch((err) => {
-      console.log(
-        "📡 Could not reach Cloud server for sync check. Running off local cache.",
-      );
-    });
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success && data.saveData) {
+          let cloudTime = data.timestamp || 0;
+          let localTime = (localParsed && localParsed.lastSaveTime) || 0;
+
+          if (cloudTime > localTime) {
+            console.log("☁️ Newer Cloud Save found! Syncing state...");
+            window.applySaveStatePayload(data.saveData);
+            if (typeof window.updateUI === "function") window.updateUI();
+            if (typeof window.renderInventory === "function")
+              window.renderInventory();
+            localStorage.setItem("idle_game_v11", JSON.stringify(data.saveData));
+          } else {
+            console.log("📱 Local progress is up to date.");
+          }
+          if (typeof window.updateSyncStatus === "function") {
+            window.updateSyncStatus("connected");
+          }
+        } else {
+          if (typeof window.updateSyncStatus === "function") {
+            window.updateSyncStatus("offline");
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(
+          "📡 Could not reach Cloud server for sync check. Running off local cache.",
+        );
+        if (typeof window.updateSyncStatus === "function") {
+          window.updateSyncStatus("offline");
+        }
+      });
 
   let autoSalvageSelect = document.getElementById("auto-salvage-setting");
   if (

@@ -9301,11 +9301,11 @@ window.fetchMailboxData = function () {
   listEl.innerHTML = `<div style="color:#aaa; text-align:center; padding: 20px 0; font-size:11px;">Checking incoming transmissions...</div>`;
 
   const claimedMailIds = window.playerStats.claimedMailIds || [];
-    fetch(`${window.GAME_SERVER_URL}/api/mailbox`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, claimedMailIds })
-    })
+  fetch(`${window.GAME_SERVER_URL}/api/mailbox`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, claimedMailIds })
+  })
   .then(response => response.json())
   .then(data => {
     if (data.success && data.mailbox) {
@@ -9415,11 +9415,12 @@ window.renderMailboxItems = function (mailbox) {
 window.claimMailReward = function (mailId) {
   if (!window.GAME_SERVER_URL) return;
   const userId = window.getGameUserId();
+  const claimedMailIds = window.playerStats.claimedMailIds || [];
 
   fetch(`${window.GAME_SERVER_URL}/api/claim-mail`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, mailId })
+    body: JSON.stringify({ userId, mailId, claimedMailIds })
   })
   .then(response => response.json())
   .then(data => {
