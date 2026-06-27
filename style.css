@@ -1069,11 +1069,18 @@ canvas {
                   gap: 4px !important;
                   flex-wrap: wrap !important;
                 }
-                .nav-btn {
+  #top-nav > div > div,
+  #top-nav > div > button {
+                  flex: 1 1 calc(33.333% - 4px) !important;
+                  min-width: 0 !important;
+                }
+  #top-nav > div > div > .nav-btn {
+                  width: 100% !important;
+                }
+  .nav-btn {
                   padding: 4px 6px !important;
                   font-size: 10px !important;
                   gap: 2px !important;
-                  flex: 1 1 calc(33.333% - 4px) !important;
                   justify-content: center !important;
                 }
   .nav-btn svg {
