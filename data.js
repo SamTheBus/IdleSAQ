@@ -3392,6 +3392,20 @@ window.resolvePlayerStats = function (useDraft = false) {
     xpRate: 1.0,
   };
 
+  // Passive cumulative title multipliers applied prior to other calculations
+  if (window.playerStats.unlockedTitles) {
+    window.playerStats.unlockedTitles.forEach((tKey) => {
+      let tData = window.TITLES_DATA[tKey];
+      if (tData && tData.stats) {
+        for (let sKey in tData.stats) {
+          if (p[sKey] !== undefined) {
+            p[sKey] += tData.stats[sKey];
+          }
+        }
+      }
+    });
+  }
+
   if (!window.playerStats.cachedAchievementBonusTotals) {
     window.recalculateAchievementTotals();
   }
@@ -4042,8 +4056,20 @@ window.playerStats = {
   dailyRewardClaimed: false,
   weeklyRewardClaimed: false,
   unviewedAchievements: [],
-  selectedPrestigeStage: 80, // Default selected Hooktail challenge tier level
-};
+    selectedPrestigeStage: 80, // Default selected Hooktail challenge tier level
+    unlockedTitles: ["hoors_beta_boi"],
+    equippedTitle: "hoors_beta_boi",
+  };
+
+  // --- CLIENT-SIDE TITLE DATABASE ---
+  window.TITLES_DATA = {
+    "hoors_beta_boi": {
+      name: "Hoor's Beta Boi",
+      desc: "A prestigious badge of honor for Hoor's silly lil testers.",
+      color: "#ff007f", // Hot Neon Pink
+      stats: { drop: 0.50, qly: 0.50 }
+    }
+  };
 
 // --- PROCEDURAL MISSION & QUEST SYSTEM ---
 

@@ -1397,11 +1397,24 @@ window.updateUI = function () {
   }
 
   // 2. Stats panel headers (re-routed to unified selectors)
-  setText("char-level", window.playerStats.level);
-  setText(
-    "char-sp",
-    window.draftAllocations !== null ? window.draftSP : window.playerStats.sp,
-  );
+    setText("char-level", window.playerStats.level);
+
+    let titleEl = document.getElementById("equipped-title");
+    if (titleEl) {
+      let activeTitle = window.playerStats.equippedTitle;
+      if (activeTitle && window.TITLES_DATA[activeTitle]) {
+        let tData = window.TITLES_DATA[activeTitle];
+        titleEl.innerText = ` [${tData.name}]`;
+        titleEl.style.color = tData.color || "#ff007f";
+      } else {
+        titleEl.innerText = "";
+      }
+    }
+
+    setText(
+      "char-sp",
+      window.draftAllocations !== null ? window.draftSP : window.playerStats.sp,
+    );
 
   let xpPct = (window.playerStats.xp / window.playerStats.xpReq) * 100;
   setText(

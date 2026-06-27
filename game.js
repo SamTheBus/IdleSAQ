@@ -929,13 +929,20 @@ window.applySaveStatePayload = function (parsed) {
       window.playerStats.activeRiftLevel = 1;
 
     if (window.playerStats.selectedPrestigeStage === undefined)
-      window.playerStats.selectedPrestigeStage = Math.max(
-        80,
-        window.playerStats.maxStage || 80,
-      );
+          window.playerStats.selectedPrestigeStage = Math.max(
+            80,
+            window.playerStats.maxStage || 80,
+          );
 
-    window.playerStats.isPrestigeBossMode = false;
-    window.playerStats.prestigeApproachTimer = 0;
+        if (window.playerStats.unlockedTitles === undefined) {
+          window.playerStats.unlockedTitles = ["hoors_beta_boi"];
+        }
+        if (window.playerStats.equippedTitle === undefined) {
+          window.playerStats.equippedTitle = "hoors_beta_boi";
+        }
+
+        window.playerStats.isPrestigeBossMode = false;
+        window.playerStats.prestigeApproachTimer = 0;
 
     if (window.playerStats.vendingQLevel === undefined)
       window.playerStats.vendingQLevel = 0;
