@@ -3080,8 +3080,8 @@ window.renderMarketShop = function () {
         : "background: linear-gradient(180deg, #f1c40f 0%, #d4af37 100%); color: #000; font-weight: 900; border-color: #fff; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);";
 
     let soldOverlay = isSold
-      ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); backdrop-filter: blur(1.5px); display:flex; justify-content:center; align-items:center; border-radius:8px; z-index:5;"><span style="color:#e74c3c; font-size:18px; font-weight:900; border: 2.5px solid #e74c3c; padding: 6px 16px; border-radius:4px; transform: rotate(-8deg); font-family:'Arial Black',Impact,sans-serif; text-shadow: 0 2px 4px #000; letter-spacing:2px; box-shadow: 0 0 15px rgba(231,76,60,0.35);">CLAIMED</span></div>`
-      : "";
+          ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); backdrop-filter: blur(1.5px); display:flex; justify-content:center; align-items:center; border-radius:8px; z-index:5;"><span style="color:#e74c3c; font-size:18px; font-weight:900; border: 2.5px solid #e74c3c; padding: 6px 16px; border-radius:4px; transform: rotate(-8deg); font-family:'Arial Black',Impact,sans-serif; text-shadow: 0 2px 4px #000; letter-spacing:2px; box-shadow: 0 0 15px rgba(231,76,60,0.35);">PURCHASED</span></div>`
+          : "";
 
     html += `
         <div class="gold-shop-iotd-hero"
@@ -3130,8 +3130,8 @@ window.renderMarketShop = function () {
     let isSold = shopItem.purchased;
 
     let soldOverlay = isSold
-      ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:12px; font-weight:900; border: 1.5px solid #e74c3c; padding: 2px 10px; border-radius:3px; transform: rotate(-5deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1px;">SOLD</span></div>`
-      : "";
+          ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:12px; font-weight:900; border: 1.5px solid #e74c3c; padding: 2px 10px; border-radius:3px; transform: rotate(-5deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1px;">PURCHASED</span></div>`
+          : "";
 
     let btnStyle =
       isSold || window.playerStats.coins < shopItem.cost
@@ -5639,17 +5639,17 @@ window.rerollDailyMission = function (missionId) {
   window.playerStats.dailyRerollsDone++;
 
   // Replace inline parameters with the new selection while ensuring Daily Sacks are preserved
-  mList[mIndex] = {
-    id: targetMission.id,
-    type: newSelect.type,
-    desc: `${newSelect.label} (${finalTarget.toLocaleString()} ${newSelect.unit})`,
-    current: 0,
-    target: finalTarget,
-    treat: "Guild Reward Sack",
-    treatQty: 1,
-    completed: false,
-    claimed: false,
-  };
+    mList[mIndex] = {
+      id: targetMission.id,
+      type: newSelect.type,
+      desc: `${newSelect.label} (${finalTarget.toLocaleString()} ${newSelect.unit})`,
+      current: 0,
+      target: finalTarget,
+      treat: "Daily Reward Sack",
+      treatQty: 1,
+      completed: false,
+      claimed: false,
+    };
 
   window.pushHeaderToast("🔄 Mission Re-rolled!", "#2ecc71");
   window.SoundManager.play("swing");
@@ -8342,47 +8342,52 @@ window.renderMissionsWindow = function () {
     let weeklyMasterClaimed = window.playerStats.weeklyRewardClaimed;
 
     let getMissionRowHtml = (m, isWeekly) => {
-      let pct = (m.current / m.target) * 100;
-      let btnHtml = "";
-      let rerollBtnHtml = "";
+          let pct = (m.current / m.target) * 100;
+          let btnHtml = "";
+          let rerollBtnHtml = "";
 
-      if (m.claimed) {
-        btnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
-      } else if (m.completed) {
-        btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
-      } else {
-        btnHtml = `<span style="color:#888; font-size:10px; font-family:monospace;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
+          if (m.claimed) {
+            btnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
+          } else if (m.completed) {
+            btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
+          } else {
+            btnHtml = `<span style="color:#888; font-size:10px; font-family:monospace;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
 
-        // Dynamic single-mission Re-roll system
-        if (!isWeekly) {
-          let rerollsDone = window.playerStats.dailyRerollsDone || 0;
-          if (rerollsDone < 2) {
-            let costLabel = rerollsDone === 0 ? "🔄 Free" : "🔄 50 Souls";
-            rerollBtnHtml = `<button onclick="window.rerollDailyMission('${m.id}')" class="btn-action" style="padding:2px 5px; font-size:8.5px; margin-left:6px; background:#4b5563; font-family:monospace; line-height:1;" title="Re-roll Daily Mission (${rerollsDone === 0 ? "Free" : "Costs 50 Monster Souls"})">${costLabel}</button>`;
+            // Dynamic single-mission Re-roll system
+            if (!isWeekly) {
+              let rerollsDone = window.playerStats.dailyRerollsDone || 0;
+              if (rerollsDone < 2) {
+                let costLabel = rerollsDone === 0 ? "🔄 Free" : "🔄 50 Souls";
+                rerollBtnHtml = `<button onclick="window.rerollDailyMission('${m.id}')" class="btn-action" style="padding:2px 5px; font-size:8.5px; margin-left:6px; background:#4b5563; font-family:monospace; line-height:1;" title="Re-roll Daily Mission (${rerollsDone === 0 ? "Free" : "Costs 50 Monster Souls"})">${costLabel}</button>`;
+              }
+            }
           }
-        }
-      }
 
-      let rewardText = `+${m.treatQty} ${m.treat}`;
-      if (m.potionAward) {
-        rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
-      }
+          let rewardText = `+${m.treatQty} ${m.treat}`;
+          if (m.potionAward) {
+            rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
+          }
 
-      return `
-                                                                                            <div style="background:#111; border:1px solid #2d3748; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px;">
-                                                                                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                                                                                    <strong style="font-size:11px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px; cursor:help;" onmouseenter="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" ontouchstart="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" onmouseleave="window.hideTooltip()">${m.desc}</strong>
-                                                                                                    <div style="display:flex; align-items:center;">${btnHtml}${rerollBtnHtml}</div>
-                                                                                                </div>
-                                                                                                <div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#aaa; margin-top:2px;">
-                                                                                                    <span>Reward: <span style="color:#f1c40f;">${rewardText}</span></span>
-                                                                                                </div>
-                                                                                                <div style="width:100%; height:4px; background:#222; border-radius:2px; overflow:hidden; border:1px solid #333; margin-top:2px;">
-                                                                                                    <div style="width:${pct}%; height:100%; background:${isWeekly ? "#9b59b6" : "#2ecc71"};"></div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        `;
-    };
+          let claimedOverlay = m.claimed
+            ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:12px; font-weight:900; border: 1.5px solid #e74c3c; padding: 2px 10px; border-radius:3px; transform: rotate(-4deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1px; box-shadow: 0 0 8px rgba(231,76,60,0.25);">CLAIMED</span></div>`
+            : "";
+
+          return `
+                    <div style="position:relative; background:#111; border:1px solid #2d3748; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px;">
+                        ${claimedOverlay}
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="font-size:11px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px; cursor:help;" onmouseenter="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" ontouchstart="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" onmouseleave="window.hideTooltip()">${m.desc}</strong>
+                            <div style="display:flex; align-items:center;">${btnHtml}${rerollBtnHtml}</div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#aaa; margin-top:2px;">
+                            <span>Reward: <span style="color:#f1c40f;">${rewardText}</span></span>
+                        </div>
+                        <div style="width:100%; height:4px; background:#222; border-radius:2px; overflow:hidden; border:1px solid #333; margin-top:2px;">
+                            <div style="width:${pct}%; height:100%; background:${isWeekly ? "#9b59b6" : "#2ecc71"};"></div>
+                        </div>
+                    </div>
+                  `;
+        };
 
     let dailyMasterBtnHtml = "";
     if (dailyMasterClaimed) {
@@ -8915,7 +8920,7 @@ window.updateGachaRecentList = function () {
              ontouchstart="window.showInventoryTooltip(event, ${item.id})"
              onmouseleave="window.hideTooltip()">
             <div style="text-align:left; min-width:0; flex:1;">
-                <span style="color:#888; font-size:8.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">[${playerName}] rolled:</span>
+                <span style="color:#888; font-size:8.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">[${window.escapeHTML(playerName)}] rolled:</span>
                 <span style="color:${col}; font-weight:bold; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block;">${shortName}</span>
             </div>
             <span style="color:#666; font-size:9px; font-family:monospace; align-self:flex-end;">${starDisplay}</span>
@@ -9348,14 +9353,15 @@ window.openDailyRewardSack = function () {
   }, 1000);
 };
 
-window.openGuildWeeklySack = function () {
-  let owned = window.inventory.USE["Guild Weekly Sack"] || 0;
+window.openWeeklyRewardSack = function (specificName) {
+  let itemToConsume = specificName || (window.inventory.USE["Weekly Reward Sack"] ? "Weekly Reward Sack" : "Guild Weekly Sack");
+  let owned = window.inventory.USE[itemToConsume] || 0;
   if (owned <= 0) return;
 
-  // Consume 1 Guild Weekly Sack
-  window.inventory.USE["Guild Weekly Sack"]--;
-  if (window.inventory.USE["Guild Weekly Sack"] === 0) {
-    delete window.inventory.USE["Guild Weekly Sack"];
+  // Consume 1
+  window.inventory.USE[itemToConsume]--;
+  if (window.inventory.USE[itemToConsume] === 0) {
+    delete window.inventory.USE[itemToConsume];
   }
 
   // Play opening sound
@@ -9583,7 +9589,7 @@ window.openGuildWeeklySack = function () {
     overlay.innerHTML = `
       <div style="background:#1a1a1a; border:2px solid #9b59b6; border-radius:8px; width:95%; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.95); animation: toastFadeIn 0.3s ease-out; overflow:hidden;">
         <div style="background:#0b0f12; border-top: 1px solid #333; padding:12px 15px; text-align:center;">
-          <h3 style="margin:0; color:#9b59b6; font-size:15px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">💼 WEEKLY SACK OPENED!</h3>
+          <h3 style="margin:0; color:#9b59b6; font-size:15px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">💼 SACK OPENED!</h3>
         </div>
         <div style="background:#111; border:1px solid #222; border-radius:6px; padding:8px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
                         <div style="display:flex; align-items:center;">
@@ -9673,13 +9679,17 @@ window.renderMailboxItems = function (mailbox) {
   }
 
   listEl.innerHTML = mailbox
-    .map((mail) => {
-      let buttonHtml = "";
-      if (mail.claimed) {
-        buttonHtml = `<span style="color:#7f8c8d; font-weight:bold; font-size:11px;">Claimed ✓</span>`;
-      } else {
-        buttonHtml = `<button class="btn-action" style="background:#e74c3c; color:white; font-size:11px; padding:4px 10px;" onclick="window.claimMailReward('${mail.id}')">Claim</button>`;
-      }
+      .map((mail) => {
+        let buttonHtml = "";
+        if (mail.claimed) {
+          buttonHtml = `<span style="color:#7f8c8d; font-weight:bold; font-size:11px;">Claimed ✓</span>`;
+        } else {
+          buttonHtml = `<button class="btn-action" style="background:#e74c3c; color:white; font-size:11px; padding:4px 10px;" onclick="window.claimMailReward('${mail.id}')">Claim</button>`;
+        }
+
+        let claimedOverlay = mail.claimed
+          ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.68); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:16px; font-weight:900; border: 2.5px solid #e74c3c; padding: 4px 14px; border-radius:4px; transform: rotate(-5deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1.5px; box-shadow: 0 0 12px rgba(231,76,60,0.35);">CLAIMED</span></div>`
+          : "";
 
       // Build highly optimized, stylized HTML badges using native visual generators
       let rewardsHtml = "";
@@ -9760,11 +9770,12 @@ window.renderMailboxItems = function (mailbox) {
       }
 
       return `
-      <div class="bag-item" style="border-left: 3px solid #e74c3c; background:#181c22; padding:8px 12px; margin-bottom:0; display:flex; flex-direction:column; gap:4px; text-align:left; cursor:default;">
-          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-              <strong style="color:#e74c3c; font-size:12.5px;">${mail.title}</strong>
-              <div>${buttonHtml}</div>
-          </div>
+            <div class="bag-item" style="position:relative; border-left: 3px solid #e74c3c; background:#181c22; padding:8px 12px; margin-bottom:0; display:flex; flex-direction:column; gap:4px; text-align:left; cursor:default;">
+                ${claimedOverlay}
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                    <strong style="color:#e74c3c; font-size:12.5px;">${mail.title}</strong>
+                    <div>${buttonHtml}</div>
+                </div>
           <div style="font-size:11px; color:#ddd; white-space:normal; line-height:1.4; margin-bottom:4px;">${mail.message}</div>
           <div style="background:#0c0f12; border:1px solid #222; border-radius:4px; padding:8px 6px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
               ${rewardsHtml}
@@ -10644,7 +10655,7 @@ window.renderLeaderboardItems = function (leaderboard) {
                 <canvas id="${canvasId}" width="40" height="50" style="width:40px; height:50px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:4px; display:block; flex-shrink:0; pointer-events:none;"></canvas>
 
                 <div style="flex:1; min-width:0;">
-                    <strong style="color:${isSelf ? "#f1c40f" : "#fff"}; font-size:12.5px; display:inline-flex; align-items:center; gap:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${player.playerName || "Unknown"}${isSelf ? " <span style='font-size:9px; color:#f1c40f;'> (You)</span>" : ""}</strong>
+                    <strong style="color:${isSelf ? "#f1c40f" : "#fff"}; font-size:12.5px; display:inline-flex; align-items:center; gap:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${window.escapeHTML(player.playerName || "Unknown")}${isSelf ? " <span style='font-size:9px; color:#f1c40f;'> (You)</span>" : ""}</strong>
                     ${titleTextHtml}
                     <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Stage ${player.lifetimePeakStage} • Prestige ${player.prestigeCount} • Lv. ${player.level}</div>
                 </div>

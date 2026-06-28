@@ -5,6 +5,14 @@
 
 window.GAME_VERSION = 0.96; // Pre-release Alpha 0.9.6 // Increment this whenever you push a new release
 
+// Core Security: HTML Sanitizer to prevent XSS injection in user lists
+window.escapeHTML = function (str) {
+  if (!str) return "";
+  return str.replace(/[&<>'"]/g,
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
+};
+
 window.getUiIconSvg = function (key, size = 12) {
   const colors = {
     atk: "#e74c3c",
@@ -261,12 +269,20 @@ window.useDex = {
     desc: "Standardised Daily Reward. Consume to initiate untying. Guarantees 1 MP, 1x Equipment scaled to Lifetime Peak Stage, and rolls extra loot with consecutive item chances!",
     color: "#f1c40f",
   },
+  "Weekly Reward Sack": {
+    desc: "Venerable Weekly Reward. Consume to break the seal. Guarantees 3 MP, 1x Ancient Core, 1x Overlord's Sigil, 1x Eridium Shard, and 3x Legendary Scraps!",
+    color: "#9b59b6",
+  },
   "Guild Reward Sack": {
-    desc: "Standardised Daily Reward. Consume to initiate untying. Guarantees 1 MP, 1x Equipment scaled to Lifetime Peak Stage, and rolls extra loot with consecutive item chances!",
+    desc: "Legacy Guild Reward Sack. Consume to open.",
+    color: "#f1c40f",
+  },
+  "Daily Guild Reward Sack": {
+    desc: "Legacy Daily Guild Reward Sack. Consume to open.",
     color: "#f1c40f",
   },
   "Guild Weekly Sack": {
-    desc: "Venerable Weekly Guild Reward. Consume to break the seal. Guarantees 3 MP, 1x Ancient Core, 1x Overlord's Sigil, 1x Eridium Shard, and 3x Legendary Scraps!",
+    desc: "Legacy Guild Weekly Sack. Consume to open.",
     color: "#9b59b6",
   },
   "SP Reset Scroll": {
@@ -4288,22 +4304,22 @@ window.generateWeeklyMissions = function () {
   let peakStage =
     window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
   window.playerStats.weeklyMissions = selected.map((m, idx) => {
-    let target = m.targetBase;
-    if (m.stageScale) {
-      target = Math.ceil(m.targetBase * Math.pow(1.045, peakStage));
-    }
-    return {
-      id: `weekly_${idx + 1}`,
-      type: m.type,
-      desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
-      current: 0,
-      target: target,
-      treat: "Guild Weekly Sack",
-      treatQty: 1,
-      completed: false,
-      claimed: false,
-    };
-  });
+      let target = m.targetBase;
+      if (m.stageScale) {
+        target = Math.ceil(m.targetBase * Math.pow(1.045, peakStage));
+      }
+      return {
+        id: `weekly_${idx + 1}`,
+        type: m.type,
+        desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
+        current: 0,
+        target: target,
+        treat: "Weekly Reward Sack",
+        treatQty: 1,
+        completed: false,
+        claimed: false,
+      };
+    });
 };
 
 window.checkAndResetMissions = function () {

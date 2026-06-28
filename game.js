@@ -43,6 +43,53 @@ window.getGameUserId = function () {
 };
 
 window.saveGame = function () {
+  // 1. Log-Safe Garbage Collection: Prune unreferenced item details from frozenItemDb
+  if (window.inventory && window.equippedSlots) {
+    let activeIds = new Set();
+
+    // Scan equipped slots
+    for (let key in window.equippedSlots) {
+      if (window.equippedSlots[key]) {
+        activeIds.add(window.equippedSlots[key].id);
+      }
+    }
+    // Scan backpack inventories
+    if (window.inventory.EQUIP) {
+      window.inventory.EQUIP.forEach(item => { if (item) activeIds.add(item.id); });
+    }
+    if (window.inventory.ARTIFACT) {
+      window.inventory.ARTIFACT.forEach(item => { if (item) activeIds.add(item.id); });
+    }
+    // Scan gacha rolls history
+    if (window.playerStats && window.playerStats.gachaHistory) {
+      window.playerStats.gachaHistory.forEach(item => { if (item) activeIds.add(item.id); });
+    }
+    // Scan logs history to preserve tooltips for item links in chat/logs
+    if (window.logsHistory) {
+      window.logsHistory.forEach(logLine => {
+        let match;
+        let regex = /showLogTooltip\(event,\s*(\d+)\)/g;
+        while ((match = regex.exec(logLine)) !== null) {
+          activeIds.add(parseInt(match[1], 10));
+        }
+        let regexInv = /showInventoryTooltip\(event,\s*(\d+)\)/g;
+        while ((match = regexInv.exec(logLine)) !== null) {
+          activeIds.add(parseInt(match[1], 10));
+        }
+      });
+    }
+
+    // Purge orphaned items
+    if (window.frozenItemDb) {
+      for (let id in window.frozenItemDb) {
+        let numId = parseInt(id, 10);
+        if (!activeIds.has(numId)) {
+          delete window.frozenItemDb[id];
+        }
+      }
+    }
+  }
+
   let saveData = {
     playerStats: window.playerStats,
     equippedSlots: window.equippedSlots,
@@ -55,43 +102,47 @@ window.saveGame = function () {
 
   const serializedData = JSON.stringify(saveData);
 
-  // 1. Instantly backup locally to prevent any network-loss data corruption
-  localStorage.setItem("idle_game_v11", serializedData);
+  // Save locally instantly using the new unified baseline key
+  localStorage.setItem("idle_saq_save", serializedData);
 
-  // 2. Perform a non-blocking asynchronous cloud save push to your Fastify server
-  if (!window.GAME_SERVER_URL) {
-    return; // Bypass network save silently on public web previews (like GitHub Pages)
+  // Non-blocking 10s debounced cloud save backup to prevent server spam
+  if (!window.GAME_SERVER_URL) return;
+
+  if (window.cloudSaveTimeoutId) {
+    clearTimeout(window.cloudSaveTimeoutId);
   }
 
-  const userId = window.getGameUserId();
-  if (typeof window.updateSyncStatus === "function") {
-    window.updateSyncStatus("syncing");
-  }
-  fetch(`${window.GAME_SERVER_URL}/api/save`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, saveData }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        console.log("☁️ Cloud Backup Successful!");
-        if (typeof window.updateSyncStatus === "function") {
-          window.updateSyncStatus("connected");
+  window.cloudSaveTimeoutId = setTimeout(() => {
+    const userId = window.getGameUserId();
+    if (typeof window.updateSyncStatus === "function") {
+      window.updateSyncStatus("syncing");
+    }
+    fetch(`${window.GAME_SERVER_URL}/api/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, saveData }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          console.log("☁️ Cloud Backup Successful!");
+          if (typeof window.updateSyncStatus === "function") {
+            window.updateSyncStatus("connected");
+          }
+        } else {
+          console.warn("⚠️ Cloud Sync Warning:", data.error);
+          if (typeof window.updateSyncStatus === "function") {
+            window.updateSyncStatus("offline");
+          }
         }
-      } else {
-        console.warn("⚠️ Cloud Sync Warning:", data.error);
+      })
+      .catch((err) => {
+        console.log("📡 Server offline or unreachable. Local save preserved.");
         if (typeof window.updateSyncStatus === "function") {
           window.updateSyncStatus("offline");
         }
-      }
-    })
-    .catch((err) => {
-      console.log("📡 Server offline or unreachable. Local save preserved.");
-      if (typeof window.updateSyncStatus === "function") {
-        window.updateSyncStatus("offline");
-      }
-    });
+      });
+  }, 10000);
 };
 
 window.getDepthQualityMultiplier = function (depth) {
@@ -172,25 +223,52 @@ window.addEventListener("beforeunload", window.saveGame);
 window.hardResetGame = function () {
   if (typeof window.showCustomConfirm === "function") {
     window.showCustomConfirm(
-      "🚨 Delete Save File?",
-      "WARNING: This will permanently delete your entire save file and progress! Are you absolutely sure you want to start over?",
-      "Proceed",
+      "🚨 Hard Reset Progress?",
+      "WARNING: This will permanently delete your entire save, remove your name from the leaderboards, and purge your cloud backup! Are you absolutely sure?",
+      "Wipe Everything",
       "Cancel",
       "#e74c3c",
       function () {
         window.showCustomConfirm(
-          "🚨 Confirm Wipe",
-          "THIS CANNOT BE UNDONE! Are you 100% sure you want to delete everything?",
-          "Wipe Everything",
+          "🚨 Final Confirmation",
+          "THIS CANNOT BE UNDONE! Confirm to delete your local and cloud saves permanently?",
+          "Wipe & Start Over",
           "Cancel",
           "#e74c3c",
           function () {
-            window.removeEventListener("beforeunload", window.saveGame);
-            localStorage.removeItem("idle_game_v11");
-            window.location.reload();
-          },
+            const userId = window.getGameUserId();
+
+            const performLocalWipe = () => {
+              window.removeEventListener("beforeunload", window.saveGame);
+              localStorage.removeItem("idle_saq_save");
+              localStorage.removeItem("idle_game_v11");
+              localStorage.removeItem("idle_game_v11_backup");
+              localStorage.removeItem("idle_saq_migrated_v11_to_v96");
+              localStorage.removeItem("idle_game_user_id"); // Force generation of a fresh guest session ID on reload
+              window.location.reload();
+            };
+
+            if (!window.GAME_SERVER_URL) {
+              performLocalWipe();
+              return;
+            }
+
+            // Purge server DB records first, then wipe local cookies on completion/fail
+            fetch(`${window.GAME_SERVER_URL}/api/wipe-save`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId }),
+            })
+              .then(() => {
+                performLocalWipe();
+              })
+              .catch((err) => {
+                console.error("Cloud wipe request failed; falling back to local wipe:", err);
+                performLocalWipe();
+              });
+          }
         );
-      },
+      }
     );
   }
 };
@@ -696,7 +774,7 @@ window.applyOfflineGains = function (offlineMs) {
   return offlineSeconds * 1000;
 };
 
-window.applySaveStatePayload = function (parsed) {
+window.applySaveStatePayload = function (parsed, skipOfflineGains = false) {
   try {
     window.playerStats = { ...window.playerStats, ...parsed.playerStats };
     window.equippedSlots = parsed.equippedSlots || window.equippedSlots;
@@ -1133,43 +1211,43 @@ window.applySaveStatePayload = function (parsed) {
     }
 
     if (parsed.lastSaveTime) {
-      let now = Date.now();
-      let offlineMs = now - parsed.lastSaveTime;
+          let now = Date.now();
+          let offlineMs = now - parsed.lastSaveTime;
 
-      let keyTypes = ["equip", "gold", "mat"];
-      keyTypes.forEach((k) => {
-        let count = k + "Keys";
-        let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
-        if (window.playerStats[count] < 3) {
-          let keyTime = window.playerStats[time] || now;
-          let msSinceNextKey = now - keyTime;
-          if (msSinceNextKey >= 0) {
-            let keysEarned = 1 + Math.floor(msSinceNextKey / 21600000);
-            window.playerStats[count] = Math.min(
-              3,
-              window.playerStats[count] + keysEarned,
-            );
-            window.playerStats[time] =
-              now + (21600000 - (msSinceNextKey % 21600000));
-          }
+          let keyTypes = ["equip", "gold", "mat"];
+          keyTypes.forEach((k) => {
+            let count = k + "Keys";
+            let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
+            if (window.playerStats[count] < 3) {
+              let keyTime = window.playerStats[time] || now;
+              let msSinceNextKey = now - keyTime;
+              if (msSinceNextKey >= 0) {
+                let keysEarned = 1 + Math.floor(msSinceNextKey / 21600000);
+                window.playerStats[count] = Math.min(
+                  3,
+                  window.playerStats[count] + keysEarned,
+                );
+                window.playerStats[time] =
+                  now + (21600000 - (msSinceNextKey % 21600000));
+              }
+            }
+          });
+          if (!skipOfflineGains && typeof window.applyOfflineGains === "function")
+            window.applyOfflineGains(offlineMs);
         }
-      });
-      if (typeof window.applyOfflineGains === "function")
-        window.applyOfflineGains(offlineMs);
-    }
-    setTimeout(() => {
-      if (typeof window.pushLog === "function")
-        window.pushLog(
-          `<span style='color:#3498db; font-weight:bold;'>[SYSTEM] Local save loaded successfully.</span>`,
-        );
-    }, 500);
+        setTimeout(() => {
+          if (typeof window.pushLog === "function")
+            window.pushLog(
+              `<span style='color:#3498db; font-weight:bold;'>[SYSTEM] Save loaded successfully.</span>`,
+            );
+        }, 500);
 
-    if (typeof window.refreshMarketShopIfNeeded === "function")
-      window.refreshMarketShopIfNeeded();
-  } catch (e) {
-    console.error("Save load failed", e);
-  }
-};
+        if (typeof window.refreshMarketShopIfNeeded === "function")
+          window.refreshMarketShopIfNeeded();
+      } catch (e) {
+        console.error("Save load failed", e);
+      }
+    };
 
 window.loadGame = function () {
   window.loadGameAndSyncCloud();
@@ -1177,20 +1255,55 @@ window.loadGame = function () {
 
 window.loadGameAndSyncCloud = function () {
   window.isCloudSynced = false;
-  let localDataRaw = localStorage.getItem("idle_game_v11");
+
+  // 1. Resolve unified save key or run safe self-healing migration
+  let migrationDone = localStorage.getItem("idle_saq_migrated_v11_to_v96");
+  if (migrationDone !== "true") {
+    let legacyDataRaw = localStorage.getItem("idle_game_v11");
+    if (legacyDataRaw) {
+      try {
+        let legacyParsed = JSON.parse(legacyDataRaw);
+        // Guarantee copy is valid and populated before overwriting
+        if (legacyParsed && legacyParsed.playerStats) {
+          console.log("🚀 Migrating legacy save to unified idle_saq_save baseline.");
+          localStorage.setItem("idle_saq_save", legacyDataRaw);
+          localStorage.setItem("idle_saq_migrated_v11_to_v96", "true");
+          // Keep old save under backup key for complete safety
+          localStorage.setItem("idle_game_v11_backup", legacyDataRaw);
+          localStorage.removeItem("idle_game_v11");
+        }
+      } catch (e) {
+        console.error("Legacy save migration check failed", e);
+      }
+    } else {
+      localStorage.setItem("idle_saq_migrated_v11_to_v96", "true");
+    }
+  }
+
+  let localDataRaw = localStorage.getItem("idle_saq_save");
   let localParsed = null;
+  let offlineMsToApply = 0;
+  let now = Date.now();
 
   if (localDataRaw) {
     try {
       localParsed = JSON.parse(localDataRaw);
-      window.applySaveStatePayload(localParsed);
+      // Skip offline gains during initial payload load
+      window.applySaveStatePayload(localParsed, true);
+      if (localParsed.lastSaveTime) {
+        offlineMsToApply = now - localParsed.lastSaveTime;
+      }
     } catch (e) {
       console.error("Local save load failed", e);
     }
   }
 
   if (!window.GAME_SERVER_URL) {
-    return; // Bypass network fetch silently on public web previews (like GitHub Pages)
+    // Offline / GitHub Pages local-only mode
+    if (offlineMsToApply > 0) {
+      window.applyOfflineGains(offlineMsToApply);
+    }
+    return;
   }
 
   const userId = window.getGameUserId();
@@ -1204,17 +1317,17 @@ window.loadGameAndSyncCloud = function () {
   })
     .then((response) => response.json())
     .then((data) => {
+      let resolvedOfflineMs = offlineMsToApply;
+
       if (data.success && data.saveData) {
         let cloudTime = data.timestamp || 0;
         let localTime = (localParsed && localParsed.lastSaveTime) || 0;
 
         if (cloudTime > localTime) {
           console.log("☁️ Newer Cloud Save found! Syncing state...");
-          window.applySaveStatePayload(data.saveData);
-          if (typeof window.updateUI === "function") window.updateUI();
-          if (typeof window.renderInventory === "function")
-            window.renderInventory();
-          localStorage.setItem("idle_game_v11", JSON.stringify(data.saveData));
+          window.applySaveStatePayload(data.saveData, true);
+          resolvedOfflineMs = now - cloudTime;
+          localStorage.setItem("idle_saq_save", JSON.stringify(data.saveData));
         } else {
           console.log("📱 Local progress is up to date.");
         }
@@ -1227,14 +1340,25 @@ window.loadGameAndSyncCloud = function () {
           window.updateSyncStatus("offline");
         }
       }
+
+      // Apply offline progress EXACTLY once after final source resolution
+      if (resolvedOfflineMs > 0) {
+        window.applyOfflineGains(resolvedOfflineMs);
+      }
+      if (typeof window.updateUI === "function") window.updateUI();
+      if (typeof window.renderInventory === "function") window.renderInventory();
     })
     .catch((err) => {
-      console.log(
-        "📡 Could not reach Cloud server for sync check. Running off local cache.",
-      );
+      console.log("📡 Could not reach Cloud server for sync check. Running off local cache.");
       if (typeof window.updateSyncStatus === "function") {
         window.updateSyncStatus("offline");
       }
+      // Apply offline gains using local cache if server is unreachable
+      if (offlineMsToApply > 0) {
+        window.applyOfflineGains(offlineMsToApply);
+      }
+      if (typeof window.updateUI === "function") window.updateUI();
+      if (typeof window.renderInventory === "function") window.renderInventory();
     });
 
   let autoSalvageSelect = document.getElementById("auto-salvage-setting");
@@ -3980,6 +4104,9 @@ window.handlePlayerDefeat = function () {
 
   let wasCrucible = window.playerStats.isCrucibleMode;
   let wasDungeon = window.playerStats.isDungeonMode;
+  let wasUber = window.playerStats.isUberBoss;
+  let wasPrestige = window.playerStats.isPrestigeBossMode;
+
   let activeDungeon = window.playerStats.currentDungeon;
   let dungeonFloor =
     wasDungeon && activeDungeon
@@ -4051,20 +4178,16 @@ window.handlePlayerDefeat = function () {
     document.getElementById("death-stat-retreat").innerText =
       `Campaign Stage ${restartStage}`;
   } else {
-    // Campaign only rollback condition (Dungeons, Crucible, Altar Uber Bosses, and Prestige Bosses bypass rollback)
-    let isOutsideCampaign =
-      window.playerStats.isUberBoss ||
-      window.playerStats.isPrestigeBossMode ||
-      window.playerStats.isCrucibleMode;
-    if (isOutsideCampaign) {
-      restartStage = window.playerStats.stage;
-      document.getElementById("death-stat-peak").innerText = window.playerStats
-        .isUberBoss
-        ? "Rift Guardian"
-        : "Prestige Boss";
-      document.getElementById("death-stat-retreat").innerText =
-        `Campaign Stage ${restartStage}`;
-    } else {
+      // Campaign only rollback condition (Dungeons, Crucible, Altar Uber Bosses, and Prestige Bosses bypass rollback)
+      let isOutsideCampaign = wasUber || wasPrestige || wasCrucible;
+      if (isOutsideCampaign) {
+        restartStage = window.playerStats.stage;
+        document.getElementById("death-stat-peak").innerText = wasUber
+          ? "Rift Guardian"
+          : "Prestige Boss";
+        document.getElementById("death-stat-retreat").innerText =
+          `Campaign Stage ${restartStage}`;
+      } else {
       // Standard campaign death (mobs or stage bosses) -> Rollback applied
       restartStage = Math.max(
         1,
@@ -4166,12 +4289,22 @@ window.useItem = function (itemName) {
   if (!window.inventory.USE[itemName] || window.inventory.USE[itemName] <= 0)
     return;
 
-  if (itemName === "Daily Reward Sack" || itemName === "Guild Reward Sack") {
-    if (typeof window.openDailyRewardSack === "function") {
-      window.openDailyRewardSack();
+  const dailySacks = ["Daily Reward Sack", "Guild Reward Sack", "Daily Guild Reward Sack"];
+    const weeklySacks = ["Weekly Reward Sack", "Guild Weekly Sack"];
+
+    if (dailySacks.includes(itemName)) {
+      if (typeof window.openDailyRewardSack === "function") {
+        window.openDailyRewardSack(itemName);
+      }
+      return;
     }
-    return;
-  }
+
+    if (weeklySacks.includes(itemName)) {
+      if (typeof window.openWeeklyRewardSack === "function") {
+        window.openWeeklyRewardSack(itemName);
+      }
+      return;
+    }
   if (itemName === "Guild Weekly Sack") {
     if (typeof window.openGuildWeeklySack === "function") {
       window.openGuildWeeklySack();
