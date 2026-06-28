@@ -5088,28 +5088,6 @@ window.getComparisonDeltaBadge = function (item) {
   let eq = getEquippedItemForComparison(item.type);
   if (!eq)
     return ` <span style="color:#2ecc71; font-weight:bold; font-size:9px;">[▲ NEW]</span>`;
-
-  let primaryStat = "atk";
-  if (["chest", "leggings", "helmet", "overall"].includes(item.type))
-    primaryStat = "def";
-  else if (item.type === "boots") primaryStat = "moveSpeed";
-  else if (item.type === "subweapon")
-    primaryStat = item.subType === "shield" ? "def" : "atk";
-
-  let val = item[primaryStat] || 0;
-  let eqVal = eq[primaryStat] || 0;
-  let diff = val - eqVal;
-  if (diff > 0.1) {
-    let label =
-      primaryStat === "moveSpeed" ? diff.toFixed(1) : Math.round(diff);
-    return ` <span style="color:#2ecc71; font-weight:bold; font-size:9px;">[▲ +${label}]</span>`;
-  } else if (diff < -0.1) {
-    let label =
-      primaryStat === "moveSpeed"
-        ? Math.abs(diff).toFixed(1)
-        : Math.round(Math.abs(diff));
-    return ` <span style="color:#e74c3c; font-weight:bold; font-size:9px;">[▼ -${label}]</span>`;
-  }
   return "";
 };
 

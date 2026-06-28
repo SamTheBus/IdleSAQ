@@ -341,6 +341,21 @@ canvas {
   /* Removed max-height and overflow-y: auto to eliminate nested scrolly scroll boxes */
 }
 
+/* Restructure Equips and Artifacts into a clean grid, leaving ETC and USE intact */
+#bag-equip,
+#bag-art {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 8px;
+  align-content: start;
+}
+
+/* Remove forced vertical margins inside grid bags */
+#bag-equip .bag-item,
+#bag-art .bag-item {
+  margin-bottom: 0;
+}
+
 .bag-item {
   background: rgba(15, 17, 26, 0.65);
   border: 1.5px solid #202632;
@@ -1062,6 +1077,12 @@ canvas {
   body {
     padding: 6px;
     font-size: 12px; /* Cascades cleanly to mobile */
+  }
+
+  /* Force single-column on mobile viewports */
+  #bag-equip,
+  #bag-art {
+    grid-template-columns: 1fr !important;
   }
 
   #top-nav {
