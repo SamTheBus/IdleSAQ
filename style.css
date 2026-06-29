@@ -1343,6 +1343,23 @@ canvas {
 }
 
 /* ==========================================================================
+           14.5. MISSION BOARD DRAGGABLE DECK
+           ========================================================================= */
+#missions-draggable-window {
+  position: absolute;
+  width: 375px;
+  max-width: 95vw;
+  background: #111115;
+  border: 2px solid var(--accent-blue);
+  border-radius: 8px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.95);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ==========================================================================
            15. REALITY RIFT TACTICAL CONSOLE
            ========================================================================= */
 #rift-console-modal {

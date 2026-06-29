@@ -8220,6 +8220,91 @@ window.claimMasterMissionReward = function (isWeekly = false) {
   window.renderMissionsWindow();
 };
 
+window.getMissionIconSvg = function (type, color) {
+  const size = 20;
+  let svgContent = "";
+  if (type === "kills" || type === "rares" || type === "rifts") {
+    // Hand-drawn crossed steel axes
+    svgContent = `
+      <g stroke="${color}" stroke-width="1.8" stroke-linecap="round" fill="none">
+        <path d="M4 20 L20 4 M3 21 L5 19 M12 6 L18 12 M9 9 L11 11" />
+        <path d="M20 20 L4 4 M21 21 L19 19 M12 18 L18 12 M9 15 L11 13" />
+        <path d="M14 4 L18 2 L22 8 L18 10 Z" fill="${color}25" stroke="${color}" stroke-width="1.2" />
+        <path d="M10 4 L6 2 L2 8 L6 10 Z" fill="${color}25" stroke="${color}" stroke-width="1.2" />
+      </g>
+    `;
+  } else if (type === "gold") {
+    // Hand-drawn rustic gold coin
+    svgContent = `
+      <g stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <circle cx="12" cy="12" r="9" fill="${color}12" />
+        <path d="M12 6 V18 M10 9 H14 M9 12 H15 M10 15 H14" stroke-width="2" />
+      </g>
+    `;
+  } else if (type === "fairies") {
+    // Whimsical fairy wings jar
+    svgContent = `
+      <g stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <path d="M9 6 H15 M10 6 V9 M14 6 V9 M8 12 C8 8 16 8 16 12 C16 16 14 20 12 20 C10 20 8 16 8 12 Z" fill="${color}10" />
+        <path d="M7 10 Q3 6, 4 12 Q8 14, 8 10 M17 10 Q21 6, 20 12 Q16 14, 16 10" stroke-width="1.2" />
+      </g>
+    `;
+  } else if (type === "tempers") {
+    // Heavy forging anvil
+    svgContent = `
+      <g stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <path d="M4 18 L20 18 L22 13 Q21 9, 16 9 L6 9 L4 13 Z" fill="${color}15" />
+        <rect x="8" y="18" width="8" height="4" />
+      </g>
+    `;
+  } else if (type === "reforges") {
+    // Polished reforge starry compass
+    svgContent = `
+      <g stroke="${color}" stroke-width="1.8" stroke-linecap="round" fill="none">
+        <circle cx="12" cy="12" r="5" />
+        <path d="M12 2 L12 6 M12 18 L12 22 M2 12 L6 12 M18 12 L22 12" stroke-width="2" />
+        <path d="M8 8 L16 16 M16 8 L8 16" stroke-width="1" />
+      </g>
+    `;
+  } else if (type === "dungeons") {
+    // Hand-drawn stone dungeon archway
+    svgContent = `
+      <g stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <path d="M4 21 V10 C4 5, 20 5, 20 10 V21 Z" fill="${color}10" />
+        <path d="M9 13 H15 V21 H9 Z" />
+        <line x1="4" y1="14" x2="9" y2="14" />
+        <line x1="15" y1="14" x2="20" y2="14" />
+      </g>
+    `;
+  } else if (type === "salvage") {
+    // Deconstruction recycling container
+    svgContent = `
+      <g stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <rect x="6" y="8" width="12" height="13" rx="1.5" />
+        <path d="M4 8 H20 M10 5 H14 M9 12 L12 9 L15 12" />
+      </g>
+    `;
+  } else if (type === "elixirs") {
+    // Hand-drawn alchemist vial
+    svgContent = `
+      <g stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <rect x="10" y="4" width="4" height="4" rx="0.5" />
+        <path d="M7 16 C7 11, 10 10, 12 10 C14 10, 17 11, 17 16 C17 20, 15 21, 12 21 C9 21, 7 20, 7 16 Z" fill="${color}18" />
+        <line x1="9" y1="16" x2="15" y2="16" stroke-width="1" opacity="0.5" />
+      </g>
+    `;
+  } else {
+    // Active clicks target
+    svgContent = `
+      <g stroke="${color}" stroke-width="1.8" stroke-linecap="round" fill="none">
+        <circle cx="12" cy="12" r="8" stroke-dasharray="3 2" />
+        <circle cx="12" cy="12" r="3" fill="${color}" />
+      </g>
+    `;
+  }
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="display:inline-block; vertical-align:middle; flex-shrink:0;">${svgContent}</svg>`;
+};
+
 window.toggleMissions = function () {
   let modal = document.getElementById("missions-draggable-window");
   if (modal) {
@@ -8236,16 +8321,15 @@ window.toggleMissions = function () {
     win.style.left = "80px";
     win.style.top = "60px";
 
-    // Structural division keeping drag handles completely separate from live content
-        win.innerHTML = `
-          <div class="draggable-header" id="missions-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
-              <span> Mission Board & Shop</span>
-              <button onclick="document.getElementById('missions-draggable-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
-          </div>
-          <div class="draggable-content" id="missions-win-content" style="max-height: 400px; padding: 12px; background:#07030b;">
-              <!-- Live sub-tab content injected dynamically below -->
-          </div>
-        `;
+    win.innerHTML = `
+      <div class="draggable-header" id="missions-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
+          <span>🎯 Mission Board & Shop</span>
+          <button onclick="document.getElementById('missions-draggable-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
+      </div>
+      <div class="draggable-content" id="missions-win-content" style="max-height: 400px; padding: 12px; background:#07030b;">
+          <!-- Live sub-tab content injected dynamically below -->
+      </div>
+    `;
 
     document.getElementById("game-container").appendChild(win);
     window.renderMissionsWindow();
@@ -8264,11 +8348,11 @@ window.renderMissionsWindow = function () {
   let tokenBalance = window.playerStats.missionTokens || 0;
 
   let tabHeaderHtml = `
-                                          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:12px; padding:0 2px;">
-                                              <button onclick="window.switchMissionsTab('BOARD')" class="sub-tab-btn ${currentTab === "BOARD" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">📋 Mission Board</button>
-                                              <button onclick="window.switchMissionsTab('SHOP')" class="sub-tab-btn ${currentTab === "SHOP" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">🏪 Mission Shop</button>
-                                          </div>
-                                      `;
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:12px; padding:0 2px;">
+        <button onclick="window.switchMissionsTab('BOARD')" class="sub-tab-btn ${currentTab === "BOARD" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">📋 Mission Board</button>
+        <button onclick="window.switchMissionsTab('SHOP')" class="sub-tab-btn ${currentTab === "SHOP" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">🏪 Mission Shop</button>
+    </div>
+  `;
 
   let contentHtml = "";
 
@@ -8283,7 +8367,8 @@ window.renderMissionsWindow = function () {
     let weeklyMasterClaimed = window.playerStats.weeklyRewardClaimed;
 
     let getMissionRowHtml = (m, isWeekly) => {
-          let pct = (m.current / m.target) * 100;
+          let pct = Math.min(100, (m.current / m.target) * 100);
+          let color = isWeekly ? "#9b59b6" : "#2ecc71";
           let btnHtml = "";
           let rerollBtnHtml = "";
 
@@ -8292,7 +8377,7 @@ window.renderMissionsWindow = function () {
           } else if (m.completed) {
             btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
           } else {
-            btnHtml = `<span style="color:#888; font-size:10px; font-family:monospace;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
+            btnHtml = `<span style="color:#2ecc71; font-size:10px; font-family:monospace; font-weight:bold;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
 
             // Dynamic single-mission Re-roll system
             if (!isWeekly) {
@@ -8314,20 +8399,23 @@ window.renderMissionsWindow = function () {
             : "";
 
           return `
-                    <div style="position:relative; background:#111; border:1px solid #2d3748; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px;">
-                        ${claimedOverlay}
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="font-size:11px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px; cursor:help;" onmouseenter="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" ontouchstart="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" onmouseleave="window.hideTooltip()">${m.desc}</strong>
-                            <div style="display:flex; align-items:center;">${btnHtml}${rerollBtnHtml}</div>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#aaa; margin-top:2px;">
-                            <span>Reward: <span style="color:#f1c40f;">${rewardText}</span></span>
-                        </div>
-                        <div style="width:100%; height:4px; background:#222; border-radius:2px; overflow:hidden; border:1px solid #333; margin-top:2px;">
-                            <div style="width:${pct}%; height:100%; background:${isWeekly ? "#9b59b6" : "#2ecc71"};"></div>
-                        </div>
+                      <div style="position:relative; background:#111; border:1.5px solid ${m.completed ? '#2ecc71' : '#2d3748'}; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px; ${m.completed ? 'border-color: ' + color + ';' : ''}">
+                ${claimedOverlay}
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:8px; text-align:left; min-width:0; flex:1;">
+                        ${window.getEtcIconHtml ? window.getEtcIconHtml(m.treat).replace("width: 32px; height: 32px;", "width: 22px; height: 22px; padding: 2px; margin-right: 4px;").replace("margin-right: 12px;", "margin-right: 4px;") : ""}
+                        <strong style="font-size:11.5px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:help;" onmouseenter="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" ontouchstart="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" onmouseleave="window.hideTooltip()">${m.desc}</strong>
                     </div>
-                  `;
+                    <div style="display:flex; align-items:center;">${btnHtml}${rerollBtnHtml}</div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#aaa; margin-top:2px;">
+                    <span>Reward: <span style="color:#f1c40f;">${rewardText}</span></span>
+                </div>
+                <div style="width:100%; height:4.5px; background:#1c1e24; border-radius:2px; overflow:hidden; border:1px solid #2d3748; margin-top:2px;">
+                    <div style="width:${pct}%; height:100%; background:${isWeekly ? "#9b59b6" : "#2ecc71"};"></div>
+                </div>
+            </div>
+          `;
         };
 
     let dailyMasterBtnHtml = "";
@@ -10701,10 +10789,8 @@ window.toggleClanHall = function () {
   if (modal) {
     modal.remove();
     window.hideTooltip();
-    window.setPauseState(false);
   } else {
     window.hideTooltip();
-    window.setPauseState(true);
     window.clanActiveTab = "OVERVIEW";
 
     let win = document.createElement("div");
@@ -10723,7 +10809,7 @@ window.toggleClanHall = function () {
               </svg>
               Clan Hall
           </span>
-          <button onclick="document.getElementById('clan-draggable-window').remove(); window.setPauseState(false); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
+          <button onclick="document.getElementById('clan-draggable-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
       </div>
       <div class="draggable-content" id="clan-win-content" style="max-height: 440px; padding: 12px; background:#07030b;">
           <!-- Injected dynamically -->
