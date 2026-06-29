@@ -343,15 +343,15 @@ window.renderForgeTab = function () {
   }
 
   if (
-      !window.forgeSelectedItem ||
-      ((window.forgeMode === "reforge" ||
-        window.forgeMode === "tier" ||
-        window.forgeMode === "enchant" ||
-        window.forgeMode === "reset_enchant" ||
-        window.forgeMode === "set") &&
-        window.forgeSelectedItem.type === "artifact")
-    ) {
-      detailEl.innerHTML = `<div style='color:#aaa; text-align:center; padding-top:10px;'>
+    !window.forgeSelectedItem ||
+    ((window.forgeMode === "reforge" ||
+      window.forgeMode === "tier" ||
+      window.forgeMode === "enchant" ||
+      window.forgeMode === "reset_enchant" ||
+      window.forgeMode === "set") &&
+      window.forgeSelectedItem.type === "artifact")
+  ) {
+    detailEl.innerHTML = `<div style='color:#aaa; text-align:center; padding-top:10px;'>
                   <div style='color:#e67e22; font-weight:bold; font-size:14px; margin-bottom:10px;'>🔨 Mystical Anvil</div>
                   <div style='font-size:11px; line-height:1.8; background:#111; padding:10px; border-radius:4px; border:1px solid #333; text-align:left;'>
                       Select an eligible item from your list.<br><br>
@@ -362,8 +362,8 @@ window.renderForgeTab = function () {
                       <b>RE-ROLL SET:</b> Infuse <strong style="color:#bdc3c7;">Monster Souls</strong> and gold to alter set resonances. Handy for completing Vanguard/Colossus layout chains!
                   </div>
               </div>`;
-      return;
-    }
+    return;
+  }
 
   let item = window.forgeSelectedItem;
   let titleColor = window.getTierColor(item.statsRolled);
@@ -2015,15 +2015,16 @@ window.salvageItem = function (id) {
   if (!item) return;
 
   if (item.locked) {
-      if (typeof window.pushHeaderToast === "function")
-        window.pushHeaderToast("🔒 Cannot salvage a Locked item!", "#e74c3c");
-      return;
-    }
-    if (window.playerStats.pendingClanProgress) {
-      window.playerStats.pendingClanProgress.salvage = (window.playerStats.pendingClanProgress.salvage || 0) + 1;
-    }
+    if (typeof window.pushHeaderToast === "function")
+      window.pushHeaderToast("🔒 Cannot salvage a Locked item!", "#e74c3c");
+    return;
+  }
+  if (window.playerStats.pendingClanProgress) {
+    window.playerStats.pendingClanProgress.salvage =
+      (window.playerStats.pendingClanProgress.salvage || 0) + 1;
+  }
 
-    if (isEquipped) {
+  if (isEquipped) {
     window.equippedSlots[slotToClear] = null;
   } else if (isArtifactSack) {
     window.inventory.ARTIFACT.splice(
@@ -2411,16 +2412,18 @@ window.triggerBulkSalvage = function () {
         });
 
         window.playerStats.itemsSalvaged =
-                  (window.playerStats.itemsSalvaged || 0) + targetItems.length;
+          (window.playerStats.itemsSalvaged || 0) + targetItems.length;
 
-                if (typeof window.progressMission === "function") {
-                  window.progressMission("salvage", targetItems.length);
-                }
-                if (window.playerStats.pendingClanProgress) {
-                  window.playerStats.pendingClanProgress.salvage = (window.playerStats.pendingClanProgress.salvage || 0) + targetItems.length;
-                }
+        if (typeof window.progressMission === "function") {
+          window.progressMission("salvage", targetItems.length);
+        }
+        if (window.playerStats.pendingClanProgress) {
+          window.playerStats.pendingClanProgress.salvage =
+            (window.playerStats.pendingClanProgress.salvage || 0) +
+            targetItems.length;
+        }
 
-                let targetIds = new Set(targetItems.map((item) => item.id));
+        let targetIds = new Set(targetItems.map((item) => item.id));
         window.inventory.EQUIP = window.inventory.EQUIP.filter(
           (item) => !targetIds.has(item.id),
         );
@@ -2484,7 +2487,8 @@ window.temperItem = function () {
   if (!window.forgeSelectedItem) return;
   let isArt = window.forgeSelectedItem.type === "artifact";
   if (window.playerStats.pendingClanProgress) {
-    window.playerStats.pendingClanProgress.tempers = (window.playerStats.pendingClanProgress.tempers || 0) + 1;
+    window.playerStats.pendingClanProgress.tempers =
+      (window.playerStats.pendingClanProgress.tempers || 0) + 1;
   }
 
   if (window.forgeMode === "temper") {
@@ -2909,7 +2913,8 @@ window.reforgeItemStat = function () {
   if (!window.forgeSelectedItem) return;
   let item = window.forgeSelectedItem;
   if (window.playerStats.pendingClanProgress) {
-    window.playerStats.pendingClanProgress.reforges = (window.playerStats.pendingClanProgress.reforges || 0) + 1;
+    window.playerStats.pendingClanProgress.reforges =
+      (window.playerStats.pendingClanProgress.reforges || 0) + 1;
   }
 
   if (!item.reforgedProperty) {

@@ -55,18 +55,24 @@ window.saveGame = function () {
     }
     // Scan backpack inventories
     if (window.inventory.EQUIP) {
-      window.inventory.EQUIP.forEach(item => { if (item) activeIds.add(item.id); });
+      window.inventory.EQUIP.forEach((item) => {
+        if (item) activeIds.add(item.id);
+      });
     }
     if (window.inventory.ARTIFACT) {
-      window.inventory.ARTIFACT.forEach(item => { if (item) activeIds.add(item.id); });
+      window.inventory.ARTIFACT.forEach((item) => {
+        if (item) activeIds.add(item.id);
+      });
     }
     // Scan gacha rolls history
     if (window.playerStats && window.playerStats.gachaHistory) {
-      window.playerStats.gachaHistory.forEach(item => { if (item) activeIds.add(item.id); });
+      window.playerStats.gachaHistory.forEach((item) => {
+        if (item) activeIds.add(item.id);
+      });
     }
     // Scan logs history to preserve tooltips for item links in chat/logs
     if (window.logsHistory) {
-      window.logsHistory.forEach(logLine => {
+      window.logsHistory.forEach((logLine) => {
         let match;
         let regex = /showLogTooltip\(event,\s*(\d+)\)/g;
         while ((match = regex.exec(logLine)) !== null) {
@@ -118,23 +124,23 @@ window.saveGame = function () {
       window.updateSyncStatus("syncing");
     }
     fetch(`${window.GAME_SERVER_URL}/api/save`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, saveData }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              console.log("☁️ Cloud Backup Successful!");
-              if (data.clearPending && window.playerStats.pendingClanProgress) {
-                for (let k in window.playerStats.pendingClanProgress) {
-                  window.playerStats.pendingClanProgress[k] = 0;
-                }
-              }
-              if (typeof window.updateSyncStatus === "function") {
-                window.updateSyncStatus("connected");
-              }
-            } else {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, saveData }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          console.log("☁️ Cloud Backup Successful!");
+          if (data.clearPending && window.playerStats.pendingClanProgress) {
+            for (let k in window.playerStats.pendingClanProgress) {
+              window.playerStats.pendingClanProgress[k] = 0;
+            }
+          }
+          if (typeof window.updateSyncStatus === "function") {
+            window.updateSyncStatus("connected");
+          }
+        } else {
           console.warn("⚠️ Cloud Sync Warning:", data.error);
           if (typeof window.updateSyncStatus === "function") {
             window.updateSyncStatus("offline");
@@ -166,7 +172,10 @@ window.requestRename = function () {
   let newName = input.value.trim();
 
   if (!window.validateNameInput(newName)) {
-    window.pushHeaderToast("❌ Invalid Name! 3-14 characters, letters/numbers and single spaces only.", "#e74c3c");
+    window.pushHeaderToast(
+      "❌ Invalid Name! 3-14 characters, letters/numbers and single spaces only.",
+      "#e74c3c",
+    );
     return;
   }
 
@@ -264,12 +273,15 @@ window.hardResetGame = function () {
                 performLocalWipe();
               })
               .catch((err) => {
-                console.error("Cloud wipe request failed; falling back to local wipe:", err);
+                console.error(
+                  "Cloud wipe request failed; falling back to local wipe:",
+                  err,
+                );
                 performLocalWipe();
               });
-          }
+          },
         );
-      }
+      },
     );
   }
 };
@@ -284,32 +296,32 @@ window.gainXp = function (amount, silent = false) {
   else window.playerStats.runXp = amount;
 
   let leveledUp = false;
-    while (window.playerStats.xp >= window.playerStats.xpReq) {
-      window.playerStats.xp -= window.playerStats.xpReq;
-      window.playerStats.level++;
-      window.playerStats.sp += 3;
-      if (window.draftAllocations !== null) window.draftSP += 3;
-      window.playerStats.xpReq = Math.floor(window.playerStats.xpReq * 1.2);
-      leveledUp = true;
-    }
-    if (leveledUp) {
-      window.invalidatePlayerStats();
-      if (!silent) {
-    if (typeof window.pushLog === "function")
-      window.pushLog(
-        `<span style='color:#f1c40f; font-weight:bold;'>⭐ LEVEL UP! You are now Level ${window.playerStats.level}! +3 SP</span>`,
-      );
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast(
-        `⭐ LEVEL UP! Level ${window.playerStats.level}`,
-        "#f1c40f",
-      );
-    p = window.resolvePlayerStats();
-    window.playerStats.currentHp = p.maxHp;
-    if (typeof window.checkAchievements === "function")
-      window.checkAchievements();
+  while (window.playerStats.xp >= window.playerStats.xpReq) {
+    window.playerStats.xp -= window.playerStats.xpReq;
+    window.playerStats.level++;
+    window.playerStats.sp += 3;
+    if (window.draftAllocations !== null) window.draftSP += 3;
+    window.playerStats.xpReq = Math.floor(window.playerStats.xpReq * 1.2);
+    leveledUp = true;
   }
-  if (typeof window.updateUI === "function") window.updateUI();
+  if (leveledUp) {
+    window.invalidatePlayerStats();
+    if (!silent) {
+      if (typeof window.pushLog === "function")
+        window.pushLog(
+          `<span style='color:#f1c40f; font-weight:bold;'>⭐ LEVEL UP! You are now Level ${window.playerStats.level}! +3 SP</span>`,
+        );
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast(
+          `⭐ LEVEL UP! Level ${window.playerStats.level}`,
+          "#f1c40f",
+        );
+      p = window.resolvePlayerStats();
+      window.playerStats.currentHp = p.maxHp;
+      if (typeof window.checkAchievements === "function")
+        window.checkAchievements();
+    }
+    if (typeof window.updateUI === "function") window.updateUI();
   }
 };
 
@@ -381,29 +393,30 @@ window.applyOfflineGains = function (offlineMs) {
   ];
 
   let originalBuffs = {
-      atk: window.playerStats.atkPotionTimer,
-      hp: window.playerStats.hpPotionTimer,
-      def: window.playerStats.defPotionTimer,
-      haste: window.playerStats.hastePotionTimer,
-      frenzy: window.playerStats.frenzyTimer,
-      adrenaline: window.playerStats.adrenalineTimer,
-    };
+    atk: window.playerStats.atkPotionTimer,
+    hp: window.playerStats.hpPotionTimer,
+    def: window.playerStats.defPotionTimer,
+    haste: window.playerStats.hastePotionTimer,
+    frenzy: window.playerStats.frenzyTimer,
+    adrenaline: window.playerStats.adrenalineTimer,
+  };
 
-    let maxStagesToAdvance = 100;
-    let stagesAdvancedCount = 0;
+  let maxStagesToAdvance = 100;
+  let stagesAdvancedCount = 0;
 
-    while (remainingSeconds > 0) {
-      let stateBefore = (window.playerStats.frenzyTimer > 0) |
-                        ((window.playerStats.adrenalineTimer > 0) << 1) |
-                        ((window.playerStats.atkPotionTimer > 0) << 2) |
-                        ((window.playerStats.hpPotionTimer > 0) << 3) |
-                        ((window.playerStats.defPotionTimer > 0) << 4) |
-                        ((window.playerStats.hastePotionTimer > 0) << 5) |
-                        ((window.playerStats.xpPotionTimer > 0) << 6) |
-                        ((window.playerStats.dropPotionTimer > 0) << 7) |
-                        ((window.playerStats.qlyPotionTimer > 0) << 8);
+  while (remainingSeconds > 0) {
+    let stateBefore =
+      (window.playerStats.frenzyTimer > 0) |
+      ((window.playerStats.adrenalineTimer > 0) << 1) |
+      ((window.playerStats.atkPotionTimer > 0) << 2) |
+      ((window.playerStats.hpPotionTimer > 0) << 3) |
+      ((window.playerStats.defPotionTimer > 0) << 4) |
+      ((window.playerStats.hastePotionTimer > 0) << 5) |
+      ((window.playerStats.xpPotionTimer > 0) << 6) |
+      ((window.playerStats.dropPotionTimer > 0) << 7) |
+      ((window.playerStats.qlyPotionTimer > 0) << 8);
 
-      let elapsedFrames = elapsedSeconds * 60;
+    let elapsedFrames = elapsedSeconds * 60;
     window.playerStats.atkPotionTimer = Math.max(
       0,
       originalBuffs.atk - elapsedFrames,
@@ -566,25 +579,26 @@ window.applyOfflineGains = function (offlineMs) {
           }
         }
       }
-            remainingSeconds = 0;
-          }
+      remainingSeconds = 0;
+    }
 
-          let stateAfter = (window.playerStats.frenzyTimer > 0) |
-                           ((window.playerStats.adrenalineTimer > 0) << 1) |
-                           ((window.playerStats.atkPotionTimer > 0) << 2) |
-                           ((window.playerStats.hpPotionTimer > 0) << 3) |
-                           ((window.playerStats.defPotionTimer > 0) << 4) |
-                           ((window.playerStats.hastePotionTimer > 0) << 5) |
-                           ((window.playerStats.xpPotionTimer > 0) << 6) |
-                           ((window.playerStats.dropPotionTimer > 0) << 7) |
-                           ((window.playerStats.qlyPotionTimer > 0) << 8);
+    let stateAfter =
+      (window.playerStats.frenzyTimer > 0) |
+      ((window.playerStats.adrenalineTimer > 0) << 1) |
+      ((window.playerStats.atkPotionTimer > 0) << 2) |
+      ((window.playerStats.hpPotionTimer > 0) << 3) |
+      ((window.playerStats.defPotionTimer > 0) << 4) |
+      ((window.playerStats.hastePotionTimer > 0) << 5) |
+      ((window.playerStats.xpPotionTimer > 0) << 6) |
+      ((window.playerStats.dropPotionTimer > 0) << 7) |
+      ((window.playerStats.qlyPotionTimer > 0) << 8);
 
-          if (stateBefore !== stateAfter) {
-            window.invalidatePlayerStats();
-          }
-        }
+    if (stateBefore !== stateAfter) {
+      window.invalidatePlayerStats();
+    }
+  }
 
-        let totalElapsedFrames = offlineSeconds * 60;
+  let totalElapsedFrames = offlineSeconds * 60;
   window.playerStats.atkPotionTimer = Math.max(
     0,
     originalBuffs.atk - totalElapsedFrames,
@@ -770,23 +784,23 @@ window.applyOfflineGains = function (offlineMs) {
   }
 
   window.playerStats.coins += totalGold;
-    window.playerStats.totalGoldEarned =
-      (window.playerStats.totalGoldEarned || 0) + totalGold;
-    window.playerStats.totalLifetimeKills =
-      (window.playerStats.totalLifetimeKills || 0) + totalKills;
-    window.playerStats.stage = currentStage;
-    window.playerStats.maxStage = Math.max(
-      window.playerStats.maxStage || 1,
-      window.playerStats.stage,
-    );
-    window.playerStats.lifetimePeakStage = Math.max(
-      window.playerStats.lifetimePeakStage || 1,
-      window.playerStats.maxStage,
-    );
-    window.gainXp(totalXp, true);
-    window.invalidatePlayerStats();
+  window.playerStats.totalGoldEarned =
+    (window.playerStats.totalGoldEarned || 0) + totalGold;
+  window.playerStats.totalLifetimeKills =
+    (window.playerStats.totalLifetimeKills || 0) + totalKills;
+  window.playerStats.stage = currentStage;
+  window.playerStats.maxStage = Math.max(
+    window.playerStats.maxStage || 1,
+    window.playerStats.stage,
+  );
+  window.playerStats.lifetimePeakStage = Math.max(
+    window.playerStats.lifetimePeakStage || 1,
+    window.playerStats.maxStage,
+  );
+  window.gainXp(totalXp, true);
+  window.invalidatePlayerStats();
 
-    if (typeof window.showOfflineSummaryModal === "function") {
+  if (typeof window.showOfflineSummaryModal === "function") {
     window.showOfflineSummaryModal(
       offlineSeconds,
       originalStage,
@@ -1240,43 +1254,43 @@ window.applySaveStatePayload = function (parsed, skipOfflineGains = false) {
     }
 
     if (parsed.lastSaveTime) {
-          let now = Date.now();
-          let offlineMs = now - parsed.lastSaveTime;
+      let now = Date.now();
+      let offlineMs = now - parsed.lastSaveTime;
 
-          let keyTypes = ["equip", "gold", "mat"];
-          keyTypes.forEach((k) => {
-            let count = k + "Keys";
-            let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
-            if (window.playerStats[count] < 3) {
-              let keyTime = window.playerStats[time] || now;
-              let msSinceNextKey = now - keyTime;
-              if (msSinceNextKey >= 0) {
-                let keysEarned = 1 + Math.floor(msSinceNextKey / 21600000);
-                window.playerStats[count] = Math.min(
-                  3,
-                  window.playerStats[count] + keysEarned,
-                );
-                window.playerStats[time] =
-                  now + (21600000 - (msSinceNextKey % 21600000));
-              }
-            }
-          });
-          if (!skipOfflineGains && typeof window.applyOfflineGains === "function")
-            window.applyOfflineGains(offlineMs);
-        }
-        setTimeout(() => {
-          if (typeof window.pushLog === "function")
-            window.pushLog(
-              `<span style='color:#3498db; font-weight:bold;'>[SYSTEM] Save loaded successfully.</span>`,
+      let keyTypes = ["equip", "gold", "mat"];
+      keyTypes.forEach((k) => {
+        let count = k + "Keys";
+        let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
+        if (window.playerStats[count] < 3) {
+          let keyTime = window.playerStats[time] || now;
+          let msSinceNextKey = now - keyTime;
+          if (msSinceNextKey >= 0) {
+            let keysEarned = 1 + Math.floor(msSinceNextKey / 21600000);
+            window.playerStats[count] = Math.min(
+              3,
+              window.playerStats[count] + keysEarned,
             );
-        }, 500);
+            window.playerStats[time] =
+              now + (21600000 - (msSinceNextKey % 21600000));
+          }
+        }
+      });
+      if (!skipOfflineGains && typeof window.applyOfflineGains === "function")
+        window.applyOfflineGains(offlineMs);
+    }
+    setTimeout(() => {
+      if (typeof window.pushLog === "function")
+        window.pushLog(
+          `<span style='color:#3498db; font-weight:bold;'>[SYSTEM] Save loaded successfully.</span>`,
+        );
+    }, 500);
 
-        if (typeof window.refreshMarketShopIfNeeded === "function")
-          window.refreshMarketShopIfNeeded();
-      } catch (e) {
-        console.error("Save load failed", e);
-      }
-    };
+    if (typeof window.refreshMarketShopIfNeeded === "function")
+      window.refreshMarketShopIfNeeded();
+  } catch (e) {
+    console.error("Save load failed", e);
+  }
+};
 
 window.loadGame = function () {
   window.loadGameAndSyncCloud();
@@ -1294,7 +1308,9 @@ window.loadGameAndSyncCloud = function () {
         let legacyParsed = JSON.parse(legacyDataRaw);
         // Guarantee copy is valid and populated before overwriting
         if (legacyParsed && legacyParsed.playerStats) {
-          console.log("🚀 Migrating legacy save to unified idle_saq_save baseline.");
+          console.log(
+            "🚀 Migrating legacy save to unified idle_saq_save baseline.",
+          );
           localStorage.setItem("idle_saq_save", legacyDataRaw);
           localStorage.setItem("idle_saq_migrated_v11_to_v96", "true");
           // Keep old save under backup key for complete safety
@@ -1349,55 +1365,59 @@ window.loadGameAndSyncCloud = function () {
       let resolvedOfflineMs = offlineMsToApply;
 
       if (data.success && data.saveData) {
-              let cloudTime = data.timestamp || 0;
-              let localTime = (localParsed && localParsed.lastSaveTime) || 0;
+        let cloudTime = data.timestamp || 0;
+        let localTime = (localParsed && localParsed.lastSaveTime) || 0;
 
-              if (cloudTime > localTime) {
-                console.log("☁️ Newer Cloud Save found! Syncing state...");
-                window.applySaveStatePayload(data.saveData, true);
-                resolvedOfflineMs = now - cloudTime;
-                localStorage.setItem("idle_saq_save", JSON.stringify(data.saveData));
-              } else {
-                console.log("📱 Local progress is up to date.");
-              }
+        if (cloudTime > localTime) {
+          console.log("☁️ Newer Cloud Save found! Syncing state...");
+          window.applySaveStatePayload(data.saveData, true);
+          resolvedOfflineMs = now - cloudTime;
+          localStorage.setItem("idle_saq_save", JSON.stringify(data.saveData));
+        } else {
+          console.log("📱 Local progress is up to date.");
+        }
 
-              // Sync and cache current Guild attributes
-                            if (data.clan) {
-                                  window.playerStats.clanId = data.clan.id;
-                                  window.playerStats.clanName = data.clan.name;
-                                  window.playerStats.clanEmblem = data.clan.leader_id.charCodeAt(0) || 0;
-                                  window.playerStats.clanLevel = data.clan.level || 1;
-                                  window.playerStats.clanSkills = {
-                                    steel_phalanx: data.clan.skill_steel_phalanx,
-                                    vitality_well: data.clan.skill_vitality_well,
-                                    prosperity_accord: data.clan.skill_prosperity_accord,
-                                    voyagers_guidance: data.clan.skill_voyagers_guidance,
-                                    aetheric_wisdom: data.clan.skill_aetheric_wisdom || 0
-                                  };
-                                } else {
-                              window.playerStats.clanId = null;
-                              window.playerStats.clanName = null;
-                            }
+        // Sync and cache current Guild attributes
+        if (data.clan) {
+          window.playerStats.clanId = data.clan.id;
+          window.playerStats.clanName = data.clan.name;
+          window.playerStats.clanEmblem =
+            data.clan.leader_id.charCodeAt(0) || 0;
+          window.playerStats.clanLevel = data.clan.level || 1;
+          window.playerStats.clanSkills = {
+            steel_phalanx: data.clan.skill_steel_phalanx,
+            vitality_well: data.clan.skill_vitality_well,
+            prosperity_accord: data.clan.skill_prosperity_accord,
+            voyagers_guidance: data.clan.skill_voyagers_guidance,
+            aetheric_wisdom: data.clan.skill_aetheric_wisdom || 0,
+          };
+        } else {
+          window.playerStats.clanId = null;
+          window.playerStats.clanName = null;
+        }
 
-              window.isCloudSynced = true;
-              if (typeof window.updateSyncStatus === "function") {
-                window.updateSyncStatus("connected");
-              }
-            } else {
-              if (typeof window.updateSyncStatus === "function") {
-                window.updateSyncStatus("offline");
-              }
-            }
+        window.isCloudSynced = true;
+        if (typeof window.updateSyncStatus === "function") {
+          window.updateSyncStatus("connected");
+        }
+      } else {
+        if (typeof window.updateSyncStatus === "function") {
+          window.updateSyncStatus("offline");
+        }
+      }
 
       // Apply offline progress EXACTLY once after final source resolution
       if (resolvedOfflineMs > 0) {
         window.applyOfflineGains(resolvedOfflineMs);
       }
       if (typeof window.updateUI === "function") window.updateUI();
-      if (typeof window.renderInventory === "function") window.renderInventory();
+      if (typeof window.renderInventory === "function")
+        window.renderInventory();
     })
     .catch((err) => {
-      console.log("📡 Could not reach Cloud server for sync check. Running off local cache.");
+      console.log(
+        "📡 Could not reach Cloud server for sync check. Running off local cache.",
+      );
       if (typeof window.updateSyncStatus === "function") {
         window.updateSyncStatus("offline");
       }
@@ -1406,7 +1426,8 @@ window.loadGameAndSyncCloud = function () {
         window.applyOfflineGains(offlineMsToApply);
       }
       if (typeof window.updateUI === "function") window.updateUI();
-      if (typeof window.renderInventory === "function") window.renderInventory();
+      if (typeof window.renderInventory === "function")
+        window.renderInventory();
     });
 
   let autoSalvageSelect = document.getElementById("auto-salvage-setting");
@@ -1796,15 +1817,16 @@ function update() {
   let now = Date.now();
   let gapMs = now - window.lastUpdateTime;
 
-  let stateBefore = (window.playerStats.frenzyTimer > 0) |
-                    ((window.playerStats.adrenalineTimer > 0) << 1) |
-                    ((window.playerStats.atkPotionTimer > 0) << 2) |
-                    ((window.playerStats.hpPotionTimer > 0) << 3) |
-                    ((window.playerStats.defPotionTimer > 0) << 4) |
-                    ((window.playerStats.hastePotionTimer > 0) << 5) |
-                    ((window.playerStats.xpPotionTimer > 0) << 6) |
-                    ((window.playerStats.dropPotionTimer > 0) << 7) |
-                    ((window.playerStats.qlyPotionTimer > 0) << 8);
+  let stateBefore =
+    (window.playerStats.frenzyTimer > 0) |
+    ((window.playerStats.adrenalineTimer > 0) << 1) |
+    ((window.playerStats.atkPotionTimer > 0) << 2) |
+    ((window.playerStats.hpPotionTimer > 0) << 3) |
+    ((window.playerStats.defPotionTimer > 0) << 4) |
+    ((window.playerStats.hastePotionTimer > 0) << 5) |
+    ((window.playerStats.xpPotionTimer > 0) << 6) |
+    ((window.playerStats.dropPotionTimer > 0) << 7) |
+    ((window.playerStats.qlyPotionTimer > 0) << 8);
 
   if (
     window.equippedSlots.subweapon &&
@@ -1946,75 +1968,75 @@ function update() {
   }
 
   let keyTypes = ["equip", "gold", "mat"];
+  keyTypes.forEach((k) => {
+    let count = k + "Keys";
+    let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
+    if (window.playerStats[count] < 3) {
+      if (!window.playerStats[time]) {
+        window.playerStats[time] = now + 21600000; // 6 Hours
+      } else if (now >= window.playerStats[time]) {
+        let msOver = now - window.playerStats[time];
+        let keysEarned = 1 + Math.floor(msOver / 21600000);
+        window.playerStats[count] = Math.min(
+          3,
+          window.playerStats[count] + keysEarned,
+        );
+        window.playerStats[time] =
+          window.playerStats[count] < 3
+            ? now + (21600000 - (msOver % 21600000))
+            : 0;
+      }
+    }
+  });
+
+  // Synchronize dynamic keys, timers, and shop refreshes at a throttled interval (twice a second) to prevent layout thrashing
+  if (window.logicClock % 30 === 0) {
     keyTypes.forEach((k) => {
       let count = k + "Keys";
       let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
+      let textKeys = window.playerStats[count];
+
+      let timerText = "";
       if (window.playerStats[count] < 3) {
-        if (!window.playerStats[time]) {
-          window.playerStats[time] = now + 21600000; // 6 Hours
-        } else if (now >= window.playerStats[time]) {
-          let msOver = now - window.playerStats[time];
-          let keysEarned = 1 + Math.floor(msOver / 21600000);
-          window.playerStats[count] = Math.min(
-            3,
-            window.playerStats[count] + keysEarned,
-          );
-          window.playerStats[time] =
-            window.playerStats[count] < 3
-              ? now + (21600000 - (msOver % 21600000))
-              : 0;
-        }
+        let msLeft = Math.max(0, window.playerStats[time] - now);
+        let hours = Math.floor(msLeft / 3600000);
+        let mins = Math.floor((msLeft % 3600000) / 60000);
+        let secs = Math.floor((msLeft % 60000) / 1000);
+        timerText = hours > 0 ? `(${hours}h ${mins}m)` : `(${mins}m ${secs}s)`;
       }
+
+      // Set popup elements
+      let pTimer = document.getElementById("dt-" + k);
+      let pKeys = document.getElementById("dk-" + k);
+      if (pTimer) pTimer.innerText = timerText;
+      if (pKeys) pKeys.innerText = textKeys;
+
+      // Set native tab elements
+      let tTimer = document.getElementById("tab-dt-" + k);
+      let tKeys = document.getElementById("tab-dk-" + k);
+      if (tTimer) tTimer.innerText = timerText;
+      if (tKeys) tKeys.innerText = textKeys;
     });
 
-    // Synchronize dynamic keys, timers, and shop refreshes at a throttled interval (twice a second) to prevent layout thrashing
-    if (window.logicClock % 30 === 0) {
-      keyTypes.forEach((k) => {
-        let count = k + "Keys";
-        let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
-        let textKeys = window.playerStats[count];
-
-        let timerText = "";
-        if (window.playerStats[count] < 3) {
-          let msLeft = Math.max(0, window.playerStats[time] - now);
-          let hours = Math.floor(msLeft / 3600000);
-          let mins = Math.floor((msLeft % 3600000) / 60000);
-          let secs = Math.floor((msLeft % 60000) / 1000);
-          timerText = hours > 0 ? `(${hours}h ${mins}m)` : `(${mins}m ${secs}s)`;
-        }
-
-        // Set popup elements
-        let pTimer = document.getElementById("dt-" + k);
-        let pKeys = document.getElementById("dk-" + k);
-        if (pTimer) pTimer.innerText = timerText;
-        if (pKeys) pKeys.innerText = textKeys;
-
-        // Set native tab elements
-        let tTimer = document.getElementById("tab-dt-" + k);
-        let tKeys = document.getElementById("tab-dk-" + k);
-        if (tTimer) tTimer.innerText = timerText;
-        if (tKeys) tKeys.innerText = textKeys;
-      });
-
-      if (
-        document.getElementById("tab-market") &&
-        document.getElementById("tab-market").classList.contains("active")
-      ) {
-        if (now >= window.playerStats.shopRefreshTime) {
-          window.refreshMarketShopIfNeeded();
-        } else {
-          let msLeft = window.playerStats.shopRefreshTime - now;
-          let mins = Math.floor((msLeft % 3600000) / 60000)
-            .toString()
-            .padStart(2, "0");
-          let secs = Math.floor((msLeft % 60000) / 1000)
-            .toString()
-            .padStart(2, "0");
-          let timerEl = document.getElementById("market-timer");
-          if (timerEl) timerEl.innerText = `Refreshes in: ${mins}:${secs}`;
-        }
+    if (
+      document.getElementById("tab-market") &&
+      document.getElementById("tab-market").classList.contains("active")
+    ) {
+      if (now >= window.playerStats.shopRefreshTime) {
+        window.refreshMarketShopIfNeeded();
+      } else {
+        let msLeft = window.playerStats.shopRefreshTime - now;
+        let mins = Math.floor((msLeft % 3600000) / 60000)
+          .toString()
+          .padStart(2, "0");
+        let secs = Math.floor((msLeft % 60000) / 1000)
+          .toString()
+          .padStart(2, "0");
+        let timerEl = document.getElementById("market-timer");
+        if (timerEl) timerEl.innerText = `Refreshes in: ${mins}:${secs}`;
       }
     }
+  }
 
   let p = window.resolvePlayerStats();
   let scrollSpeed = 2 + p.moveSpeed * 0.05;
@@ -2809,37 +2831,38 @@ function update() {
                   : "Standard Monster";
 
               window.playerStats.killedByMob = JSON.parse(
-                              JSON.stringify(window.mob),
-                            );
-                            window.playerStats.currentHp = 0;
-                            window.deathAnimationTimer = window.deathMaxFrames;
-                            return;
-                          }
-                        }
-                      }
-                      window.updateUI();
-                    }
-                  }
-                }
+                JSON.stringify(window.mob),
+              );
+              window.playerStats.currentHp = 0;
+              window.deathAnimationTimer = window.deathMaxFrames;
+              return;
+            }
+          }
+        }
+        window.updateUI();
+      }
+    }
+  }
 
-                let stateAfter = (window.playerStats.frenzyTimer > 0) |
-                                 ((window.playerStats.adrenalineTimer > 0) << 1) |
-                                 ((window.playerStats.atkPotionTimer > 0) << 2) |
-                                 ((window.playerStats.hpPotionTimer > 0) << 3) |
-                                 ((window.playerStats.defPotionTimer > 0) << 4) |
-                                 ((window.playerStats.hastePotionTimer > 0) << 5) |
-                                 ((window.playerStats.xpPotionTimer > 0) << 6) |
-                                 ((window.playerStats.dropPotionTimer > 0) << 7) |
-                                 ((window.playerStats.qlyPotionTimer > 0) << 8);
+  let stateAfter =
+    (window.playerStats.frenzyTimer > 0) |
+    ((window.playerStats.adrenalineTimer > 0) << 1) |
+    ((window.playerStats.atkPotionTimer > 0) << 2) |
+    ((window.playerStats.hpPotionTimer > 0) << 3) |
+    ((window.playerStats.defPotionTimer > 0) << 4) |
+    ((window.playerStats.hastePotionTimer > 0) << 5) |
+    ((window.playerStats.xpPotionTimer > 0) << 6) |
+    ((window.playerStats.dropPotionTimer > 0) << 7) |
+    ((window.playerStats.qlyPotionTimer > 0) << 8);
 
-                if (stateBefore !== stateAfter) {
-                  window.invalidatePlayerStats();
-                }
-              }
+  if (stateBefore !== stateAfter) {
+    window.invalidatePlayerStats();
+  }
+}
 
-              // --- GAMEPLAY TRIGGERS & HOOKS ---
+// --- GAMEPLAY TRIGGERS & HOOKS ---
 
-              window.triggerPlayerSlash = function () {
+window.triggerPlayerSlash = function () {
   if (window.isGamePaused) return;
   let p = window.resolvePlayerStats();
   let cooldownCap =
@@ -2883,12 +2906,13 @@ window.executeHitCalculations = function () {
     if (window.playerStats.adrenalineTimer > 0) finalDamage *= 2;
 
     let isCrit = Math.random() < p.critChance;
-        if (isCrit) {
-          finalDamage = Math.ceil(finalDamage * p.critDamage);
-          if (window.playerStats.pendingClanProgress) {
-            window.playerStats.pendingClanProgress.crits = (window.playerStats.pendingClanProgress.crits || 0) + 1;
-          }
-        }
+    if (isCrit) {
+      finalDamage = Math.ceil(finalDamage * p.critDamage);
+      if (window.playerStats.pendingClanProgress) {
+        window.playerStats.pendingClanProgress.crits =
+          (window.playerStats.pendingClanProgress.crits || 0) + 1;
+      }
+    }
 
     // Core mitigation layer filtering final base slash damage against active mob defense
     let mobDef = window.mob.def || 0;
@@ -3602,14 +3626,15 @@ window.handleMobDeath = function () {
     let riftLvl = window.playerStats.activeRiftLevel || 1;
 
     window.playerStats.highestRiftLevel = Math.max(
-          window.playerStats.highestRiftLevel || 0,
-          riftLvl,
-        );
-        window.playerStats.activeRift = null;
-        window.playerStats.activeRiftLevel = 1;
-        if (window.playerStats.pendingClanProgress) {
-          window.playerStats.pendingClanProgress.rifts = (window.playerStats.pendingClanProgress.rifts || 0) + 1;
-        }
+      window.playerStats.highestRiftLevel || 0,
+      riftLvl,
+    );
+    window.playerStats.activeRift = null;
+    window.playerStats.activeRiftLevel = 1;
+    if (window.playerStats.pendingClanProgress) {
+      window.playerStats.pendingClanProgress.rifts =
+        (window.playerStats.pendingClanProgress.rifts || 0) + 1;
+    }
 
     // Highly Scaled & Rewarding Loot Matrix for challenging higher Level Reality Rifts
     let keysEarned = 1 + Math.floor(riftLvl / 10);
@@ -3762,18 +3787,23 @@ window.handleMobDeath = function () {
   if (window.playerStats.runKills !== undefined) window.playerStats.runKills++;
 
   if (window.mob && window.mob.type !== "prestige_boss") {
-      if (typeof window.progressMission === "function") {
-        window.progressMission("kills", 1);
-        if (window.mob.isRare) {
-          window.progressMission("rares", 1);
-        }
-      }
-      if (!window.playerStats.isDungeonMode && !window.playerStats.isCrucibleMode && !window.playerStats.isUberBoss) {
-        if (window.playerStats.pendingClanProgress) {
-          window.playerStats.pendingClanProgress.kills = (window.playerStats.pendingClanProgress.kills || 0) + 1;
-        }
+    if (typeof window.progressMission === "function") {
+      window.progressMission("kills", 1);
+      if (window.mob.isRare) {
+        window.progressMission("rares", 1);
       }
     }
+    if (
+      !window.playerStats.isDungeonMode &&
+      !window.playerStats.isCrucibleMode &&
+      !window.playerStats.isUberBoss
+    ) {
+      if (window.playerStats.pendingClanProgress) {
+        window.playerStats.pendingClanProgress.kills =
+          (window.playerStats.pendingClanProgress.kills || 0) + 1;
+      }
+    }
+  }
 
   // Handle Prestige Boss death checks and skip normal campaign rewards
   if (window.mob && window.mob.type === "prestige_boss") {
@@ -3801,13 +3831,14 @@ window.handleMobDeath = function () {
   }
 
   if (window.playerStats.isDungeonMode) {
-      if (window.mob.type === "dungeon_boss") {
-        let dType = window.playerStats.currentDungeon;
-        window.playerStats.currentDungeonStage[dType]++;
-        let nextStg = window.playerStats.currentDungeonStage[dType];
-        if (window.playerStats.pendingClanProgress) {
-          window.playerStats.pendingClanProgress.dungeons = (window.playerStats.pendingClanProgress.dungeons || 0) + 1;
-        }
+    if (window.mob.type === "dungeon_boss") {
+      let dType = window.playerStats.currentDungeon;
+      window.playerStats.currentDungeonStage[dType]++;
+      let nextStg = window.playerStats.currentDungeonStage[dType];
+      if (window.playerStats.pendingClanProgress) {
+        window.playerStats.pendingClanProgress.dungeons =
+          (window.playerStats.pendingClanProgress.dungeons || 0) + 1;
+      }
       window.playerStats.dungeonPeaks[dType] = Math.max(
         window.playerStats.dungeonPeaks[dType] || 1,
         nextStg,
@@ -4023,25 +4054,26 @@ window.processEnemySpawn = function () {
   } else {
     let tier = window.getStageTier();
     if (window.playerStats.isBossMode) {
-          if (window.playerStats.isUberBoss) {
-            let bossType = window.playerStats.currentUberBoss || "guardian";
-            let hpMult = 10.0;
-            let dmgMult = 10.0;
-            let speedMult = 100;
-            let mType = "aegis_goliath";
-            let logText =
-              "<strong style='color:#3498db;'>Aegis Goliath, The Iron Sentinel</strong> has materialized from the cracked Aether!";
+      if (window.playerStats.isUberBoss) {
+        let bossType = window.playerStats.currentUberBoss || "guardian";
+        let hpMult = 10.0;
+        let dmgMult = 10.0;
+        let speedMult = 100;
+        let mType = "aegis_goliath";
+        let logText =
+          "<strong style='color:#3498db;'>Aegis Goliath, The Iron Sentinel</strong> has materialized from the cracked Aether!";
 
-            if (bossType === "chronos") {
-              speedMult = 90;
-              mType = "chronos_arbitrator";
-              logText =
-                "<strong style='color:#f1c40f;'>Chronos Arbitrator</strong> has stepped from the temporal flow!";
-            } else if (bossType === "nexus") {
-              speedMult = 80;
-              mType = "nexus_overseer";
-              logText = "<strong style='color:#ff007f;'>Nexus Overseer</strong> has infected the reality stream!";
-            }
+        if (bossType === "chronos") {
+          speedMult = 90;
+          mType = "chronos_arbitrator";
+          logText =
+            "<strong style='color:#f1c40f;'>Chronos Arbitrator</strong> has stepped from the temporal flow!";
+        } else if (bossType === "nexus") {
+          speedMult = 80;
+          mType = "nexus_overseer";
+          logText =
+            "<strong style='color:#ff007f;'>Nexus Overseer</strong> has infected the reality stream!";
+        }
 
         let riftLvl = window.playerStats.activeRiftLevel || 1;
         let equivalentStage = 50 + riftLvl * 10;
@@ -4268,16 +4300,16 @@ window.handlePlayerDefeat = function () {
     document.getElementById("death-stat-retreat").innerText =
       `Campaign Stage ${restartStage}`;
   } else {
-      // Campaign only rollback condition (Dungeons, Crucible, Altar Uber Bosses, and Prestige Bosses bypass rollback)
-      let isOutsideCampaign = wasUber || wasPrestige || wasCrucible;
-      if (isOutsideCampaign) {
-        restartStage = window.playerStats.stage;
-        document.getElementById("death-stat-peak").innerText = wasUber
-          ? "Rift Guardian"
-          : "Prestige Boss";
-        document.getElementById("death-stat-retreat").innerText =
-          `Campaign Stage ${restartStage}`;
-      } else {
+    // Campaign only rollback condition (Dungeons, Crucible, Altar Uber Bosses, and Prestige Bosses bypass rollback)
+    let isOutsideCampaign = wasUber || wasPrestige || wasCrucible;
+    if (isOutsideCampaign) {
+      restartStage = window.playerStats.stage;
+      document.getElementById("death-stat-peak").innerText = wasUber
+        ? "Rift Guardian"
+        : "Prestige Boss";
+      document.getElementById("death-stat-retreat").innerText =
+        `Campaign Stage ${restartStage}`;
+    } else {
       // Standard campaign death (mobs or stage bosses) -> Rollback applied
       restartStage = Math.max(
         1,
@@ -4379,22 +4411,26 @@ window.useItem = function (itemName) {
   if (!window.inventory.USE[itemName] || window.inventory.USE[itemName] <= 0)
     return;
 
-  const dailySacks = ["Daily Reward Sack", "Guild Reward Sack", "Daily Guild Reward Sack"];
-    const weeklySacks = ["Weekly Reward Sack", "Guild Weekly Sack"];
+  const dailySacks = [
+    "Daily Reward Sack",
+    "Guild Reward Sack",
+    "Daily Guild Reward Sack",
+  ];
+  const weeklySacks = ["Weekly Reward Sack", "Guild Weekly Sack"];
 
-    if (dailySacks.includes(itemName)) {
-      if (typeof window.openDailyRewardSack === "function") {
-        window.openDailyRewardSack(itemName);
-      }
-      return;
+  if (dailySacks.includes(itemName)) {
+    if (typeof window.openDailyRewardSack === "function") {
+      window.openDailyRewardSack(itemName);
     }
+    return;
+  }
 
-    if (weeklySacks.includes(itemName)) {
-      if (typeof window.openWeeklyRewardSack === "function") {
-        window.openWeeklyRewardSack(itemName);
-      }
-      return;
+  if (weeklySacks.includes(itemName)) {
+    if (typeof window.openWeeklyRewardSack === "function") {
+      window.openWeeklyRewardSack(itemName);
     }
+    return;
+  }
   if (itemName === "Guild Weekly Sack") {
     if (typeof window.openGuildWeeklySack === "function") {
       window.openGuildWeeklySack();
@@ -4432,12 +4468,13 @@ window.useItem = function (itemName) {
       if (window.inventory.USE[name] === 0) delete window.inventory.USE[name];
     }
     window.playerStats.elixirsConsumed =
-          (window.playerStats.elixirsConsumed || 0) + 1;
-        if (name.includes("Elixir") && window.playerStats.pendingClanProgress) {
-          window.playerStats.pendingClanProgress.potions = (window.playerStats.pendingClanProgress.potions || 0) + 1;
-        }
-        window.checkAchievements();
-        window.pushHeaderToast(`Consumed ${name}!`, "#2ecc71");
+      (window.playerStats.elixirsConsumed || 0) + 1;
+    if (name.includes("Elixir") && window.playerStats.pendingClanProgress) {
+      window.playerStats.pendingClanProgress.potions =
+        (window.playerStats.pendingClanProgress.potions || 0) + 1;
+    }
+    window.checkAchievements();
+    window.pushHeaderToast(`Consumed ${name}!`, "#2ecc71");
   }
 
   if (itemName === "SP Reset Scroll") {
@@ -4619,14 +4656,15 @@ window.triggerFairyLoot = function (targetFairy) {
   );
 
   window.activeFairies = window.activeFairies.filter(
-      (f) => f.id !== targetFairy.id,
-    );
-    window.SoundManager.play("fairy");
-    window.playerStats.fairiesClicked =
-      (window.playerStats.fairiesClicked || 0) + 1;
-    if (window.playerStats.pendingClanProgress) {
-      window.playerStats.pendingClanProgress.fairies = (window.playerStats.pendingClanProgress.fairies || 0) + 1;
-    }
+    (f) => f.id !== targetFairy.id,
+  );
+  window.SoundManager.play("fairy");
+  window.playerStats.fairiesClicked =
+    (window.playerStats.fairiesClicked || 0) + 1;
+  if (window.playerStats.pendingClanProgress) {
+    window.playerStats.pendingClanProgress.fairies =
+      (window.playerStats.pendingClanProgress.fairies || 0) + 1;
+  }
   if (typeof window.progressMission === "function")
     window.progressMission("fairies", 1);
 

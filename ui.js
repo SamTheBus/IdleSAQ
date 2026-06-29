@@ -191,14 +191,14 @@ window.getEquipIconHtml = function (item, size = 32) {
   }
 
   let bg = "rgba(170, 170, 170, 0.12)";
-    let border = "#444";
-    return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; display: inline-flex; align-items: center; justify-content: center; width: ${size}px; height: ${size}px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${svg}</span>`;
-  };
+  let border = "#444";
+  return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; display: inline-flex; align-items: center; justify-content: center; width: ${size}px; height: ${size}px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${svg}</span>`;
+};
 
-  window.getBossIconHtml = function (bossType) {
-    let uid = Math.floor(Math.random() * 10000000);
-    if (bossType === "guardian") {
-      return `
+window.getBossIconHtml = function (bossType) {
+  let uid = Math.floor(Math.random() * 10000000);
+  if (bossType === "guardian") {
+    return `
               <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(52, 152, 219, 0.45));">
                   <defs>
                       <linearGradient id="g_goliath_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#34495e"/><stop offset="100%" stop-color="#1a252f"/></linearGradient>
@@ -209,8 +209,8 @@ window.getEquipIconHtml = function (item, size = 32) {
                   <polygon points="26,24 20,22 24,28" fill="#e74c3c" />
                   <polygon points="38,24 44,22 40,28" fill="#e74c3c" />
               </svg>`;
-    } else if (bossType === "chronos") {
-      return `
+  } else if (bossType === "chronos") {
+    return `
               <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(241, 196, 15, 0.45));">
                   <defs><linearGradient id="g_chron_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#b7950b"/></linearGradient></defs>
                   <circle cx="32" cy="32" r="24" fill="none" stroke="url(#g_chron_${uid})" stroke-width="3" />
@@ -219,19 +219,19 @@ window.getEquipIconHtml = function (item, size = 32) {
                   <line x1="32" y1="32" x2="32" y2="20" stroke="#fff" stroke-width="2" stroke-linecap="round" />
                   <line x1="32" y1="32" x2="40" y2="32" stroke="#e67e22" stroke-width="1.5" stroke-linecap="round" />
               </svg>`;
-    } else if (bossType === "nexus") {
-      return `
+  } else if (bossType === "nexus") {
+    return `
               <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(255, 0, 127, 0.45));">
                   <defs><linearGradient id="g_nex_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff007f"/><stop offset="100%" stop-color="#00d2ff"/></linearGradient></defs>
                   <rect x="14" y="14" width="36" height="36" fill="none" stroke="url(#g_nex_${uid})" stroke-width="2" />
                   <rect x="20" y="20" width="24" height="24" fill="none" stroke="#00b894" stroke-width="1.5" />
                   <circle cx="32" cy="32" r="4" fill="#fff" stroke="#ff007f" stroke-width="1" />
               </svg>`;
-    }
-    return `🔮`;
-  };
+  }
+  return `🔮`;
+};
 
-  window.getEtcIconHtml = function (key) {
+window.getEtcIconHtml = function (key) {
   let uid = Math.floor(Math.random() * 10000000);
   let bg = "rgba(170, 170, 170, 0.12)";
   let border = "#444";
@@ -584,9 +584,9 @@ window.getUseIconHtml = function (key) {
   }
 
   return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; margin-right: 12px; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${svgContent}</span>`;
-  };
+};
 
-  window.getArtifactIconHtml = function (trait, size = 24) {
+window.getArtifactIconHtml = function (trait, size = 24) {
   let uid = Math.floor(Math.random() * 10000000);
   let svg = "";
   if (trait === "frenzy") {
@@ -870,16 +870,31 @@ window.activeStatTooltip = null;
 
 // Rigorous alphanumeric checks to prevent HTML element breaking, XSS, and SQL injection
 window.validateNameInput = function (name) {
-  return /^[a-zA-Z0-9]([a-zA-Z0-9 ]*[a-zA-Z0-9])?$/.test(name) && name.length >= 3 && name.length <= 14;
+  return (
+    /^[a-zA-Z0-9]([a-zA-Z0-9 ]*[a-zA-Z0-9])?$/.test(name) &&
+    name.length >= 3 &&
+    name.length <= 14
+  );
 };
 window.validateGuildNameInput = function (name) {
-  return /^[a-zA-Z0-9]([a-zA-Z0-9 ]*[a-zA-Z0-9])?$/.test(name) && name.length >= 3 && name.length <= 16;
+  return (
+    /^[a-zA-Z0-9]([a-zA-Z0-9 ]*[a-zA-Z0-9])?$/.test(name) &&
+    name.length >= 3 &&
+    name.length <= 16
+  );
 };
 
 // Procedural SVG Shield Emblem Generator using mathematically deterministic properties
 window.getClanEmblemHtml = function (emblemSeed, size = 18) {
   let seed = parseInt(emblemSeed, 10) || 0;
-  let colors = ["#8e44ad", "#f1c40f", "#e74c3c", "#2ecc71", "#00d2ff", "#34495e"];
+  let colors = [
+    "#8e44ad",
+    "#f1c40f",
+    "#e74c3c",
+    "#2ecc71",
+    "#00d2ff",
+    "#34495e",
+  ];
   let bgCol = colors[seed % colors.length];
   let fgCol = colors[(seed + 2) % colors.length];
   if (bgCol === fgCol) fgCol = "#ffffff";
@@ -888,7 +903,7 @@ window.getClanEmblemHtml = function (emblemSeed, size = 18) {
     `<path d="M4 4 Q16 2, 28 4 Q26 18, 16 28 Q6 18, 4 4 Z" fill="${bgCol}" stroke="#000" stroke-width="1.8"/>`,
     `<path d="M6 6 Q16 2, 26 6 Q24 20, 16 28 Q8 20, 6 6 Z" fill="${bgCol}" stroke="#000" stroke-width="1.8"/>`,
     `<rect x="4" y="4" width="24" height="24" rx="4" fill="${bgCol}" stroke="#000" stroke-width="1.8"/>`,
-    `<circle cx="16" cy="16" r="12" fill="${bgCol}" stroke="#000" stroke-width="1.8"/>`
+    `<circle cx="16" cy="16" r="12" fill="${bgCol}" stroke="#000" stroke-width="1.8"/>`,
   ];
 
   let symbols = [
@@ -896,7 +911,7 @@ window.getClanEmblemHtml = function (emblemSeed, size = 18) {
     `<path d="M16 8 L18 12 L17 22 L15 22 L14 12 Z M12 22 H20 V23.5 H12 Z M14.5 23.5 H17.5 V27 H14.5 Z" fill="${fgCol}" stroke="#000" stroke-width="0.8"/>`,
     `<path d="M11 11 Q16 9, 21 11 L20 18 Q16 22, 16 22 Q16 22, 12 18 Z" fill="${fgCol}" stroke="#000" stroke-width="0.8"/>`,
     `<path d="M10 22 L12 14 L14 18 L16 11 L18 18 L20 14 L22 22 Z" fill="${fgCol}" stroke="#000" stroke-width="0.8"/>`,
-    `<path d="M16 21 C16 21 10 16 10 12 C10 9 12 7 14.5 9 C16 11 16 11 16 11 C16 11 16 11 17.5 9 C20 7 22 9 22 12 C22 16 16 21 16 21 Z" fill="${fgCol}" stroke="#000" stroke-width="0.8"/>`
+    `<path d="M16 21 C16 21 10 16 10 12 C10 9 12 7 14.5 9 C16 11 16 11 16 11 C16 11 16 11 17.5 9 C20 7 22 9 22 12 C22 16 16 21 16 21 Z" fill="${fgCol}" stroke="#000" stroke-width="0.8"/>`,
   ];
 
   let bgPath = charges[seed % charges.length];
@@ -925,9 +940,13 @@ window.getPacificTimeNow = function (ms) {
   if (!window.ptFormatter) {
     window.ptFormatter = new Intl.DateTimeFormat("en-US", {
       timeZone: "America/Los_Angeles",
-      year: "numeric", month: "numeric", day: "numeric",
-      hour: "numeric", minute: "numeric", second: "numeric",
-      hour12: false
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
     });
   }
   // Formats date parts into a parsable layout: MM/DD/YYYY, HH:MM:SS
@@ -936,7 +955,14 @@ window.getPacificTimeNow = function (ms) {
   for (let p of parts) {
     map[p.type] = p.value;
   }
-  return new Date(map.year, map.month - 1, map.day, map.hour, map.minute, map.second);
+  return new Date(
+    map.year,
+    map.month - 1,
+    map.day,
+    map.hour,
+    map.minute,
+    map.second,
+  );
 };
 
 window.hexToRgba = function (hex, alpha) {
@@ -1448,42 +1474,45 @@ window.updateUI = function () {
   }
 
   // Update Dungeon Peaks & Checkpoints in Activities Menu
-    if (window.playerStats.dungeonPeaks) {
-      let eqPeak = window.playerStats.dungeonPeaks.equip || 1;
-      let goPeak = window.playerStats.dungeonPeaks.gold || 1;
-      let maPeak = window.playerStats.dungeonPeaks.mat || 1;
+  if (window.playerStats.dungeonPeaks) {
+    let eqPeak = window.playerStats.dungeonPeaks.equip || 1;
+    let goPeak = window.playerStats.dungeonPeaks.gold || 1;
+    let maPeak = window.playerStats.dungeonPeaks.mat || 1;
 
-      window.setText("dp-equip", eqPeak);
-      window.setText("dp-gold", goPeak);
-      window.setText("dp-mat", maPeak);
+    window.setText("dp-equip", eqPeak);
+    window.setText("dp-gold", goPeak);
+    window.setText("dp-mat", maPeak);
 
-      window.setText("tab-dp-equip", eqPeak);
-      window.setText("tab-dp-gold", goPeak);
-      window.setText("tab-dp-mat", maPeak);
+    window.setText("tab-dp-equip", eqPeak);
+    window.setText("tab-dp-gold", goPeak);
+    window.setText("tab-dp-mat", maPeak);
 
-      let eqCheck = Math.max(1, Math.floor(eqPeak * 0.9));
-      let goCheck = Math.max(1, Math.floor(goPeak * 0.9));
-      let maCheck = Math.max(1, Math.floor(maPeak * 0.9));
+    let eqCheck = Math.max(1, Math.floor(eqPeak * 0.9));
+    let goCheck = Math.max(1, Math.floor(goPeak * 0.9));
+    let maCheck = Math.max(1, Math.floor(maPeak * 0.9));
 
-      window.setText("dc-equip", eqCheck);
-      window.setText("dc-gold", goCheck);
-      window.setText("dc-mat", maCheck);
+    window.setText("dc-equip", eqCheck);
+    window.setText("dc-gold", goCheck);
+    window.setText("dc-mat", maCheck);
 
-      window.setText("tab-dc-equip", eqCheck);
-      window.setText("tab-dc-gold", goCheck);
-      window.setText("tab-dc-mat", maCheck);
-    }
+    window.setText("tab-dc-equip", eqCheck);
+    window.setText("tab-dc-gold", goCheck);
+    window.setText("tab-dc-mat", maCheck);
+  }
 
-    // Update Crucible Peak & Checkpoint in Activities Menu
-    let cPeak = window.playerStats.cruciblePeak || 1;
-    window.setText("crucible-peak-wave", cPeak);
-    window.setText("tab-crucible-peak-wave", cPeak);
+  // Update Crucible Peak & Checkpoint in Activities Menu
+  let cPeak = window.playerStats.cruciblePeak || 1;
+  window.setText("crucible-peak-wave", cPeak);
+  window.setText("tab-crucible-peak-wave", cPeak);
 
-    let cCheck = Math.max(1, Math.floor(cPeak * 0.8));
-      window.setText("crucible-checkpoint-wave", cCheck);
-      window.setText("tab-crucible-checkpoint-wave", cCheck);
+  let cCheck = Math.max(1, Math.floor(cPeak * 0.8));
+  window.setText("crucible-checkpoint-wave", cCheck);
+  window.setText("tab-crucible-checkpoint-wave", cCheck);
 
-      window.setText("tab-etc-souls", (window.inventory.ETC["Monster Soul"] || 0).toLocaleString());
+  window.setText(
+    "tab-etc-souls",
+    (window.inventory.ETC["Monster Soul"] || 0).toLocaleString(),
+  );
 
   let maxBag = window.getMaxBagSlots();
   let bagEl = document.getElementById("hud-bag");
@@ -1496,42 +1525,38 @@ window.updateUI = function () {
         : "#2ecc71";
   }
 
-  // 2. Stats panel headers (re-routed to unified selectors)
-    setText("char-level", window.playerStats.level);
-    setText("header-player-name", window.playerStats.playerName || "Guest");
+  // 2. Stats panel headers (Cleaned up: Name + Bold Title Pill)
+  setText("char-level", window.playerStats.level);
 
-    let titleEl = document.getElementById("header-equipped-title");
-    if (titleEl) {
-      let activeTitle = window.playerStats.equippedTitle;
-      if (activeTitle && window.TITLES_DATA[activeTitle]) {
-        let tData = window.TITLES_DATA[activeTitle];
-        titleEl.innerHTML = ` <span style="color: ${tData.color || "#ff007f"}; font-weight:900;">[${tData.name}]</span>`;
-      } else {
-        titleEl.innerHTML = "";
-      }
+  let nameEl = document.getElementById("header-player-name");
+  if (nameEl) {
+    let activeTitle = window.playerStats.equippedTitle;
+    let tData = activeTitle ? window.TITLES_DATA[activeTitle] : null;
+    // Bold, pill-styled Title Badge with Icon
+    let titleHtml = tData
+      ? `
+          <span style="background:${tData.color || "#ff007f"}20; color:${tData.color || "#ff007f"}; border:1px solid ${tData.color || "#ff007f"}; padding: 1px 6px; border-radius: 10px; font-size: 9px; font-weight: 900; margin-left: 6px; display: inline-flex; align-items:center; gap:3px; text-transform: uppercase;">
+            ${tData.icon || ""} ${tData.name}
+          </span>`
+      : "";
+    nameEl.innerHTML = `<span>${window.playerStats.playerName || "Guest"}</span>${titleHtml}`;
+  }
+
+  // Status Tags Row (Guild Emblem + Name)
+  let tagsEl = document.getElementById("header-status-tags");
+  if (tagsEl) {
+    let clanHtml = "";
+    if (window.playerStats.clanId && window.playerStats.clanName) {
+      let emblemHtml = window.getClanEmblemHtml(
+        window.playerStats.clanEmblem || 0,
+        10,
+      );
+      clanHtml = `<span style="background:rgba(142, 68, 173, 0.15); border:1px solid #8e44ad; color:#df9ffb; padding:2px 6px; border-radius:10px; font-size:9px; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${emblemHtml} ${window.escapeHTML(window.playerStats.clanName)}</span>`;
     }
+    tagsEl.innerHTML = `<div style="display:flex; justify-content:center; gap:6px; margin-top:4px;">${clanHtml}</div>`;
+  }
 
-    let clanBadgeEl = document.getElementById("header-clan-badge");
-        if (clanBadgeEl) {
-          if (window.playerStats.clanId && window.playerStats.clanName) {
-            clanBadgeEl.style.display = "inline-flex";
-            let emblemHtml = window.getClanEmblemHtml(window.playerStats.clanEmblem || 0, 14);
-            clanBadgeEl.innerHTML = `${emblemHtml} <span style="white-space:nowrap;">${window.escapeHTML(window.playerStats.clanName)}</span>`;
-          } else {
-            clanBadgeEl.style.display = "none";
-          }
-        }
-
-    let nameLabel = document.getElementById("current-name-label");
-    if (nameLabel) {
-      nameLabel.innerText = `(Current: ${window.playerStats.playerName || "Guest"})`;
-    }
-
-  setText(
-    "char-sp",
-    window.draftAllocations !== null ? window.draftSP : window.playerStats.sp,
-  );
-
+  // XP Bar (Stable tracking)
   let xpPct = (window.playerStats.xp / window.playerStats.xpReq) * 100;
   setText(
     "char-xp-text",
@@ -1541,18 +1566,16 @@ window.updateUI = function () {
   const xpFill = document.getElementById("char-xp-fill");
   if (xpFill) {
     xpFill.style.width = Math.min(100, xpPct) + "%";
-    // Dynamically pulse the bar's glow once the user crosses the 90% threshold
-    if (xpPct >= 90) {
-      xpFill.style.boxShadow = "0 0 12px #d946ef, 0 0 4px #8b5cf6";
-    } else {
-      xpFill.style.boxShadow = "0 0 8px rgba(139, 92, 246, 0.45)";
-    }
   }
 
   // 3. Core attributes matrix
   setText("stat-str", p.str);
   setText("stat-dex", p.dex);
   setText("stat-int", p.int);
+  setText(
+    "char-sp",
+    window.draftAllocations !== null ? window.draftSP : window.playerStats.sp,
+  );
 
   // 4. Multipliers & Avoidance
   setText("stat-atk", window.formatNumber(p.atk));
@@ -1596,7 +1619,7 @@ window.updateUI = function () {
   }
 
   // Run unified roll-up alerts check
-    window.updateHubAlerts();
+  window.updateHubAlerts();
 
   // Refresh core SP allocations button display
   const updateSPButtonStates = () => {
@@ -1730,10 +1753,10 @@ window.updateUI = function () {
   setText("live-qty-scraps", scrapsSum.toLocaleString());
 
   // Update Altar UI Card dynamically if Runs tab is active
-    let runsTab = document.getElementById("tab-activities");
-    if (runsTab && runsTab.classList.contains("active")) {
-      window.renderAltarTab();
-    }
+  let runsTab = document.getElementById("tab-activities");
+  if (runsTab && runsTab.classList.contains("active")) {
+    window.renderAltarTab();
+  }
 
   // Update Vending Subtab variables if active
   let gachaSec = document.getElementById("market-sec-gacha");
@@ -1892,21 +1915,21 @@ window.updateUI = function () {
   if (artMaxBtn) artMaxBtn.innerText = capMax;
 
   window.renderPaperDoll();
-    window.renderInventory();
+  window.renderInventory();
 
-    // Invalidate the player stats cache on any UI update to force clean computations on state change
-    window.invalidatePlayerStats();
+  // Invalidate the player stats cache on any UI update to force clean computations on state change
+  window.invalidatePlayerStats();
 
-    // Auto-refresh tooltip
-    if (window.activeStatTooltip) {
-      window.refreshActiveStatTooltip();
-    }
+  // Auto-refresh tooltip
+  if (window.activeStatTooltip) {
+    window.refreshActiveStatTooltip();
+  }
 
-    // Refreshes the medal banner on UI state changes instead of rendering inside a 60 FPS loop
-    if (typeof window.updateMedalBanner === "function") {
-      window.updateMedalBanner();
-    }
-  };
+  // Refreshes the medal banner on UI state changes instead of rendering inside a 60 FPS loop
+  if (typeof window.updateMedalBanner === "function") {
+    window.updateMedalBanner();
+  }
+};
 
 // --- ATTRIBUTES MATRIX CONTROLS ---
 
@@ -3022,8 +3045,8 @@ window.renderMarketShop = function () {
         : "background: linear-gradient(180deg, #f1c40f 0%, #d4af37 100%); color: #000; font-weight: 900; border-color: #fff; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);";
 
     let soldOverlay = isSold
-          ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); backdrop-filter: blur(1.5px); display:flex; justify-content:center; align-items:center; border-radius:8px; z-index:5;"><span style="color:#e74c3c; font-size:18px; font-weight:900; border: 2.5px solid #e74c3c; padding: 6px 16px; border-radius:4px; transform: rotate(-8deg); font-family:'Arial Black',Impact,sans-serif; text-shadow: 0 2px 4px #000; letter-spacing:2px; box-shadow: 0 0 15px rgba(231,76,60,0.35);">PURCHASED</span></div>`
-          : "";
+      ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); backdrop-filter: blur(1.5px); display:flex; justify-content:center; align-items:center; border-radius:8px; z-index:5;"><span style="color:#e74c3c; font-size:18px; font-weight:900; border: 2.5px solid #e74c3c; padding: 6px 16px; border-radius:4px; transform: rotate(-8deg); font-family:'Arial Black',Impact,sans-serif; text-shadow: 0 2px 4px #000; letter-spacing:2px; box-shadow: 0 0 15px rgba(231,76,60,0.35);">PURCHASED</span></div>`
+      : "";
 
     html += `
         <div class="gold-shop-iotd-hero"
@@ -3072,8 +3095,8 @@ window.renderMarketShop = function () {
     let isSold = shopItem.purchased;
 
     let soldOverlay = isSold
-          ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:12px; font-weight:900; border: 1.5px solid #e74c3c; padding: 2px 10px; border-radius:3px; transform: rotate(-5deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1px;">PURCHASED</span></div>`
-          : "";
+      ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:12px; font-weight:900; border: 1.5px solid #e74c3c; padding: 2px 10px; border-radius:3px; transform: rotate(-5deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1px;">PURCHASED</span></div>`
+      : "";
 
     let btnStyle =
       isSold || window.playerStats.coins < shopItem.cost
@@ -3279,10 +3302,10 @@ window.renderGoldUpgrades = function () {
   ];
 
   el.innerHTML = upgrades
-      .map((up) => {
-        let costColor = p.coins >= up.cost ? "#2ecc71" : "#e74c3c";
-        let bgStyle = window.hexToRgba(up.color, 0.04);
-        let bonusPct = up.level * (up.id === "global" ? 1.5 : 1);
+    .map((up) => {
+      let costColor = p.coins >= up.cost ? "#2ecc71" : "#e74c3c";
+      let bgStyle = window.hexToRgba(up.color, 0.04);
+      let bonusPct = up.level * (up.id === "global" ? 1.5 : 1);
       let btnStyle =
         p.coins < up.cost
           ? "background: #333; color: #666; cursor: not-allowed; border-color: #444;"
@@ -3665,10 +3688,11 @@ window.triggerPrestigeAscension = function () {
   let totalAwarded = Math.min(10, basePoints + bonusPoints) + pushBonus;
 
   window.playerStats.prestigePoints += totalAwarded;
-    window.playerStats.prestigeCount++;
-    if (window.playerStats.pendingClanProgress) {
-      window.playerStats.pendingClanProgress.prestige = (window.playerStats.pendingClanProgress.prestige || 0) + 1;
-    }
+  window.playerStats.prestigeCount++;
+  if (window.playerStats.pendingClanProgress) {
+    window.playerStats.pendingClanProgress.prestige =
+      (window.playerStats.pendingClanProgress.prestige || 0) + 1;
+  }
 
   let nowTime = Date.now();
   if (
@@ -4769,57 +4793,57 @@ window.generateItemCardHtml = function (
 
   // --- BASE STATS SECTION ---
   if (item.id !== "dummy" && item.type !== "artifact") {
-      let baseStats = [];
+    let baseStats = [];
 
-      if (item.baseAtk > 0) {
-        baseStats.push({
-          label: "Weapon Damage",
-          val: Math.round(item.baseAtk),
-          icon: window.getUiIconSvg("atk", 14),
-        });
-      }
-      if (item.baseDef > 0) {
-        baseStats.push({
-          label: "Armor",
-          val: Math.round(item.baseDef),
-          icon: window.getUiIconSvg("def", 14),
-        });
-      }
-      if (item.baseMaxHp > 0) {
-        baseStats.push({
-          label: "Max Life",
-          val: Math.round(item.baseMaxHp),
-          icon: window.getUiIconSvg("maxHp", 14),
-        });
-      }
-      if (item.baseMoveSpeed > 0) {
-        baseStats.push({
-          label: "Speed",
-          val: Math.round(item.baseMoveSpeed),
-          icon: window.getUiIconSvg("moveSpeed", 14),
-        });
-      }
-      if (item.baseBlock > 0) {
-        baseStats.push({
-          label: "Block Rate",
-          val: Math.round(item.baseBlock * 100) + "%",
-          icon: window.getUiIconSvg("block", 14),
-        });
-      }
-      if (item.baseParry > 0) {
-        baseStats.push({
-          label: "Parry Rate",
-          val: Math.round(item.baseParry * 100) + "%",
-          icon: window.getUiIconSvg("parry", 14),
-        });
-      }
-      if (item.baseInt > 0) {
-        baseStats.push({
-          label: "Intelligence",
-          val: Math.round(item.baseInt),
-          icon: window.getUiIconSvg("int", 14),
-        });
-      }
+    if (item.baseAtk > 0) {
+      baseStats.push({
+        label: "Weapon Damage",
+        val: Math.round(item.baseAtk),
+        icon: window.getUiIconSvg("atk", 14),
+      });
+    }
+    if (item.baseDef > 0) {
+      baseStats.push({
+        label: "Armor",
+        val: Math.round(item.baseDef),
+        icon: window.getUiIconSvg("def", 14),
+      });
+    }
+    if (item.baseMaxHp > 0) {
+      baseStats.push({
+        label: "Max Life",
+        val: Math.round(item.baseMaxHp),
+        icon: window.getUiIconSvg("maxHp", 14),
+      });
+    }
+    if (item.baseMoveSpeed > 0) {
+      baseStats.push({
+        label: "Speed",
+        val: Math.round(item.baseMoveSpeed),
+        icon: window.getUiIconSvg("moveSpeed", 14),
+      });
+    }
+    if (item.baseBlock > 0) {
+      baseStats.push({
+        label: "Block Rate",
+        val: Math.round(item.baseBlock * 100) + "%",
+        icon: window.getUiIconSvg("block", 14),
+      });
+    }
+    if (item.baseParry > 0) {
+      baseStats.push({
+        label: "Parry Rate",
+        val: Math.round(item.baseParry * 100) + "%",
+        icon: window.getUiIconSvg("parry", 14),
+      });
+    }
+    if (item.baseInt > 0) {
+      baseStats.push({
+        label: "Intelligence",
+        val: Math.round(item.baseInt),
+        icon: window.getUiIconSvg("int", 14),
+      });
+    }
 
     if (baseStats.length > 0) {
       html += `<div style="background: rgba(255, 255, 255, 0.02); border: 1px solid #222; border-radius: 4px; padding: 6px; margin: 8px 0; text-align: center;">`;
@@ -5306,26 +5330,26 @@ window.switchTab = function (tabId) {
     window.ensureDraftInitialized();
   }
   if (tabId === "forge") {
-              if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-            }
-            if (tabId === "activities") {
-                let currentSub = window.state.currentActivitiesSubTab || "DUNGEONS";
-                window.switchActivitiesSubTab(currentSub);
-                if (typeof window.renderAltarTab === "function") {
-                  window.renderAltarTab();
-                }
-              }
-    if (tabId === "market") {
-      if (typeof window.refreshMarketShopIfNeeded === "function")
-        window.refreshMarketShopIfNeeded();
-      if (typeof window.renderMysticalShop === "function")
-        window.renderMysticalShop();
-      if (typeof window.renderGoldUpgrades === "function")
-        window.renderGoldUpgrades();
-      if (!document.querySelector("#tab-market .sub-tab-btn.active")) {
-        window.switchMarketSubTab("GACHA");
-      }
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+  }
+  if (tabId === "activities") {
+    let currentSub = window.state.currentActivitiesSubTab || "DUNGEONS";
+    window.switchActivitiesSubTab(currentSub);
+    if (typeof window.renderAltarTab === "function") {
+      window.renderAltarTab();
     }
+  }
+  if (tabId === "market") {
+    if (typeof window.refreshMarketShopIfNeeded === "function")
+      window.refreshMarketShopIfNeeded();
+    if (typeof window.renderMysticalShop === "function")
+      window.renderMysticalShop();
+    if (typeof window.renderGoldUpgrades === "function")
+      window.renderGoldUpgrades();
+    if (!document.querySelector("#tab-market .sub-tab-btn.active")) {
+      window.switchMarketSubTab("GACHA");
+    }
+  }
   if (tabId === "prestige") {
     if (typeof window.renderPrestigeTab === "function")
       window.renderPrestigeTab();
@@ -5387,38 +5411,43 @@ window.switchMarketSubTab = function (subTabId) {
   if (activeSec) activeSec.style.display = "block";
 
   if (subTabId === "ALTAR") {
-      window.renderAltarTab();
-    } else if (subTabId === "GACHA") {
-      window.updateGachaRecentList();
-      window.renderGachaShowcaseMarquee();
-    }
+    window.renderAltarTab();
+  } else if (subTabId === "GACHA") {
+    window.updateGachaRecentList();
+    window.renderGachaShowcaseMarquee();
+  }
 
-    if (typeof window.hideTooltip === "function") window.hideTooltip();
-  };
+  if (typeof window.hideTooltip === "function") window.hideTooltip();
+};
 
-  window.switchActivitiesSubTab = function (subTabId) {
-    window.state.currentActivitiesSubTab = subTabId;
-    document
-      .querySelectorAll("#tab-activities .sub-tabs .sub-tab-btn")
-      .forEach((btn) => btn.classList.remove("active"));
-    document
-      .querySelectorAll(".activities-section-content")
-      .forEach((sec) => (sec.style.display = "none"));
+window.switchActivitiesSubTab = function (subTabId) {
+  window.state.currentActivitiesSubTab = subTabId;
+  document
+    .querySelectorAll("#tab-activities .sub-tabs .sub-tab-btn")
+    .forEach((btn) => btn.classList.remove("active"));
+  document
+    .querySelectorAll(".activities-section-content")
+    .forEach((sec) => (sec.style.display = "none"));
 
-    let btnSuffix = subTabId === "DUNGEONS" ? "dungeons" : subTabId === "CRUCIBLE" ? "crucible" : "altar";
-    let activeBtn = document.getElementById("activities-sub-tab-" + btnSuffix);
-    if (activeBtn) activeBtn.classList.add("active");
+  let btnSuffix =
+    subTabId === "DUNGEONS"
+      ? "dungeons"
+      : subTabId === "CRUCIBLE"
+        ? "crucible"
+        : "altar";
+  let activeBtn = document.getElementById("activities-sub-tab-" + btnSuffix);
+  if (activeBtn) activeBtn.classList.add("active");
 
-    let activeSec = document.getElementById("activities-sec-" + btnSuffix);
-    if (activeSec) activeSec.style.display = "block";
+  let activeSec = document.getElementById("activities-sec-" + btnSuffix);
+  if (activeSec) activeSec.style.display = "block";
 
-    if (subTabId === "ALTAR") {
-      window.renderAltarTab();
-    }
-    if (typeof window.hideTooltip === "function") window.hideTooltip();
-  };
+  if (subTabId === "ALTAR") {
+    window.renderAltarTab();
+  }
+  if (typeof window.hideTooltip === "function") window.hideTooltip();
+};
 
-  window.toggleFullscreen = function () {
+window.toggleFullscreen = function () {
   if (!document.fullscreenElement) {
     document.documentElement.requestFullscreen().catch((err) => {
       console.log("Fullscreen activation failed", err);
@@ -5577,17 +5606,17 @@ window.rerollDailyMission = function (missionId) {
   window.playerStats.dailyRerollsDone++;
 
   // Replace inline parameters with the new selection while ensuring Daily Sacks are preserved
-    mList[mIndex] = {
-      id: targetMission.id,
-      type: newSelect.type,
-      desc: `${newSelect.label} (${finalTarget.toLocaleString()} ${newSelect.unit})`,
-      current: 0,
-      target: finalTarget,
-      treat: "Daily Reward Sack",
-      treatQty: 1,
-      completed: false,
-      claimed: false,
-    };
+  mList[mIndex] = {
+    id: targetMission.id,
+    type: newSelect.type,
+    desc: `${newSelect.label} (${finalTarget.toLocaleString()} ${newSelect.unit})`,
+    current: 0,
+    target: finalTarget,
+    treat: "Daily Reward Sack",
+    treatQty: 1,
+    completed: false,
+    claimed: false,
+  };
 
   window.pushHeaderToast("🔄 Mission Re-rolled!", "#2ecc71");
   window.SoundManager.play("swing");
@@ -8367,39 +8396,39 @@ window.renderMissionsWindow = function () {
     let weeklyMasterClaimed = window.playerStats.weeklyRewardClaimed;
 
     let getMissionRowHtml = (m, isWeekly) => {
-          let pct = Math.min(100, (m.current / m.target) * 100);
-          let color = isWeekly ? "#9b59b6" : "#2ecc71";
-          let btnHtml = "";
-          let rerollBtnHtml = "";
+      let pct = Math.min(100, (m.current / m.target) * 100);
+      let color = isWeekly ? "#9b59b6" : "#2ecc71";
+      let btnHtml = "";
+      let rerollBtnHtml = "";
 
-          if (m.claimed) {
-            btnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
-          } else if (m.completed) {
-            btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
-          } else {
-            btnHtml = `<span style="color:#2ecc71; font-size:10px; font-family:monospace; font-weight:bold;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
+      if (m.claimed) {
+        btnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
+      } else if (m.completed) {
+        btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
+      } else {
+        btnHtml = `<span style="color:#2ecc71; font-size:10px; font-family:monospace; font-weight:bold;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
 
-            // Dynamic single-mission Re-roll system
-            if (!isWeekly) {
-              let rerollsDone = window.playerStats.dailyRerollsDone || 0;
-              if (rerollsDone < 2) {
-                let costLabel = rerollsDone === 0 ? "🔄 Free" : "🔄 50 Souls";
-                rerollBtnHtml = `<button onclick="window.rerollDailyMission('${m.id}')" class="btn-action" style="padding:2px 5px; font-size:8.5px; margin-left:6px; background:#4b5563; font-family:monospace; line-height:1;" title="Re-roll Daily Mission (${rerollsDone === 0 ? "Free" : "Costs 50 Monster Souls"})">${costLabel}</button>`;
-              }
-            }
+        // Dynamic single-mission Re-roll system
+        if (!isWeekly) {
+          let rerollsDone = window.playerStats.dailyRerollsDone || 0;
+          if (rerollsDone < 2) {
+            let costLabel = rerollsDone === 0 ? "🔄 Free" : "🔄 50 Souls";
+            rerollBtnHtml = `<button onclick="window.rerollDailyMission('${m.id}')" class="btn-action" style="padding:2px 5px; font-size:8.5px; margin-left:6px; background:#4b5563; font-family:monospace; line-height:1;" title="Re-roll Daily Mission (${rerollsDone === 0 ? "Free" : "Costs 50 Monster Souls"})">${costLabel}</button>`;
           }
+        }
+      }
 
-          let rewardText = `+${m.treatQty} ${m.treat}`;
-          if (m.potionAward) {
-            rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
-          }
+      let rewardText = `+${m.treatQty} ${m.treat}`;
+      if (m.potionAward) {
+        rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
+      }
 
-          let claimedOverlay = m.claimed
-            ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:12px; font-weight:900; border: 1.5px solid #e74c3c; padding: 2px 10px; border-radius:3px; transform: rotate(-4deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1px; box-shadow: 0 0 8px rgba(231,76,60,0.25);">CLAIMED</span></div>`
-            : "";
+      let claimedOverlay = m.claimed
+        ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:12px; font-weight:900; border: 1.5px solid #e74c3c; padding: 2px 10px; border-radius:3px; transform: rotate(-4deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1px; box-shadow: 0 0 8px rgba(231,76,60,0.25);">CLAIMED</span></div>`
+        : "";
 
-          return `
-                      <div style="position:relative; background:#111; border:1.5px solid ${m.completed ? '#2ecc71' : '#2d3748'}; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px; ${m.completed ? 'border-color: ' + color + ';' : ''}">
+      return `
+                      <div style="position:relative; background:#111; border:1.5px solid ${m.completed ? "#2ecc71" : "#2d3748"}; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px; ${m.completed ? "border-color: " + color + ";" : ""}">
                 ${claimedOverlay}
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                     <div style="display:flex; align-items:center; gap:8px; text-align:left; min-width:0; flex:1;">
@@ -8416,7 +8445,7 @@ window.renderMissionsWindow = function () {
                 </div>
             </div>
           `;
-        };
+    };
 
     let dailyMasterBtnHtml = "";
     if (dailyMasterClaimed) {
@@ -8705,47 +8734,47 @@ window.renderMissionsWindow = function () {
                                       `;
 
   if (currentTab === "BOARD") {
-      // Dynamic countdown timer calculations locked to Pacific Time (PST/PDT)
-      let now = Date.now();
-      let ptNow = window.getPacificTimeNow(now);
+    // Dynamic countdown timer calculations locked to Pacific Time (PST/PDT)
+    let now = Date.now();
+    let ptNow = window.getPacificTimeNow(now);
 
-      // Next midnight in Pacific Time
-      let nextMidnightPt = new Date(
-        ptNow.getFullYear(),
-        ptNow.getMonth(),
-        ptNow.getDate() + 1,
-        0,
-        0,
-        0,
-        0,
-      );
-      let dailyLeftMs = nextMidnightPt.getTime() - ptNow.getTime();
+    // Next midnight in Pacific Time
+    let nextMidnightPt = new Date(
+      ptNow.getFullYear(),
+      ptNow.getMonth(),
+      ptNow.getDate() + 1,
+      0,
+      0,
+      0,
+      0,
+    );
+    let dailyLeftMs = nextMidnightPt.getTime() - ptNow.getTime();
 
-      let dH = Math.floor(dailyLeftMs / 3600000);
-      let dM = Math.floor((dailyLeftMs % 3600000) / 60000);
-      let dTimerEl = document.getElementById("daily-timer-val");
-            if (dTimerEl) dTimerEl.innerText = `${dH}h ${dM}m left`;
+    let dH = Math.floor(dailyLeftMs / 3600000);
+    let dM = Math.floor((dailyLeftMs % 3600000) / 60000);
+    let dTimerEl = document.getElementById("daily-timer-val");
+    if (dTimerEl) dTimerEl.innerText = `${dH}h ${dM}m left`;
 
-            // Next Monday 12:00 AM in Pacific Time
-            let dayOfWeek = ptNow.getDay();
-            let daysToMonday = (8 - dayOfWeek) % 7;
-            if (daysToMonday === 0) daysToMonday = 7;
-            let nextMondayPt = new Date(
-              ptNow.getFullYear(),
-              ptNow.getMonth(),
-              ptNow.getDate() + daysToMonday,
-              0,
-              0,
-              0,
-              0,
-            );
-            let weeklyLeftMs = nextMondayPt.getTime() - ptNow.getTime();
+    // Next Monday 12:00 AM in Pacific Time
+    let dayOfWeek = ptNow.getDay();
+    let daysToMonday = (8 - dayOfWeek) % 7;
+    if (daysToMonday === 0) daysToMonday = 7;
+    let nextMondayPt = new Date(
+      ptNow.getFullYear(),
+      ptNow.getMonth(),
+      ptNow.getDate() + daysToMonday,
+      0,
+      0,
+      0,
+      0,
+    );
+    let weeklyLeftMs = nextMondayPt.getTime() - ptNow.getTime();
 
-            let wD = Math.floor(weeklyLeftMs / 86400000);
-            let wH = Math.floor((weeklyLeftMs % 86400000) / 3600000);
-            let wTimerEl = document.getElementById("weekly-timer-val");
-            if (wTimerEl) wTimerEl.innerText = `${wD}d ${wH}h left`;
-    }
+    let wD = Math.floor(weeklyLeftMs / 86400000);
+    let wH = Math.floor((weeklyLeftMs % 86400000) / 3600000);
+    let wTimerEl = document.getElementById("weekly-timer-val");
+    if (wTimerEl) wTimerEl.innerText = `${wD}d ${wH}h left`;
+  }
 };
 
 // --- DYNAMIC RECENT LOGS & SHOWCASE SYSTEM ---
@@ -9408,33 +9437,58 @@ window.openWeeklyRewardSack = function (specificName) {
   ];
 
   // Double XP Potion (Chance scales up with Clan level)
-  let xpChance = Math.min(0.60, 0.10 + clanLvl * 0.04);
+  let xpChance = Math.min(0.6, 0.1 + clanLvl * 0.04);
   if (Math.random() < xpChance) {
-    receivedRewards.push({ name: "Double XP Elixir", qty: 1 + Math.floor(clanLvl / 10), color: "#a855f7", type: "use" });
+    receivedRewards.push({
+      name: "Double XP Elixir",
+      qty: 1 + Math.floor(clanLvl / 10),
+      color: "#a855f7",
+      type: "use",
+    });
   }
 
   // Double Drop Potion (Chance scales up with Clan level)
-  let dropChance = Math.min(0.50, 0.05 + clanLvl * 0.03);
+  let dropChance = Math.min(0.5, 0.05 + clanLvl * 0.03);
   if (Math.random() < dropChance) {
-    receivedRewards.push({ name: "Double Drop Elixir", qty: 1 + Math.floor(clanLvl / 15), color: "#22c55e", type: "use" });
+    receivedRewards.push({
+      name: "Double Drop Elixir",
+      qty: 1 + Math.floor(clanLvl / 15),
+      color: "#22c55e",
+      type: "use",
+    });
   }
 
   // Drop Quality Potion (Chance scales up with Clan level)
-  let qlyChance = Math.min(0.40, 0.03 + clanLvl * 0.02);
+  let qlyChance = Math.min(0.4, 0.03 + clanLvl * 0.02);
   if (Math.random() < qlyChance) {
-    receivedRewards.push({ name: "Drop Quality Elixir", qty: 1, color: "#3b82f6", type: "use" });
+    receivedRewards.push({
+      name: "Drop Quality Elixir",
+      qty: 1,
+      color: "#3b82f6",
+      type: "use",
+    });
   }
 
   // Advanced reagents unlocked inside Sacks for Clans Level 10+
   if (clanLvl >= 10) {
-    let coreChance = Math.min(0.40, 0.05 + (clanLvl - 10) * 0.03);
+    let coreChance = Math.min(0.4, 0.05 + (clanLvl - 10) * 0.03);
     if (Math.random() < coreChance) {
-      receivedRewards.push({ name: "Catalyst Core", qty: 1, color: "#2ecc71", type: "etc" });
+      receivedRewards.push({
+        name: "Catalyst Core",
+        qty: 1,
+        color: "#2ecc71",
+        type: "etc",
+      });
     }
 
-    let essenceChance = Math.min(0.30, 0.03 + (clanLvl - 10) * 0.02);
+    let essenceChance = Math.min(0.3, 0.03 + (clanLvl - 10) * 0.02);
     if (Math.random() < essenceChance) {
-      receivedRewards.push({ name: "Astral Essence", qty: 1, color: "#9b59b6", type: "etc" });
+      receivedRewards.push({
+        name: "Astral Essence",
+        qty: 1,
+        color: "#9b59b6",
+        type: "etc",
+      });
     }
   }
 
@@ -9740,17 +9794,17 @@ window.renderMailboxItems = function (mailbox) {
   }
 
   listEl.innerHTML = mailbox
-      .map((mail) => {
-        let buttonHtml = "";
-        if (mail.claimed) {
-          buttonHtml = `<span style="color:#7f8c8d; font-weight:bold; font-size:11px;">Claimed ✓</span>`;
-        } else {
-          buttonHtml = `<button class="btn-action" style="background:#e74c3c; color:white; font-size:11px; padding:4px 10px;" onclick="window.claimMailReward('${mail.id}')">Claim</button>`;
-        }
+    .map((mail) => {
+      let buttonHtml = "";
+      if (mail.claimed) {
+        buttonHtml = `<span style="color:#7f8c8d; font-weight:bold; font-size:11px;">Claimed ✓</span>`;
+      } else {
+        buttonHtml = `<button class="btn-action" style="background:#e74c3c; color:white; font-size:11px; padding:4px 10px;" onclick="window.claimMailReward('${mail.id}')">Claim</button>`;
+      }
 
-        let claimedOverlay = mail.claimed
-          ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.68); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:16px; font-weight:900; border: 2.5px solid #e74c3c; padding: 4px 14px; border-radius:4px; transform: rotate(-5deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1.5px; box-shadow: 0 0 12px rgba(231,76,60,0.35);">CLAIMED</span></div>`
-          : "";
+      let claimedOverlay = mail.claimed
+        ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.68); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:16px; font-weight:900; border: 2.5px solid #e74c3c; padding: 4px 14px; border-radius:4px; transform: rotate(-5deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1.5px; box-shadow: 0 0 12px rgba(231,76,60,0.35);">CLAIMED</span></div>`
+        : "";
 
       // Build highly optimized, stylized HTML badges using native visual generators
       let rewardsHtml = "";
@@ -9948,15 +10002,26 @@ window.updateHubAlerts = function () {
   let weeklies = window.playerStats.weeklyMissions || [];
   let dailyClaimable = dailies.some((m) => m.completed && !m.claimed);
   let weeklyClaimable = weeklies.some((m) => m.completed && !m.claimed);
-  let dailyMasterClaimable = !window.playerStats.dailyRewardClaimed && dailies.filter((m) => m.completed).length >= 5;
-  let weeklyMasterClaimable = window.playerStats.prestigeCount > 0 && !window.playerStats.weeklyRewardClaimed && weeklies.filter((m) => m.completed).length === 3;
-  let hasMissionsAlert = dailyClaimable || weeklyClaimable || dailyMasterClaimable || weeklyMasterClaimable;
+  let dailyMasterClaimable =
+    !window.playerStats.dailyRewardClaimed &&
+    dailies.filter((m) => m.completed).length >= 5;
+  let weeklyMasterClaimable =
+    window.playerStats.prestigeCount > 0 &&
+    !window.playerStats.weeklyRewardClaimed &&
+    weeklies.filter((m) => m.completed).length === 3;
+  let hasMissionsAlert =
+    dailyClaimable ||
+    weeklyClaimable ||
+    dailyMasterClaimable ||
+    weeklyMasterClaimable;
 
   let mBadge = document.getElementById("hub-card-missions-badge");
   if (mBadge) mBadge.style.display = hasMissionsAlert ? "inline-block" : "none";
 
   // 2. Evaluate Trophies
-  let hasTrophiesAlert = window.playerStats.unviewedAchievements && window.playerStats.unviewedAchievements.length > 0;
+  let hasTrophiesAlert =
+    window.playerStats.unviewedAchievements &&
+    window.playerStats.unviewedAchievements.length > 0;
   let tBadge = document.getElementById("hub-card-trophies-badge");
   if (tBadge) tBadge.style.display = hasTrophiesAlert ? "inline-block" : "none";
 
@@ -9971,7 +10036,10 @@ window.updateHubAlerts = function () {
   // 5. Update Main Top Bar Hub Button Dot
   let mainDot = document.getElementById("hub-menu-alert-dot");
   if (mainDot) {
-    mainDot.style.display = (hasMissionsAlert || hasTrophiesAlert || hasMailAlert || hasClanAlert) ? "inline-block" : "none";
+    mainDot.style.display =
+      hasMissionsAlert || hasTrophiesAlert || hasMailAlert || hasClanAlert
+        ? "inline-block"
+        : "none";
   }
 };
 
@@ -10336,23 +10404,23 @@ window.renderLeaderboardItems = function (leaderboard) {
       }
 
       let isSelf = player.userId === localUserId;
-            let cardStyle = isSelf
-              ? `border: 1.5px solid #f1c40f; background: rgba(241, 196, 15, 0.05); box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.05);`
-              : `border: 1.5px solid #222; background: #161a22;`;
+      let cardStyle = isSelf
+        ? `border: 1.5px solid #f1c40f; background: rgba(241, 196, 15, 0.05); box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.05);`
+        : `border: 1.5px solid #222; background: #161a22;`;
 
-            let canvasId = `leaderboard-canvas-${player.userId}`;
+      let canvasId = `leaderboard-canvas-${player.userId}`;
 
-            let guildBadgeHtml = "";
-            if (player.guildName) {
-              let emblem = window.getGuildEmblemHtml(player.guildEmblem || 0, 12);
-              guildBadgeHtml = `
+      let guildBadgeHtml = "";
+      if (player.guildName) {
+        let emblem = window.getGuildEmblemHtml(player.guildEmblem || 0, 12);
+        guildBadgeHtml = `
                 <div style="display: inline-flex; align-items: center; gap: 3px; background: rgba(142, 68, 173, 0.1); border: 1px solid #8e44ad; padding: 1px 4px; border-radius: 3px; font-size: 8.5px; color: #df9ffb; font-weight: bold; margin-left: 6px;">
                   ${emblem} <span>${window.escapeHTML(player.guildName)}</span>
                 </div>
               `;
-            }
+      }
 
-            return `
+      return `
               <div class="bag-item" style="display:flex; justify-content:space-between; align-items:center; padding:6px 12px; gap:8px; cursor:default; ${cardStyle}">
                   <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; text-align:left;">
                       <span style="display:inline-flex; width:24px; height:24px; background:#111; border:1px solid ${badgeColor}; border-radius:50%; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:#fff; ${badgeGlow}">${rankIcon}</span>
@@ -10534,14 +10602,14 @@ window.renderInspectModal = function (profile) {
 
   // Render the inspected player's equipped medal banner
   let medalBannerHtml = "";
-    let activeTitle = stats.equippedTitle;
-    if (activeTitle && window.TITLES_DATA[activeTitle]) {
-      let tData = window.TITLES_DATA[activeTitle];
-      let color = tData.color || "#ff007f";
-      let bgRgba = window.hexToRgba(color, 0.05);
-      let borderGlow = `inset 0 0 10px ${window.hexToRgba(color, 0.08)}, 0 0 6px ${window.hexToRgba(color, 0.1)}`;
+  let activeTitle = stats.equippedTitle;
+  if (activeTitle && window.TITLES_DATA[activeTitle]) {
+    let tData = window.TITLES_DATA[activeTitle];
+    let color = tData.color || "#ff007f";
+    let bgRgba = window.hexToRgba(color, 0.05);
+    let borderGlow = `inset 0 0 10px ${window.hexToRgba(color, 0.08)}, 0 0 6px ${window.hexToRgba(color, 0.1)}`;
 
-      medalBannerHtml = `
+    medalBannerHtml = `
             <div id="inspected-medal-banner"
                  style="margin-top: 6px; border: 1.5px solid ${color}; background: ${bgRgba}; border-radius: 6px; padding: 10px; display: flex; align-items: center; gap: 10px; box-shadow: ${borderGlow}; cursor: help;"
                  onmouseenter="window.showTitleMedalTooltip(event, '${activeTitle}')"
@@ -10845,20 +10913,28 @@ window.fetchClanData = function () {
         if (data.clan) {
           window.playerStats.clanId = data.clan.id;
           window.playerStats.clanName = data.clan.name;
-          window.playerStats.clanEmblem = data.clan.leader_id.charCodeAt(0) || 0;
+          window.playerStats.clanEmblem =
+            data.clan.leader_id.charCodeAt(0) || 0;
           window.playerStats.clanLevel = data.clan.level || 1;
           window.playerStats.clanSkills = {
             steel_phalanx: data.clan.skill_steel_phalanx,
             vitality_well: data.clan.skill_vitality_well,
             prosperity_accord: data.clan.skill_prosperity_accord,
             voyagers_guidance: data.clan.skill_voyagers_guidance,
-            aetheric_wisdom: data.clan.skill_aetheric_wisdom || 0
+            aetheric_wisdom: data.clan.skill_aetheric_wisdom || 0,
           };
-          window.renderClanDashboard(data.clan, data.members, data.invitations || []);
+          window.renderClanDashboard(
+            data.clan,
+            data.members,
+            data.invitations || [],
+          );
         } else {
           window.playerStats.clanId = null;
           window.playerStats.clanName = null;
-          window.renderClanCreation(data.clansList || [], data.invitations || []);
+          window.renderClanCreation(
+            data.clansList || [],
+            data.invitations || [],
+          );
         }
       } else {
         contentEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Error loading clan matrix.</div>`;
@@ -10905,12 +10981,16 @@ window.renderClanCreation = function (clansList, invitations) {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               Pending Clan Invitations:
           </strong>
-          ${invitations.map(inv => `
+          ${invitations
+            .map(
+              (inv) => `
               <div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:6px; border-radius:4px; margin-bottom:4px; border:1px solid #333;">
                   <span style="font-size:11px; color:#fff; font-weight:bold;">${window.escapeHTML(inv.clanName)}</span>
                   <button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71;" onclick="window.acceptClanInvitation(${inv.id})">Join</button>
               </div>
-          `).join("")}
+          `,
+            )
+            .join("")}
       </div>
     `;
   }
@@ -10934,17 +11014,24 @@ window.renderClanCreation = function (clansList, invitations) {
         Available Clans (${clansList.length})
     </strong>
     <div style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
-        ${clansList.length === 0 ? `<div style="font-size:10.5px; color:#666; font-style:italic; padding:15px; text-align:center;">No open clans found. Try founding one!</div>` : clansList.map(g => {
-          let emblem = window.getClanEmblemHtml(g.leader_id.charCodeAt(0) || 0, 14);
-          let btnHtml = "";
-          let pLvl = window.playerStats.level || 1;
-          if (g.join_policy === "open") {
-            let canJoin = pLvl >= g.min_level;
-            btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71;" ${canJoin ? "" : "disabled style='opacity:0.5; cursor:not-allowed;' title='Requires Level " + g.min_level + "'"} onclick="window.joinOpenClan(${g.id})">Join</button>`;
-          } else {
-            btnHtml = `<span style="font-size:9.5px; color:#666;" title="This clan requires an explicit invitation from the founder.">Invite-Only</span>`;
-          }
-          return `
+        ${
+          clansList.length === 0
+            ? `<div style="font-size:10.5px; color:#666; font-style:italic; padding:15px; text-align:center;">No open clans found. Try founding one!</div>`
+            : clansList
+                .map((g) => {
+                  let emblem = window.getClanEmblemHtml(
+                    g.leader_id.charCodeAt(0) || 0,
+                    14,
+                  );
+                  let btnHtml = "";
+                  let pLvl = window.playerStats.level || 1;
+                  if (g.join_policy === "open") {
+                    let canJoin = pLvl >= g.min_level;
+                    btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71;" ${canJoin ? "" : "disabled style='opacity:0.5; cursor:not-allowed;' title='Requires Level " + g.min_level + "'"} onclick="window.joinOpenClan(${g.id})">Join</button>`;
+                  } else {
+                    btnHtml = `<span style="font-size:9.5px; color:#666;" title="This clan requires an explicit invitation from the founder.">Invite-Only</span>`;
+                  }
+                  return `
             <div style="display:flex; justify-content:space-between; align-items:center; background:#111; border:1px solid #222; padding:6px 10px; border-radius:4px; gap:8px;">
                 <div style="display:flex; align-items:center; gap:6px; text-align:left; min-width:0; flex:1;">
                     ${emblem}
@@ -10956,7 +11043,9 @@ window.renderClanCreation = function (clansList, invitations) {
                 ${btnHtml}
             </div>
           `;
-        }).join("")}
+                })
+                .join("")
+        }
     </div>
   `;
 };
@@ -10967,12 +11056,18 @@ window.executeCreateClan = function () {
   let name = nameInput.value.trim();
 
   if (!window.validateGuildNameInput(name)) {
-    window.pushHeaderToast("❌ Invalid Clan Name! 3-16 chars, letters/numbers and single spaces only.", "#e74c3c");
+    window.pushHeaderToast(
+      "❌ Invalid Clan Name! 3-16 chars, letters/numbers and single spaces only.",
+      "#e74c3c",
+    );
     return;
   }
 
   if (window.playerStats.coins < 100000) {
-    window.pushHeaderToast("❌ Insufficient Gold! Foundation requires 100,000 Gold.", "#e74c3c");
+    window.pushHeaderToast(
+      "❌ Insufficient Gold! Foundation requires 100,000 Gold.",
+      "#e74c3c",
+    );
     return;
   }
 
@@ -10986,7 +11081,10 @@ window.executeCreateClan = function () {
     .then((data) => {
       if (data.success) {
         window.playerStats.coins -= 100000;
-        window.pushHeaderToast(`🏰 Clan ${name} successfully founded!`, "#2ecc71");
+        window.pushHeaderToast(
+          `🏰 Clan ${name} successfully founded!`,
+          "#2ecc71",
+        );
         window.fetchClanData();
         window.updateUI();
         window.saveGame();
@@ -11032,8 +11130,12 @@ window.renderClanDashboard = function (clan, members, invitations) {
 
   let unclaimedQuestsCount = 0;
   if (clan.quests && clan.quests.activeList) {
-    clan.quests.activeList.forEach(q => {
-      if (q.completed && q.claimedUserIds && !q.claimedUserIds.includes(userId)) {
+    clan.quests.activeList.forEach((q) => {
+      if (
+        q.completed &&
+        q.claimedUserIds &&
+        !q.claimedUserIds.includes(userId)
+      ) {
         unclaimedQuestsCount++;
       }
     });
@@ -11069,7 +11171,10 @@ window.renderClanDashboard = function (clan, members, invitations) {
   if (currentTab === "OVERVIEW") {
     let nextXp = Math.floor(100 * Math.pow(clan.level, 1.8));
     let xpPct = Math.min(100, (clan.xp / nextXp) * 100);
-    let emblem = window.getClanEmblemHtml(clan.leader_id.charCodeAt(0) || 0, 32);
+    let emblem = window.getClanEmblemHtml(
+      clan.leader_id.charCodeAt(0) || 0,
+      32,
+    );
 
     tabContentHtml = `
       <div style="background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; align-items:center; gap:12px; text-align:left;">
@@ -11085,7 +11190,7 @@ window.renderClanDashboard = function (clan, members, invitations) {
 
       <div style="background:#111; border:1px solid #222; border-radius:6px; padding:8px 10px; margin-bottom:12px; font-size:11px; text-align:left; line-height:1.4; color:#ddd; white-space:normal;">
           <span style="color:#888; font-size:9px; font-weight:bold; display:block; margin-bottom:2px; text-transform:uppercase;">📜 CLAN ANNOUNCEMENT:</span>
-          "${window.escapeHTML(clan.description || 'Welcome to our Clan!')}"
+          "${window.escapeHTML(clan.description || "Welcome to our Clan!")}"
       </div>
 
       <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:6px; padding:8px; margin-bottom:12px; font-size:10.5px; text-align:left;">
@@ -11099,7 +11204,7 @@ window.renderClanDashboard = function (clan, members, invitations) {
 
       <div style="background:#111; border:1px solid #222; border-radius:6px; padding:10px; font-size:11px; text-align:left; line-height:1.45; white-space:normal; color:#aaa;">
           <strong style="color:#df9ffb;">💡 CLAN INFO:</strong><br>
-          • Join Policy: <span style="color:#fff; font-weight:bold;">${clan.join_policy === 'open' ? 'Open (Join Instantly)' : 'Invite Only'}</span><br>
+          • Join Policy: <span style="color:#fff; font-weight:bold;">${clan.join_policy === "open" ? "Open (Join Instantly)" : "Invite Only"}</span><br>
           • Minimum Level Requirement: <span style="color:#fff; font-weight:bold;">Lv. ${clan.min_level}</span><br>
           • Members Enrolled: <span style="color:#fff; font-weight:bold;">${members.length} / 20</span>
       </div>
@@ -11181,19 +11286,22 @@ window.renderClanDashboard = function (clan, members, invitations) {
 
     tabContentHtml = `
       <div style="display:flex; flex-direction:column; gap:4px; max-height: 280px; overflow-y:auto; padding-right:4px;">
-          ${members.map((m, idx) => {
-            let isLeaderRow = m.userId === clan.leader_id;
-            let rankTag = isLeaderRow ? `<span style="color:#f1c40f; font-weight:bold;">Founder</span>` : `<span style="color:#888;">Member</span>`;
-            let canvasId = `clan-member-canvas-${m.userId}`;
+          ${members
+            .map((m, idx) => {
+              let isLeaderRow = m.userId === clan.leader_id;
+              let rankTag = isLeaderRow
+                ? `<span style="color:#f1c40f; font-weight:bold;">Founder</span>`
+                : `<span style="color:#888;">Member</span>`;
+              let canvasId = `clan-member-canvas-${m.userId}`;
 
-            let titleTextHtml = "";
-            if (m.equippedTitle && window.TITLES_DATA[m.equippedTitle]) {
-              let tData = window.TITLES_DATA[m.equippedTitle];
-              titleTextHtml = `<span style="color:${tData.color || '#ff007f'}; font-size:8px; font-weight:bold; margin-left:4px;">[${tData.name}]</span>`;
-            }
+              let titleTextHtml = "";
+              if (m.equippedTitle && window.TITLES_DATA[m.equippedTitle]) {
+                let tData = window.TITLES_DATA[m.equippedTitle];
+                titleTextHtml = `<span style="color:${tData.color || "#ff007f"}; font-size:8px; font-weight:bold; margin-left:4px;">[${tData.name}]</span>`;
+              }
 
-            let showKickBtn = isLeader && !isLeaderRow;
-            return `
+              let showKickBtn = isLeader && !isLeaderRow;
+              return `
               <div style="background:#111; border:1px solid #222; border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
                   <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; text-align:left;">
                       <canvas id="${canvasId}" width="30" height="40" style="width:30px; height:40px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:4px; flex-shrink:0; pointer-events:none;"></canvas>
@@ -11212,7 +11320,8 @@ window.renderClanDashboard = function (clan, members, invitations) {
                   </div>
               </div>
             `;
-          }).join("")}
+            })
+            .join("")}
       </div>
     `;
 
@@ -11223,7 +11332,11 @@ window.renderClanDashboard = function (clan, members, invitations) {
           let ctx = canvas.getContext("2d");
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.imageSmoothingEnabled = false;
-          window.drawSingleHero(ctx, 15, 14, 0.55, m.equippedSlots, m, 0, { slashFrame: false, deathAnimationTimer: 0, isMainHero: false });
+          window.drawSingleHero(ctx, 15, 14, 0.55, m.equippedSlots, m, 0, {
+            slashFrame: false,
+            deathAnimationTimer: 0,
+            isMainHero: false,
+          });
         }
       });
     }, 50);
@@ -11231,45 +11344,79 @@ window.renderClanDashboard = function (clan, members, invitations) {
     let questsData = clan.quests;
     let listHtml = "";
 
-    if (!questsData || !questsData.activeList || questsData.activeList.length === 0) {
+    if (
+      !questsData ||
+      !questsData.activeList ||
+      questsData.activeList.length === 0
+    ) {
       listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
     } else {
-      let stgScale = Math.max(1, Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1);
+      let stgScale = Math.max(
+        1,
+        Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1,
+      );
       let calculatedGoldMult = Math.pow(1.8, stgScale);
 
-      listHtml = questsData.activeList.map((q) => {
-        let pct = Math.min(100, (q.current / q.target) * 100);
-        let hasClaimed = q.claimedUserIds && q.claimedUserIds.includes(userId);
+      listHtml = questsData.activeList
+        .map((q) => {
+          let pct = Math.min(100, (q.current / q.target) * 100);
+          let hasClaimed =
+            q.claimedUserIds && q.claimedUserIds.includes(userId);
 
-        let claimBtnHtml = "";
-        if (hasClaimed) {
-          claimBtnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
-        } else if (q.completed) {
-          claimBtnHtml = `<button class="btn-action btn-pulse" style="padding:4px 10px; font-size:10px; background:#2ecc71; border-color:#fff;" onclick="window.executeClaimClanQuestReward('${q.id}')">Claim</button>`;
-        } else {
-          claimBtnHtml = `<span style="color:#aaa; font-size:10px; font-family:monospace;">${q.current.toLocaleString()} / ${q.target.toLocaleString()}</span>`;
-        }
+          let claimBtnHtml = "";
+          if (hasClaimed) {
+            claimBtnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
+          } else if (q.completed) {
+            claimBtnHtml = `<button class="btn-action btn-pulse" style="padding:4px 10px; font-size:10px; background:#2ecc71; border-color:#fff;" onclick="window.executeClaimClanQuestReward('${q.id}')">Claim</button>`;
+          } else {
+            claimBtnHtml = `<span style="color:#aaa; font-size:10px; font-family:monospace;">${q.current.toLocaleString()} / ${q.target.toLocaleString()}</span>`;
+          }
 
-        let rewardItems = [];
-        if (q.rewards.keys > 0) rewardItems.push(`<span style="color:#f1c40f;">+${q.rewards.keys} Keys</span>`);
-        if (q.rewards.cores > 0) rewardItems.push(`<span style="color:#2ecc71;">+${q.rewards.cores} Cores</span>`);
-        if (q.rewards.essence > 0) rewardItems.push(`<span style="color:#9b59b6;">+${q.rewards.essence} Essence</span>`);
-        if (q.rewards.shards > 0) rewardItems.push(`<span style="color:#8e44ad;">+${q.rewards.shards} Shards</span>`);
-        if (q.rewards.souls > 0) rewardItems.push(`<span style="color:#ffb6c1;">+${q.rewards.souls} Souls</span>`);
-        if (q.rewards.pp > 0) rewardItems.push(`<span style="color:#ff007f;">+${q.rewards.pp} PP</span>`);
-        if (q.rewards.sacks > 0) rewardItems.push(`<span style="color:#f1c40f;">+${q.rewards.sacks}x Clan Sack</span>`);
+          let rewardItems = [];
+          if (q.rewards.keys > 0)
+            rewardItems.push(
+              `<span style="color:#f1c40f;">+${q.rewards.keys} Keys</span>`,
+            );
+          if (q.rewards.cores > 0)
+            rewardItems.push(
+              `<span style="color:#2ecc71;">+${q.rewards.cores} Cores</span>`,
+            );
+          if (q.rewards.essence > 0)
+            rewardItems.push(
+              `<span style="color:#9b59b6;">+${q.rewards.essence} Essence</span>`,
+            );
+          if (q.rewards.shards > 0)
+            rewardItems.push(
+              `<span style="color:#8e44ad;">+${q.rewards.shards} Shards</span>`,
+            );
+          if (q.rewards.souls > 0)
+            rewardItems.push(
+              `<span style="color:#ffb6c1;">+${q.rewards.souls} Souls</span>`,
+            );
+          if (q.rewards.pp > 0)
+            rewardItems.push(
+              `<span style="color:#ff007f;">+${q.rewards.pp} PP</span>`,
+            );
+          if (q.rewards.sacks > 0)
+            rewardItems.push(
+              `<span style="color:#f1c40f;">+${q.rewards.sacks}x Clan Sack</span>`,
+            );
 
-        if (q.rewards.goldBase > 0) {
-          let actualGoldReward = Math.ceil(q.rewards.goldBase * calculatedGoldMult);
-          rewardItems.push(`<span style="color:#ffd700;">+${window.formatNumber(actualGoldReward)} Gold</span>`);
-        }
+          if (q.rewards.goldBase > 0) {
+            let actualGoldReward = Math.ceil(
+              q.rewards.goldBase * calculatedGoldMult,
+            );
+            rewardItems.push(
+              `<span style="color:#ffd700;">+${window.formatNumber(actualGoldReward)} Gold</span>`,
+            );
+          }
 
-        let completedOverlay = q.completed
-          ? `<div style="position:absolute; top:2px; right:8px; width:12px; height:12px; background:#2ecc71; border-radius:50%; box-shadow:0 0 6px #2ecc71; display:flex; align-items:center; justify-content:center; color:#fff; font-size:8px; font-weight:bold;">✓</div>`
-          : "";
+          let completedOverlay = q.completed
+            ? `<div style="position:absolute; top:2px; right:8px; width:12px; height:12px; background:#2ecc71; border-radius:50%; box-shadow:0 0 6px #2ecc71; display:flex; align-items:center; justify-content:center; color:#fff; font-size:8px; font-weight:bold;">✓</div>`
+            : "";
 
-        return `
-          <div style="position:relative; background:#111; border:1.5px solid ${q.completed ? '#2ecc71' : '#2d3748'}; border-radius:6px; padding:10px; margin-bottom:8px; text-align:left;">
+          return `
+          <div style="position:relative; background:#111; border:1.5px solid ${q.completed ? "#2ecc71" : "#2d3748"}; border-radius:6px; padding:10px; margin-bottom:8px; text-align:left;">
               ${completedOverlay}
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:8px;">
                   <strong style="font-size:12.5px; color:#fff; display:block;">${q.label}</strong>
@@ -11280,15 +11427,16 @@ window.renderClanDashboard = function (clan, members, invitations) {
               <div style="background:#090a0f; border:1px solid #222; border-radius:4px; padding:6px; font-size:9.5px; margin-bottom:8px; display:flex; flex-wrap:wrap; gap:4px 8px; font-family:monospace; line-height:1.2;">
                   <div style="width:100%; color:#9b59b6; font-weight:bold; margin-bottom:2px;">🎁 Quest Rewards (Completed):</div>
                   <div style="color:#df9ffb; font-weight:bold;">+${q.xpReward} Clan XP</div>
-                  ${rewardItems.map(item => `<div>${item}</div>`).join("")}
+                  ${rewardItems.map((item) => `<div>${item}</div>`).join("")}
               </div>
 
               <div style="width:100%; height:6px; background:#222; border-radius:3px; overflow:hidden; border:1px solid #333; margin-top:2px;">
-                  <div style="width:${pct}%; height:100%; background:${q.completed ? '#2ecc71' : '#9b59b6'};"></div>
+                  <div style="width:${pct}%; height:100%; background:${q.completed ? "#2ecc71" : "#9b59b6"};"></div>
               </div>
           </div>
         `;
-      }).join("");
+        })
+        .join("");
     }
 
     tabContentHtml = `
@@ -11313,12 +11461,14 @@ window.renderClanDashboard = function (clan, members, invitations) {
           Founder control board to customize description, toggle entry policy, edit emblem seeds, promote members, or disband.
       </div>
 
-      ${isLeader ? `
+      ${
+        isLeader
+          ? `
           <div style="display:flex; flex-direction:column; gap:8px; text-align:left; max-height:280px; overflow-y:auto; padding-right:4px;">
               <!-- Description -->
               <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px;">
                   <label for="settings-clan-desc" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Custom Announcement / Desc:</label>
-                  <textarea id="settings-clan-desc" style="width:100%; height:45px; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px; font-family:sans-serif; resize:none;" maxlength="120">${window.escapeHTML(clan.description || '')}</textarea>
+                  <textarea id="settings-clan-desc" style="width:100%; height:45px; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px; font-family:sans-serif; resize:none;" maxlength="120">${window.escapeHTML(clan.description || "")}</textarea>
               </div>
 
               <!-- Join Policy & Min Lvl -->
@@ -11326,8 +11476,8 @@ window.renderClanDashboard = function (clan, members, invitations) {
                   <div>
                       <label for="settings-clan-policy" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Join Policy:</label>
                       <select id="settings-clan-policy" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px;">
-                          <option value="invite_only" ${!isJoinOpen ? 'selected' : ''}>Invite Only</option>
-                          <option value="open" ${isJoinOpen ? 'selected' : ''}>Open Join</option>
+                          <option value="invite_only" ${!isJoinOpen ? "selected" : ""}>Invite Only</option>
+                          <option value="open" ${isJoinOpen ? "selected" : ""}>Open Join</option>
                       </select>
                   </div>
                   <div>
@@ -11336,27 +11486,48 @@ window.renderClanDashboard = function (clan, members, invitations) {
                   </div>
               </div>
 
-              <button class="btn-action" style="width:100%; background:#2ecc71; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeSaveClanSettings()">Save Clan Customizations</button>
+              <button class="btn-action" style="width:100%; margin-bottom: 10px; background:#2ecc71; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeSaveClanSettings()">Save Clan Customizations</button>
+
+              <button class="btn-action un" style="width:100%; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeDisbandClan()">Disband Clan</button>
           </div>
-      ` : `
+      `
+          : `
           <div style="border:1px solid #222; border-radius:6px; padding:15px; text-align:center; color:#888; font-style:italic; font-size:11px; white-space:normal; line-height:1.45;">
               🔐 Founder lock enabled. Only the Founder/Leader can modify settings, change description, or set join policy limitations.
           </div>
-      `}
+      `
+      }
     `;
   } else if (currentTab === "RESEARCH") {
-    let getSkillUpgradeCardHtml = (key, label, bonusText, currentL, maxL, col) => {
+    let getSkillUpgradeCardHtml = (
+      key,
+      label,
+      bonusText,
+      currentL,
+      maxL,
+      col,
+    ) => {
       let costGold = 0;
       let costSoul = 0;
       let soulName = "";
 
       if (key === "steel_phalanx" || key === "vitality_well") {
-        costGold = Math.floor((key === "steel_phalanx" ? 25000 : 20000) * Math.pow(1.35, currentL));
+        costGold = Math.floor(
+          (key === "steel_phalanx" ? 25000 : 20000) * Math.pow(1.35, currentL),
+        );
         costSoul = Math.floor(200 * Math.pow(1.25, currentL));
         soulName = "Monster Souls";
       } else {
-        costGold = Math.floor((key === "prosperity_accord" ? 40000 : key === "voyagers_guidance" ? 50000 : 45000) * Math.pow(1.4, currentL));
-        costSoul = Math.floor((key === "aetheric_wisdom" ? 6 : 5) * Math.pow(1.3, currentL));
+        costGold = Math.floor(
+          (key === "prosperity_accord"
+            ? 40000
+            : key === "voyagers_guidance"
+              ? 50000
+              : 45000) * Math.pow(1.4, currentL),
+        );
+        costSoul = Math.floor(
+          (key === "aetheric_wisdom" ? 6 : 5) * Math.pow(1.3, currentL),
+        );
         soulName = "Luminous Souls";
       }
 
@@ -11364,20 +11535,30 @@ window.renderClanDashboard = function (clan, members, invitations) {
       let clanLevel = clan.level || 1;
       let isGated = currentL >= clanLevel * 2;
       let canAffordGold = clan.gold_bank >= costGold;
-      let canAffordSoul = (key === "steel_phalanx" || key === "vitality_well")
-        ? clan.souls_bank >= costSoul
-        : clan.luminous_bank >= costSoul;
+      let canAffordSoul =
+        key === "steel_phalanx" || key === "vitality_well"
+          ? clan.souls_bank >= costSoul
+          : clan.luminous_bank >= costSoul;
 
-      let canUpgrade = isLeader && !isMaxed && !isGated && canAffordGold && canAffordSoul;
-      let bgStyle = window.hexToRgba ? window.hexToRgba(col, 0.04) : "rgba(255,255,255,0.02)";
-      let btnTextColor = col === "#f1c40f" || col === "#ffb6c1" ? "#111" : "#fff";
+      let canUpgrade =
+        isLeader && !isMaxed && !isGated && canAffordGold && canAffordSoul;
+      let bgStyle = window.hexToRgba
+        ? window.hexToRgba(col, 0.04)
+        : "rgba(255,255,255,0.02)";
+      let btnTextColor =
+        col === "#f1c40f" || col === "#ffb6c1" ? "#111" : "#fff";
 
       let icon = "";
-      if (key === "steel_phalanx") icon = window.getUiIconSvg("atk", 13) + " " + window.getUiIconSvg("def", 13);
+      if (key === "steel_phalanx")
+        icon =
+          window.getUiIconSvg("atk", 13) + " " + window.getUiIconSvg("def", 13);
       else if (key === "vitality_well") icon = window.getUiIconSvg("maxHp", 13);
-      else if (key === "prosperity_accord") icon = window.getUiIconSvg("gold", 13);
-      else if (key === "voyagers_guidance") icon = window.getUiIconSvg("dropRate", 13);
-      else if (key === "aetheric_wisdom") icon = window.getUiIconSvg("xpRate", 13);
+      else if (key === "prosperity_accord")
+        icon = window.getUiIconSvg("gold", 13);
+      else if (key === "voyagers_guidance")
+        icon = window.getUiIconSvg("dropRate", 13);
+      else if (key === "aetheric_wisdom")
+        icon = window.getUiIconSvg("xpRate", 13);
 
       let gateText = "";
       if (isGated && !isMaxed) {
@@ -11392,13 +11573,21 @@ window.renderClanDashboard = function (clan, members, invitations) {
                           </div>
                           <div style="font-size:9.5px; color:#aaa; line-height:1.35; margin-bottom:6px;">
                               Current active bonus: <strong style="color:#fff;">${bonusText}</strong>${gateText}<br>
-                              ${isMaxed ? `<span style="color:#2ecc71; font-weight:bold;">Shared research cap reached!</span>` : `
+                              ${
+                                isMaxed
+                                  ? `<span style="color:#2ecc71; font-weight:bold;">Shared research cap reached!</span>`
+                                  : `
                               Cost: <span style="${canAffordGold ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costGold)} Gold</span> &
-                              <span style="${canAffordSoul ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costSoul)} ${soulName}</span>`}
+                              <span style="${canAffordSoul ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costSoul)} ${soulName}</span>`
+                              }
                           </div>
-            ${isLeader ? `
+            ${
+              isLeader
+                ? `
                 <button class="btn-action" style="background:${col}; color:${btnTextColor}; font-weight:bold; font-size:10px; padding:4px;" ${canUpgrade ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeUpgradeClanSkill('${key}')">Upgrade Research</button>
-            ` : `<div style="font-size:8.5px; color:#888; font-style:italic; text-align:center;">* Only the Clan Founder can initiate research upgrades.</div>`}
+            `
+                : `<div style="font-size:8.5px; color:#888; font-style:italic; text-align:center;">* Only the Clan Founder can initiate research upgrades.</div>`
+            }
         </div>
       `;
     };
@@ -11459,7 +11648,8 @@ window.executeClaimClanQuestReward = function (questId) {
           claimsReport.push(`+${r.souls} Monster Souls`);
         }
         if (r.pp > 0) {
-          window.playerStats.prestigePoints = (window.playerStats.prestigePoints || 0) + r.pp;
+          window.playerStats.prestigePoints =
+            (window.playerStats.prestigePoints || 0) + r.pp;
           claimsReport.push(`+${r.pp} Prestige Points (PP)`);
         }
         if (r.sacks > 0) {
@@ -11467,14 +11657,22 @@ window.executeClaimClanQuestReward = function (questId) {
           claimsReport.push(`+${r.sacks}x Clan Sacks`);
         }
         if (r.goldBase > 0) {
-          let stgScale = Math.max(1, Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1);
+          let stgScale = Math.max(
+            1,
+            Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) +
+              1,
+          );
           let calculatedGold = Math.ceil(r.goldBase * Math.pow(1.8, stgScale));
           window.playerStats.coins += calculatedGold;
-          window.playerStats.totalGoldEarned = (window.playerStats.totalGoldEarned || 0) + calculatedGold;
+          window.playerStats.totalGoldEarned =
+            (window.playerStats.totalGoldEarned || 0) + calculatedGold;
           claimsReport.push(`+${window.formatNumber(calculatedGold)} Gold`);
         }
 
-        window.pushHeaderToast(`🎁 Quest Claimed: ${claimsReport.join(", ")}!`, "#2ecc71");
+        window.pushHeaderToast(
+          `🎁 Quest Claimed: ${claimsReport.join(", ")}!`,
+          "#2ecc71",
+        );
         if (window.SoundManager) window.SoundManager.play("revive");
 
         // Particle burst
@@ -11490,7 +11688,7 @@ window.executeClaimClanQuestReward = function (questId) {
             radius: Math.random() * 3 + 1,
             color: "#f1c40f",
             alpha: 1,
-            life: 30
+            life: 30,
           });
         }
 
@@ -11503,7 +11701,10 @@ window.executeClaimClanQuestReward = function (questId) {
       }
     })
     .catch(() => {
-      window.pushHeaderToast("❌ Network error claiming quest reward.", "#e74c3c");
+      window.pushHeaderToast(
+        "❌ Network error claiming quest reward.",
+        "#e74c3c",
+      );
     });
 };
 
@@ -11535,7 +11736,10 @@ window.executeSaveClanSettings = function () {
       }
     })
     .catch(() => {
-      window.pushHeaderToast("❌ Network error customizing settings.", "#e74c3c");
+      window.pushHeaderToast(
+        "❌ Network error customizing settings.",
+        "#e74c3c",
+      );
     });
 };
 
@@ -11556,16 +11760,22 @@ window.executeKickMember = function (targetUserId, targetName) {
         .then((r) => r.json())
         .then((data) => {
           if (data.success) {
-            window.pushHeaderToast(`🏃 Expelled member: ${targetName}.`, "#e67e22");
+            window.pushHeaderToast(
+              `🏃 Expelled member: ${targetName}.`,
+              "#e67e22",
+            );
             window.fetchClanData();
           } else {
             window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
           }
         })
         .catch(() => {
-          window.pushHeaderToast("❌ Network error expelling member.", "#e74c3c");
+          window.pushHeaderToast(
+            "❌ Network error expelling member.",
+            "#e74c3c",
+          );
         });
-    }
+    },
   );
 };
 
@@ -11595,7 +11805,7 @@ window.executeLeaveClan = function () {
               steel_phalanx: 0,
               vitality_well: 0,
               prosperity_accord: 0,
-              voyagers_guidance: 0
+              voyagers_guidance: 0,
             };
             window.pushHeaderToast("🏃 You have departed the Clan.", "#7f8c8d");
             if (modal) modal.remove();
@@ -11610,7 +11820,7 @@ window.executeLeaveClan = function () {
         .catch(() => {
           window.pushHeaderToast("❌ Network error exiting clan.", "#e74c3c");
         });
-    }
+    },
   );
 };
 
@@ -11722,4 +11932,43 @@ window.updateSalvagePadUI = function () {
       }
     }
   }
+};
+
+window.executeDisbandClan = function () {
+  window.showCustomConfirm(
+    "DISBAND CLAN",
+    "WARNING: This will permanently dissolve the clan, wipe the vault, and remove all members. This action is IRREVERSIBLE.",
+    "Disband Clan",
+    "Cancel",
+    "#e74c3c",
+    function () {
+      const userId = window.getGameUserId();
+      fetch(`${window.GAME_SERVER_URL}/api/clan/disband`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success) {
+            window.pushHeaderToast("🏰 Clan disbanded.", "#e74c3c");
+            window.playerStats.clanId = null;
+            window.playerStats.clanName = null;
+            let modal = document.getElementById("clan-draggable-window");
+            if (modal) modal.remove();
+            window.hideTooltip();
+            window.updateUI();
+            window.saveGame();
+          } else {
+            window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+          }
+        })
+        .catch(() => {
+          window.pushHeaderToast(
+            "❌ Network error disbanding clan.",
+            "#e74c3c",
+          );
+        });
+    },
+  );
 };

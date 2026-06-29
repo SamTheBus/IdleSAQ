@@ -8,8 +8,12 @@ window.GAME_VERSION = 0.97; // Pre-release Alpha 0.9.7 // Increment this wheneve
 // Core Security: HTML Sanitizer to prevent XSS injection in user lists
 window.escapeHTML = function (str) {
   if (!str) return "";
-  return str.replace(/[&<>'"]/g,
-    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  return str.replace(
+    /[&<>'"]/g,
+    (tag) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[
+        tag
+      ] || tag,
   );
 };
 
@@ -45,9 +49,9 @@ window.getUiIconSvg = function (key, size = 12) {
     moveSpeed: `<path d="M6 5h5v6l8 4c2 1 2 4-1 4H6V5zm3 2h2M9 9h2" />`,
     critChance: `<path d="M12 2 Q12 12, 2 12 Q12 12, 12 22 Q12 12, 22 12 Z" />`,
     critDamage: `<path d="M12 2l3 5.5 5.5-3-3 5.5 5.5 3-5.5 3 3 5.5-5.5-3-3 5.5-3-5.5-5.5 3 3-5.5-5.5-3 5.5-3-3-5.5 5.5 3z" />`,
-        block: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />`,
-        parry: `<path d="M4 20L20 4M4 20L2 22M5 15L9 19M20 20L4 4M20 20L22 22M15 19L19 15" />`,
-        str: `<path d="M18 10h-2V8c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H6c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h2v2c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2v-2h2c1.1 0 2-.9 2-2v-2c0-1.1-.9-2-2-2z" />`,
+    block: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />`,
+    parry: `<path d="M4 20L20 4M4 20L2 22M5 15L9 19M20 20L4 4M20 20L22 22M15 19L19 15" />`,
+    str: `<path d="M18 10h-2V8c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H6c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h2v2c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2v-2h2c1.1 0 2-.9 2-2v-2c0-1.1-.9-2-2-2z" />`,
     dex: `<circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="3" /><path d="M12 1v4 M12 19v4 M1 12h4 M19 12h4" />`,
     int: `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /><path d="M12 8v8 M8 12h8" />`,
     activeAttackSpeed: `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />`,
@@ -3923,19 +3927,22 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   // Centralized real-time XP rate multiplier calculation
-    let expBonusMult =
-      1.0 + (window.playerStats.prestigeUpgrades?.exp || 0) * 0.1;
+  let expBonusMult =
+    1.0 + (window.playerStats.prestigeUpgrades?.exp || 0) * 0.1;
 
-    // Add Aetheric Wisdom Clan Skill passive XP rate multiplier
-    let wisdom = Math.min(30, window.playerStats.clanSkills?.aetheric_wisdom || 0);
-    expBonusMult += wisdom * 0.01;
+  // Add Aetheric Wisdom Clan Skill passive XP rate multiplier
+  let wisdom = Math.min(
+    30,
+    window.playerStats.clanSkills?.aetheric_wisdom || 0,
+  );
+  expBonusMult += wisdom * 0.01;
 
-    if (
-      window.equippedSlots.subweapon &&
-      window.equippedSlots.subweapon.isUniqueChronicle &&
-      !window.playerStats.isDungeonMode &&
-      !window.playerStats.isCrucibleMode
-    ) {
+  if (
+    window.equippedSlots.subweapon &&
+    window.equippedSlots.subweapon.isUniqueChronicle &&
+    !window.playerStats.isDungeonMode &&
+    !window.playerStats.isCrucibleMode
+  ) {
     let historicalPeakLvl =
       window.playerStats.historicalPeakLvl || window.playerStats.level;
     if (window.playerStats.level < Math.floor(historicalPeakLvl * 0.75)) {
@@ -3999,42 +4006,48 @@ window.resolvePlayerStats = function (useDraft = false) {
     1.0 + (window.playerStats.missionUpgrades?.hp || 0) * 0.03;
 
   p.atk = Math.floor(p.atk * prestigeAtkMult * missionAtkMult);
-      p.maxHp = Math.floor(p.maxHp * prestigeHpMult * missionHpMult);
-      p.def = Math.floor(p.def * prestigeDefMult);
+  p.maxHp = Math.floor(p.maxHp * prestigeHpMult * missionHpMult);
+  p.def = Math.floor(p.def * prestigeDefMult);
 
-      // Apply Shared Cooperative Clan Skill Multipliers
-              let phalanx = Math.min(50, window.playerStats.clanSkills?.steel_phalanx || 0);
-              let well = Math.min(50, window.playerStats.clanSkills?.vitality_well || 0);
-              let accord = Math.min(30, window.playerStats.clanSkills?.prosperity_accord || 0);
-              let guidance = Math.min(30, window.playerStats.clanSkills?.voyagers_guidance || 0);
+  // Apply Shared Cooperative Clan Skill Multipliers
+  let phalanx = Math.min(50, window.playerStats.clanSkills?.steel_phalanx || 0);
+  let well = Math.min(50, window.playerStats.clanSkills?.vitality_well || 0);
+  let accord = Math.min(
+    30,
+    window.playerStats.clanSkills?.prosperity_accord || 0,
+  );
+  let guidance = Math.min(
+    30,
+    window.playerStats.clanSkills?.voyagers_guidance || 0,
+  );
 
-              p.atk = Math.floor(p.atk * (1.0 + phalanx * 0.005));
-              p.def = Math.floor(p.def * (1.0 + phalanx * 0.005));
-              p.maxHp = Math.floor(p.maxHp * (1.0 + well * 0.008));
-              p.gold += accord * 0.01;
-              p.drop += guidance * 0.005;
-              p.qly += guidance * 0.005;
+  p.atk = Math.floor(p.atk * (1.0 + phalanx * 0.005));
+  p.def = Math.floor(p.def * (1.0 + phalanx * 0.005));
+  p.maxHp = Math.floor(p.maxHp * (1.0 + well * 0.008));
+  p.gold += accord * 0.01;
+  p.drop += guidance * 0.005;
+  p.qly += guidance * 0.005;
 
-      if (
-        isNaN(p.idleAttackSpeed) ||
-      p.idleAttackSpeed <= 0 ||
-      !isFinite(p.idleAttackSpeed)
-    )
-      p.idleAttackSpeed = 60;
-    if (
-      isNaN(p.activeAttackSpeed) ||
-      p.activeAttackSpeed <= 0 ||
-      !isFinite(p.activeAttackSpeed)
-    )
-      p.activeAttackSpeed = 15;
+  if (
+    isNaN(p.idleAttackSpeed) ||
+    p.idleAttackSpeed <= 0 ||
+    !isFinite(p.idleAttackSpeed)
+  )
+    p.idleAttackSpeed = 60;
+  if (
+    isNaN(p.activeAttackSpeed) ||
+    p.activeAttackSpeed <= 0 ||
+    !isFinite(p.activeAttackSpeed)
+  )
+    p.activeAttackSpeed = 15;
 
-    if (!useDraft) {
-      window.cachedPlayerStats = p;
-      window.playerStatsDirty = false;
-    }
+  if (!useDraft) {
+    window.cachedPlayerStats = p;
+    window.playerStatsDirty = false;
+  }
 
-    return p;
-  };
+  return p;
+};
 
 // --- INITIAL GLOBAL STATE ---
 
@@ -4170,20 +4183,20 @@ window.playerStats = {
   fairyClicksWindow: [],
   canvasClicksWindow: [],
   recentHeals: [], // Track siphoned heals in a sliding 1,000ms window
-    pendingClanProgress: {
-      kills: 0,
-      rifts: 0,
-      prestige: 0,
-      dungeons: 0,
-      fairies: 0,
-      tempers: 0,
-      reforges: 0,
-      potions: 0,
-      salvage: 0,
-      crits: 0
-    },
+  pendingClanProgress: {
+    kills: 0,
+    rifts: 0,
+    prestige: 0,
+    dungeons: 0,
+    fairies: 0,
+    tempers: 0,
+    reforges: 0,
+    potions: 0,
+    salvage: 0,
+    crits: 0,
+  },
 
-    // Achievement Checkpoint Flags
+  // Achievement Checkpoint Flags
   hasTriggeredMurphysLaw: false,
   hasTriggeredAgainstOdds: false,
   hasTriggeredLuckySeven: false,
@@ -4206,31 +4219,31 @@ window.playerStats = {
   damageTakenThisBattle: 0,
   ankhTriggeredThisBattle: false,
   dailyMissions: [],
-      weeklyMissions: [],
-      dailyRerollsDone: 0, // Reset daily at 12:00 AM PST/PDT
-      lastDailyResetTime: 0,
-      lastWeeklyResetTime: 0,
-      dailyRewardClaimed: false,
-      weeklyRewardClaimed: false,
-      unviewedAchievements: [],
-      selectedPrestigeStage: 80,
-      unlockedTitles: [],
-      equippedTitle: null,
-      achievementTimestamps: {},
-      claimedMailIds: [],
-      playerName: "Guest",
-      clanId: null,
-      clanName: null,
-      clanEmblem: null,
-      clanSkills: {
-              steel_phalanx: 0,
-              vitality_well: 0,
-              prosperity_accord: 0,
-              voyagers_guidance: 0,
-              aetheric_wisdom: 0
-            },
-      clanContribution: 0,
-    };
+  weeklyMissions: [],
+  dailyRerollsDone: 0, // Reset daily at 12:00 AM PST/PDT
+  lastDailyResetTime: 0,
+  lastWeeklyResetTime: 0,
+  dailyRewardClaimed: false,
+  weeklyRewardClaimed: false,
+  unviewedAchievements: [],
+  selectedPrestigeStage: 80,
+  unlockedTitles: [],
+  equippedTitle: null,
+  achievementTimestamps: {},
+  claimedMailIds: [],
+  playerName: "Guest",
+  clanId: null,
+  clanName: null,
+  clanEmblem: null,
+  clanSkills: {
+    steel_phalanx: 0,
+    vitality_well: 0,
+    prosperity_accord: 0,
+    voyagers_guidance: 0,
+    aetheric_wisdom: 0,
+  },
+  clanContribution: 0,
+};
 
 // --- CLIENT-SIDE TITLE DATABASE ---
 window.TITLES_DATA = {
@@ -4311,22 +4324,22 @@ window.generateDailyMissions = function () {
 
   let stage = window.playerStats.stage || 1;
   window.playerStats.dailyMissions = selected.map((m, idx) => {
-      let target = m.targetBase;
-      if (m.stageScale) {
-        target = Math.ceil(m.targetBase * Math.pow(1.045, stage));
-      }
-      return {
-        id: `daily_${idx + 1}`,
-        type: m.type,
-        desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
-        current: 0,
-        target: target,
-        treat: "Clan Reward Sack",
-        treatQty: 1,
-        completed: false,
-        claimed: false,
-      };
-    });
+    let target = m.targetBase;
+    if (m.stageScale) {
+      target = Math.ceil(m.targetBase * Math.pow(1.045, stage));
+    }
+    return {
+      id: `daily_${idx + 1}`,
+      type: m.type,
+      desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
+      current: 0,
+      target: target,
+      treat: "Clan Reward Sack",
+      treatQty: 1,
+      completed: false,
+      claimed: false,
+    };
+  });
 };
 
 window.generateWeeklyMissions = function () {
@@ -4370,22 +4383,22 @@ window.generateWeeklyMissions = function () {
   let peakStage =
     window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
   window.playerStats.weeklyMissions = selected.map((m, idx) => {
-        let target = m.targetBase;
-        if (m.stageScale) {
-          target = Math.ceil(m.targetBase * Math.pow(1.045, peakStage));
-        }
-        return {
-          id: `weekly_${idx + 1}`,
-          type: m.type,
-          desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
-          current: 0,
-          target: target,
-          treat: "Clan Weekly Sack",
-          treatQty: 1,
-          completed: false,
-          claimed: false,
-        };
-      });
+    let target = m.targetBase;
+    if (m.stageScale) {
+      target = Math.ceil(m.targetBase * Math.pow(1.045, peakStage));
+    }
+    return {
+      id: `weekly_${idx + 1}`,
+      type: m.type,
+      desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
+      current: 0,
+      target: target,
+      treat: "Clan Weekly Sack",
+      treatQty: 1,
+      completed: false,
+      claimed: false,
+    };
+  });
 };
 
 window.checkAndResetMissions = function () {
@@ -4409,35 +4422,35 @@ window.checkAndResetMissions = function () {
     window.playerStats.dailyRewardClaimed = false;
     window.playerStats.dailyRerollsDone = 0; // Reset active re-roll tracker daily
     if (typeof window.pushLog === "function")
-          window.pushLog(
-            "<span style='color:#2ecc71; font-weight:bold;'>📅 [SYSTEM] Clan Daily Board refreshed! Reset at 12:00 AM PST/PDT. Complete at least 5 for a grand treat!</span>",
-          );
-      }
+      window.pushLog(
+        "<span style='color:#2ecc71; font-weight:bold;'>📅 [SYSTEM] Clan Daily Board refreshed! Reset at 12:00 AM PST/PDT. Complete at least 5 for a grand treat!</span>",
+      );
+  }
 
-      // Check Weekly reset (Monday 12:00 AM PST/PDT)
-      let dayOfWeek = ptDate.getDay(); // 0 is Sunday, 1 is Monday...
-      let daysSinceMonday = (dayOfWeek + 6) % 7; // Days elapsed since last Monday
-      let lastMondayDate = new Date(ptDate);
-      lastMondayDate.setDate(ptDate.getDate() - daysSinceMonday);
-      let lastMondayStr = lastMondayDate.toLocaleDateString("en-US");
+  // Check Weekly reset (Monday 12:00 AM PST/PDT)
+  let dayOfWeek = ptDate.getDay(); // 0 is Sunday, 1 is Monday...
+  let daysSinceMonday = (dayOfWeek + 6) % 7; // Days elapsed since last Monday
+  let lastMondayDate = new Date(ptDate);
+  lastMondayDate.setDate(ptDate.getDate() - daysSinceMonday);
+  let lastMondayStr = lastMondayDate.toLocaleDateString("en-US");
 
-      if (window.playerStats.prestigeCount > 0) {
-        if (
-          !window.playerStats.lastWeeklyResetMondayStr ||
-          window.playerStats.lastWeeklyResetMondayStr !== lastMondayStr
-        ) {
-          window.generateWeeklyMissions();
-          window.playerStats.lastWeeklyResetMondayStr = lastMondayStr;
-          window.playerStats.lastWeeklyResetTime = now;
-          window.playerStats.weeklyRewardClaimed = false;
-          if (typeof window.pushLog === "function")
-            window.pushLog(
-              "<span style='color:#9b59b6; font-weight:bold;'>📅 [SYSTEM] Clan Weekly Board refreshed! Reset Monday at 12:00 AM PST/PDT. Slay Rift targets and complete objectives.</span>",
-            );
-        }
-      } else {
-        window.playerStats.weeklyMissions = [];
-      }
+  if (window.playerStats.prestigeCount > 0) {
+    if (
+      !window.playerStats.lastWeeklyResetMondayStr ||
+      window.playerStats.lastWeeklyResetMondayStr !== lastMondayStr
+    ) {
+      window.generateWeeklyMissions();
+      window.playerStats.lastWeeklyResetMondayStr = lastMondayStr;
+      window.playerStats.lastWeeklyResetTime = now;
+      window.playerStats.weeklyRewardClaimed = false;
+      if (typeof window.pushLog === "function")
+        window.pushLog(
+          "<span style='color:#9b59b6; font-weight:bold;'>📅 [SYSTEM] Clan Weekly Board refreshed! Reset Monday at 12:00 AM PST/PDT. Slay Rift targets and complete objectives.</span>",
+        );
+    }
+  } else {
+    window.playerStats.weeklyMissions = [];
+  }
 };
 
 window.progressMission = function (type, amount) {
@@ -4519,7 +4532,13 @@ window.projectiles = [];
 window.groundScroll = 0;
 window.logicClock = 0;
 window.spacePressed = false;
-window.state = { autoAttack: true, efficiency: 1.0, currentSubTab: "EQUIP", currentActivitiesSubTab: "DUNGEONS" };window.isGamePaused = false;
+window.state = {
+  autoAttack: true,
+  efficiency: 1.0,
+  currentSubTab: "EQUIP",
+  currentActivitiesSubTab: "DUNGEONS",
+};
+window.isGamePaused = false;
 window.isCloudSynced = false;
 window.reviveTimer = 0;
 window.deathAnimationTimer = 0;
