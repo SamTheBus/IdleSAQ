@@ -2015,12 +2015,15 @@ window.salvageItem = function (id) {
   if (!item) return;
 
   if (item.locked) {
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast("🔒 Cannot salvage a Locked item!", "#e74c3c");
-    return;
-  }
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast("🔒 Cannot salvage a Locked item!", "#e74c3c");
+      return;
+    }
+    if (window.playerStats.pendingClanProgress) {
+      window.playerStats.pendingClanProgress.salvage = (window.playerStats.pendingClanProgress.salvage || 0) + 1;
+    }
 
-  if (isEquipped) {
+    if (isEquipped) {
     window.equippedSlots[slotToClear] = null;
   } else if (isArtifactSack) {
     window.inventory.ARTIFACT.splice(
@@ -2408,13 +2411,16 @@ window.triggerBulkSalvage = function () {
         });
 
         window.playerStats.itemsSalvaged =
-          (window.playerStats.itemsSalvaged || 0) + targetItems.length;
+                  (window.playerStats.itemsSalvaged || 0) + targetItems.length;
 
-        if (typeof window.progressMission === "function") {
-          window.progressMission("salvage", targetItems.length);
-        }
+                if (typeof window.progressMission === "function") {
+                  window.progressMission("salvage", targetItems.length);
+                }
+                if (window.playerStats.pendingClanProgress) {
+                  window.playerStats.pendingClanProgress.salvage = (window.playerStats.pendingClanProgress.salvage || 0) + targetItems.length;
+                }
 
-        let targetIds = new Set(targetItems.map((item) => item.id));
+                let targetIds = new Set(targetItems.map((item) => item.id));
         window.inventory.EQUIP = window.inventory.EQUIP.filter(
           (item) => !targetIds.has(item.id),
         );
@@ -2477,6 +2483,9 @@ window.triggerBulkSalvage = function () {
 window.temperItem = function () {
   if (!window.forgeSelectedItem) return;
   let isArt = window.forgeSelectedItem.type === "artifact";
+  if (window.playerStats.pendingClanProgress) {
+    window.playerStats.pendingClanProgress.tempers = (window.playerStats.pendingClanProgress.tempers || 0) + 1;
+  }
 
   if (window.forgeMode === "temper") {
     let maxT = window.getMaxTemper(
@@ -2899,6 +2908,9 @@ window.selectReforgeStat = function (propKey) {
 window.reforgeItemStat = function () {
   if (!window.forgeSelectedItem) return;
   let item = window.forgeSelectedItem;
+  if (window.playerStats.pendingClanProgress) {
+    window.playerStats.pendingClanProgress.reforges = (window.playerStats.pendingClanProgress.reforges || 0) + 1;
+  }
 
   if (!item.reforgedProperty) {
     if (!item.tempReforgeProp) {

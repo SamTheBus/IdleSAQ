@@ -3665,7 +3665,10 @@ window.triggerPrestigeAscension = function () {
   let totalAwarded = Math.min(10, basePoints + bonusPoints) + pushBonus;
 
   window.playerStats.prestigePoints += totalAwarded;
-  window.playerStats.prestigeCount++;
+    window.playerStats.prestigeCount++;
+    if (window.playerStats.pendingClanProgress) {
+      window.playerStats.pendingClanProgress.prestige = (window.playerStats.pendingClanProgress.prestige || 0) + 1;
+    }
 
   let nowTime = Date.now();
   if (
@@ -9301,12 +9304,51 @@ window.openWeeklyRewardSack = function (specificName) {
   window.playerStats.missionTokens =
     (window.playerStats.missionTokens || 0) + 3;
 
+  let clanLvl = window.playerStats.clanLevel || 1;
+
+  // Base quantities scale up dynamically based on Clan Level!
+  let coreQty = 1 + Math.floor(clanLvl * 0.1);
+  let sigilQty = 1 + Math.floor(clanLvl * 0.05);
+  let shardQty = 1 + Math.floor(clanLvl * 0.2);
+  let scrapQty = 3 + Math.floor(clanLvl * 0.5);
+
   let receivedRewards = [
-    { name: "Ancient Core", qty: 1, color: "#e74c3c", type: "etc" },
-    { name: "Overlord's Sigil", qty: 1, color: "#1abc9c", type: "etc" },
-    { name: "Eridium Shard", qty: 1, color: "#8e44ad", type: "etc" },
-    { name: "Legendary Scrap", qty: 3, color: "#f1c40f", type: "etc" },
+    { name: "Ancient Core", qty: coreQty, color: "#e74c3c", type: "etc" },
+    { name: "Overlord's Sigil", qty: sigilQty, color: "#1abc9c", type: "etc" },
+    { name: "Eridium Shard", qty: shardQty, color: "#8e44ad", type: "etc" },
+    { name: "Legendary Scrap", qty: scrapQty, color: "#f1c40f", type: "etc" },
   ];
+
+  // Double XP Potion (Chance scales up with Clan level)
+  let xpChance = Math.min(0.60, 0.10 + clanLvl * 0.04);
+  if (Math.random() < xpChance) {
+    receivedRewards.push({ name: "Double XP Elixir", qty: 1 + Math.floor(clanLvl / 10), color: "#a855f7", type: "use" });
+  }
+
+  // Double Drop Potion (Chance scales up with Clan level)
+  let dropChance = Math.min(0.50, 0.05 + clanLvl * 0.03);
+  if (Math.random() < dropChance) {
+    receivedRewards.push({ name: "Double Drop Elixir", qty: 1 + Math.floor(clanLvl / 15), color: "#22c55e", type: "use" });
+  }
+
+  // Drop Quality Potion (Chance scales up with Clan level)
+  let qlyChance = Math.min(0.40, 0.03 + clanLvl * 0.02);
+  if (Math.random() < qlyChance) {
+    receivedRewards.push({ name: "Drop Quality Elixir", qty: 1, color: "#3b82f6", type: "use" });
+  }
+
+  // Advanced reagents unlocked inside Sacks for Clans Level 10+
+  if (clanLvl >= 10) {
+    let coreChance = Math.min(0.40, 0.05 + (clanLvl - 10) * 0.03);
+    if (Math.random() < coreChance) {
+      receivedRewards.push({ name: "Catalyst Core", qty: 1, color: "#2ecc71", type: "etc" });
+    }
+
+    let essenceChance = Math.min(0.30, 0.03 + (clanLvl - 10) * 0.02);
+    if (Math.random() < essenceChance) {
+      receivedRewards.push({ name: "Astral Essence", qty: 1, color: "#9b59b6", type: "etc" });
+    }
+  }
 
   // 5% chance for a random Artifact
   if (Math.random() < 0.05) {
@@ -9517,9 +9559,9 @@ window.openWeeklyRewardSack = function (specificName) {
 
     overlay.innerHTML = `
           <div style="background:#1a1a1a; border:2px solid #9b59b6; border-radius:8px; width:95%; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.95); animation: toastFadeIn 0.3s ease-out; overflow:hidden;">
-            <div style="background:#0b0f12; border-top: 1px solid #333; padding:12px 15px; text-align:center;">
-              <h3 style="margin:0; color:#9b59b6; font-size:15px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">💼 CLAN WEEKLY SACK OPENED!</h3>
-            </div>
+                        <div style="background:#0b0f12; border-top: 1px solid #333; padding:12px 15px; text-align:center;">
+                          <h3 style="margin:0; color:#9b59b6; font-size:15px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">💼 CLAN WEEKLY SACK OPENED! (Lv. ${clanLvl})</h3>
+                        </div>
             <div style="background:#111; border:1px solid #222; border-radius:6px; padding:8px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
                             <div style="display:flex; align-items:center;">
                               <span style="background:rgba(155,89,182,0.1); border:1px solid #9b59b6; border-radius:4px; padding:4px; display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:16px;">
@@ -10670,7 +10712,7 @@ window.toggleClanHall = function () {
     win.className = "draggable-window";
     win.style.left = "80px";
     win.style.top = "60px";
-    win.style.width = "360px";
+    win.style.width = "390px";
 
     win.innerHTML = `
       <div class="draggable-header" id="clan-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
@@ -10683,7 +10725,7 @@ window.toggleClanHall = function () {
           </span>
           <button onclick="document.getElementById('clan-draggable-window').remove(); window.setPauseState(false); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
       </div>
-      <div class="draggable-content" id="clan-win-content" style="max-height: 420px; padding: 12px; background:#07030b;">
+      <div class="draggable-content" id="clan-win-content" style="max-height: 440px; padding: 12px; background:#07030b;">
           <!-- Injected dynamically -->
       </div>
     `;
@@ -10718,11 +10760,13 @@ window.fetchClanData = function () {
           window.playerStats.clanId = data.clan.id;
           window.playerStats.clanName = data.clan.name;
           window.playerStats.clanEmblem = data.clan.leader_id.charCodeAt(0) || 0;
+          window.playerStats.clanLevel = data.clan.level || 1;
           window.playerStats.clanSkills = {
             steel_phalanx: data.clan.skill_steel_phalanx,
             vitality_well: data.clan.skill_vitality_well,
             prosperity_accord: data.clan.skill_prosperity_accord,
-            voyagers_guidance: data.clan.skill_voyagers_guidance
+            voyagers_guidance: data.clan.skill_voyagers_guidance,
+            aetheric_wisdom: data.clan.skill_aetheric_wisdom || 0
           };
           window.renderClanDashboard(data.clan, data.members, data.invitations || []);
         } else {
@@ -10737,6 +10781,29 @@ window.fetchClanData = function () {
     .catch((err) => {
       console.error("Clan fetch failed:", err);
       contentEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Could not connect to the Clan Sanctum server.</div>`;
+    });
+};
+
+window.joinOpenClan = function (clanId) {
+  const userId = window.getGameUserId();
+  fetch(`${window.GAME_SERVER_URL}/api/clan/join-open`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, clanId }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.success) {
+        window.pushHeaderToast("🎉 Welcome to your new Clan!", "#2ecc71");
+        window.fetchClanData();
+        window.updateUI();
+        window.saveGame();
+      } else {
+        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+      }
+    })
+    .catch(() => {
+      window.pushHeaderToast("❌ Connection error joining clan.", "#e74c3c");
     });
 };
 
@@ -10783,14 +10850,24 @@ window.renderClanCreation = function (clansList, invitations) {
     <div style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
         ${clansList.length === 0 ? `<div style="font-size:10.5px; color:#666; font-style:italic; padding:15px; text-align:center;">No open clans found. Try founding one!</div>` : clansList.map(g => {
           let emblem = window.getClanEmblemHtml(g.leader_id.charCodeAt(0) || 0, 14);
+          let btnHtml = "";
+          let pLvl = window.playerStats.level || 1;
+          if (g.join_policy === "open") {
+            let canJoin = pLvl >= g.min_level;
+            btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71;" ${canJoin ? "" : "disabled style='opacity:0.5; cursor:not-allowed;' title='Requires Level " + g.min_level + "'"} onclick="window.joinOpenClan(${g.id})">Join</button>`;
+          } else {
+            btnHtml = `<span style="font-size:9.5px; color:#666;" title="This clan requires an explicit invitation from the founder.">Invite-Only</span>`;
+          }
           return `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#111; border:1px solid #222; padding:6px 10px; border-radius:4px;">
-                <div style="display:flex; align-items:center; gap:6px; text-align:left;">
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#111; border:1px solid #222; padding:6px 10px; border-radius:4px; gap:8px;">
+                <div style="display:flex; align-items:center; gap:6px; text-align:left; min-width:0; flex:1;">
                     ${emblem}
-                    <strong style="font-size:11.5px; color:#fff;">${window.escapeHTML(g.name)}</strong>
-                    <span style="font-size:9.5px; color:#aaa;">(Lv. ${g.level})</span>
+                    <div style="min-width:0; flex:1;">
+                        <strong style="font-size:11.5px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${window.escapeHTML(g.name)}</strong>
+                        <span style="font-size:9px; color:#aaa; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Level ${g.level} ${g.min_level > 1 ? "• Min Lv. " + g.min_level : ""}</span>
+                    </div>
                 </div>
-                <span style="font-size:9.5px; color:#666;">Apply via Member Invite</span>
+                ${btnHtml}
             </div>
           `;
         }).join("")}
@@ -10867,19 +10944,36 @@ window.renderClanDashboard = function (clan, members, invitations) {
   const userId = window.getGameUserId();
   const isLeader = clan.leader_id === userId;
 
+  let unclaimedQuestsCount = 0;
+  if (clan.quests && clan.quests.activeList) {
+    clan.quests.activeList.forEach(q => {
+      if (q.completed && q.claimedUserIds && !q.claimedUserIds.includes(userId)) {
+        unclaimedQuestsCount++;
+      }
+    });
+  }
+  window.playerStats.pendingClanQuestsCompletedCount = unclaimedQuestsCount;
+
   let tabHeaderHtml = `
-    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px; margin-bottom:12px;">
-        <button onclick="window.switchClanTab('OVERVIEW')" class="sub-tab-btn ${currentTab === "OVERVIEW" ? "active" : ""}" style="padding:5px; font-size:10px; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 22"/></svg>
+    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:2px; margin-bottom:12px;">
+        <button onclick="window.switchClanTab('OVERVIEW')" class="sub-tab-btn ${currentTab === "OVERVIEW" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
             Overview
         </button>
-        <button onclick="window.switchClanTab('DONATE')" class="sub-tab-btn ${currentTab === "DONATE" ? "active" : ""}" style="padding:5px; font-size:10px; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6"/></svg>
+        <button onclick="window.switchClanTab('MEMBERS')" class="sub-tab-btn ${currentTab === "MEMBERS" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
+            Members
+        </button>
+        <button onclick="window.switchClanTab('QUESTS')" class="sub-tab-btn ${currentTab === "QUESTS" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px; position:relative;">
+            Quests
+            ${unclaimedQuestsCount > 0 ? `<span style="position:absolute; top:-1px; right:-1px; width:6px; height:6px; background:#e74c3c; border-radius:50%; box-shadow:0 0 4px #e74c3c;"></span>` : ""}
+        </button>
+        <button onclick="window.switchClanTab('DONATE')" class="sub-tab-btn ${currentTab === "DONATE" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
             Donation
         </button>
-        <button onclick="window.switchClanTab('RESEARCH')" class="sub-tab-btn ${currentTab === "RESEARCH" ? "active" : ""}" style="padding:5px; font-size:10px; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 22h20M12 18v4M12 2a4 4 0 0 1 4 4v7H8V6a4 4 0 0 1 4-4z"/></svg>
+        <button onclick="window.switchClanTab('RESEARCH')" class="sub-tab-btn ${currentTab === "RESEARCH" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
             Research
+        </button>
+        <button onclick="window.switchClanTab('SETTINGS')" class="sub-tab-btn ${currentTab === "SETTINGS" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
+            Settings
         </button>
     </div>
   `;
@@ -10903,6 +10997,11 @@ window.renderClanDashboard = function (clan, members, invitations) {
           </div>
       </div>
 
+      <div style="background:#111; border:1px solid #222; border-radius:6px; padding:8px 10px; margin-bottom:12px; font-size:11px; text-align:left; line-height:1.4; color:#ddd; white-space:normal;">
+          <span style="color:#888; font-size:9px; font-weight:bold; display:block; margin-bottom:2px; text-transform:uppercase;">📜 CLAN ANNOUNCEMENT:</span>
+          "${window.escapeHTML(clan.description || 'Welcome to our Clan!')}"
+      </div>
+
       <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:6px; padding:8px; margin-bottom:12px; font-size:10.5px; text-align:left;">
           <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:3px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace;">🏛️ Clan Vault Balances:</div>
           <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; text-align:center; font-family:monospace;">
@@ -10912,40 +11011,12 @@ window.renderClanDashboard = function (clan, members, invitations) {
           </div>
       </div>
 
-      <div style="border:1px solid #222; border-radius:6px; padding:8px; margin-bottom:12px;">
-          <strong style="color:#df9ffb; font-size:11px; display:inline-flex; align-items:center; gap:4px; margin-bottom:6px; text-align:left; text-transform:uppercase; letter-spacing:0.5px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              Clan Members (${members.length})
-          </strong>
-          <div style="max-height:110px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
-              ${members.map(m => {
-                let rank = m.userId === clan.leader_id ? `<span style="color:#f1c40f;">[Leader]</span>` : `<span style="color:#888;">[Member]</span>`;
-                return `
-                  <div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:4px 8px; border-radius:4px; font-size:11px;">
-                      <span style="font-weight:bold; color:#fff;">${window.escapeHTML(m.name)}</span>
-                      <span style="font-family:monospace; font-size:9.5px;">${rank}</span>
-                  </div>
-                `;
-              }).join("")}
-          </div>
+      <div style="background:#111; border:1px solid #222; border-radius:6px; padding:10px; font-size:11px; text-align:left; line-height:1.45; white-space:normal; color:#aaa;">
+          <strong style="color:#df9ffb;">💡 CLAN INFO:</strong><br>
+          • Join Policy: <span style="color:#fff; font-weight:bold;">${clan.join_policy === 'open' ? 'Open (Join Instantly)' : 'Invite Only'}</span><br>
+          • Minimum Level Requirement: <span style="color:#fff; font-weight:bold;">Lv. ${clan.min_level}</span><br>
+          • Members Enrolled: <span style="color:#fff; font-weight:bold;">${members.length} / 20</span>
       </div>
-
-      ${isLeader ? `
-          <div style="border: 1px dashed #4a154b; border-radius: 6px; padding: 10px; background: rgba(142, 68, 173, 0.03); margin-bottom:12px; text-align:left;">
-              <strong style="color:#df9ffb; font-size:11px; display:inline-flex; align-items:center; gap:4px; margin-bottom:6px; text-transform:uppercase;">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                  Invite Member by Name:
-              </strong>
-              <div style="display:flex; gap:6px;">
-                  <input type="text" id="clan-invite-name" placeholder="Character Name" maxlength="14" style="flex:1; background:#111; color:#fff; border:1px solid #444; padding:4px; font-size:11px; border-radius:4px;">
-                  <button class="btn-action" style="background:#9b59b6; color:#fff; font-size:10px; padding:4px 10px;" onclick="window.executeClanInvite()">Invite</button>
-              </div>
-          </div>
-      ` : ""}
-
-      <button class="btn-action un" style="width:100%; font-size:10.5px; padding:8px 0;" onclick="window.executeLeaveClan()">
-          ${isLeader ? "🚨 Dissolve Clan" : "🏃 Leave Clan"}
-      </button>
     `;
   } else if (currentTab === "DONATE") {
     let goldOwned = window.playerStats.coins || 0;
@@ -10958,7 +11029,7 @@ window.renderClanDashboard = function (clan, members, invitations) {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6M9 13h6"/></svg>
               Contribution Chamber
           </strong>
-          Donating resources directly increases your shared **Clan XP** to level up, expanding skill limits, and grows the Vault treasury to execute research upgrades.
+          Donating resources grows the shared **Clan Vault treasury**, enabling the Clan Founder to initiate powerful skill passive research. (Clan XP is earned through weekly cooperative quests).
       </div>
 
       <div style="display:flex; flex-direction:column; gap:6px; text-align:left;">
@@ -11008,6 +11079,185 @@ window.renderClanDashboard = function (clan, members, invitations) {
           </div>
       </div>
     `;
+  } else if (currentTab === "MEMBERS") {
+    function formatRelativeTime(timestamp) {
+      let diff = Date.now() - timestamp;
+      if (diff < 15000) return "Active now";
+      let secs = Math.floor(diff / 1000);
+      if (secs < 60) return `${secs}s ago`;
+      let mins = Math.floor(secs / 60);
+      if (mins < 60) return `${mins}m ago`;
+      let hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours}h ago`;
+      let days = Math.floor(hours / 24);
+      return `${days}d ago`;
+    }
+
+    tabContentHtml = `
+      <div style="display:flex; flex-direction:column; gap:4px; max-height: 280px; overflow-y:auto; padding-right:4px;">
+          ${members.map((m, idx) => {
+            let isLeaderRow = m.userId === clan.leader_id;
+            let rankTag = isLeaderRow ? `<span style="color:#f1c40f; font-weight:bold;">Founder</span>` : `<span style="color:#888;">Member</span>`;
+            let canvasId = `clan-member-canvas-${m.userId}`;
+
+            let titleTextHtml = "";
+            if (m.equippedTitle && window.TITLES_DATA[m.equippedTitle]) {
+              let tData = window.TITLES_DATA[m.equippedTitle];
+              titleTextHtml = `<span style="color:${tData.color || '#ff007f'}; font-size:8px; font-weight:bold; margin-left:4px;">[${tData.name}]</span>`;
+            }
+
+            let showKickBtn = isLeader && !isLeaderRow;
+            return `
+              <div style="background:#111; border:1px solid #222; border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                  <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; text-align:left;">
+                      <canvas id="${canvasId}" width="30" height="40" style="width:30px; height:40px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:4px; flex-shrink:0; pointer-events:none;"></canvas>
+                      <div style="min-width:0; flex:1;">
+                          <div style="display:flex; align-items:center; flex-wrap:wrap; line-height:1.1;">
+                              <strong style="font-size:11.5px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">${window.escapeHTML(m.name)}</strong>
+                              ${titleTextHtml}
+                          </div>
+                          <span style="font-size:9px; color:#aaa; font-family:monospace; display:block; margin-top:2px;">Lv. ${m.level} • Peak Stg ${m.lifetimePeakStage} • Contribution: <span style="color:#2ecc71;">${window.formatNumber(m.clanContribution)}</span></span>
+                          <span style="font-size:8px; color:#7f8c8d; font-family:monospace;">${formatRelativeTime(Number(m.lastActive))}</span>
+                      </div>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:4px;">
+                      <button class="btn-action" style="background:#3498db; font-size:9.5px; padding:3px 6px;" onclick="window.inspectPlayer('${m.userId}')">Inspect</button>
+                      ${showKickBtn ? `<button class="btn-action un" style="background:#c0392b; font-size:9.5px; padding:3px 6px;" onclick="window.executeKickMember('${m.userId}', '${window.escapeHTML(m.name)}')">Kick</button>` : ""}
+                  </div>
+              </div>
+            `;
+          }).join("")}
+      </div>
+    `;
+
+    setTimeout(() => {
+      members.forEach((m) => {
+        let canvas = document.getElementById(`clan-member-canvas-${m.userId}`);
+        if (canvas) {
+          let ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.imageSmoothingEnabled = false;
+          window.drawSingleHero(ctx, 15, 14, 0.55, m.equippedSlots, m, 0, { slashFrame: false, deathAnimationTimer: 0, isMainHero: false });
+        }
+      });
+    }, 50);
+  } else if (currentTab === "QUESTS") {
+    let questsData = clan.quests;
+    let listHtml = "";
+
+    if (!questsData || !questsData.activeList || questsData.activeList.length === 0) {
+      listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
+    } else {
+      let stgScale = Math.max(1, Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1);
+      let calculatedGoldMult = Math.pow(1.8, stgScale);
+
+      listHtml = questsData.activeList.map((q) => {
+        let pct = Math.min(100, (q.current / q.target) * 100);
+        let hasClaimed = q.claimedUserIds && q.claimedUserIds.includes(userId);
+
+        let claimBtnHtml = "";
+        if (hasClaimed) {
+          claimBtnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
+        } else if (q.completed) {
+          claimBtnHtml = `<button class="btn-action btn-pulse" style="padding:4px 10px; font-size:10px; background:#2ecc71; border-color:#fff;" onclick="window.executeClaimClanQuestReward('${q.id}')">Claim</button>`;
+        } else {
+          claimBtnHtml = `<span style="color:#aaa; font-size:10px; font-family:monospace;">${q.current.toLocaleString()} / ${q.target.toLocaleString()}</span>`;
+        }
+
+        let rewardItems = [];
+        if (q.rewards.keys > 0) rewardItems.push(`<span style="color:#f1c40f;">+${q.rewards.keys} Keys</span>`);
+        if (q.rewards.cores > 0) rewardItems.push(`<span style="color:#2ecc71;">+${q.rewards.cores} Cores</span>`);
+        if (q.rewards.essence > 0) rewardItems.push(`<span style="color:#9b59b6;">+${q.rewards.essence} Essence</span>`);
+        if (q.rewards.shards > 0) rewardItems.push(`<span style="color:#8e44ad;">+${q.rewards.shards} Shards</span>`);
+        if (q.rewards.souls > 0) rewardItems.push(`<span style="color:#ffb6c1;">+${q.rewards.souls} Souls</span>`);
+        if (q.rewards.pp > 0) rewardItems.push(`<span style="color:#ff007f;">+${q.rewards.pp} PP</span>`);
+        if (q.rewards.sacks > 0) rewardItems.push(`<span style="color:#f1c40f;">+${q.rewards.sacks}x Clan Sack</span>`);
+
+        if (q.rewards.goldBase > 0) {
+          let actualGoldReward = Math.ceil(q.rewards.goldBase * calculatedGoldMult);
+          rewardItems.push(`<span style="color:#ffd700;">+${window.formatNumber(actualGoldReward)} Gold</span>`);
+        }
+
+        let completedOverlay = q.completed
+          ? `<div style="position:absolute; top:2px; right:8px; width:12px; height:12px; background:#2ecc71; border-radius:50%; box-shadow:0 0 6px #2ecc71; display:flex; align-items:center; justify-content:center; color:#fff; font-size:8px; font-weight:bold;">✓</div>`
+          : "";
+
+        return `
+          <div style="position:relative; background:#111; border:1.5px solid ${q.completed ? '#2ecc71' : '#2d3748'}; border-radius:6px; padding:10px; margin-bottom:8px; text-align:left;">
+              ${completedOverlay}
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:8px;">
+                  <strong style="font-size:12.5px; color:#fff; display:block;">${q.label}</strong>
+                  ${claimBtnHtml}
+              </div>
+              <p style="font-size:10px; color:#aaa; margin-bottom:8px; line-height:1.35; white-space:normal;">${q.desc}</p>
+
+              <div style="background:#090a0f; border:1px solid #222; border-radius:4px; padding:6px; font-size:9.5px; margin-bottom:8px; display:flex; flex-wrap:wrap; gap:4px 8px; font-family:monospace; line-height:1.2;">
+                  <div style="width:100%; color:#9b59b6; font-weight:bold; margin-bottom:2px;">🎁 Quest Rewards (Completed):</div>
+                  <div style="color:#df9ffb; font-weight:bold;">+${q.xpReward} Clan XP</div>
+                  ${rewardItems.map(item => `<div>${item}</div>`).join("")}
+              </div>
+
+              <div style="width:100%; height:6px; background:#222; border-radius:3px; overflow:hidden; border:1px solid #333; margin-top:2px;">
+                  <div style="width:${pct}%; height:100%; background:${q.completed ? '#2ecc71' : '#9b59b6'};"></div>
+              </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    tabContentHtml = `
+      <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.4;">
+          <strong style="color:#df9ffb; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z"/></svg>
+              Weekly Guild Objectives
+          </strong>
+          Cooperate with your Clan to achieve these weekly active goals. Completing quests is the **only way** to gain Clan XP and level up!
+      </div>
+      <div style="max-height: 280px; overflow-y:auto; padding-right:4px;">
+          ${listHtml}
+      </div>
+    `;
+  } else if (currentTab === "SETTINGS") {
+    let isJoinOpen = clan.join_policy === "open";
+    tabContentHtml = `
+      <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.45;">
+          <strong style="color:#f1c40f; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
+              ⚙️ Clan Settings
+          </strong>
+          Founder control board to customize description, toggle entry policy, edit emblem seeds, promote members, or disband.
+      </div>
+
+      ${isLeader ? `
+          <div style="display:flex; flex-direction:column; gap:8px; text-align:left; max-height:280px; overflow-y:auto; padding-right:4px;">
+              <!-- Description -->
+              <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px;">
+                  <label for="settings-clan-desc" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Custom Announcement / Desc:</label>
+                  <textarea id="settings-clan-desc" style="width:100%; height:45px; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px; font-family:sans-serif; resize:none;" maxlength="120">${window.escapeHTML(clan.description || '')}</textarea>
+              </div>
+
+              <!-- Join Policy & Min Lvl -->
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; background:#111; border:1px solid #222; padding:8px; border-radius:6px;">
+                  <div>
+                      <label for="settings-clan-policy" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Join Policy:</label>
+                      <select id="settings-clan-policy" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px;">
+                          <option value="invite_only" ${!isJoinOpen ? 'selected' : ''}>Invite Only</option>
+                          <option value="open" ${isJoinOpen ? 'selected' : ''}>Open Join</option>
+                      </select>
+                  </div>
+                  <div>
+                      <label for="settings-clan-minlevel" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Min Level:</label>
+                      <input type="number" id="settings-clan-minlevel" value="${clan.min_level || 1}" min="1" max="1000" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px; font-family:monospace;">
+                  </div>
+              </div>
+
+              <button class="btn-action" style="width:100%; background:#2ecc71; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeSaveClanSettings()">Save Clan Customizations</button>
+          </div>
+      ` : `
+          <div style="border:1px solid #222; border-radius:6px; padding:15px; text-align:center; color:#888; font-style:italic; font-size:11px; white-space:normal; line-height:1.45;">
+              🔐 Founder lock enabled. Only the Founder/Leader can modify settings, change description, or set join policy limitations.
+          </div>
+      `}
+    `;
   } else if (currentTab === "RESEARCH") {
     let getSkillUpgradeCardHtml = (key, label, bonusText, currentL, maxL, col) => {
       let costGold = 0;
@@ -11019,18 +11269,20 @@ window.renderClanDashboard = function (clan, members, invitations) {
         costSoul = Math.floor(200 * Math.pow(1.25, currentL));
         soulName = "Monster Souls";
       } else {
-        costGold = Math.floor((key === "prosperity_accord" ? 40000 : 50000) * Math.pow(1.4, currentL));
-        costSoul = Math.floor(5 * Math.pow(1.3, currentL));
+        costGold = Math.floor((key === "prosperity_accord" ? 40000 : key === "voyagers_guidance" ? 50000 : 45000) * Math.pow(1.4, currentL));
+        costSoul = Math.floor((key === "aetheric_wisdom" ? 6 : 5) * Math.pow(1.3, currentL));
         soulName = "Luminous Souls";
       }
 
       let isMaxed = currentL >= maxL;
+      let clanLevel = clan.level || 1;
+      let isGated = currentL >= clanLevel * 2;
       let canAffordGold = clan.gold_bank >= costGold;
       let canAffordSoul = (key === "steel_phalanx" || key === "vitality_well")
         ? clan.souls_bank >= costSoul
         : clan.luminous_bank >= costSoul;
 
-      let canUpgrade = isLeader && !isMaxed && canAffordGold && canAffordSoul;
+      let canUpgrade = isLeader && !isMaxed && !isGated && canAffordGold && canAffordSoul;
       let bgStyle = window.hexToRgba ? window.hexToRgba(col, 0.04) : "rgba(255,255,255,0.02)";
       let btnTextColor = col === "#f1c40f" || col === "#ffb6c1" ? "#111" : "#fff";
 
@@ -11039,19 +11291,25 @@ window.renderClanDashboard = function (clan, members, invitations) {
       else if (key === "vitality_well") icon = window.getUiIconSvg("maxHp", 13);
       else if (key === "prosperity_accord") icon = window.getUiIconSvg("gold", 13);
       else if (key === "voyagers_guidance") icon = window.getUiIconSvg("dropRate", 13);
+      else if (key === "aetheric_wisdom") icon = window.getUiIconSvg("xpRate", 13);
+
+      let gateText = "";
+      if (isGated && !isMaxed) {
+        gateText = `<br><span style="color:#e74c3c; font-weight:bold;">🔒 BLOCKED: Level up Clan to ${Math.ceil((currentL + 1) / 2)} to upgrade further!</span>`;
+      }
 
       return `
         <div class="shop-row" style="border-color:${col}; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:4px; padding:10px; margin-bottom:6px; cursor:help;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <strong style="color:${col}; font-size:11.5px; display:inline-flex; align-items:center; gap:4px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${currentL}/${maxL})</span></strong>
-                <span style="color:#aaa; font-size:9px; font-family:monospace;">${isMaxed ? "MAXED" : "RESEARCH"}</span>
-            </div>
-            <div style="font-size:9.5px; color:#aaa; line-height:1.35; margin-bottom:6px;">
-                Current active bonus: <strong style="color:#fff;">${bonusText}</strong><br>
-                ${isMaxed ? `<span style="color:#2ecc71; font-weight:bold;">Shared skill limit reached!</span>` : `
-                Cost: <span style="${canAffordGold ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costGold)} Gold</span> &
-                <span style="${canAffordSoul ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costSoul)} ${soulName}</span>`}
-            </div>
+                          <div style="display:flex; justify-content:space-between; align-items:center;">
+                              <strong style="color:${col}; font-size:11.5px; display:inline-flex; align-items:center; gap:4px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${currentL}/${maxL})</span></strong>
+                              <span style="color:#aaa; font-size:9px; font-family:monospace;">${isMaxed ? "MAXED" : "RESEARCH"}</span>
+                          </div>
+                          <div style="font-size:9.5px; color:#aaa; line-height:1.35; margin-bottom:6px;">
+                              Current active bonus: <strong style="color:#fff;">${bonusText}</strong>${gateText}<br>
+                              ${isMaxed ? `<span style="color:#2ecc71; font-weight:bold;">Shared research cap reached!</span>` : `
+                              Cost: <span style="${canAffordGold ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costGold)} Gold</span> &
+                              <span style="${canAffordSoul ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costSoul)} ${soulName}</span>`}
+                          </div>
             ${isLeader ? `
                 <button class="btn-action" style="background:${col}; color:${btnTextColor}; font-weight:bold; font-size:10px; padding:4px;" ${canUpgrade ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeUpgradeClanSkill('${key}')">Upgrade Research</button>
             ` : `<div style="font-size:8.5px; color:#888; font-style:italic; text-align:center;">* Only the Clan Founder can initiate research upgrades.</div>`}
@@ -11060,13 +11318,14 @@ window.renderClanDashboard = function (clan, members, invitations) {
     };
 
     tabContentHtml = `
-      <div style="display:flex; flex-direction:column; gap:4px;">
-          ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", `+${(clan.skill_steel_phalanx * 0.5).toFixed(1)}% Attack & Defense`, clan.skill_steel_phalanx, 50, "#e74c3c")}
-          ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", `+${(clan.skill_vitality_well * 0.8).toFixed(1)}% Max HP`, clan.skill_vitality_well, 50, "#3498db")}
-          ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", `+${(clan.skill_prosperity_accord * 1.0).toFixed(1)}% Gold Multiplier`, clan.skill_prosperity_accord, 30, "#f1c40f")}
-          ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager\\'s Guidance", `+${(clan.skill_voyagers_guidance * 0.5).toFixed(1)}% Drop Rate & Quality`, clan.skill_voyagers_guidance, 30, "#2ecc71")}
-      </div>
-    `;
+                          <div style="display:flex; flex-direction:column; gap:4px;">
+                              ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", `+${((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1)}% Attack & Defense`, clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
+                              ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", `+${((clan.skill_vitality_well || 0) * 0.8).toFixed(1)}% Max HP`, clan.skill_vitality_well || 0, 50, "#3498db")}
+                              ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", `+${((clan.skill_prosperity_accord || 0) * 1.0).toFixed(1)}% Gold Multiplier`, clan.skill_prosperity_accord || 0, 30, "#f1c40f")}
+                              ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager\\'s Guidance", `+${((clan.skill_voyagers_guidance || 0) * 0.5).toFixed(1)}% Drop Rate & Quality`, clan.skill_voyagers_guidance || 0, 30, "#2ecc71")}
+                              ${getSkillUpgradeCardHtml("aetheric_wisdom", "Aetheric Wisdom", `+${((clan.skill_aetheric_wisdom || 0) * 1.0).toFixed(1)}% XP Rate`, clan.skill_aetheric_wisdom || 0, 30, "#9b59b6")}
+                          </div>
+                        `;
   }
 
   contentEl.innerHTML = `
@@ -11080,52 +11339,75 @@ window.switchClanTab = function (tabId) {
   window.fetchClanData();
 };
 
-window.executeClanInvite = function () {
-  let input = document.getElementById("clan-invite-name");
-  if (!input) return;
-  let charName = input.value.trim();
-
-  if (!charName) return;
-
+window.executeClaimClanQuestReward = function (questId) {
   const userId = window.getGameUserId();
-  fetch(`${window.GAME_SERVER_URL}/api/clan/invite`, {
+  fetch(`${window.GAME_SERVER_URL}/api/clan/quests-claim`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, charName }),
+    body: JSON.stringify({ userId, questId }),
   })
     .then((r) => r.json())
     .then((data) => {
-      if (data.success) {
-        window.pushHeaderToast(`📬 Invitation dispatched to ${charName}!`, "#2ecc71");
-        input.value = "";
-      } else {
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-      }
-    })
-    .catch(() => {
-      window.pushHeaderToast("❌ Network error sending invitation.", "#e74c3c");
-    });
-};
+      if (data.success && data.rewards) {
+        let r = data.rewards;
+        let claimsReport = [];
 
-window.executeClanDonate = function (resType, amount) {
-  const userId = window.getGameUserId();
-  fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, resType, amount }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.success) {
-        if (resType === "gold") window.playerStats.coins -= amount;
-        else if (resType === "souls") window.inventory.ETC["Monster Soul"] -= amount;
-        else if (resType === "luminous") window.inventory.ETC["Luminous Soul"] -= amount;
+        if (r.keys > 0) {
+          window.addEtcDrop("Gacha Key", r.keys);
+          claimsReport.push(`+${r.keys} Gacha Keys`);
+        }
+        if (r.cores > 0) {
+          window.addEtcDrop("Catalyst Core", r.cores);
+          claimsReport.push(`+${r.cores} Catalyst Cores`);
+        }
+        if (r.essence > 0) {
+          window.addEtcDrop("Astral Essence", r.essence);
+          claimsReport.push(`+${r.essence} Astral Essence`);
+        }
+        if (r.shards > 0) {
+          window.addEtcDrop("Eridium Shard", r.shards);
+          claimsReport.push(`+${r.shards} Eridium Shards`);
+        }
+        if (r.souls > 0) {
+          window.addEtcDrop("Monster Soul", r.souls);
+          claimsReport.push(`+${r.souls} Monster Souls`);
+        }
+        if (r.pp > 0) {
+          window.playerStats.prestigePoints = (window.playerStats.prestigePoints || 0) + r.pp;
+          claimsReport.push(`+${r.pp} Prestige Points (PP)`);
+        }
+        if (r.sacks > 0) {
+          window.addUseDrop("Clan Reward Sack", r.sacks);
+          claimsReport.push(`+${r.sacks}x Clan Sacks`);
+        }
+        if (r.goldBase > 0) {
+          let stgScale = Math.max(1, Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1);
+          let calculatedGold = Math.ceil(r.goldBase * Math.pow(1.8, stgScale));
+          window.playerStats.coins += calculatedGold;
+          window.playerStats.totalGoldEarned = (window.playerStats.totalGoldEarned || 0) + calculatedGold;
+          claimsReport.push(`+${window.formatNumber(calculatedGold)} Gold`);
+        }
 
-        // Clean empty item keys
-        if (window.inventory.ETC["Monster Soul"] === 0) delete window.inventory.ETC["Monster Soul"];
-        if (window.inventory.ETC["Luminous Soul"] === 0) delete window.inventory.ETC["Luminous Soul"];
+        window.pushHeaderToast(`🎁 Quest Claimed: ${claimsReport.join(", ")}!`, "#2ecc71");
+        if (window.SoundManager) window.SoundManager.play("revive");
 
-        window.pushHeaderToast(`💎 Thank you for contributing to the Vault!`, "#2ecc71");
+        // Particle burst
+        let cvs = document.getElementById("gameCanvas");
+        let w = cvs ? cvs.width : 750;
+        let h = cvs ? cvs.height : 250;
+        for (let i = 0; i < 30; i++) {
+          window.particles.push({
+            x: w / 2,
+            y: h / 2,
+            vx: (Math.random() - 0.5) * 10,
+            vy: (Math.random() - 0.5) * 10,
+            radius: Math.random() * 3 + 1,
+            color: "#f1c40f",
+            alpha: 1,
+            life: 30
+          });
+        }
+
         window.fetchClanData();
         window.updateUI();
         window.renderInventory();
@@ -11135,31 +11417,70 @@ window.executeClanDonate = function (resType, amount) {
       }
     })
     .catch(() => {
-      window.pushHeaderToast("❌ Network error during contribution.", "#e74c3c");
+      window.pushHeaderToast("❌ Network error claiming quest reward.", "#e74c3c");
     });
 };
 
-window.executeUpgradeClanSkill = function (skillKey) {
+window.executeSaveClanSettings = function () {
+  let descInput = document.getElementById("settings-clan-desc");
+  let policySelect = document.getElementById("settings-clan-policy");
+  let minLvlInput = document.getElementById("settings-clan-minlevel");
+
+  if (!descInput || !policySelect || !minLvlInput) return;
+
   const userId = window.getGameUserId();
-  fetch(`${window.GAME_SERVER_URL}/api/clan/upgrade-skill`, {
+  const description = descInput.value.trim();
+  const joinPolicy = policySelect.value;
+  const minLevel = parseInt(minLvlInput.value, 10) || 1;
+
+  fetch(`${window.GAME_SERVER_URL}/api/clan/update-settings`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, skillKey }),
+    body: JSON.stringify({ userId, description, joinPolicy, minLevel }),
   })
     .then((r) => r.json())
     .then((data) => {
       if (data.success) {
-        window.pushHeaderToast(`🧪 Research upgraded successfully!`, "#2ecc71");
+        window.pushHeaderToast(`✓ Clan settings customized!`, "#2ecc71");
         window.fetchClanData();
-        window.updateUI();
         window.saveGame();
       } else {
         window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
       }
     })
     .catch(() => {
-      window.pushHeaderToast("❌ Network error upgrading research.", "#e74c3c");
+      window.pushHeaderToast("❌ Network error customizing settings.", "#e74c3c");
     });
+};
+
+window.executeKickMember = function (targetUserId, targetName) {
+  window.showCustomConfirm(
+    "Expel Member",
+    `Are you sure you want to expel **${targetName}** from the Clan? Their contribution stats will be lost permanently.`,
+    "Expel Member",
+    "Cancel",
+    "#c0392b",
+    function () {
+      const userId = window.getGameUserId();
+      fetch(`${window.GAME_SERVER_URL}/api/clan/kick`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, targetUserId }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success) {
+            window.pushHeaderToast(`🏃 Expelled member: ${targetName}.`, "#e67e22");
+            window.fetchClanData();
+          } else {
+            window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+          }
+        })
+        .catch(() => {
+          window.pushHeaderToast("❌ Network error expelling member.", "#e74c3c");
+        });
+    }
+  );
 };
 
 window.executeLeaveClan = function () {

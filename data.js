@@ -90,7 +90,9 @@ window.getUiIconSvg = function (key, size = 12) {
 // --- SYSTEM UTILS ---
 
 window.formatNumber = function (num) {
-  if (num === null || num === undefined || isNaN(num)) return "0";
+  if (num === null || num === undefined) return "0";
+  num = Number(num);
+  if (isNaN(num)) return "0";
   if (num < 1000) {
     return num % 1 === 0 ? num.toFixed(0) : num.toFixed(1);
   }
@@ -3921,14 +3923,19 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   // Centralized real-time XP rate multiplier calculation
-  let expBonusMult =
-    1.0 + (window.playerStats.prestigeUpgrades?.exp || 0) * 0.1;
-  if (
-    window.equippedSlots.subweapon &&
-    window.equippedSlots.subweapon.isUniqueChronicle &&
-    !window.playerStats.isDungeonMode &&
-    !window.playerStats.isCrucibleMode
-  ) {
+    let expBonusMult =
+      1.0 + (window.playerStats.prestigeUpgrades?.exp || 0) * 0.1;
+
+    // Add Aetheric Wisdom Clan Skill passive XP rate multiplier
+    let wisdom = Math.min(30, window.playerStats.clanSkills?.aetheric_wisdom || 0);
+    expBonusMult += wisdom * 0.01;
+
+    if (
+      window.equippedSlots.subweapon &&
+      window.equippedSlots.subweapon.isUniqueChronicle &&
+      !window.playerStats.isDungeonMode &&
+      !window.playerStats.isCrucibleMode
+    ) {
     let historicalPeakLvl =
       window.playerStats.historicalPeakLvl || window.playerStats.level;
     if (window.playerStats.level < Math.floor(historicalPeakLvl * 0.75)) {
@@ -3992,24 +3999,24 @@ window.resolvePlayerStats = function (useDraft = false) {
     1.0 + (window.playerStats.missionUpgrades?.hp || 0) * 0.03;
 
   p.atk = Math.floor(p.atk * prestigeAtkMult * missionAtkMult);
-    p.maxHp = Math.floor(p.maxHp * prestigeHpMult * missionHpMult);
-    p.def = Math.floor(p.def * prestigeDefMult);
+      p.maxHp = Math.floor(p.maxHp * prestigeHpMult * missionHpMult);
+      p.def = Math.floor(p.def * prestigeDefMult);
 
-    // Apply Shared Cooperative Clan Skill Multipliers
-        let phalanx = Math.min(50, window.playerStats.clanSkills?.steel_phalanx || 0);
-        let well = Math.min(50, window.playerStats.clanSkills?.vitality_well || 0);
-        let accord = Math.min(30, window.playerStats.clanSkills?.prosperity_accord || 0);
-        let guidance = Math.min(30, window.playerStats.clanSkills?.voyagers_guidance || 0);
+      // Apply Shared Cooperative Clan Skill Multipliers
+              let phalanx = Math.min(50, window.playerStats.clanSkills?.steel_phalanx || 0);
+              let well = Math.min(50, window.playerStats.clanSkills?.vitality_well || 0);
+              let accord = Math.min(30, window.playerStats.clanSkills?.prosperity_accord || 0);
+              let guidance = Math.min(30, window.playerStats.clanSkills?.voyagers_guidance || 0);
 
-        p.atk = Math.floor(p.atk * (1.0 + phalanx * 0.005));
-        p.def = Math.floor(p.def * (1.0 + phalanx * 0.005));
-        p.maxHp = Math.floor(p.maxHp * (1.0 + well * 0.008));
-        p.gold += accord * 0.01;
-        p.drop += guidance * 0.005;
-        p.qly += guidance * 0.005;
+              p.atk = Math.floor(p.atk * (1.0 + phalanx * 0.005));
+              p.def = Math.floor(p.def * (1.0 + phalanx * 0.005));
+              p.maxHp = Math.floor(p.maxHp * (1.0 + well * 0.008));
+              p.gold += accord * 0.01;
+              p.drop += guidance * 0.005;
+              p.qly += guidance * 0.005;
 
-    if (
-      isNaN(p.idleAttackSpeed) ||
+      if (
+        isNaN(p.idleAttackSpeed) ||
       p.idleAttackSpeed <= 0 ||
       !isFinite(p.idleAttackSpeed)
     )
@@ -4163,8 +4170,20 @@ window.playerStats = {
   fairyClicksWindow: [],
   canvasClicksWindow: [],
   recentHeals: [], // Track siphoned heals in a sliding 1,000ms window
+    pendingClanProgress: {
+      kills: 0,
+      rifts: 0,
+      prestige: 0,
+      dungeons: 0,
+      fairies: 0,
+      tempers: 0,
+      reforges: 0,
+      potions: 0,
+      salvage: 0,
+      crits: 0
+    },
 
-  // Achievement Checkpoint Flags
+    // Achievement Checkpoint Flags
   hasTriggeredMurphysLaw: false,
   hasTriggeredAgainstOdds: false,
   hasTriggeredLuckySeven: false,
@@ -4204,11 +4223,12 @@ window.playerStats = {
       clanName: null,
       clanEmblem: null,
       clanSkills: {
-        steel_phalanx: 0,
-        vitality_well: 0,
-        prosperity_accord: 0,
-        voyagers_guidance: 0
-      },
+              steel_phalanx: 0,
+              vitality_well: 0,
+              prosperity_accord: 0,
+              voyagers_guidance: 0,
+              aetheric_wisdom: 0
+            },
       clanContribution: 0,
     };
 

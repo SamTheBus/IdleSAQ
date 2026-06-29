@@ -118,18 +118,23 @@ window.saveGame = function () {
       window.updateSyncStatus("syncing");
     }
     fetch(`${window.GAME_SERVER_URL}/api/save`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, saveData }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          console.log("☁️ Cloud Backup Successful!");
-          if (typeof window.updateSyncStatus === "function") {
-            window.updateSyncStatus("connected");
-          }
-        } else {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, saveData }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              console.log("☁️ Cloud Backup Successful!");
+              if (data.clearPending && window.playerStats.pendingClanProgress) {
+                for (let k in window.playerStats.pendingClanProgress) {
+                  window.playerStats.pendingClanProgress[k] = 0;
+                }
+              }
+              if (typeof window.updateSyncStatus === "function") {
+                window.updateSyncStatus("connected");
+              }
+            } else {
           console.warn("⚠️ Cloud Sync Warning:", data.error);
           if (typeof window.updateSyncStatus === "function") {
             window.updateSyncStatus("offline");
@@ -1357,20 +1362,22 @@ window.loadGameAndSyncCloud = function () {
               }
 
               // Sync and cache current Guild attributes
-              if (data.guild) {
-                window.playerStats.guildId = data.guild.id;
-                window.playerStats.guildName = data.guild.name;
-                window.playerStats.guildEmblem = data.guild.leader_id.charCodeAt(0) || 0;
-                window.playerStats.guildSkills = {
-                  steel_phalanx: data.guild.skill_steel_phalanx,
-                  vitality_well: data.guild.skill_vitality_well,
-                  prosperity_accord: data.guild.skill_prosperity_accord,
-                  voyagers_guidance: data.guild.skill_voyagers_guidance
-                };
-              } else {
-                window.playerStats.guildId = null;
-                window.playerStats.guildName = null;
-              }
+                            if (data.clan) {
+                                  window.playerStats.clanId = data.clan.id;
+                                  window.playerStats.clanName = data.clan.name;
+                                  window.playerStats.clanEmblem = data.clan.leader_id.charCodeAt(0) || 0;
+                                  window.playerStats.clanLevel = data.clan.level || 1;
+                                  window.playerStats.clanSkills = {
+                                    steel_phalanx: data.clan.skill_steel_phalanx,
+                                    vitality_well: data.clan.skill_vitality_well,
+                                    prosperity_accord: data.clan.skill_prosperity_accord,
+                                    voyagers_guidance: data.clan.skill_voyagers_guidance,
+                                    aetheric_wisdom: data.clan.skill_aetheric_wisdom || 0
+                                  };
+                                } else {
+                              window.playerStats.clanId = null;
+                              window.playerStats.clanName = null;
+                            }
 
               window.isCloudSynced = true;
               if (typeof window.updateSyncStatus === "function") {
@@ -2876,7 +2883,12 @@ window.executeHitCalculations = function () {
     if (window.playerStats.adrenalineTimer > 0) finalDamage *= 2;
 
     let isCrit = Math.random() < p.critChance;
-    if (isCrit) finalDamage = Math.ceil(finalDamage * p.critDamage);
+        if (isCrit) {
+          finalDamage = Math.ceil(finalDamage * p.critDamage);
+          if (window.playerStats.pendingClanProgress) {
+            window.playerStats.pendingClanProgress.crits = (window.playerStats.pendingClanProgress.crits || 0) + 1;
+          }
+        }
 
     // Core mitigation layer filtering final base slash damage against active mob defense
     let mobDef = window.mob.def || 0;
@@ -3590,11 +3602,14 @@ window.handleMobDeath = function () {
     let riftLvl = window.playerStats.activeRiftLevel || 1;
 
     window.playerStats.highestRiftLevel = Math.max(
-      window.playerStats.highestRiftLevel || 0,
-      riftLvl,
-    );
-    window.playerStats.activeRift = null;
-    window.playerStats.activeRiftLevel = 1;
+          window.playerStats.highestRiftLevel || 0,
+          riftLvl,
+        );
+        window.playerStats.activeRift = null;
+        window.playerStats.activeRiftLevel = 1;
+        if (window.playerStats.pendingClanProgress) {
+          window.playerStats.pendingClanProgress.rifts = (window.playerStats.pendingClanProgress.rifts || 0) + 1;
+        }
 
     // Highly Scaled & Rewarding Loot Matrix for challenging higher Level Reality Rifts
     let keysEarned = 1 + Math.floor(riftLvl / 10);
@@ -3747,13 +3762,18 @@ window.handleMobDeath = function () {
   if (window.playerStats.runKills !== undefined) window.playerStats.runKills++;
 
   if (window.mob && window.mob.type !== "prestige_boss") {
-    if (typeof window.progressMission === "function") {
-      window.progressMission("kills", 1);
-      if (window.mob.isRare) {
-        window.progressMission("rares", 1);
+      if (typeof window.progressMission === "function") {
+        window.progressMission("kills", 1);
+        if (window.mob.isRare) {
+          window.progressMission("rares", 1);
+        }
+      }
+      if (!window.playerStats.isDungeonMode && !window.playerStats.isCrucibleMode && !window.playerStats.isUberBoss) {
+        if (window.playerStats.pendingClanProgress) {
+          window.playerStats.pendingClanProgress.kills = (window.playerStats.pendingClanProgress.kills || 0) + 1;
+        }
       }
     }
-  }
 
   // Handle Prestige Boss death checks and skip normal campaign rewards
   if (window.mob && window.mob.type === "prestige_boss") {
@@ -3781,10 +3801,13 @@ window.handleMobDeath = function () {
   }
 
   if (window.playerStats.isDungeonMode) {
-    if (window.mob.type === "dungeon_boss") {
-      let dType = window.playerStats.currentDungeon;
-      window.playerStats.currentDungeonStage[dType]++;
-      let nextStg = window.playerStats.currentDungeonStage[dType];
+      if (window.mob.type === "dungeon_boss") {
+        let dType = window.playerStats.currentDungeon;
+        window.playerStats.currentDungeonStage[dType]++;
+        let nextStg = window.playerStats.currentDungeonStage[dType];
+        if (window.playerStats.pendingClanProgress) {
+          window.playerStats.pendingClanProgress.dungeons = (window.playerStats.pendingClanProgress.dungeons || 0) + 1;
+        }
       window.playerStats.dungeonPeaks[dType] = Math.max(
         window.playerStats.dungeonPeaks[dType] || 1,
         nextStg,
@@ -4409,9 +4432,12 @@ window.useItem = function (itemName) {
       if (window.inventory.USE[name] === 0) delete window.inventory.USE[name];
     }
     window.playerStats.elixirsConsumed =
-      (window.playerStats.elixirsConsumed || 0) + 1;
-    window.checkAchievements();
-    window.pushHeaderToast(`Consumed ${name}!`, "#2ecc71");
+          (window.playerStats.elixirsConsumed || 0) + 1;
+        if (name.includes("Elixir") && window.playerStats.pendingClanProgress) {
+          window.playerStats.pendingClanProgress.potions = (window.playerStats.pendingClanProgress.potions || 0) + 1;
+        }
+        window.checkAchievements();
+        window.pushHeaderToast(`Consumed ${name}!`, "#2ecc71");
   }
 
   if (itemName === "SP Reset Scroll") {
@@ -4593,11 +4619,14 @@ window.triggerFairyLoot = function (targetFairy) {
   );
 
   window.activeFairies = window.activeFairies.filter(
-    (f) => f.id !== targetFairy.id,
-  );
-  window.SoundManager.play("fairy");
-  window.playerStats.fairiesClicked =
-    (window.playerStats.fairiesClicked || 0) + 1;
+      (f) => f.id !== targetFairy.id,
+    );
+    window.SoundManager.play("fairy");
+    window.playerStats.fairiesClicked =
+      (window.playerStats.fairiesClicked || 0) + 1;
+    if (window.playerStats.pendingClanProgress) {
+      window.playerStats.pendingClanProgress.fairies = (window.playerStats.pendingClanProgress.fairies || 0) + 1;
+    }
   if (typeof window.progressMission === "function")
     window.progressMission("fairies", 1);
 
