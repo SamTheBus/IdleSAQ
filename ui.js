@@ -8234,15 +8234,15 @@ window.toggleMissions = function () {
     win.style.top = "60px";
 
     // Structural division keeping drag handles completely separate from live content
-    win.innerHTML = `
-      <div class="draggable-header" id="missions-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
-          <span> Guild Board & Shop</span>
-          <button onclick="document.getElementById('missions-draggable-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
-      </div>
-      <div class="draggable-content" id="missions-win-content" style="max-height: 400px; padding: 12px; background:#07030b;">
-          <!-- Live sub-tab content injected dynamically below -->
-      </div>
-    `;
+        win.innerHTML = `
+          <div class="draggable-header" id="missions-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
+              <span> Mission Board & Shop</span>
+              <button onclick="document.getElementById('missions-draggable-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
+          </div>
+          <div class="draggable-content" id="missions-win-content" style="max-height: 400px; padding: 12px; background:#07030b;">
+              <!-- Live sub-tab content injected dynamically below -->
+          </div>
+        `;
 
     document.getElementById("game-container").appendChild(win);
     window.renderMissionsWindow();
@@ -8261,11 +8261,11 @@ window.renderMissionsWindow = function () {
   let tokenBalance = window.playerStats.missionTokens || 0;
 
   let tabHeaderHtml = `
-                                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:12px; padding:0 2px;">
-                                            <button onclick="window.switchMissionsTab('BOARD')" class="sub-tab-btn ${currentTab === "BOARD" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">📋 Guild Board</button>
-                                            <button onclick="window.switchMissionsTab('SHOP')" class="sub-tab-btn ${currentTab === "SHOP" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">🏪 Mission Shop</button>
-                                        </div>
-                                    `;
+                                          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:12px; padding:0 2px;">
+                                              <button onclick="window.switchMissionsTab('BOARD')" class="sub-tab-btn ${currentTab === "BOARD" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">📋 Mission Board</button>
+                                              <button onclick="window.switchMissionsTab('SHOP')" class="sub-tab-btn ${currentTab === "SHOP" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">🏪 Mission Shop</button>
+                                          </div>
+                                      `;
 
   let contentHtml = "";
 
@@ -8632,28 +8632,28 @@ window.renderMissionsWindow = function () {
 
       let dH = Math.floor(dailyLeftMs / 3600000);
       let dM = Math.floor((dailyLeftMs % 3600000) / 60000);
-      let dTimerEl = window.getCachedEl("daily-timer-val");
-      if (dTimerEl) dTimerEl.innerText = `${dH}h ${dM}m left`;
+      let dTimerEl = document.getElementById("daily-timer-val");
+            if (dTimerEl) dTimerEl.innerText = `${dH}h ${dM}m left`;
 
-      // Next Monday 12:00 AM in Pacific Time
-      let dayOfWeek = ptNow.getDay();
-      let daysToMonday = (8 - dayOfWeek) % 7;
-      if (daysToMonday === 0) daysToMonday = 7;
-      let nextMondayPt = new Date(
-        ptNow.getFullYear(),
-        ptNow.getMonth(),
-        ptNow.getDate() + daysToMonday,
-        0,
-        0,
-        0,
-        0,
-      );
-      let weeklyLeftMs = nextMondayPt.getTime() - ptNow.getTime();
+            // Next Monday 12:00 AM in Pacific Time
+            let dayOfWeek = ptNow.getDay();
+            let daysToMonday = (8 - dayOfWeek) % 7;
+            if (daysToMonday === 0) daysToMonday = 7;
+            let nextMondayPt = new Date(
+              ptNow.getFullYear(),
+              ptNow.getMonth(),
+              ptNow.getDate() + daysToMonday,
+              0,
+              0,
+              0,
+              0,
+            );
+            let weeklyLeftMs = nextMondayPt.getTime() - ptNow.getTime();
 
-      let wD = Math.floor(weeklyLeftMs / 86400000);
-      let wH = Math.floor((weeklyLeftMs % 86400000) / 3600000);
-      let wTimerEl = window.getCachedEl("weekly-timer-val");
-      if (wTimerEl) wTimerEl.innerText = `${wD}d ${wH}h left`;
+            let wD = Math.floor(weeklyLeftMs / 86400000);
+            let wH = Math.floor((weeklyLeftMs % 86400000) / 3600000);
+            let wTimerEl = document.getElementById("weekly-timer-val");
+            if (wTimerEl) wTimerEl.innerText = `${wD}d ${wH}h left`;
     }
 };
 
