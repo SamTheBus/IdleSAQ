@@ -452,13 +452,11 @@ window.applyOfflineGains = function (offlineMs) {
     let killsNeededForStage = 5 - window.playerStats.killCount;
 
     // Smooth out post-wall base acceleration to prevent runaway super-exponential cliffs
-    let growthRate = 1.045 + (currentStage * 0.04) / (currentStage + 200);
-    let expScale = Math.pow(growthRate, currentStage);
+        let growthRate = 1.045 + (currentStage * 0.04) / (currentStage + 200);
+        let expScale = Math.pow(growthRate, currentStage);
 
-    let rawMobDef = 1.2 * expScale;
-    let rawBossDef = 6.0 * expScale;
-    let mobHp = 15 * expScale * (1 + rawMobDef / 100);
-    let bossHp = 60 * expScale * (1 + rawBossDef / 100);
+        let mobHp = Math.floor(25 * expScale * (1 + currentStage * 0.06));
+        let bossHp = Math.floor(120 * expScale * (1 + currentStage * 0.06));
     let mobDef = 0;
     let bossDef = 0;
 
@@ -4085,22 +4083,34 @@ window.processEnemySpawn = function () {
 
   let p = window.resolvePlayerStats();
 
+  // Define activeStage at the top of the function so all sub-blocks can access it
+  let activeStage = window.playerStats.stage;
+  if (window.playerStats.isUberBoss) {
+    let runPeak = Math.max(
+      window.playerStats.stage,
+      window.playerStats.maxStage || 1,
+    );
+    let allTime90 = Math.floor(
+      (window.playerStats.lifetimePeakStage || 1) * 0.9,
+    );
+    activeStage = Math.max(runPeak, allTime90);
+  }
+
   if (window.playerStats.isCrucibleMode) {
     let cWave = window.playerStats.crucibleWave || 1;
     let growthRate = 1.06 + cWave * 0.00015;
     let scale = Math.pow(growthRate, cWave);
     if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-      let rawDef = 6.0 * scale;
-      let hp = Math.floor(60 * scale * (1 + rawDef / 100));
-      window.mob = {
-        x: 750,
-        y: 140,
-        w: 45,
-        h: 75,
-        type: "dungeon_boss",
-        isCrucible: true,
-        isRare: false,
-        hp: hp,
+          let hp = Math.floor(120 * scale * (1 + cWave * 0.06));
+          window.mob = {
+            x: 750,
+            y: 140,
+            w: 45,
+            h: 75,
+            type: "dungeon_boss",
+            isCrucible: true,
+            isRare: false,
+            hp: hp,
         maxHp: hp,
         damage: Math.floor(20 * scale),
         def: 0,
@@ -4110,14 +4120,13 @@ window.processEnemySpawn = function () {
         attackTimer: 100,
       };
     } else {
-      let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
-      let chosenVisual =
-        cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
-      let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
+          let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
+          let chosenVisual =
+            cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
+          let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
 
-      let rawDef = 1.2 * scale;
-      let hp = Math.floor(15 * scale * (1 + rawDef / 100));
-      window.mob = {
+          let hp = Math.floor(25 * scale * (1 + cWave * 0.06));
+          window.mob = {
         x: 750,
         y: isFlying ? 145 : 195,
         w: 25,
@@ -4152,29 +4161,18 @@ window.processEnemySpawn = function () {
     let growthRate = 1.05 + dStage * 0.00025;
     scale = Math.pow(growthRate, dStage);
   } else {
-    let activeStage = window.playerStats.stage;
-    if (window.playerStats.isUberBoss) {
-      let runPeak = Math.max(
-        window.playerStats.stage,
-        window.playerStats.maxStage || 1,
-      );
-      let allTime90 = Math.floor(
-        (window.playerStats.lifetimePeakStage || 1) * 0.9,
-      );
-      activeStage = Math.max(runPeak, allTime90);
+      // Smooth out post-wall base acceleration to prevent runaway super-exponential cliffs
+      let growthRate = 1.045 + (activeStage * 0.04) / (activeStage + 200);
+      scale = Math.pow(growthRate, activeStage);
     }
-    // Smooth out post-wall base acceleration to prevent runaway super-exponential cliffs
-    let growthRate = 1.045 + (activeStage * 0.04) / (activeStage + 200);
-    scale = Math.pow(growthRate, activeStage);
-  }
 
   if (window.playerStats.isDungeonMode) {
-    let hpScale = window.playerStats.currentDungeon === "gold" ? 1.5 : 1;
+      let hpScale = window.playerStats.currentDungeon === "gold" ? 1.5 : 1;
+      let dStage = window.playerStats.currentDungeonStage[window.playerStats.currentDungeon] || 1;
 
-    if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-      let rawDef = 6.0 * scale;
-      let hp = 60 * scale * hpScale * (1 + rawDef / 100);
-      window.mob = {
+      if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
+        let hp = Math.floor(100 * scale * hpScale * (1 + dStage * 0.06));
+        window.mob = {
         x: 750,
         y: 140,
         w: 50,
@@ -4210,17 +4208,16 @@ window.processEnemySpawn = function () {
         "wyrmling",
       ].includes(chosenVisual);
 
-      let rawDef = 1.2 * scale;
-      let hp = 15 * scale * hpScale * (1 + rawDef / 100);
-      window.mob = {
-        x: 750,
-        y: isFlying ? 150 : 195,
-        w: 25,
-        h: 40,
-        type: "mob",
-        visualType: chosenVisual,
-        isRare: false,
-        hp: Math.floor(hp),
+      let hp = Math.floor(25 * scale * hpScale * (1 + dStage * 0.06));
+            window.mob = {
+              x: 750,
+              y: isFlying ? 150 : 195,
+              w: 25,
+              h: 40,
+              type: "mob",
+              visualType: chosenVisual,
+              isRare: false,
+              hp: hp,
         maxHp: Math.floor(hp),
         damage: Math.floor(5.2 * scale),
         def: 0,
@@ -4255,15 +4252,14 @@ window.processEnemySpawn = function () {
         }
 
         let riftLvl = window.playerStats.activeRiftLevel || 1;
-        let equivalentStage = 50 + riftLvl * 10;
-        let riftGrowthRate =
-          1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
-        let riftScale = Math.pow(riftGrowthRate, equivalentStage);
+                let equivalentStage = 50 + riftLvl * 10;
+                let riftGrowthRate =
+                  1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
+                let riftScale = Math.pow(riftGrowthRate, equivalentStage);
 
-        let rawDef = 8.0 * riftScale;
-        let hp = Math.floor(hpMult * (60 * riftScale) * (1 + rawDef / 100));
-        let dmg = Math.floor(20 * riftScale * dmgMult);
-        window.mob = {
+                let hp = Math.floor(hpMult * (100 * riftScale) * (1 + equivalentStage * 0.06));
+                let dmg = Math.floor(20 * riftScale * dmgMult);
+                window.mob = {
           x: 750,
           y: 115,
           w: 60,
@@ -4283,9 +4279,8 @@ window.processEnemySpawn = function () {
           `<span style='color:#9b59b6; font-weight:bold;'>[RIFT HUNT]</span> ${logText}`,
         );
       } else {
-        let rawDef = 6.0 * scale;
-        let baseBossHp = 60 * scale * (1 + rawDef / 100);
-        window.mob = {
+              let baseBossHp = Math.floor(120 * scale * (1 + activeStage * 0.06));
+              window.mob = {
           x: 750,
           y: 150,
           w: 40,
@@ -4335,9 +4330,8 @@ window.processEnemySpawn = function () {
       )
         baseSpd = Math.round(baseSpd * 1.33);
 
-      let rawDef = 1.2 * scale * (isRare ? 1.5 : 1);
-      let hp = Math.floor(15 * scale * hpMult * (1 + rawDef / 100));
-      window.mob = {
+      let hp = Math.floor(25 * scale * hpMult * (1 + activeStage * 0.06));
+            window.mob = {
         x: 750,
         y: isMelee ? 195 : 210,
         w: isMelee ? 25 : 30,

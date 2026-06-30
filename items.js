@@ -1186,10 +1186,10 @@ window.buildProceduralName = function (item) {
 
 window.getStatBaseRange = function (item, statKey) {
   let stageLevel = item.stageLevel || 1;
-  let isArt = item.type === "artifact";
-  let rarityMult = isArt ? 1.45 : 1 + (item.statsRolled || 0) * 0.15;
-  let expScale = Math.pow(1.18, stageLevel) * Math.pow(stageLevel, 3.5);
-  let hpDefExpScale = Math.pow(1.16, stageLevel) * Math.pow(stageLevel, 3.5);
+    let isArt = item.type === "artifact";
+    let rarityMult = isArt ? 1.45 : 1 + (item.statsRolled || 0) * 0.15;
+    let expScale = Math.pow(1.18, stageLevel) * Math.pow(stageLevel, 2.2);
+    let hpDefExpScale = Math.pow(1.16, stageLevel) * Math.pow(stageLevel, 2.2);
 
   let min = 0;
   let max = 0;
@@ -1466,10 +1466,10 @@ window.recalculateItemStats = function (item) {
   item.bonusInt = item.bonusInt || 0;
 
   // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-  let expScale =
-    Math.pow(1.18, item.stageLevel || 1) * Math.pow(item.stageLevel || 1, 3.5);
-  let hpDefExpScale =
-    Math.pow(1.16, item.stageLevel || 1) * Math.pow(item.stageLevel || 1, 3.5);
+    let expScale =
+      Math.pow(1.18, item.stageLevel || 1) * Math.pow(item.stageLevel || 1, 2.2);
+    let hpDefExpScale =
+      Math.pow(1.16, item.stageLevel || 1) * Math.pow(item.stageLevel || 1, 2.2);
   let prestigeCount = window.playerStats.prestigeCount || 0;
   let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
 
@@ -1755,9 +1755,9 @@ window.addRandomStatLineToItem = function (item) {
 
   let selectedStat = pool[Math.floor(Math.random() * pool.length)];
   let stageScale = item.stageLevel || 1;
-  // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-  let expScale = Math.pow(1.18, stageScale) * Math.pow(stageScale, 3.5);
-  let hpDefExpScale = Math.pow(1.16, stageScale) * Math.pow(stageScale, 3.5);
+    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
+    let expScale = Math.pow(1.18, stageScale) * Math.pow(stageScale, 2.2);
+    let hpDefExpScale = Math.pow(1.16, stageScale) * Math.pow(stageScale, 2.2);
   let rarityMult = 1 + item.statsRolled * 0.15;
   let prestigeMult = Math.pow(1.08, window.playerStats.prestigeCount || 0);
 
