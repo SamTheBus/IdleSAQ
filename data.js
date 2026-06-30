@@ -143,6 +143,38 @@ window.randInt = (min, max) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 window.randFloat = (min, max) => Math.random() * (max - min) + min;
 
+// Universal Normalized Weight-Based Rarity Probability Solver
+window.calculateRarityProbabilities = function(qly, isGacha = false) {
+  let weights = [0, 0, 0, 0, 0, 0]; // Index maps to stars quality (0 to 5)
+
+  if (isGacha) {
+    // Intrinsic Base Weights for Gacha Vending Machine at Q=1.0:
+    // 0★: 0 (Guarantees 1★+) | 1★: 54 | 2★: 25 | 3★: 15 | 4★: 5 | 5★: 1
+    weights[0] = 0;
+    weights[1] = 54 / Math.pow(qly, 0.5); // Lowers as quality grows
+    weights[2] = 25 * Math.pow(qly, 0.4);
+    weights[3] = 15 * Math.pow(qly, 0.8);
+    weights[4] = 5 * Math.pow(qly, 1.2);
+    weights[5] = 1 * Math.pow(qly, 1.6);
+  } else {
+    // Intrinsic Base Weights for Campaign & Dungeon Drops at Q=1.0:
+    // 0★: 84.82 | 1★: 11.0 | 2★: 3.2 | 3★: 0.8 | 4★: 0.16 | 5★: 0.02
+    weights[0] = 84.82 / Math.pow(qly, 0.6); // Shrinks as quality grows
+    weights[1] = 11.0 / Math.pow(qly, 0.1);  // Slightly scales down relative to upper tiers
+    weights[2] = 3.2 * Math.pow(qly, 0.4);
+    weights[3] = 0.8 * Math.pow(qly, 0.8);
+    // Preserves native quality gating checks
+    weights[4] = (qly >= 1.5) ? 0.16 * Math.pow(qly, 1.2) : 0;
+    weights[5] = (qly >= 2.0) ? 0.02 * Math.pow(qly, 1.6) : 0;
+  }
+
+  let totalWeight = weights.reduce((sum, w) => sum + w, 0);
+  if (totalWeight <= 0) return [100, 0, 0, 0, 0, 0]; // Fallback sanity check
+
+  // Return normalized percentage list (0.0% to 100.0%)
+  return weights.map(w => (w / totalWeight) * 100);
+};
+
 // --- STATIC DATA POOLS ---
 
 window.MYSTICAL_STOCK = [
@@ -245,6 +277,8 @@ window.POTION_TRANSMUTATIONS = [
 window.etcDex = {
   "Eridium Shard":
     "A glowing, alien fragment used in the Forge to Tier Up an item's Star Rarity.",
+  "Glimmering Gachapon Key":
+    "Premium fused Key. Guarantees 3-5★ Equipment drops with a heavily elevated 5.0% Unique Artifact chance.",
   "Gacha Key":
     "Guaranteed drop from Guardians. Used at the Vending Machine for a gear roll.",
   "Ancient Core":
@@ -3579,7 +3613,14 @@ window.resolvePlayerStats = function (useDraft = false) {
   let idleSpeedPct = 0.0 + (aT.idleSpeedPct || 0);
   let activeSpeedPct = 0.0 + (aT.activeSpeedPct || 0);
 
-  for (let key in window.equippedSlots) {
+    let paragonLevel = window.playerStats.paragonLevel || 0;
+    let paragonMult = 1.0 + (paragonLevel * 0.005); // Compounding +0.5% attributes per Paragon Level
+
+    achStrPct *= paragonMult;
+    achDexPct *= paragonMult;
+    achIntPct *= paragonMult;
+
+    for (let key in window.equippedSlots) {
     let item = window.equippedSlots[key];
     if (item) {
       p.atk += item.atk || 0;
@@ -4241,32 +4282,33 @@ window.playerStats = {
   damageTakenThisBattle: 0,
   ankhTriggeredThisBattle: false,
   dailyMissions: [],
-  weeklyMissions: [],
-  dailyRerollsDone: 0, // Reset daily at 12:00 AM PST/PDT
-  lastDailyResetTime: 0,
-  lastWeeklyResetTime: 0,
-  dailyRewardClaimed: false,
-  weeklyRewardClaimed: false,
-  unviewedAchievements: [],
-  selectedPrestigeStage: 80,
-  unlockedTitles: [],
-  equippedTitle: null,
-  achievementTimestamps: {},
-  claimedMailIds: [],
-  unlockedSkins: ["default"],
-  playerName: "Guest",
-  clanId: null,
-  clanName: null,
-  clanEmblem: null,
-  clanSkills: {
-    steel_phalanx: 0,
-    vitality_well: 0,
-    prosperity_accord: 0,
-    voyagers_guidance: 0,
-    aetheric_wisdom: 0,
-  },
-  clanContribution: 0,
-};
+    weeklyMissions: [],
+    dailyRerollsDone: 0, // Reset daily at 12:00 AM PST/PDT
+    lastDailyResetTime: 0,
+    lastWeeklyResetTime: 0,
+    dailyRewardClaimed: false,
+    weeklyRewardClaimed: false,
+    unviewedAchievements: [],
+    selectedPrestigeStage: 80,
+    unlockedTitles: [],
+    equippedTitle: null,
+    achievementTimestamps: {},
+    claimedMailIds: [],
+    unlockedSkins: ["default"],
+    playerName: "Guest",
+    clanId: null,
+    clanName: null,
+    clanEmblem: null,
+    clanSkills: {
+      steel_phalanx: 0,
+      vitality_well: 0,
+      prosperity_accord: 0,
+      voyagers_guidance: 0,
+      aetheric_wisdom: 0,
+    },
+    clanContribution: 0,
+    paragonLevel: 0,
+  };
 
 // --- CLIENT-SIDE COSMETIC REGISTRY ---
 window.COSMETIC_SKINS = {

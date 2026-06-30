@@ -3124,16 +3124,20 @@ window.buyGachaCrate = function () {
   window.openGachaModal();
 };
 
-window.rollGachaCrateItem = function () {
+window.rollGachaCrateItem = function (isGlimmering = false, useStandardForGlimmering = false) {
   let p = window.resolvePlayerStats();
   let maxBag = window.getMaxBagSlots();
 
-  let keys = window.inventory.ETC["Gacha Key"] || 0;
-  if (keys < 1) {
-    return { error: "Insufficient Gacha Keys!" };
+  let keyName = isGlimmering
+    ? (useStandardForGlimmering ? "Gacha Key" : "Glimmering Gachapon Key")
+    : "Gacha Key";
+  let keysNeeded = isGlimmering && useStandardForGlimmering ? 10 : 1;
+  let keys = window.inventory.ETC[keyName] || 0;
+  if (keys < keysNeeded) {
+    return { error: `Insufficient ${keyName}s!` };
   }
 
-  let allowArtifact = Math.random() < 0.0005;
+  let allowArtifact = Math.random() < (isGlimmering ? 0.05 : 0.01);
   let types = [
     "weapon",
     "subweapon",
@@ -3158,38 +3162,46 @@ window.rollGachaCrateItem = function () {
   }
 
   // Deduct key & save state
-  window.inventory.ETC["Gacha Key"]--;
-  if (window.inventory.ETC["Gacha Key"] === 0)
-    delete window.inventory.ETC["Gacha Key"];
+  window.inventory.ETC[keyName] -= keysNeeded;
+  if (window.inventory.ETC[keyName] === 0)
+    delete window.inventory.ETC[keyName];
 
   // --- PITY COUNTER ENGINE ---
-  window.playerStats.vendingPity = (window.playerStats.vendingPity || 0) + 1;
   let isPityTriggered = false;
-
-  if (window.playerStats.vendingPity >= 50) {
-    isPityTriggered = true;
-    window.playerStats.vendingPity = 0; // Reset pity
+  if (isGlimmering) {
+    window.playerStats.glimmeringPity = (window.playerStats.glimmeringPity || 0) + 1;
+    if (window.playerStats.glimmeringPity >= 25) {
+      isPityTriggered = true;
+      window.playerStats.glimmeringPity = 0;
+    }
+  } else {
+    window.playerStats.vendingPity = (window.playerStats.vendingPity || 0) + 1;
+    if (window.playerStats.vendingPity >= 50) {
+      isPityTriggered = true;
+      window.playerStats.vendingPity = 0; // Reset pity
+    }
   }
 
   let statLinesCount = 1;
   if (isPityTriggered) {
     statLinesCount = 5; // Guaranteed Mythic
   } else {
-    let qly = p.qly; // Fully live with your stats!
+    let probs = window.calculateRarityProbabilities(p.qly, true, isGlimmering);
     let roll = Math.random() * 100;
-    let mythic = 1.0 * qly;
-    let leg = 5.0 * qly;
-    let epic = 15.0 * qly;
-    let magic = 25.0 * qly;
+    let cumulative = 0;
 
-    if (roll < mythic) {
+    if (roll < (cumulative += probs[5])) {
       statLinesCount = 5;
-      window.playerStats.vendingPity = 0; // Natural pull resets pity
-    } else if (roll < mythic + leg) {
+      if (isGlimmering) {
+        window.playerStats.glimmeringPity = 0;
+      } else {
+        window.playerStats.vendingPity = 0; // Natural pull resets pity
+      }
+    } else if (roll < (cumulative += probs[4])) {
       statLinesCount = 4;
-    } else if (roll < mythic + leg + epic) {
+    } else if (roll < (cumulative += probs[3])) {
       statLinesCount = 3;
-    } else if (roll < mythic + leg + epic + magic) {
+    } else if (roll < (cumulative += probs[2])) {
       statLinesCount = 2;
     } else {
       statLinesCount = 1;
@@ -3227,400 +3239,4 @@ window.rollGachaCrateItem = function () {
   window.checkAchievements();
   window.saveGame();
   return { item: newItem };
-};
-
-window.summonUberBossFromSelect = function () {
-  if (
-    window.playerStats.isDungeonMode ||
-    window.playerStats.isCrucibleMode ||
-    window.playerStats.isPrestigeBossMode
-  ) {
-    window.pushHeaderToast(
-      "❌ Cannot summon: already in another activity!",
-      "#e74c3c",
-    );
-    return;
-  }
-
-  if (window.playerStats.activeRift) {
-    let bossType = window.playerStats.activeRift;
-    let riftLvl = window.playerStats.activeRiftLevel || 1;
-
-    window.playerStats.isBossMode = true;
-    window.playerStats.isUberBoss = true;
-    window.playerStats.currentUberBoss = bossType;
-    window.playerStats.killCount = 0;
-    window.playerStats.targetsRequired = 1;
-    window.mob = null;
-
-    let p = window.resolvePlayerStats();
-    window.playerStats.currentHp = p.maxHp;
-
-    window.pushLog(
-      `<span style='color:#9b59b6; font-weight:bold;'>[RIFT SUMMON] Re-entering Level ${riftLvl} Rift for ${bossType === "guardian" ? "Aegis Goliath" : bossType === "chronos" ? "Chronos Arbitrator" : "Nexus Overseer"}!</span>`,
-    );
-    window.updateUI();
-    window.saveGame();
-    return;
-  }
-
-  let cores = window.inventory.ETC["Ancient Core"] || 0;
-  if (cores < 1) {
-    window.pushHeaderToast("❌ Requires 1 Ancient Core!", "#e74c3c");
-    return;
-  }
-  if (window.playerStats.level < 30) {
-    window.pushHeaderToast(
-      "❌ Requires Level 30+ to activate the Rift Altar!",
-      "#e74c3c",
-    );
-    return;
-  }
-
-  let selectEl = document.getElementById("rift-hunt-select");
-  let bossType = selectEl ? selectEl.value : "guardian";
-
-  let lvlInput = document.getElementById("rift-level-select");
-  let selectedLvl = parseInt(lvlInput ? lvlInput.value : 1, 10);
-  if (isNaN(selectedLvl) || selectedLvl < 1) selectedLvl = 1;
-
-  let maxLvl = (window.playerStats.highestRiftLevel || 0) + 5;
-  if (selectedLvl > maxLvl) {
-    window.pushHeaderToast(
-      `❌ Level ${selectedLvl} is locked! Max available: Level ${maxLvl}`,
-      "#e74c3c",
-    );
-    return;
-  }
-
-  window.showCustomConfirm(
-    "Activate Altar of Rifts",
-    `Sacrifice 1 Ancient Core to open a Level ${selectedLvl} Reality Rift?`,
-    "Open Rift",
-    "Cancel",
-    "#9b59b6",
-    function () {
-      window.inventory.ETC["Ancient Core"] -= 1;
-      if (window.inventory.ETC["Ancient Core"] === 0)
-        delete window.inventory.ETC["Ancient Core"];
-
-      window.playerStats.activeRift = bossType;
-      window.playerStats.activeRiftLevel = selectedLvl;
-
-      window.playerStats.isBossMode = true;
-      window.playerStats.isUberBoss = true;
-      window.playerStats.currentUberBoss = bossType;
-      window.playerStats.killCount = 0;
-      window.playerStats.targetsRequired = 1;
-      window.mob = null;
-
-      let p = window.resolvePlayerStats();
-      window.playerStats.currentHp = p.maxHp;
-
-      window.pushLog(
-        `<span style='color:#9b59b6; font-weight:bold;'>[RIFT SUMMON] The Altar consumes your Core! A Level ${selectedLvl} Rift forms...</span>`,
-      );
-      window.updateUI();
-      window.saveGame();
-    },
-  );
-};
-
-window.abandonRift = function () {
-  if (!window.playerStats.activeRift) return;
-
-  window.showCustomConfirm(
-    "Abandon Reality Rift",
-    "Are you sure you want to collapse the active Rift? The spent Ancient Core will be lost permanently.",
-    "Collapse Rift",
-    "Keep Attempting",
-    "#e74c3c",
-    function () {
-      window.playerStats.activeRift = null;
-      window.playerStats.activeRiftLevel = 1;
-      window.playerStats.isUberBoss = false;
-      window.playerStats.isBossMode = false;
-      window.mob = null;
-      window.pushLog(
-        "<span style='color:#e74c3c;'>[RIFT] The Reality Rift collapsed.</span>",
-      );
-      window.updateUI();
-      window.saveGame();
-    },
-  );
-};
-
-window.buyGoldUpgrade = function (upId) {
-  let p = window.playerStats;
-  let cost = 0;
-  let name = "";
-
-  if (upId === "vending") {
-    cost = Math.floor(15000 * Math.pow(1.18, p.vendingQLevel || 0));
-    name = "Gacha Calibration";
-  } else if (upId === "shop") {
-    cost = Math.floor(30000 * Math.pow(1.22, p.shopQLevel || 0));
-    name = "Merchant Investment";
-  } else if (upId === "global") {
-    cost = Math.floor(100000 * Math.pow(1.28, p.globalQLevel || 0));
-    name = "Aura of Fortune";
-  }
-
-  if (p.coins < cost) {
-    window.pushHeaderToast("❌ Insufficient Gold!", "#e74c3c");
-    return;
-  }
-
-  p.coins -= cost;
-  if (p.coins === 0) p.hasTriggeredExactChange = true;
-
-  if (upId === "vending") p.vendingQLevel = (p.vendingQLevel || 0) + 1;
-  else if (upId === "shop") p.shopQLevel = (p.shopQLevel || 0) + 1;
-  else if (upId === "global") p.globalQLevel = (p.globalQLevel || 0) + 1;
-
-  window.pushHeaderToast(
-    `🎉 Upgraded ${name} to Lv. ${p[upId + "QLevel"]}!`,
-    "#2ecc71",
-  );
-  window.pushLog(
-    `<span style='color:#2ecc71; font-weight:bold;'>[UPGRADE] Purchased ${name} Upgrade (Lv. ${p[upId + "QLevel"]})</span>`,
-  );
-
-  window.SoundManager.play("spell");
-  if (typeof window.spawnPurchaseCelebration === "function") {
-    window.spawnPurchaseCelebration("alchemy", "#2ecc71", 0);
-  }
-
-  window.checkAchievements();
-  window.updateUI();
-  window.renderGoldUpgrades();
-  window.saveGame();
-};
-
-window.buyMysticalItem = function (index) {
-  let item = window.MYSTICAL_STOCK[index];
-  if (!item) return;
-
-  let actualCost = item.cost;
-  let hasCurrency = false;
-
-  if (item.currency === "Luminous Soul") {
-    let owned = window.inventory.ETC["Luminous Soul"] || 0;
-    if (owned >= item.cost) {
-      window.inventory.ETC["Luminous Soul"] -= item.cost;
-      if (window.inventory.ETC["Luminous Soul"] === 0)
-        delete window.inventory.ETC["Luminous Soul"];
-      hasCurrency = true;
-    }
-  } else if (item.currency === "Astral Shards") {
-    let owned = window.playerStats.astralShards || 0;
-    if (owned >= item.cost) {
-      window.playerStats.astralShards -= item.cost;
-      hasCurrency = true;
-    }
-  } else {
-    actualCost = Math.ceil(
-      item.cost * Math.pow(1.08, window.playerStats.stage),
-    );
-    if (window.playerStats.coins >= actualCost) {
-      window.playerStats.coins -= actualCost;
-      if (window.playerStats.coins === 0)
-        window.playerStats.hasTriggeredExactChange = true;
-      hasCurrency = true;
-    }
-  }
-
-  if (!hasCurrency) {
-    window.pushHeaderToast(`❌ Cannot afford ${item.name}!`, "#e74c3c");
-    return;
-  }
-
-  const useItems = [
-    "Attack Elixir",
-    "Greater Attack Elixir",
-    "Supernal Attack Elixir",
-    "Vitality Elixir",
-    "Greater Vitality Elixir",
-    "Supernal Vitality Elixir",
-    "Armored Elixir",
-    "Greater Armored Elixir",
-    "Supernal Armored Elixir",
-    "Haste Elixir",
-    "Greater Haste Elixir",
-    "Supernal Haste Elixir",
-    "SP Reset Scroll",
-    "PP Reset Scroll",
-  ];
-
-  if (useItems.includes(item.name)) {
-    window.inventory.USE[item.name] =
-      (window.inventory.USE[item.name] || 0) + 1;
-  } else {
-    window.inventory.ETC[item.name] =
-      (window.inventory.ETC[item.name] || 0) + 1;
-  }
-
-  window.pushHeaderToast(`🛒 Bought 1x ${item.name}!`, "#9b59b6");
-  window.pushLog(
-    `<span style='color:#9b59b6;'>[MYSTICAL SHOP] Exchanged currency for 1x ${item.name}</span>`,
-  );
-
-  window.SoundManager.play("fairy");
-  if (typeof window.spawnPurchaseCelebration === "function") {
-    window.spawnPurchaseCelebration("alchemy", item.color, 0);
-  }
-
-  window.updateUI();
-  window.renderMysticalShop();
-  window.renderInventory();
-  window.saveGame();
-};
-
-window.transmutePotion = function (index) {
-  let recipe = window.POTION_TRANSMUTATIONS[index];
-  if (!recipe) return;
-
-  let owned = window.inventory.USE[recipe.req] || 0;
-  if (owned < recipe.amount) {
-    window.pushHeaderToast(
-      `❌ Requires ${recipe.amount}x ${recipe.req}!`,
-      "#e74c3c",
-    );
-    return;
-  }
-
-  window.inventory.USE[recipe.req] -= recipe.amount;
-  if (window.inventory.USE[recipe.req] === 0)
-    delete window.inventory.USE[recipe.req];
-
-  window.inventory.USE[recipe.result] =
-    (window.inventory.USE[recipe.result] || 0) + 1;
-
-  window.pushHeaderToast(`🧪 Transmuted into 1x ${recipe.result}!`, "#2ecc71");
-  window.pushLog(
-    `<span style='color:#2ecc71;'>[ALCHEMY] Transmuted ${recipe.amount}x ${recipe.req} ➔ 1x ${recipe.result}</span>`,
-  );
-
-  window.SoundManager.play("spell");
-  if (typeof window.spawnPurchaseCelebration === "function") {
-    window.spawnPurchaseCelebration("alchemy", recipe.color, 0);
-  }
-
-  window.updateUI();
-  window.renderMysticalShop();
-  window.renderInventory();
-  window.saveGame();
-};
-
-window.buyShopItem = function (index) {
-  let item = window.playerStats.shopItems[index];
-  if (!item || item.purchased) return;
-
-  let maxBag = window.getMaxBagSlots();
-  if (window.inventory.EQUIP.length >= maxBag) {
-    window.pushHeaderToast("❌ Equipment bag is completely full!", "#e74c3c");
-    return;
-  }
-
-  if (window.playerStats.coins < item.cost) {
-    window.pushHeaderToast("❌ Insufficient Gold!", "#e74c3c");
-    return;
-  }
-
-  window.playerStats.coins -= item.cost;
-  if (window.playerStats.coins === 0)
-    window.playerStats.hasTriggeredExactChange = true;
-
-  item.purchased = true;
-  let addedItem = JSON.parse(JSON.stringify(item));
-  delete addedItem.cost;
-  delete addedItem.purchased;
-  delete addedItem.isIOTD;
-
-  window.inventory.EQUIP.push(addedItem);
-
-  window.pushHeaderToast(`🛒 Bought ${item.name}!`, "#f1c40f");
-  window.pushLog(
-    `<span style='color:#f1c40f;'>[MERCHANT] Purchased ${item.name} from the Gold Shop</span>`,
-    addedItem.id,
-  );
-
-  window.SoundManager.play("fairy");
-  if (typeof window.spawnPurchaseCelebration === "function") {
-    window.spawnPurchaseCelebration(
-      "gacha",
-      window.getTierColor(addedItem.statsRolled),
-      addedItem.statsRolled,
-    );
-  }
-
-  window.updateUI();
-  window.renderMarketShop();
-  window.renderInventory();
-  window.saveGame();
-};
-
-// Re-rolls set names on standard equipment at the Blacksmith Station
-window.rerollItemSet = function () {
-  if (!window.forgeSelectedItem) return;
-  let item = window.forgeSelectedItem;
-  if (item.type === "artifact") return;
-
-  let costGold = window.getSetRerollGoldCost(item);
-  let soulCost = 25 + item.statsRolled * 25;
-  let ownedSouls = window.inventory.ETC["Monster Soul"] || 0;
-
-  if (window.playerStats.coins < costGold) {
-    window.pushHeaderToast("❌ Insufficient Gold!", "#e74c3c");
-    return;
-  }
-  if (ownedSouls < soulCost) {
-    window.pushHeaderToast("❌ Insufficient Monster Souls!", "#e74c3c");
-    return;
-  }
-
-  window.playerStats.coins -= costGold;
-  window.inventory.ETC["Monster Soul"] -= soulCost;
-  if (window.inventory.ETC["Monster Soul"] === 0)
-    delete window.inventory.ETC["Monster Soul"];
-
-  let setKeys = [
-    "Vanguard",
-    "Colossus",
-    "Bastion",
-    "Windrunner",
-    "Wraith",
-    "Reaver",
-    "Dreadnought",
-    "Duellist",
-    "Scholar",
-    "Berserker",
-    "Scout",
-    "Fortune",
-    "Mystic",
-    "Alchemist",
-    "Midas",
-    "Biohazard",
-    "Warlord",
-    "VoidTouched",
-  ];
-
-  // Ensure the roll shifts to a different set name
-  let availableSets = setKeys.filter((k) => k !== item.setName);
-  let newSet = availableSets[Math.floor(Math.random() * availableSets.length)];
-
-  item.setName = newSet;
-  item.name = window.buildProceduralName(item);
-
-  window.pushLog(
-    `<span style='color:#e67e22;'>[FORGE]</span> Reforged the set resonance of ${item.name} to <strong style='color:#2ecc71;'>${newSet}</strong>!`,
-  );
-  window.pushHeaderToast(`✨ Set Changed to ${newSet}!`, "#2ecc71");
-
-  if (typeof window.spawnTemperParticles === "function")
-    window.spawnTemperParticles(true);
-  window.updateUI();
-  window.renderInventory();
-  window.renderForgeTab();
-  window.saveGame();
 };

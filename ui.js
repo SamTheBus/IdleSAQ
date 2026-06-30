@@ -238,21 +238,39 @@ window.getEtcIconHtml = function (key) {
   let svgContent = "";
 
   if (key === "Eridium Shard") {
-    bg = "rgba(155, 89, 182, 0.25)";
-    border = "#9b59b6";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_EridiumShard_${uid}" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#e84393" />
-                    <stop offset="100%" stop-color="#8e44ad" />
-                </linearGradient>
-            </defs>
-            <path d="M16 2 L26 16 L16 30 L6 16 Z" fill="url(#grad_EridiumShard_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M16 2 L16 30" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-            <path d="M6 16 L26 16" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>
-        </svg>`;
-  } else if (key === "Gacha Key") {
+      bg = "rgba(155, 89, 182, 0.25)";
+      border = "#9b59b6";
+      svgContent = `
+          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
+              <defs>
+                  <linearGradient id="grad_EridiumShard_${uid}" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#e84393" />
+                      <stop offset="100%" stop-color="#8e44ad" />
+                  </linearGradient>
+              </defs>
+              <path d="M16 2 L26 16 L16 30 L6 16 Z" fill="url(#grad_EridiumShard_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M16 2 L16 30" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+              <path d="M6 16 L26 16" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>
+          </svg>`;
+    } else if (key === "Glimmering Gachapon Key") {
+      bg = "rgba(0, 210, 255, 0.18)";
+      border = "#00d2ff";
+      svgContent = `
+          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block; filter: drop-shadow(0 0 4px #00d2ff);">
+              <defs>
+                  <linearGradient id="grad_GlimmeringKey_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#00d2ff" />
+                      <stop offset="50%" stop-color="#e84393" />
+                      <stop offset="100%" stop-color="#9b59b6" />
+                  </linearGradient>
+              </defs>
+              <path d="M11 4 L14 11 L21 11 L15 15 L18 22 L11 17 L4 22 L7 15 L1 11 L8 11 Z" fill="url(#grad_GlimmeringKey_${uid})" stroke="#000" stroke-width="1.8" />
+              <circle cx="11" cy="12" r="2.5" fill="#111" stroke="#000" stroke-width="1" />
+              <path d="M15 15 L27 27 L25 29 L23 27" stroke="#000" stroke-width="2" stroke-linecap="round" fill="none" />
+              <path d="M15.5 15.5 L26.5 26.5" stroke="url(#grad_GlimmeringKey_${uid})" stroke-width="3" stroke-linecap="round" fill="none"/>
+              <path d="M23.5 23.5 L21.5 25.5 M25.5 25.5 L23.5 27.5" stroke="url(#grad_GlimmeringKey_${uid})" stroke-width="2" stroke-linecap="round"/>
+          </svg>`;
+    } else if (key === "Gacha Key") {
     bg = "rgba(241, 196, 15, 0.25)";
     border = "#f1c40f";
     svgContent = `
@@ -1417,14 +1435,14 @@ window.updateUI = function () {
   let stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.maxStage || 1}`;
 
   if (window.playerStats.isDungeonMode) {
-    let dType = window.playerStats.currentDungeon || "gold";
-    let dNames = { equip: "Equip Floor", gold: "Gold Floor", mat: "Mat Floor" };
-    let dIcons = {
-      equip: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l2 2M11 19l-2 2" /></svg>`,
-      gold: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="#f1c40f" fill-opacity="0.15" /><path d="M12 8v8M9 10h6M9 13h6" /></svg>`,
-      mat: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77" /></svg>`,
-    };
-    displayTitleHtml = `${dIcons[dType] || ""} ${dNames[dType] || "Floor"}`;
+      let dType = window.playerStats.currentDungeon || "gold";
+      let dNames = { equip: "Equip Floor", gold: "Gold Floor", mat: "Mat Floor" };
+      let dIcons = {
+        equip: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l2 2M11 19l-2 2" /></svg>`,
+        gold: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="#f1c40f" fill-opacity="0.15" /><path d="M12 8v8M9 10h6M9 13h6" /></svg>`,
+        mat: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77" /></svg>`,
+      };
+      displayTitleHtml = `${dIcons[dType] || ""} ${dNames[dType] || "Floor"}`;
     activeStageVal = window.playerStats.currentDungeonStage[dType] || 1;
     stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.dungeonPeaks[dType] || 1}`;
   } else if (window.playerStats.isCrucibleMode) {
@@ -1709,19 +1727,19 @@ window.updateUI = function () {
   let elRateAcore = document.getElementById("live-rate-acore");
   if (elRateAcore) elRateAcore.innerText = (40.0 * drp).toFixed(2) + "%";
 
-  let chance5 = p.qly >= 2.0 ? 0.02 * p.qly : 0;
-  let chance4 = p.qly >= 1.5 ? 0.16 * p.qly : 0;
-  setText(
-    "star-rate-5",
-    chance5 > 0 ? chance5.toFixed(2) + "%" : "0.00% 🔒 (Req. 2.0x Qly)",
-  );
-  setText(
-    "star-rate-4",
-    chance4 > 0 ? chance4.toFixed(2) + "%" : "0.00% 🔒 (Req. 1.5x Qly)",
-  );
-  setText("star-rate-3", (0.8 * p.qly - (chance5 + chance4)).toFixed(2) + "%");
-  setText("star-rate-2", (3.2 * p.qly).toFixed(2) + "%");
-  setText("star-rate-1", (11.0 * p.qly).toFixed(2) + "%");
+  let dropProbs = window.calculateRarityProbabilities(p.qly, false);
+
+    setText(
+      "star-rate-5",
+      p.qly >= 2.0 ? dropProbs[5].toFixed(2) + "%" : "0.00% 🔒 (Req. 2.0x Qly)",
+    );
+    setText(
+      "star-rate-4",
+      p.qly >= 1.5 ? dropProbs[4].toFixed(2) + "%" : "0.00% 🔒 (Req. 1.5x Qly)",
+    );
+    setText("star-rate-3", dropProbs[3].toFixed(2) + "%");
+    setText("star-rate-2", dropProbs[2].toFixed(2) + "%");
+    setText("star-rate-1", dropProbs[1].toFixed(2) + "%");
 
   setText("live-qty-acore", window.inventory.ETC["Ancient Core"] || 0);
   setText(
@@ -1774,18 +1792,13 @@ window.updateUI = function () {
     window.renderGachaShowcaseMarquee();
 
     // Update live vending rates board (Fully live with your stats!)
-    let qly = p.qly;
-    let chance5 = 1.0 * qly;
-    let chance4 = 5.0 * qly;
-    let chance3 = 15.0 * qly;
-    let chance2 = 25.0 * qly;
-    let chance1 = Math.max(0, 100 - (chance5 + chance4 + chance3 + chance2));
+        let probs = window.calculateRarityProbabilities(p.qly, true);
 
-    window.setText("vending-rate-5", chance5.toFixed(2) + "%");
-    window.setText("vending-rate-4", chance4.toFixed(2) + "%");
-    window.setText("vending-rate-3", chance3.toFixed(2) + "%");
-    window.setText("vending-rate-2", chance2.toFixed(2) + "%");
-    window.setText("vending-rate-1", chance1.toFixed(2) + "%");
+        window.setText("vending-rate-5", probs[5].toFixed(2) + "%");
+        window.setText("vending-rate-4", probs[4].toFixed(2) + "%");
+        window.setText("vending-rate-3", probs[3].toFixed(2) + "%");
+        window.setText("vending-rate-2", probs[2].toFixed(2) + "%");
+        window.setText("vending-rate-1", probs[1].toFixed(2) + "%");
   }
 
   // Refresh Gacha Pity Elements if present
@@ -3443,32 +3456,95 @@ window.renderPrestigeTab = function () {
   }
 
   let getUpgradeCardHtml = (
-    type,
-    label,
-    icon,
-    currentText,
-    bonusDesc,
-    pts,
-    color,
-  ) => {
-    let cost = window.getPrestigeUpgradeCost(type, pts);
-    let canAfford = p.prestigePoints >= cost;
-    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-    let bgStyle = window.hexToRgba(color, 0.04);
-    let fontColor =
-      color === "#f1c40f" || color === "#ffb6c1" ? "#111" : "#fff";
+      type,
+      label,
+      icon,
+      currentText,
+      bonusDesc,
+      pts,
+      color,
+    ) => {
+      let cost = window.getPrestigeUpgradeCost(type, pts);
+      let canAfford = p.prestigePoints >= cost;
+      let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+      let bgStyle = window.hexToRgba(color, 0.04);
+      let fontColor =
+        color === "#f1c40f" || color === "#ffb6c1" ? "#111" : "#fff";
 
-    return `
-      <div class="shop-row" style="border-color:${color}; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:4px; padding:10px; margin-bottom:0; cursor:help;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-              <strong style="color:${color}; font-size:11.5px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${pts})</span></strong>
-              <span style="color:${costColor}; font-weight:bold; font-size:11px;">${cost} PP</span>
+      return `
+        <div class="shop-row" style="border-color:${color}; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:4px; padding:10px; margin-bottom:0; cursor:help;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="color:${color}; font-size:11.5px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${pts})</span></strong>
+                <span style="color:${costColor}; font-weight:bold; font-size:11px;">${cost} PP</span>
+            </div>
+            <div style="font-size:9.5px; color:#aaa; line-height:1.35; margin-bottom:6px;">${bonusDesc} <br>Currently: <span style="color:#fff; font-weight:bold;">${currentText}</span></div>
+            <button class="btn-action" style="background:${color}; color:${fontColor}; font-weight:bold; font-size:10px; padding:4px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.buyPrestigeUpgrade('${type}')">Upgrade</button>
+        </div>
+      `;
+    };
+
+    // Pre-calculate Paragon cost requirements based on P level
+    let parLevel = p.paragonLevel || 0;
+    let parGoldCost = Math.floor(1000000 * Math.pow(1.5, parLevel));
+    let parMythicScrapCost = Math.floor(50 * Math.pow(1.3, parLevel));
+    let parLegendaryScrapCost = Math.floor(150 * Math.pow(1.3, parLevel));
+    let parEpicScrapCost = Math.floor(350 * Math.pow(1.3, parLevel));
+    let parCoreCost = Math.floor(10 * Math.pow(1.15, parLevel));
+
+    let goldOwned = window.playerStats.coins || 0;
+    let mythicScrapsOwned = window.inventory.ETC["Mythic Scrap"] || 0;
+    let legendaryScrapsOwned = window.inventory.ETC["Legendary Scrap"] || 0;
+    let epicScrapsOwned = window.inventory.ETC["Epic Scrap"] || 0;
+    let coresOwned = window.inventory.ETC["Catalyst Core"] || 0;
+
+    let canAffordParagon =
+      goldOwned >= parGoldCost &&
+      mythicScrapsOwned >= parMythicScrapCost &&
+      legendaryScrapsOwned >= parLegendaryScrapCost &&
+      epicScrapsOwned >= parEpicScrapCost &&
+      coresOwned >= parCoreCost;
+
+    let parGoldColor = goldOwned >= parGoldCost ? "#2ecc71" : "#e74c3c";
+    let parMythicColor = mythicScrapsOwned >= parMythicScrapCost ? "#2ecc71" : "#e74c3c";
+    let parLegendaryColor = legendaryScrapsOwned >= parLegendaryScrapCost ? "#2ecc71" : "#e74c3c";
+    let parEpicColor = epicScrapsOwned >= parEpicScrapCost ? "#2ecc71" : "#e74c3c";
+    let parCoreColor = coresOwned >= parCoreCost ? "#2ecc71" : "#e74c3c";
+
+    let paragonBonusText = `+${(parLevel * 0.5).toFixed(1)}% Base Attributes (STR/DEX/INT)`;
+
+    let paragonInfusionCardHtml = `
+      <div class="market-card" style="border-color:#ff007f; background:linear-gradient(135deg, #15000b 0%, #030003 100%); text-align:left; padding:12px; border-radius:8px; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.15); margin-top:12px; display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #5a0a33; padding-bottom:6px; margin-bottom:8px;">
+                  <h3 style="margin:0; color:#ff007f; font-size:13px; text-transform:uppercase; letter-spacing:1px; text-shadow:0 0 8px rgba(255,0,127,0.35); display:flex; align-items:center; gap:6px;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff007f" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                      Paragon Infusion
+                  </h3>
+                  <span style="background:rgba(255,0,127,0.15); border:1px solid #ff007f; color:#ffb6c1; font-size:10px; font-weight:bold; padding:2px 10px; border-radius:10px; font-family:monospace;">Paragon Level: ${parLevel}</span>
+              </div>
+              <p style="font-size:10px; color:#aaa; margin-bottom:10px; line-height:1.4; white-space:normal;">
+                  Sacrifice high-end materials and massive gold caches to fuse the permanent Paragon Matrix. Multiplies all base attributes permanently.
+              </p>
+              <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:4px; padding:8px; margin-bottom:10px; font-size:10.5px;">
+                  <div style="font-weight:bold; color:#ff007f; font-family:monospace; margin-bottom:4px;">🧬 ACTIVE MATRIX BONUS:</div>
+                  <strong style="color:#fff; font-size:11.5px;">${paragonBonusText}</strong>
+              </div>
+              <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:4px; padding:8px; font-family:monospace; font-size:9.5px;">
+                  <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">📋 Next Level Requirements:</div>
+                  <div style="display:flex; flex-direction:column; gap:3px;">
+                      <div style="display:flex; justify-content:space-between;"><span>• Gold:</span><strong style="color:${parGoldColor};">${window.formatNumber(parGoldCost)} / ${window.formatNumber(goldOwned)}</strong></div>
+                      <div style="display:flex; justify-content:space-between;"><span>• Mythic Scraps:</span><strong style="color:${parMythicColor};">${parMythicScrapCost} / ${mythicScrapsOwned}</strong></div>
+                      <div style="display:flex; justify-content:space-between;"><span>• Legendary Scraps:</span><strong style="color:${parLegendaryColor};">${parLegendaryScrapCost} / ${legendaryScrapsOwned}</strong></div>
+                      <div style="display:flex; justify-content:space-between;"><span>• Epic Scraps:</span><strong style="color:${parEpicColor};">${parEpicScrapCost} / ${epicScrapsOwned}</strong></div>
+                      <div style="display:flex; justify-content:space-between;"><span>• Catalyst Cores:</span><strong style="color:${parCoreColor};">${parCoreCost} / ${coresOwned}</strong></div>
+                  </div>
+              </div>
           </div>
-          <div style="font-size:9.5px; color:#aaa; line-height:1.35; margin-bottom:6px;">${bonusDesc} <br>Currently: <span style="color:#fff; font-weight:bold;">${currentText}</span></div>
-          <button class="btn-action" style="background:${color}; color:${fontColor}; font-weight:bold; font-size:10px; padding:4px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.buyPrestigeUpgrade('${type}')">Upgrade</button>
+          <button class="btn-action" style="width:100%; margin-top:10px; padding:10px; font-weight:bold; font-size:11.5px; background:#ff007f; color:white; border:1px solid #fff; box-shadow:0 0 12px rgba(255,0,127,0.35);" ${canAffordParagon ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeParagonUpgrade()">
+              INFUSE MATRIX
+          </button>
       </div>
     `;
-  };
 
   el.innerHTML = `
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
@@ -3524,42 +3600,44 @@ window.renderPrestigeTab = function () {
                 </div>
 
                 <!-- Projected Victory Loot Payouts -->
-                <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:4px; padding:8px; margin-bottom:12px; font-family:monospace; font-size:9.5px;">
-                    <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">💎 Projected Ascension Loot:</div>
-                    <div style="display:flex; flex-direction:column; gap:2px; padding:2px;">
-                        <div style="display:flex; justify-content:space-between;"><span>✨ Prestige Points (PP):</span><strong style="color:#f1c40f;">+${totalPP} PP</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>🔋 Catalyst Cores:</span><strong style="color:#2ecc71;">~ ${estCores}</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>🔮 Eridium Shards:</span><strong style="color:#8e44ad;">~ ${estShards}</strong></div>
-                    </div>
-                </div>
-            </div>
+                                            <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:4px; padding:8px; margin-bottom:12px; font-family:monospace; font-size:9.5px;">
+                                                <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">💎 Projected Ascension Loot:</div>
+                                                <div style="display:flex; flex-direction:column; gap:2px; padding:2px;">
+                                                    <div style="display:flex; justify-content:space-between;"><span>✨ Prestige Points (PP):</span><strong style="color:#f1c40f;">+${totalPP} PP</strong></div>
+                                                    <div style="display:flex; justify-content:space-between;"><span>🔋 Catalyst Cores:</span><strong style="color:#2ecc71;">~ ${estCores}</strong></div>
+                                                    <div style="display:flex; justify-content:space-between;"><span>🔮 Eridium Shards:</span><strong style="color:#8e44ad;">~ ${estShards}</strong></div>
+                                                </div>
+                                            </div>
+                                        </div>
 
-            <div style="margin-top:auto;">
-                ${challengeBtnHtml}
-            </div>
-        </div>
+                                        <div style="margin-top:auto;">
+                                            ${challengeBtnHtml}
+                                        </div>
+                                    </div>
 
-        <!-- RIGHT COLUMN: ASCENSION ALTAR CARDS -->
-                <div class="market-card" style="border-color:#9b59b6; background:#111; text-align:left; padding:12px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.7); display:flex; flex-direction:column;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:6px; margin-bottom:10px;">
-                        <h3 style="margin:0; color:#9b59b6; font-size:13px; text-transform:uppercase; letter-spacing:1px; text-shadow:0 0 10px rgba(155, 89, 182, 0.35);">✨ Altar of Ascension</h3>
-                        <span style="background:rgba(155, 89, 182, 0.15); border:1px solid #9b59b6; color:#df9ffb; font-size:10px; font-weight:bold; padding:2px 10px; border-radius:10px; font-family:monospace;" id="prestige-points-qty">PP: ${p.prestigePoints.toLocaleString()}</span>
-                    </div>
+                                    <!-- RIGHT COLUMN: UPGRADES & PARAGON -->
+                                    <div style="display:flex; flex-direction:column; gap:12px;">
+                                        <!-- Prestige points balance banner -->
+                                        <div style="background:#111; border:1px solid #333; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px;">
+                                            <span>Ascension Points:</span>
+                                            <strong style="color:#9b59b6; font-size:13px;">${p.prestigePoints} PP</strong>
+                                        </div>
 
-                    <!-- Scroll box replaced with elegant, space-filling responsive dual-column grid -->
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:6px; flex:1; align-content:start;" onscroll="window.hideTooltip()">
-                        ${getUpgradeCardHtml("gold", "Midas' Legacy", "🟡", `+${(goldPts * 25).toLocaleString()}%`, "Increases campaign gold drops by +25% per level.", goldPts, "#f1c40f")}
-                        ${getUpgradeCardHtml("exp", "Ancient Wisdom", "🧠", `+${(expPts * 10).toLocaleString()}%`, "Increases all experience gained by +10% per level.", expPts, "#9b59b6")}
-                        ${getUpgradeCardHtml("drop", "Cosmic Fortune", "🍀", `+${(dropPts * 5).toLocaleString()}%`, "Increases global item drop rates by +5% per level.", dropPts, "#2ecc71")}
-                        ${getUpgradeCardHtml("atk", "Gladiator's Might", "🔱", `x${Math.pow(1.12, atkPts).toFixed(2)}`, "Compounding multiplier to all hero Attack power (+12% per level).", atkPts, "#e74c3c")}
-                        ${getUpgradeCardHtml("fort", "Colossal Fortitude", "🛡️", `x${Math.pow(1.1, fortPts).toFixed(2)} HP / x${Math.pow(1.05, fortPts).toFixed(2)} Def`, "Compounding +10% HP and +5% Defense multiplier per level.", fortPts, "#1abc9c")}
-                        ${getUpgradeCardHtml("fairy", "Aetheric Beacon", "🧚", `+${(fairyPts * 5).toLocaleString()}%`, "Adds a compounding +5% multi-fairy wild spawn rate.", fairyPts, "#ffb6c1")}
-                    </div>
-                </div>
+                                        <div style="display:flex; flex-direction:column; gap:6px;">
+                                            ${getUpgradeCardHtml("gold", "Midas' Legacy", "🟡", `+${(goldPts * 25).toFixed(0)}% Gold`, "Increases Gold gained from mobs/bosses by +25% per level.", goldPts, "#f1c40f")}
+                                            ${getUpgradeCardHtml("exp", "Ancient Wisdom", "🧠", `+${(expPts * 10).toFixed(0)}% EXP`, "Increases EXP gained from all sources by +10% per level.", expPts, "#a855f7")}
+                                            ${getUpgradeCardHtml("drop", "Cosmic Fortune", "🍀", `+${(dropPts * 5).toFixed(0)}% Drop`, "Increases global drop rate modifier by +5% per level.", dropPts, "#2ecc71")}
+                                            ${getUpgradeCardHtml("atk", "Gladiator's Might", "⚔️", `+${(atkPts * 12).toFixed(0)}% Atk`, "Increases global attack power by +12% per level.", atkPts, "#e74c3c")}
+                                            ${getUpgradeCardHtml("fort", "Colossal Fortitude", "🛡️", `+${(fortPts * 10).toFixed(0)}% HP / +${(fortPts * 5).toFixed(0)}% Def`, "Increases global Max HP by +10% and Defense by +5% per level.", fortPts, "#3498db")}
+                                            ${getUpgradeCardHtml("fairy", "Aetheric Beacon", "🧚", `+${(fairyPts * 5).toFixed(0)}% Spawn`, "Increases wild fairy spawn rates by +5% per level.", fairyPts, "#ffb6c1")}
+                                        </div>
 
-    </div>
-  `;
-};
+                                        ${paragonInfusionCardHtml}
+                                    </div>
+
+                                </div>
+                              `;
+                            };
 
 window.buyPrestigeUpgrade = function (type) {
   let currentLevel = window.playerStats.prestigeUpgrades[type] || 0;
@@ -5170,6 +5248,8 @@ window.showEtcTooltip = function (e, keyName) {
   let color = "#bdc3c7";
   if (keyName === "Eridium Shard") {
     color = "#8e44ad";
+  } else if (keyName === "Glimmering Gachapon Key") {
+    color = "#00d2ff";
   } else if (keyName === "Gacha Key") {
     color = "#f1c40f";
   } else if (keyName === "Ancient Core") {
@@ -6969,16 +7049,13 @@ window.showCurrentRatesModal = function () {
   let cruciblePeak = window.playerStats.cruciblePeak || 1;
 
   // Equipment Drop Chances (Chances of rolling each star quality based on active Drop Quality stats)
-  let luckMultiplier = p.qly;
-  let chance5 = luckMultiplier >= 2.0 ? 0.02 * luckMultiplier : 0;
-  let chance4 = luckMultiplier >= 1.5 ? 0.16 * luckMultiplier : 0;
-  let chance3 = 0.8 * luckMultiplier - (chance5 + chance4);
-  let chance2 = 3.2 * luckMultiplier;
-  let chance1 = 11.0 * luckMultiplier;
-  let chance0 = Math.max(
-    0,
-    100 - (chance5 + chance4 + chance3 + chance2 + chance1),
-  );
+    let dropProbs = window.calculateRarityProbabilities(p.qly, false);
+    let chance5 = p.qly >= 2.0 ? dropProbs[5] : 0;
+    let chance4 = p.qly >= 1.5 ? dropProbs[4] : 0;
+    let chance3 = dropProbs[3];
+    let chance2 = dropProbs[2];
+    let chance1 = dropProbs[1];
+    let chance0 = dropProbs[0];
 
   win.innerHTML = `
                         <div class="draggable-header" id="rates-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
@@ -7687,6 +7764,8 @@ window.executeAltarSummon = function (isReentry = false) {
 // --- INTERACTIVE RETRO GACHA CONTROLLER ---
 window.gachaActiveState = "idle";
 
+window.gachaSelectedMode = window.gachaSelectedMode || "standard"; // "standard" or "glimmering"
+
 window.openGachaModal = function () {
   let overlay = document.getElementById("gacha-modal-overlay");
   if (overlay) overlay.remove();
@@ -7706,18 +7785,22 @@ window.renderGachaModal = function () {
   let overlay = document.getElementById("gacha-modal-overlay");
   if (!overlay) return;
 
-  let keysOwned = window.inventory.ETC["Gacha Key"] || 0;
-  let pityProgress = window.playerStats.vendingPity || 0;
-  let ballsColors = [
-    "#e74c3c",
-    "#f1c40f",
-    "#3498db",
-    "#9b59b6",
-    "#2ecc71",
-    "#e67e22",
-  ];
+  let mode = window.gachaSelectedMode;
+  let isGlim = mode === "glimmering";
 
-  // Generate a realistic pile of colorful capsule balls with 6 keyframe targets for centrifugal swirl
+  let standardKeys = window.inventory.ETC["Gacha Key"] || 0;
+  let glimmeringKeys = window.inventory.ETC["Glimmering Gachapon Key"] || 0;
+
+  let pityProgress = isGlim
+    ? (window.playerStats.glimmeringPity || 0)
+    : (window.playerStats.vendingPity || 0);
+  let maxPity = isGlim ? 25 : 50;
+
+  // Set up thematic capsule colors
+  let ballsColors = isGlim
+    ? ["#00d2ff", "#ff007f", "#9b59b6", "#a855f7", "#ffffff"]
+    : ["#e74c3c", "#f1c40f", "#3498db", "#9b59b6", "#2ecc71", "#e67e22"];
+
   let ballsHtml = "";
   for (let i = 0; i < 22; i++) {
     let left = 20 + Math.random() * 240;
@@ -7725,22 +7808,16 @@ window.renderGachaModal = function () {
     let rot = Math.random() * 360;
     let col = ballsColors[Math.floor(Math.random() * ballsColors.length)];
 
-    // Generate 6 random steps representing physical collision coordinates inside the sphere
     let tx1 = Math.random() * 240 + 20 - left;
     let ty1 = -(Math.random() * 80 + 40 - bottom);
-
     let tx2 = Math.random() * 240 + 20 - left;
     let ty2 = -(Math.random() * 110 + 20 - bottom);
-
     let tx3 = Math.random() * 240 + 20 - left;
     let ty3 = -(Math.random() * 80 + 40 - bottom);
-
     let tx4 = Math.random() * 240 + 20 - left;
     let ty4 = -(Math.random() * 110 + 20 - bottom);
-
     let tx5 = Math.random() * 240 + 20 - left;
     let ty5 = -(Math.random() * 60 + 5 - bottom);
-
     let tx6 = Math.random() * 240 + 20 - left;
     let ty6 = -(Math.random() * 20 + 0 - bottom);
 
@@ -7748,72 +7825,133 @@ window.renderGachaModal = function () {
     let animDuration = (0.7 + Math.random() * 0.4).toFixed(2);
 
     ballsHtml += `
-                                            <div class="gacha-ball-pile" style="
-                                                left: ${left}px; bottom: ${bottom}px;
-                                                transform: rotate(${rot}deg);
-                                                background: linear-gradient(180deg, ${col} 50%, #ffffff 50%);
-                                                --tx1: ${tx1}px; --ty1: ${ty1}px;
-                                                --tx2: ${tx2}px; --ty2: ${ty2}px;
-                                                --tx3: ${tx3}px; --ty3: ${ty3}px;
-                                                --tx4: ${tx4}px; --ty4: ${ty4}px;
-                                                --tx5: ${tx5}px; --ty5: ${ty5}px;
-                                                --tx6: ${tx6}px; --ty6: ${ty6}px;
-                                                animation-delay: ${animDelay}s;
-                                                animation-duration: ${animDuration}s;
-                                            "></div>
-                                        `;
+        <div class="gacha-ball-pile" style="
+            left: ${left}px; bottom: ${bottom}px;
+            transform: rotate(${rot}deg);
+            background: linear-gradient(180deg, ${col} 50%, #ffffff 50%);
+            --tx1: ${tx1}px; --ty1: ${ty1}px;
+            --tx2: ${tx2}px; --ty2: ${ty2}px;
+            --tx3: ${tx3}px; --ty3: ${ty3}px;
+            --tx4: ${tx4}px; --ty4: ${ty4}px;
+            --tx5: ${tx5}px; --ty5: ${ty5}px;
+            --tx6: ${tx6}px; --ty6: ${ty6}px;
+            animation-delay: ${animDelay}s;
+            animation-duration: ${animDuration}s;
+        "></div>
+    `;
   }
 
+  // Calculate live rates for the LED screen
+  let p = window.resolvePlayerStats();
+  let probs = window.calculateRarityProbabilities(p.qly, true, isGlim);
+
+  let ledContent = isGlim
+      ? `
+        <div class="gacha-led-readout glimmering">
+            <div class="led-header">GLIMMERING BOOSTER TERMINAL</div>
+            <div class="led-grid">
+                <span style="color:#e74c3c; text-shadow: 0 0 4px rgba(231,76,60,0.55); font-weight:bold;">5★: ${probs[5].toFixed(1)}%</span>
+                <span style="color:#f1c40f; text-shadow: 0 0 4px rgba(241,196,15,0.55); font-weight:bold;">4★: ${probs[4].toFixed(1)}%</span>
+                <span style="color:#e67e22; text-shadow: 0 0 4px rgba(230,126,34,0.55); font-weight:bold;">3★: ${probs[3].toFixed(1)}%</span>
+                <span style="color:#1abc9c; text-shadow: 0 0 4px rgba(26,188,156,0.55); font-weight:bold;">ART: 5.0%</span>
+            </div>
+        </div>`
+      : `
+        <div class="gacha-led-readout standard">
+            <div class="led-header">STANDARD VENDING TERMINAL</div>
+            <div class="led-grid">
+                <span style="color:#e74c3c; text-shadow: 0 0 4px rgba(231,76,60,0.55); font-weight:bold;">5★: ${probs[5].toFixed(2)}%</span>
+                <span style="color:#f1c40f; text-shadow: 0 0 4px rgba(241,196,15,0.55); font-weight:bold;">4★: ${probs[4].toFixed(2)}%</span>
+                <span style="color:#e67e22; text-shadow: 0 0 4px rgba(230,126,34,0.55); font-weight:bold;">3★: ${probs[3].toFixed(1)}%</span>
+                <span style="color:#9b59b6; text-shadow: 0 0 4px rgba(155,89,182,0.55); font-weight:bold;">2★: ${probs[2].toFixed(1)}%</span>
+                <span style="color:#3498db; text-shadow: 0 0 4px rgba(52,152,219,0.55); font-weight:bold;">1★: ${probs[1].toFixed(1)}%</span>
+            </div>
+        </div>`;
+
+  let cabinetClass = isGlim ? "gacha-cabinet glimmering-style" : "gacha-cabinet standard-style";
+  let titleColor = isGlim ? "#00d2ff" : "#f1c40f";
+  let switcherBtnHtml = `
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; width:100%; margin-bottom:8px;">
+        <button onclick="window.gachaSelectedMode='standard'; window.renderGachaModal();" class="sub-tab-btn ${!isGlim ? "active" : ""}" style="font-size:9.5px; padding:4px;">Standard Machine</button>
+        <button onclick="window.gachaSelectedMode='glimmering'; window.renderGachaModal();" class="sub-tab-btn ${isGlim ? "active" : ""}" style="font-size:9.5px; padding:4px;">Glimmering Machine</button>
+    </div>
+  `;
+
+  let keyIcon = isGlim
+    ? `<svg width="12" height="12" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 3px #00d2ff);"><path d="M11 4 L14 11 L21 11 L15 15 L18 22 L11 17 L4 22 L7 15 L1 11 L8 11 Z" fill="url(#g_glim_key_modal)" /></svg>`
+    : `<svg width="12" height="12" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; fill:#f1c40f;"><circle cx="11" cy="21" r="6" /><path d="M15 17 L27 5 L30 8 L28 10 L26 8" stroke="#000" stroke-width="2" fill="none"/></svg>`;
+
   overlay.innerHTML = `
-                                        <div class="gacha-cabinet gacha-cabinet-enter" onanimationend="this.classList.remove('gacha-cabinet-enter')">
-                                            <div style="display:flex; justify-content:space-between; align-items:center; width:100%; border-bottom:1px solid #f1c40f; padding-bottom:6px; margin-bottom:10px;">
-                                                <h3 style="margin:0; color:#f1c40f; font-size:13px; letter-spacing:1px; display:flex; align-items:center; gap:6px;">🎰 ARCADE GACHAPON</h3>
-                                                <button onclick="document.getElementById('gacha-modal-overlay').remove(); window.setPauseState(false); window.hideTooltip();" style="background:#222; border:1px solid #444; color:#aaa; font-weight:bold; cursor:pointer; font-size:10px; padding:3px 8px; border-radius:4px;">Close</button>
-                                            </div>
+        <svg style="width:0; height:0; position:absolute;">
+            <defs>
+                <linearGradient id="g_glim_key_modal" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00d2ff" />
+                    <stop offset="50%" stop-color="#e84393" />
+                    <stop offset="100%" stop-color="#9b59b6" />
+                </linearGradient>
+            </defs>
+        </svg>
+        <div class="${cabinetClass} gacha-cabinet-enter" onanimationend="this.classList.remove('gacha-cabinet-enter')">
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%; border-bottom:1px solid ${titleColor}; padding-bottom:6px; margin-bottom:10px;">
+                <h3 style="margin:0; color:${titleColor}; font-size:13px; letter-spacing:1px; display:flex; align-items:center; gap:6px;">🎰 ARCADE GACHAPON</h3>
+                <button onclick="document.getElementById('gacha-modal-overlay').remove(); window.setPauseState(false); window.hideTooltip();" style="background:#222; border:1px solid #444; color:#aaa; font-weight:bold; cursor:pointer; font-size:10px; padding:3px 8px; border-radius:4px;">Close</button>
+            </div>
 
-                                            <!-- Capsule Globe -->
-                                            <div class="gacha-globe" id="gacha-globe-element">
-                                                ${ballsHtml}
-                                            </div>
+            ${switcherBtnHtml}
 
-                                            <!-- PITY TRACKER PROGRESS -->
-                                                                                        <div style="width: 100%; margin: 8px 0; background:rgba(0,0,0,0.5); border:1px solid #333; padding:8px; border-radius:6px; text-align:center;">
-                                                                                            <div style="display:flex; justify-content:space-between; font-size:10px; color:#cbd5e1; font-weight:bold; margin-bottom:4px; font-family:monospace;">
-                                                                                                <span id="vending-pity-text">Pity progress: ${pityProgress} / 50</span>
-                                                                                                <span style="color:#e74c3c;">Guaranteed 5★ on 50</span>
-                                                                                            </div>
-                                                                                            <div style="width:100%; height:6px; background:#222; border-radius:3px; overflow:hidden; border:1px solid #444;">
-                                                                                                <div id="vending-pity-fill" style="width:${(pityProgress / 50) * 100}%; height:100%; background:linear-gradient(90deg, #ff007f, #e74c3c); transition:width 0.3s ease;"></div>
-                                                                                            </div>
-                                                                                        </div>
+            <!-- Capsule Globe -->
+            <div class="gacha-globe" id="gacha-globe-element">
+                ${ballsHtml}
+            </div>
 
-                                            <!-- CONTROL PANEL & CRANK -->
-                                            <div class="gacha-control-panel">
-                                                <div style="font-size:10px; color:#aaa; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace;">
-                                                    🔑 Gacha Keys: <strong style="color:#2ecc71; font-size:12px;" id="gacha-key-count-lbl">${keysOwned}</strong>
-                                                </div>
+            <!-- LED Screen dynamic rate readouts inside the machine -->
+            ${ledContent}
 
-                                                <div class="gacha-crank-handle" id="gacha-crank-element" onclick="window.crankGachaMachine()">
-                                                    <div class="gacha-crank-cross"></div>
-                                                    <div class="gacha-crank-cross vertical"></div>
-                                                </div>
+            <!-- PITY TRACKER PROGRESS -->
+            <div style="width: 100%; margin: 8px 0; background:rgba(0,0,0,0.5); border:1px solid #333; padding:8px; border-radius:6px; text-align:center;">
+                <div style="display:flex; justify-content:space-between; font-size:10px; color:#cbd5e1; font-weight:bold; margin-bottom:4px; font-family:monospace;">
+                    <span id="vending-pity-text">Pity progress: ${pityProgress} / ${maxPity}</span>
+                    <span style="color:#e74c3c;">Guaranteed 5★ on ${maxPity}</span>
+                </div>
+                <div style="width:100%; height:6px; background:#222; border-radius:3px; overflow:hidden; border:1px solid #444;">
+                    <div id="vending-pity-fill" style="width:${(pityProgress / maxPity) * 100}%; height:100%; background:linear-gradient(90deg, #ff007f, #e74c3c); transition:width 0.3s ease;"></div>
+                </div>
+            </div>
 
-                                                <div style="font-size:9.5px; color:#f1c40f; margin-top:8px; text-align:center; font-weight:bold;">
-                                                    CLICK CRANK TO SPIN!
-                                                </div>
-                                            </div>
+            <!-- CONTROL PANEL & CRANK -->
+            <div class="gacha-control-panel">
+                <div style="font-size:10px; color:#aaa; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace; display:flex; flex-direction:column; align-items:center; gap:4px; width:100%;">
+                    <div style="display:flex; justify-content:space-between; width:100%; padding: 0 10px;">
+                        <span>Standard Keys:</span>
+                        <strong style="color:#f1c40f;">${standardKeys}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; width:100%; padding: 0 10px;">
+                        <span>Glimmering Keys:</span>
+                        <strong style="color:#00d2ff;">${glimmeringKeys}</strong>
+                    </div>
+                </div>
 
-                                            <!-- CHUTE SLOT -->
-                                            <div class="gacha-chute" id="gacha-chute-element">
-                                                <!-- Dispensed capsule drops here -->
-                                            </div>
+                <div class="gacha-crank-handle" id="gacha-crank-element" onclick="window.crankGachaMachine()">
+                    <div class="gacha-crank-cross"></div>
+                    <div class="gacha-crank-cross vertical"></div>
+                </div>
 
-                                            <div id="gacha-reward-overlay" style="display:none; margin-top:10px; width:100%;"></div>
-                                        </div>
-                                    `;
+                <div style="font-size:9.5px; color:${titleColor}; margin-top:8px; text-align:center; font-weight:bold;">
+                    CLICK CRANK TO SPIN!
+                </div>
+            </div>
+
+            <!-- CHUTE SLOT -->
+            <div class="gacha-chute" id="gacha-chute-element">
+                <!-- Dispensed capsule drops here -->
+            </div>
+
+            <div id="gacha-reward-overlay" style="display:none; margin-top:10px; width:100%;"></div>
+        </div>
+    `;
 };
 
-window.crankGachaMachine = function () {
+window.crankGachaMachine = function (forceSpendStandard = false) {
   if (
     window.gachaActiveState === "spinning" ||
     window.gachaActiveState === "dispensed"
@@ -7825,8 +7963,44 @@ window.crankGachaMachine = function () {
   let chute = document.getElementById("gacha-chute-element");
   let cabinet = document.querySelector(".gacha-cabinet");
 
+  let isGlim = window.gachaSelectedMode === "glimmering";
+
+  // Intercept the crank click if it is Glimmering and they have no Glimmering Key, but have 10 standard keys
+  if (isGlim && !forceSpendStandard) {
+    let glimmeringKeys = window.inventory.ETC["Glimmering Gachapon Key"] || 0;
+    let standardKeys = window.inventory.ETC["Gacha Key"] || 0;
+
+    if (glimmeringKeys < 1) {
+      if (standardKeys >= 10) {
+        window.showCustomConfirm(
+          "Spend 10 Standard Keys?",
+          "You don't have a Glimmering Key. Would you like to spend 10 Standard Gacha Keys to spin the Glimmering Machine?",
+          "Yes, spin!",
+          "Cancel",
+          "#00d2ff",
+          function () {
+            window.crankGachaMachine(true); // run again, forcing standard key spending
+          }
+        );
+        return;
+      } else {
+        window.SoundManager.play("block");
+        if (crank) {
+          crank.classList.add("crank-jammed-animate");
+          setTimeout(() => crank.classList.remove("crank-jammed-animate"), 600);
+        }
+        if (cabinet) {
+          cabinet.classList.add("cabinet-rattle");
+          setTimeout(() => cabinet.classList.remove("cabinet-rattle"), 450);
+        }
+        window.pushHeaderToast("❌ Insufficient Glimmering Key or standard Gacha Keys!", "#e74c3c");
+        return;
+      }
+    }
+  }
+
   // 1. Evaluate Gacha roll result first to coordinate the mechanical response
-  let res = window.rollGachaCrateItem();
+  let res = window.rollGachaCrateItem(isGlim, forceSpendStandard);
   if (res.error) {
     // Play jammed locking mechanical feedback sound
     window.SoundManager.play("block");
@@ -7919,16 +8093,16 @@ window.revealGachaReward = function (item) {
   let itemCardHtml = window.generateItemCardHtml(item, null, false);
 
   rewardOverlay.innerHTML = `
-                        <div style="background:#111; border:2px solid ${color}; border-radius:6px; padding:10px; margin-top:10px; animation: toastFadeIn 0.3s ease-out; position:relative;">
-                            <div style="max-height:220px; overflow-y:auto; overscroll-behavior:contain; margin-bottom:10px;">
-                                ${itemCardHtml}
+                            <div style="background:#111; border:2px solid ${color}; border-radius:6px; padding:10px; margin-top:10px; animation: toastFadeIn 0.3s ease-out; position:relative;">
+                                <div style="max-height:220px; overflow-y:auto; overscroll-behavior:contain; margin-bottom:10px;">
+                                    ${itemCardHtml}
+                                </div>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                                    <button class="btn-action" style="background:#555; font-size:10px; padding:6px;" onclick="document.getElementById('gacha-modal-overlay').remove(); window.setPauseState(false); window.hideTooltip();">Claim & Exit</button>
+                                    <button class="btn-action" style="background:#2ecc71; font-size:10px; padding:6px;" onclick="window.renderGachaModal()">Spin Again</button>
+                                </div>
                             </div>
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
-                                <button class="btn-action" style="background:#555; font-size:10px; padding:6px;" onclick="document.getElementById('gacha-modal-overlay').remove(); window.setPauseState(false); window.hideTooltip();">Claim & Exit</button>
-                                <button class="btn-action" style="background:#2ecc71; font-size:10px; padding:6px;" onclick="window.renderGachaModal()">Spin Again</button>
-                            </div>
-                        </div>
-                    `;
+                        `;
   rewardOverlay.style.display = "block";
 
   window.updateUI();
@@ -11971,14 +12145,14 @@ window.renderClanDashboard = function (clan, members, invitations) {
     };
 
     tabContentHtml = `
-                          <div style="display:flex; flex-direction:column; gap:4px;">
-                              ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", `+${((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1)}% Attack & Defense`, clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
-                              ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", `+${((clan.skill_vitality_well || 0) * 0.8).toFixed(1)}% Max HP`, clan.skill_vitality_well || 0, 50, "#3498db")}
-                              ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", `+${((clan.skill_prosperity_accord || 0) * 1.0).toFixed(1)}% Gold Multiplier`, clan.skill_prosperity_accord || 0, 30, "#f1c40f")}
-                              ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager\\'s Guidance", `+${((clan.skill_voyagers_guidance || 0) * 0.5).toFixed(1)}% Drop Rate & Quality`, clan.skill_voyagers_guidance || 0, 30, "#2ecc71")}
-                              ${getSkillUpgradeCardHtml("aetheric_wisdom", "Aetheric Wisdom", `+${((clan.skill_aetheric_wisdom || 0) * 1.0).toFixed(1)}% XP Rate`, clan.skill_aetheric_wisdom || 0, 30, "#9b59b6")}
-                          </div>
-                        `;
+                              <div style="display:flex; flex-direction:column; gap:4px;">
+                                  ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", "+" + ((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1) + "% Attack & Defense", clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
+                                  ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", "+" + ((clan.skill_vitality_well || 0) * 0.8).toFixed(1) + "% Max HP", clan.skill_vitality_well || 0, 50, "#3498db")}
+                                  ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", "+" + ((clan.skill_prosperity_accord || 0) * 1.0).toFixed(1) + "% Gold Multiplier", clan.skill_prosperity_accord || 0, 30, "#f1c40f")}
+                                  ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager's Guidance", "+" + ((clan.skill_voyagers_guidance || 0) * 0.5).toFixed(1) + "% Drop Rate & Quality", clan.skill_voyagers_guidance || 0, 30, "#2ecc71")}
+                                  ${getSkillUpgradeCardHtml("aetheric_wisdom", "Aetheric Wisdom", "+" + ((clan.skill_aetheric_wisdom || 0) * 1.0).toFixed(1) + "% XP Rate", clan.skill_aetheric_wisdom || 0, 30, "#9b59b6")}
+                              </div>
+                            `;
   }
 
   contentEl.innerHTML = `
@@ -12280,73 +12454,73 @@ window.updateSalvagePadUI = function () {
   }
 
   // 2. Bulk-Salvage Buttons Styling
-  let bulkButtons = {
-    0: "btn-bulk-salvage-0",
-    1: "btn-bulk-salvage-1",
-    2: "btn-bulk-salvage-2",
-    3: "btn-bulk-salvage-3",
-  };
+    let bulkButtons = {
+      0: "btn-bulk-salvage-0",
+      1: "btn-bulk-salvage-1",
+      2: "btn-bulk-salvage-2",
+      3: "btn-bulk-salvage-3",
+    };
 
-  for (let k in bulkButtons) {
-    let el = document.getElementById(bulkButtons[k]);
-    if (el) {
-      if (parseInt(k, 10) === bulkTarget) {
-        el.classList.add("active");
-        let cfg = configs[k];
-        el.style.background = cfg.bg;
-        el.style.color = cfg.color;
-        el.style.borderColor = cfg.border;
-        el.style.boxShadow = `0 0 12px ${cfg.shadow}`;
-        el.style.opacity = "1";
-        el.style.fontWeight = "bold";
-      } else {
-        el.classList.remove("active");
-        el.style.background = "rgba(0,0,0,0.4)";
-        el.style.color = "#7f8c8d";
-        el.style.borderColor = "#2d3748";
-        el.style.boxShadow = "";
-        el.style.opacity = "0.45";
-        el.style.fontWeight = "normal";
+    for (let k in bulkButtons) {
+      let el = document.getElementById(bulkButtons[k]);
+      if (el) {
+        if (parseInt(k, 10) === bulkTarget) {
+          el.classList.add("active");
+          let cfg = configs[k];
+          el.style.background = cfg.bg;
+          el.style.color = cfg.color;
+          el.style.borderColor = cfg.border;
+          el.style.boxShadow = `0 0 12px ${cfg.shadow}`;
+          el.style.opacity = "1";
+          el.style.fontWeight = "bold";
+        } else {
+          el.classList.remove("active");
+          el.style.background = "rgba(0,0,0,0.4)";
+          el.style.color = "#7f8c8d";
+          el.style.borderColor = "#2d3748";
+          el.style.boxShadow = "";
+          el.style.opacity = "0.45";
+          el.style.fontWeight = "normal";
+        }
       }
     }
-  }
-};
+  };
 
-window.executeDisbandClan = function () {
-  window.showCustomConfirm(
-    "DISBAND CLAN",
-    "WARNING: This will permanently dissolve the clan, wipe the vault, and remove all members. This action is IRREVERSIBLE.",
-    "Disband Clan",
-    "Cancel",
-    "#e74c3c",
-    function () {
-      const userId = window.getGameUserId();
-      fetch(`${window.GAME_SERVER_URL}/api/clan/disband`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.success) {
-            window.pushHeaderToast("🏰 Clan disbanded.", "#e74c3c");
-            window.playerStats.clanId = null;
-            window.playerStats.clanName = null;
-            let modal = document.getElementById("clan-draggable-window");
-            if (modal) modal.remove();
-            window.hideTooltip();
-            window.updateUI();
-            window.saveGame();
-          } else {
-            window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-          }
+  window.executeDisbandClan = function () {
+    window.showCustomConfirm(
+      "DISBAND CLAN",
+      "WARNING: This will permanently dissolve the clan, wipe the vault, and remove all members. This action is IRREVERSIBLE.",
+      "Disband Clan",
+      "Cancel",
+      "#e74c3c",
+      function () {
+        const userId = window.getGameUserId();
+        fetch(`${window.GAME_SERVER_URL}/api/clan/disband`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
         })
-        .catch(() => {
-          window.pushHeaderToast(
-            "❌ Network error disbanding clan.",
-            "#e74c3c",
-          );
-        });
-    },
-  );
-};
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.success) {
+              window.pushHeaderToast("🏰 Clan disbanded.", "#e74c3c");
+              window.playerStats.clanId = null;
+              window.playerStats.clanName = null;
+              let modal = document.getElementById("clan-draggable-window");
+              if (modal) modal.remove();
+              window.hideTooltip();
+              window.updateUI();
+              window.saveGame();
+            } else {
+              window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+            }
+          })
+          .catch(() => {
+            window.pushHeaderToast(
+              "❌ Network error disbanding clan.",
+              "#e74c3c",
+            );
+          });
+      },
+    );
+  };

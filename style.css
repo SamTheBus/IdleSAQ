@@ -207,6 +207,10 @@ canvas {
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
   touch-action: none; /* Prevents canvas touch drag gestures from locking the viewport scroll */
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 /* --- STATS HUD OVERLAY --- */
@@ -266,7 +270,7 @@ canvas {
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
   color: #94a3b8;
   border: 1px solid #334155;
-  padding: 10px 4px;
+  padding: 6px 4px;
   cursor: pointer;
   font-weight: bold;
   border-radius: 6px;
@@ -277,6 +281,10 @@ canvas {
   position: relative;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   outline: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tab-btn:hover {
@@ -443,7 +451,7 @@ canvas {
 #bag-equip,
 #bag-art {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
   gap: 8px;
   align-content: start;
 }
@@ -636,7 +644,7 @@ canvas {
   background: #090b0e;
   color: #94a3b8;
   border: 1px solid #1e293b;
-  padding: 6px 10px;
+  padding: 8px 10px;
   font-size: 11px;
   border-radius: 20px; /* Modern capsule-pill shape */
   cursor: pointer;
@@ -646,6 +654,10 @@ canvas {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   outline: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sub-tab-btn:hover {
@@ -1227,10 +1239,12 @@ canvas {
     width: 100% !important;
   }
   .nav-btn {
-    padding: 4px 6px !important;
+    padding: 8px 6px !important;
     font-size: 10px !important;
     gap: 2px !important;
     justify-content: center !important;
+    min-height: 44px;
+    align-items: center;
   }
   .nav-btn svg {
     width: 11px !important;
@@ -1286,7 +1300,7 @@ canvas {
   .slots-card {
     font-size: 10.5px !important; /* Scaled up from 9px for mobile readability */
     padding: 4px !important;
-    min-height: 50px !important;
+    min-height: 55px !important; /* Touch safety cushion */
   }
 
   .slots-card strong {
@@ -1343,6 +1357,9 @@ canvas {
     text-align: center !important;
     letter-spacing: 0px !important;
     white-space: nowrap !important;
+    min-height: 44px !important; /* Enforces 44px on mobile screens */
+    align-items: center;
+    justify-content: center;
   }
 
   #forge-station-container {
@@ -1379,7 +1396,11 @@ canvas {
     flex: 1 !important;
     text-align: center !important;
     font-size: 10.5px !important;
-    padding: 6px 4px !important;
+    padding: 8px 4px !important;
+    min-height: 44px !important; /* Mobile Touch Target Normalization */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 }
 
@@ -2237,10 +2258,11 @@ canvas {
   }
 
   .tab-btn {
-    padding: 6px 1px !important;
-    font-size: 10px !important;
+      padding: 6px 1px !important;
+      font-size: 10px !important;
+      min-height: 38px !important; /* Highly optimized vertical balance for tight landscape viewports */
+    }
   }
-}
 
 /* ==========================================================================
            19. HALL OF LEGENDS LEADERBOARD LAYOUTS
@@ -2309,10 +2331,66 @@ canvas {
   }
 
   #inspect-content canvas {
-    width: 60px !important;
-    height: 75px !important;
+      width: 60px !important;
+      height: 75px !important;
+    }
   }
-}
+
+  /* --- CYBER NEON GLIMMERING CABINET STYLINGS --- */
+  .gacha-cabinet.glimmering-style {
+    background: linear-gradient(135deg, #090615 0%, #15000b 100%) !important;
+    border: 3px solid #00d2ff !important;
+    border-bottom-width: 6px !important;
+    box-shadow:
+      0 15px 40px rgba(0, 0, 0, 0.95),
+      inset 0 0 25px rgba(0, 210, 255, 0.2),
+      0 0 25px rgba(0, 210, 255, 0.15) !important;
+  }
+
+  /* --- GLOWING DIGITAL LED READOUT SCREENS --- */
+  .gacha-led-readout {
+    width: 100%;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: monospace;
+    box-sizing: border-box;
+    text-align: center;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.85);
+    border: 1.5px solid currentColor;
+  }
+
+  .gacha-led-readout.standard {
+    background: #020703;
+    color: #2ecc71;
+    border-color: #2ecc71;
+    text-shadow: 0 0 4px rgba(46, 204, 113, 0.55);
+  }
+
+  .gacha-led-readout.glimmering {
+    background: #020710;
+    color: #00d2ff;
+    border-color: #ff007f;
+    text-shadow: 0 0 6px rgba(0, 210, 255, 0.65);
+  }
+
+  .led-header {
+    font-size: 8px;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+    padding-bottom: 2px;
+  }
+
+  .led-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3px 8px;
+    font-size: 9.5px;
+    font-weight: 900;
+  }
 
 /* --- ADVENTURER'S HUB MENU (ADVENTURY BUBBLY THEME) --- */
 #menu-hub-overlay {

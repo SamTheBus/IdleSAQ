@@ -65,25 +65,43 @@ window.saveGame = function () {
       });
     }
     // Scan gacha rolls history
-    if (window.playerStats && window.playerStats.gachaHistory) {
-      window.playerStats.gachaHistory.forEach((item) => {
-        if (item) activeIds.add(item.id);
-      });
-    }
-    // Scan logs history to preserve tooltips for item links in chat/logs
-    if (window.logsHistory) {
-      window.logsHistory.forEach((logLine) => {
-        let match;
-        let regex = /showLogTooltip\(event,\s*(\d+)\)/g;
-        while ((match = regex.exec(logLine)) !== null) {
-          activeIds.add(parseInt(match[1], 10));
+        if (window.playerStats && window.playerStats.gachaHistory) {
+          window.playerStats.gachaHistory.forEach((item) => {
+            if (item) activeIds.add(item.id);
+          });
         }
-        let regexInv = /showInventoryTooltip\(event,\s*(\d+)\)/g;
-        while ((match = regexInv.exec(logLine)) !== null) {
-          activeIds.add(parseInt(match[1], 10));
+        // Scan active gacha showcase items to prevent garbage collection
+        if (window.gachaShowcaseItems) {
+          window.gachaShowcaseItems.forEach((item) => {
+            if (item) activeIds.add(item.id);
+          });
         }
-      });
-    }
+        // Scan global recent pulls to protect their item IDs from garbage collection
+        if (window.lastGachaRecentPullsData) {
+          window.lastGachaRecentPullsData.forEach((pull) => {
+            if (pull && pull.item) activeIds.add(pull.item.id);
+          });
+        }
+        // Scan inspected player slots to prevent garbage collection while inspecting
+        if (window.inspectedSlots) {
+          for (let k in window.inspectedSlots) {
+            if (window.inspectedSlots[k]) activeIds.add(window.inspectedSlots[k].id);
+          }
+        }
+        // Scan logs history to preserve tooltips for item links in chat/logs
+        if (window.logsHistory) {
+          window.logsHistory.forEach((logLine) => {
+            let match;
+            let regex = /showLogTooltip\(event,\s*(\d+)\)/g;
+            while ((match = regex.exec(logLine)) !== null) {
+              activeIds.add(parseInt(match[1], 10));
+            }
+            let regexInv = /showInventoryTooltip\(event,\s*(\d+)\)/g;
+            while ((match = regexInv.exec(logLine)) !== null) {
+              activeIds.add(parseInt(match[1], 10));
+            }
+          });
+        }
 
     // Purge orphaned items
     if (window.frozenItemDb) {
@@ -392,236 +410,6 @@ window.applyOfflineGains = function (offlineMs) {
     "boots",
   ];
 
-  let originalBuffs = {
-    atk: window.playerStats.atkPotionTimer,
-    hp: window.playerStats.hpPotionTimer,
-    def: window.playerStats.defPotionTimer,
-    haste: window.playerStats.hastePotionTimer,
-    frenzy: window.playerStats.frenzyTimer,
-    adrenaline: window.playerStats.adrenalineTimer,
-  };
-
-  let maxStagesToAdvance = 100;
-  let stagesAdvancedCount = 0;
-
-  while (remainingSeconds > 0) {
-    let stateBefore =
-      (window.playerStats.frenzyTimer > 0) |
-      ((window.playerStats.adrenalineTimer > 0) << 1) |
-      ((window.playerStats.atkPotionTimer > 0) << 2) |
-      ((window.playerStats.hpPotionTimer > 0) << 3) |
-      ((window.playerStats.defPotionTimer > 0) << 4) |
-      ((window.playerStats.hastePotionTimer > 0) << 5) |
-      ((window.playerStats.xpPotionTimer > 0) << 6) |
-      ((window.playerStats.dropPotionTimer > 0) << 7) |
-      ((window.playerStats.qlyPotionTimer > 0) << 8);
-
-    let elapsedFrames = elapsedSeconds * 60;
-    window.playerStats.atkPotionTimer = Math.max(
-      0,
-      originalBuffs.atk - elapsedFrames,
-    );
-    window.playerStats.hpPotionTimer = Math.max(
-      0,
-      originalBuffs.hp - elapsedFrames,
-    );
-    window.playerStats.defPotionTimer = Math.max(
-      0,
-      originalBuffs.def - elapsedFrames,
-    );
-    window.playerStats.hastePotionTimer = Math.max(
-      0,
-      originalBuffs.haste - elapsedFrames,
-    );
-    window.playerStats.frenzyTimer = Math.max(
-      0,
-      originalBuffs.frenzy - elapsedFrames,
-    );
-    window.playerStats.adrenalineTimer = Math.max(
-      0,
-      originalBuffs.adrenaline - elapsedFrames,
-    );
-
-    let p = window.resolvePlayerStats();
-    let effMultiplier = 1 + p.critChance * (p.critDamage - 1);
-    let playerDps = Math.max(
-      1,
-      p.atk * effMultiplier * (60 / p.idleAttackSpeed),
-    );
-
-    let killsNeededForStage = 5 - window.playerStats.killCount;
-
-    // Smooth out post-wall base acceleration to prevent runaway super-exponential cliffs
-        let growthRate = 1.045 + (currentStage * 0.04) / (currentStage + 200);
-        let expScale = Math.pow(growthRate, currentStage);
-
-        let mobHp = Math.floor(25 * expScale * (1 + currentStage * 0.06));
-        let bossHp = Math.floor(120 * expScale * (1 + currentStage * 0.06));
-    let mobDef = 0;
-    let bossDef = 0;
-
-    let blendedMobHp = (1 - p.rareSpawn) * mobHp + p.rareSpawn * (2.5 * mobHp);
-    let blendedMobDef =
-      (1 - p.rareSpawn) * mobDef + p.rareSpawn * (1.5 * mobDef);
-
-    // Mitigate player offline DPS curves smoothly against average mob/boss defenses
-    let playerDpsMitigatedMob = playerDps * (100 / (100 + blendedMobDef));
-    let playerDpsMitigatedBoss = playerDps * (100 / (100 + bossDef));
-
-    let ttkMob = blendedMobHp / Math.max(1, playerDpsMitigatedMob);
-    let ttkBoss = bossHp / Math.max(1, playerDpsMitigatedBoss);
-    let cycleTime = Math.max(
-      0.5,
-      Math.min(300, (5 * ttkMob + ttkBoss) / 6 + 10.0),
-    );
-
-    let mobDmg = 5.2 * expScale;
-    let netMobDmg = Math.max(1, Math.ceil(mobDmg * (100 / (100 + p.def))));
-    let bossTtk = bossHp / Math.max(1, playerDpsMitigatedBoss);
-    let bossHits = Math.floor(bossTtk / 2);
-    let bossDmg = 20 * expScale;
-    let bossNetDmg = Math.max(1, Math.ceil(bossDmg * (100 / (100 + p.def))));
-    let bossDmgTaken = bossHits * bossNetDmg;
-    let bossVampHeal = window.checkArtifactTrait("vampirism")
-      ? Math.min(
-          Math.floor(playerDps * bossTtk * 0.03),
-          Math.ceil(p.maxHp * 0.05 * (bossTtk * (60 / p.idleAttackSpeed))),
-        )
-      : 0;
-    let bossNetDmgTaken = Math.max(0, bossDmgTaken - bossVampHeal);
-
-    let cumulativeStageDamage =
-      netMobDmg * killsNeededForStage + bossNetDmgTaken;
-    if (
-      cumulativeStageDamage > p.maxHp &&
-      !window.checkArtifactTrait("second_wind")
-    ) {
-      diedOffline = true;
-      deathStage = currentStage;
-      stagesAdvancedCount = maxStagesToAdvance;
-    }
-
-    let timeNeededForStage = (killsNeededForStage + 1) * cycleTime;
-    let hitStageCap = currentStage >= (window.playerStats.maxStage || 1);
-
-    if (
-      timeNeededForStage <= remainingSeconds &&
-      stagesAdvancedCount < maxStagesToAdvance &&
-      !diedOffline &&
-      !window.playerStats.isFarmingLoop &&
-      !hitStageCap
-    ) {
-      remainingSeconds -= timeNeededForStage;
-      elapsedSeconds += timeNeededForStage;
-      totalKills += killsNeededForStage + 1;
-
-      for (let k = 0; k < killsNeededForStage; k++) {
-        let isRare = Math.random() < p.rareSpawn;
-        totalGold += Math.ceil(
-          Math.floor(2 * expScale * (isRare ? 4 : 1)) * p.gold,
-        );
-        totalXp += Math.floor(5 * expScale * (isRare ? 3 : 1));
-        let dropR = isRare ? 0.005 : 0.001;
-        if (Math.random() < dropR * p.drop * window.state.efficiency)
-          rollOfflineItem(false, currentStage, isRare);
-        if (typeof window.rollPotionDrop === "function") {
-          let rolledPot = window.rollPotionDrop(false, isRare, true);
-          if (rolledPot) recordScrapGained(rolledPot, 1);
-        }
-      }
-
-      totalGold += Math.ceil(Math.floor(15 * expScale) * p.gold);
-      totalXp += Math.floor(25 * expScale);
-      if (Math.random() < 0.01 * p.drop * window.state.efficiency) {
-        if (typeof window.rollEquipmentDrop === "function")
-          window.rollEquipmentDrop(true, currentStage, false);
-      }
-      if (typeof window.rollPotionDrop === "function") {
-        let rolledBossPot = window.rollPotionDrop(true, false, true);
-        if (rolledBossPot) recordScrapGained(rolledBossPot, 1);
-      }
-
-      // Decoupled flat rare drops to prevent hyper-inflation at high levels
-      let offlineDepthQ = window.getDepthQualityMultiplier(currentStage);
-      if (offlineDepthQ > 1.0) {
-        if (Math.random() < 0.0005) recordScrapGained("Ancient Core", 1);
-        if (Math.random() < 0.0004) recordScrapGained("Overlord's Sigil", 1);
-        if (Math.random() < 0.0004) recordScrapGained("Eridium Shard", 1);
-        if (Math.random() < 0.0003) recordScrapGained("Gacha Key", 1);
-      }
-
-      currentStage++;
-      stagesGained++;
-      stagesAdvancedCount++;
-      window.playerStats.killCount = 0;
-    } else {
-      let partialKills = Math.floor(remainingSeconds / cycleTime);
-      if (partialKills > 0) {
-        totalKills += partialKills;
-        let elapsedForKills = partialKills * cycleTime;
-        elapsedSeconds += elapsedForKills;
-        remainingSeconds -= elapsedForKills;
-
-        for (let k = 0; k < partialKills; k++) {
-          let isRare = Math.random() < p.rareSpawn;
-          totalGold += Math.ceil(
-            Math.floor(2 * expScale * (isRare ? 4 : 1)) * p.gold,
-          );
-          totalXp += Math.floor(5 * expScale * (isRare ? 3 : 1));
-          let dropR = isRare ? 0.005 : 0.001;
-          if (Math.random() < dropR * p.drop * window.state.efficiency)
-            rollOfflineItem(false, currentStage, isRare);
-          if (typeof window.rollPotionDrop === "function") {
-            let rolledPartialPot = window.rollPotionDrop(false, isRare, true);
-            if (rolledPartialPot) recordScrapGained(rolledPartialPot, 1);
-          }
-        }
-      }
-      remainingSeconds = 0;
-    }
-
-    let stateAfter =
-      (window.playerStats.frenzyTimer > 0) |
-      ((window.playerStats.adrenalineTimer > 0) << 1) |
-      ((window.playerStats.atkPotionTimer > 0) << 2) |
-      ((window.playerStats.hpPotionTimer > 0) << 3) |
-      ((window.playerStats.defPotionTimer > 0) << 4) |
-      ((window.playerStats.hastePotionTimer > 0) << 5) |
-      ((window.playerStats.xpPotionTimer > 0) << 6) |
-      ((window.playerStats.dropPotionTimer > 0) << 7) |
-      ((window.playerStats.qlyPotionTimer > 0) << 8);
-
-    if (stateBefore !== stateAfter) {
-      window.invalidatePlayerStats();
-    }
-  }
-
-  let totalElapsedFrames = offlineSeconds * 60;
-  window.playerStats.atkPotionTimer = Math.max(
-    0,
-    originalBuffs.atk - totalElapsedFrames,
-  );
-  window.playerStats.hpPotionTimer = Math.max(
-    0,
-    originalBuffs.hp - totalElapsedFrames,
-  );
-  window.playerStats.defPotionTimer = Math.max(
-    0,
-    originalBuffs.def - totalElapsedFrames,
-  );
-  window.playerStats.hastePotionTimer = Math.max(
-    0,
-    originalBuffs.haste - totalElapsedFrames,
-  );
-  window.playerStats.frenzyTimer = Math.max(
-    0,
-    originalBuffs.frenzy - totalElapsedFrames,
-  );
-  window.playerStats.adrenalineTimer = Math.max(
-    0,
-    originalBuffs.adrenaline - totalElapsedFrames,
-  );
-
   function rollOfflineItem(isBossKill, stageNum, isRareMob) {
     let pCurrent = window.resolvePlayerStats();
     let chosenType =
@@ -781,20 +569,216 @@ window.applyOfflineGains = function (offlineMs) {
     }
   }
 
+  let isFarming = window.playerStats.isFarmingLoop || false;
+
+  let timersList = [
+    "atkPotionTimer",
+    "hpPotionTimer",
+    "defPotionTimer",
+    "hastePotionTimer",
+    "xpPotionTimer",
+    "dropPotionTimer",
+    "qlyPotionTimer",
+    "frenzyTimer",
+    "adrenalineTimer"
+  ];
+
+  // Segmented progress chunking loop
+  while (remainingSeconds > 0) {
+    let chunkSeconds = Math.min(remainingSeconds, 600); // 10 minute segment chunks
+
+    // Identify next scheduled potion timer expiry during this segment
+    let nextExpirySec = chunkSeconds;
+    timersList.forEach(tName => {
+      let tVal = window.playerStats[tName];
+      if (tVal > 0) {
+        let tSec = tVal / 60;
+        if (tSec < nextExpirySec) {
+          nextExpirySec = tSec;
+        }
+      }
+    });
+
+    let stepSeconds = nextExpirySec;
+    let segmentTimeLeft = stepSeconds;
+
+    while (segmentTimeLeft > 0) {
+      // Fetch fresh, live stats relative to active potion/buff levels
+      let p = window.resolvePlayerStats();
+      let effMultiplier = 1 + p.critChance * (p.critDamage - 1);
+      let playerDps = Math.max(1, p.atk * effMultiplier * (60 / p.idleAttackSpeed));
+
+      // Calculate localized stage parameters
+      let growthRate = 1.045 + (currentStage * 0.04) / (currentStage + 200);
+      let expScale = Math.pow(growthRate, currentStage);
+
+      let mobHp = Math.floor(25 * expScale * (1 + currentStage * 0.06));
+      let bossHp = Math.floor(120 * expScale * (1 + currentStage * 0.06));
+      let blendedMobHp = (1 - p.rareSpawn) * mobHp + p.rareSpawn * (2.5 * mobHp);
+      let blendedMobDef = 0;
+
+      let playerDpsMitigatedMob = playerDps * (100 / (100 + blendedMobDef));
+      let playerDpsMitigatedBoss = playerDps * (100 / (100 + 0));
+
+      let ttkMob = blendedMobHp / Math.max(1, playerDpsMitigatedMob);
+      let ttkBoss = bossHp / Math.max(1, playerDpsMitigatedBoss);
+      let cycleTime = Math.max(0.5, Math.min(300, (5 * ttkMob + ttkBoss) / 6 + 10.0));
+
+      let targetsRequired = window.playerStats.targetsRequired || 5;
+      let killsNeededForStage = targetsRequired - window.playerStats.killCount;
+
+      if (isFarming) {
+        // Safe level farming simulation (no advancement)
+        let killsInThisSub = Math.floor(segmentTimeLeft / cycleTime);
+        if (killsInThisSub <= 0) {
+          elapsedSeconds += segmentTimeLeft;
+          segmentTimeLeft = 0;
+          break;
+        }
+        let elapsed = killsInThisSub * cycleTime;
+        segmentTimeLeft -= elapsed;
+        elapsedSeconds += elapsed;
+        totalKills += killsInThisSub;
+
+        for (let k = 0; k < killsInThisSub; k++) {
+          let isRare = Math.random() < p.rareSpawn;
+          totalGold += Math.ceil(Math.floor(2 * expScale * (isRare ? 4 : 1)) * p.gold);
+          totalXp += Math.floor(5 * expScale * (isRare ? 3 : 1));
+          let dropR = isRare ? 0.005 : 0.001;
+          if (Math.random() < dropR * p.drop * window.state.efficiency) {
+            rollOfflineItem(false, currentStage, isRare);
+          }
+          if (typeof window.rollPotionDrop === "function") {
+            let rolledPot = window.rollPotionDrop(false, isRare, true);
+            if (rolledPot) recordScrapGained(rolledPot, 1);
+          }
+        }
+      } else {
+        // Stage progress / push simulation
+        let mobDmg = 5.2 * expScale;
+        let netMobDmg = Math.max(1, Math.ceil(mobDmg * (100 / (100 + p.def))));
+        let bossDmg = 20 * expScale;
+        let bossNetDmg = Math.max(1, Math.ceil(bossDmg * (100 / (100 + p.def))));
+        let bossHits = Math.floor(ttkBoss / 2);
+        let bossDmgTaken = bossHits * bossNetDmg;
+        let bossVampHeal = window.checkArtifactTrait("vampirism")
+          ? Math.min(
+              Math.floor(playerDps * ttkBoss * 0.03),
+              Math.ceil(p.maxHp * 0.05 * (ttkBoss * (60 / p.idleAttackSpeed))),
+            )
+          : 0;
+        let bossNetDmgTaken = Math.max(0, bossDmgTaken - bossVampHeal);
+        let cumulativeStageDamage = netMobDmg * killsNeededForStage + bossNetDmgTaken;
+
+        // Perform active defeat validation
+        if (cumulativeStageDamage > p.maxHp && !window.checkArtifactTrait("second_wind")) {
+          diedOffline = true;
+          deathStage = currentStage;
+          let prestigeCount = window.playerStats.prestigeCount || 0;
+          let rollbackPercent = 0.8;
+          if (prestigeCount >= 1) {
+            rollbackPercent = Math.min(0.95, 0.9 + (prestigeCount - 1) * 0.01);
+          }
+          currentStage = Math.max(1, Math.floor(deathStage * rollbackPercent));
+          isFarming = true;
+          continue; // Restart sub-loop utilizing new safe-farming stage parameters
+        }
+
+        let timeNeededForStage = (killsNeededForStage + 1) * cycleTime;
+        let hitStageCap = currentStage >= (window.playerStats.maxStage || 1);
+
+        if (timeNeededForStage <= segmentTimeLeft && !hitStageCap) {
+          // Clear stage successfully
+          segmentTimeLeft -= timeNeededForStage;
+          elapsedSeconds += timeNeededForStage;
+          totalKills += killsNeededForStage + 1;
+
+          for (let k = 0; k < killsNeededForStage; k++) {
+            let isRare = Math.random() < p.rareSpawn;
+            totalGold += Math.ceil(Math.floor(2 * expScale * (isRare ? 4 : 1)) * p.gold);
+            totalXp += Math.floor(5 * expScale * (isRare ? 3 : 1));
+            let dropR = isRare ? 0.005 : 0.001;
+            if (Math.random() < dropR * p.drop * window.state.efficiency) {
+              rollOfflineItem(false, currentStage, isRare);
+            }
+            if (typeof window.rollPotionDrop === "function") {
+              let rolledPot = window.rollPotionDrop(false, isRare, true);
+              if (rolledPot) recordScrapGained(rolledPot, 1);
+            }
+          }
+
+          totalGold += Math.ceil(Math.floor(15 * expScale) * p.gold);
+          totalXp += Math.floor(25 * expScale);
+          if (Math.random() < 0.01 * p.drop * window.state.efficiency) {
+            if (typeof window.rollEquipmentDrop === "function") {
+              window.rollEquipmentDrop(true, currentStage, false);
+            }
+          }
+          if (typeof window.rollPotionDrop === "function") {
+            let rolledBossPot = window.rollPotionDrop(true, false, true);
+            if (rolledBossPot) recordScrapGained(rolledBossPot, 1);
+          }
+
+          let offlineDepthQ = window.getDepthQualityMultiplier(currentStage);
+          if (offlineDepthQ > 1.0) {
+            if (Math.random() < 0.0005) recordScrapGained("Ancient Core", 1);
+            if (Math.random() < 0.0004) recordScrapGained("Overlord's Sigil", 1);
+            if (Math.random() < 0.0004) recordScrapGained("Eridium Shard", 1);
+            if (Math.random() < 0.0003) recordScrapGained("Gacha Key", 1);
+          }
+
+          currentStage++;
+          stagesGained++;
+          window.playerStats.killCount = 0;
+        } else {
+          // Farm partial remaining time
+          let partialKills = Math.floor(segmentTimeLeft / cycleTime);
+          if (partialKills > 0) {
+            totalKills += partialKills;
+            let elapsedForKills = partialKills * cycleTime;
+            elapsedSeconds += elapsedForKills;
+            segmentTimeLeft -= elapsedForKills;
+
+            for (let k = 0; k < partialKills; k++) {
+              let isRare = Math.random() < p.rareSpawn;
+              totalGold += Math.ceil(Math.floor(2 * expScale * (isRare ? 4 : 1)) * p.gold);
+              totalXp += Math.floor(5 * expScale * (isRare ? 3 : 1));
+              let dropR = isRare ? 0.005 : 0.001;
+              if (Math.random() < dropR * p.drop * window.state.efficiency) {
+                rollOfflineItem(false, currentStage, isRare);
+              }
+              if (typeof window.rollPotionDrop === "function") {
+                let rolledPartialPot = window.rollPotionDrop(false, isRare, true);
+                if (rolledPartialPot) recordScrapGained(rolledPartialPot, 1);
+              }
+            }
+          } else {
+            elapsedSeconds += segmentTimeLeft;
+          }
+          segmentTimeLeft = 0;
+        }
+      }
+    }
+
+    // Decrement potion/buff timers by stepSeconds and invalidate stats
+    timersList.forEach(tName => {
+      if (window.playerStats[tName] !== undefined && window.playerStats[tName] > 0) {
+        window.playerStats[tName] = Math.max(0, window.playerStats[tName] - stepSeconds * 60);
+      }
+    });
+    window.invalidatePlayerStats();
+
+    remainingSeconds -= stepSeconds;
+  }
+
+  // Commit accumulated results to primary data structures
   window.playerStats.coins += totalGold;
-  window.playerStats.totalGoldEarned =
-    (window.playerStats.totalGoldEarned || 0) + totalGold;
-  window.playerStats.totalLifetimeKills =
-    (window.playerStats.totalLifetimeKills || 0) + totalKills;
+  window.playerStats.totalGoldEarned = (window.playerStats.totalGoldEarned || 0) + totalGold;
+  window.playerStats.totalLifetimeKills = (window.playerStats.totalLifetimeKills || 0) + totalKills;
   window.playerStats.stage = currentStage;
-  window.playerStats.maxStage = Math.max(
-    window.playerStats.maxStage || 1,
-    window.playerStats.stage,
-  );
-  window.playerStats.lifetimePeakStage = Math.max(
-    window.playerStats.lifetimePeakStage || 1,
-    window.playerStats.maxStage,
-  );
+  window.playerStats.maxStage = Math.max(window.playerStats.maxStage || 1, window.playerStats.stage);
+  window.playerStats.lifetimePeakStage = Math.max(window.playerStats.lifetimePeakStage || 1, window.playerStats.maxStage);
+
   window.gainXp(totalXp, true);
   window.invalidatePlayerStats();
 
@@ -1181,11 +1165,13 @@ window.applySaveStatePayload = function (parsed, skipOfflineGains = false) {
     window.playerStats.prestigeApproachTimer = 0;
 
     if (window.playerStats.vendingQLevel === undefined)
-      window.playerStats.vendingQLevel = 0;
-    if (window.playerStats.vendingPity === undefined)
-      window.playerStats.vendingPity = 0;
-    if (window.playerStats.shopQLevel === undefined)
-      window.playerStats.shopQLevel = 0;
+          window.playerStats.vendingQLevel = 0;
+        if (window.playerStats.vendingPity === undefined)
+          window.playerStats.vendingPity = 0;
+        if (window.playerStats.glimmeringPity === undefined)
+          window.playerStats.glimmeringPity = 0;
+        if (window.playerStats.shopQLevel === undefined)
+          window.playerStats.shopQLevel = 0;
     if (window.playerStats.globalQLevel === undefined)
       window.playerStats.globalQLevel = 0;
     if (window.playerStats.dailyRerollsDone === undefined)
@@ -1271,22 +1257,22 @@ window.applySaveStatePayload = function (parsed, skipOfflineGains = false) {
 
       let keyTypes = ["equip", "gold", "mat"];
       keyTypes.forEach((k) => {
-        let count = k + "Keys";
-        let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
-        if (window.playerStats[count] < 3) {
-          let keyTime = window.playerStats[time] || now;
-          let msSinceNextKey = now - keyTime;
-          if (msSinceNextKey >= 0) {
-            let keysEarned = 1 + Math.floor(msSinceNextKey / 21600000);
-            window.playerStats[count] = Math.min(
-              3,
-              window.playerStats[count] + keysEarned,
-            );
-            window.playerStats[time] =
-              now + (21600000 - (msSinceNextKey % 21600000));
-          }
-        }
-      });
+              let count = k + "Keys";
+              let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
+              if (window.playerStats[count] < 3) {
+                let keyTime = window.playerStats[time] || now;
+                let msSinceNextKey = now - keyTime;
+                if (msSinceNextKey >= 0) {
+                  let keysEarned = 1 + Math.floor(msSinceNextKey / 43200000);
+                  window.playerStats[count] = Math.min(
+                    3,
+                    window.playerStats[count] + keysEarned,
+                  );
+                  window.playerStats[time] =
+                    now + (43200000 - (msSinceNextKey % 43200000));
+                }
+              }
+            });
       if (!skipOfflineGains && typeof window.applyOfflineGains === "function")
         window.applyOfflineGains(offlineMs);
     }
@@ -1978,26 +1964,26 @@ function update() {
   }
 
   let keyTypes = ["equip", "gold", "mat"];
-  keyTypes.forEach((k) => {
-    let count = k + "Keys";
-    let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
-    if (window.playerStats[count] < 3) {
-      if (!window.playerStats[time]) {
-        window.playerStats[time] = now + 21600000; // 6 Hours
-      } else if (now >= window.playerStats[time]) {
-        let msOver = now - window.playerStats[time];
-        let keysEarned = 1 + Math.floor(msOver / 21600000);
-        window.playerStats[count] = Math.min(
-          3,
-          window.playerStats[count] + keysEarned,
-        );
-        window.playerStats[time] =
-          window.playerStats[count] < 3
-            ? now + (21600000 - (msOver % 21600000))
-            : 0;
+    keyTypes.forEach((k) => {
+      let count = k + "Keys";
+      let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
+      if (window.playerStats[count] < 3) {
+        if (!window.playerStats[time]) {
+          window.playerStats[time] = now + 43200000; // 12 Hours
+        } else if (now >= window.playerStats[time]) {
+          let msOver = now - window.playerStats[time];
+          let keysEarned = 1 + Math.floor(msOver / 43200000);
+          window.playerStats[count] = Math.min(
+            3,
+            window.playerStats[count] + keysEarned,
+          );
+          window.playerStats[time] =
+            window.playerStats[count] < 3
+              ? now + (43200000 - (msOver % 43200000))
+              : 0;
+        }
       }
-    }
-  });
+    });
 
   // Synchronize dynamic keys, timers, and shop refreshes at a throttled interval (twice a second) to prevent layout thrashing
   if (window.logicClock % 30 === 0) {
@@ -5027,8 +5013,8 @@ window.enterDungeon = function (type) {
     function () {
       window.saveCurrentActivityPeak();
       window.playerStats[countField]--;
-      if (window.playerStats[countField] === 2)
-        window.playerStats[timeField] = Date.now() + 21600000; // 6 Hours
+            if (window.playerStats[countField] === 2)
+              window.playerStats[timeField] = Date.now() + 43200000; // 12 Hours
 
       window.playerStats.isDungeonMode = true;
       window.playerStats.isCrucibleMode = false;
@@ -5173,29 +5159,36 @@ window.rollEquipmentDrop = function (
   }
 
   let chosenType = allowArtifact
-    ? "artifact"
-    : types[Math.floor(Math.random() * types.length)];
-  let statLinesCount = 0;
-  let luckMultiplier = p.qly;
-  let roll = Math.random() * 100;
+              ? "artifact"
+              : types[Math.floor(Math.random() * types.length)];
+            let statLinesCount = 0;
 
-  let chance5 = luckMultiplier >= 2.0 ? 0.02 * luckMultiplier : 0;
-  let chance4 = luckMultiplier >= 1.5 ? 0.16 * luckMultiplier : 0;
+            let probs = window.calculateRarityProbabilities(p.qly, false);
 
-  if (minStars === 1) {
-    if (roll < chance5) statLinesCount = 5;
-    else if (roll < chance5 + chance4) statLinesCount = 4;
-    else if (roll < 0.8 * luckMultiplier) statLinesCount = 3;
-    else if (roll < 4.0 * luckMultiplier) statLinesCount = 2;
-    else statLinesCount = 1;
-  } else {
-    if (roll < chance5) statLinesCount = 5;
-    else if (roll < chance5 + chance4) statLinesCount = 4;
-    else if (roll < 0.8 * luckMultiplier) statLinesCount = 3;
-    else if (roll < 4.0 * luckMultiplier) statLinesCount = 2;
-    else if (roll < 15.0 * luckMultiplier) statLinesCount = 1;
-    else statLinesCount = 0;
-  }
+            if (minStars > 0) {
+              // Slice the distribution and re-normalize the remainder
+              let subset = Array(6).fill(0);
+              for (let i = minStars; i <= 5; i++) {
+                subset[i] = probs[i];
+              }
+              let subSum = subset.reduce((sum, w) => sum + w, 0);
+              if (subSum > 0) {
+                probs = subset.map(w => (w / subSum) * 100);
+              } else {
+                probs = Array(6).fill(0);
+                probs[minStars] = 100; // Hard fallback guarantee
+              }
+            }
+
+            let roll = Math.random() * 100;
+            let cumulative = 0;
+
+            if (roll < (cumulative += probs[5])) statLinesCount = 5;
+            else if (roll < (cumulative += probs[4])) statLinesCount = 4;
+            else if (roll < (cumulative += probs[3])) statLinesCount = 3;
+            else if (roll < (cumulative += probs[2])) statLinesCount = 2;
+            else if (roll < (cumulative += probs[1])) statLinesCount = 1;
+            else statLinesCount = 0;
 
   let activeStage = window.playerStats.stage;
   if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
