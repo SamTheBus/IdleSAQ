@@ -65,43 +65,44 @@ window.saveGame = function () {
       });
     }
     // Scan gacha rolls history
-        if (window.playerStats && window.playerStats.gachaHistory) {
-          window.playerStats.gachaHistory.forEach((item) => {
-            if (item) activeIds.add(item.id);
-          });
+    if (window.playerStats && window.playerStats.gachaHistory) {
+      window.playerStats.gachaHistory.forEach((item) => {
+        if (item) activeIds.add(item.id);
+      });
+    }
+    // Scan active gacha showcase items to prevent garbage collection
+    if (window.gachaShowcaseItems) {
+      window.gachaShowcaseItems.forEach((item) => {
+        if (item) activeIds.add(item.id);
+      });
+    }
+    // Scan global recent pulls to protect their item IDs from garbage collection
+    if (window.lastGachaRecentPullsData) {
+      window.lastGachaRecentPullsData.forEach((pull) => {
+        if (pull && pull.item) activeIds.add(pull.item.id);
+      });
+    }
+    // Scan inspected player slots to prevent garbage collection while inspecting
+    if (window.inspectedSlots) {
+      for (let k in window.inspectedSlots) {
+        if (window.inspectedSlots[k])
+          activeIds.add(window.inspectedSlots[k].id);
+      }
+    }
+    // Scan logs history to preserve tooltips for item links in chat/logs
+    if (window.logsHistory) {
+      window.logsHistory.forEach((logLine) => {
+        let match;
+        let regex = /showLogTooltip\(event,\s*(\d+)\)/g;
+        while ((match = regex.exec(logLine)) !== null) {
+          activeIds.add(parseInt(match[1], 10));
         }
-        // Scan active gacha showcase items to prevent garbage collection
-        if (window.gachaShowcaseItems) {
-          window.gachaShowcaseItems.forEach((item) => {
-            if (item) activeIds.add(item.id);
-          });
+        let regexInv = /showInventoryTooltip\(event,\s*(\d+)\)/g;
+        while ((match = regexInv.exec(logLine)) !== null) {
+          activeIds.add(parseInt(match[1], 10));
         }
-        // Scan global recent pulls to protect their item IDs from garbage collection
-        if (window.lastGachaRecentPullsData) {
-          window.lastGachaRecentPullsData.forEach((pull) => {
-            if (pull && pull.item) activeIds.add(pull.item.id);
-          });
-        }
-        // Scan inspected player slots to prevent garbage collection while inspecting
-        if (window.inspectedSlots) {
-          for (let k in window.inspectedSlots) {
-            if (window.inspectedSlots[k]) activeIds.add(window.inspectedSlots[k].id);
-          }
-        }
-        // Scan logs history to preserve tooltips for item links in chat/logs
-        if (window.logsHistory) {
-          window.logsHistory.forEach((logLine) => {
-            let match;
-            let regex = /showLogTooltip\(event,\s*(\d+)\)/g;
-            while ((match = regex.exec(logLine)) !== null) {
-              activeIds.add(parseInt(match[1], 10));
-            }
-            let regexInv = /showInventoryTooltip\(event,\s*(\d+)\)/g;
-            while ((match = regexInv.exec(logLine)) !== null) {
-              activeIds.add(parseInt(match[1], 10));
-            }
-          });
-        }
+      });
+    }
 
     // Purge orphaned items
     if (window.frozenItemDb) {
@@ -580,7 +581,7 @@ window.applyOfflineGains = function (offlineMs) {
     "dropPotionTimer",
     "qlyPotionTimer",
     "frenzyTimer",
-    "adrenalineTimer"
+    "adrenalineTimer",
   ];
 
   // Segmented progress chunking loop
@@ -589,7 +590,7 @@ window.applyOfflineGains = function (offlineMs) {
 
     // Identify next scheduled potion timer expiry during this segment
     let nextExpirySec = chunkSeconds;
-    timersList.forEach(tName => {
+    timersList.forEach((tName) => {
       let tVal = window.playerStats[tName];
       if (tVal > 0) {
         let tSec = tVal / 60;
@@ -606,7 +607,10 @@ window.applyOfflineGains = function (offlineMs) {
       // Fetch fresh, live stats relative to active potion/buff levels
       let p = window.resolvePlayerStats();
       let effMultiplier = 1 + p.critChance * (p.critDamage - 1);
-      let playerDps = Math.max(1, p.atk * effMultiplier * (60 / p.idleAttackSpeed));
+      let playerDps = Math.max(
+        1,
+        p.atk * effMultiplier * (60 / p.idleAttackSpeed),
+      );
 
       // Calculate localized stage parameters
       let growthRate = 1.045 + (currentStage * 0.04) / (currentStage + 200);
@@ -614,7 +618,8 @@ window.applyOfflineGains = function (offlineMs) {
 
       let mobHp = Math.floor(25 * expScale * (1 + currentStage * 0.06));
       let bossHp = Math.floor(120 * expScale * (1 + currentStage * 0.06));
-      let blendedMobHp = (1 - p.rareSpawn) * mobHp + p.rareSpawn * (2.5 * mobHp);
+      let blendedMobHp =
+        (1 - p.rareSpawn) * mobHp + p.rareSpawn * (2.5 * mobHp);
       let blendedMobDef = 0;
 
       let playerDpsMitigatedMob = playerDps * (100 / (100 + blendedMobDef));
@@ -622,7 +627,10 @@ window.applyOfflineGains = function (offlineMs) {
 
       let ttkMob = blendedMobHp / Math.max(1, playerDpsMitigatedMob);
       let ttkBoss = bossHp / Math.max(1, playerDpsMitigatedBoss);
-      let cycleTime = Math.max(0.5, Math.min(300, (5 * ttkMob + ttkBoss) / 6 + 10.0));
+      let cycleTime = Math.max(
+        0.5,
+        Math.min(300, (5 * ttkMob + ttkBoss) / 6 + 10.0),
+      );
 
       let targetsRequired = window.playerStats.targetsRequired || 5;
       let killsNeededForStage = targetsRequired - window.playerStats.killCount;
@@ -642,7 +650,9 @@ window.applyOfflineGains = function (offlineMs) {
 
         for (let k = 0; k < killsInThisSub; k++) {
           let isRare = Math.random() < p.rareSpawn;
-          totalGold += Math.ceil(Math.floor(2 * expScale * (isRare ? 4 : 1)) * p.gold);
+          totalGold += Math.ceil(
+            Math.floor(2 * expScale * (isRare ? 4 : 1)) * p.gold,
+          );
           totalXp += Math.floor(5 * expScale * (isRare ? 3 : 1));
           let dropR = isRare ? 0.005 : 0.001;
           if (Math.random() < dropR * p.drop * window.state.efficiency) {
@@ -658,7 +668,10 @@ window.applyOfflineGains = function (offlineMs) {
         let mobDmg = 5.2 * expScale;
         let netMobDmg = Math.max(1, Math.ceil(mobDmg * (100 / (100 + p.def))));
         let bossDmg = 20 * expScale;
-        let bossNetDmg = Math.max(1, Math.ceil(bossDmg * (100 / (100 + p.def))));
+        let bossNetDmg = Math.max(
+          1,
+          Math.ceil(bossDmg * (100 / (100 + p.def))),
+        );
         let bossHits = Math.floor(ttkBoss / 2);
         let bossDmgTaken = bossHits * bossNetDmg;
         let bossVampHeal = window.checkArtifactTrait("vampirism")
@@ -668,10 +681,14 @@ window.applyOfflineGains = function (offlineMs) {
             )
           : 0;
         let bossNetDmgTaken = Math.max(0, bossDmgTaken - bossVampHeal);
-        let cumulativeStageDamage = netMobDmg * killsNeededForStage + bossNetDmgTaken;
+        let cumulativeStageDamage =
+          netMobDmg * killsNeededForStage + bossNetDmgTaken;
 
         // Perform active defeat validation
-        if (cumulativeStageDamage > p.maxHp && !window.checkArtifactTrait("second_wind")) {
+        if (
+          cumulativeStageDamage > p.maxHp &&
+          !window.checkArtifactTrait("second_wind")
+        ) {
           diedOffline = true;
           deathStage = currentStage;
           let prestigeCount = window.playerStats.prestigeCount || 0;
@@ -695,7 +712,9 @@ window.applyOfflineGains = function (offlineMs) {
 
           for (let k = 0; k < killsNeededForStage; k++) {
             let isRare = Math.random() < p.rareSpawn;
-            totalGold += Math.ceil(Math.floor(2 * expScale * (isRare ? 4 : 1)) * p.gold);
+            totalGold += Math.ceil(
+              Math.floor(2 * expScale * (isRare ? 4 : 1)) * p.gold,
+            );
             totalXp += Math.floor(5 * expScale * (isRare ? 3 : 1));
             let dropR = isRare ? 0.005 : 0.001;
             if (Math.random() < dropR * p.drop * window.state.efficiency) {
@@ -722,7 +741,8 @@ window.applyOfflineGains = function (offlineMs) {
           let offlineDepthQ = window.getDepthQualityMultiplier(currentStage);
           if (offlineDepthQ > 1.0) {
             if (Math.random() < 0.0005) recordScrapGained("Ancient Core", 1);
-            if (Math.random() < 0.0004) recordScrapGained("Overlord's Sigil", 1);
+            if (Math.random() < 0.0004)
+              recordScrapGained("Overlord's Sigil", 1);
             if (Math.random() < 0.0004) recordScrapGained("Eridium Shard", 1);
             if (Math.random() < 0.0003) recordScrapGained("Gacha Key", 1);
           }
@@ -741,14 +761,20 @@ window.applyOfflineGains = function (offlineMs) {
 
             for (let k = 0; k < partialKills; k++) {
               let isRare = Math.random() < p.rareSpawn;
-              totalGold += Math.ceil(Math.floor(2 * expScale * (isRare ? 4 : 1)) * p.gold);
+              totalGold += Math.ceil(
+                Math.floor(2 * expScale * (isRare ? 4 : 1)) * p.gold,
+              );
               totalXp += Math.floor(5 * expScale * (isRare ? 3 : 1));
               let dropR = isRare ? 0.005 : 0.001;
               if (Math.random() < dropR * p.drop * window.state.efficiency) {
                 rollOfflineItem(false, currentStage, isRare);
               }
               if (typeof window.rollPotionDrop === "function") {
-                let rolledPartialPot = window.rollPotionDrop(false, isRare, true);
+                let rolledPartialPot = window.rollPotionDrop(
+                  false,
+                  isRare,
+                  true,
+                );
                 if (rolledPartialPot) recordScrapGained(rolledPartialPot, 1);
               }
             }
@@ -761,9 +787,15 @@ window.applyOfflineGains = function (offlineMs) {
     }
 
     // Decrement potion/buff timers by stepSeconds and invalidate stats
-    timersList.forEach(tName => {
-      if (window.playerStats[tName] !== undefined && window.playerStats[tName] > 0) {
-        window.playerStats[tName] = Math.max(0, window.playerStats[tName] - stepSeconds * 60);
+    timersList.forEach((tName) => {
+      if (
+        window.playerStats[tName] !== undefined &&
+        window.playerStats[tName] > 0
+      ) {
+        window.playerStats[tName] = Math.max(
+          0,
+          window.playerStats[tName] - stepSeconds * 60,
+        );
       }
     });
     window.invalidatePlayerStats();
@@ -773,11 +805,19 @@ window.applyOfflineGains = function (offlineMs) {
 
   // Commit accumulated results to primary data structures
   window.playerStats.coins += totalGold;
-  window.playerStats.totalGoldEarned = (window.playerStats.totalGoldEarned || 0) + totalGold;
-  window.playerStats.totalLifetimeKills = (window.playerStats.totalLifetimeKills || 0) + totalKills;
+  window.playerStats.totalGoldEarned =
+    (window.playerStats.totalGoldEarned || 0) + totalGold;
+  window.playerStats.totalLifetimeKills =
+    (window.playerStats.totalLifetimeKills || 0) + totalKills;
   window.playerStats.stage = currentStage;
-  window.playerStats.maxStage = Math.max(window.playerStats.maxStage || 1, window.playerStats.stage);
-  window.playerStats.lifetimePeakStage = Math.max(window.playerStats.lifetimePeakStage || 1, window.playerStats.maxStage);
+  window.playerStats.maxStage = Math.max(
+    window.playerStats.maxStage || 1,
+    window.playerStats.stage,
+  );
+  window.playerStats.lifetimePeakStage = Math.max(
+    window.playerStats.lifetimePeakStage || 1,
+    window.playerStats.maxStage,
+  );
 
   window.gainXp(totalXp, true);
   window.invalidatePlayerStats();
@@ -801,26 +841,148 @@ window.applyOfflineGains = function (offlineMs) {
 
 window.applySaveStatePayload = function (parsed, skipOfflineGains = false) {
   try {
-    window.playerStats = { ...window.playerStats, ...parsed.playerStats };
-    window.equippedSlots = parsed.equippedSlots || window.equippedSlots;
+    // 1. Recursive Schema Validation Helpers
+    const isObject = (item) =>
+      item && typeof item === "object" && !Array.isArray(item);
+
+    const deepSanitize = (defaultObj, savedObj) => {
+      if (savedObj === undefined || savedObj === null) {
+        return JSON.parse(JSON.stringify(defaultObj));
+      }
+      if (!isObject(defaultObj)) {
+        if (typeof defaultObj === "number") {
+          let parsedNum = Number(savedObj);
+          return isNaN(parsedNum) || savedObj === null ? defaultObj : parsedNum;
+        }
+        return savedObj;
+      }
+      let result = {};
+      for (let key in defaultObj) {
+        if (Object.prototype.hasOwnProperty.call(defaultObj, key)) {
+          result[key] = deepSanitize(defaultObj[key], savedObj[key]);
+        }
+      }
+      // Preserve dynamic properties from savedObj that aren't in defaultObj
+      for (let key in savedObj) {
+        if (
+          Object.prototype.hasOwnProperty.call(savedObj, key) &&
+          result[key] === undefined
+        ) {
+          let val = savedObj[key];
+          if (typeof val === "number") {
+            result[key] = isNaN(val) ? 0 : val;
+          } else {
+            result[key] = val;
+          }
+        }
+      }
+      return result;
+    };
+
+    const sanitizeItem = (item) => {
+      if (!item || typeof item !== "object") return null;
+      const numericKeys = [
+        "id",
+        "atk",
+        "maxHp",
+        "def",
+        "moveSpeed",
+        "critChance",
+        "critDamage",
+        "block",
+        "parry",
+        "dropRate",
+        "quality",
+        "goldMulti",
+        "rareSpawn",
+        "fairySpawn",
+        "activeAttackSpeed",
+        "idleAttackSpeed",
+        "baseAtk",
+        "baseMaxHp",
+        "baseDef",
+        "baseMoveSpeed",
+        "baseBlock",
+        "baseParry",
+        "baseInt",
+        "bonusAtk",
+        "bonusMaxHp",
+        "bonusDef",
+        "bonusMoveSpeed",
+        "bonusCritChance",
+        "bonusCritDamage",
+        "bonusBlock",
+        "bonusParry",
+        "bonusActiveSpeed",
+        "bonusIdleSpeed",
+        "bonusStr",
+        "bonusDex",
+        "bonusInt",
+        "str",
+        "dex",
+        "int",
+        "temperLevel",
+        "stageLevel",
+      ];
+      numericKeys.forEach((k) => {
+        if (item[k] !== undefined) {
+          let parsedVal = Number(item[k]);
+          item[k] = isNaN(parsedVal) ? 0 : parsedVal;
+        }
+      });
+      if (item.enchantments && typeof item.enchantments === "object") {
+        for (let k in item.enchantments) {
+          if (Object.prototype.hasOwnProperty.call(item.enchantments, k)) {
+            let val = Number(item.enchantments[k]);
+            item.enchantments[k] = isNaN(val) ? 0 : val;
+          }
+        }
+      }
+      return item;
+    };
+
+    // 2. Deep Sanitize Player Stats
+    const defaultStats = JSON.parse(JSON.stringify(window.playerStats || {}));
+    window.playerStats = deepSanitize(defaultStats, parsed.playerStats);
+
+    // 3. Deep Sanitize Equipped Slots
+    let savedEquipped = parsed.equippedSlots || {};
+    for (let slot in window.equippedSlots) {
+      if (savedEquipped[slot]) {
+        window.equippedSlots[slot] = sanitizeItem(savedEquipped[slot]);
+      } else {
+        window.equippedSlots[slot] = null;
+      }
+    }
 
     if (window.playerStats.autoSalvageThreshold === undefined) {
       window.playerStats.autoSalvageThreshold = -1;
     }
-    window.inventory = parsed.inventory || {
-      EQUIP: [],
-      ARTIFACT: [],
+
+    // 4. Deep Sanitize Inventory Sacks
+    let savedInventory = parsed.inventory || {};
+    window.inventory = {
+      EQUIP: Array.isArray(savedInventory.EQUIP)
+        ? savedInventory.EQUIP.map(sanitizeItem).filter(Boolean)
+        : [],
+      ARTIFACT: Array.isArray(savedInventory.ARTIFACT)
+        ? savedInventory.ARTIFACT.map(sanitizeItem).filter(Boolean)
+        : [],
       ETC: {},
       USE: {},
     };
-    if (!window.inventory.ARTIFACT) {
-      window.inventory.ARTIFACT = [];
+
+    if (savedInventory.ETC && typeof savedInventory.ETC === "object") {
+      for (let k in savedInventory.ETC) {
+        let num = Number(savedInventory.ETC[k]);
+        window.inventory.ETC[k] = isNaN(num) ? 0 : num;
+      }
     }
-    if (!window.inventory.ETC) {
-      window.inventory.ETC = {};
-    }
-    if (!window.inventory.USE) {
-      window.inventory.USE = {};
+    if (savedInventory.USE && typeof savedInventory.USE === "object") {
+      for (let k in savedInventory.USE) {
+        let num = Number(savedInventory.USE[k]);
+        window.inventory.USE[k] = isNaN(num) ? 0 : num;
+      }
     }
 
     const useItemsList = [
@@ -1165,13 +1327,13 @@ window.applySaveStatePayload = function (parsed, skipOfflineGains = false) {
     window.playerStats.prestigeApproachTimer = 0;
 
     if (window.playerStats.vendingQLevel === undefined)
-          window.playerStats.vendingQLevel = 0;
-        if (window.playerStats.vendingPity === undefined)
-          window.playerStats.vendingPity = 0;
-        if (window.playerStats.glimmeringPity === undefined)
-          window.playerStats.glimmeringPity = 0;
-        if (window.playerStats.shopQLevel === undefined)
-          window.playerStats.shopQLevel = 0;
+      window.playerStats.vendingQLevel = 0;
+    if (window.playerStats.vendingPity === undefined)
+      window.playerStats.vendingPity = 0;
+    if (window.playerStats.glimmeringPity === undefined)
+      window.playerStats.glimmeringPity = 0;
+    if (window.playerStats.shopQLevel === undefined)
+      window.playerStats.shopQLevel = 0;
     if (window.playerStats.globalQLevel === undefined)
       window.playerStats.globalQLevel = 0;
     if (window.playerStats.dailyRerollsDone === undefined)
@@ -1257,22 +1419,22 @@ window.applySaveStatePayload = function (parsed, skipOfflineGains = false) {
 
       let keyTypes = ["equip", "gold", "mat"];
       keyTypes.forEach((k) => {
-              let count = k + "Keys";
-              let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
-              if (window.playerStats[count] < 3) {
-                let keyTime = window.playerStats[time] || now;
-                let msSinceNextKey = now - keyTime;
-                if (msSinceNextKey >= 0) {
-                  let keysEarned = 1 + Math.floor(msSinceNextKey / 43200000);
-                  window.playerStats[count] = Math.min(
-                    3,
-                    window.playerStats[count] + keysEarned,
-                  );
-                  window.playerStats[time] =
-                    now + (43200000 - (msSinceNextKey % 43200000));
-                }
-              }
-            });
+        let count = k + "Keys";
+        let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
+        if (window.playerStats[count] < 3) {
+          let keyTime = window.playerStats[time] || now;
+          let msSinceNextKey = now - keyTime;
+          if (msSinceNextKey >= 0) {
+            let keysEarned = 1 + Math.floor(msSinceNextKey / 43200000);
+            window.playerStats[count] = Math.min(
+              3,
+              window.playerStats[count] + keysEarned,
+            );
+            window.playerStats[time] =
+              now + (43200000 - (msSinceNextKey % 43200000));
+          }
+        }
+      });
       if (!skipOfflineGains && typeof window.applyOfflineGains === "function")
         window.applyOfflineGains(offlineMs);
     }
@@ -1964,26 +2126,26 @@ function update() {
   }
 
   let keyTypes = ["equip", "gold", "mat"];
-    keyTypes.forEach((k) => {
-      let count = k + "Keys";
-      let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
-      if (window.playerStats[count] < 3) {
-        if (!window.playerStats[time]) {
-          window.playerStats[time] = now + 43200000; // 12 Hours
-        } else if (now >= window.playerStats[time]) {
-          let msOver = now - window.playerStats[time];
-          let keysEarned = 1 + Math.floor(msOver / 43200000);
-          window.playerStats[count] = Math.min(
-            3,
-            window.playerStats[count] + keysEarned,
-          );
-          window.playerStats[time] =
-            window.playerStats[count] < 3
-              ? now + (43200000 - (msOver % 43200000))
-              : 0;
-        }
+  keyTypes.forEach((k) => {
+    let count = k + "Keys";
+    let time = "next" + k.charAt(0).toUpperCase() + k.slice(1) + "KeyTime";
+    if (window.playerStats[count] < 3) {
+      if (!window.playerStats[time]) {
+        window.playerStats[time] = now + 43200000; // 12 Hours
+      } else if (now >= window.playerStats[time]) {
+        let msOver = now - window.playerStats[time];
+        let keysEarned = 1 + Math.floor(msOver / 43200000);
+        window.playerStats[count] = Math.min(
+          3,
+          window.playerStats[count] + keysEarned,
+        );
+        window.playerStats[time] =
+          window.playerStats[count] < 3
+            ? now + (43200000 - (msOver % 43200000))
+            : 0;
       }
-    });
+    }
+  });
 
   // Synchronize dynamic keys, timers, and shop refreshes at a throttled interval (twice a second) to prevent layout thrashing
   if (window.logicClock % 30 === 0) {
@@ -4021,6 +4183,7 @@ window.handleMobDeath = function () {
   } else if (isBoss) {
     if (!window.playerStats.isUberBoss) {
       let oldMax = window.playerStats.maxStage;
+      let oldPeak = window.playerStats.lifetimePeakStage || 1; // Capture original all-time peak stage before increments
       window.playerStats.stage++;
       window.playerStats.maxStage = Math.max(
         window.playerStats.maxStage || 1,
@@ -4036,7 +4199,12 @@ window.handleMobDeath = function () {
         );
 
       // First-time milestone clear reward (Stage 10, 20, 30...)
-      if (window.playerStats.maxStage > oldMax && oldMax % 10 === 0) {
+      // Enforce peak checking to prevent players from farming milestone drops repeatedly after prestiging
+      if (
+        window.playerStats.maxStage > oldMax &&
+        oldMax % 10 === 0 &&
+        window.playerStats.maxStage > oldPeak
+      ) {
         if (typeof window.pushLog === "function")
           window.pushLog(
             `<strong style="color:#f1c40f;">🏆 [MILESTONE] Stage ${oldMax} Beaten! Guaranteed random equip dropped!</strong>`,
@@ -4087,16 +4255,16 @@ window.processEnemySpawn = function () {
     let growthRate = 1.06 + cWave * 0.00015;
     let scale = Math.pow(growthRate, cWave);
     if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-          let hp = Math.floor(120 * scale * (1 + cWave * 0.06));
-          window.mob = {
-            x: 750,
-            y: 140,
-            w: 45,
-            h: 75,
-            type: "dungeon_boss",
-            isCrucible: true,
-            isRare: false,
-            hp: hp,
+      let hp = Math.floor(120 * scale * (1 + cWave * 0.06));
+      window.mob = {
+        x: 750,
+        y: 140,
+        w: 45,
+        h: 75,
+        type: "dungeon_boss",
+        isCrucible: true,
+        isRare: false,
+        hp: hp,
         maxHp: hp,
         damage: Math.floor(20 * scale),
         def: 0,
@@ -4106,13 +4274,13 @@ window.processEnemySpawn = function () {
         attackTimer: 100,
       };
     } else {
-          let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
-          let chosenVisual =
-            cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
-          let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
+      let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
+      let chosenVisual =
+        cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
+      let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
 
-          let hp = Math.floor(25 * scale * (1 + cWave * 0.06));
-          window.mob = {
+      let hp = Math.floor(25 * scale * (1 + cWave * 0.06));
+      window.mob = {
         x: 750,
         y: isFlying ? 145 : 195,
         w: 25,
@@ -4147,18 +4315,21 @@ window.processEnemySpawn = function () {
     let growthRate = 1.05 + dStage * 0.00025;
     scale = Math.pow(growthRate, dStage);
   } else {
-      // Smooth out post-wall base acceleration to prevent runaway super-exponential cliffs
-      let growthRate = 1.045 + (activeStage * 0.04) / (activeStage + 200);
-      scale = Math.pow(growthRate, activeStage);
-    }
+    // Smooth out post-wall base acceleration to prevent runaway super-exponential cliffs
+    let growthRate = 1.045 + (activeStage * 0.04) / (activeStage + 200);
+    scale = Math.pow(growthRate, activeStage);
+  }
 
   if (window.playerStats.isDungeonMode) {
-      let hpScale = window.playerStats.currentDungeon === "gold" ? 1.5 : 1;
-      let dStage = window.playerStats.currentDungeonStage[window.playerStats.currentDungeon] || 1;
+    let hpScale = window.playerStats.currentDungeon === "gold" ? 1.5 : 1;
+    let dStage =
+      window.playerStats.currentDungeonStage[
+        window.playerStats.currentDungeon
+      ] || 1;
 
-      if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-        let hp = Math.floor(100 * scale * hpScale * (1 + dStage * 0.06));
-        window.mob = {
+    if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
+      let hp = Math.floor(100 * scale * hpScale * (1 + dStage * 0.06));
+      window.mob = {
         x: 750,
         y: 140,
         w: 50,
@@ -4195,15 +4366,15 @@ window.processEnemySpawn = function () {
       ].includes(chosenVisual);
 
       let hp = Math.floor(25 * scale * hpScale * (1 + dStage * 0.06));
-            window.mob = {
-              x: 750,
-              y: isFlying ? 150 : 195,
-              w: 25,
-              h: 40,
-              type: "mob",
-              visualType: chosenVisual,
-              isRare: false,
-              hp: hp,
+      window.mob = {
+        x: 750,
+        y: isFlying ? 150 : 195,
+        w: 25,
+        h: 40,
+        type: "mob",
+        visualType: chosenVisual,
+        isRare: false,
+        hp: hp,
         maxHp: Math.floor(hp),
         damage: Math.floor(5.2 * scale),
         def: 0,
@@ -4238,14 +4409,16 @@ window.processEnemySpawn = function () {
         }
 
         let riftLvl = window.playerStats.activeRiftLevel || 1;
-                let equivalentStage = 50 + riftLvl * 10;
-                let riftGrowthRate =
-                  1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
-                let riftScale = Math.pow(riftGrowthRate, equivalentStage);
+        let equivalentStage = 50 + riftLvl * 10;
+        let riftGrowthRate =
+          1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
+        let riftScale = Math.pow(riftGrowthRate, equivalentStage);
 
-                let hp = Math.floor(hpMult * (100 * riftScale) * (1 + equivalentStage * 0.06));
-                let dmg = Math.floor(20 * riftScale * dmgMult);
-                window.mob = {
+        let hp = Math.floor(
+          hpMult * (100 * riftScale) * (1 + equivalentStage * 0.06),
+        );
+        let dmg = Math.floor(20 * riftScale * dmgMult);
+        window.mob = {
           x: 750,
           y: 115,
           w: 60,
@@ -4265,8 +4438,8 @@ window.processEnemySpawn = function () {
           `<span style='color:#9b59b6; font-weight:bold;'>[RIFT HUNT]</span> ${logText}`,
         );
       } else {
-              let baseBossHp = Math.floor(120 * scale * (1 + activeStage * 0.06));
-              window.mob = {
+        let baseBossHp = Math.floor(120 * scale * (1 + activeStage * 0.06));
+        window.mob = {
           x: 750,
           y: 150,
           w: 40,
@@ -4317,7 +4490,7 @@ window.processEnemySpawn = function () {
         baseSpd = Math.round(baseSpd * 1.33);
 
       let hp = Math.floor(25 * scale * hpMult * (1 + activeStage * 0.06));
-            window.mob = {
+      window.mob = {
         x: 750,
         y: isMelee ? 195 : 210,
         w: isMelee ? 25 : 30,
@@ -4569,6 +4742,141 @@ window.respawnHero = function () {
 window.useItem = function (itemName) {
   if (!window.inventory.USE[itemName] || window.inventory.USE[itemName] <= 0)
     return;
+
+  // Handle Weekly Clan Supply Crate locally
+  if (itemName === "Weekly Clan Supply Crate") {
+    window.inventory.USE[itemName]--;
+    if (window.inventory.USE[itemName] === 0) {
+      delete window.inventory.USE[itemName];
+    }
+
+    window.SoundManager.play("revive");
+    window.setPauseState(true);
+
+    let depotLevel =
+      (window.playerStats.clanSkills &&
+        window.playerStats.clanSkills.clan_supply_depot) ||
+      0;
+    let stage = window.playerStats.stage || 1;
+    let stgScale = Math.max(1, Math.floor((stage - 1) / 10) + 1);
+    let itemLvlMultiplier = Math.pow(1.08, stage);
+
+    // Scaling yields based on Depot Level research
+    let baseGold = Math.floor(
+      50000 * itemLvlMultiplier * (1 + depotLevel * 0.2),
+    );
+    let baseSouls = Math.floor(100 * (1 + depotLevel * 0.1));
+    let baseKeys = 1;
+
+    window.playerStats.coins += baseGold;
+    window.playerStats.totalGoldEarned =
+      (window.playerStats.totalGoldEarned || 0) + baseGold;
+    window.addEtcDrop("Monster Soul", baseSouls);
+    window.addEtcDrop("Gacha Key", baseKeys);
+
+    let premiumDrops = [];
+    if (depotLevel >= 5) {
+      window.addEtcDrop("Catalyst Core", 1);
+      premiumDrops.push(`<span style="color:#2ecc71;">+1 Catalyst Core</span>`);
+    }
+    if (depotLevel >= 10) {
+      window.addEtcDrop("Ancient Core", 1);
+      premiumDrops.push(`<span style="color:#e74c3c;">+1 Ancient Core</span>`);
+    }
+    if (depotLevel >= 15) {
+      window.addEtcDrop("Astral Essence", 1);
+      premiumDrops.push(
+        `<span style="color:#9b59b6;">+1 Astral Essence</span>`,
+      );
+    }
+    if (depotLevel >= 20) {
+      window.addEtcDrop("Eridium Shard", 2);
+      premiumDrops.push(
+        `<span style="color:#8e44ad;">+2 Eridium Shards</span>`,
+      );
+    }
+    if (depotLevel >= 25) {
+      window.addEtcDrop("Glimmering Gachapon Key", 1);
+      premiumDrops.push(
+        `<span style="color:#00d2ff;">+1 Glimmering Key</span>`,
+      );
+    }
+    if (depotLevel >= 30) {
+      let types = [
+        "weapon",
+        "subweapon",
+        "helmet",
+        "chest",
+        "leggings",
+        "overall",
+        "boots",
+      ];
+      let chosenType = types[Math.floor(Math.random() * types.length)];
+      let rolledStars = Math.random() < 0.25 ? 5 : 4;
+      let rewardItem = window.createItemObject(
+        chosenType,
+        rolledStars,
+        stgScale,
+        rolledStars,
+      );
+      window.inventory.EQUIP.push(rewardItem);
+      window.frozenItemDb[rewardItem.id] = JSON.parse(
+        JSON.stringify(rewardItem),
+      );
+      premiumDrops.push(
+        `<span style="color:${window.getTierColor(rolledStars)}; font-weight:bold;">+${rewardItem.name} (${rolledStars}★)</span>`,
+      );
+    }
+
+    let overlay = document.createElement("div");
+    overlay.id = "supply-crate-overlay";
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.backgroundColor = "rgba(0,0,0,0.92)";
+    overlay.style.display = "flex";
+    overlay.style.justifyContent = "center";
+    overlay.style.alignItems = "center";
+    overlay.style.zIndex = "45000";
+    overlay.style.backdropFilter = "blur(10px)";
+    document.body.appendChild(overlay);
+
+    let premiumHtml =
+      premiumDrops.length > 0
+        ? `<div style="margin-top:12px; border-top:1px dashed #444; padding-top:10px; font-family:monospace; font-size:10px; text-align:left;">
+            <div style="color:#00d2ff; font-weight:bold; margin-bottom:4px; text-transform:uppercase;">🏢 SUPPLY DEPOT BONUS CHECKS:</div>
+            ${premiumDrops.join("<br>")}
+         </div>`
+        : "";
+
+    overlay.innerHTML = `
+      <div style="background:#151515; border:3px solid #ffaa00; border-radius:12px; width:95%; max-width:420px; box-shadow:0 15px 45px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s; overflow:hidden;">
+          <h2 style="margin:0 0 10px 0; color:#ffaa00; letter-spacing:2px; text-transform:uppercase; font-size:18px;">🎁 SUPPLY CRATE UNBOXED!</h2>
+          <div style="height:2px; background:linear-gradient(90deg, transparent, #ffaa00, transparent); margin-bottom:15px;"></div>
+          <p style="font-size:11px; color:#aaa; line-height:1.45; margin-bottom:15px; white-space:normal; text-align:center;">
+              You cracked open the **Weekly Supply Crate**! Depot level **Lv. ${depotLevel}** has granted the following yields:
+          </p>
+          <div style="background:#0c0f12; border:1px solid #ffaa00; border-radius:6px; padding:15px; margin-bottom:15px; text-align:left;">
+              <div style="font-size:11px; color:#aaa; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">📦 Loot Yields:</div>
+              <div style="font-size:13px; color:#f1c40f; font-weight:bold; margin-bottom:3px; font-family:monospace;">🟡 +${baseGold.toLocaleString()} Gold</div>
+              <div style="font-size:13px; color:#ffb6c1; font-weight:bold; margin-bottom:3px; font-family:monospace;">💀 +${baseSouls.toLocaleString()} Monster Souls</div>
+              <div style="font-size:13px; color:#f1c40f; font-weight:bold; font-family:monospace;">🔑 +${baseKeys} Gacha Key</div>
+              ${premiumHtml}
+          </div>
+          <button id="btn-supply-crate-confirm" style="background:linear-gradient(135deg, #ffaa00, #e67e22); color:#000; border:1px solid #fff; font-weight:bold; font-size:12px; text-transform:uppercase; letter-spacing:1px; padding:12px; border-radius:6px; cursor:pointer; width:100%; box-shadow:0 4px 15px rgba(255,170,0,0.3);">Claim Supplies</button>
+      </div>
+    `;
+
+    document.getElementById("btn-supply-crate-confirm").onclick = function () {
+      overlay.remove();
+      window.isGamePaused = false;
+      window.updateUI();
+      window.renderInventory();
+    };
+    return;
+  }
 
   const dailySacks = [
     "Daily Reward Sack",
@@ -5013,8 +5321,8 @@ window.enterDungeon = function (type) {
     function () {
       window.saveCurrentActivityPeak();
       window.playerStats[countField]--;
-            if (window.playerStats[countField] === 2)
-              window.playerStats[timeField] = Date.now() + 43200000; // 12 Hours
+      if (window.playerStats[countField] === 2)
+        window.playerStats[timeField] = Date.now() + 43200000; // 12 Hours
 
       window.playerStats.isDungeonMode = true;
       window.playerStats.isCrucibleMode = false;
@@ -5159,36 +5467,36 @@ window.rollEquipmentDrop = function (
   }
 
   let chosenType = allowArtifact
-              ? "artifact"
-              : types[Math.floor(Math.random() * types.length)];
-            let statLinesCount = 0;
+    ? "artifact"
+    : types[Math.floor(Math.random() * types.length)];
+  let statLinesCount = 0;
 
-            let probs = window.calculateRarityProbabilities(p.qly, false);
+  let probs = window.calculateRarityProbabilities(p.qly, false);
 
-            if (minStars > 0) {
-              // Slice the distribution and re-normalize the remainder
-              let subset = Array(6).fill(0);
-              for (let i = minStars; i <= 5; i++) {
-                subset[i] = probs[i];
-              }
-              let subSum = subset.reduce((sum, w) => sum + w, 0);
-              if (subSum > 0) {
-                probs = subset.map(w => (w / subSum) * 100);
-              } else {
-                probs = Array(6).fill(0);
-                probs[minStars] = 100; // Hard fallback guarantee
-              }
-            }
+  if (minStars > 0) {
+    // Slice the distribution and re-normalize the remainder
+    let subset = Array(6).fill(0);
+    for (let i = minStars; i <= 5; i++) {
+      subset[i] = probs[i];
+    }
+    let subSum = subset.reduce((sum, w) => sum + w, 0);
+    if (subSum > 0) {
+      probs = subset.map((w) => (w / subSum) * 100);
+    } else {
+      probs = Array(6).fill(0);
+      probs[minStars] = 100; // Hard fallback guarantee
+    }
+  }
 
-            let roll = Math.random() * 100;
-            let cumulative = 0;
+  let roll = Math.random() * 100;
+  let cumulative = 0;
 
-            if (roll < (cumulative += probs[5])) statLinesCount = 5;
-            else if (roll < (cumulative += probs[4])) statLinesCount = 4;
-            else if (roll < (cumulative += probs[3])) statLinesCount = 3;
-            else if (roll < (cumulative += probs[2])) statLinesCount = 2;
-            else if (roll < (cumulative += probs[1])) statLinesCount = 1;
-            else statLinesCount = 0;
+  if (roll < (cumulative += probs[5])) statLinesCount = 5;
+  else if (roll < (cumulative += probs[4])) statLinesCount = 4;
+  else if (roll < (cumulative += probs[3])) statLinesCount = 3;
+  else if (roll < (cumulative += probs[2])) statLinesCount = 2;
+  else if (roll < (cumulative += probs[1])) statLinesCount = 1;
+  else statLinesCount = 0;
 
   let activeStage = window.playerStats.stage;
   if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {

@@ -2258,11 +2258,11 @@ canvas {
   }
 
   .tab-btn {
-      padding: 6px 1px !important;
-      font-size: 10px !important;
-      min-height: 38px !important; /* Highly optimized vertical balance for tight landscape viewports */
-    }
+    padding: 6px 1px !important;
+    font-size: 10px !important;
+    min-height: 38px !important; /* Highly optimized vertical balance for tight landscape viewports */
   }
+}
 
 /* ==========================================================================
            19. HALL OF LEGENDS LEADERBOARD LAYOUTS
@@ -2331,66 +2331,66 @@ canvas {
   }
 
   #inspect-content canvas {
-      width: 60px !important;
-      height: 75px !important;
-    }
+    width: 60px !important;
+    height: 75px !important;
   }
+}
 
-  /* --- CYBER NEON GLIMMERING CABINET STYLINGS --- */
-  .gacha-cabinet.glimmering-style {
-    background: linear-gradient(135deg, #090615 0%, #15000b 100%) !important;
-    border: 3px solid #00d2ff !important;
-    border-bottom-width: 6px !important;
-    box-shadow:
-      0 15px 40px rgba(0, 0, 0, 0.95),
-      inset 0 0 25px rgba(0, 210, 255, 0.2),
-      0 0 25px rgba(0, 210, 255, 0.15) !important;
-  }
+/* --- CYBER NEON GLIMMERING CABINET STYLINGS --- */
+.gacha-cabinet.glimmering-style {
+  background: linear-gradient(135deg, #090615 0%, #15000b 100%) !important;
+  border: 3px solid #00d2ff !important;
+  border-bottom-width: 6px !important;
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.95),
+    inset 0 0 25px rgba(0, 210, 255, 0.2),
+    0 0 25px rgba(0, 210, 255, 0.15) !important;
+}
 
-  /* --- GLOWING DIGITAL LED READOUT SCREENS --- */
-  .gacha-led-readout {
-    width: 100%;
-    border-radius: 6px;
-    padding: 8px 10px;
-    font-family: monospace;
-    box-sizing: border-box;
-    text-align: center;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.85);
-    border: 1.5px solid currentColor;
-  }
+/* --- GLOWING DIGITAL LED READOUT SCREENS --- */
+.gacha-led-readout {
+  width: 100%;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: monospace;
+  box-sizing: border-box;
+  text-align: center;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.85);
+  border: 1.5px solid currentColor;
+}
 
-  .gacha-led-readout.standard {
-    background: #020703;
-    color: #2ecc71;
-    border-color: #2ecc71;
-    text-shadow: 0 0 4px rgba(46, 204, 113, 0.55);
-  }
+.gacha-led-readout.standard {
+  background: #020703;
+  color: #2ecc71;
+  border-color: #2ecc71;
+  text-shadow: 0 0 4px rgba(46, 204, 113, 0.55);
+}
 
-  .gacha-led-readout.glimmering {
-    background: #020710;
-    color: #00d2ff;
-    border-color: #ff007f;
-    text-shadow: 0 0 6px rgba(0, 210, 255, 0.65);
-  }
+.gacha-led-readout.glimmering {
+  background: #020710;
+  color: #00d2ff;
+  border-color: #ff007f;
+  text-shadow: 0 0 6px rgba(0, 210, 255, 0.65);
+}
 
-  .led-header {
-    font-size: 8px;
-    font-weight: bold;
-    letter-spacing: 1.2px;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
-    padding-bottom: 2px;
-  }
+.led-header {
+  font-size: 8px;
+  font-weight: bold;
+  letter-spacing: 1.2px;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+  padding-bottom: 2px;
+}
 
-  .led-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 3px 8px;
-    font-size: 9.5px;
-    font-weight: 900;
-  }
+.led-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px 8px;
+  font-size: 9.5px;
+  font-weight: 900;
+}
 
 /* --- ADVENTURER'S HUB MENU (ADVENTURY BUBBLY THEME) --- */
 #menu-hub-overlay {

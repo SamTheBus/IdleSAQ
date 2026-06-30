@@ -144,7 +144,7 @@ window.randInt = (min, max) =>
 window.randFloat = (min, max) => Math.random() * (max - min) + min;
 
 // Universal Normalized Weight-Based Rarity Probability Solver
-window.calculateRarityProbabilities = function(qly, isGacha = false) {
+window.calculateRarityProbabilities = function (qly, isGacha = false) {
   let weights = [0, 0, 0, 0, 0, 0]; // Index maps to stars quality (0 to 5)
 
   if (isGacha) {
@@ -160,19 +160,19 @@ window.calculateRarityProbabilities = function(qly, isGacha = false) {
     // Intrinsic Base Weights for Campaign & Dungeon Drops at Q=1.0:
     // 0★: 84.82 | 1★: 11.0 | 2★: 3.2 | 3★: 0.8 | 4★: 0.16 | 5★: 0.02
     weights[0] = 84.82 / Math.pow(qly, 0.6); // Shrinks as quality grows
-    weights[1] = 11.0 / Math.pow(qly, 0.1);  // Slightly scales down relative to upper tiers
+    weights[1] = 11.0 / Math.pow(qly, 0.1); // Slightly scales down relative to upper tiers
     weights[2] = 3.2 * Math.pow(qly, 0.4);
     weights[3] = 0.8 * Math.pow(qly, 0.8);
     // Preserves native quality gating checks
-    weights[4] = (qly >= 1.5) ? 0.16 * Math.pow(qly, 1.2) : 0;
-    weights[5] = (qly >= 2.0) ? 0.02 * Math.pow(qly, 1.6) : 0;
+    weights[4] = qly >= 1.5 ? 0.16 * Math.pow(qly, 1.2) : 0;
+    weights[5] = qly >= 2.0 ? 0.02 * Math.pow(qly, 1.6) : 0;
   }
 
   let totalWeight = weights.reduce((sum, w) => sum + w, 0);
   if (totalWeight <= 0) return [100, 0, 0, 0, 0, 0]; // Fallback sanity check
 
   // Return normalized percentage list (0.0% to 100.0%)
-  return weights.map(w => (w / totalWeight) * 100);
+  return weights.map((w) => (w / totalWeight) * 100);
 };
 
 // --- STATIC DATA POOLS ---
@@ -305,6 +305,10 @@ window.etcDex = {
 };
 
 window.useDex = {
+  "Weekly Clan Supply Crate": {
+    desc: "A special supply crate issued weekly to active guild members. Can be upgraded through the Clan Skills 'Supply Depot' research card to unlock massive bonus rewards like Catalyst Cores, Ancient Cores, and guaranteed high-rarity item rolls!",
+    color: "#ffaa00",
+  },
   "Clan Reward Sack": {
     desc: "Standardised Clan Reward. Consume to initiate untying. Guarantees 1 MP, 1x Equipment scaled to Lifetime Peak Stage, and rolls extra loot with consecutive item chances!",
     color: "#f1c40f",
@@ -3613,14 +3617,14 @@ window.resolvePlayerStats = function (useDraft = false) {
   let idleSpeedPct = 0.0 + (aT.idleSpeedPct || 0);
   let activeSpeedPct = 0.0 + (aT.activeSpeedPct || 0);
 
-    let paragonLevel = window.playerStats.paragonLevel || 0;
-    let paragonMult = 1.0 + (paragonLevel * 0.005); // Compounding +0.5% attributes per Paragon Level
+  let paragonLevel = window.playerStats.paragonLevel || 0;
+  let paragonMult = 1.0 + paragonLevel * 0.005; // Compounding +0.5% attributes per Paragon Level
 
-    achStrPct *= paragonMult;
-    achDexPct *= paragonMult;
-    achIntPct *= paragonMult;
+  achStrPct *= paragonMult;
+  achDexPct *= paragonMult;
+  achIntPct *= paragonMult;
 
-    for (let key in window.equippedSlots) {
+  for (let key in window.equippedSlots) {
     let item = window.equippedSlots[key];
     if (item) {
       p.atk += item.atk || 0;
@@ -4282,33 +4286,34 @@ window.playerStats = {
   damageTakenThisBattle: 0,
   ankhTriggeredThisBattle: false,
   dailyMissions: [],
-    weeklyMissions: [],
-    dailyRerollsDone: 0, // Reset daily at 12:00 AM PST/PDT
-    lastDailyResetTime: 0,
-    lastWeeklyResetTime: 0,
-    dailyRewardClaimed: false,
-    weeklyRewardClaimed: false,
-    unviewedAchievements: [],
-    selectedPrestigeStage: 80,
-    unlockedTitles: [],
-    equippedTitle: null,
-    achievementTimestamps: {},
-    claimedMailIds: [],
-    unlockedSkins: ["default"],
-    playerName: "Guest",
-    clanId: null,
-    clanName: null,
-    clanEmblem: null,
-    clanSkills: {
-      steel_phalanx: 0,
-      vitality_well: 0,
-      prosperity_accord: 0,
-      voyagers_guidance: 0,
-      aetheric_wisdom: 0,
-    },
-    clanContribution: 0,
-    paragonLevel: 0,
-  };
+  weeklyMissions: [],
+  dailyRerollsDone: 0, // Reset daily at 12:00 AM PST/PDT
+  lastDailyResetTime: 0,
+  lastWeeklyResetTime: 0,
+  dailyRewardClaimed: false,
+  weeklyRewardClaimed: false,
+  unviewedAchievements: [],
+  selectedPrestigeStage: 80,
+  unlockedTitles: [],
+  equippedTitle: null,
+  achievementTimestamps: {},
+  claimedMailIds: [],
+  unlockedSkins: ["default"],
+  playerName: "Guest",
+  clanId: null,
+  clanName: null,
+  clanEmblem: null,
+  clanSkills: {
+    steel_phalanx: 0,
+    vitality_well: 0,
+    prosperity_accord: 0,
+    voyagers_guidance: 0,
+    aetheric_wisdom: 0,
+    clan_supply_depot: 0,
+  },
+  clanContribution: 0,
+  paragonLevel: 0,
+};
 
 // --- CLIENT-SIDE COSMETIC REGISTRY ---
 window.COSMETIC_SKINS = {

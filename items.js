@@ -1186,26 +1186,28 @@ window.buildProceduralName = function (item) {
 
 window.getStatBaseRange = function (item, statKey) {
   let stageLevel = item.stageLevel || 1;
-    let isArt = item.type === "artifact";
-    let rarityMult = isArt ? 1.45 : 1 + (item.statsRolled || 0) * 0.15;
-    let expScale = Math.pow(1.18, stageLevel) * Math.pow(stageLevel, 2.2);
-    let hpDefExpScale = Math.pow(1.16, stageLevel) * Math.pow(stageLevel, 2.2);
+  let isArt = item.type === "artifact";
+  let rarityMult = isArt ? 1.45 : 1 + (item.statsRolled || 0) * 0.15;
+  // Aligned with the 3.5 exponent progression scale of createItemObject
+  let expScale = Math.pow(1.18, stageLevel) * Math.pow(stageLevel, 3.5);
+  let hpDefExpScale = Math.pow(1.16, stageLevel) * Math.pow(stageLevel, 3.5);
 
   let min = 0;
   let max = 0;
 
+  // Aligned with core roll ranges (Atk: 0.15~0.35, HP: 0.4~1.2, Def: 0.15~0.35) to prevent out-of-bounds rendering
   if (
     statKey === "atk" &&
     (item.bonusAtk > 0 || item.type === "weapon" || isArt)
   ) {
-    min += Math.ceil(1 * expScale * rarityMult);
-    max += Math.ceil(2 * expScale * rarityMult);
+    min += Math.ceil(0.15 * expScale * rarityMult);
+    max += Math.ceil(0.35 * expScale * rarityMult);
   } else if (statKey === "maxHp" && (item.bonusMaxHp > 0 || isArt)) {
-    min += Math.ceil(3 * hpDefExpScale * rarityMult);
-    max += Math.ceil(8 * hpDefExpScale * rarityMult);
+    min += Math.ceil(0.4 * hpDefExpScale * rarityMult);
+    max += Math.ceil(1.2 * hpDefExpScale * rarityMult);
   } else if (statKey === "def" && (item.bonusDef > 0 || isArt)) {
-    min += Math.ceil(1 * hpDefExpScale * rarityMult);
-    max += Math.ceil(2 * hpDefExpScale * rarityMult);
+    min += Math.ceil(0.15 * hpDefExpScale * rarityMult);
+    max += Math.ceil(0.35 * hpDefExpScale * rarityMult);
   } else if (statKey === "moveSpeed" && item.bonusMoveSpeed > 0) {
     min += Math.ceil(1 * stageLevel * rarityMult);
     max += Math.ceil(2 * stageLevel * rarityMult);
@@ -1466,10 +1468,12 @@ window.recalculateItemStats = function (item) {
   item.bonusInt = item.bonusInt || 0;
 
   // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-    let expScale =
-      Math.pow(1.18, item.stageLevel || 1) * Math.pow(item.stageLevel || 1, 2.2);
-    let hpDefExpScale =
-      Math.pow(1.16, item.stageLevel || 1) * Math.pow(item.stageLevel || 1, 2.2);
+  // Aligned with the 3.5 exponent progression scale of createItemObject
+  let expScale =
+    Math.pow(1.18, item.stageLevel || 1) * Math.pow(item.stageLevel || 1, 3.5);
+  let hpDefExpScale =
+    Math.pow(1.16, item.stageLevel || 1) * Math.pow(item.stageLevel || 1, 3.5);
+
   let prestigeCount = window.playerStats.prestigeCount || 0;
   let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
 
@@ -1755,9 +1759,9 @@ window.addRandomStatLineToItem = function (item) {
 
   let selectedStat = pool[Math.floor(Math.random() * pool.length)];
   let stageScale = item.stageLevel || 1;
-    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-    let expScale = Math.pow(1.18, stageScale) * Math.pow(stageScale, 2.2);
-    let hpDefExpScale = Math.pow(1.16, stageScale) * Math.pow(stageScale, 2.2);
+  // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
+  let expScale = Math.pow(1.18, stageScale) * Math.pow(stageScale, 2.2);
+  let hpDefExpScale = Math.pow(1.16, stageScale) * Math.pow(stageScale, 2.2);
   let rarityMult = 1 + item.statsRolled * 0.15;
   let prestigeMult = Math.pow(1.08, window.playerStats.prestigeCount || 0);
 
@@ -3124,12 +3128,17 @@ window.buyGachaCrate = function () {
   window.openGachaModal();
 };
 
-window.rollGachaCrateItem = function (isGlimmering = false, useStandardForGlimmering = false) {
+window.rollGachaCrateItem = function (
+  isGlimmering = false,
+  useStandardForGlimmering = false,
+) {
   let p = window.resolvePlayerStats();
   let maxBag = window.getMaxBagSlots();
 
   let keyName = isGlimmering
-    ? (useStandardForGlimmering ? "Gacha Key" : "Glimmering Gachapon Key")
+    ? useStandardForGlimmering
+      ? "Gacha Key"
+      : "Glimmering Gachapon Key"
     : "Gacha Key";
   let keysNeeded = isGlimmering && useStandardForGlimmering ? 10 : 1;
   let keys = window.inventory.ETC[keyName] || 0;
@@ -3163,13 +3172,13 @@ window.rollGachaCrateItem = function (isGlimmering = false, useStandardForGlimme
 
   // Deduct key & save state
   window.inventory.ETC[keyName] -= keysNeeded;
-  if (window.inventory.ETC[keyName] === 0)
-    delete window.inventory.ETC[keyName];
+  if (window.inventory.ETC[keyName] === 0) delete window.inventory.ETC[keyName];
 
   // --- PITY COUNTER ENGINE ---
   let isPityTriggered = false;
   if (isGlimmering) {
-    window.playerStats.glimmeringPity = (window.playerStats.glimmeringPity || 0) + 1;
+    window.playerStats.glimmeringPity =
+      (window.playerStats.glimmeringPity || 0) + 1;
     if (window.playerStats.glimmeringPity >= 25) {
       isPityTriggered = true;
       window.playerStats.glimmeringPity = 0;

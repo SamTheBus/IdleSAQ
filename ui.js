@@ -238,9 +238,9 @@ window.getEtcIconHtml = function (key) {
   let svgContent = "";
 
   if (key === "Eridium Shard") {
-      bg = "rgba(155, 89, 182, 0.25)";
-      border = "#9b59b6";
-      svgContent = `
+    bg = "rgba(155, 89, 182, 0.25)";
+    border = "#9b59b6";
+    svgContent = `
           <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
               <defs>
                   <linearGradient id="grad_EridiumShard_${uid}" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -252,10 +252,10 @@ window.getEtcIconHtml = function (key) {
               <path d="M16 2 L16 30" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
               <path d="M6 16 L26 16" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>
           </svg>`;
-    } else if (key === "Glimmering Gachapon Key") {
-      bg = "rgba(0, 210, 255, 0.18)";
-      border = "#00d2ff";
-      svgContent = `
+  } else if (key === "Glimmering Gachapon Key") {
+    bg = "rgba(0, 210, 255, 0.18)";
+    border = "#00d2ff";
+    svgContent = `
           <svg width="24" height="24" viewBox="0 0 32 32" style="display:block; filter: drop-shadow(0 0 4px #00d2ff);">
               <defs>
                   <linearGradient id="grad_GlimmeringKey_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -270,7 +270,7 @@ window.getEtcIconHtml = function (key) {
               <path d="M15.5 15.5 L26.5 26.5" stroke="url(#grad_GlimmeringKey_${uid})" stroke-width="3" stroke-linecap="round" fill="none"/>
               <path d="M23.5 23.5 L21.5 25.5 M25.5 25.5 L23.5 27.5" stroke="url(#grad_GlimmeringKey_${uid})" stroke-width="2" stroke-linecap="round"/>
           </svg>`;
-    } else if (key === "Gacha Key") {
+  } else if (key === "Gacha Key") {
     bg = "rgba(241, 196, 15, 0.25)";
     border = "#f1c40f";
     svgContent = `
@@ -1435,14 +1435,14 @@ window.updateUI = function () {
   let stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.maxStage || 1}`;
 
   if (window.playerStats.isDungeonMode) {
-      let dType = window.playerStats.currentDungeon || "gold";
-      let dNames = { equip: "Equip Floor", gold: "Gold Floor", mat: "Mat Floor" };
-      let dIcons = {
-        equip: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l2 2M11 19l-2 2" /></svg>`,
-        gold: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="#f1c40f" fill-opacity="0.15" /><path d="M12 8v8M9 10h6M9 13h6" /></svg>`,
-        mat: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77" /></svg>`,
-      };
-      displayTitleHtml = `${dIcons[dType] || ""} ${dNames[dType] || "Floor"}`;
+    let dType = window.playerStats.currentDungeon || "gold";
+    let dNames = { equip: "Equip Floor", gold: "Gold Floor", mat: "Mat Floor" };
+    let dIcons = {
+      equip: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l2 2M11 19l-2 2" /></svg>`,
+      gold: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="#f1c40f" fill-opacity="0.15" /><path d="M12 8v8M9 10h6M9 13h6" /></svg>`,
+      mat: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77" /></svg>`,
+    };
+    displayTitleHtml = `${dIcons[dType] || ""} ${dNames[dType] || "Floor"}`;
     activeStageVal = window.playerStats.currentDungeonStage[dType] || 1;
     stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.dungeonPeaks[dType] || 1}`;
   } else if (window.playerStats.isCrucibleMode) {
@@ -1729,17 +1729,17 @@ window.updateUI = function () {
 
   let dropProbs = window.calculateRarityProbabilities(p.qly, false);
 
-    setText(
-      "star-rate-5",
-      p.qly >= 2.0 ? dropProbs[5].toFixed(2) + "%" : "0.00% 🔒 (Req. 2.0x Qly)",
-    );
-    setText(
-      "star-rate-4",
-      p.qly >= 1.5 ? dropProbs[4].toFixed(2) + "%" : "0.00% 🔒 (Req. 1.5x Qly)",
-    );
-    setText("star-rate-3", dropProbs[3].toFixed(2) + "%");
-    setText("star-rate-2", dropProbs[2].toFixed(2) + "%");
-    setText("star-rate-1", dropProbs[1].toFixed(2) + "%");
+  setText(
+    "star-rate-5",
+    p.qly >= 2.0 ? dropProbs[5].toFixed(2) + "%" : "0.00% 🔒 (Req. 2.0x Qly)",
+  );
+  setText(
+    "star-rate-4",
+    p.qly >= 1.5 ? dropProbs[4].toFixed(2) + "%" : "0.00% 🔒 (Req. 1.5x Qly)",
+  );
+  setText("star-rate-3", dropProbs[3].toFixed(2) + "%");
+  setText("star-rate-2", dropProbs[2].toFixed(2) + "%");
+  setText("star-rate-1", dropProbs[1].toFixed(2) + "%");
 
   setText("live-qty-acore", window.inventory.ETC["Ancient Core"] || 0);
   setText(
@@ -1792,13 +1792,13 @@ window.updateUI = function () {
     window.renderGachaShowcaseMarquee();
 
     // Update live vending rates board (Fully live with your stats!)
-        let probs = window.calculateRarityProbabilities(p.qly, true);
+    let probs = window.calculateRarityProbabilities(p.qly, true);
 
-        window.setText("vending-rate-5", probs[5].toFixed(2) + "%");
-        window.setText("vending-rate-4", probs[4].toFixed(2) + "%");
-        window.setText("vending-rate-3", probs[3].toFixed(2) + "%");
-        window.setText("vending-rate-2", probs[2].toFixed(2) + "%");
-        window.setText("vending-rate-1", probs[1].toFixed(2) + "%");
+    window.setText("vending-rate-5", probs[5].toFixed(2) + "%");
+    window.setText("vending-rate-4", probs[4].toFixed(2) + "%");
+    window.setText("vending-rate-3", probs[3].toFixed(2) + "%");
+    window.setText("vending-rate-2", probs[2].toFixed(2) + "%");
+    window.setText("vending-rate-1", probs[1].toFixed(2) + "%");
   }
 
   // Refresh Gacha Pity Elements if present
@@ -3456,22 +3456,22 @@ window.renderPrestigeTab = function () {
   }
 
   let getUpgradeCardHtml = (
-      type,
-      label,
-      icon,
-      currentText,
-      bonusDesc,
-      pts,
-      color,
-    ) => {
-      let cost = window.getPrestigeUpgradeCost(type, pts);
-      let canAfford = p.prestigePoints >= cost;
-      let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-      let bgStyle = window.hexToRgba(color, 0.04);
-      let fontColor =
-        color === "#f1c40f" || color === "#ffb6c1" ? "#111" : "#fff";
+    type,
+    label,
+    icon,
+    currentText,
+    bonusDesc,
+    pts,
+    color,
+  ) => {
+    let cost = window.getPrestigeUpgradeCost(type, pts);
+    let canAfford = p.prestigePoints >= cost;
+    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+    let bgStyle = window.hexToRgba(color, 0.04);
+    let fontColor =
+      color === "#f1c40f" || color === "#ffb6c1" ? "#111" : "#fff";
 
-      return `
+    return `
         <div class="shop-row" style="border-color:${color}; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:4px; padding:10px; margin-bottom:0; cursor:help;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <strong style="color:${color}; font-size:11.5px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${pts})</span></strong>
@@ -3481,38 +3481,41 @@ window.renderPrestigeTab = function () {
             <button class="btn-action" style="background:${color}; color:${fontColor}; font-weight:bold; font-size:10px; padding:4px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.buyPrestigeUpgrade('${type}')">Upgrade</button>
         </div>
       `;
-    };
+  };
 
-    // Pre-calculate Paragon cost requirements based on P level
-    let parLevel = p.paragonLevel || 0;
-    let parGoldCost = Math.floor(1000000 * Math.pow(1.5, parLevel));
-    let parMythicScrapCost = Math.floor(50 * Math.pow(1.3, parLevel));
-    let parLegendaryScrapCost = Math.floor(150 * Math.pow(1.3, parLevel));
-    let parEpicScrapCost = Math.floor(350 * Math.pow(1.3, parLevel));
-    let parCoreCost = Math.floor(10 * Math.pow(1.15, parLevel));
+  // Pre-calculate Paragon cost requirements based on P level
+  let parLevel = p.paragonLevel || 0;
+  let parGoldCost = Math.floor(1000000 * Math.pow(1.5, parLevel));
+  let parMythicScrapCost = Math.floor(50 * Math.pow(1.3, parLevel));
+  let parLegendaryScrapCost = Math.floor(150 * Math.pow(1.3, parLevel));
+  let parEpicScrapCost = Math.floor(350 * Math.pow(1.3, parLevel));
+  let parCoreCost = Math.floor(10 * Math.pow(1.15, parLevel));
 
-    let goldOwned = window.playerStats.coins || 0;
-    let mythicScrapsOwned = window.inventory.ETC["Mythic Scrap"] || 0;
-    let legendaryScrapsOwned = window.inventory.ETC["Legendary Scrap"] || 0;
-    let epicScrapsOwned = window.inventory.ETC["Epic Scrap"] || 0;
-    let coresOwned = window.inventory.ETC["Catalyst Core"] || 0;
+  let goldOwned = window.playerStats.coins || 0;
+  let mythicScrapsOwned = window.inventory.ETC["Mythic Scrap"] || 0;
+  let legendaryScrapsOwned = window.inventory.ETC["Legendary Scrap"] || 0;
+  let epicScrapsOwned = window.inventory.ETC["Epic Scrap"] || 0;
+  let coresOwned = window.inventory.ETC["Catalyst Core"] || 0;
 
-    let canAffordParagon =
-      goldOwned >= parGoldCost &&
-      mythicScrapsOwned >= parMythicScrapCost &&
-      legendaryScrapsOwned >= parLegendaryScrapCost &&
-      epicScrapsOwned >= parEpicScrapCost &&
-      coresOwned >= parCoreCost;
+  let canAffordParagon =
+    goldOwned >= parGoldCost &&
+    mythicScrapsOwned >= parMythicScrapCost &&
+    legendaryScrapsOwned >= parLegendaryScrapCost &&
+    epicScrapsOwned >= parEpicScrapCost &&
+    coresOwned >= parCoreCost;
 
-    let parGoldColor = goldOwned >= parGoldCost ? "#2ecc71" : "#e74c3c";
-    let parMythicColor = mythicScrapsOwned >= parMythicScrapCost ? "#2ecc71" : "#e74c3c";
-    let parLegendaryColor = legendaryScrapsOwned >= parLegendaryScrapCost ? "#2ecc71" : "#e74c3c";
-    let parEpicColor = epicScrapsOwned >= parEpicScrapCost ? "#2ecc71" : "#e74c3c";
-    let parCoreColor = coresOwned >= parCoreCost ? "#2ecc71" : "#e74c3c";
+  let parGoldColor = goldOwned >= parGoldCost ? "#2ecc71" : "#e74c3c";
+  let parMythicColor =
+    mythicScrapsOwned >= parMythicScrapCost ? "#2ecc71" : "#e74c3c";
+  let parLegendaryColor =
+    legendaryScrapsOwned >= parLegendaryScrapCost ? "#2ecc71" : "#e74c3c";
+  let parEpicColor =
+    epicScrapsOwned >= parEpicScrapCost ? "#2ecc71" : "#e74c3c";
+  let parCoreColor = coresOwned >= parCoreCost ? "#2ecc71" : "#e74c3c";
 
-    let paragonBonusText = `+${(parLevel * 0.5).toFixed(1)}% Base Attributes (STR/DEX/INT)`;
+  let paragonBonusText = `+${(parLevel * 0.5).toFixed(1)}% Base Attributes (STR/DEX/INT)`;
 
-    let paragonInfusionCardHtml = `
+  let paragonInfusionCardHtml = `
       <div class="market-card" style="border-color:#ff007f; background:linear-gradient(135deg, #15000b 0%, #030003 100%); text-align:left; padding:12px; border-radius:8px; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.15); margin-top:12px; display:flex; flex-direction:column; justify-content:space-between;">
           <div>
               <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #5a0a33; padding-bottom:6px; margin-bottom:8px;">
@@ -3637,7 +3640,7 @@ window.renderPrestigeTab = function () {
 
                                 </div>
                               `;
-                            };
+};
 
 window.buyPrestigeUpgrade = function (type) {
   let currentLevel = window.playerStats.prestigeUpgrades[type] || 0;
@@ -3789,15 +3792,7 @@ window.triggerPrestigeAscension = function () {
     window.playerStats.maxStage || 1,
   );
 
-  for (let slot in window.equippedSlots) {
-    if (window.equippedSlots[slot]) {
-      let item = window.equippedSlots[slot];
-      delete item.isEquippedSlot;
-      if (item.type === "artifact") window.inventory.ARTIFACT.push(item);
-      else window.inventory.EQUIP.push(item);
-      window.equippedSlots[slot] = null;
-    }
-  }
+  // Removed unequip loop: Gear now remains fully equipped across prestige resets as a quality-of-life improvement.
 
   window.playerStats.level = 1;
   window.playerStats.xp = 0;
@@ -7049,13 +7044,13 @@ window.showCurrentRatesModal = function () {
   let cruciblePeak = window.playerStats.cruciblePeak || 1;
 
   // Equipment Drop Chances (Chances of rolling each star quality based on active Drop Quality stats)
-    let dropProbs = window.calculateRarityProbabilities(p.qly, false);
-    let chance5 = p.qly >= 2.0 ? dropProbs[5] : 0;
-    let chance4 = p.qly >= 1.5 ? dropProbs[4] : 0;
-    let chance3 = dropProbs[3];
-    let chance2 = dropProbs[2];
-    let chance1 = dropProbs[1];
-    let chance0 = dropProbs[0];
+  let dropProbs = window.calculateRarityProbabilities(p.qly, false);
+  let chance5 = p.qly >= 2.0 ? dropProbs[5] : 0;
+  let chance4 = p.qly >= 1.5 ? dropProbs[4] : 0;
+  let chance3 = dropProbs[3];
+  let chance2 = dropProbs[2];
+  let chance1 = dropProbs[1];
+  let chance0 = dropProbs[0];
 
   win.innerHTML = `
                         <div class="draggable-header" id="rates-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
@@ -7792,8 +7787,8 @@ window.renderGachaModal = function () {
   let glimmeringKeys = window.inventory.ETC["Glimmering Gachapon Key"] || 0;
 
   let pityProgress = isGlim
-    ? (window.playerStats.glimmeringPity || 0)
-    : (window.playerStats.vendingPity || 0);
+    ? window.playerStats.glimmeringPity || 0
+    : window.playerStats.vendingPity || 0;
   let maxPity = isGlim ? 25 : 50;
 
   // Set up thematic capsule colors
@@ -7846,7 +7841,7 @@ window.renderGachaModal = function () {
   let probs = window.calculateRarityProbabilities(p.qly, true, isGlim);
 
   let ledContent = isGlim
-      ? `
+    ? `
         <div class="gacha-led-readout glimmering">
             <div class="led-header">GLIMMERING BOOSTER TERMINAL</div>
             <div class="led-grid">
@@ -7856,7 +7851,7 @@ window.renderGachaModal = function () {
                 <span style="color:#1abc9c; text-shadow: 0 0 4px rgba(26,188,156,0.55); font-weight:bold;">ART: 5.0%</span>
             </div>
         </div>`
-      : `
+    : `
         <div class="gacha-led-readout standard">
             <div class="led-header">STANDARD VENDING TERMINAL</div>
             <div class="led-grid">
@@ -7868,7 +7863,9 @@ window.renderGachaModal = function () {
             </div>
         </div>`;
 
-  let cabinetClass = isGlim ? "gacha-cabinet glimmering-style" : "gacha-cabinet standard-style";
+  let cabinetClass = isGlim
+    ? "gacha-cabinet glimmering-style"
+    : "gacha-cabinet standard-style";
   let titleColor = isGlim ? "#00d2ff" : "#f1c40f";
   let switcherBtnHtml = `
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; width:100%; margin-bottom:8px;">
@@ -7980,7 +7977,7 @@ window.crankGachaMachine = function (forceSpendStandard = false) {
           "#00d2ff",
           function () {
             window.crankGachaMachine(true); // run again, forcing standard key spending
-          }
+          },
         );
         return;
       } else {
@@ -7993,7 +7990,10 @@ window.crankGachaMachine = function (forceSpendStandard = false) {
           cabinet.classList.add("cabinet-rattle");
           setTimeout(() => cabinet.classList.remove("cabinet-rattle"), 450);
         }
-        window.pushHeaderToast("❌ Insufficient Glimmering Key or standard Gacha Keys!", "#e74c3c");
+        window.pushHeaderToast(
+          "❌ Insufficient Glimmering Key or standard Gacha Keys!",
+          "#e74c3c",
+        );
         return;
       }
     }
@@ -9196,7 +9196,9 @@ window.updateGachaRecentList = function () {
     );
 
     // Distinguish players with dedicated name tag styling
-    let isSelf = playerName === "You" || playerName === (window.playerStats.playerName || "Guest");
+    let isSelf =
+      playerName === "You" ||
+      playerName === (window.playerStats.playerName || "Guest");
     let nameCol = isSelf ? "#ffd700" : "#00d2ff"; // Gold for self, Bright Cyber Cyan for other players
     let displayName = isSelf ? "You" : window.escapeHTML(playerName);
 
@@ -9988,24 +9990,61 @@ window.toggleMailbox = function () {
   }
 };
 
+window.getWeeklyClanMail = function () {
+  if (!window.playerStats.clanId || !window.playerStats.clanName) return null;
+
+  // Resolve current last Monday string
+  let now = Date.now();
+  let ptString = new Date(now).toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles",
+  });
+  let ptDate = new Date(ptString);
+  let dayOfWeek = ptDate.getDay();
+  let daysSinceMonday = (dayOfWeek + 6) % 7;
+  let lastMondayDate = new Date(ptDate);
+  lastMondayDate.setDate(ptDate.getDate() - daysSinceMonday);
+  let lastMondayStr = lastMondayDate
+    .toLocaleDateString("en-US")
+    .replace(/\//g, "_");
+
+  let mailId = `clan_weekly_mail_${lastMondayStr}`;
+  let claimedMailIds = window.playerStats.claimedMailIds || [];
+  let isClaimed = claimedMailIds.includes(mailId);
+
+  return {
+    id: mailId,
+    title: "Weekly Clan Supply Crate",
+    message: `Greetings, Hero! Here is your weekly share of supplies from the **${window.playerStats.clanName}** supply depot. Keep supporting your guild!`,
+    rewards: {
+      use: {
+        "Weekly Clan Supply Crate": 1,
+      },
+    },
+    claimed: isClaimed,
+  };
+};
+
 window.fetchMailboxData = function () {
   const listEl = document.getElementById("mailbox-list");
   if (!listEl) return;
-
-  if (!window.GAME_SERVER_URL) {
-    listEl.innerHTML = `<div style="color:#666; text-align:center; padding: 20px 0; font-size:11px; font-style:italic;">Mailbox unavailable in offline/GitHub mode.</div>`;
-    return;
-  }
-
-  if (!window.isCloudSynced) {
-    listEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px; font-style:italic;">📡 Mailbox is offline. Please wait for a secure server connection...</div>`;
-    return;
-  }
 
   const userId = window.getGameUserId ? window.getGameUserId() : "guest_local";
   listEl.innerHTML = `<div style="color:#aaa; text-align:center; padding: 20px 0; font-size:11px;">Checking incoming transmissions...</div>`;
 
   const claimedMailIds = window.playerStats.claimedMailIds || [];
+
+  if (!window.GAME_SERVER_URL || !window.isCloudSynced) {
+    // Local / Offline fallback allows players to still receive their Weekly Clan Supply Crate!
+    let localMail = window.getWeeklyClanMail();
+    if (localMail) {
+      window.renderMailboxItems([localMail]);
+      window.updateMailboxBadge(!localMail.claimed);
+    } else {
+      listEl.innerHTML = `<div style="color:#666; text-align:center; padding: 20px 0; font-size:11px; font-style:italic;">Mailbox empty (Offline mode).</div>`;
+    }
+    return;
+  }
+
   fetch(`${window.GAME_SERVER_URL}/api/mailbox`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -10014,16 +10053,34 @@ window.fetchMailboxData = function () {
     .then((response) => response.json())
     .then((data) => {
       if (data.success && data.mailbox) {
-        window.renderMailboxItems(data.mailbox);
-        const hasUnclaimed = data.mailbox.some((m) => !m.claimed);
+        let mailList = [...data.mailbox];
+        let localMail = window.getWeeklyClanMail();
+        if (localMail) {
+          if (!mailList.some((m) => m.id === localMail.id)) {
+            mailList.unshift(localMail);
+          }
+        }
+        window.renderMailboxItems(mailList);
+        const hasUnclaimed = mailList.some((m) => !m.claimed);
         window.updateMailboxBadge(hasUnclaimed);
       } else {
-        listEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Error loading mailbox data.</div>`;
+        let localMail = window.getWeeklyClanMail();
+        if (localMail) {
+          window.renderMailboxItems([localMail]);
+          window.updateMailboxBadge(!localMail.claimed);
+        } else {
+          listEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Error loading mailbox data.</div>`;
+        }
       }
     })
     .catch((err) => {
-      console.error("Mailbox fetch failed:", err);
-      listEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Could not connect to the mail server.</div>`;
+      let localMail = window.getWeeklyClanMail();
+      if (localMail) {
+        window.renderMailboxItems([localMail]);
+        window.updateMailboxBadge(!localMail.claimed);
+      } else {
+        listEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Could not connect to the mail server.</div>`;
+      }
     });
 };
 
@@ -10145,6 +10202,29 @@ window.renderMailboxItems = function (mailbox) {
 };
 
 window.claimMailReward = function (mailId) {
+  // Catch client-side weekly clan mail claim
+  if (mailId.startsWith("clan_weekly_mail_")) {
+    let localMail = window.getWeeklyClanMail();
+    if (localMail && !localMail.claimed) {
+      window.addUseDrop("Weekly Clan Supply Crate", 1);
+      window.playerStats.claimedMailIds =
+        window.playerStats.claimedMailIds || [];
+      if (!window.playerStats.claimedMailIds.includes(mailId)) {
+        window.playerStats.claimedMailIds.push(mailId);
+      }
+      if (typeof window.spawnPurchaseCelebration === "function") {
+        window.spawnPurchaseCelebration("gacha", "#ffaa00", 5);
+      }
+      if (window.SoundManager) window.SoundManager.play("revive");
+      window.pushHeaderToast("🎁 Weekly Clan Supply Crate Claimed!", "#2ecc71");
+      window.updateUI();
+      window.renderInventory();
+      window.saveGame();
+      window.fetchMailboxData();
+    }
+    return;
+  }
+
   if (!window.GAME_SERVER_URL) return;
   const userId = window.getGameUserId();
   const claimedMailIds = window.playerStats.claimedMailIds || [];
@@ -12070,16 +12150,20 @@ window.renderClanDashboard = function (clan, members, invitations) {
         costSoul = Math.floor(200 * Math.pow(1.25, currentL));
         soulName = "Monster Souls";
       } else {
-        costGold = Math.floor(
-          (key === "prosperity_accord"
+        let baseG =
+          key === "prosperity_accord"
             ? 40000
             : key === "voyagers_guidance"
               ? 50000
-              : 45000) * Math.pow(1.4, currentL),
-        );
-        costSoul = Math.floor(
-          (key === "aetheric_wisdom" ? 6 : 5) * Math.pow(1.3, currentL),
-        );
+              : key === "clan_supply_depot"
+                ? 55000
+                : 45000;
+        let baseS =
+          key === "aetheric_wisdom" ? 6 : key === "clan_supply_depot" ? 8 : 5;
+        let scaleG = key === "clan_supply_depot" ? 1.45 : 1.4;
+        let scaleS = key === "clan_supply_depot" ? 1.35 : 1.3;
+        costGold = Math.floor(baseG * Math.pow(scaleG, currentL));
+        costSoul = Math.floor(baseS * Math.pow(scaleS, currentL));
         soulName = "Luminous Souls";
       }
 
@@ -12145,14 +12229,15 @@ window.renderClanDashboard = function (clan, members, invitations) {
     };
 
     tabContentHtml = `
-                              <div style="display:flex; flex-direction:column; gap:4px;">
-                                  ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", "+" + ((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1) + "% Attack & Defense", clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
-                                  ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", "+" + ((clan.skill_vitality_well || 0) * 0.8).toFixed(1) + "% Max HP", clan.skill_vitality_well || 0, 50, "#3498db")}
-                                  ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", "+" + ((clan.skill_prosperity_accord || 0) * 1.0).toFixed(1) + "% Gold Multiplier", clan.skill_prosperity_accord || 0, 30, "#f1c40f")}
-                                  ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager's Guidance", "+" + ((clan.skill_voyagers_guidance || 0) * 0.5).toFixed(1) + "% Drop Rate & Quality", clan.skill_voyagers_guidance || 0, 30, "#2ecc71")}
-                                  ${getSkillUpgradeCardHtml("aetheric_wisdom", "Aetheric Wisdom", "+" + ((clan.skill_aetheric_wisdom || 0) * 1.0).toFixed(1) + "% XP Rate", clan.skill_aetheric_wisdom || 0, 30, "#9b59b6")}
-                              </div>
-                            `;
+                                  <div style="display:flex; flex-direction:column; gap:4px;">
+                                      ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", "+" + ((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1) + "% Attack & Defense", clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
+                                      ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", "+" + ((clan.skill_vitality_well || 0) * 0.8).toFixed(1) + "% Max HP", clan.skill_vitality_well || 0, 50, "#3498db")}
+                                      ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", "+" + ((clan.skill_prosperity_accord || 0) * 1.0).toFixed(1) + "% Gold Multiplier", clan.skill_prosperity_accord || 0, 30, "#f1c40f")}
+                                      ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager's Guidance", "+" + ((clan.skill_voyagers_guidance || 0) * 0.5).toFixed(1) + "% Drop Rate & Quality", clan.skill_voyagers_guidance || 0, 30, "#2ecc71")}
+                                      ${getSkillUpgradeCardHtml("aetheric_wisdom", "Aetheric Wisdom", "+" + ((clan.skill_aetheric_wisdom || 0) * 1.0).toFixed(1) + "% XP Rate", clan.skill_aetheric_wisdom || 0, 30, "#9b59b6")}
+                                      ${getSkillUpgradeCardHtml("clan_supply_depot", "Supply Depot", "Crate yields: " + (clan.skill_clan_supply_depot || 0) * 20 + "% Gold & " + (clan.skill_clan_supply_depot || 0) * 10 + "% Souls", clan.skill_clan_supply_depot || 0, 30, "#ffaa00")}
+                                  </div>
+                                `;
   }
 
   contentEl.innerHTML = `
@@ -12331,7 +12416,47 @@ window.executeKickMember = function (targetUserId, targetName) {
   );
 };
 
-window.executeLeaveClan = function () {
+window.executeUpgradeClanSkill = function (skillKey) {
+  if (!window.GAME_SERVER_URL) {
+    let currentL = window.playerStats.clanSkills[skillKey] || 0;
+    window.playerStats.clanSkills[skillKey] = currentL + 1;
+    window.pushHeaderToast(`✓ Research upgraded! (Offline)`, "#2ecc71");
+    window.updateUI();
+    window.saveGame();
+    return;
+  }
+
+  const userId = window.getGameUserId();
+  fetch(`${window.GAME_SERVER_URL}/api/clan/upgrade-skill`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, skillKey }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.success) {
+        window.pushHeaderToast(`✓ Research upgraded!`, "#2ecc71");
+        if (window.playerStats.clanSkills) {
+          window.playerStats.clanSkills[skillKey] =
+            (window.playerStats.clanSkills[skillKey] || 0) + 1;
+        }
+        window.fetchClanData();
+        window.updateUI();
+        window.saveGame();
+      } else {
+        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+      }
+    })
+    .catch(() => {
+      let currentL = window.playerStats.clanSkills[skillKey] || 0;
+      window.playerStats.clanSkills[skillKey] = currentL + 1;
+      window.pushHeaderToast(`✓ Research upgraded! (Offline)`, "#2ecc71");
+      window.updateUI();
+      window.saveGame();
+    });
+};
+
+window.executeDisbandClan = function () {
   let modal = document.getElementById("clan-draggable-window");
   let label = window.playerStats.clanName || "Clan";
 
@@ -12454,73 +12579,73 @@ window.updateSalvagePadUI = function () {
   }
 
   // 2. Bulk-Salvage Buttons Styling
-    let bulkButtons = {
-      0: "btn-bulk-salvage-0",
-      1: "btn-bulk-salvage-1",
-      2: "btn-bulk-salvage-2",
-      3: "btn-bulk-salvage-3",
-    };
+  let bulkButtons = {
+    0: "btn-bulk-salvage-0",
+    1: "btn-bulk-salvage-1",
+    2: "btn-bulk-salvage-2",
+    3: "btn-bulk-salvage-3",
+  };
 
-    for (let k in bulkButtons) {
-      let el = document.getElementById(bulkButtons[k]);
-      if (el) {
-        if (parseInt(k, 10) === bulkTarget) {
-          el.classList.add("active");
-          let cfg = configs[k];
-          el.style.background = cfg.bg;
-          el.style.color = cfg.color;
-          el.style.borderColor = cfg.border;
-          el.style.boxShadow = `0 0 12px ${cfg.shadow}`;
-          el.style.opacity = "1";
-          el.style.fontWeight = "bold";
-        } else {
-          el.classList.remove("active");
-          el.style.background = "rgba(0,0,0,0.4)";
-          el.style.color = "#7f8c8d";
-          el.style.borderColor = "#2d3748";
-          el.style.boxShadow = "";
-          el.style.opacity = "0.45";
-          el.style.fontWeight = "normal";
-        }
+  for (let k in bulkButtons) {
+    let el = document.getElementById(bulkButtons[k]);
+    if (el) {
+      if (parseInt(k, 10) === bulkTarget) {
+        el.classList.add("active");
+        let cfg = configs[k];
+        el.style.background = cfg.bg;
+        el.style.color = cfg.color;
+        el.style.borderColor = cfg.border;
+        el.style.boxShadow = `0 0 12px ${cfg.shadow}`;
+        el.style.opacity = "1";
+        el.style.fontWeight = "bold";
+      } else {
+        el.classList.remove("active");
+        el.style.background = "rgba(0,0,0,0.4)";
+        el.style.color = "#7f8c8d";
+        el.style.borderColor = "#2d3748";
+        el.style.boxShadow = "";
+        el.style.opacity = "0.45";
+        el.style.fontWeight = "normal";
       }
     }
-  };
+  }
+};
 
-  window.executeDisbandClan = function () {
-    window.showCustomConfirm(
-      "DISBAND CLAN",
-      "WARNING: This will permanently dissolve the clan, wipe the vault, and remove all members. This action is IRREVERSIBLE.",
-      "Disband Clan",
-      "Cancel",
-      "#e74c3c",
-      function () {
-        const userId = window.getGameUserId();
-        fetch(`${window.GAME_SERVER_URL}/api/clan/disband`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId }),
+window.executeDisbandClan = function () {
+  window.showCustomConfirm(
+    "DISBAND CLAN",
+    "WARNING: This will permanently dissolve the clan, wipe the vault, and remove all members. This action is IRREVERSIBLE.",
+    "Disband Clan",
+    "Cancel",
+    "#e74c3c",
+    function () {
+      const userId = window.getGameUserId();
+      fetch(`${window.GAME_SERVER_URL}/api/clan/disband`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success) {
+            window.pushHeaderToast("🏰 Clan disbanded.", "#e74c3c");
+            window.playerStats.clanId = null;
+            window.playerStats.clanName = null;
+            let modal = document.getElementById("clan-draggable-window");
+            if (modal) modal.remove();
+            window.hideTooltip();
+            window.updateUI();
+            window.saveGame();
+          } else {
+            window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+          }
         })
-          .then((r) => r.json())
-          .then((data) => {
-            if (data.success) {
-              window.pushHeaderToast("🏰 Clan disbanded.", "#e74c3c");
-              window.playerStats.clanId = null;
-              window.playerStats.clanName = null;
-              let modal = document.getElementById("clan-draggable-window");
-              if (modal) modal.remove();
-              window.hideTooltip();
-              window.updateUI();
-              window.saveGame();
-            } else {
-              window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-            }
-          })
-          .catch(() => {
-            window.pushHeaderToast(
-              "❌ Network error disbanding clan.",
-              "#e74c3c",
-            );
-          });
-      },
-    );
-  };
+        .catch(() => {
+          window.pushHeaderToast(
+            "❌ Network error disbanding clan.",
+            "#e74c3c",
+          );
+        });
+    },
+  );
+};
