@@ -1561,12 +1561,13 @@ window.onload = function () {
 
   // Input Listeners
   window.addEventListener("keydown", function (e) {
-    if (e.code === "Space" && !window.spacePressed) {
-      e.preventDefault();
-      window.spacePressed = true;
-      window.triggerPlayerSlash();
-    }
-  });
+      if (e.code === "Space" && !window.spacePressed) {
+        e.preventDefault();
+        window.spacePressed = true;
+        window.registerMaelstromTap();
+        window.triggerPlayerSlash();
+      }
+    });
   window.addEventListener("keyup", function (e) {
     if (e.code === "Space") {
       window.spacePressed = false;
@@ -1676,9 +1677,10 @@ window.onload = function () {
     }
 
     window.activeCanvasPointers.add(e.pointerId);
-    window.isCanvasPressed = true;
-    window.triggerPlayerSlash();
-    if (typeof window.progressMission === "function") {
+        window.isCanvasPressed = true;
+        window.registerMaelstromTap();
+        window.triggerPlayerSlash();
+        if (typeof window.progressMission === "function") {
       window.progressMission("active_clicks", 1);
     }
   });
@@ -2091,12 +2093,25 @@ function update() {
   }
 
   if (window.playerStats.frenzyTimer > 0) window.playerStats.frenzyTimer--;
-  if (window.playerStats.adrenalineTimer > 0)
-    window.playerStats.adrenalineTimer--;
-  if (window.playerStats.tempestCooldown > 0)
-    window.playerStats.tempestCooldown--;
-  if (window.playerStats.atkPotionTimer > 0)
-    window.playerStats.atkPotionTimer--;
+    if (window.playerStats.adrenalineTimer > 0)
+      window.playerStats.adrenalineTimer--;
+    if (window.playerStats.galeCooldown > 0) window.playerStats.galeCooldown--;
+    if (window.playerStats.warpCoreSprintTimer > 0) {
+      window.playerStats.warpCoreSprintTimer--;
+      if (window.playerStats.warpCoreSprintTimer <= 0) {
+        window.invalidatePlayerStats();
+      }
+    }
+
+    if (window.playerStats.galeResonanceTimer > 0) {
+      window.playerStats.galeResonanceTimer--;
+      if (window.playerStats.galeResonanceTimer <= 0) {
+        window.detonateGaleFlurry();
+      }
+    }
+
+    if (window.playerStats.atkPotionTimer > 0)
+      window.playerStats.atkPotionTimer--;
   if (window.playerStats.hpPotionTimer > 0) window.playerStats.hpPotionTimer--;
   if (window.playerStats.defPotionTimer > 0)
     window.playerStats.defPotionTimer--;
@@ -2862,15 +2877,93 @@ function update() {
 
 // --- GAMEPLAY TRIGGERS & HOOKS ---
 
-window.triggerPlayerSlash = function () {
-  if (window.isGamePaused) return;
-  let p = window.resolvePlayerStats();
-  let cooldownCap =
-    window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
-  if (window.hero.attackTimer > 0) return;
+window.registerMaelstromTap = function () {
+    if (
+      window.equippedSlots.weapon &&
+      window.equippedSlots.weapon.isUniqueMaelstrom &&
+      window.playerStats.galeResonanceTimer > 0
+    ) {
+      let now = Date.now();
+      // Anti-macro: 80ms throttle to prevent macro tools from exploiting speed caps
+      if (!window.playerStats.lastGaleTapTime || now - window.playerStats.lastGaleTapTime >= 80) {
+        window.playerStats.lastGaleTapTime = now;
+        window.playerStats.galeCharges = Math.min(20, (window.playerStats.galeCharges || 0) + 1);
+        window.effects.push({
+          x: window.hero.x,
+          y: window.hero.y - 30,
+          text: `⚡ COMBO: ${window.playerStats.galeCharges}/20`,
+          color: "#00ffcc",
+          life: 30,
+        });
 
-  window.SoundManager.play("swing");
-  window.hero.attackTimer = cooldownCap;
+        // Stack Tornado Alley speed stacking on tap!
+        window.playerStats.maelstromSpeedStacks = Math.min(3, (window.playerStats.maelstromSpeedStacks || 0) + 1);
+        window.playerStats.maelstromSpeedTimer = 360; // 6 seconds
+        window.invalidatePlayerStats();
+        window.updateUI();
+      }
+    }
+  };
+
+  window.detonateGaleFlurry = function () {
+    if (!window.mob || window.mob.hp <= 0) {
+      window.playerStats.galeCharges = 0;
+      return;
+    }
+    let charges = window.playerStats.galeCharges || 0;
+    if (charges <= 0) return;
+
+    window.playerStats.galeCharges = 0;
+    let p = window.resolvePlayerStats();
+    let mobDef = window.mob.def || 0;
+    let flurryDmgPerCharge = Math.ceil(p.atk * 0.15); // 15% weapon scaling per charge
+    flurryDmgPerCharge = Math.max(1, Math.ceil(flurryDmgPerCharge * (100 / (100 + mobDef))));
+    let totalFlurryDmg = flurryDmgPerCharge * charges;
+
+    window.mob.hp -= totalFlurryDmg;
+    window.mob.flashTimer = 10;
+    window.spawnDamageEffect(totalFlurryDmg, "frost", true); // Wind uses frost ice color/icon
+    window.damageHistory.push({ time: Date.now(), amount: totalFlurryDmg });
+
+    window.effects.push({
+      x: window.mob.x + window.mob.w / 2,
+      y: window.mob.y - 15,
+      text: `🌪️ GALE FLURRY! (${charges}x)`,
+      color: "#00ffcc",
+      life: 60,
+    });
+
+    // Draw the physical wind crescents flying!
+    for (let i = 0; i < charges; i++) {
+      setTimeout(() => {
+        if (window.mob && window.mob.hp > 0) {
+          window.particles.push({
+            x: window.hero.x + 35,
+            y: window.hero.y + 10,
+            vx: window.randFloat(4, 7),
+            vy: window.randFloat(-1.5, 1.5),
+            radius: window.randFloat(1.5, 3.5),
+            color: "#00ffcc",
+            alpha: 1,
+            life: 25,
+          });
+        }
+      }, i * 40); // 40ms staggering between crescent sprays
+    }
+
+    if (window.mob.hp <= 0) window.handleMobDeath();
+    window.updateUI();
+  };
+
+  window.triggerPlayerSlash = function () {
+    if (window.isGamePaused) return;
+    let p = window.resolvePlayerStats();
+    let cooldownCap =
+      window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
+    if (window.hero.attackTimer > 0) return;
+
+    window.SoundManager.play("swing");
+    window.hero.attackTimer = cooldownCap;
 
   if (
     window.equippedSlots.weapon &&
@@ -2951,25 +3044,42 @@ window.executeHitCalculations = function () {
       window.damageHistory.push({ time: Date.now(), amount: finalDamage });
     }
 
-    // UNIQUE: Maelstrom Glaive Wind Crescent projectile on critical hit (25% chance)
-    if (
-      window.equippedSlots.weapon &&
-      window.equippedSlots.weapon.isUniqueMaelstrom &&
-      isCrit &&
-      Math.random() < 0.25 &&
-      window.mob &&
-      window.mob.hp > 0
-    ) {
-      window.projectiles.push({
-        x: window.hero.x + 35,
-        y: window.hero.y + 10,
-        r: 12,
-        isMaelstromCrescent: true,
-        hitMobs: [],
-        pulseOffset: Math.random() * 5,
-      });
-      window.SoundManager.play("swing"); // Swoosh sound
-    }
+    // UNIQUE: Maelstrom Glaive Wind Crescent projectile on critical hit and Resonance trigger
+                    if (
+                      window.equippedSlots.weapon &&
+                      window.equippedSlots.weapon.isUniqueMaelstrom &&
+                      isCrit &&
+                      window.mob &&
+                      window.mob.hp > 0
+                    ) {
+                      // Fire wind crescent gale projectile
+                      window.projectiles.push({
+                        x: window.hero.x + 35,
+                        y: window.hero.y + 10,
+                        r: 12,
+                        isMaelstromCrescent: true,
+                        hitMobs: [],
+                        pulseOffset: Math.random() * 5,
+                      });
+                      window.SoundManager.play("swing");
+
+                      // 30% chance to trigger Gale Resonance (Combo active state) on critical strikes
+                      if (
+                        Math.random() < 0.3 &&
+                        (!window.playerStats.galeCooldown || window.playerStats.galeCooldown <= 0)
+                      ) {
+                        window.playerStats.galeResonanceTimer = 300; // 5 seconds combo window
+                        window.playerStats.galeCharges = 0;
+                        window.playerStats.galeCooldown = 900; // 15 seconds cooldown
+                        window.effects.push({
+                          x: window.hero.x + 12,
+                          y: window.hero.y - 20,
+                          text: "🌪️ GALE RESONANCE!",
+                          color: "#00ffcc",
+                          life: 65,
+                        });
+                      }
+                    }
 
     // Stacking Bleed & Sanguine Rupture on hit
     if (
@@ -3283,24 +3393,63 @@ window.handleMobDeath = function () {
   window.effects = window.effects.filter((e) => !e.isCumulative);
   let p = window.resolvePlayerStats();
 
-  // UNIQUE: Maelstrom Glaive Overkill Cleave damage carry-over calculation
+  // Universal Overkill Splash / Stage-Skip Mechanic
   if (
-    window.equippedSlots.weapon &&
-    window.equippedSlots.weapon.isUniqueMaelstrom &&
-    window.mob
+    window.mob &&
+    window.mob.hp < 0 &&
+    !window.playerStats.isDungeonMode &&
+    !window.playerStats.isCrucibleMode &&
+    !window.playerStats.isBossMode &&
+    !window.playerStats.isFarmingLoop
   ) {
-    let overkill = Math.abs(window.mob.hp); // excess damage below 0
-    if (overkill > 0) {
-      window.playerStats.maelstromCleavePool = overkill;
-      if (typeof window.pushLog === "function")
-        window.pushLog(
-          `<strong style='color:#2ecc71;'>[MAELSTROM CLEAVE]</strong> Stored <span style='color:#2ecc71;'>${window.formatNumber(overkill)} overkill damage</span> to unleash on next spawn!`,
-        );
+    let overkillRatio = Math.abs(window.mob.hp) / window.mob.maxHp;
+    if (overkillRatio >= 2.0) { // Overkilled by at least 200% of mob Max HP
+      let extraKills = Math.min(3, Math.floor(overkillRatio)); // Cap at 3 extra progress kills
+      window.playerStats.killCount = Math.min(
+        window.playerStats.targetsRequired,
+        window.playerStats.killCount + extraKills
+      );
+      window.effects.push({
+        x: window.hero.x + 12,
+        y: window.hero.y - 25,
+        text: `💥 OVERKILL SPLASH (+${extraKills})`,
+        color: "#2ecc71",
+        life: 55,
+      });
+      if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
+        window.playerStats.isBossMode = true;
+      }
     }
   }
+
   let isBoss =
     window.mob.type === "boss" ||
     window.mob.type === "dungeon_boss" ||
+    window.mob.type === "dungeon_miniboss" ||
+    window.mob.type === "rift_guardian" ||
+    window.mob.type === "prestige_boss" ||
+    window.mob.type === "aegis_goliath" ||
+    window.mob.type === "chronos_arbitrator" ||
+    window.mob.type === "nexus_overseer";
+
+  // UNIQUE: Warp-Core Greaves "Time Dilation" Boss Kill Haste trigger
+  if (
+    isBoss &&
+    window.equippedSlots.boots &&
+    window.equippedSlots.boots.isUniqueWarpCore &&
+    !window.playerStats.isDungeonMode &&
+    !window.playerStats.isCrucibleMode
+  ) {
+    window.playerStats.warpCoreSprintTimer = 240; // 4 seconds of Max Haste (4-frame cap)
+    window.invalidatePlayerStats();
+    window.effects.push({
+      x: window.hero.x + 12,
+      y: window.hero.y - 12,
+      text: "⚡ MAX HASTE ACTIVE!",
+      color: "#00d2ff",
+      life: 55,
+    });
+  }
     window.mob.type === "dungeon_miniboss" ||
     window.mob.type === "rift_guardian" ||
     window.mob.type === "prestige_boss" ||
@@ -4323,13 +4472,13 @@ window.handlePlayerDefeat = function () {
     }
   }
 
-  document.getElementById("death-stat-kills").innerText = (
-    window.playerStats.runKills || 0
-  ).toLocaleString();
-  document.getElementById("death-stat-run-gold").innerText =
-    `+` + (window.playerStats.runGold || 0).toLocaleString();
-  document.getElementById("death-stat-run-xp").innerText =
-    `+` + (window.playerStats.runXp || 0).toLocaleString();
+  document.getElementById("death-stat-kills").innerText = window.formatNumber(
+      window.playerStats.runKills || 0
+    );
+    document.getElementById("death-stat-run-gold").innerText =
+      `+` + window.formatNumber(window.playerStats.runGold || 0);
+    document.getElementById("death-stat-run-xp").innerText =
+      `+` + window.formatNumber(window.playerStats.runXp || 0);
   document.getElementById("death-tip-text").innerText =
     "Reforging modifiers with Catalyst Cores and tempering weapon components significantly increases battle survivability.";
 
@@ -5368,7 +5517,7 @@ window.showOfflineSummaryModal = function (
             else if (key.includes("Armored Elixir")) color = "#3498db";
             else if (key.includes("Haste Elixir")) color = "#f1c40f";
             else if (key === "PP Reset Scroll") color = "#e67e22";
-            return `<div class="bag-item" style="background:#090a0f; border: 1px solid #222; padding: 6px 10px; border-radius: 4px; font-size: 11px; display:inline-flex; align-items:center; margin: 3px; font-family:monospace;"><span style="color:#aaa; margin-right:4px;">${key}:</span> <strong style="color:${color};">+${scraps[key].toLocaleString()}</strong></div>`;
+            return `<div class="bag-item" style="background:#090a0f; border: 1px solid #222; padding: 6px 10px; border-radius: 4px; font-size: 11px; display:inline-flex; align-items:center; margin: 3px; font-family:monospace;"><span style="color:#aaa; margin-right:4px;">${key}:</span> <strong style="color:${color};">+${window.formatNumber(scraps[key])}</strong></div>`;
           })
           .join("")
       : `<div style="color:#666; font-style:italic; font-size:11px; padding: 5px 0; text-align:center; width:100%;">No materials salvaged.</div>`;
@@ -5386,19 +5535,19 @@ window.showOfflineSummaryModal = function (
                 ${deathAlert}
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
                     <div style="background:rgba(0,0,0,0.55); padding:10px; border-radius:6px; border:1px solid #222; text-align:center; box-shadow: inset 0 0 8px #000;">
-                        <div style="font-size:9px; color:#aaa; margin-bottom:4px; letter-spacing:0.8px; font-weight:bold; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:4px;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6M9 13h6"/></svg>
-                            Gold Accumulated
-                        </div>
-                        <div style="font-size:18px; color:#f1c40f; font-weight:900; font-family:monospace; text-shadow:0 0 10px rgba(241, 196, 15, 0.25);">+${gold.toLocaleString()}</div>
-                    </div>
-                    <div style="background:rgba(0,0,0,0.55); padding:10px; border-radius:6px; border:1px solid #222; text-align:center; box-shadow: inset 0 0 8px #000;">
-                        <div style="font-size:9px; color:#aaa; margin-bottom:4px; letter-spacing:0.8px; font-weight:bold; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:4px;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m17 13-5-5-5 5M17 17l-5-5-5 5"/></svg>
-                            Exp Harvested
-                        </div>
-                        <div style="font-size:18px; color:#9b59b6; font-weight:900; font-family:monospace; text-shadow:0 0 10px rgba(155, 89, 182, 0.25);">+${xp.toLocaleString()}</div>
-                    </div>
+                                            <div style="font-size:9px; color:#aaa; margin-bottom:4px; letter-spacing:0.8px; font-weight:bold; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:4px;">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6M9 13h6"/></svg>
+                                                Gold Accumulated
+                                            </div>
+                                            <div style="font-size:18px; color:#f1c40f; font-weight:900; font-family:monospace; text-shadow:0 0 10px rgba(241, 196, 15, 0.25);">+${window.formatNumber(gold)}</div>
+                                        </div>
+                                        <div style="background:rgba(0,0,0,0.55); padding:10px; border-radius:6px; border:1px solid #222; text-align:center; box-shadow: inset 0 0 8px #000;">
+                                            <div style="font-size:9px; color:#aaa; margin-bottom:4px; letter-spacing:0.8px; font-weight:bold; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:4px;">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m17 13-5-5-5 5M17 17l-5-5-5 5"/></svg>
+                                                Exp Harvested
+                                            </div>
+                                            <div style="font-size:18px; color:#9b59b6; font-weight:900; font-family:monospace; text-shadow:0 0 10px rgba(155, 89, 182, 0.25);">+${window.formatNumber(xp)}</div>
+                                        </div>
                 </div>
                 <div style="background:rgba(0,0,0,0.35); padding:10px; border-radius:6px; margin-bottom:15px; font-size:11.5px; display:flex; justify-content:space-between; border:1px solid #2d3748; align-items:center;">
                     <span style="display:flex; align-items:center; gap:4px;">

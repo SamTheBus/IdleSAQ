@@ -3843,11 +3843,21 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   let finalIdleDivisor = Math.max(0.1, 1 + idleSpeedPct);
-  let finalActiveDivisor = Math.max(0.1, 1 + activeSpeedPct);
-  p.idleAttackSpeed = Math.max(10, Math.round(60 / finalIdleDivisor));
-  p.activeAttackSpeed = Math.max(4, Math.round(15 / finalActiveDivisor));
+    let finalActiveDivisor = Math.max(0.1, 1 + activeSpeedPct);
+    p.idleAttackSpeed = Math.max(10, Math.round(60 / finalIdleDivisor));
+    p.activeAttackSpeed = Math.max(4, Math.round(15 / finalActiveDivisor));
 
-  if (window.playerStats.frenzyTimer > 0) {
+    // UNIQUE: Warp-Core Greaves "Time Dilation" Boss Kill Max Haste trigger
+    if (
+      window.equippedSlots.boots &&
+      window.equippedSlots.boots.isUniqueWarpCore &&
+      window.playerStats.warpCoreSprintTimer > 0
+    ) {
+      p.idleAttackSpeed = 10;
+      p.activeAttackSpeed = 4;
+    }
+
+    if (window.playerStats.frenzyTimer > 0) {
     p.critChance = 1.0;
     p.critDamage += 0.5;
     p.activeAttackSpeed = 4;
@@ -3872,22 +3882,34 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.def = Math.floor(p.def);
   p.moveSpeed = parseFloat(p.moveSpeed.toFixed(1));
 
-  if (
-    window.equippedSlots.boots &&
-    window.equippedSlots.boots.isUniqueWarpCore &&
-    !window.playerStats.isDungeonMode &&
-    !window.playerStats.isCrucibleMode
-  ) {
-    let limit = Math.floor((window.playerStats.lifetimePeakStage || 1) * 0.85);
-    if (window.playerStats.stage < limit) {
-      p.moveSpeed = parseFloat((p.moveSpeed * 2.5).toFixed(1));
-      window.playerStats.targetsRequired = 3;
-    } else {
-      window.playerStats.targetsRequired = 5;
-    }
-  } else {
+  // Set default targets required
     window.playerStats.targetsRequired = 5;
-  }
+
+    // UNIQUE: Warp-Core Greaves "Time Dilation" missing health attack speed scaling
+    if (
+      window.equippedSlots.boots &&
+      window.equippedSlots.boots.isUniqueWarpCore &&
+      window.mob &&
+      window.mob.hp > 0
+    ) {
+      let hpPct = window.mob.hp / window.mob.maxHp;
+      let missingHpPct = 1.0 - hpPct;
+      let speedBonus = Math.min(0.99, missingHpPct); // up to +99% speed
+      idleSpeedPct += speedBonus;
+      activeSpeedPct += speedBonus;
+    }
+
+    // UNIQUE: Maelstrom Gale-Glaive "Tornado Alley" speed stacking
+    if (window.playerStats.maelstromSpeedTimer > 0) {
+      window.playerStats.maelstromSpeedTimer--;
+      if (window.playerStats.maelstromSpeedTimer <= 0) {
+        window.playerStats.maelstromSpeedStacks = 0;
+      }
+    }
+    if (window.playerStats.maelstromSpeedStacks > 0) {
+      idleSpeedPct += window.playerStats.maelstromSpeedStacks * 0.10;
+      activeSpeedPct += window.playerStats.maelstromSpeedStacks * 0.10;
+    }
 
   if (
     window.equippedSlots.subweapon &&

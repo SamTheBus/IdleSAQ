@@ -2047,14 +2047,14 @@ window.showSPConfirmationModal = function () {
     let diff = newVal - curVal;
     if (Math.abs(diff) > 0.0001) {
       let curStr = s.isPct
-        ? Math.round(curVal * 100) + "%"
-        : Math.round(curVal).toLocaleString();
-      let newStr = s.isPct
-        ? Math.round(newVal * 100) + "%"
-        : Math.round(newVal).toLocaleString();
-      let diffStr = s.isPct
-        ? "+" + Math.round(diff * 100) + "%"
-        : "+" + Math.round(diff).toLocaleString();
+              ? Math.round(curVal * 100) + "%"
+              : window.formatNumber(curVal);
+            let newStr = s.isPct
+              ? Math.round(newVal * 100) + "%"
+              : window.formatNumber(newVal);
+            let diffStr = s.isPct
+              ? "+" + Math.round(diff * 100) + "%"
+              : "+" + window.formatNumber(diff);
       diffs.push(`
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:6px; font-family:monospace; background:rgba(255,255,255,0.02); padding:6px 10px; border-radius:4px; border:1px solid #222;">
                     <span style="color:#aaa; font-weight:bold;">${s.label}:</span>
@@ -2155,19 +2155,19 @@ window.showSPPreview = function (e, statKey) {
   ];
 
   statsToCheck.forEach((s) => {
-    let curVal = current[s.key] || 0;
-    let newVal = preview[s.key] || 0;
-    let diff = newVal - curVal;
-    if (Math.abs(diff) > 0.0001) {
-      let curStr = s.isPct
-        ? Math.round(curVal * 100) + "%"
-        : Math.round(curVal).toLocaleString();
-      let newStr = s.isPct
-        ? Math.round(newVal * 100) + "%"
-        : Math.round(newVal).toLocaleString();
-      let diffStr = s.isPct
-        ? "+" + Math.round(diff * 100) + "%"
-        : "+" + Math.round(diff).toLocaleString();
+      let curVal = current[s.key] || 0;
+      let newVal = preview[s.key] || 0;
+      let diff = newVal - curVal;
+      if (Math.abs(diff) > 0.0001) {
+        let curStr = s.isPct
+          ? Math.round(curVal * 100) + "%"
+          : window.formatNumber(curVal);
+        let newStr = s.isPct
+          ? Math.round(newVal * 100) + "%"
+          : window.formatNumber(newVal);
+        let diffStr = s.isPct
+          ? "+" + Math.round(diff * 100) + "%"
+          : "+" + window.formatNumber(diff);
       diffs.push(`
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:4px; font-family:monospace;">
                     <span style="color:#aaa;">${s.label}:</span>
@@ -2909,7 +2909,7 @@ window.showStatBreakdown = function (e, statKey, isPct = false) {
   }
 
   let formatVal = (v) =>
-    isPct ? `+${Math.floor(v * 100)}%` : `+${v.toLocaleString()}`;
+      isPct ? `+${Math.floor(v * 100)}%` : `+${window.formatNumber(v)}`;
   if (statKey === "gold")
     formatVal = (v) =>
       `+${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -2947,20 +2947,20 @@ window.showStatBreakdown = function (e, statKey, isPct = false) {
     prestigeTotal +
     setFlatBonus;
   if (statKey === "atk" && effectiveStr > 0) {
-    let actualDmgAdded = Math.floor(totalVal * (effectiveStr * 0.003));
-    html += `<div class="tt-stat-line" style="color:#e67e22;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${actualDmgAdded} Damage</div>`;
-    html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
-  }
-  if (statKey === "maxHp" && effectiveStr > 0) {
-    let hpBonus = Math.floor(totalVal * (effectiveStr * 0.003));
-    html += `<div class="tt-stat-line" style="color:#e74c3c;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${hpBonus.toLocaleString()} HP</div>`;
-    html += `<div class="tt-stat-line" style="color:#e74c3c; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
-  }
-  if (statKey === "def" && effectiveInt > 0) {
-    let logarithmicIntPct = Math.log10(effectiveInt + 1) * 0.15;
-    html += `<div class="tt-stat-line" style="color:#9b59b6;">• ${window.getUiIconSvg("int", 11)} Intelligence Scaling (INT): +${Math.floor(totalVal * logarithmicIntPct)} Defense</div>`;
-    html += `<div class="tt-stat-line" style="color:#9b59b6; font-style:italic;">  (+${(logarithmicIntPct * 100).toFixed(1)}% Multiplier)</div>`;
-  }
+      let actualDmgAdded = Math.floor(totalVal * (effectiveStr * 0.003));
+      html += `<div class="tt-stat-line" style="color:#e67e22;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(actualDmgAdded)} Damage</div>`;
+      html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
+    }
+    if (statKey === "maxHp" && effectiveStr > 0) {
+      let hpBonus = Math.floor(totalVal * (effectiveStr * 0.003));
+      html += `<div class="tt-stat-line" style="color:#e74c3c;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(hpBonus)} HP</div>`;
+      html += `<div class="tt-stat-line" style="color:#e74c3c; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
+    }
+    if (statKey === "def" && effectiveInt > 0) {
+      let logarithmicIntPct = Math.log10(effectiveInt + 1) * 0.15;
+      html += `<div class="tt-stat-line" style="color:#9b59b6;">• ${window.getUiIconSvg("int", 11)} Intelligence Scaling (INT): +${window.formatNumber(Math.floor(totalVal * logarithmicIntPct))} Defense</div>`;
+      html += `<div class="tt-stat-line" style="color:#9b59b6; font-style:italic;">  (+${(logarithmicIntPct * 100).toFixed(1)}% Multiplier)</div>`;
+    }
   if (statKey === "moveSpeed" && effectiveDex > 0) {
     let scaleVal = (effectiveDex * 20) / (effectiveDex + 150);
     html += `<div class="tt-stat-line" style="color:#3498db;">• ${window.getUiIconSvg("dex", 11)} Dexterity Scaling (DEX): +${scaleVal.toFixed(1)} Speed</div>`;
@@ -3427,12 +3427,15 @@ window.renderPrestigeTab = function () {
   let estShards = Math.round(11 * rewardMultiplier);
 
   let challengeBtnHtml = "";
-  if (p.level < 25) {
-    challengeBtnHtml = `<button class="btn-action" style="background:#333; color:#777; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #444; cursor:not-allowed;" disabled>🔒 Level 25 Required</button>`;
-  } else if (p.maxStage < 80) {
-    challengeBtnHtml = `<button class="btn-action" style="background:#2c1a1a; color:#e74c3c; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #781c1c; cursor:not-allowed;" disabled>🔒 Reach Stage 80 (Peak: ${p.maxStage})</button>`;
-  } else {
-    challengeBtnHtml = `
+    let peak = p.lifetimePeakStage || 1;
+    let requiredStage = Math.max(80, Math.floor(peak * 0.9));
+
+    if (p.level < 25) {
+      challengeBtnHtml = `<button class="btn-action" style="background:#333; color:#777; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #444; cursor:not-allowed;" disabled>🔒 Level 25 Required</button>`;
+    } else if (p.maxStage < requiredStage) {
+      challengeBtnHtml = `<button class="btn-action" style="background:#2c1a1a; color:#e74c3c; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #781c1c; cursor:not-allowed;" disabled>🔒 Reach Stage ${requiredStage} (90% of Peak ${peak})</button>`;
+    } else {
+      challengeBtnHtml = `
       <button class="btn-action btn-pulse" style="background:#e74c3c; color:white; width:100%; padding:12px; font-weight:bold; font-size:11.5px; border:1px solid #f1c40f; text-shadow:0 1px 2px #000; box-shadow:0 4px 12px rgba(231,76,60,0.35); text-transform:uppercase; letter-spacing:0.5px;" onclick="window.challengeHooktail()">
           Challenge Hooktail
       </button>
@@ -3611,11 +3614,12 @@ window.challengeHooktail = function () {
     return;
   }
 
-  // Hooktail Stage requirements - check peak run stage (maxStage) instead of current stage
-  let requiredStage = window.playerStats.prestigeCount === 0 ? 80 : 1;
+  // Hooktail Stage requirements - check current run's maxStage meets 90% of peak Stage (with 80 floor) [1]
+  let peak = window.playerStats.lifetimePeakStage || 1;
+  let requiredStage = Math.max(80, Math.floor(peak * 0.9));
   if (window.playerStats.maxStage < requiredStage) {
     window.pushHeaderToast(
-      `Requires Campaign Peak Stage ${requiredStage} to challenge Hooktail!`,
+      `Requires current run Max Stage ${requiredStage} (90% of Peak ${peak}) to challenge Hooktail!`,
       "#e74c3c",
     );
     return;
@@ -3718,12 +3722,17 @@ window.triggerPrestigeAscension = function () {
   }
 
   window.playerStats.level = 1;
-  window.playerStats.xp = 0;
-  window.playerStats.xpReq = 100;
-  window.playerStats.stage = 1;
-  window.playerStats.maxStage = 1;
-  window.playerStats.crucibleWave = 1;
-  window.playerStats.crucibleStartWave = 1;
+    window.playerStats.xp = 0;
+    window.playerStats.xpReq = 100;
+
+    // Advanced Start (50% of peak Stage, with floor of 1) [1]
+    let peak = window.playerStats.lifetimePeakStage || 1;
+    let advancedStart = Math.max(1, Math.floor(peak * 0.5));
+    window.playerStats.stage = advancedStart;
+    window.playerStats.maxStage = advancedStart;
+
+    window.playerStats.crucibleWave = 1;
+    window.playerStats.crucibleStartWave = 1;
   window.playerStats.isPrestigeBossMode = false;
   window.playerStats.prestigeApproachTimer = 0;
   window.mob = null;
@@ -4190,24 +4199,24 @@ window.renderPaperDoll = function () {
       if (isArt) {
         el.innerHTML = `${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
       } else {
-        let s = [];
-        let sPlain = [];
-        if (item.atk > 0) {
-          s.push(`${window.getUiIconSvg("atk", 9.5)}${item.atk}`);
-          sPlain.push(`Atk: ${item.atk}`);
-        }
-        if (item.maxHp > 0) {
-          s.push(`${window.getUiIconSvg("maxHp", 9.5)}${item.maxHp}`);
-          sPlain.push(`HP: ${item.maxHp}`);
-        }
-        if (item.def > 0) {
-          s.push(`${window.getUiIconSvg("def", 9.5)}${item.def}`);
-          sPlain.push(`Def: ${item.def}`);
-        }
-        if (item.moveSpeed > 0) {
-          s.push(`${window.getUiIconSvg("moveSpeed", 9.5)}${item.moveSpeed}`);
-          sPlain.push(`Speed: ${item.moveSpeed}`);
-        }
+              let s = [];
+              let sPlain = [];
+              if (item.atk > 0) {
+                s.push(`${window.getUiIconSvg("atk", 9.5)}${window.formatNumber(item.atk)}`);
+                sPlain.push(`Atk: ${window.formatNumber(item.atk)}`);
+              }
+              if (item.maxHp > 0) {
+                s.push(`${window.getUiIconSvg("maxHp", 9.5)}${window.formatNumber(item.maxHp)}`);
+                sPlain.push(`HP: ${window.formatNumber(item.maxHp)}`);
+              }
+              if (item.def > 0) {
+                s.push(`${window.getUiIconSvg("def", 9.5)}${window.formatNumber(item.def)}`);
+                sPlain.push(`Def: ${window.formatNumber(item.def)}`);
+              }
+              if (item.moveSpeed > 0) {
+                s.push(`${window.getUiIconSvg("moveSpeed", 9.5)}${window.formatNumber(item.moveSpeed)}`);
+                sPlain.push(`Speed: ${window.formatNumber(item.moveSpeed)}`);
+              }
         if (item.critChance > 0) {
           s.push(
             `${window.getUiIconSvg("critChance", 9.5)}${Math.floor(item.critChance * 100)}%`,
@@ -4793,58 +4802,58 @@ window.generateItemCardHtml = function (
   }
 
   // --- BASE STATS SECTION ---
-  if (item.id !== "dummy" && item.type !== "artifact") {
-    let baseStats = [];
+    if (item.id !== "dummy" && item.type !== "artifact") {
+      let baseStats = [];
 
-    if (item.baseAtk > 0) {
-      baseStats.push({
-        label: "Weapon Damage",
-        val: Math.round(item.baseAtk),
-        icon: window.getUiIconSvg("atk", 14),
-      });
-    }
-    if (item.baseDef > 0) {
-      baseStats.push({
-        label: "Armor",
-        val: Math.round(item.baseDef),
-        icon: window.getUiIconSvg("def", 14),
-      });
-    }
-    if (item.baseMaxHp > 0) {
-      baseStats.push({
-        label: "Max Life",
-        val: Math.round(item.baseMaxHp),
-        icon: window.getUiIconSvg("maxHp", 14),
-      });
-    }
-    if (item.baseMoveSpeed > 0) {
-      baseStats.push({
-        label: "Speed",
-        val: Math.round(item.baseMoveSpeed),
-        icon: window.getUiIconSvg("moveSpeed", 14),
-      });
-    }
-    if (item.baseBlock > 0) {
-      baseStats.push({
-        label: "Block Rate",
-        val: Math.round(item.baseBlock * 100) + "%",
-        icon: window.getUiIconSvg("block", 14),
-      });
-    }
-    if (item.baseParry > 0) {
-      baseStats.push({
-        label: "Parry Rate",
-        val: Math.round(item.baseParry * 100) + "%",
-        icon: window.getUiIconSvg("parry", 14),
-      });
-    }
-    if (item.baseInt > 0) {
-      baseStats.push({
-        label: "Intelligence",
-        val: Math.round(item.baseInt),
-        icon: window.getUiIconSvg("int", 14),
-      });
-    }
+      if (item.baseAtk > 0) {
+        baseStats.push({
+          label: "Weapon Damage",
+          val: window.formatNumber(item.baseAtk),
+          icon: window.getUiIconSvg("atk", 14),
+        });
+      }
+      if (item.baseDef > 0) {
+        baseStats.push({
+          label: "Armor",
+          val: window.formatNumber(item.baseDef),
+          icon: window.getUiIconSvg("def", 14),
+        });
+      }
+      if (item.baseMaxHp > 0) {
+        baseStats.push({
+          label: "Max Life",
+          val: window.formatNumber(item.baseMaxHp),
+          icon: window.getUiIconSvg("maxHp", 14),
+        });
+      }
+      if (item.baseMoveSpeed > 0) {
+        baseStats.push({
+          label: "Speed",
+          val: window.formatNumber(item.baseMoveSpeed),
+          icon: window.getUiIconSvg("moveSpeed", 14),
+        });
+      }
+      if (item.baseBlock > 0) {
+        baseStats.push({
+          label: "Block Rate",
+          val: Math.round(item.baseBlock * 100) + "%",
+          icon: window.getUiIconSvg("block", 14),
+        });
+      }
+      if (item.baseParry > 0) {
+        baseStats.push({
+          label: "Parry Rate",
+          val: Math.round(item.baseParry * 100) + "%",
+          icon: window.getUiIconSvg("parry", 14),
+        });
+      }
+      if (item.baseInt > 0) {
+        baseStats.push({
+          label: "Intelligence",
+          val: window.formatNumber(item.baseInt),
+          icon: window.getUiIconSvg("int", 14),
+        });
+      }
 
     if (baseStats.length > 0) {
       html += `<div style="background: rgba(255, 255, 255, 0.02); border: 1px solid #222; border-radius: 4px; padding: 6px; margin: 8px 0; text-align: center;">`;
@@ -4943,13 +4952,13 @@ window.generateItemCardHtml = function (
           affixVal > 0)
       ) {
         let displayVal = "";
-        if (s.isDoublePct) {
-          displayVal = `+${(affixVal * 100).toFixed(2)}%`;
-        } else if (s.isPct) {
-          displayVal = `+${Math.floor(affixVal * 100)}%`;
-        } else {
-          displayVal = `+${Math.round(affixVal).toLocaleString()}`;
-        }
+                if (s.isDoublePct) {
+                  displayVal = `+${(affixVal * 100).toFixed(2)}%`;
+                } else if (s.isPct) {
+                  displayVal = `+${Math.floor(affixVal * 100)}%`;
+                } else {
+                  displayVal = `+${window.formatNumber(affixVal)}`;
+                }
 
         let iconSvg = window.getUiIconSvg(s.key, 11);
         let rangeStr = window.formatStatRangeStr
@@ -5029,19 +5038,19 @@ window.generateItemCardHtml = function (
     ];
 
     statsList.forEach((s) => {
-      let val = item[s.key] || 0;
-      let eqVal = compareItem[s.key] || 0;
-      let diff = val - eqVal;
-      if (Math.abs(diff) > 0.001) {
-        hasDiffs = true;
-        let isPct =
-          s.isPct || ["activeAttackSpeed", "idleAttackSpeed"].includes(s.key);
-        let isPositive = s.inverseGood ? diff < 0 : diff > 0;
-        let color = isPositive ? "#2ecc71" : "#e74c3c";
-        let sign = diff > 0 ? "+" : "";
-        let diffStr = isPct
-          ? sign + Math.round(diff * 100) + "%"
-          : sign + Math.round(diff).toLocaleString();
+                       let val = item[s.key] || 0;
+                       let eqVal = compareItem[s.key] || 0;
+                       let diff = val - eqVal;
+                       if (Math.abs(diff) > 0.001) {
+                         hasDiffs = true;
+                         let isPct =
+                           s.isPct || ["activeAttackSpeed", "idleAttackSpeed"].includes(s.key);
+                         let isPositive = s.inverseGood ? diff < 0 : diff > 0;
+                         let color = isPositive ? "#2ecc71" : "#e74c3c";
+                         let sign = diff > 0 ? "+" : "";
+                         let diffStr = isPct
+                           ? sign + Math.round(diff * 100) + "%"
+                           : sign + window.formatNumber(diff);
         let emoji = s.icon ? s.icon + " " : "";
         let sLabel = window.getStatLabel(s.key);
 
@@ -6510,13 +6519,12 @@ window.devSpawnUnique = function () {
       newItem.desc =
         "Glows for 7s every 30s. Tap during window to enter 5s Storing state, then detonates spatial collapse.";
     } else if (sub === "maelstrom") {
-      newItem.isUniqueMaelstrom = true;
-      newItem.noun = "Maelstrom Glaive";
-      newItem.setName = null;
-      newItem.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${lvl})`;
-      newItem.desc =
-        "Overkill damage cleaves on next spawn. Critical strikes have 25% chance to project piercing gales.";
-    } else if (sub === "aegis") {
+              item.isUniqueMaelstrom = true;
+              item.noun = "Maelstrom Glaive";
+              item.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${lvl})`;
+              item.desc =
+                "Critical strikes project piercing wind gales. Casting gales grants +10% Active & Idle Attack Speed for 6s (stacks up to 3x).";
+            } else if (sub === "aegis") {
       newItem.subType = "shield";
       newItem.isUniqueAegis = true;
       newItem.noun = "Void-Warped Aegis";
@@ -6541,13 +6549,12 @@ window.devSpawnUnique = function () {
       newItem.desc =
         "Boosts XP gain by +200% and bypasses level locks while below 75% peak level.";
     } else if (sub === "warpcore") {
-      newItem.isUniqueWarpCore = true;
-      newItem.noun = "Warp-Core Greaves";
-      newItem.setName = null;
-      newItem.name = `⚡ Warp-Core Greaves (Lv. ${lvl})`;
-      newItem.desc =
-        "While below 85% Peak Stage: +150% sprint speed, and kills count as 2.";
-    } else if (sub === "tempest") {
+              item.isUniqueWarpCore = true;
+              item.noun = "Warp-Core Greaves";
+              item.name = `⚡ Warp-Core Greaves (Lv. ${lvl})`;
+              item.desc =
+                "Time Dilation: Attacks speed up by +1% for every 1% of target missing health (up to +99%). Boss kills grant 4s of Maximum Haste.";
+            } else if (sub === "tempest") {
       newItem.isUniqueTempest = true;
       newItem.noun = "Crown of Tempests";
       newItem.setName = null;

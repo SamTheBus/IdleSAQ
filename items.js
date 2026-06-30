@@ -95,25 +95,25 @@ window.getForgeDiffLines = function (item, previewItem) {
     },
   ];
   baseStatsToCompare.forEach((s) => {
-    let curVal = item[s.key] || 0;
-    let newVal = previewItem[s.key] || 0;
-    let diff = newVal - curVal;
-    if (diff > 0.001) {
-      diffLines += `
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; background:rgba(26,188,156,0.06); padding:6px 8px; border-radius:3px; margin-bottom:4px; border:1px solid #1abc9c;">
-                    <span style="color:#1abc9c; font-weight:bold;">${s.icon} ${s.label}</span>
-                    <span style="font-family:monospace;">
-                        <span style="color:#7f8c8d;">${Math.round(curVal)}</span> ➔
-                        <strong style="color:#fff;">${Math.round(newVal)}</strong>
-                        <span style="color:#2ecc71; font-weight:bold; margin-left:4px;">(+${Math.round(diff)})</span>
-                    </span>
-                </div>
-            `;
-    }
-  });
+      let curVal = item[s.key] || 0;
+      let newVal = previewItem[s.key] || 0;
+      let diff = newVal - curVal;
+      if (diff > 0.001) {
+        diffLines += `
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; background:rgba(26,188,156,0.06); padding:6px 8px; border-radius:3px; margin-bottom:4px; border:1px solid #1abc9c;">
+                      <span style="color:#1abc9c; font-weight:bold;">${s.icon} ${s.label}</span>
+                      <span style="font-family:monospace;">
+                          <span style="color:#7f8c8d;">${window.formatNumber(curVal)}</span> ➔
+                          <strong style="color:#fff;">${window.formatNumber(newVal)}</strong>
+                          <span style="color:#2ecc71; font-weight:bold; margin-left:4px;">(+${window.formatNumber(diff)})</span>
+                      </span>
+                  </div>
+              `;
+      }
+    });
 
-  // 2. Render combined total / affix parameters comparative
-  let statsToCompare = [
+    // 2. Render combined total / affix parameters comparative
+    let statsToCompare = [
     {
       key: "atk",
       icon: window.getUiIconSvg("atk", 11),
@@ -225,25 +225,25 @@ window.getForgeDiffLines = function (item, previewItem) {
     },
   ];
   statsToCompare.forEach((s) => {
-    let curVal = item[s.key] || 0;
-    let newVal = previewItem[s.key] || 0;
-    let diff = newVal - curVal;
-    if (Math.abs(diff) > 0.0001) {
-      let curValStr = s.isPct
-        ? s.isDoublePct
-          ? (curVal * 100).toFixed(2) + "%"
-          : Math.round(curVal * 100) + "%"
-        : Math.round(curVal).toLocaleString();
-      let newValStr = s.isPct
-        ? s.isDoublePct
-          ? (newVal * 100).toFixed(2) + "%"
-          : Math.round(newVal * 100) + "%"
-        : Math.round(newVal).toLocaleString();
-      let diffStr = s.isPct
-        ? s.isDoublePct
-          ? (diff * 100).toFixed(2) + "%"
-          : Math.round(diff * 100) + "%"
-        : Math.round(diff).toLocaleString();
+      let curVal = item[s.key] || 0;
+      let newVal = previewItem[s.key] || 0;
+      let diff = newVal - curVal;
+      if (Math.abs(diff) > 0.0001) {
+        let curValStr = s.isPct
+          ? s.isDoublePct
+            ? (curVal * 100).toFixed(2) + "%"
+            : Math.round(curVal * 100) + "%"
+          : window.formatNumber(curVal);
+        let newValStr = s.isPct
+          ? s.isDoublePct
+            ? (newVal * 100).toFixed(2) + "%"
+            : Math.round(newVal * 100) + "%"
+          : window.formatNumber(newVal);
+        let diffStr = s.isPct
+          ? s.isDoublePct
+            ? (diff * 100).toFixed(2) + "%"
+            : Math.round(diff * 100) + "%"
+          : window.formatNumber(diff);
 
       diffLines += `
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; background:rgba(0,0,0,0.4); padding:6px 8px; border-radius:3px; margin-bottom:4px; border:1px solid #333;">
@@ -792,9 +792,9 @@ window.createItemObject = function (
   }
 
   let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
-  // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-  let expScale = Math.pow(1.58, stageScale);
-  let hpDefExpScale = Math.pow(1.56, stageScale);
+    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
+    let expScale = Math.pow(1.18, stageScale) * Math.pow(stageScale, 3.5);
+    let hpDefExpScale = Math.pow(1.16, stageScale) * Math.pow(stageScale, 3.5);
 
   // Apply baseline attribute values matching slot configurations (Slot-Specific Base Stats)
   if (!isArt) {
@@ -990,17 +990,17 @@ window.createItemObject = function (
         (window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4),
       );
     } else if (selectedStat === "str")
-      item.bonusStr += Math.ceil(
-        window.randInt(1, 3) * stageScale * rarityMult * prestigeMult,
-      );
-    else if (selectedStat === "dex")
-      item.bonusDex += Math.ceil(
-        window.randInt(1, 3) * stageScale * rarityMult * prestigeMult,
-      );
-    else if (selectedStat === "int")
-      item.bonusInt += Math.ceil(
-        window.randInt(1, 3) * stageScale * rarityMult * prestigeMult,
-      );
+            item.bonusStr += Math.ceil(
+              window.randInt(1, 3) * Math.pow(stageScale, 1.8) * rarityMult * prestigeMult,
+            );
+          else if (selectedStat === "dex")
+            item.bonusDex += Math.ceil(
+              window.randInt(1, 3) * Math.pow(stageScale, 1.8) * rarityMult * prestigeMult,
+            );
+          else if (selectedStat === "int")
+            item.bonusInt += Math.ceil(
+              window.randInt(1, 3) * Math.pow(stageScale, 1.8) * rarityMult * prestigeMult,
+            );
     else if (selectedStat === "dropRate")
       item.dropRate += parseFloat(
         (window.randFloat(0.02, 0.05) * rarityMult * prestigeMult).toFixed(4),
@@ -1075,12 +1075,12 @@ window.createItemObject = function (
             "Glows for 7s every 30s. Tap during window to enter 5s Storing state, then detonates spatial collapse.";
         } else if (selected === "maelstrom") {
           item.isUniqueMaelstrom = true;
-          item.noun = "Maelstrom Glaive";
-          item.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${stageScale})`;
-          item.desc =
-            "Excess overkill damage cleaves onto next spawn. Critical strikes have 25% chance to project piercing gales.";
-        }
-      } else if (chosenType === "subweapon") {
+                    item.noun = "Maelstrom Glaive";
+                    item.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${stageScale})`;
+                    item.desc =
+                      "Critical strikes project piercing wind gales. Casting gales grants +10% Active & Idle Attack Speed for 6s (stacks up to 3x).";
+                  }
+                } else if (chosenType === "subweapon") {
         let subOptions = ["aegis", "watch", "chronicle"];
         let selected =
           subOptions[Math.floor(Math.random() * subOptions.length)];
@@ -1108,12 +1108,12 @@ window.createItemObject = function (
             "Boosts XP gain by +200% and bypasses level locks while below 75% peak level.";
         }
       } else if (chosenType === "boots") {
-        item.isUniqueWarpCore = true;
-        item.noun = "Warp-Core Greaves";
-        item.name = `⚡ Warp-Core Greaves (Lv. ${stageScale})`;
-        item.desc =
-          "While below 85% Peak Stage: +150% sprint speed, and kills count as 2.";
-      } else if (chosenType === "helmet") {
+              item.isUniqueWarpCore = true;
+              item.noun = "Warp-Core Greaves";
+              item.name = `⚡ Warp-Core Greaves (Lv. ${stageScale})`;
+              item.desc =
+                "Time Dilation: Attacks speed up by +1% for every 1% of target missing health (up to +99%). Boss kills grant 4s of Maximum Haste.";
+            } else if (chosenType === "helmet") {
         item.isUniqueTempest = true;
         item.noun = "Crown of Tempests";
         item.name = `👑 Crown of crackling Tempests (Lv. ${stageScale})`;
@@ -1179,8 +1179,8 @@ window.getStatBaseRange = function (item, statKey) {
   let stageLevel = item.stageLevel || 1;
   let isArt = item.type === "artifact";
   let rarityMult = isArt ? 1.45 : 1 + (item.statsRolled || 0) * 0.15;
-  let expScale = Math.pow(1.58, stageLevel);
-  let hpDefExpScale = Math.pow(1.56, stageLevel);
+  let expScale = Math.pow(1.18, stageLevel) * Math.pow(stageLevel, 3.5);
+  let hpDefExpScale = Math.pow(1.16, stageLevel) * Math.pow(stageLevel, 3.5);
 
   let min = 0;
   let max = 0;
@@ -1201,14 +1201,14 @@ window.getStatBaseRange = function (item, statKey) {
     min += Math.ceil(1 * stageLevel * rarityMult);
     max += Math.ceil(2 * stageLevel * rarityMult);
   } else if (statKey === "str" && (item.bonusStr > 0 || isArt)) {
-    min += Math.ceil(1 * stageLevel * rarityMult);
-    max += Math.ceil(3 * stageLevel * rarityMult);
-  } else if (statKey === "dex" && (item.bonusDex > 0 || isArt)) {
-    min += Math.ceil(1 * stageLevel * rarityMult);
-    max += Math.ceil(3 * stageLevel * rarityMult);
-  } else if (statKey === "int" && (item.bonusInt > 0 || isArt)) {
-    min += Math.ceil(1 * stageLevel * rarityMult);
-    max += Math.ceil(3 * stageLevel * rarityMult);
+      min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
+      max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
+    } else if (statKey === "dex" && (item.bonusDex > 0 || isArt)) {
+      min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
+      max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
+    } else if (statKey === "int" && (item.bonusInt > 0 || isArt)) {
+      min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
+      max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
   } else if (statKey === "critChance" && item.bonusCritChance > 0) {
     min += 0.01 * Math.sqrt(stageLevel) * rarityMult;
     max += 0.025 * Math.sqrt(stageLevel) * rarityMult;
@@ -1323,12 +1323,9 @@ window.getStatBaseRange = function (item, statKey) {
         max *= multiplier;
       }
       if (statKey === "moveSpeed") {
-        min += tempers;
-        max += tempers;
-      } else if (statKey === "str" || statKey === "dex" || statKey === "int") {
-        min += tempers;
-        max += tempers;
-      } else if (statKey === "critChance") {
+                min += tempers;
+                max += tempers;
+              } else if (statKey === "critChance") {
         min += tempers * 0.005;
         max += tempers * 0.005;
       } else if (statKey === "critDamage") {
@@ -1386,9 +1383,9 @@ window.formatStatRangeStr = function (item, statKey, isPct = false) {
     minStr = Math.floor(range.min * 100) + "%";
     maxStr = Math.floor(range.max * 100) + "%";
   } else {
-    minStr = Math.round(range.min).toLocaleString();
-    maxStr = Math.round(range.max).toLocaleString();
-  }
+      minStr = window.formatNumber(range.min);
+      maxStr = window.formatNumber(range.max);
+    }
 
   if (minStr === maxStr) {
     return ` <span style="color:#7f8c8d; font-size:9px;">[${minStr}]</span>`;
@@ -1460,8 +1457,8 @@ window.recalculateItemStats = function (item) {
   item.bonusInt = item.bonusInt || 0;
 
   // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-  let expScale = Math.pow(1.58, item.stageLevel || 1);
-  let hpDefExpScale = Math.pow(1.56, item.stageLevel || 1);
+  let expScale = Math.pow(1.18, item.stageLevel || 1) * Math.pow(item.stageLevel || 1, 3.5);
+  let hpDefExpScale = Math.pow(1.16, item.stageLevel || 1) * Math.pow(item.stageLevel || 1, 3.5);
   let prestigeCount = window.playerStats.prestigeCount || 0;
   let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
 
@@ -1746,10 +1743,10 @@ window.addRandomStatLineToItem = function (item) {
   }
 
   let selectedStat = pool[Math.floor(Math.random() * pool.length)];
-  let stageScale = item.stageLevel || 1;
-  // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-  let expScale = Math.pow(1.58, stageScale);
-  let hpDefExpScale = Math.pow(1.56, stageScale);
+    let stageScale = item.stageLevel || 1;
+    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
+    let expScale = Math.pow(1.18, stageScale) * Math.pow(stageScale, 3.5);
+    let hpDefExpScale = Math.pow(1.16, stageScale) * Math.pow(stageScale, 3.5);
   let rarityMult = 1 + item.statsRolled * 0.15;
   let prestigeMult = Math.pow(1.08, window.playerStats.prestigeCount || 0);
 
@@ -1816,17 +1813,17 @@ window.addRandomStatLineToItem = function (item) {
       ).toFixed(4),
     );
   } else if (selectedStat === "str")
-    item.bonusStr += Math.ceil(
-      window.randInt(1, 3) * stageScale * rarityMult * prestigeMult,
-    );
-  else if (selectedStat === "dex")
-    item.bonusDex += Math.ceil(
-      window.randInt(1, 3) * stageScale * rarityMult * prestigeMult,
-    );
-  else if (selectedStat === "int")
-    item.bonusInt += Math.ceil(
-      window.randInt(1, 3) * stageScale * rarityMult * prestigeMult,
-    );
+        item.bonusStr += Math.ceil(
+          window.randInt(1, 3) * Math.pow(stageScale, 1.8) * rarityMult * prestigeMult,
+        );
+      else if (selectedStat === "dex")
+        item.bonusDex += Math.ceil(
+          window.randInt(1, 3) * Math.pow(stageScale, 1.8) * rarityMult * prestigeMult,
+        );
+      else if (selectedStat === "int")
+        item.bonusInt += Math.ceil(
+          window.randInt(1, 3) * Math.pow(stageScale, 1.8) * rarityMult * prestigeMult,
+        );
 
   window.recalculateItemStats(item);
 };
