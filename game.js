@@ -1158,6 +1158,20 @@ window.applySaveStatePayload = function (parsed, skipOfflineGains = false) {
     if (window.playerStats.cosmeticSkin === undefined) {
       window.playerStats.cosmeticSkin = "default";
     }
+    if (window.playerStats.unlockedSkins === undefined) {
+      window.playerStats.unlockedSkins = ["default"];
+      if (
+        window.playerStats.cosmeticSkin !== "default" &&
+        !window.playerStats.unlockedSkins.includes(
+          window.playerStats.cosmeticSkin,
+        )
+      ) {
+        window.playerStats.unlockedSkins.push(window.playerStats.cosmeticSkin);
+      }
+    }
+    if (window.playerStats.unlockedSkins.length === 0) {
+      window.playerStats.unlockedSkins = ["default"];
+    }
     if (window.playerStats.equippedTitle === undefined) {
       window.playerStats.equippedTitle = null;
     }
@@ -1437,10 +1451,6 @@ window.loadGameAndSyncCloud = function () {
   ) {
     autoSalvageSelect.value = window.playerStats.autoSalvageThreshold;
   }
-  let skinSelect = document.getElementById("settings-cosmetic-skin");
-  if (skinSelect && window.playerStats.cosmeticSkin !== undefined) {
-    skinSelect.value = window.playerStats.cosmeticSkin;
-  }
   if (typeof window.refreshMarketShopIfNeeded === "function")
     window.refreshMarketShopIfNeeded();
 
@@ -1561,13 +1571,13 @@ window.onload = function () {
 
   // Input Listeners
   window.addEventListener("keydown", function (e) {
-      if (e.code === "Space" && !window.spacePressed) {
-        e.preventDefault();
-        window.spacePressed = true;
-        window.registerMaelstromTap();
-        window.triggerPlayerSlash();
-      }
-    });
+    if (e.code === "Space" && !window.spacePressed) {
+      e.preventDefault();
+      window.spacePressed = true;
+      window.registerMaelstromTap();
+      window.triggerPlayerSlash();
+    }
+  });
   window.addEventListener("keyup", function (e) {
     if (e.code === "Space") {
       window.spacePressed = false;
@@ -1677,10 +1687,10 @@ window.onload = function () {
     }
 
     window.activeCanvasPointers.add(e.pointerId);
-        window.isCanvasPressed = true;
-        window.registerMaelstromTap();
-        window.triggerPlayerSlash();
-        if (typeof window.progressMission === "function") {
+    window.isCanvasPressed = true;
+    window.registerMaelstromTap();
+    window.triggerPlayerSlash();
+    if (typeof window.progressMission === "function") {
       window.progressMission("active_clicks", 1);
     }
   });
@@ -2093,25 +2103,25 @@ function update() {
   }
 
   if (window.playerStats.frenzyTimer > 0) window.playerStats.frenzyTimer--;
-    if (window.playerStats.adrenalineTimer > 0)
-      window.playerStats.adrenalineTimer--;
-    if (window.playerStats.galeCooldown > 0) window.playerStats.galeCooldown--;
-    if (window.playerStats.warpCoreSprintTimer > 0) {
-      window.playerStats.warpCoreSprintTimer--;
-      if (window.playerStats.warpCoreSprintTimer <= 0) {
-        window.invalidatePlayerStats();
-      }
+  if (window.playerStats.adrenalineTimer > 0)
+    window.playerStats.adrenalineTimer--;
+  if (window.playerStats.galeCooldown > 0) window.playerStats.galeCooldown--;
+  if (window.playerStats.warpCoreSprintTimer > 0) {
+    window.playerStats.warpCoreSprintTimer--;
+    if (window.playerStats.warpCoreSprintTimer <= 0) {
+      window.invalidatePlayerStats();
     }
+  }
 
-    if (window.playerStats.galeResonanceTimer > 0) {
-      window.playerStats.galeResonanceTimer--;
-      if (window.playerStats.galeResonanceTimer <= 0) {
-        window.detonateGaleFlurry();
-      }
+  if (window.playerStats.galeResonanceTimer > 0) {
+    window.playerStats.galeResonanceTimer--;
+    if (window.playerStats.galeResonanceTimer <= 0) {
+      window.detonateGaleFlurry();
     }
+  }
 
-    if (window.playerStats.atkPotionTimer > 0)
-      window.playerStats.atkPotionTimer--;
+  if (window.playerStats.atkPotionTimer > 0)
+    window.playerStats.atkPotionTimer--;
   if (window.playerStats.hpPotionTimer > 0) window.playerStats.hpPotionTimer--;
   if (window.playerStats.defPotionTimer > 0)
     window.playerStats.defPotionTimer--;
@@ -2878,92 +2888,104 @@ function update() {
 // --- GAMEPLAY TRIGGERS & HOOKS ---
 
 window.registerMaelstromTap = function () {
+  if (
+    window.equippedSlots.weapon &&
+    window.equippedSlots.weapon.isUniqueMaelstrom &&
+    window.playerStats.galeResonanceTimer > 0
+  ) {
+    let now = Date.now();
+    // Anti-macro: 80ms throttle to prevent macro tools from exploiting speed caps
     if (
-      window.equippedSlots.weapon &&
-      window.equippedSlots.weapon.isUniqueMaelstrom &&
-      window.playerStats.galeResonanceTimer > 0
+      !window.playerStats.lastGaleTapTime ||
+      now - window.playerStats.lastGaleTapTime >= 80
     ) {
-      let now = Date.now();
-      // Anti-macro: 80ms throttle to prevent macro tools from exploiting speed caps
-      if (!window.playerStats.lastGaleTapTime || now - window.playerStats.lastGaleTapTime >= 80) {
-        window.playerStats.lastGaleTapTime = now;
-        window.playerStats.galeCharges = Math.min(20, (window.playerStats.galeCharges || 0) + 1);
-        window.effects.push({
-          x: window.hero.x,
-          y: window.hero.y - 30,
-          text: `⚡ COMBO: ${window.playerStats.galeCharges}/20`,
-          color: "#00ffcc",
-          life: 30,
-        });
+      window.playerStats.lastGaleTapTime = now;
+      window.playerStats.galeCharges = Math.min(
+        20,
+        (window.playerStats.galeCharges || 0) + 1,
+      );
+      window.effects.push({
+        x: window.hero.x,
+        y: window.hero.y - 30,
+        text: `⚡ COMBO: ${window.playerStats.galeCharges}/20`,
+        color: "#00ffcc",
+        life: 30,
+      });
 
-        // Stack Tornado Alley speed stacking on tap!
-        window.playerStats.maelstromSpeedStacks = Math.min(3, (window.playerStats.maelstromSpeedStacks || 0) + 1);
-        window.playerStats.maelstromSpeedTimer = 360; // 6 seconds
-        window.invalidatePlayerStats();
-        window.updateUI();
-      }
+      // Stack Tornado Alley speed stacking on tap!
+      window.playerStats.maelstromSpeedStacks = Math.min(
+        3,
+        (window.playerStats.maelstromSpeedStacks || 0) + 1,
+      );
+      window.playerStats.maelstromSpeedTimer = 360; // 6 seconds
+      window.invalidatePlayerStats();
+      window.updateUI();
     }
-  };
+  }
+};
 
-  window.detonateGaleFlurry = function () {
-    if (!window.mob || window.mob.hp <= 0) {
-      window.playerStats.galeCharges = 0;
-      return;
-    }
-    let charges = window.playerStats.galeCharges || 0;
-    if (charges <= 0) return;
-
+window.detonateGaleFlurry = function () {
+  if (!window.mob || window.mob.hp <= 0) {
     window.playerStats.galeCharges = 0;
-    let p = window.resolvePlayerStats();
-    let mobDef = window.mob.def || 0;
-    let flurryDmgPerCharge = Math.ceil(p.atk * 0.15); // 15% weapon scaling per charge
-    flurryDmgPerCharge = Math.max(1, Math.ceil(flurryDmgPerCharge * (100 / (100 + mobDef))));
-    let totalFlurryDmg = flurryDmgPerCharge * charges;
+    return;
+  }
+  let charges = window.playerStats.galeCharges || 0;
+  if (charges <= 0) return;
 
-    window.mob.hp -= totalFlurryDmg;
-    window.mob.flashTimer = 10;
-    window.spawnDamageEffect(totalFlurryDmg, "frost", true); // Wind uses frost ice color/icon
-    window.damageHistory.push({ time: Date.now(), amount: totalFlurryDmg });
+  window.playerStats.galeCharges = 0;
+  let p = window.resolvePlayerStats();
+  let mobDef = window.mob.def || 0;
+  let flurryDmgPerCharge = Math.ceil(p.atk * 0.15); // 15% weapon scaling per charge
+  flurryDmgPerCharge = Math.max(
+    1,
+    Math.ceil(flurryDmgPerCharge * (100 / (100 + mobDef))),
+  );
+  let totalFlurryDmg = flurryDmgPerCharge * charges;
 
-    window.effects.push({
-      x: window.mob.x + window.mob.w / 2,
-      y: window.mob.y - 15,
-      text: `🌪️ GALE FLURRY! (${charges}x)`,
-      color: "#00ffcc",
-      life: 60,
-    });
+  window.mob.hp -= totalFlurryDmg;
+  window.mob.flashTimer = 10;
+  window.spawnDamageEffect(totalFlurryDmg, "frost", true); // Wind uses frost ice color/icon
+  window.damageHistory.push({ time: Date.now(), amount: totalFlurryDmg });
 
-    // Draw the physical wind crescents flying!
-    for (let i = 0; i < charges; i++) {
-      setTimeout(() => {
-        if (window.mob && window.mob.hp > 0) {
-          window.particles.push({
-            x: window.hero.x + 35,
-            y: window.hero.y + 10,
-            vx: window.randFloat(4, 7),
-            vy: window.randFloat(-1.5, 1.5),
-            radius: window.randFloat(1.5, 3.5),
-            color: "#00ffcc",
-            alpha: 1,
-            life: 25,
-          });
-        }
-      }, i * 40); // 40ms staggering between crescent sprays
-    }
+  window.effects.push({
+    x: window.mob.x + window.mob.w / 2,
+    y: window.mob.y - 15,
+    text: `🌪️ GALE FLURRY! (${charges}x)`,
+    color: "#00ffcc",
+    life: 60,
+  });
 
-    if (window.mob.hp <= 0) window.handleMobDeath();
-    window.updateUI();
-  };
+  // Draw the physical wind crescents flying!
+  for (let i = 0; i < charges; i++) {
+    setTimeout(() => {
+      if (window.mob && window.mob.hp > 0) {
+        window.particles.push({
+          x: window.hero.x + 35,
+          y: window.hero.y + 10,
+          vx: window.randFloat(4, 7),
+          vy: window.randFloat(-1.5, 1.5),
+          radius: window.randFloat(1.5, 3.5),
+          color: "#00ffcc",
+          alpha: 1,
+          life: 25,
+        });
+      }
+    }, i * 40); // 40ms staggering between crescent sprays
+  }
 
-  window.triggerPlayerSlash = function () {
-    if (window.isGamePaused) return;
-    let p = window.resolvePlayerStats();
-    let cooldownCap =
-      window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
-    if (window.hero.attackTimer > 0) return;
+  if (window.mob.hp <= 0) window.handleMobDeath();
+  window.updateUI();
+};
 
-    window.SoundManager.play("swing");
-    window.hero.attackTimer = cooldownCap;
+window.triggerPlayerSlash = function () {
+  if (window.isGamePaused) return;
+  let p = window.resolvePlayerStats();
+  let cooldownCap =
+    window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
+  if (window.hero.attackTimer > 0) return;
+
+  window.SoundManager.play("swing");
+  window.hero.attackTimer = cooldownCap;
 
   if (
     window.equippedSlots.weapon &&
@@ -3045,41 +3067,42 @@ window.executeHitCalculations = function () {
     }
 
     // UNIQUE: Maelstrom Glaive Wind Crescent projectile on critical hit and Resonance trigger
-                    if (
-                      window.equippedSlots.weapon &&
-                      window.equippedSlots.weapon.isUniqueMaelstrom &&
-                      isCrit &&
-                      window.mob &&
-                      window.mob.hp > 0
-                    ) {
-                      // Fire wind crescent gale projectile
-                      window.projectiles.push({
-                        x: window.hero.x + 35,
-                        y: window.hero.y + 10,
-                        r: 12,
-                        isMaelstromCrescent: true,
-                        hitMobs: [],
-                        pulseOffset: Math.random() * 5,
-                      });
-                      window.SoundManager.play("swing");
+    if (
+      window.equippedSlots.weapon &&
+      window.equippedSlots.weapon.isUniqueMaelstrom &&
+      isCrit &&
+      window.mob &&
+      window.mob.hp > 0
+    ) {
+      // Fire wind crescent gale projectile
+      window.projectiles.push({
+        x: window.hero.x + 35,
+        y: window.hero.y + 10,
+        r: 12,
+        isMaelstromCrescent: true,
+        hitMobs: [],
+        pulseOffset: Math.random() * 5,
+      });
+      window.SoundManager.play("swing");
 
-                      // 30% chance to trigger Gale Resonance (Combo active state) on critical strikes
-                      if (
-                        Math.random() < 0.3 &&
-                        (!window.playerStats.galeCooldown || window.playerStats.galeCooldown <= 0)
-                      ) {
-                        window.playerStats.galeResonanceTimer = 300; // 5 seconds combo window
-                        window.playerStats.galeCharges = 0;
-                        window.playerStats.galeCooldown = 900; // 15 seconds cooldown
-                        window.effects.push({
-                          x: window.hero.x + 12,
-                          y: window.hero.y - 20,
-                          text: "🌪️ GALE RESONANCE!",
-                          color: "#00ffcc",
-                          life: 65,
-                        });
-                      }
-                    }
+      // 30% chance to trigger Gale Resonance (Combo active state) on critical strikes
+      if (
+        Math.random() < 0.3 &&
+        (!window.playerStats.galeCooldown ||
+          window.playerStats.galeCooldown <= 0)
+      ) {
+        window.playerStats.galeResonanceTimer = 300; // 5 seconds combo window
+        window.playerStats.galeCharges = 0;
+        window.playerStats.galeCooldown = 900; // 15 seconds cooldown
+        window.effects.push({
+          x: window.hero.x + 12,
+          y: window.hero.y - 20,
+          text: "🌪️ GALE RESONANCE!",
+          color: "#00ffcc",
+          life: 65,
+        });
+      }
+    }
 
     // Stacking Bleed & Sanguine Rupture on hit
     if (
@@ -3403,11 +3426,12 @@ window.handleMobDeath = function () {
     !window.playerStats.isFarmingLoop
   ) {
     let overkillRatio = Math.abs(window.mob.hp) / window.mob.maxHp;
-    if (overkillRatio >= 2.0) { // Overkilled by at least 200% of mob Max HP
+    if (overkillRatio >= 2.0) {
+      // Overkilled by at least 200% of mob Max HP
       let extraKills = Math.min(3, Math.floor(overkillRatio)); // Cap at 3 extra progress kills
       window.playerStats.killCount = Math.min(
         window.playerStats.targetsRequired,
-        window.playerStats.killCount + extraKills
+        window.playerStats.killCount + extraKills,
       );
       window.effects.push({
         x: window.hero.x + 12,
@@ -3450,7 +3474,7 @@ window.handleMobDeath = function () {
       life: 55,
     });
   }
-    window.mob.type === "dungeon_miniboss" ||
+  window.mob.type === "dungeon_miniboss" ||
     window.mob.type === "rift_guardian" ||
     window.mob.type === "prestige_boss" ||
     window.mob.type === "aegis_goliath" ||
@@ -3528,8 +3552,14 @@ window.handleMobDeath = function () {
         window.playerStats.currentDungeon
       ] || 1
     : window.playerStats.stage;
-  if (window.playerStats.isCrucibleMode)
+  if (window.playerStats.isCrucibleMode) {
     scaleVal = window.playerStats.crucibleWave;
+  }
+  // Decouple Rift Guardian rewards completely from the Campaign Stage
+  if (window.playerStats.isUberBoss) {
+    let riftLvl = window.playerStats.activeRiftLevel || 1;
+    scaleVal = 50 + riftLvl * 10;
+  }
 
   let expScale = Math.pow(1.045, scaleVal);
 
@@ -4473,12 +4503,12 @@ window.handlePlayerDefeat = function () {
   }
 
   document.getElementById("death-stat-kills").innerText = window.formatNumber(
-      window.playerStats.runKills || 0
-    );
-    document.getElementById("death-stat-run-gold").innerText =
-      `+` + window.formatNumber(window.playerStats.runGold || 0);
-    document.getElementById("death-stat-run-xp").innerText =
-      `+` + window.formatNumber(window.playerStats.runXp || 0);
+    window.playerStats.runKills || 0,
+  );
+  document.getElementById("death-stat-run-gold").innerText =
+    `+` + window.formatNumber(window.playerStats.runGold || 0);
+  document.getElementById("death-stat-run-xp").innerText =
+    `+` + window.formatNumber(window.playerStats.runXp || 0);
   document.getElementById("death-tip-text").innerText =
     "Reforging modifiers with Catalyst Cores and tempering weapon components significantly increases battle survivability.";
 

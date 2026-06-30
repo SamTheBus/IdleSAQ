@@ -24,6 +24,101 @@
   box-sizing: border-box;
 }
 
+/* Custom Scrollbar globally */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a3441;
+  border: 1px solid #1a2332;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a3441 #090d16;
+}
+
+/* Custom Dropdown Styling */
+.custom-select {
+  position: relative;
+  width: 100%;
+  font-family: inherit;
+  user-select: none;
+}
+.custom-select-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #222;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.custom-select-trigger:hover,
+.custom-select.active .custom-select-trigger {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+}
+.custom-select-arrow {
+  font-size: 9px;
+  transition: transform 0.2s;
+  color: #888;
+}
+.custom-select.active .custom-select-arrow {
+  transform: rotate(180deg);
+}
+.custom-select-options {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #111;
+  border: 1px solid #444;
+  border-radius: 4px;
+  z-index: 10000;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.85);
+}
+.custom-select.active .custom-select-options {
+  display: block;
+}
+.custom-select-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  transition:
+    background 0.1s,
+    color 0.1s;
+  text-align: left;
+}
+.custom-select-option:hover {
+  background: rgba(52, 152, 219, 0.15);
+  color: #fff;
+}
+.custom-select-option.selected {
+  background: rgba(52, 152, 219, 0.25);
+  color: #fff;
+  font-weight: bold;
+}
+
 html,
 body {
   margin: 0;

@@ -3836,8 +3836,8 @@
       totalDamage += window.damageHistory[i].amount;
     }
     let avgDps = totalDamage / 3;
-        return window.formatNumber(avgDps);
-      };
+    return window.formatNumber(avgDps);
+  };
 
   window.drawSingleHero = function (
     ctx,
@@ -3880,6 +3880,11 @@
       bodyColor = "#ffd700";
       armorColor = "#b7950b";
       capeColor = "#111111";
+    } else if (skin === "celestial") {
+      bodyColor = "#0f172a";
+      armorColor = "#00d2ff";
+      capeColor = "#ffffff";
+      eyeColor = "#00d2ff";
     }
 
     // Draw Subweapon
@@ -4095,46 +4100,46 @@
     ctx.stroke();
 
     // Crown of Tempests Aura
-        if (
-          equipped.helmet &&
-          equipped.helmet.isUniqueTempest &&
-          (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
-        ) {
-          ctx.save();
-          ctx.translate(0, -14 + bounce);
-          ctx.strokeStyle = "#00d2ff";
-          ctx.lineWidth = 2.0;
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = "#00d2ff";
-          ctx.beginPath();
-          ctx.moveTo(-6, -2);
-          ctx.quadraticCurveTo(-14, -12, -18, -8);
-          ctx.quadraticCurveTo(-10, -5, -4, 0);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(6, -2);
-          ctx.quadraticCurveTo(14, -12, 18, -8);
-          ctx.quadraticCurveTo(10, -5, 4, 0);
-          ctx.stroke();
-          ctx.restore();
-        }
+    if (
+      equipped.helmet &&
+      equipped.helmet.isUniqueTempest &&
+      (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
+    ) {
+      ctx.save();
+      ctx.translate(0, -14 + bounce);
+      ctx.strokeStyle = "#00d2ff";
+      ctx.lineWidth = 2.0;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = "#00d2ff";
+      ctx.beginPath();
+      ctx.moveTo(-6, -2);
+      ctx.quadraticCurveTo(-14, -12, -18, -8);
+      ctx.quadraticCurveTo(-10, -5, -4, 0);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(6, -2);
+      ctx.quadraticCurveTo(14, -12, 18, -8);
+      ctx.quadraticCurveTo(10, -5, 4, 0);
+      ctx.stroke();
+      ctx.restore();
+    }
 
-        // UNIQUE: Maelstrom Gale-Glaive "Gale Resonance" Canvas Aura
-        if (
-          stats.galeResonanceTimer > 0 &&
-          (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
-        ) {
-          ctx.save();
-          ctx.translate(0, bounce);
-          ctx.strokeStyle = "rgba(0, 255, 204, 0.45)";
-          ctx.lineWidth = 1.8;
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = "#00ffcc";
-          ctx.beginPath();
-          ctx.arc(0, 0, 24 + Math.sin(Date.now() / 100) * 3, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.restore();
-        }
+    // UNIQUE: Maelstrom Gale-Glaive "Gale Resonance" Canvas Aura
+    if (
+      stats.galeResonanceTimer > 0 &&
+      (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
+    ) {
+      ctx.save();
+      ctx.translate(0, bounce);
+      ctx.strokeStyle = "rgba(0, 255, 204, 0.45)";
+      ctx.lineWidth = 1.8;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = "#00ffcc";
+      ctx.beginPath();
+      ctx.arc(0, 0, 24 + Math.sin(Date.now() / 100) * 3, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
 
     // Helmet Visor / Eyes
     ctx.fillStyle = "#2c3e50";

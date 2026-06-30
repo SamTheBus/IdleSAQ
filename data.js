@@ -3843,21 +3843,21 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   let finalIdleDivisor = Math.max(0.1, 1 + idleSpeedPct);
-    let finalActiveDivisor = Math.max(0.1, 1 + activeSpeedPct);
-    p.idleAttackSpeed = Math.max(10, Math.round(60 / finalIdleDivisor));
-    p.activeAttackSpeed = Math.max(4, Math.round(15 / finalActiveDivisor));
+  let finalActiveDivisor = Math.max(0.1, 1 + activeSpeedPct);
+  p.idleAttackSpeed = Math.max(10, Math.round(60 / finalIdleDivisor));
+  p.activeAttackSpeed = Math.max(4, Math.round(15 / finalActiveDivisor));
 
-    // UNIQUE: Warp-Core Greaves "Time Dilation" Boss Kill Max Haste trigger
-    if (
-      window.equippedSlots.boots &&
-      window.equippedSlots.boots.isUniqueWarpCore &&
-      window.playerStats.warpCoreSprintTimer > 0
-    ) {
-      p.idleAttackSpeed = 10;
-      p.activeAttackSpeed = 4;
-    }
+  // UNIQUE: Warp-Core Greaves "Time Dilation" Boss Kill Max Haste trigger
+  if (
+    window.equippedSlots.boots &&
+    window.equippedSlots.boots.isUniqueWarpCore &&
+    window.playerStats.warpCoreSprintTimer > 0
+  ) {
+    p.idleAttackSpeed = 10;
+    p.activeAttackSpeed = 4;
+  }
 
-    if (window.playerStats.frenzyTimer > 0) {
+  if (window.playerStats.frenzyTimer > 0) {
     p.critChance = 1.0;
     p.critDamage += 0.5;
     p.activeAttackSpeed = 4;
@@ -3883,33 +3883,33 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.moveSpeed = parseFloat(p.moveSpeed.toFixed(1));
 
   // Set default targets required
-    window.playerStats.targetsRequired = 5;
+  window.playerStats.targetsRequired = 5;
 
-    // UNIQUE: Warp-Core Greaves "Time Dilation" missing health attack speed scaling
-    if (
-      window.equippedSlots.boots &&
-      window.equippedSlots.boots.isUniqueWarpCore &&
-      window.mob &&
-      window.mob.hp > 0
-    ) {
-      let hpPct = window.mob.hp / window.mob.maxHp;
-      let missingHpPct = 1.0 - hpPct;
-      let speedBonus = Math.min(0.99, missingHpPct); // up to +99% speed
-      idleSpeedPct += speedBonus;
-      activeSpeedPct += speedBonus;
-    }
+  // UNIQUE: Warp-Core Greaves "Time Dilation" missing health attack speed scaling
+  if (
+    window.equippedSlots.boots &&
+    window.equippedSlots.boots.isUniqueWarpCore &&
+    window.mob &&
+    window.mob.hp > 0
+  ) {
+    let hpPct = window.mob.hp / window.mob.maxHp;
+    let missingHpPct = 1.0 - hpPct;
+    let speedBonus = Math.min(0.99, missingHpPct); // up to +99% speed
+    idleSpeedPct += speedBonus;
+    activeSpeedPct += speedBonus;
+  }
 
-    // UNIQUE: Maelstrom Gale-Glaive "Tornado Alley" speed stacking
-    if (window.playerStats.maelstromSpeedTimer > 0) {
-      window.playerStats.maelstromSpeedTimer--;
-      if (window.playerStats.maelstromSpeedTimer <= 0) {
-        window.playerStats.maelstromSpeedStacks = 0;
-      }
+  // UNIQUE: Maelstrom Gale-Glaive "Tornado Alley" speed stacking
+  if (window.playerStats.maelstromSpeedTimer > 0) {
+    window.playerStats.maelstromSpeedTimer--;
+    if (window.playerStats.maelstromSpeedTimer <= 0) {
+      window.playerStats.maelstromSpeedStacks = 0;
     }
-    if (window.playerStats.maelstromSpeedStacks > 0) {
-      idleSpeedPct += window.playerStats.maelstromSpeedStacks * 0.10;
-      activeSpeedPct += window.playerStats.maelstromSpeedStacks * 0.10;
-    }
+  }
+  if (window.playerStats.maelstromSpeedStacks > 0) {
+    idleSpeedPct += window.playerStats.maelstromSpeedStacks * 0.1;
+    activeSpeedPct += window.playerStats.maelstromSpeedStacks * 0.1;
+  }
 
   if (
     window.equippedSlots.subweapon &&
@@ -4253,6 +4253,7 @@ window.playerStats = {
   equippedTitle: null,
   achievementTimestamps: {},
   claimedMailIds: [],
+  unlockedSkins: ["default"],
   playerName: "Guest",
   clanId: null,
   clanName: null,
@@ -4265,6 +4266,50 @@ window.playerStats = {
     aetheric_wisdom: 0,
   },
   clanContribution: 0,
+};
+
+// --- CLIENT-SIDE COSMETIC REGISTRY ---
+window.COSMETIC_SKINS = {
+  default: {
+    id: "default",
+    name: "Default Steel Armor",
+    desc: "The standard plate armor issued to all newly recruited kingdom guardians.",
+    color: "#bdc3c7",
+    cost: 0,
+    currency: "Gold",
+  },
+  void: {
+    id: "void",
+    name: "Void Sovereign",
+    desc: "Plate mail corrupted by the deep pressure of the Event Horizon. Emits a dark purple aura.",
+    color: "#8e44ad",
+    cost: 100,
+    currency: "Luminous Soul",
+  },
+  crimson: {
+    id: "crimson",
+    name: "Sanguine Dreadnought",
+    desc: "Drenched in the blood of ancient drakes. Its steel has stained a permanent crimson.",
+    color: "#e74c3c",
+    cost: 100,
+    currency: "Luminous Soul",
+  },
+  gilded: {
+    id: "gilded",
+    name: "Gilded Emperor",
+    desc: "Pure aurum plate armor forged for high-ranking monarchs. Blindingly brilliant.",
+    color: "#f1c40f",
+    cost: 150,
+    currency: "Luminous Soul",
+  },
+  celestial: {
+    id: "celestial",
+    name: "Celestial Arbiter",
+    desc: "Forged in the stellar nurseries of the Aether. Pulsates with clean cosmic starlight.",
+    color: "#00d2ff",
+    cost: 200,
+    currency: "Luminous Soul",
+  },
 };
 
 // --- CLIENT-SIDE TITLE DATABASE ---

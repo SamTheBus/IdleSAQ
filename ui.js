@@ -1155,9 +1155,9 @@ window.renderRiftConsole = function () {
       let gRate = 1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
       let rScale = Math.pow(gRate, equivalentStage);
 
-      let hpVal = Math.floor(boss.hpMult * (60 * rScale));
-      let dmgVal = Math.floor(20 * rScale * boss.dmgMult);
       let defVal = Math.floor(boss.defMult * rScale);
+      let hpVal = Math.floor(boss.hpMult * (60 * rScale) * (1 + defVal / 100)); // True Effective Health
+      let dmgVal = Math.floor(20 * rScale * boss.dmgMult);
 
       let lootHtml = boss.artifacts
         .map((art) => {
@@ -2047,14 +2047,14 @@ window.showSPConfirmationModal = function () {
     let diff = newVal - curVal;
     if (Math.abs(diff) > 0.0001) {
       let curStr = s.isPct
-              ? Math.round(curVal * 100) + "%"
-              : window.formatNumber(curVal);
-            let newStr = s.isPct
-              ? Math.round(newVal * 100) + "%"
-              : window.formatNumber(newVal);
-            let diffStr = s.isPct
-              ? "+" + Math.round(diff * 100) + "%"
-              : "+" + window.formatNumber(diff);
+        ? Math.round(curVal * 100) + "%"
+        : window.formatNumber(curVal);
+      let newStr = s.isPct
+        ? Math.round(newVal * 100) + "%"
+        : window.formatNumber(newVal);
+      let diffStr = s.isPct
+        ? "+" + Math.round(diff * 100) + "%"
+        : "+" + window.formatNumber(diff);
       diffs.push(`
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:6px; font-family:monospace; background:rgba(255,255,255,0.02); padding:6px 10px; border-radius:4px; border:1px solid #222;">
                     <span style="color:#aaa; font-weight:bold;">${s.label}:</span>
@@ -2155,19 +2155,19 @@ window.showSPPreview = function (e, statKey) {
   ];
 
   statsToCheck.forEach((s) => {
-      let curVal = current[s.key] || 0;
-      let newVal = preview[s.key] || 0;
-      let diff = newVal - curVal;
-      if (Math.abs(diff) > 0.0001) {
-        let curStr = s.isPct
-          ? Math.round(curVal * 100) + "%"
-          : window.formatNumber(curVal);
-        let newStr = s.isPct
-          ? Math.round(newVal * 100) + "%"
-          : window.formatNumber(newVal);
-        let diffStr = s.isPct
-          ? "+" + Math.round(diff * 100) + "%"
-          : "+" + window.formatNumber(diff);
+    let curVal = current[s.key] || 0;
+    let newVal = preview[s.key] || 0;
+    let diff = newVal - curVal;
+    if (Math.abs(diff) > 0.0001) {
+      let curStr = s.isPct
+        ? Math.round(curVal * 100) + "%"
+        : window.formatNumber(curVal);
+      let newStr = s.isPct
+        ? Math.round(newVal * 100) + "%"
+        : window.formatNumber(newVal);
+      let diffStr = s.isPct
+        ? "+" + Math.round(diff * 100) + "%"
+        : "+" + window.formatNumber(diff);
       diffs.push(`
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:4px; font-family:monospace;">
                     <span style="color:#aaa;">${s.label}:</span>
@@ -2909,7 +2909,7 @@ window.showStatBreakdown = function (e, statKey, isPct = false) {
   }
 
   let formatVal = (v) =>
-      isPct ? `+${Math.floor(v * 100)}%` : `+${window.formatNumber(v)}`;
+    isPct ? `+${Math.floor(v * 100)}%` : `+${window.formatNumber(v)}`;
   if (statKey === "gold")
     formatVal = (v) =>
       `+${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -2947,20 +2947,20 @@ window.showStatBreakdown = function (e, statKey, isPct = false) {
     prestigeTotal +
     setFlatBonus;
   if (statKey === "atk" && effectiveStr > 0) {
-      let actualDmgAdded = Math.floor(totalVal * (effectiveStr * 0.003));
-      html += `<div class="tt-stat-line" style="color:#e67e22;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(actualDmgAdded)} Damage</div>`;
-      html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
-    }
-    if (statKey === "maxHp" && effectiveStr > 0) {
-      let hpBonus = Math.floor(totalVal * (effectiveStr * 0.003));
-      html += `<div class="tt-stat-line" style="color:#e74c3c;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(hpBonus)} HP</div>`;
-      html += `<div class="tt-stat-line" style="color:#e74c3c; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
-    }
-    if (statKey === "def" && effectiveInt > 0) {
-      let logarithmicIntPct = Math.log10(effectiveInt + 1) * 0.15;
-      html += `<div class="tt-stat-line" style="color:#9b59b6;">• ${window.getUiIconSvg("int", 11)} Intelligence Scaling (INT): +${window.formatNumber(Math.floor(totalVal * logarithmicIntPct))} Defense</div>`;
-      html += `<div class="tt-stat-line" style="color:#9b59b6; font-style:italic;">  (+${(logarithmicIntPct * 100).toFixed(1)}% Multiplier)</div>`;
-    }
+    let actualDmgAdded = Math.floor(totalVal * (effectiveStr * 0.003));
+    html += `<div class="tt-stat-line" style="color:#e67e22;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(actualDmgAdded)} Damage</div>`;
+    html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
+  }
+  if (statKey === "maxHp" && effectiveStr > 0) {
+    let hpBonus = Math.floor(totalVal * (effectiveStr * 0.003));
+    html += `<div class="tt-stat-line" style="color:#e74c3c;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(hpBonus)} HP</div>`;
+    html += `<div class="tt-stat-line" style="color:#e74c3c; font-style:italic;">  (+${(effectiveStr * 0.3).toFixed(1)}% Multiplier)</div>`;
+  }
+  if (statKey === "def" && effectiveInt > 0) {
+    let logarithmicIntPct = Math.log10(effectiveInt + 1) * 0.15;
+    html += `<div class="tt-stat-line" style="color:#9b59b6;">• ${window.getUiIconSvg("int", 11)} Intelligence Scaling (INT): +${window.formatNumber(Math.floor(totalVal * logarithmicIntPct))} Defense</div>`;
+    html += `<div class="tt-stat-line" style="color:#9b59b6; font-style:italic;">  (+${(logarithmicIntPct * 100).toFixed(1)}% Multiplier)</div>`;
+  }
   if (statKey === "moveSpeed" && effectiveDex > 0) {
     let scaleVal = (effectiveDex * 20) / (effectiveDex + 150);
     html += `<div class="tt-stat-line" style="color:#3498db;">• ${window.getUiIconSvg("dex", 11)} Dexterity Scaling (DEX): +${scaleVal.toFixed(1)} Speed</div>`;
@@ -3427,15 +3427,15 @@ window.renderPrestigeTab = function () {
   let estShards = Math.round(11 * rewardMultiplier);
 
   let challengeBtnHtml = "";
-    let peak = p.lifetimePeakStage || 1;
-    let requiredStage = Math.max(80, Math.floor(peak * 0.9));
+  let peak = p.lifetimePeakStage || 1;
+  let requiredStage = Math.max(80, Math.floor(peak * 0.9));
 
-    if (p.level < 25) {
-      challengeBtnHtml = `<button class="btn-action" style="background:#333; color:#777; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #444; cursor:not-allowed;" disabled>🔒 Level 25 Required</button>`;
-    } else if (p.maxStage < requiredStage) {
-      challengeBtnHtml = `<button class="btn-action" style="background:#2c1a1a; color:#e74c3c; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #781c1c; cursor:not-allowed;" disabled>🔒 Reach Stage ${requiredStage} (90% of Peak ${peak})</button>`;
-    } else {
-      challengeBtnHtml = `
+  if (p.level < 25) {
+    challengeBtnHtml = `<button class="btn-action" style="background:#333; color:#777; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #444; cursor:not-allowed;" disabled>🔒 Level 25 Required</button>`;
+  } else if (p.maxStage < requiredStage) {
+    challengeBtnHtml = `<button class="btn-action" style="background:#2c1a1a; color:#e74c3c; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #781c1c; cursor:not-allowed;" disabled>🔒 Reach Stage ${requiredStage} (90% of Peak ${peak})</button>`;
+  } else {
+    challengeBtnHtml = `
       <button class="btn-action btn-pulse" style="background:#e74c3c; color:white; width:100%; padding:12px; font-weight:bold; font-size:11.5px; border:1px solid #f1c40f; text-shadow:0 1px 2px #000; box-shadow:0 4px 12px rgba(231,76,60,0.35); text-transform:uppercase; letter-spacing:0.5px;" onclick="window.challengeHooktail()">
           Challenge Hooktail
       </button>
@@ -3722,17 +3722,17 @@ window.triggerPrestigeAscension = function () {
   }
 
   window.playerStats.level = 1;
-    window.playerStats.xp = 0;
-    window.playerStats.xpReq = 100;
+  window.playerStats.xp = 0;
+  window.playerStats.xpReq = 100;
 
-    // Advanced Start (50% of peak Stage, with floor of 1) [1]
-    let peak = window.playerStats.lifetimePeakStage || 1;
-    let advancedStart = Math.max(1, Math.floor(peak * 0.5));
-    window.playerStats.stage = advancedStart;
-    window.playerStats.maxStage = advancedStart;
+  // Advanced Start (50% of peak Stage, with floor of 1) [1]
+  let peak = window.playerStats.lifetimePeakStage || 1;
+  let advancedStart = Math.max(1, Math.floor(peak * 0.5));
+  window.playerStats.stage = advancedStart;
+  window.playerStats.maxStage = advancedStart;
 
-    window.playerStats.crucibleWave = 1;
-    window.playerStats.crucibleStartWave = 1;
+  window.playerStats.crucibleWave = 1;
+  window.playerStats.crucibleStartWave = 1;
   window.playerStats.isPrestigeBossMode = false;
   window.playerStats.prestigeApproachTimer = 0;
   window.mob = null;
@@ -4199,24 +4199,32 @@ window.renderPaperDoll = function () {
       if (isArt) {
         el.innerHTML = `${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
       } else {
-              let s = [];
-              let sPlain = [];
-              if (item.atk > 0) {
-                s.push(`${window.getUiIconSvg("atk", 9.5)}${window.formatNumber(item.atk)}`);
-                sPlain.push(`Atk: ${window.formatNumber(item.atk)}`);
-              }
-              if (item.maxHp > 0) {
-                s.push(`${window.getUiIconSvg("maxHp", 9.5)}${window.formatNumber(item.maxHp)}`);
-                sPlain.push(`HP: ${window.formatNumber(item.maxHp)}`);
-              }
-              if (item.def > 0) {
-                s.push(`${window.getUiIconSvg("def", 9.5)}${window.formatNumber(item.def)}`);
-                sPlain.push(`Def: ${window.formatNumber(item.def)}`);
-              }
-              if (item.moveSpeed > 0) {
-                s.push(`${window.getUiIconSvg("moveSpeed", 9.5)}${window.formatNumber(item.moveSpeed)}`);
-                sPlain.push(`Speed: ${window.formatNumber(item.moveSpeed)}`);
-              }
+        let s = [];
+        let sPlain = [];
+        if (item.atk > 0) {
+          s.push(
+            `${window.getUiIconSvg("atk", 9.5)}${window.formatNumber(item.atk)}`,
+          );
+          sPlain.push(`Atk: ${window.formatNumber(item.atk)}`);
+        }
+        if (item.maxHp > 0) {
+          s.push(
+            `${window.getUiIconSvg("maxHp", 9.5)}${window.formatNumber(item.maxHp)}`,
+          );
+          sPlain.push(`HP: ${window.formatNumber(item.maxHp)}`);
+        }
+        if (item.def > 0) {
+          s.push(
+            `${window.getUiIconSvg("def", 9.5)}${window.formatNumber(item.def)}`,
+          );
+          sPlain.push(`Def: ${window.formatNumber(item.def)}`);
+        }
+        if (item.moveSpeed > 0) {
+          s.push(
+            `${window.getUiIconSvg("moveSpeed", 9.5)}${window.formatNumber(item.moveSpeed)}`,
+          );
+          sPlain.push(`Speed: ${window.formatNumber(item.moveSpeed)}`);
+        }
         if (item.critChance > 0) {
           s.push(
             `${window.getUiIconSvg("critChance", 9.5)}${Math.floor(item.critChance * 100)}%`,
@@ -4802,58 +4810,58 @@ window.generateItemCardHtml = function (
   }
 
   // --- BASE STATS SECTION ---
-    if (item.id !== "dummy" && item.type !== "artifact") {
-      let baseStats = [];
+  if (item.id !== "dummy" && item.type !== "artifact") {
+    let baseStats = [];
 
-      if (item.baseAtk > 0) {
-        baseStats.push({
-          label: "Weapon Damage",
-          val: window.formatNumber(item.baseAtk),
-          icon: window.getUiIconSvg("atk", 14),
-        });
-      }
-      if (item.baseDef > 0) {
-        baseStats.push({
-          label: "Armor",
-          val: window.formatNumber(item.baseDef),
-          icon: window.getUiIconSvg("def", 14),
-        });
-      }
-      if (item.baseMaxHp > 0) {
-        baseStats.push({
-          label: "Max Life",
-          val: window.formatNumber(item.baseMaxHp),
-          icon: window.getUiIconSvg("maxHp", 14),
-        });
-      }
-      if (item.baseMoveSpeed > 0) {
-        baseStats.push({
-          label: "Speed",
-          val: window.formatNumber(item.baseMoveSpeed),
-          icon: window.getUiIconSvg("moveSpeed", 14),
-        });
-      }
-      if (item.baseBlock > 0) {
-        baseStats.push({
-          label: "Block Rate",
-          val: Math.round(item.baseBlock * 100) + "%",
-          icon: window.getUiIconSvg("block", 14),
-        });
-      }
-      if (item.baseParry > 0) {
-        baseStats.push({
-          label: "Parry Rate",
-          val: Math.round(item.baseParry * 100) + "%",
-          icon: window.getUiIconSvg("parry", 14),
-        });
-      }
-      if (item.baseInt > 0) {
-        baseStats.push({
-          label: "Intelligence",
-          val: window.formatNumber(item.baseInt),
-          icon: window.getUiIconSvg("int", 14),
-        });
-      }
+    if (item.baseAtk > 0) {
+      baseStats.push({
+        label: "Weapon Damage",
+        val: window.formatNumber(item.baseAtk),
+        icon: window.getUiIconSvg("atk", 14),
+      });
+    }
+    if (item.baseDef > 0) {
+      baseStats.push({
+        label: "Armor",
+        val: window.formatNumber(item.baseDef),
+        icon: window.getUiIconSvg("def", 14),
+      });
+    }
+    if (item.baseMaxHp > 0) {
+      baseStats.push({
+        label: "Max Life",
+        val: window.formatNumber(item.baseMaxHp),
+        icon: window.getUiIconSvg("maxHp", 14),
+      });
+    }
+    if (item.baseMoveSpeed > 0) {
+      baseStats.push({
+        label: "Speed",
+        val: window.formatNumber(item.baseMoveSpeed),
+        icon: window.getUiIconSvg("moveSpeed", 14),
+      });
+    }
+    if (item.baseBlock > 0) {
+      baseStats.push({
+        label: "Block Rate",
+        val: Math.round(item.baseBlock * 100) + "%",
+        icon: window.getUiIconSvg("block", 14),
+      });
+    }
+    if (item.baseParry > 0) {
+      baseStats.push({
+        label: "Parry Rate",
+        val: Math.round(item.baseParry * 100) + "%",
+        icon: window.getUiIconSvg("parry", 14),
+      });
+    }
+    if (item.baseInt > 0) {
+      baseStats.push({
+        label: "Intelligence",
+        val: window.formatNumber(item.baseInt),
+        icon: window.getUiIconSvg("int", 14),
+      });
+    }
 
     if (baseStats.length > 0) {
       html += `<div style="background: rgba(255, 255, 255, 0.02); border: 1px solid #222; border-radius: 4px; padding: 6px; margin: 8px 0; text-align: center;">`;
@@ -4952,13 +4960,13 @@ window.generateItemCardHtml = function (
           affixVal > 0)
       ) {
         let displayVal = "";
-                if (s.isDoublePct) {
-                  displayVal = `+${(affixVal * 100).toFixed(2)}%`;
-                } else if (s.isPct) {
-                  displayVal = `+${Math.floor(affixVal * 100)}%`;
-                } else {
-                  displayVal = `+${window.formatNumber(affixVal)}`;
-                }
+        if (s.isDoublePct) {
+          displayVal = `+${(affixVal * 100).toFixed(2)}%`;
+        } else if (s.isPct) {
+          displayVal = `+${Math.floor(affixVal * 100)}%`;
+        } else {
+          displayVal = `+${window.formatNumber(affixVal)}`;
+        }
 
         let iconSvg = window.getUiIconSvg(s.key, 11);
         let rangeStr = window.formatStatRangeStr
@@ -5038,19 +5046,19 @@ window.generateItemCardHtml = function (
     ];
 
     statsList.forEach((s) => {
-                       let val = item[s.key] || 0;
-                       let eqVal = compareItem[s.key] || 0;
-                       let diff = val - eqVal;
-                       if (Math.abs(diff) > 0.001) {
-                         hasDiffs = true;
-                         let isPct =
-                           s.isPct || ["activeAttackSpeed", "idleAttackSpeed"].includes(s.key);
-                         let isPositive = s.inverseGood ? diff < 0 : diff > 0;
-                         let color = isPositive ? "#2ecc71" : "#e74c3c";
-                         let sign = diff > 0 ? "+" : "";
-                         let diffStr = isPct
-                           ? sign + Math.round(diff * 100) + "%"
-                           : sign + window.formatNumber(diff);
+      let val = item[s.key] || 0;
+      let eqVal = compareItem[s.key] || 0;
+      let diff = val - eqVal;
+      if (Math.abs(diff) > 0.001) {
+        hasDiffs = true;
+        let isPct =
+          s.isPct || ["activeAttackSpeed", "idleAttackSpeed"].includes(s.key);
+        let isPositive = s.inverseGood ? diff < 0 : diff > 0;
+        let color = isPositive ? "#2ecc71" : "#e74c3c";
+        let sign = diff > 0 ? "+" : "";
+        let diffStr = isPct
+          ? sign + Math.round(diff * 100) + "%"
+          : sign + window.formatNumber(diff);
         let emoji = s.icon ? s.icon + " " : "";
         let sLabel = window.getStatLabel(s.key);
 
@@ -5403,7 +5411,9 @@ window.switchMarketSubTab = function (subTabId) {
           ? "sinks"
           : subTabId === "ALCHEMY"
             ? "alchemy"
-            : "shop";
+            : subTabId === "BOUTIQUE"
+              ? "boutique"
+              : "shop";
   let activeBtn = document.getElementById("market-sub-tab-" + btnSuffix);
   if (activeBtn) activeBtn.classList.add("active");
 
@@ -5416,7 +5426,9 @@ window.switchMarketSubTab = function (subTabId) {
           ? "sinks"
           : subTabId === "ALCHEMY"
             ? "alchemy"
-            : "shop";
+            : subTabId === "BOUTIQUE"
+              ? "boutique"
+              : "shop";
   let activeSec = document.getElementById("market-sec-" + secSuffix);
   if (activeSec) activeSec.style.display = "block";
 
@@ -5425,6 +5437,8 @@ window.switchMarketSubTab = function (subTabId) {
   } else if (subTabId === "GACHA") {
     window.updateGachaRecentList();
     window.renderGachaShowcaseMarquee();
+  } else if (subTabId === "BOUTIQUE") {
+    window.renderBoutiqueSkins();
   }
 
   if (typeof window.hideTooltip === "function") window.hideTooltip();
@@ -6519,12 +6533,12 @@ window.devSpawnUnique = function () {
       newItem.desc =
         "Glows for 7s every 30s. Tap during window to enter 5s Storing state, then detonates spatial collapse.";
     } else if (sub === "maelstrom") {
-              item.isUniqueMaelstrom = true;
-              item.noun = "Maelstrom Glaive";
-              item.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${lvl})`;
-              item.desc =
-                "Critical strikes project piercing wind gales. Casting gales grants +10% Active & Idle Attack Speed for 6s (stacks up to 3x).";
-            } else if (sub === "aegis") {
+      item.isUniqueMaelstrom = true;
+      item.noun = "Maelstrom Glaive";
+      item.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${lvl})`;
+      item.desc =
+        "Critical strikes project piercing wind gales. Casting gales grants +10% Active & Idle Attack Speed for 6s (stacks up to 3x).";
+    } else if (sub === "aegis") {
       newItem.subType = "shield";
       newItem.isUniqueAegis = true;
       newItem.noun = "Void-Warped Aegis";
@@ -6549,12 +6563,12 @@ window.devSpawnUnique = function () {
       newItem.desc =
         "Boosts XP gain by +200% and bypasses level locks while below 75% peak level.";
     } else if (sub === "warpcore") {
-              item.isUniqueWarpCore = true;
-              item.noun = "Warp-Core Greaves";
-              item.name = `⚡ Warp-Core Greaves (Lv. ${lvl})`;
-              item.desc =
-                "Time Dilation: Attacks speed up by +1% for every 1% of target missing health (up to +99%). Boss kills grant 4s of Maximum Haste.";
-            } else if (sub === "tempest") {
+      item.isUniqueWarpCore = true;
+      item.noun = "Warp-Core Greaves";
+      item.name = `⚡ Warp-Core Greaves (Lv. ${lvl})`;
+      item.desc =
+        "Time Dilation: Attacks speed up by +1% for every 1% of target missing health (up to +99%). Boss kills grant 4s of Maximum Haste.";
+    } else if (sub === "tempest") {
       newItem.isUniqueTempest = true;
       newItem.noun = "Crown of Tempests";
       newItem.setName = null;
@@ -7450,9 +7464,9 @@ window.renderAltarTab = function () {
       let gRate = 1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
       let rScale = Math.pow(gRate, equivalentStage);
 
-      let hpVal = Math.floor(boss.hpMult * (60 * rScale));
-      let dmgVal = Math.floor(20 * rScale * boss.dmgMult);
       let defVal = Math.floor(boss.defMult * rScale);
+      let hpVal = Math.floor(boss.hpMult * (60 * rScale) * (1 + defVal / 100)); // True Effective Health
+      let dmgVal = Math.floor(20 * rScale * boss.dmgMult);
 
       let lootHtml = boss.artifacts
         .map((art) => {
@@ -10004,6 +10018,315 @@ window.updateMailboxBadge = function (hasUnclaimed) {
   window.updateHubAlerts();
 };
 
+/* --- CUSTOM UI SELECTS & WARDROBE BOUTIQUE --- */
+window.toggleCustomSelect = function (id) {
+  let select = document.getElementById(id);
+  if (!select) return;
+  let isActive = select.classList.contains("active");
+
+  document.querySelectorAll(".custom-select").forEach((el) => {
+    if (el.id !== id) el.classList.remove("active");
+  });
+
+  if (isActive) {
+    select.classList.remove("active");
+  } else {
+    select.classList.add("active");
+  }
+};
+
+window.selectCustomForgeStation = function (val) {
+  let select = document.getElementById("custom-forge-select");
+  if (select) {
+    select.classList.remove("active");
+    let textSpan = document.getElementById("custom-forge-select-text");
+    if (textSpan) {
+      textSpan.innerText =
+        val === "blacksmith"
+          ? "🛡️ Blacksmith Station (Temper / Level / Tier)"
+          : "🔮 Mystical Enchanter (Infuse / Purge)";
+    }
+    select.querySelectorAll(".custom-select-option").forEach((opt) => {
+      if (opt.getAttribute("data-value") === val) {
+        opt.classList.add("selected");
+      } else {
+        opt.classList.remove("selected");
+      }
+    });
+  }
+  window.switchForgeStation(val);
+};
+
+window.selectedBoutiqueSkinKey =
+  window.selectedBoutiqueSkinKey ||
+  window.playerStats.cosmeticSkin ||
+  "default";
+
+window.renderBoutiqueSkins = function () {
+  let el = document.getElementById("boutique-skins-list");
+  let showcaseCanvas = document.getElementById("wardrobe-preview-canvas");
+  let showcaseName = document.getElementById("showcase-skin-name");
+  let showcaseDesc = document.getElementById("showcase-skin-desc");
+  let showcasePrice = document.getElementById("showcase-skin-price");
+  let showcaseBtn = document.getElementById("showcase-action-btn");
+  if (
+    !el ||
+    !showcaseCanvas ||
+    !showcaseName ||
+    !showcaseDesc ||
+    !showcasePrice ||
+    !showcaseBtn
+  )
+    return;
+
+  let p = window.playerStats;
+  let unlocked = p.unlockedSkins || ["default"];
+  let activeSkin = p.cosmeticSkin || "default";
+  let selKey = window.selectedBoutiqueSkinKey;
+  let selSkin = window.COSMETIC_SKINS[selKey];
+
+  // 1. Render the top Showcase Chamber details
+  showcaseName.innerText = selSkin.name;
+  showcaseName.style.color = selSkin.color;
+  showcaseDesc.innerText = selSkin.desc;
+
+  let showcaseChamber = document.getElementById("boutique-showcase-chamber");
+  let previewWrapper =
+    document.getElementById("boutique-preview-wrapper") ||
+    (showcaseChamber ? showcaseChamber.querySelector("div") : null);
+  if (showcaseChamber) {
+    showcaseChamber.style.border = `2px solid ${selSkin.color}`;
+    showcaseChamber.style.background = `radial-gradient(circle at 50% 50%, ${window.hexToRgba(selSkin.color, 0.12)} 0%, #0c0e12 100%)`;
+    showcaseChamber.style.boxShadow = `0 4px 15px ${window.hexToRgba(selSkin.color, 0.15)}, inset 0 0 10px ${window.hexToRgba(selSkin.color, 0.1)}`;
+  }
+  if (previewWrapper) {
+    previewWrapper.style.border = `1.5px solid ${selSkin.color}`;
+    previewWrapper.style.boxShadow = `inset 0 0 8px #000, 0 0 8px ${window.hexToRgba(selSkin.color, 0.2)}`;
+  }
+
+  // Draw showcase preview
+  let sCtx = showcaseCanvas.getContext("2d");
+  sCtx.clearRect(0, 0, showcaseCanvas.width, showcaseCanvas.height);
+  sCtx.imageSmoothingEnabled = false;
+  window.drawSingleHero(
+    sCtx,
+    40,
+    50,
+    1.5,
+    window.equippedSlots,
+    {
+      cosmeticSkin: selKey,
+      frenzyTimer: 0,
+    },
+    0,
+    {
+      slashFrame: false,
+      deathAnimationTimer: 0,
+      isMainHero: false,
+    },
+  );
+
+  // Handle showcase button state
+  let isUnlocked = unlocked.includes(selKey);
+  let isActive = activeSkin === selKey;
+
+  if (isActive) {
+    showcasePrice.innerText = "Active Outfit";
+    showcasePrice.style.color = "#bdc3c7";
+    showcaseBtn.innerText = "ACTIVE";
+    showcaseBtn.disabled = true;
+    showcaseBtn.style.background = "#334155";
+    showcaseBtn.style.color = "#64748b";
+    showcaseBtn.style.cursor = "not-allowed";
+    showcaseBtn.style.boxShadow = "none";
+  } else if (isUnlocked) {
+    showcasePrice.innerText = "Unlocked";
+    showcasePrice.style.color = "#2ecc71";
+    showcaseBtn.innerText = "EQUIP SKIN";
+    showcaseBtn.disabled = false;
+    showcaseBtn.style.background = "#2ecc71";
+    showcaseBtn.style.color = "#fff";
+    showcaseBtn.style.cursor = "pointer";
+    showcaseBtn.style.boxShadow = "0 0 10px rgba(46, 204, 113, 0.4)";
+  } else {
+    let currencyLabel = selSkin.currency === "Luminous Soul" ? "Souls" : "Gold";
+    let owned =
+      selSkin.currency === "Luminous Soul"
+        ? window.inventory.ETC["Luminous Soul"] || 0
+        : p.coins;
+    let canAfford = owned >= selSkin.cost;
+
+    showcasePrice.innerText = `${selSkin.cost} ${currencyLabel}`;
+    showcasePrice.style.color = canAfford ? "#f1c40f" : "#e74c3c";
+    showcaseBtn.innerText = `UNLOCK SKIN`;
+    showcaseBtn.disabled = !canAfford;
+    if (canAfford) {
+      showcaseBtn.style.background = selSkin.color;
+      showcaseBtn.style.color = selSkin.color === "#f1c40f" ? "#111" : "#fff";
+      showcaseBtn.style.cursor = "pointer";
+      showcaseBtn.style.boxShadow = `0 0 12px ${selSkin.color}55`;
+    } else {
+      showcaseBtn.style.background = "#333";
+      showcaseBtn.style.color = "#666";
+      showcaseBtn.style.cursor = "not-allowed";
+      showcaseBtn.style.boxShadow = "none";
+    }
+  }
+
+  // 2. Render the grid below
+  let html = "";
+  Object.keys(window.COSMETIC_SKINS).forEach((key) => {
+    let skin = window.COSMETIC_SKINS[key];
+    let cardUnlocked = unlocked.includes(key);
+    let cardActive = activeSkin === key;
+    let isSelected = selKey === key;
+
+    let borderGlowStyle = isSelected
+      ? `border: 2px solid ${skin.color}; box-shadow: 0 0 12px ${skin.color}45;`
+      : `border: 1px solid #333;`;
+
+    let statusText = cardActive
+      ? `<span style="color:#2ecc71; font-size:8px; font-weight:bold; display:block; margin-top:2px;">ACTIVE ✓</span>`
+      : cardUnlocked
+        ? `<span style="color:#aaa; font-size:8px; display:block; margin-top:2px;">UNLOCKED</span>`
+        : `<span style="color:${skin.color}; font-size:8px; font-weight:bold; display:block; margin-top:2px;">LOCKED</span>`;
+
+    let canvasId = `boutique-skin-canvas-${key}`;
+    html += `
+          <div class="market-card" style="background:#111; ${borderGlowStyle} padding:8px; text-align:center; display:flex; flex-direction:column; align-items:center; cursor:pointer;" onclick="window.selectBoutiqueSkin('${key}')">
+              <canvas id="${canvasId}" width="40" height="50" style="width:40px; height:50px; background:rgba(0,0,0,0.55); border:1px solid ${isSelected ? skin.color : "#222"}; border-radius:4px; display:block; flex-shrink:0; pointer-events:none;"></canvas>
+              <strong style="color:${skin.color}; font-size:11px; margin-top:4px; display:block; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${skin.name}</strong>
+              ${statusText}
+          </div>
+        `;
+  });
+
+  el.innerHTML = html;
+
+  // Draw previews for the grid cards
+  Object.keys(window.COSMETIC_SKINS).forEach((key) => {
+    let canvas = document.getElementById(`boutique-skin-canvas-${key}`);
+    if (canvas) {
+      let ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.imageSmoothingEnabled = false;
+
+      window.drawSingleHero(
+        ctx,
+        20,
+        21,
+        0.7,
+        window.equippedSlots,
+        {
+          cosmeticSkin: key,
+          frenzyTimer: 0,
+        },
+        0,
+        {
+          slashFrame: false,
+          deathAnimationTimer: 0,
+          isMainHero: false,
+        },
+      );
+    }
+  });
+};
+
+window.selectBoutiqueSkin = function (key) {
+  window.selectedBoutiqueSkinKey = key;
+  window.renderBoutiqueSkins();
+};
+
+window.handleShowcaseAction = function () {
+  let key = window.selectedBoutiqueSkinKey || "default";
+  let p = window.playerStats;
+  let unlocked = p.unlockedSkins || ["default"];
+  let isActive = p.cosmeticSkin === key;
+
+  if (isActive) return;
+
+  if (unlocked.includes(key)) {
+    window.equipBoutiqueSkin(key);
+  } else {
+    window.buyBoutiqueSkin(key);
+  }
+};
+
+window.buyBoutiqueSkin = function (skinKey) {
+  let skin = window.COSMETIC_SKINS[skinKey];
+  if (!skin) return;
+
+  let p = window.playerStats;
+  let unlocked = p.unlockedSkins || ["default"];
+  if (unlocked.includes(skinKey)) return;
+
+  let canAfford = false;
+  if (skin.currency === "Luminous Soul") {
+    let owned = window.inventory.ETC["Luminous Soul"] || 0;
+    if (owned >= skin.cost) {
+      window.inventory.ETC["Luminous Soul"] -= skin.cost;
+      if (window.inventory.ETC["Luminous Soul"] === 0) {
+        delete window.inventory.ETC["Luminous Soul"];
+      }
+      canAfford = true;
+    }
+  } else {
+    if (p.coins >= skin.cost) {
+      p.coins -= skin.cost;
+      canAfford = true;
+    }
+  }
+
+  if (!canAfford) {
+    window.pushHeaderToast("❌ Cannot afford this skin!", "#e74c3c");
+    return;
+  }
+
+  p.unlockedSkins = unlocked;
+  p.unlockedSkins.push(skinKey);
+  p.cosmeticSkin = skinKey; // Auto-equip
+  window.selectedBoutiqueSkinKey = skinKey;
+
+  window.pushHeaderToast(`🎭 Unlocked & Equipped: ${skin.name}!`, "#2ecc71");
+  window.pushLog(
+    `<span style='color:#ff007f;'>[BOUTIQUE]</span> Unlocked and equipped skin: <span style='color:${skin.color};'>${skin.name}</span>.`,
+  );
+
+  if (window.SoundManager) window.SoundManager.play("fairy");
+  if (window.spawnPurchaseCelebration) {
+    window.spawnPurchaseCelebration("alchemy", skin.color, 4);
+  }
+
+  window.updateUI();
+  window.renderBoutiqueSkins();
+  window.saveGame();
+};
+
+window.equipBoutiqueSkin = function (skinKey) {
+  let p = window.playerStats;
+  let unlocked = p.unlockedSkins || ["default"];
+  if (!unlocked.includes(skinKey)) return;
+
+  p.cosmeticSkin = skinKey;
+  window.selectedBoutiqueSkinKey = skinKey;
+  window.pushHeaderToast(
+    `🎭 Equipped: ${window.COSMETIC_SKINS[skinKey].name}!`,
+    "#2ecc71",
+  );
+  window.updateUI();
+  window.renderBoutiqueSkins();
+  window.saveGame();
+};
+
+// Close custom selectors globally when clicking outside
+document.addEventListener("pointerdown", function (e) {
+  if (!e.target.closest(".custom-select")) {
+    document.querySelectorAll(".custom-select").forEach((el) => {
+      el.classList.remove("active");
+    });
+  }
+});
+
 window.updateHubAlerts = function () {
   // 1. Evaluate Missions
   let dailies = window.playerStats.dailyMissions || [];
@@ -10419,14 +10742,14 @@ window.renderLeaderboardItems = function (leaderboard) {
       let canvasId = `leaderboard-canvas-${player.userId}`;
 
       let guildBadgeHtml = "";
-            if (player.guildName) {
-              let emblem = window.getClanEmblemHtml(player.guildEmblem || 0, 12);
-              guildBadgeHtml = `
+      if (player.guildName) {
+        let emblem = window.getClanEmblemHtml(player.guildEmblem || 0, 12);
+        guildBadgeHtml = `
                       <div style="display: inline-flex; align-items: center; gap: 3px; background: rgba(142, 68, 173, 0.1); border: 1px solid #8e44ad; padding: 1px 4px; border-radius: 3px; font-size: 8.5px; color: #df9ffb; font-weight: bold; margin-left: 6px;">
                         ${emblem} <span>${window.escapeHTML(player.guildName)}</span>
                       </div>
                     `;
-            }
+      }
 
       return `
               <div class="bag-item" style="display:flex; justify-content:space-between; align-items:center; padding:6px 12px; gap:8px; cursor:default; ${cardStyle}">
