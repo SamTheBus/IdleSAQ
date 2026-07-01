@@ -149,6 +149,13 @@ body {
   font-size: 13.5px;
 }
 
+body.scroll-lock {
+  overflow: hidden !important;
+  height: 100% !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
 /* --- GAME PLATFORM FRAME --- */
 #game-container {
   width: 100%;
@@ -1460,6 +1467,19 @@ canvas {
   .market-card {
     padding: 10px !important;
   }
+
+  /* Snaps absolute draggable windows into fixed centered overlays on mobile */
+  .draggable-window {
+    position: fixed !important;
+    left: 2.5vw !important;
+    right: 2.5vw !important;
+    top: 10% !important;
+    width: 95vw !important;
+    max-width: 95vw !important;
+    transform: none !important;
+    height: auto !important;
+    max-height: 80vh !important;
+  }
 }
 
 /* ==========================================================================
@@ -2446,6 +2466,16 @@ canvas {
   position: relative;
   transition: all 0.18s ease-in-out;
   text-align: left;
+}
+
+.hub-card.locked-void {
+  background: linear-gradient(135deg, #0d0615 0%, #030008 100%) !important;
+  border: 1.8px solid #9b59b6 !important;
+  box-shadow:
+    0 0 12px rgba(155, 89, 182, 0.35),
+    inset 0 0 8px rgba(155, 89, 182, 0.15) !important;
+  position: relative;
+  cursor: not-allowed !important;
 }
 
 .hub-card strong {

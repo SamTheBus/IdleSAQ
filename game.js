@@ -1376,6 +1376,24 @@ window.applySaveStatePayload = function (parsed, skipOfflineGains = false) {
       window.playerStats.dailyMissions = [];
     if (window.playerStats.weeklyMissions === undefined)
       window.playerStats.weeklyMissions = [];
+
+    // Self-Healing Migration: Retroactively convert any active personal missions
+    // holding Clan Sacks back to standard personal Reward Sacks
+    if (window.playerStats.dailyMissions) {
+      window.playerStats.dailyMissions.forEach((m) => {
+        if (m.treat === "Clan Reward Sack") {
+          m.treat = "Daily Reward Sack";
+        }
+      });
+    }
+    if (window.playerStats.weeklyMissions) {
+      window.playerStats.weeklyMissions.forEach((m) => {
+        if (m.treat === "Clan Weekly Sack") {
+          m.treat = "Weekly Reward Sack";
+        }
+      });
+    }
+
     if (window.playerStats.lastDailyResetTime === undefined)
       window.playerStats.lastDailyResetTime = 0;
     if (window.playerStats.lastWeeklyResetTime === undefined)
@@ -4843,38 +4861,133 @@ window.useItem = function (itemName) {
     overlay.style.backdropFilter = "blur(10px)";
     document.body.appendChild(overlay);
 
-    let premiumHtml =
-      premiumDrops.length > 0
-        ? `<div style="margin-top:12px; border-top:1px dashed #444; padding-top:10px; font-family:monospace; font-size:10px; text-align:left;">
-            <div style="color:#00d2ff; font-weight:bold; margin-bottom:4px; text-transform:uppercase;">🏢 SUPPLY DEPOT BONUS CHECKS:</div>
-            ${premiumDrops.join("<br>")}
-         </div>`
-        : "";
-
     overlay.innerHTML = `
-      <div style="background:#151515; border:3px solid #ffaa00; border-radius:12px; width:95%; max-width:420px; box-shadow:0 15px 45px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s; overflow:hidden;">
-          <h2 style="margin:0 0 10px 0; color:#ffaa00; letter-spacing:2px; text-transform:uppercase; font-size:18px;">🎁 SUPPLY CRATE UNBOXED!</h2>
-          <div style="height:2px; background:linear-gradient(90deg, transparent, #ffaa00, transparent); margin-bottom:15px;"></div>
-          <p style="font-size:11px; color:#aaa; line-height:1.45; margin-bottom:15px; white-space:normal; text-align:center;">
-              You cracked open the **Weekly Supply Crate**! Depot level **Lv. ${depotLevel}** has granted the following yields:
-          </p>
-          <div style="background:#0c0f12; border:1px solid #ffaa00; border-radius:6px; padding:15px; margin-bottom:15px; text-align:left;">
-              <div style="font-size:11px; color:#aaa; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">📦 Loot Yields:</div>
-              <div style="font-size:13px; color:#f1c40f; font-weight:bold; margin-bottom:3px; font-family:monospace;">🟡 +${baseGold.toLocaleString()} Gold</div>
-              <div style="font-size:13px; color:#ffb6c1; font-weight:bold; margin-bottom:3px; font-family:monospace;">💀 +${baseSouls.toLocaleString()} Monster Souls</div>
-              <div style="font-size:13px; color:#f1c40f; font-weight:bold; font-family:monospace;">🔑 +${baseKeys} Gacha Key</div>
-              ${premiumHtml}
-          </div>
-          <button id="btn-supply-crate-confirm" style="background:linear-gradient(135deg, #ffaa00, #e67e22); color:#000; border:1px solid #fff; font-weight:bold; font-size:12px; text-transform:uppercase; letter-spacing:1px; padding:12px; border-radius:6px; cursor:pointer; width:100%; box-shadow:0 4px 15px rgba(255,170,0,0.3);">Claim Supplies</button>
-      </div>
-    `;
+        <style>
+          .crate-anim-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 180px;
+            margin-bottom: 10px;
+          }
+          .crate-svg {
+            animation: crateShake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+            overflow: visible !important;
+          }
+          .crate-lid {
+            animation: lidPopoff 0.5s cubic-bezier(0.25, 0.8, 0.25, 1.25) forwards;
+            animation-delay: 0.5s;
+            transform-origin: 50px 30px;
+          }
+          .crate-sparkle {
+            opacity: 0;
+            animation: crateSparkleUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: 0.55s;
+          }
+          .cs1 { --dx: 0px; --dy: -42px; --ds: 1.5; }
+          .cs2 { --dx: -32px; --dy: -32px; --ds: 1.3; }
+          .cs3 { --dx: 32px; --dy: -32px; --ds: 1.3; }
+          .cs4 { --dx: -16px; --dy: -46px; --ds: 1.2; }
+          .cs5 { --dx: 16px; --dy: -46px; --ds: 1.2; }
 
-    document.getElementById("btn-supply-crate-confirm").onclick = function () {
-      overlay.remove();
-      window.isGamePaused = false;
-      window.updateUI();
-      window.renderInventory();
-    };
+          @keyframes crateShake {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            15% { transform: rotate(-6deg) scale(1.05); }
+            30% { transform: rotate(7deg) scale(1.05); }
+            45% { transform: rotate(-7deg) scale(1.05); }
+            60% { transform: rotate(5deg) scale(1.02); }
+            75% { transform: rotate(-3deg) scale(1.01); }
+            90% { transform: rotate(1deg) scale(1.0); }
+          }
+          @keyframes lidPopoff {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-30px) rotate(-15deg); opacity: 0; }
+          }
+          @keyframes crateSparkleUp {
+            0% { transform: translate(0, 15px) scale(0); opacity: 0; }
+            40% { opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(var(--ds)); opacity: 0; }
+          }
+        </style>
+        <div style="text-align:center; color:white; animation: toastFadeIn 0.3s ease-out;">
+          <div class="crate-anim-container">
+            <svg class="crate-svg" width="150" height="150" viewBox="0 0 100 100">
+              <!-- Drop Shadow -->
+              <ellipse cx="50" cy="90" rx="36" ry="6" fill="rgba(0,0,0,0.5)" />
+              <!-- Crate Body -->
+              <rect x="20" y="38" width="60" height="48" rx="2" fill="#873600" stroke="#000" stroke-width="2.5" />
+              <!-- Inner Wood Planks lines -->
+              <line x1="32" y1="38" x2="32" y2="86" stroke="#5c2e16" stroke-width="1.5" />
+              <line x1="44" y1="38" x2="44" y2="86" stroke="#5c2e16" stroke-width="1.5" />
+              <line x1="56" y1="38" x2="56" y2="86" stroke="#5c2e16" stroke-width="1.5" />
+              <line x1="68" y1="38" x2="68" y2="86" stroke="#5c2e16" stroke-width="1.5" />
+              <!-- Diagonal Crossbeams -->
+              <line x1="22" y1="40" x2="78" y2="84" stroke="#5c2e16" stroke-width="3" />
+              <!-- Iron Corner Brackets -->
+              <rect x="20" y="38" width="10" height="10" fill="#7f8c8d" stroke="#000" stroke-width="1.5" />
+              <rect x="70" y="38" width="10" height="10" fill="#7f8c8d" stroke="#000" stroke-width="1.5" />
+              <rect x="20" y="76" width="10" height="10" fill="#7f8c8d" stroke="#000" stroke-width="1.5" />
+              <rect x="70" y="76" width="10" height="10" fill="#7f8c8d" stroke="#000" stroke-width="1.5" />
+              <!-- Lock Bracket -->
+              <rect x="44" y="44" width="12" height="15" rx="1.5" fill="#f1c40f" stroke="#000" stroke-width="1.5" />
+              <circle cx="50" cy="51" r="2.2" fill="#111" />
+
+              <!-- Crate Lid (Pops Off!) -->
+              <g class="crate-lid">
+                <rect x="16" y="28" width="68" height="11" rx="1" fill="#a0522d" stroke="#000" stroke-width="2.5" />
+                <line x1="24" y1="28" x2="24" y2="39" stroke="#5c2e16" stroke-width="1.5" />
+                <line x1="76" y1="28" x2="76" y2="39" stroke="#5c2e16" stroke-width="1.5" />
+              </g>
+
+              <!-- Sparkling treasures bursting -->
+              <g>
+                <polygon class="crate-sparkle cs1" points="50,22 53,28 60,28 55,32 57,38 50,34 43,38 45,32 40,28 47,28" fill="#f1c40f" stroke="#000" stroke-width="0.8" />
+                <circle class="crate-sparkle cs2" cx="35" cy="25" r="3" fill="#00d2ff" />
+                <circle class="crate-sparkle cs3" cx="65" cy="25" r="3" fill="#2ecc71" />
+                <polygon class="crate-sparkle cs4" points="40,20 42,24 46,24 43,26 44,30 40,28 36,30 37,26 34,24 38,24" fill="#9b59b6" stroke="#000" stroke-width="0.8" />
+                <circle class="crate-sparkle cs5" cx="60" cy="18" r="2.5" fill="#ffb6c1" />
+              </g>
+            </svg>
+          </div>
+          <div style="font-size: 15px; font-weight: 900; color:#ffaa00; letter-spacing: 2px; text-shadow: 0 0 6px rgba(255,170,0,0.3);">UNBOXING SUPPLY CRATE...</div>
+        </div>
+      `;
+
+    setTimeout(() => {
+      let premiumHtml =
+        premiumDrops.length > 0
+          ? `<div style="margin-top:12px; border-top:1px dashed #444; padding-top:10px; font-family:monospace; font-size:10px; text-align:left;">
+                <div style="color:#00d2ff; font-weight:bold; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">🏢 SUPPLY DEPOT BONUS CHECKS:</div>
+                ${premiumDrops.join("<br>")}
+             </div>`
+          : "";
+
+      overlay.innerHTML = `
+          <div style="background:#151515; border:3px solid #ffaa00; border-radius:12px; width:95%; max-width:420px; box-shadow:0 15px 45px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s; overflow:hidden;">
+              <h2 style="margin:0 0 10px 0; color:#ffaa00; letter-spacing:2px; text-transform:uppercase; font-size:18px;">🎁 SUPPLY CRATE UNBOXED!</h2>
+              <div style="height:2px; background:linear-gradient(90deg, transparent, #ffaa00, transparent); margin-bottom:15px;"></div>
+              <p style="font-size:11px; color:#aaa; line-height:1.45; margin-bottom:15px; white-space:normal; text-align:center;">
+                  You cracked open the **Weekly Supply Crate**! Depot level **Lv. ${depotLevel}** has granted the following yields:
+              </p>
+              <div style="background:#0c0f12; border:1px solid #ffaa00; border-radius:6px; padding:15px; margin-bottom:15px; text-align:left;">
+                  <div style="font-size:11px; color:#aaa; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">📦 Loot Yields:</div>
+                  <div style="font-size:13px; color:#f1c40f; font-weight:bold; margin-bottom:3px; font-family:monospace;">🟡 +${baseGold.toLocaleString()} Gold</div>
+                  <div style="font-size:13px; color:#ffb6c1; font-weight:bold; margin-bottom:3px; font-family:monospace;">💀 +${baseSouls.toLocaleString()} Monster Souls</div>
+                  <div style="font-size:13px; color:#f1c40f; font-weight:bold; font-family:monospace;">🔑 +${baseKeys} Gacha Key</div>
+                  ${premiumHtml}
+              </div>
+              <button id="btn-supply-crate-confirm" style="background:linear-gradient(135deg, #ffaa00, #e67e22); color:#000; border:1px solid #fff; font-weight:bold; font-size:12px; text-transform:uppercase; letter-spacing:1px; padding:12px; border-radius:6px; cursor:pointer; width:100%; box-shadow:0 4px 15px rgba(255,170,0,0.3);">Claim Supplies</button>
+          </div>
+        `;
+
+      document.getElementById("btn-supply-crate-confirm").onclick =
+        function () {
+          overlay.remove();
+          window.isGamePaused = false;
+          window.updateUI();
+          window.renderInventory();
+        };
+    }, 1100);
     return;
   }
 
@@ -4882,9 +4995,13 @@ window.useItem = function (itemName) {
     "Daily Reward Sack",
     "Guild Reward Sack",
     "Daily Guild Reward Sack",
+    "Clan Reward Sack",
   ];
-  const weeklySacks = ["Weekly Reward Sack", "Guild Weekly Sack"];
-
+  const weeklySacks = [
+    "Weekly Reward Sack",
+    "Guild Weekly Sack",
+    "Clan Weekly Sack",
+  ];
   if (dailySacks.includes(itemName)) {
     if (typeof window.openDailyRewardSack === "function") {
       window.openDailyRewardSack(itemName);

@@ -793,15 +793,15 @@ window.createItemObject = function (
 
   let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
 
-    // Direct-Alignment Scaling Model: Maps item creation baselines exactly to enemy exponential scale curves
-    let repStage = stageScale * 10;
-    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-    let repScale = Math.pow(repGrowth, repStage);
+  // Direct-Alignment Scaling Model: Maps item creation baselines exactly to enemy exponential scale curves
+  let repStage = stageScale * 10;
+  let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+  let repScale = Math.pow(repGrowth, repStage);
 
-    let expScale = repScale;
-    let hpDefExpScale = repScale;
+  let expScale = repScale;
+  let hpDefExpScale = repScale;
 
-    // Apply baseline attribute values matching slot configurations (Slot-Specific Base Stats)
+  // Apply baseline attribute values matching slot configurations (Slot-Specific Base Stats)
   if (!isArt) {
     let baseRarityMult = 1.0 + statLinesCount * 0.3; // Apply same base rarity multiplier immediately on drop
     if (chosenType === "weapon") {
@@ -1157,22 +1157,24 @@ window.buildProceduralName = function (item) {
   if (item.statsRolled === "UNIQUE") return item.name;
   let stars = item.statsRolled;
 
-  const nomenclature = {
-    bonusAtk: "Vanguard",
-    bonusMaxHp: "Colossus",
-    bonusDef: "Bastion",
-    bonusMoveSpeed: "Windrunner",
-    bonusCritChance: "Wraith",
-    bonusCritDamage: "Reaver",
-    bonusBlock: "Dreadnought",
-    bonusParry: "Duellist",
-    bonusStr: "Berserker",
-    bonusDex: "Scout",
-    bonusInt: "Scholar",
-  };
+  // Prioritize the Set Name as the theme prefix if it exists!
+  let themeName = item.setName || "Standard";
 
-  let themeName = "Standard";
-  if (stars > 0) {
+  if (!item.setName && stars > 0) {
+    const nomenclature = {
+      bonusAtk: "Vanguard",
+      bonusMaxHp: "Colossus",
+      bonusDef: "Bastion",
+      bonusMoveSpeed: "Windrunner",
+      bonusCritChance: "Wraith",
+      bonusCritDamage: "Reaver",
+      bonusBlock: "Dreadnought",
+      bonusParry: "Duellist",
+      bonusStr: "Berserker",
+      bonusDex: "Scout",
+      bonusInt: "Scholar",
+    };
+
     let highestKey = null;
     let maxVal = -1;
     Object.keys(nomenclature).forEach((k) => {
@@ -1478,14 +1480,14 @@ window.recalculateItemStats = function (item) {
   item.bonusInt = item.bonusInt || 0;
 
   // Direct-Alignment Scaling Model: Maps recalculations exactly to enemy exponential scale curves
-    let repStage = (item.stageLevel || 1) * 10;
-    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-    let repScale = Math.pow(repGrowth, repStage);
+  let repStage = (item.stageLevel || 1) * 10;
+  let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+  let repScale = Math.pow(repGrowth, repStage);
 
-    let expScale = repScale;
-    let hpDefExpScale = repScale;
+  let expScale = repScale;
+  let hpDefExpScale = repScale;
 
-    let prestigeCount = window.playerStats.prestigeCount || 0;
+  let prestigeCount = window.playerStats.prestigeCount || 0;
   let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
 
   // Dynamic base scaling transitions for standard slot configurations
@@ -3259,4 +3261,248 @@ window.rollGachaCrateItem = function (
   window.checkAchievements();
   window.saveGame();
   return { item: newItem };
+};
+
+// --- MERCHANT & TRANSACTION OPERATIONS ---
+
+window.buyShopItem = function (index) {
+  let item = window.playerStats.shopItems[index];
+  if (!item || item.purchased) return;
+
+  if (window.playerStats.coins < item.cost) {
+    window.pushHeaderToast("❌ Insufficient Gold!", "#e74c3c");
+    return;
+  }
+
+  let maxBag = window.getMaxBagSlots();
+  if (window.inventory.EQUIP.length >= maxBag) {
+    window.pushHeaderToast("❌ Inventory Full!", "#e74c3c");
+    return;
+  }
+
+  window.playerStats.coins -= item.cost;
+  item.purchased = true;
+
+  if (window.playerStats.coins === 0) {
+    window.playerStats.hasTriggeredExactChange = true;
+  }
+
+  window.inventory.EQUIP.push(item);
+  window.frozenItemDb[item.id] = JSON.parse(JSON.stringify(item));
+
+  window.pushHeaderToast(`🛒 Purchased ${item.name}!`, "#2ecc71");
+  window.SoundManager.play("fairy");
+
+  if (window.spawnPurchaseCelebration) {
+    window.spawnPurchaseCelebration(
+      "alchemy",
+      window.getTierColor(item.statsRolled),
+      item.statsRolled,
+    );
+  }
+
+  window.updateUI();
+  window.renderInventory();
+  window.saveGame();
+};
+
+window.buyMysticalItem = function (index) {
+  let item = window.MYSTICAL_STOCK[index];
+  if (!item) return;
+
+  let cost = item.cost;
+  let currency = item.currency;
+
+  if (currency === "Gold") {
+    cost = Math.ceil(item.cost * Math.pow(1.08, window.playerStats.stage));
+    if (window.playerStats.coins < cost) {
+      window.pushHeaderToast("❌ Insufficient Gold!", "#e74c3c");
+      return;
+    }
+    window.playerStats.coins -= cost;
+    if (window.playerStats.coins === 0) {
+      window.playerStats.hasTriggeredExactChange = true;
+    }
+  } else if (currency === "Luminous Soul") {
+    let owned = window.inventory.ETC["Luminous Soul"] || 0;
+    if (owned < cost) {
+      window.pushHeaderToast("❌ Insufficient Luminous Souls!", "#e74c3c");
+      return;
+    }
+    window.inventory.ETC["Luminous Soul"] -= cost;
+    if (window.inventory.ETC["Luminous Soul"] === 0) {
+      delete window.inventory.ETC["Luminous Soul"];
+    }
+  } else if (currency === "Astral Shards") {
+    let owned = window.playerStats.astralShards || 0;
+    if (owned < cost) {
+      window.pushHeaderToast("❌ Insufficient Astral Shards!", "#e74c3c");
+      return;
+    }
+    window.playerStats.astralShards -= cost;
+  }
+
+  // Grant item
+  if (
+    item.name === "Gacha Key" ||
+    item.name === "Astral Essence" ||
+    item.name === "Catalyst Core"
+  ) {
+    window.addEtcDrop(item.name, 1);
+  } else {
+    window.addUseDrop(item.name, 1);
+  }
+
+  window.pushHeaderToast(`🛒 Purchased ${item.name}!`, "#2ecc71");
+  window.SoundManager.play("fairy");
+
+  if (window.spawnPurchaseCelebration) {
+    window.spawnPurchaseCelebration("alchemy", item.color || "#9b59b6", 3);
+  }
+
+  window.updateUI();
+  window.renderInventory();
+  window.saveGame();
+};
+
+window.buyGoldUpgrade = function (type) {
+  let p = window.playerStats;
+  let cost = 0;
+  let levelField = "";
+
+  if (type === "vending") {
+    levelField = "vendingQLevel";
+    cost = Math.floor(15000 * Math.pow(1.18, p.vendingQLevel || 0));
+  } else if (type === "shop") {
+    levelField = "shopQLevel";
+    cost = Math.floor(30000 * Math.pow(1.22, p.shopQLevel || 0));
+  } else if (type === "global") {
+    levelField = "globalQLevel";
+    cost = Math.floor(100000 * Math.pow(1.28, p.globalQLevel || 0));
+  }
+
+  if (p.coins < cost) {
+    window.pushHeaderToast("❌ Insufficient Gold!", "#e74c3c");
+    return;
+  }
+
+  p.coins -= cost;
+  p[levelField] = (p[levelField] || 0) + 1;
+
+  if (p.coins === 0) {
+    p.hasTriggeredExactChange = true;
+  }
+
+  window.pushHeaderToast("🎉 Upgrade Acquired!", "#2ecc71");
+  window.SoundManager.play("spell");
+
+  if (window.spawnPurchaseCelebration) {
+    window.spawnPurchaseCelebration("alchemy", "#f1c40f", 4);
+  }
+
+  window.updateUI();
+  window.renderGoldUpgrades();
+  window.saveGame();
+};
+
+window.transmutePotion = function (index) {
+  let recipe = window.POTION_TRANSMUTATIONS[index];
+  if (!recipe) return;
+
+  let ownedCount = window.inventory.USE[recipe.req] || 0;
+  if (ownedCount < recipe.amount) {
+    window.pushHeaderToast("❌ Insufficient ingredients!", "#e74c3c");
+    return;
+  }
+
+  window.inventory.USE[recipe.req] -= recipe.amount;
+  if (window.inventory.USE[recipe.req] === 0) {
+    delete window.inventory.USE[recipe.req];
+  }
+
+  window.addUseDrop(recipe.result, 1);
+
+  window.pushHeaderToast(`🧪 Brewed ${recipe.result}!`, "#2ecc71");
+  window.SoundManager.play("spell");
+
+  if (window.spawnPurchaseCelebration) {
+    window.spawnPurchaseCelebration("alchemy", recipe.color || "#2ecc71", 3);
+  }
+
+  window.updateUI();
+  window.renderInventory();
+  window.renderMysticalShop();
+  window.saveGame();
+};
+
+window.rerollItemSet = function () {
+  if (!window.forgeSelectedItem) return;
+  let item = window.forgeSelectedItem;
+  if (item.type === "artifact" || item.statsRolled === "UNIQUE") return;
+
+  let costGold = window.getSetRerollGoldCost(item);
+  let soulCost = 25 + item.statsRolled * 25;
+  let ownedSouls = window.inventory.ETC["Monster Soul"] || 0;
+
+  if (window.playerStats.coins < costGold) {
+    if (typeof window.pushHeaderToast === "function")
+      window.pushHeaderToast("❌ Not enough Gold!", "#e74c3c");
+    return;
+  }
+  if (ownedSouls < soulCost) {
+    if (typeof window.pushHeaderToast === "function")
+      window.pushHeaderToast("❌ Not enough Monster Souls!", "#e74c3c");
+    return;
+  }
+
+  window.playerStats.coins -= costGold;
+  window.inventory.ETC["Monster Soul"] -= soulCost;
+  if (window.inventory.ETC["Monster Soul"] === 0) {
+    delete window.inventory.ETC["Monster Soul"];
+  }
+
+  let setKeys = [
+    "Vanguard",
+    "Colossus",
+    "Bastion",
+    "Windrunner",
+    "Wraith",
+    "Reaver",
+    "Dreadnought",
+    "Duellist",
+    "Scholar",
+    "Berserker",
+    "Scout",
+    "Fortune",
+    "Mystic",
+    "Alchemist",
+    "Midas",
+    "Biohazard",
+    "Warlord",
+    "VoidTouched",
+  ];
+
+  // Roll a set that is different from the current one
+  let filtered = setKeys.filter((k) => k !== item.setName);
+  if (filtered.length === 0) filtered = setKeys;
+  let newSet = filtered[Math.floor(Math.random() * filtered.length)];
+
+  item.setName = newSet;
+  item.name = window.buildProceduralName(item);
+
+  if (typeof window.pushLog === "function")
+    window.pushLog(
+      `<span style='color:#2ecc71;'>[FORGE]</span> Successfully re-rolled set resonance of ${item.noun} to <strong style='color:#2ecc71;'>${newSet} Set</strong>!`,
+    );
+  if (typeof window.pushHeaderToast === "function")
+    window.pushHeaderToast(`✨ Set Resonated: ${newSet}!`, "#2ecc71");
+
+  if (typeof window.spawnTemperParticles === "function")
+    window.spawnTemperParticles(true);
+  if (window.SoundManager) window.SoundManager.play("spell");
+
+  window.updateUI();
+  window.renderInventory();
+  window.renderForgeTab();
+  window.saveGame();
 };

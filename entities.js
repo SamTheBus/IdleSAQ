@@ -1438,6 +1438,59 @@
         c.ellipse(cx, cy + 9, 5, 7, 0, 0, Math.PI * 2);
         c.fill();
         c.stroke();
+      } else if (vType === "marsh_ghost") {
+        // Render a wispy, translucent, floating swamp phantom
+        let hover = Math.sin(Date.now() / 140) * 6;
+        let cx = m.x + m.w / 2;
+        let cy = m.y + m.h / 2 + hover;
+
+        c.save();
+        // Translucent glowing trail
+        let glowTime = Date.now() / 200;
+        let trailGrad = c.createLinearGradient(cx, cy - 10, cx, cy + 22);
+        if (m.flashTimer > 0) {
+          trailGrad.addColorStop(0, "#ffffff");
+          trailGrad.addColorStop(1, "rgba(255,255,255,0)");
+        } else {
+          trailGrad.addColorStop(0, "rgba(46, 204, 113, 0.7)");
+          trailGrad.addColorStop(0.5, "rgba(155, 89, 182, 0.4)");
+          trailGrad.addColorStop(1, "rgba(0,0,0,0)");
+        }
+
+        c.fillStyle = trailGrad;
+        c.beginPath();
+        c.moveTo(cx - 12, cy - 4);
+        c.quadraticCurveTo(cx - 16, cy + 8, cx - 4, cy + 22);
+        c.lineTo(cx + 4, cy + 22);
+        c.quadraticCurveTo(cx + 16, cy + 8, cx + 12, cy - 4);
+        c.closePath();
+        c.fill();
+
+        // Wispy spirit head
+        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#111a14";
+        c.strokeStyle = "#000";
+        c.lineWidth = 1.8;
+        c.beginPath();
+        c.arc(cx, cy - 10, 9, Math.PI, 0);
+        c.lineTo(cx + 9, cy + 2);
+        c.quadraticCurveTo(cx + 6, cy + 8, cx, cy + 12);
+        c.quadraticCurveTo(cx - 6, cy + 8, cx - 9, cy + 2);
+        c.closePath();
+        c.fill();
+        c.stroke();
+
+        if (m.flashTimer === 0) {
+          // Glowing swamp eyes
+          c.fillStyle = "#55efc4";
+          c.shadowBlur = 6;
+          c.shadowColor = "#55efc4";
+          c.beginPath();
+          c.arc(cx - 3, cy - 10, 1.8, 0, Math.PI * 2);
+          c.arc(cx + 3, cy - 10, 1.8, 0, Math.PI * 2);
+          c.fill();
+          c.shadowBlur = 0;
+        }
+        c.restore();
       } else if (vType === "void_orb") {
         let hover = Math.sin(Date.now() / 150) * 4;
         let cx = m.x + m.w / 2;

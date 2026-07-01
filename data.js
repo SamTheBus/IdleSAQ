@@ -318,11 +318,11 @@ window.useDex = {
     color: "#9b59b6",
   },
   "Daily Reward Sack": {
-    desc: "Legacy Daily Reward Sack. Consume to open.",
+    desc: "Standardised Daily Reward. Consume to initiate untying. Guarantees 1 MP, 1x Equipment scaled to Lifetime Peak Stage, and rolls extra loot with consecutive item chances!",
     color: "#f1c40f",
   },
   "Weekly Reward Sack": {
-    desc: "Legacy Weekly Reward Sack. Consume to open.",
+    desc: "Venerable Weekly Reward. Consume to break the seal. Guarantees 3 MP, 1x Ancient Core, 1x Overlord's Sigil, 1x Eridium Shard, and 3x Legendary Scraps!",
     color: "#9b59b6",
   },
   "Guild Reward Sack": {
@@ -4448,7 +4448,7 @@ window.generateDailyMissions = function () {
       desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
       current: 0,
       target: target,
-      treat: "Clan Reward Sack",
+      treat: "Daily Reward Sack",
       treatQty: 1,
       completed: false,
       claimed: false,
@@ -4507,7 +4507,7 @@ window.generateWeeklyMissions = function () {
       desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
       current: 0,
       target: target,
-      treat: "Clan Weekly Sack",
+      treat: "Weekly Reward Sack",
       treatQty: 1,
       completed: false,
       claimed: false,

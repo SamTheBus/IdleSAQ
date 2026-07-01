@@ -25,7 +25,11 @@ window.getEquipIconHtml = function (item, size = 32) {
 
   // Draw custom procedural generic equipment icons based on slot!
   let color = window.getTierColor(item.statsRolled);
-  let id = item.id || Math.floor(Math.random() * 100000);
+  // Guarantee a globally unique ID suffix to prevent DOM duplicate ID collisions (which fall back to black fills)
+  let id =
+    (item.id || Math.floor(Math.random() * 100000)) +
+    "_" +
+    Math.floor(Math.random() * 1000000);
   let svg = "";
 
   if (item.type === "weapon") {
@@ -516,55 +520,84 @@ window.getUseIconHtml = function (key) {
               <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
               <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
           </svg>`;
-  } else if (key === "Guild Reward Sack" || key === "Daily Reward Sack") {
+  } else if (
+    key === "Guild Reward Sack" ||
+    key === "Daily Reward Sack" ||
+    key === "Clan Reward Sack"
+  ) {
     bg = "rgba(241, 196, 15, 0.25)";
     border = "#f1c40f";
     svgContent = `
-            <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-              <defs>
-                  <linearGradient id="grad_RewardSack" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#f1c40f" />
-                      <stop offset="100%" stop-color="#d35400" />
-                  </linearGradient>
-              </defs>
-              <path d="M16 8 C10 8, 6 11, 6 18 C6 25, 10 29, 16 29 C22 29, 26 25, 26 18 C26 11, 22 8, 16 8 Z" fill="url(#grad_RewardSack)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-              <ellipse cx="16" cy="10" rx="5" ry="1.8" fill="#d35400" stroke="#000" stroke-width="1.5" />
-              <path d="M14 10 L10 14 M18 10 L22 14" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round"/>
-              <polygon points="16,13 18,17 22,17 19,20 20,24 16,22 12,24 13,20 10,17 14,17" fill="#fff" opacity="0.9" stroke="#000" stroke-width="0.8"/>
-          </svg>`;
-  } else if (key === "Guild Weekly Sack") {
+              <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
+                <defs>
+                    <linearGradient id="grad_RewardSack" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#f1c40f" />
+                        <stop offset="100%" stop-color="#d35400" />
+                    </linearGradient>
+                </defs>
+                <path d="M16 8 C10 8, 6 11, 6 18 C6 25, 10 29, 16 29 C22 29, 26 25, 26 18 C26 11, 22 8, 16 8 Z" fill="url(#grad_RewardSack)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+                <ellipse cx="16" cy="10" rx="5" ry="1.8" fill="#d35400" stroke="#000" stroke-width="1.5" />
+                <path d="M14 10 L10 14 M18 10 L22 14" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round"/>
+                <polygon points="16,13 18,17 22,17 19,20 20,24 16,22 12,24 13,20 10,17 14,17" fill="#fff" opacity="0.9" stroke="#000" stroke-width="0.8"/>
+            </svg>`;
+  } else if (
+    key === "Weekly Reward Sack" ||
+    key === "Guild Weekly Sack" ||
+    key === "Clan Weekly Sack"
+  ) {
     bg = "rgba(155, 89, 182, 0.25)";
     border = "#9b59b6";
     svgContent = `
-          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-              <defs>
-                  <linearGradient id="grad_WeeklySack" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#9b59b6" />
-                      <stop offset="100%" stop-color="#3a045c" />
-                  </linearGradient>
-              </defs>
-              <path d="M16 8 C10 8, 6 11, 6 18 C6 25, 10 29, 16 29 C22 29, 26 25, 26 18 C26 11, 22 8, 16 8 Z" fill="url(#grad_WeeklySack)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-              <ellipse cx="16" cy="10" rx="5" ry="1.8" fill="#3a045c" stroke="#000" stroke-width="1.5" />
-              <path d="M14 10 L10 14 M18 10 L22 14" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round"/>
-              <circle cx="16" cy="18" r="4.5" fill="#f1c40f" stroke="#000" stroke-width="1"/>
-              <path d="M16 15.5 L16 20.5 M13.5 18 L18.5 18" stroke="#3a045c" stroke-width="1" stroke-linecap="round"/>
-          </svg>`;
+            <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
+                <defs>
+                    <linearGradient id="grad_WeeklySack" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#9b59b6" />
+                        <stop offset="100%" stop-color="#3a045c" />
+                    </linearGradient>
+                </defs>
+                <path d="M16 8 C10 8, 6 11, 6 18 C6 25, 10 29, 16 29 C22 29, 26 25, 26 18 C26 11, 22 8, 16 8 Z" fill="url(#grad_WeeklySack)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+                <ellipse cx="16" cy="10" rx="5" ry="1.8" fill="#3a045c" stroke="#000" stroke-width="1.5" />
+                <path d="M14 10 L10 14 M18 10 L22 14" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="16" cy="18" r="4.5" fill="#f1c40f" stroke="#000" stroke-width="1"/>
+                <path d="M16 15.5 L16 20.5 M13.5 18 L18.5 18" stroke="#3a045c" stroke-width="1" stroke-linecap="round"/>
+            </svg>`;
   } else if (key === "PP Reset Scroll") {
     bg = "rgba(230, 126, 34, 0.25)";
     border = "#e67e22";
     svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_Scroll_PP" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#fdf6e2" />
-                    <stop offset="100%" stop-color="#d5dbdb" />
-                </linearGradient>
-            </defs>
-            <path d="M6 10 L26 6 L26 22 L6 26 Z" fill="url(#grad_Scroll_PP)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <rect x="13" y="11" width="6" height="11" transform="rotate(-11 16 16)" fill="#e67e22" stroke="#000" stroke-width="1.5" />
-            <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
-            <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
-        </svg>`;
+          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
+              <defs>
+                  <linearGradient id="grad_Scroll_PP" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#fdf6e2" />
+                      <stop offset="100%" stop-color="#d5dbdb" />
+                  </linearGradient>
+              </defs>
+              <path d="M6 10 L26 6 L26 22 L6 26 Z" fill="url(#grad_Scroll_PP)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+              <rect x="13" y="11" width="6" height="11" transform="rotate(-11 16 16)" fill="#e67e22" stroke="#000" stroke-width="1.5" />
+              <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
+              <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
+          </svg>`;
+  } else if (key === "Weekly Clan Supply Crate") {
+    let uid = Math.floor(Math.random() * 10000000);
+    bg = "rgba(255, 170, 0, 0.25)";
+    border = "#ffaa00";
+    svgContent = `
+          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
+              <defs>
+                  <linearGradient id="grad_Crate_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#d35400" />
+                      <stop offset="100%" stop-color="#5c3a21" />
+                  </linearGradient>
+              </defs>
+              <rect x="5" y="8" width="22" height="20" rx="3" fill="url(#grad_Crate_${uid})" stroke="#000" stroke-width="2"/>
+              <line x1="5" y1="8" x2="27" y2="28" stroke="#3e2723" stroke-width="2.5"/>
+              <line x1="27" y1="8" x2="5" y2="28" stroke="#3e2723" stroke-width="2.5"/>
+              <rect x="5" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1"/>
+              <rect x="22" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1"/>
+              <rect x="5" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1"/>
+              <rect x="22" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1"/>
+              <rect x="13" y="15" width="6" height="6" fill="#ffd700" stroke="#000" stroke-width="1.5" rx="1"/>
+          </svg>`;
   } else if (key.includes("Attack")) {
     bg = "rgba(46, 204, 113, 0.25)";
     border = "#2ecc71";
@@ -1416,7 +1449,55 @@ window.setText = function (id, text) {
 
 // --- CORE UI REFRESHER ---
 
+window.updateScrollLock = function () {
+  const idsToCheck = [
+    "menu-hub-overlay",
+    "settings-modal",
+    "achievements-modal",
+    "mailbox-modal",
+    "leaderboard-modal",
+    "inspect-modal",
+  ];
+  const selectorsToCheck = [
+    "#gacha-modal-overlay",
+    "#equip-swap-window",
+    "#medal-swap-window",
+    "#rates-draggable-window",
+    "#missions-draggable-window",
+    "#clan-draggable-window",
+    "#supply-crate-overlay",
+    "#sack-opening-overlay",
+    "#sp-confirm-modal",
+  ];
+
+  let isAnyOpen = false;
+
+  for (let id of idsToCheck) {
+    let el = document.getElementById(id);
+    if (el && el.style.display !== "none" && el.style.display !== "") {
+      isAnyOpen = true;
+      break;
+    }
+  }
+
+  if (!isAnyOpen) {
+    for (let sel of selectorsToCheck) {
+      if (document.querySelector(sel)) {
+        isAnyOpen = true;
+        break;
+      }
+    }
+  }
+
+  if (isAnyOpen) {
+    document.body.classList.add("scroll-lock");
+  } else {
+    document.body.classList.remove("scroll-lock");
+  }
+};
+
 window.updateUI = function () {
+  window.updateScrollLock();
   let hasDraftChanges = false;
   if (window.draftAllocations) {
     for (let k in window.draftAllocations) {
@@ -1428,6 +1509,52 @@ window.updateUI = function () {
   }
 
   let p = window.resolvePlayerStats(hasDraftChanges);
+
+  // Dynamic Clan Hall Locked Overlay Rendering (Void-style Lock & Chains)
+  let clanCard = document.getElementById("hub-card-clan");
+  if (clanCard) {
+    if (window.playerStats.level < 25) {
+      clanCard.classList.add("locked-void");
+      clanCard.innerHTML = `
+        <div class="hub-card-icon" style="border-color: #9b59b6 !important; background: rgba(155, 89, 182, 0.15) !important; position: relative; z-index: 2;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff007f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px #ff007f);">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <div style="flex: 1; min-width: 0; position: relative; z-index: 2;">
+          <strong style="color: #df9ffb !important; font-size: 11.5px; text-shadow: 0 0 4px rgba(155, 89, 182, 0.5);">Clan Hall [LOCKED]</strong>
+          <div style="font-size: 9px; color: #a29bfe !important; margin-top: 2px;">
+            Unlocks at Level 25 (Required: ${window.playerStats.level}/25)
+          </div>
+        </div>
+        <!-- Chain Graphic Overlay -->
+        <div style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; opacity:0.65;">
+          <svg width="100%" height="100%" viewBox="0 0 200 60" preserveAspectRatio="none">
+            <path d="M0,5 L200,55" stroke="#8e44ad" stroke-width="3.5" stroke-dasharray="10 7" stroke-linecap="round" fill="none" style="filter: drop-shadow(0 0 3px #ff007f);" />
+            <path d="M0,55 L200,5" stroke="#8e44ad" stroke-width="3.5" stroke-dasharray="10 7" stroke-linecap="round" fill="none" style="filter: drop-shadow(0 0 3px #ff007f);" />
+          </svg>
+        </div>
+      `;
+    } else {
+      clanCard.classList.remove("locked-void");
+      clanCard.innerHTML = `
+        <div class="hub-card-icon" style="border-color: #8e44ad; background: rgba(142, 68, 173, 0.08);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8e44ad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="M12 8v8M9 11h6" />
+          </svg>
+        </div>
+        <div style="flex: 1; min-width: 0">
+          <strong style="color: #ffebcc; font-size: 11.5px">Clan Hall</strong>
+          <div style="font-size: 9px; color: #c8b195; margin-top: 2px">
+            Cooperate & Research Upgrades
+          </div>
+        </div>
+        <span id="hub-card-clan-badge" class="hub-card-badge" style="display: none">!</span>
+      `;
+    }
+  }
 
   // 1. Hud overlays (Dynamic Activities stage tracking)
   let displayTitleHtml = "";
@@ -8679,20 +8806,20 @@ window.renderMissionsWindow = function () {
                                             `;
     } else {
       weekliesCardHtml = `
-                                                <div style="border:1px solid #9b59b6; border-radius:6px; padding:10px; background:rgba(155,89,182,0.03);">
-                                                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #9b59b6; padding-bottom:4px; margin-bottom:8px;">
-                                                        <strong style="color:#9b59b6; font-size:12px; text-transform:uppercase;">📆 Weekly Objectives</strong>
-                                                        <span style="font-size:9.5px; color:#aaa; font-family:monospace;" id="weekly-timer-val">Refreshing...</span>
-                                                    </div>
-                                                    <div>
-                                                        ${weeklies.map((m) => getMissionRowHtml(m, true)).join("")}
-                                                    </div>
-                                                    <div style="margin-top:10px;">
-                                                        ${weeklyMasterBtnHtml}
-                                                        ${weeklyMasterClaimed ? "" : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:4px;">Grand treat: +${scalingPPText} PP (scales with prestiges), 3x Gacha Keys, 1x Catalyst Core, and a high-tier guaranteed Gear Drop!</div>`}
-                                                    </div>
-                                                </div>
-                                            `;
+                                                      <div style="border:1px solid #9b59b6; border-radius:6px; padding:10px; background:rgba(155,89,182,0.03);">
+                                                          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #9b59b6; padding-bottom:4px; margin-bottom:8px;">
+                                                              <strong style="color:#9b59b6; font-size:12px; text-transform:uppercase;">📆 Weekly Clan Quests</strong>
+                                                              <span style="font-size:9.5px; color:#aaa; font-family:monospace;" id="weekly-timer-val">Refreshing...</span>
+                                                          </div>
+                                                          <div>
+                                                              ${weeklies.map((m) => getMissionRowHtml(m, true)).join("")}
+                                                          </div>
+                                                          <div style="margin-top:10px;">
+                                                              ${weeklyMasterBtnHtml}
+                                                              ${weeklyMasterClaimed ? "" : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:4px;">Grand treat: +${scalingPPText} PP (scales with prestiges), 3x Gacha Keys, 1x Catalyst Core, and a high-tier guaranteed Gear Drop!</div>`}
+                                                          </div>
+                                                      </div>
+                                                  `;
     }
 
     contentHtml = `
@@ -11485,6 +11612,10 @@ window.resolveInspectedPlayerStats = function (profile) {
 window.clanActiveTab = "OVERVIEW";
 
 window.toggleClanHall = function () {
+  if (window.playerStats.level < 25) {
+    window.pushHeaderToast("🔒 Clan Hall unlocks at Level 25!", "#e74c3c");
+    return;
+  }
   let modal = document.getElementById("clan-draggable-window");
   if (modal) {
     modal.remove();
@@ -12072,17 +12203,17 @@ window.renderClanDashboard = function (clan, members, invitations) {
     }
 
     tabContentHtml = `
-          <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.4;">
-              <strong style="color:#df9ffb; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z"/></svg>
-                  Weekly Guild Objectives
-              </strong>
-              Cooperate with your Clan to achieve these weekly active goals. Completing quests is the <strong style="color:#df9ffb;">only way</strong> to gain Clan XP and level up!
-          </div>
-          <div style="max-height: 280px; overflow-y:auto; padding-right:4px;">
-              ${listHtml}
-          </div>
-        `;
+              <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.4;">
+                  <strong style="color:#df9ffb; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z"/></svg>
+                      Weekly Clan Quests
+                  </strong>
+                  Cooperate with your Clan to achieve these weekly active goals. Completing quests is the <strong style="color:#df9ffb;">only way</strong> to gain Clan XP and level up! Each completed quest yields massive rewards like **Gacha Keys, Catalyst Cores, Astral Essence, Eridium Shards, or PP** for every single member!
+              </div>
+              <div style="max-height: 280px; overflow-y:auto; padding-right:4px;">
+                  ${listHtml}
+              </div>
+            `;
   } else if (currentTab === "SETTINGS") {
     let isJoinOpen = clan.join_policy === "open";
     tabContentHtml = `
@@ -12499,6 +12630,79 @@ window.executeDisbandClan = function () {
         });
     },
   );
+};
+
+window.executeClanDonate = function (type, amount) {
+  const userId = window.getGameUserId();
+  let balance = 0;
+
+  if (type === "gold") {
+    balance = window.playerStats.coins || 0;
+  } else if (type === "souls") {
+    balance = window.inventory.ETC["Monster Soul"] || 0;
+  } else if (type === "luminous") {
+    balance = window.inventory.ETC["Luminous Soul"] || 0;
+  }
+
+  if (balance < amount) {
+    window.pushHeaderToast("❌ Insufficient funds for donation!", "#e74c3c");
+    return;
+  }
+
+  // Deduct locally first
+  if (type === "gold") {
+    window.playerStats.coins -= amount;
+    if (window.playerStats.coins === 0) {
+      window.playerStats.hasTriggeredExactChange = true;
+    }
+  } else if (type === "souls") {
+    window.inventory.ETC["Monster Soul"] -= amount;
+    if (window.inventory.ETC["Monster Soul"] === 0) {
+      delete window.inventory.ETC["Monster Soul"];
+    }
+  } else if (type === "luminous") {
+    window.inventory.ETC["Luminous Soul"] -= amount;
+    if (window.inventory.ETC["Luminous Soul"] === 0) {
+      delete window.inventory.ETC["Luminous Soul"];
+    }
+  }
+
+  // Hit network endpoint
+  fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, type, amount }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.success) {
+        window.pushHeaderToast(
+          `🙏 Contribution Recorded! +${amount.toLocaleString()}`,
+          "#2ecc71",
+        );
+        window.fetchClanData();
+        window.updateUI();
+        window.saveGame();
+      } else {
+        // Rollback local deduction
+        if (type === "gold") {
+          window.playerStats.coins += amount;
+        } else if (type === "souls") {
+          window.inventory.ETC["Monster Soul"] =
+            (window.inventory.ETC["Monster Soul"] || 0) + amount;
+        } else if (type === "luminous") {
+          window.inventory.ETC["Luminous Soul"] =
+            (window.inventory.ETC["Luminous Soul"] || 0) + amount;
+        }
+        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+      }
+    })
+    .catch(() => {
+      // Keep local change if we want it to work offline, but warn user
+      window.pushHeaderToast(`🙏 Contribution Recorded Offline!`, "#2ecc71");
+      window.updateUI();
+      window.saveGame();
+    });
 };
 
 window.updateSalvagePadUI = function () {
