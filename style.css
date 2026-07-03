@@ -2901,3 +2901,15 @@ canvas {
   background: #e74c3c !important;
   box-shadow: 0 0 6px #e74c3c !important;
 }
+
+/* Fix Boutique buttons on mobile */
+@media (max-width: 580px) {
+  #btn-boutique-costumes, #btn-boutique-dyes {
+    min-height: 44px !important; /* Ensure they are touch-friendly */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: auto !important; /* Force interaction */
+    z-index: 10 !important;
+  }
+}

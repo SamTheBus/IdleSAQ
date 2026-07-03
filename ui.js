@@ -10216,19 +10216,22 @@ window.selectedBoutiqueCostumeKey =
   window.playerStats.equippedCostume ||
   "knight";
 
+// Replace your existing switchBoutiqueCategory function in ui.js
 window.switchBoutiqueCategory = function (cat) {
   window.state.boutiqueCategory = cat;
+
+  // Force update button visual states
+  document.querySelectorAll(".sub-tab-btn").forEach(btn => btn.classList.remove("active"));
+
   let btnCostumes = document.getElementById("btn-boutique-costumes");
   let btnDyes = document.getElementById("btn-boutique-dyes");
-  if (btnCostumes && btnDyes) {
-    if (cat === "costumes") {
-      btnCostumes.classList.add("active");
-      btnDyes.classList.remove("active");
-    } else {
-      btnCostumes.classList.remove("active");
-      btnDyes.classList.add("active");
-    }
+
+  if (cat === 'costumes') {
+    if(btnCostumes) btnCostumes.classList.add("active");
+  } else {
+    if(btnDyes) btnDyes.classList.add("active");
   }
+
   window.renderBoutiqueSkins();
 };
 
