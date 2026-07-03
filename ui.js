@@ -9874,7 +9874,7 @@ window.fetchMailboxData = function () {
 
   if (!window.GAME_SERVER_URL || !window.isCloudSynced) {
     // Local / Offline fallback allows players to still receive their Weekly Clan Supply Crate!
-    let localMail = window.getWeeklyClanMail();
+    let localMail = (typeof window.getWeeklyClanMail === 'function') ? window.getWeeklyClanMail() : null;
     if (localMail) {
       window.renderMailboxItems([localMail]);
       window.updateMailboxBadge(!localMail.claimed);
@@ -10052,15 +10052,18 @@ window.claimMailReward = function (mailId) {
   window.justClaimedMailIds.add(mailId);
 
   // Catch client-side weekly clan mail claim
-  if (mailId.startsWith("clan_weekly_mail_")) {
-    let localMail = window.getWeeklyClanMail();
-    if (localMail && !localMail.claimed) {
-      window.addUseDrop("Weekly Clan Supply Crate", 1);
-      window.playerStats.claimedMailIds =
-        window.playerStats.claimedMailIds || [];
-      if (!window.playerStats.claimedMailIds.includes(mailId)) {
-        window.playerStats.claimedMailIds.push(mailId);
-      }
+    if (mailId.startsWith("clan_weekly_mail_")) {
+      let localMail = window.getWeeklyClanMail();
+      if (localMail && !localMail.claimed) {
+        window.addUseDrop("Weekly Clan Supply Crate", 1);
+
+        // Mark as claimed in playerStats
+        window.playerStats.weeklyClanCrateClaimed = true;
+
+        window.playerStats.claimedMailIds = window.playerStats.claimedMailIds || [];
+        if (!window.playerStats.claimedMailIds.includes(mailId)) {
+          window.playerStats.claimedMailIds.push(mailId);
+        }
       if (typeof window.spawnPurchaseCelebration === "function") {
         window.spawnPurchaseCelebration("gacha", "#ffaa00", 5);
       }

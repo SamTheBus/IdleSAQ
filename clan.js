@@ -1173,3 +1173,22 @@ window.executeClanDonate = function (type, amount) {
       window.saveGame();
     });
 };
+
+window.getWeeklyClanMail = function () {
+  // 1. Must be in a clan to receive the crate
+  if (!window.playerStats.clanId) return null;
+
+  // 2. Must not have already claimed this week's crate
+  if (window.playerStats.weeklyClanCrateClaimed) return null;
+
+  // 3. Ensure we have a valid weekly reset identifier
+  if (!window.playerStats.lastWeeklyResetMondayStr) return null;
+
+  return {
+    id: "clan_weekly_mail_" + window.playerStats.lastWeeklyResetMondayStr,
+    title: "Weekly Clan Supply Crate",
+    message: "Your weekly contribution has been processed. Here is your supply crate based on current Clan level.",
+    claimed: false,
+    rewards: { use: { "Weekly Clan Supply Crate": 1 } }
+  };
+};

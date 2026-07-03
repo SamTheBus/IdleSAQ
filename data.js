@@ -1701,18 +1701,22 @@ Object.assign(window.QuestSystem, {
 
     if (window.playerStats.prestigeCount > 0) {
       if (
-        !window.playerStats.lastWeeklyResetMondayStr ||
-        window.playerStats.lastWeeklyResetMondayStr !== lastMondayStr
-      ) {
-        this.generateWeeklyMissions();
-        window.playerStats.lastWeeklyResetMondayStr = lastMondayStr;
-        window.playerStats.lastWeeklyResetTime = now;
-        window.playerStats.weeklyRewardClaimed = false;
-        if (typeof window.pushLog === "function")
-          window.pushLog(
-            "<span style='color:#9b59b6; font-weight:bold;'>📅 [SYSTEM] Clan Weekly Board refreshed! Reset Monday at 12:00 AM PST/PDT. Slay Rift targets and complete objectives.</span>",
-          );
-      }
+              !window.playerStats.lastWeeklyResetMondayStr ||
+              window.playerStats.lastWeeklyResetMondayStr !== lastMondayStr
+            ) {
+              this.generateWeeklyMissions();
+              window.playerStats.lastWeeklyResetMondayStr = lastMondayStr;
+              window.playerStats.lastWeeklyResetTime = now;
+              window.playerStats.weeklyRewardClaimed = false;
+
+              // Add this line below:
+              window.playerStats.weeklyClanCrateClaimed = false;
+
+              if (typeof window.pushLog === "function")
+                window.pushLog(
+                  "<span style='color:#9b59b6; font-weight:bold;'>📅 [SYSTEM] Clan Weekly Board refreshed!</span>",
+                );
+            }
     } else {
       window.playerStats.weeklyMissions = [];
     }
