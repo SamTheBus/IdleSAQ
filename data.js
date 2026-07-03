@@ -1387,6 +1387,7 @@ window.playerStats = {
     ),
   fairiesClicked: 0,
   deathCount: 0,
+  lootPityCounter: 0,
   dungeonPeaks: { equip: 1, gold: 1, mat: 1 },
   currentDungeonStage: { equip: 1, gold: 1, mat: 1 },
   astralShards: 0,

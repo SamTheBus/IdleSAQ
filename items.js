@@ -3,6 +3,21 @@
    Sack Management, Forge/Crafting, and Shop Transaction Logic.
    ========================================================================= */
 
+window.PitySystem = {
+    increment() {
+        window.playerStats.lootPityCounter = (window.playerStats.lootPityCounter || 0) + 1;
+    },
+    reset() {
+        window.playerStats.lootPityCounter = 0;
+    },
+    getEffectiveRate(baseRate) {
+        // Only apply in Dungeons to preserve Campaign balance
+        if (!window.playerStats.isDungeonMode) return baseRate;
+        let counter = window.playerStats.lootPityCounter || 0;
+        return baseRate * (1 + (counter * 0.05)); // Each failed kill adds +5% base rate
+    }
+};
+
 window.forgeSelectedItem = null;
 window.forgeMode = "temper";
 
