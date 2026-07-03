@@ -127,7 +127,7 @@ window.GameState = {
     while (window.playerStats.xp >= window.playerStats.xpReq) {
       window.playerStats.xp -= window.playerStats.xpReq;
       window.playerStats.level++;
-      window.playerStats.sp++; // Award 1 Skill Point per level up
+            window.playerStats.sp += 3; // Award 3 Skill Points per level up
 
       // Exponential scaling thresholds prevent runaway level inflation
       window.playerStats.xpReq = Math.floor(
