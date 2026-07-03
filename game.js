@@ -4797,7 +4797,7 @@ window.CombatEngine = {
               `<strong style="color:#f1c40f;">🏆 [MILESTONE] Stage ${oldMax} Beaten! Guaranteed random equip dropped!</strong>`,
             );
           if (typeof window.rollEquipmentDrop === "function")
-            window.rollEquipmentDrop(true, false, 0, false, oldMax);
+            window.rollEquipmentDrop(true, false, 0, false, true); // IS MILESTONE = true
         }
       }
       window.playerStats.killCount = 0;

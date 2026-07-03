@@ -141,9 +141,31 @@ window.GameState = {
       }
     }
 
+window.triggerLevelUpEffect = function() {
+    let heroX = window.hero.x + 12;
+    let heroY = window.hero.y + 15;
+    // Explode 60 golden particles in a ring
+    for(let i = 0; i < 60; i++) {
+        let angle = (i / 60) * Math.PI * 2;
+        window.particles.push({
+            x: heroX,
+            y: heroY,
+            vx: Math.cos(angle) * 8,
+            vy: Math.sin(angle) * 8,
+            radius: window.randFloat(2, 5),
+            color: "#f1c40f",
+            alpha: 1,
+            life: 60,
+            gravity: 0.1
+        });
+    }
+};
+
     if (leveledUp) {
-      window.invalidatePlayerStats();
-      let p = window.resolvePlayerStats();
+          window.triggerLevelUpEffect();
+
+                window.invalidatePlayerStats();
+          let p = window.resolvePlayerStats();
       window.playerStats.currentHp = p.maxHp; // Fully heal to new Max HP
 
       if (!isOffline) {
@@ -1301,7 +1323,7 @@ window.resolvePlayerStats = function (useDraft = false) {
 window.playerStats = {
   level: 1,
   xp: 0,
-  xpReq: 250,
+  xpReq: 100,
   sp: 0,
   spAllocations: {
     spHp: 0,
