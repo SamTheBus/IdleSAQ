@@ -2201,10 +2201,11 @@ function engineCycle() {
     update(); // State ticks still execute at a liquid 60 ticks per second
 
     let now = Date.now();
-    let limit =
-      window.playerStats && window.playerStats.ecoMode ? 1000 / 30 : 0;
+        // 45 FPS target (approx 22.2ms per frame) provides smoother motion while maintaining thermal efficiency
+        let limit =
+          window.playerStats && window.playerStats.ecoMode ? 1000 / 45 : 0;
 
-    if (now - lastRenderTime >= limit) {
+        if (now - lastRenderTime >= limit) {
       window.draw(); // Draws at 30 FPS if Eco Mode is enabled, saving massive thermal output
       lastRenderTime = now;
     }
