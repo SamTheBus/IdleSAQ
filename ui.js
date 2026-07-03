@@ -1029,18 +1029,19 @@ window.updateUI = function () {
     nameEl.innerHTML = `<span>${window.playerStats.playerName || "Guest"}</span>${titleHtml}`;
   }
 
-  // Status Tags Row (Guild Emblem + Name)
-  let tagsEl = document.getElementById("header-status-tags");
-  if (tagsEl) {
-    let clanHtml = "";
+// Status Tags Row (Guild Emblem + Name)
+  let clanBadgeEl = document.getElementById("header-clan-badge");
+  if (clanBadgeEl) {
     if (window.playerStats.clanId && window.playerStats.clanName) {
       let emblemHtml = window.getClanEmblemHtml(
         window.playerStats.clanEmblem || 0,
-        10,
+        12,
       );
-      clanHtml = `<span style="background:rgba(142, 68, 173, 0.15); border:1px solid #8e44ad; color:#df9ffb; padding:2px 6px; border-radius:10px; font-size:9px; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${emblemHtml} ${window.escapeHTML(window.playerStats.clanName)}</span>`;
+      clanBadgeEl.innerHTML = `${emblemHtml} ${window.escapeHTML(window.playerStats.clanName)}`;
+      clanBadgeEl.style.display = "flex";
+    } else {
+      clanBadgeEl.style.display = "none";
     }
-    tagsEl.innerHTML = `<div style="display:flex; justify-content:center; gap:6px; margin-top:4px;">${clanHtml}</div>`;
   }
 
   // XP Bar (Stable tracking)
