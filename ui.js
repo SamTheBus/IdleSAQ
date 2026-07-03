@@ -9872,9 +9872,9 @@ window.fetchMailboxData = function () {
 
   const claimedMailIds = window.playerStats.claimedMailIds || [];
 
-  if (!window.GAME_SERVER_URL || !window.isCloudSynced) {
-    // Local / Offline fallback allows players to still receive their Weekly Clan Supply Crate!
-    let localMail = (typeof window.getWeeklyClanMail === 'function') ? window.getWeeklyClanMail() : null;
+  if (!window.GAME_SERVER_URL) {
+      // Local / Offline fallback allows players to still receive their Weekly Clan Supply Crate!
+      let localMail = (typeof window.getWeeklyClanMail === 'function') ? window.getWeeklyClanMail() : null;
     if (localMail) {
       window.renderMailboxItems([localMail]);
       window.updateMailboxBadge(!localMail.claimed);
@@ -10677,7 +10677,8 @@ window.checkUnreadMail = function () {
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.success && data.mailbox) {
+          console.log("📨 Mailbox Server Response:", data); // Add this line
+          if (data.success && data.mailbox) {
         const hasUnclaimed = data.mailbox.some((m) => !m.claimed);
         window.updateMailboxBadge(hasUnclaimed);
       }
