@@ -165,36 +165,36 @@ window.getUseIconHtml = function (key, size = 32) {
   let border = "#444";
   let innerHtml = "";
 
-  if (key === "SP Reset Scroll") {
-    bg = "rgba(155, 89, 182, 0.25)";
-    border = "#9b59b6";
-  } else if (key === "PP Reset Scroll") {
-    bg = "rgba(230, 126, 34, 0.25)";
-    border = "#e67e22";
-  } else if (key === "Cavern Sigil Sack") {
-    bg = "rgba(155, 89, 182, 0.25)";
-    border = "#9b59b6";
-    innerHtml = window.AssetCatalog.consumables.cavern_sigil_sack(uid);
-  } else if (
-    key === "Guild Reward Sack" ||
-    key === "Daily Reward Sack" ||
-    key === "Clan Reward Sack" ||
-    key === "Weekly Reward Sack" ||
-    key === "Guild Weekly Sack" ||
-    key === "Clan Weekly Sack"
-  ) {
-    bg = key.includes("Weekly")
-      ? "rgba(155, 89, 182, 0.25)"
-      : "rgba(241, 196, 15, 0.25)";
-    border = key.includes("Weekly") ? "#9b59b6" : "#f1c40f";
-  } else if (key === "Weekly Clan Supply Crate") {
-    bg = "rgba(255, 170, 0, 0.25)";
-    border = "#ffaa00";
-  } else if (key.includes("Attack")) {
-    bg = "rgba(46, 204, 113, 0.25)";
-    border = "#2ecc71";
-    innerHtml = window.AssetCatalog.consumables.potion(uid, "#2ecc71");
-  } else if (key.includes("Vitality")) {
+  // 1. Handle special unique assets
+    if (key === "SP Reset Scroll") {
+      bg = "rgba(155, 89, 182, 0.25)";
+      border = "#9b59b6";
+    } else if (key === "PP Reset Scroll") {
+      bg = "rgba(230, 126, 34, 0.25)";
+      border = "#e67e22";
+    } else if (key === "Cavern Sigil Sack") {
+      bg = "rgba(155, 89, 182, 0.25)";
+      border = "#9b59b6";
+      innerHtml = window.AssetCatalog.consumables.cavern_sigil_sack(uid);
+    } else if (key.includes("Sack")) {
+      bg = key.includes("Weekly") ? "rgba(155, 89, 182, 0.25)" : "rgba(241, 196, 15, 0.25)";
+      border = key.includes("Weekly") ? "#9b59b6" : "#f1c40f";
+      let stopCol = key.includes("Weekly") ? "#4a154b" : "#d35400";
+      innerHtml = window.AssetCatalog.consumables.sack(uid, stopCol);
+    } else if (key === "Weekly Clan Supply Crate") {
+      bg = "rgba(255, 170, 0, 0.25)";
+      border = "#ffaa00";
+      innerHtml = window.AssetCatalog.consumables.crate(uid);
+    } else if (key.includes("Elixir")) {
+      // 2. Map standard elixirs to the potion template
+      let pColor = key.includes("Attack") ? "#2ecc71" :
+                   key.includes("Vitality") ? "#e74c3c" :
+                   key.includes("Armored") ? "#3498db" :
+                   "#f1c40f";
+      bg = window.hexToRgba ? window.hexToRgba(pColor, 0.25) : "rgba(170, 170, 170, 0.25)";
+      border = pColor;
+      innerHtml = window.AssetCatalog.consumables.potion(uid, pColor);
+    } else if (key.includes("Vitality")) {
     bg = "rgba(231, 76, 60, 0.25)";
     border = "#e74c3c";
     innerHtml = window.AssetCatalog.consumables.potion(uid, "#e74c3c");
