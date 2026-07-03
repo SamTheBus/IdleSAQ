@@ -1849,3 +1849,8 @@ window.deathMaxFrames = 90;
 window.lastUpdateTime = Date.now();
 window.sessionStartTime = Date.now();
 window.respawnIntervalId = null;
+window.recalculateXpRequirement = function() {
+    window.playerStats.xpReq = Math.floor(
+        100 * Math.pow(1.2, window.playerStats.level - 1)
+    );
+};

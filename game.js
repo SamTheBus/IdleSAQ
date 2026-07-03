@@ -1716,15 +1716,15 @@ window.loadGameAndSyncCloud = function () {
 
   if (localDataRaw) {
     try {
-      localParsed = JSON.parse(localDataRaw);
-      // Skip offline gains during initial payload load
-      window.applySaveStatePayload(localParsed, true);
-      if (localParsed.lastSaveTime) {
-        offlineMsToApply = now - localParsed.lastSaveTime;
-      }
-    } catch (e) {
-      console.error("Local save load failed", e);
-    }
+          localParsed = JSON.parse(localDataRaw);
+          window.applySaveStatePayload(localParsed, true);
+          window.recalculateXpRequirement(); // FORCE the new formula on every load
+          if (localParsed.lastSaveTime) {
+            offlineMsToApply = now - localParsed.lastSaveTime;
+          }
+        } catch (e) {
+          console.error("Local save load failed", e);
+        }
   }
 
   if (!window.GAME_SERVER_URL) {

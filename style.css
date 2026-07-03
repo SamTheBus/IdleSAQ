@@ -165,6 +165,23 @@ body.scroll-lock {
   border-radius: 8px;
   position: relative;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  overflow: visible !important; /* Force visible so sticky isn't clipped */
+}
+
+/* Ensure the canvas is correctly positioned */
+#gameCanvas {
+  display: block;
+  background: #0c0f12;
+  width: 100%;
+  height: auto;
+  border-bottom: 2px solid #1f242d;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  touch-action: none;
+  /* Make sure these are enforced for sticky */
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 999 !important;
 }
 
 /* --- TOP NAVIGATION BAR --- */

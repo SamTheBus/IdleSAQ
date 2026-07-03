@@ -1992,31 +1992,26 @@ window.toggleAuto = function () {
 };
 
 window.updateStickyCanvasStyle = function () {
-  let active = window.playerStats.stickyCanvas !== false;
-  let btn = document.getElementById("settings-toggle-sticky");
-  if (btn) {
-    btn.innerText = active ? "Sticky Cam: ON" : "Sticky Cam: OFF";
-    btn.className = active ? "btn-action" : "btn-action un";
-  }
-  let canvasEl = document.getElementById("gameCanvas");
-  let containerEl = document.getElementById("game-container");
+    let active = window.playerStats.stickyCanvas !== false;
+    let btn = document.getElementById("settings-toggle-sticky");
+    let canvasEl = document.getElementById("gameCanvas");
+    let containerEl = document.getElementById("game-container");
 
-  if (canvasEl) {
-    if (active) {
-      canvasEl.style.position = "-webkit-sticky"; // Safari support
-      canvasEl.style.position = "sticky";
-      canvasEl.style.top = "0";
-      canvasEl.style.zIndex = "999";
-      // Ensure the container does not clip the sticky behavior
-      if(containerEl) containerEl.style.overflow = "visible";
-    } else {
-      canvasEl.style.position = "static";
-      canvasEl.style.top = "";
-      canvasEl.style.zIndex = "";
-      if(containerEl) containerEl.style.overflow = "";
+    if (btn) {
+      btn.innerText = active ? "Sticky Cam: ON" : "Sticky Cam: OFF";
+      btn.className = active ? "btn-action" : "btn-action un";
     }
-  }
-};
+
+    if (canvasEl) {
+      canvasEl.style.position = active ? "sticky" : "static";
+      canvasEl.style.top = active ? "0" : "";
+      canvasEl.style.zIndex = active ? "999" : "";
+    }
+
+    if (containerEl) {
+      containerEl.style.overflow = active ? "visible" : "";
+    }
+  };
 
 window.toggleStickyCanvas = function () {
   window.playerStats.stickyCanvas = !window.playerStats.stickyCanvas;
