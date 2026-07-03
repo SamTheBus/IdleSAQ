@@ -927,8 +927,16 @@ window.SaveManager = {
         }
       }
       if (window.playerStats.unlockedSkins.length === 0)
-        window.playerStats.unlockedSkins = ["default"];
-      if (window.playerStats.equippedTitle === undefined)
+              window.playerStats.unlockedSkins = ["default"];
+
+            if (window.playerStats.equippedCostume === undefined) {
+              window.playerStats.equippedCostume = "knight";
+            }
+            if (window.playerStats.unlockedCostumes === undefined || window.playerStats.unlockedCostumes.length === 0) {
+              window.playerStats.unlockedCostumes = ["knight"];
+            }
+
+            if (window.playerStats.equippedTitle === undefined)
         window.playerStats.equippedTitle = null;
       if (window.playerStats.claimedMailIds === undefined)
         window.playerStats.claimedMailIds = [];

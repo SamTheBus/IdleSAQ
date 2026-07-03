@@ -2838,13 +2838,11 @@ Object.assign(window.ForgeManager, {
     } else if (window.forgeMode === "tier") {
       if (window.forgeSelectedItem.statsRolled >= 5) return;
       let currentStars = window.forgeSelectedItem.statsRolled;
-      let targetStars = currentStars + 1;
-      let costGold = targetStars * 2500;
-      let shardReq = targetStars;
-      let scrapReqAmount = targetStars * 5;
-      let targetScrapName = this.getScrapYieldName
-        ? window.getScrapYieldName(targetStars)
-        : window.ItemFactory.getScrapYieldName(targetStars);
+                let targetStars = currentStars + 1;
+                let costGold = targetStars * 2500;
+                let shardReq = targetStars;
+                let scrapReqAmount = targetStars * 5;
+                let targetScrapName = window.getScrapYieldName(targetStars);
 
       let playerShards = window.inventory.ETC["Eridium Shard"] || 0;
       let playerScraps = window.inventory.ETC[targetScrapName] || 0;

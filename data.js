@@ -1486,6 +1486,8 @@ window.playerStats = {
   achievementTimestamps: {},
   claimedMailIds: [],
   unlockedSkins: ["default"],
+    equippedCostume: "knight",
+    unlockedCostumes: ["knight"],
   playerName: "Guest",
   clanId: null,
   clanName: null,

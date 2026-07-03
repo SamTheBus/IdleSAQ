@@ -10211,6 +10211,26 @@ window.selectedBoutiqueSkinKey =
   window.selectedBoutiqueSkinKey ||
   window.playerStats.cosmeticSkin ||
   "default";
+window.selectedBoutiqueCostumeKey =
+  window.selectedBoutiqueCostumeKey ||
+  window.playerStats.equippedCostume ||
+  "knight";
+
+window.switchBoutiqueCategory = function (cat) {
+  window.state.boutiqueCategory = cat;
+  let btnCostumes = document.getElementById("btn-boutique-costumes");
+  let btnDyes = document.getElementById("btn-boutique-dyes");
+  if (btnCostumes && btnDyes) {
+    if (cat === "costumes") {
+      btnCostumes.classList.add("active");
+      btnDyes.classList.remove("active");
+    } else {
+      btnCostumes.classList.remove("active");
+      btnDyes.classList.add("active");
+    }
+  }
+  window.renderBoutiqueSkins();
+};
 
 window.renderBoutiqueSkins = function () {
   let el = document.getElementById("boutique-skins-list");
@@ -10230,31 +10250,46 @@ window.renderBoutiqueSkins = function () {
     return;
 
   let p = window.playerStats;
-  let unlocked = p.unlockedSkins || ["default"];
-  let activeSkin = p.cosmeticSkin || "default";
-  let selKey = window.selectedBoutiqueSkinKey;
-  let selSkin = window.COSMETIC_SKINS[selKey];
+  let cat = window.state.boutiqueCategory || "costumes";
+
+  let selSkinKey = window.selectedBoutiqueSkinKey;
+  let selCostumeKey = window.selectedBoutiqueCostumeKey;
+
+  let isCostumesTab = cat === "costumes";
+  let activeLabelEl = document.getElementById("boutique-list-header");
+  if (activeLabelEl) {
+    activeLabelEl.innerHTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-11.4 8.38 8.38 0 0 1 3.8.9L21 4.5z"/>
+      </svg>
+      Available ${isCostumesTab ? "Costumes style" : "Colors dye"}
+    `;
+  }
+
+  let selItem = isCostumesTab
+    ? window.COSMETIC_COSTUMES[selCostumeKey]
+    : window.COSMETIC_SKINS[selSkinKey];
 
   // 1. Render the top Showcase Chamber details
-  showcaseName.innerText = selSkin.name;
-  showcaseName.style.color = selSkin.color;
-  showcaseDesc.innerText = selSkin.desc;
+  showcaseName.innerText = selItem.name;
+  showcaseName.style.color = selItem.color;
+  showcaseDesc.innerText = selItem.desc;
 
   let showcaseChamber = document.getElementById("boutique-showcase-chamber");
   let previewWrapper =
     document.getElementById("boutique-preview-wrapper") ||
     (showcaseChamber ? showcaseChamber.querySelector("div") : null);
   if (showcaseChamber) {
-    showcaseChamber.style.border = `2px solid ${selSkin.color}`;
-    showcaseChamber.style.background = `radial-gradient(circle at 50% 50%, ${window.hexToRgba(selSkin.color, 0.12)} 0%, #0c0e12 100%)`;
-    showcaseChamber.style.boxShadow = `0 4px 15px ${window.hexToRgba(selSkin.color, 0.15)}, inset 0 0 10px ${window.hexToRgba(selSkin.color, 0.1)}`;
+    showcaseChamber.style.border = `2px solid ${selItem.color}`;
+    showcaseChamber.style.background = `radial-gradient(circle at 50% 50%, ${window.hexToRgba(selItem.color, 0.12)} 0%, #0c0e12 100%)`;
+    showcaseChamber.style.boxShadow = `0 4px 15px ${window.hexToRgba(selItem.color, 0.15)}, inset 0 0 10px ${window.hexToRgba(selItem.color, 0.1)}`;
   }
   if (previewWrapper) {
-    previewWrapper.style.border = `1.5px solid ${selSkin.color}`;
-    previewWrapper.style.boxShadow = `inset 0 0 8px #000, 0 0 8px ${window.hexToRgba(selSkin.color, 0.2)}`;
+    previewWrapper.style.border = `1.5px solid ${selItem.color}`;
+    previewWrapper.style.boxShadow = `inset 0 0 8px #000, 0 0 8px ${window.hexToRgba(selItem.color, 0.2)}`;
   }
 
-  // Draw showcase preview
+  // Draw showcase preview combining selected Costume & Color Dye
   let sCtx = showcaseCanvas.getContext("2d");
   sCtx.clearRect(0, 0, showcaseCanvas.width, showcaseCanvas.height);
   sCtx.imageSmoothingEnabled = false;
@@ -10265,7 +10300,8 @@ window.renderBoutiqueSkins = function () {
     1.5,
     window.equippedSlots,
     {
-      cosmeticSkin: selKey,
+      cosmeticSkin: selSkinKey,
+      equippedCostume: selCostumeKey,
       frenzyTimer: 0,
     },
     0,
@@ -10277,8 +10313,16 @@ window.renderBoutiqueSkins = function () {
   );
 
   // Handle showcase button state
-  let isUnlocked = unlocked.includes(selKey);
-  let isActive = activeSkin === selKey;
+  let unlocked = isCostumesTab
+    ? p.unlockedCostumes || ["knight"]
+    : p.unlockedSkins || ["default"];
+  let activeKey = isCostumesTab
+    ? p.equippedCostume || "knight"
+    : p.cosmeticSkin || "default";
+  let targetKey = isCostumesTab ? selCostumeKey : selSkinKey;
+
+  let isUnlocked = unlocked.includes(targetKey);
+  let isActive = activeKey === targetKey;
 
   if (isActive) {
     showcasePrice.innerText = "Active Outfit";
@@ -10292,29 +10336,29 @@ window.renderBoutiqueSkins = function () {
   } else if (isUnlocked) {
     showcasePrice.innerText = "Unlocked";
     showcasePrice.style.color = "#2ecc71";
-    showcaseBtn.innerText = "EQUIP SKIN";
+    showcaseBtn.innerText = isCostumesTab ? "EQUIP COSTUME" : "EQUIP COLOR";
     showcaseBtn.disabled = false;
     showcaseBtn.style.background = "#2ecc71";
     showcaseBtn.style.color = "#fff";
     showcaseBtn.style.cursor = "pointer";
     showcaseBtn.style.boxShadow = "0 0 10px rgba(46, 204, 113, 0.4)";
   } else {
-    let currencyLabel = selSkin.currency === "Luminous Soul" ? "Souls" : "Gold";
+    let currencyLabel = selItem.currency === "Luminous Soul" ? "Souls" : "Gold";
     let owned =
-      selSkin.currency === "Luminous Soul"
+      selItem.currency === "Luminous Soul"
         ? window.inventory.ETC["Luminous Soul"] || 0
         : p.coins;
-    let canAfford = owned >= selSkin.cost;
+    let canAfford = owned >= selItem.cost;
 
-    showcasePrice.innerText = `${selSkin.cost} ${currencyLabel}`;
-    showcasePrice.style.color = canAfford ? "#f1c40f" : "#e74c3c";
-    showcaseBtn.innerText = `UNLOCK SKIN`;
-    showcaseBtn.disabled = !canAfford;
+    showcasePrice.innerText = `${selItem.cost} ${currencyLabel}`;
+        showcasePrice.style.color = canAfford ? "#f1c40f" : "#e74c3c";
+        showcaseBtn.innerText = `UNLOCK`;
+        showcaseBtn.disabled = false; // Always keep the button clickable so the error toast fires
     if (canAfford) {
-      showcaseBtn.style.background = selSkin.color;
-      showcaseBtn.style.color = selSkin.color === "#f1c40f" ? "#111" : "#fff";
+      showcaseBtn.style.background = selItem.color;
+      showcaseBtn.style.color = selItem.color === "#f1c40f" ? "#111" : "#fff";
       showcaseBtn.style.cursor = "pointer";
-      showcaseBtn.style.boxShadow = `0 0 12px ${selSkin.color}55`;
+      showcaseBtn.style.boxShadow = `0 0 12px ${selItem.color}55`;
     } else {
       showcaseBtn.style.background = "#333";
       showcaseBtn.style.color = "#666";
@@ -10325,27 +10369,29 @@ window.renderBoutiqueSkins = function () {
 
   // 2. Render the grid below
   let html = "";
-  Object.keys(window.COSMETIC_SKINS).forEach((key) => {
-    let skin = window.COSMETIC_SKINS[key];
+  let datasource = isCostumesTab ? window.COSMETIC_COSTUMES : window.COSMETIC_SKINS;
+
+  Object.keys(datasource).forEach((key) => {
+    let item = datasource[key];
     let cardUnlocked = unlocked.includes(key);
-    let cardActive = activeSkin === key;
-    let isSelected = selKey === key;
+    let cardActive = activeKey === key;
+    let isSelected = (isCostumesTab ? selCostumeKey : selSkinKey) === key;
 
     let borderGlowStyle = isSelected
-      ? `border: 2px solid ${skin.color}; box-shadow: 0 0 12px ${skin.color}45;`
+      ? `border: 2px solid ${item.color}; box-shadow: 0 0 12px ${item.color}45;`
       : `border: 1px solid #333;`;
 
     let statusText = cardActive
       ? `<span style="color:#2ecc71; font-size:8px; font-weight:bold; display:block; margin-top:2px;">ACTIVE ✓</span>`
       : cardUnlocked
         ? `<span style="color:#aaa; font-size:8px; display:block; margin-top:2px;">UNLOCKED</span>`
-        : `<span style="color:${skin.color}; font-size:8px; font-weight:bold; display:block; margin-top:2px;">LOCKED</span>`;
+        : `<span style="color:${item.color}; font-size:8px; font-weight:bold; display:block; margin-top:2px;">LOCKED</span>`;
 
-    let canvasId = `boutique-skin-canvas-${key}`;
+    let canvasId = `boutique-item-canvas-${key}`;
     html += `
-          <div class="market-card" style="background:#111; ${borderGlowStyle} padding:8px; text-align:center; display:flex; flex-direction:column; align-items:center; cursor:pointer;" onclick="window.selectBoutiqueSkin('${key}')">
-              <canvas id="${canvasId}" width="40" height="50" style="width:40px; height:50px; background:rgba(0,0,0,0.55); border:1px solid ${isSelected ? skin.color : "#222"}; border-radius:4px; display:block; flex-shrink:0; pointer-events:none;"></canvas>
-              <strong style="color:${skin.color}; font-size:11px; margin-top:4px; display:block; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${skin.name}</strong>
+          <div class="market-card" style="background:#111; ${borderGlowStyle} padding:8px; text-align:center; display:flex; flex-direction:column; align-items:center; cursor:pointer;" onclick="window.selectBoutiqueItem('${key}')">
+              <canvas id="${canvasId}" width="40" height="50" style="width:40px; height:50px; background:rgba(0,0,0,0.55); border:1px solid ${isSelected ? item.color : "#222"}; border-radius:4px; display:block; flex-shrink:0; pointer-events:none;"></canvas>
+              <strong style="color:${item.color}; font-size:11px; margin-top:4px; display:block; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">${item.name}</strong>
               ${statusText}
           </div>
         `;
@@ -10354,12 +10400,16 @@ window.renderBoutiqueSkins = function () {
   el.innerHTML = html;
 
   // Draw previews for the grid cards
-  Object.keys(window.COSMETIC_SKINS).forEach((key) => {
-    let canvas = document.getElementById(`boutique-skin-canvas-${key}`);
+  Object.keys(datasource).forEach((key) => {
+    let canvas = document.getElementById(`boutique-item-canvas-${key}`);
     if (canvas) {
       let ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.imageSmoothingEnabled = false;
+
+      // When rendering preview cards: Blend that card with your currently active options on the other axis
+      let testSkin = isCostumesTab ? selSkinKey : key;
+      let testCostume = isCostumesTab ? key : selCostumeKey;
 
       window.drawSingleHero(
         ctx,
@@ -10368,7 +10418,8 @@ window.renderBoutiqueSkins = function () {
         0.7,
         window.equippedSlots,
         {
-          cosmeticSkin: key,
+          cosmeticSkin: testSkin,
+          equippedCostume: testCostume,
           frenzyTimer: 0,
         },
         0,
@@ -10382,24 +10433,108 @@ window.renderBoutiqueSkins = function () {
   });
 };
 
-window.selectBoutiqueSkin = function (key) {
-  window.selectedBoutiqueSkinKey = key;
+window.selectBoutiqueItem = function (key) {
+  let cat = window.state.boutiqueCategory || "costumes";
+  if (cat === "costumes") {
+    window.selectedBoutiqueCostumeKey = key;
+  } else {
+    window.selectedBoutiqueSkinKey = key;
+  }
   window.renderBoutiqueSkins();
 };
 
+// Map original selectBoutiqueSkin to selectBoutiqueItem for safety
+window.selectBoutiqueSkin = function (key) {
+  window.selectBoutiqueItem(key);
+};
+
 window.handleShowcaseAction = function () {
-  let key = window.selectedBoutiqueSkinKey || "default";
-  let p = window.playerStats;
-  let unlocked = p.unlockedSkins || ["default"];
-  let isActive = p.cosmeticSkin === key;
-
-  if (isActive) return;
-
-  if (unlocked.includes(key)) {
-    window.equipBoutiqueSkin(key);
+  let cat = window.state.boutiqueCategory || "costumes";
+  if (cat === "costumes") {
+    let key = window.selectedBoutiqueCostumeKey || "knight";
+    let p = window.playerStats;
+    let unlocked = p.unlockedCostumes || ["knight"];
+    if (unlocked.includes(key)) {
+      window.equipBoutiqueCostume(key);
+    } else {
+      window.buyBoutiqueCostume(key);
+    }
   } else {
-    window.buyBoutiqueSkin(key);
+    let key = window.selectedBoutiqueSkinKey || "default";
+    let p = window.playerStats;
+    let unlocked = p.unlockedSkins || ["default"];
+    if (unlocked.includes(key)) {
+      window.equipBoutiqueSkin(key);
+    } else {
+      window.buyBoutiqueSkin(key);
+    }
   }
+};
+
+window.buyBoutiqueCostume = function (costumeKey) {
+  let skin = window.COSMETIC_COSTUMES[costumeKey];
+  if (!skin) return;
+
+  let p = window.playerStats;
+  let unlocked = p.unlockedCostumes || ["knight"];
+  if (unlocked.includes(costumeKey)) return;
+
+  let canAfford = false;
+  if (skin.currency === "Luminous Soul") {
+    let owned = window.inventory.ETC["Luminous Soul"] || 0;
+    if (owned >= skin.cost) {
+      window.inventory.ETC["Luminous Soul"] -= skin.cost;
+      if (window.inventory.ETC["Luminous Soul"] === 0) {
+        delete window.inventory.ETC["Luminous Soul"];
+      }
+      canAfford = true;
+    }
+  } else {
+    if (p.coins >= skin.cost) {
+      p.coins -= skin.cost;
+      canAfford = true;
+    }
+  }
+
+  if (!canAfford) {
+    window.pushHeaderToast("❌ Cannot afford this costume!", "#e74c3c");
+    return;
+  }
+
+  p.unlockedCostumes = unlocked;
+  p.unlockedCostumes.push(costumeKey);
+  p.equippedCostume = costumeKey; // Auto-equip
+  window.selectedBoutiqueCostumeKey = costumeKey;
+
+  window.pushHeaderToast(`🎭 Unlocked & Equipped: ${skin.name}!`, "#2ecc71");
+  window.pushLog(
+    `<span style='color:#ff007f;'>[BOUTIQUE]</span> Unlocked and equipped costume: <span style='color:${skin.color};'>${skin.name}</span>.`,
+  );
+
+  if (window.SoundManager) window.SoundManager.play("fairy");
+  if (window.spawnPurchaseCelebration) {
+    window.spawnPurchaseCelebration("alchemy", skin.color, 4);
+  }
+
+  window.updateUI();
+  window.renderBoutiqueSkins();
+  window.saveGame();
+};
+
+window.equipBoutiqueCostume = function (costumeKey) {
+  let p = window.playerStats;
+  let unlocked = p.unlockedCostumes || ["knight"];
+  if (!unlocked.includes(costumeKey)) return;
+
+  p.equippedCostume = costumeKey;
+  window.selectedBoutiqueCostumeKey = costumeKey;
+  window.pushHeaderToast(
+    `🎭 Equipped: ${window.COSMETIC_COSTUMES[costumeKey].name}!`,
+    "#2ecc71",
+  );
+  window.updateUI();
+  window.renderBoutiqueSkins();
+  window.saveGame();
 };
 
 window.buyBoutiqueSkin = function (skinKey) {

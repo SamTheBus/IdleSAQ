@@ -2985,44 +2985,103 @@ window.slotNouns = {
 window.COSMETIC_SKINS = {
   default: {
     id: "default",
-    name: "Default Steel Armor",
-    desc: "The standard plate armor issued to all newly recruited kingdom guardians.",
+    name: "Steel Grey Color",
+    desc: "The standard metallic iron polish of the royal guard.",
     color: "#bdc3c7",
     cost: 0,
     currency: "Gold",
   },
   void: {
     id: "void",
-    name: "Void Sovereign",
-    desc: "Plate mail corrupted by the deep pressure of the Event Horizon. Emits a dark purple aura.",
+    name: "Abyssal Void Color",
+    desc: "A swirling cosmic color that turns fabrics into deep black holes.",
     color: "#8e44ad",
     cost: 500,
     currency: "Luminous Soul",
   },
   crimson: {
     id: "crimson",
-    name: "Sanguine Dreadnought",
-    desc: "Drenched in the blood of ancient drakes. Its steel has stained a permanent crimson.",
+    name: "Dragon Blood Color",
+    desc: "Stained with ancient drake blood for a dark crimson finish.",
     color: "#e74c3c",
     cost: 500,
     currency: "Luminous Soul",
   },
   gilded: {
     id: "gilded",
-    name: "Gilded Emperor",
-    desc: "Pure aurum plate armor forged for high-ranking monarchs. Blindingly brilliant.",
+    name: "Royal Gold Color",
+    desc: "A rich gold leaf lacquer that shines with absolute brilliance.",
     color: "#f1c40f",
     cost: 750,
     currency: "Luminous Soul",
   },
   celestial: {
     id: "celestial",
-    name: "Celestial Arbiter",
-    desc: "Forged in the stellar nurseries of the Aether. Pulsates with clean cosmic starlight.",
+    name: "Nebula Star Color",
+    desc: "Infused with active stardust that shimmers with stellar colors.",
     color: "#00d2ff",
     cost: 1000,
     currency: "Luminous Soul",
   },
+};
+
+window.COSMETIC_COSTUMES = {
+  knight: {
+    id: "knight",
+    name: "Classic Plate Mail",
+    desc: "The timeless armor of the kingdom's elite frontliners.",
+    cost: 0,
+    currency: "Gold",
+    color: "#bdc3c7"
+  },
+  shinobi: {
+    id: "shinobi",
+    name: "Sleek Shinobi Garb",
+    desc: "Woven from silent shadow threads. Enhances stealth profile and swift parries.",
+    cost: 150000,
+    currency: "Gold",
+    color: "#3498db"
+  },
+  archmage: {
+    id: "archmage",
+    name: "Archmage Robes",
+    desc: "Infused with residual mana to project an active arcane barrier.",
+    cost: 250,
+    currency: "Luminous Soul",
+    color: "#9b59b6"
+  },
+  cyber: {
+    id: "cyber",
+    name: "Neon Cyber-Grid",
+    desc: "Futuristic composite grid-suit driven by a pulsating neon core.",
+    cost: 500,
+    currency: "Luminous Soul",
+    color: "#00d2ff"
+  },
+  jackolantern: {
+    id: "jackolantern",
+    name: "Jack-O'-Lantern Gourd",
+    desc: "Spooky harvest armor capped with a glowing carved pumpkin helmet. (Autumn/Halloween Seasonal)",
+    cost: 1000,
+    currency: "Luminous Soul",
+    color: "#e67e22"
+  },
+  santashelper: {
+    id: "santashelper",
+    name: "Holiday Helper Suit",
+    desc: "Cozy red and white trim coat with a floppy pom-pom cone cap. (Winter/Holiday Seasonal)",
+    cost: 1000,
+    currency: "Luminous Soul",
+    color: "#ff7675"
+  },
+  midsummer: {
+    id: "midsummer",
+    name: "Solstice Druid Garb",
+    desc: "Leafy forest tunic with comfortable straps and a crown of seasonal wildflowers. (Summer/Solstice Seasonal)",
+    cost: 1000,
+    currency: "Luminous Soul",
+    color: "#2ecc71"
+  }
 };
 
 window.CAVERN_BUFFS = [

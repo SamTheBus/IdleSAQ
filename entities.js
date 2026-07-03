@@ -4172,87 +4172,607 @@
       }
     }
 
-    // Draw Cape & Body Armor
-    ctx.strokeStyle = "#000000";
-    ctx.lineWidth = penHero;
-    ctx.fillStyle = capeColor;
-    ctx.beginPath();
-    ctx.moveTo(-6, bounce);
-    ctx.lineTo(-18, 15);
-    ctx.lineTo(-2, 18);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    let costume = stats.equippedCostume || "knight";
 
-    ctx.fillStyle = bodyColor;
-    ctx.beginPath();
-    ctx.rect(-8, bounce, 14, 16);
-    ctx.fill();
-    ctx.stroke();
+        // Decoupled Multi-Axis Visual Render Matrix
+        switch (costume) {
+          case "shinobi":
+                      // Localized custom colors for classic stealth ninja palette (dark charcoal/navy with dye accents)
+                      let shinobiGiColor = "#1a1a24";    // Stealth dark navy/grey
+                      let shinobiMaskColor = "#111115";  // Deep black mask wrap
+                      let shinobiSashColor = armorColor || "#3498db";  // Sash ties respect equipped armor dye
+                      let shinobiScarfColor = capeColor || "#c0392b";  // Flowing scarf respects cape dye
+                      let shinobiEyeColor = eyeColor || "#e74c3c";     // Peeking eyes respect frenzy state/skin
 
-    ctx.fillStyle = armorColor;
-    ctx.beginPath();
-    ctx.rect(-10, -14 + bounce, 18, 16);
-    ctx.fill();
-    ctx.stroke();
+                      // 1. Crossed Katana Sheaths on the Back (Drawn behind the body)
+                      ctx.save();
+                      ctx.strokeStyle = "#000000";
+                      ctx.lineWidth = penHero;
+                      ctx.lineJoin = "round";
 
-    // Crown of Tempests Aura
-    if (
-      equipped.helmet &&
-      equipped.helmet.isUniqueTempest &&
-      (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
-    ) {
-      ctx.save();
-      ctx.translate(0, -14 + bounce);
-      ctx.strokeStyle = "#00d2ff";
-      ctx.lineWidth = 2.0;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = "#00d2ff";
-      ctx.beginPath();
-      ctx.moveTo(-6, -2);
-      ctx.quadraticCurveTo(-14, -12, -18, -8);
-      ctx.quadraticCurveTo(-10, -5, -4, 0);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(6, -2);
-      ctx.quadraticCurveTo(14, -12, 18, -8);
-      ctx.quadraticCurveTo(10, -5, 4, 0);
-      ctx.stroke();
-      ctx.restore();
-    }
+                      // Left sheath & hilt
+                      ctx.save();
+                      ctx.translate(-4, bounce - 2);
+                      ctx.rotate(-Math.PI / 4);
+                      ctx.fillStyle = "#1e1e24";
+                      ctx.fillRect(-2, -18, 4, 20);
+                      ctx.strokeRect(-2, -18, 4, 20);
+                      ctx.fillStyle = "#ffd700"; // Gold hilt
+                      ctx.fillRect(-3, -24, 6, 6);
+                      ctx.strokeRect(-3, -24, 6, 6);
+                      ctx.restore();
 
-    // UNIQUE: Maelstrom Gale-Glaive "Gale Resonance" Canvas Aura
-    if (
-      stats.galeResonanceTimer > 0 &&
-      (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
-    ) {
-      ctx.save();
-      ctx.translate(0, bounce);
-      ctx.strokeStyle = "rgba(0, 255, 204, 0.45)";
-      ctx.lineWidth = 1.8;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = "#00ffcc";
-      ctx.beginPath();
-      ctx.arc(0, 0, 24 + Math.sin(Date.now() / 100) * 3, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
+                      // Right sheath & hilt
+                      ctx.save();
+                      ctx.translate(2, -2 + bounce);
+                      ctx.rotate(Math.PI / 4);
+                      ctx.fillStyle = "#1e1e24";
+                      ctx.fillRect(-2, -18, 4, 20);
+                      ctx.strokeRect(-2, -18, 4, 20);
+                      ctx.fillStyle = "#ffd700"; // Gold hilt
+                      ctx.fillRect(-3, -24, 6, 6);
+                      ctx.strokeRect(-3, -24, 6, 6);
+                      ctx.restore();
+                      ctx.restore();
 
-    // Helmet Visor / Eyes
-    ctx.fillStyle = "#2c3e50";
-    ctx.beginPath();
-    ctx.rect(0, -8 + bounce, 6, 4);
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = eyeColor;
-    ctx.beginPath();
-    ctx.rect(-5, -20 + bounce, 4, 6);
-    ctx.fill();
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.rect(-9, -16 + bounce, 8, 4);
-    ctx.fill();
-    ctx.stroke();
+                      // 2. Flowing Animated Scarf (Drawn behind/around neck, waving in the wind!)
+                      ctx.save();
+                      ctx.strokeStyle = "#000000";
+                      ctx.lineWidth = penHero;
+                      ctx.fillStyle = shinobiScarfColor;
+                      ctx.lineJoin = "round";
+                      let windWave1 = Math.sin(Date.now() / 120) * 4;
+                      let windWave2 = Math.cos(Date.now() / 150) * 3;
+
+                      // First waving scarf tail
+                      ctx.beginPath();
+                      ctx.moveTo(-6, -2 + bounce);
+                      ctx.quadraticCurveTo(-18 + windWave1, -6 + bounce, -28 + windWave1, -2 + windWave2 + bounce);
+                      ctx.lineTo(-24 + windWave1, 4 + windWave2 + bounce);
+                      ctx.quadraticCurveTo(-14 + windWave1, 0 + bounce, -6, 2 + bounce);
+                      ctx.closePath();
+                      ctx.fill();
+                      ctx.stroke();
+
+                      // Second waving scarf tail
+                      ctx.beginPath();
+                      ctx.moveTo(-6, -4 + bounce);
+                      ctx.quadraticCurveTo(-20 + windWave2, 2 + bounce, -26 + windWave2, 8 + windWave1 + bounce);
+                      ctx.lineTo(-21 + windWave2, 13 + windWave1 + bounce);
+                      ctx.quadraticCurveTo(-12 + windWave2, 6 + bounce, -6, 1 + bounce);
+                      ctx.closePath();
+                      ctx.fill();
+                      ctx.stroke();
+                      ctx.restore();
+
+                      // 3. Sleek Ninja Gi (Torso body block)
+                      ctx.fillStyle = shinobiGiColor;
+                      ctx.beginPath();
+                      ctx.rect(-7, bounce, 12, 16);
+                      ctx.fill();
+                      ctx.stroke();
+
+                      // Kimono/Gi overlapping crossover lines (the "V" overlap)
+                      ctx.strokeStyle = "#000000";
+                      ctx.lineWidth = 1.5;
+                      ctx.beginPath();
+                      ctx.moveTo(-7, bounce);
+                      ctx.lineTo(-1, 8 + bounce);
+                      ctx.moveTo(5, bounce);
+                      ctx.lineTo(-3, 10 + bounce);
+                      ctx.stroke();
+
+                      // 4. Belt Sash with hanging ribbon ends
+                      ctx.fillStyle = shinobiSashColor;
+                      ctx.strokeStyle = "#000000";
+                      ctx.lineWidth = penHero;
+                      ctx.beginPath();
+                      ctx.rect(-8, 7 + bounce, 14, 3.5);
+                      ctx.fill();
+                      ctx.stroke();
+
+                      // Hanging belt ribbons waving gently in the wind
+                      ctx.save();
+                      ctx.fillStyle = shinobiSashColor;
+                      ctx.translate(-4, 10 + bounce);
+                      ctx.rotate(Math.PI / 10 + Math.sin(Date.now() / 100) * 0.1);
+                      ctx.beginPath();
+                      ctx.rect(-1.5, 0, 3, 10);
+                      ctx.fill();
+                      ctx.stroke();
+                      ctx.restore();
+
+                      // 5. Hood & Mask Wrap (Head)
+                      ctx.fillStyle = shinobiGiColor;
+                      ctx.beginPath();
+                      ctx.roundRect(-10, -14 + bounce, 18, 16, [6, 6, 2, 2]);
+                      ctx.fill();
+                      ctx.stroke();
+
+                      // Dark mask plate eye slit interior
+                      ctx.fillStyle = "#2c3e50";
+                      ctx.beginPath();
+                      ctx.rect(-6, -11 + bounce, 10, 6);
+                      ctx.fill();
+
+                      // Mask Wrap (Lower half of face)
+                      ctx.fillStyle = shinobiMaskColor;
+                      ctx.beginPath();
+                      ctx.rect(-10, -6 + bounce, 18, 8);
+                      ctx.fill();
+                      ctx.stroke();
+
+                      // Forehead Protector Plate (Headband / Hitai-ate)
+                      ctx.fillStyle = "#7f8c8d";
+                      ctx.beginPath();
+                      ctx.rect(-6, -14 + bounce, 11, 3);
+                      ctx.fill();
+                      ctx.stroke();
+                      // Tiny metal headband rivets
+                      ctx.fillStyle = "#ffffff";
+                      ctx.fillRect(-5, -13 + bounce, 0.8, 0.8);
+                      ctx.fillRect(3, -13 + bounce, 0.8, 0.8);
+
+                      // 6. Peeking Glowing Shinobi Eyes
+                      ctx.fillStyle = shinobiEyeColor;
+                      ctx.shadowBlur = 6;
+                      ctx.shadowColor = shinobiEyeColor;
+                      ctx.beginPath();
+                      ctx.rect(-5, -10 + bounce, 2.5, 1.5);
+                      ctx.rect(0, -10 + bounce, 2.5, 1.5);
+                      ctx.fill();
+                      ctx.shadowBlur = 0;
+                      break;
+
+          case "archmage":
+            // Flowing Wizard Robes (Flared base)
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penHero;
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.moveTo(-6, bounce);
+            ctx.lineTo(-12, 16 + bounce);
+            ctx.lineTo(6, 16 + bounce);
+            ctx.lineTo(4, bounce);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Inner center vertical trim
+            ctx.fillStyle = capeColor;
+            ctx.beginPath();
+            ctx.rect(-2, bounce, 4, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            // Mage Shoulders
+            ctx.fillStyle = armorColor;
+            ctx.beginPath();
+            ctx.rect(-9, bounce, 3, 4);
+            ctx.rect(5, bounce, 3, 4);
+            ctx.fill();
+            ctx.stroke();
+
+            // Long White Beard
+            ctx.fillStyle = "#ecf0f1";
+            ctx.beginPath();
+            ctx.moveTo(-5, -3 + bounce);
+            ctx.lineTo(0, 10 + bounce);
+            ctx.lineTo(4, -3 + bounce);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Head Base
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.rect(-8, -14 + bounce, 15, 14);
+            ctx.fill();
+            ctx.stroke();
+
+            // Wizard Pointy Hat
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.moveTo(-11, -14 + bounce);
+            ctx.lineTo(0, -29 + bounce);
+            ctx.lineTo(10, -14 + bounce);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Hat Brim
+            ctx.fillStyle = armorColor;
+            ctx.beginPath();
+            ctx.rect(-12, -16 + bounce, 23, 3);
+            ctx.fill();
+            ctx.stroke();
+
+            // Glowing Archmage eyes
+            ctx.fillStyle = eyeColor;
+            ctx.beginPath();
+            ctx.rect(-5, -11 + bounce, 2, 2);
+            ctx.rect(1, -11 + bounce, 2, 2);
+            ctx.fill();
+            break;
+
+          case "cyber":
+            // Jetpack Thruster Wings
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penHero;
+            ctx.fillStyle = capeColor;
+            ctx.beginPath();
+            ctx.moveTo(-6, bounce);
+            ctx.lineTo(-20, -4 + bounce);
+            ctx.lineTo(-18, 12 + bounce);
+            ctx.lineTo(-6, 8 + bounce);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Cyber Body (Composite armor plating)
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.rect(-8, bounce, 14, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            // Neon glowing chest core
+            ctx.fillStyle = eyeColor;
+            ctx.beginPath();
+            ctx.arc(-1, 6 + bounce, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Visor Helmet Head
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.rect(-10, -14 + bounce, 18, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            // High-tech Plate lining
+            ctx.strokeStyle = armorColor;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(-10, -1 + bounce);
+            ctx.lineTo(8, -1 + bounce);
+            ctx.stroke();
+
+            // Full horizontal glowing visor
+            ctx.fillStyle = eyeColor;
+            ctx.beginPath();
+            ctx.rect(-9, -10 + bounce, 16, 4);
+            ctx.fill();
+            ctx.stroke();
+            break;
+
+          case "jackolantern":
+            // Leafy Cape (Autumn colors)
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penHero;
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.moveTo(-6, bounce);
+            ctx.lineTo(-18, 16 + bounce);
+            ctx.lineTo(-2, 18 + bounce);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Vine Chestplate
+            ctx.fillStyle = armorColor;
+            ctx.beginPath();
+            ctx.rect(-8, bounce, 14, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            // Gourd straps crossing
+            ctx.strokeStyle = capeColor;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(-8, bounce);
+            ctx.lineTo(6, 16 + bounce);
+            ctx.moveTo(6, bounce);
+            ctx.lineTo(-8, 16 + bounce);
+            ctx.stroke();
+
+            // Pumpkin Head
+            ctx.fillStyle = armorColor;
+            ctx.beginPath();
+            ctx.arc(-1, -7 + bounce, 9, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Gourd stem
+            ctx.strokeStyle = capeColor;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(-1, -15 + bounce);
+            ctx.quadraticCurveTo(2, -19 + bounce, 3, -18 + bounce);
+            ctx.stroke();
+
+            // Carved Eyes & Mouth
+            ctx.fillStyle = eyeColor;
+            // Left Eye
+            ctx.beginPath();
+            ctx.moveTo(-5, -10 + bounce);
+            ctx.lineTo(-2, -10 + bounce);
+            ctx.lineTo(-3.5, -7 + bounce);
+            ctx.closePath();
+            ctx.fill();
+            // Right Eye
+            ctx.beginPath();
+            ctx.moveTo(1, -10 + bounce);
+            ctx.lineTo(4, -10 + bounce);
+            ctx.lineTo(2.5, -7 + bounce);
+            ctx.closePath();
+            ctx.fill();
+            // Jagged carved mouth
+            ctx.beginPath();
+            ctx.moveTo(-6, -4 + bounce);
+            ctx.lineTo(-4, -2 + bounce);
+            ctx.lineTo(-2, -4 + bounce);
+            ctx.lineTo(0, -2 + bounce);
+            ctx.lineTo(2, -4 + bounce);
+            ctx.lineTo(4, -2 + bounce);
+            ctx.lineTo(2, 0 + bounce);
+            ctx.lineTo(-2, 0 + bounce);
+            ctx.closePath();
+            ctx.fill();
+            break;
+
+          case "santashelper":
+            // Cozy Back Cloak
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penHero;
+            ctx.fillStyle = capeColor;
+            ctx.beginPath();
+            ctx.moveTo(-6, bounce);
+            ctx.lineTo(-18, 15);
+            ctx.lineTo(-2, 18);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Cozy Red Coat
+            ctx.fillStyle = capeColor;
+            ctx.beginPath();
+            ctx.rect(-8, bounce, 14, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            // White fur collar/trim
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.rect(-8.5, bounce, 15, 3.5);
+            ctx.fill();
+            ctx.stroke();
+
+            // White vertical seam
+            ctx.beginPath();
+            ctx.rect(-1.5, 3.5 + bounce, 3, 12.5);
+            ctx.fill();
+            ctx.stroke();
+
+            // Black belt sash
+            ctx.fillStyle = "#111115";
+            ctx.beginPath();
+            ctx.rect(-8.5, 8 + bounce, 15, 3.5);
+            ctx.fill();
+            ctx.stroke();
+
+            // Gold belt buckle
+            ctx.fillStyle = "#f1c40f";
+            ctx.beginPath();
+            ctx.rect(-2.5, 7.5 + bounce, 5, 4.5);
+            ctx.fill();
+            ctx.stroke();
+
+            // Hood under floppy hat
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.rect(-10, -14 + bounce, 18, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            // White plush hat brim
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.rect(-11, -16 + bounce, 20, 4.5);
+            ctx.fill();
+            ctx.stroke();
+
+            // Floppy red hat cone falling to the left
+            ctx.fillStyle = capeColor;
+            ctx.beginPath();
+            ctx.moveTo(-9, -16 + bounce);
+            ctx.lineTo(-18, -25 + bounce); // Flopped point
+            ctx.lineTo(5, -16 + bounce);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Fluffy white pom-pom ball on flopped point
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(-18, -25 + bounce, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Cozy eyes
+            ctx.fillStyle = eyeColor;
+            ctx.beginPath();
+            ctx.rect(-5, -10 + bounce, 2, 2);
+            ctx.rect(1, -10 + bounce, 2, 2);
+            ctx.fill();
+            break;
+
+          case "midsummer":
+            // Ivy Leaf Cape (Flowing green)
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penHero;
+            ctx.fillStyle = capeColor;
+            ctx.beginPath();
+            ctx.moveTo(-6, bounce);
+            ctx.lineTo(-18, 15);
+            ctx.lineTo(-2, 18);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Under-Shirt
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.rect(-8, bounce, 14, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            // Leafy Druid Tunic Vest
+            ctx.fillStyle = "#2ecc71";
+            ctx.beginPath();
+            ctx.moveTo(-8, bounce);
+            ctx.lineTo(0, 16 + bounce);
+            ctx.lineTo(-8, 16 + bounce);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(6, bounce);
+            ctx.lineTo(-2, 16 + bounce);
+            ctx.lineTo(6, 16 + bounce);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Head Base
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.rect(-10, -14 + bounce, 18, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            // Vine crown base ring
+            ctx.strokeStyle = "#27ae60";
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(-11, -12 + bounce);
+            ctx.quadraticCurveTo(0, -15 + bounce, 10, -12 + bounce);
+            ctx.stroke();
+
+            // Colorful wildflowers blooming in the crown
+            ctx.fillStyle = "#ff7675"; // Rose flower
+            ctx.beginPath();
+            ctx.arc(-7, -13 + bounce, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffd23f"; // Dandelion
+            ctx.beginPath();
+            ctx.arc(0, -14 + bounce, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#00d2ff"; // Bluebell
+            ctx.beginPath();
+            ctx.arc(6, -13 + bounce, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Bright druid eyes
+            ctx.fillStyle = eyeColor;
+            ctx.beginPath();
+            ctx.rect(-5, -8 + bounce, 2, 2);
+            ctx.rect(1, -8 + bounce, 2, 2);
+            ctx.fill();
+            break;
+
+          default: // "knight" Classic Plate Armor
+            // Draw Cape
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penHero;
+            ctx.fillStyle = capeColor;
+            ctx.beginPath();
+            ctx.moveTo(-6, bounce);
+            ctx.lineTo(-18, 15);
+            ctx.lineTo(-2, 18);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Draw Body
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.rect(-8, bounce, 14, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            // Draw Helmet
+            ctx.fillStyle = armorColor;
+            ctx.beginPath();
+            ctx.rect(-10, -14 + bounce, 18, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            // Helmet Visor / Eyes
+            ctx.fillStyle = "#2c3e50";
+            ctx.beginPath();
+            ctx.rect(0, -8 + bounce, 6, 4);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = eyeColor;
+            ctx.beginPath();
+            ctx.rect(-5, -20 + bounce, 4, 6);
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.rect(-9, -16 + bounce, 8, 4);
+            ctx.fill();
+            ctx.stroke();
+            break;
+        }
+
+        // Crown of Tempests Aura
+        if (
+          equipped.helmet &&
+          equipped.helmet.isUniqueTempest &&
+          (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
+        ) {
+          ctx.save();
+          ctx.translate(0, -14 + bounce);
+          ctx.strokeStyle = "#00d2ff";
+          ctx.lineWidth = 2.0;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = "#00d2ff";
+          ctx.beginPath();
+          ctx.moveTo(-6, -2);
+          ctx.quadraticCurveTo(-14, -12, -18, -8);
+          ctx.quadraticCurveTo(-10, -5, -4, 0);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(6, -2);
+          ctx.quadraticCurveTo(14, -12, 18, -8);
+          ctx.quadraticCurveTo(10, -5, 4, 0);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // UNIQUE: Maelstrom Gale-Glaive "Gale Resonance" Canvas Aura
+        if (
+          stats.galeResonanceTimer > 0 &&
+          (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
+        ) {
+          ctx.save();
+          ctx.translate(0, bounce);
+          ctx.strokeStyle = "rgba(0, 255, 204, 0.45)";
+          ctx.lineWidth = 1.8;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = "#00ffcc";
+          ctx.beginPath();
+          ctx.arc(0, 0, 24 + Math.sin(Date.now() / 100) * 3, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
 
     // Weapon
     ctx.save();
