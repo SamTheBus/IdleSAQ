@@ -14,49 +14,56 @@ window.hexToRgbValues = function (hex) {
   return `${r}, ${g}, ${b}`;
 };
 
-// Universal Set generation roller with targeted theme biases for Dungeons and Rift hunts
-window.rollSetForItem = function (isBoss, isRare, isDungeon, currentDungeon) {
-  let setChance = 0.15; // 15% base rate
-  if (isDungeon) setChance = 0.4;
-  else if (isBoss) setChance = 0.3;
-  else if (isRare) setChance = 0.25;
+// Initialize window.ItemFactory Namespace to encapsulate item math and properties
+window.ItemFactory = {
+  // Universal Set generation roller with targeted theme biases for Dungeons and Rift hunts
+  rollSetForItem(isBoss, isRare, isDungeon, currentDungeon) {
+    let setChance = 0.15; // 15% base rate
+    if (isDungeon) setChance = 0.4;
+    else if (isBoss) setChance = 0.3;
+    else if (isRare) setChance = 0.25;
 
-  if (Math.random() > setChance) return null;
+    if (Math.random() > setChance) return null;
 
-  let setKeys = [
-    "Vanguard",
-    "Colossus",
-    "Bastion",
-    "Windrunner",
-    "Wraith",
-    "Reaver",
-    "Dreadnought",
-    "Duellist",
-    "Scholar",
-    "Berserker",
-    "Scout",
-    "Fortune",
-    "Mystic",
-    "Alchemist",
-    "Midas",
-    "Biohazard",
-    "Warlord",
-    "VoidTouched",
-  ];
+    let setKeys = [
+      "Vanguard",
+      "Colossus",
+      "Bastion",
+      "Windrunner",
+      "Wraith",
+      "Reaver",
+      "Dreadnought",
+      "Duellist",
+      "Scholar",
+      "Berserker",
+      "Scout",
+      "Fortune",
+      "Mystic",
+      "Alchemist",
+      "Midas",
+      "Biohazard",
+      "Warlord",
+      "VoidTouched",
+    ];
 
-  // 70% chance to respect regional theme layout
-  if (Math.random() < 0.7) {
-    if (isDungeon && currentDungeon) {
-      let themes = { equip: "Warlord", gold: "Midas", mat: "Biohazard" };
-      if (themes[currentDungeon]) return themes[currentDungeon];
+    // 70% chance to respect regional theme layout
+    if (Math.random() < 0.7) {
+      if (isDungeon && currentDungeon) {
+        let themes = { equip: "Warlord", gold: "Midas", mat: "Biohazard" };
+        if (themes[currentDungeon]) return themes[currentDungeon];
+      }
+      if (window.playerStats.isUberBoss) {
+        return "VoidTouched";
+      }
     }
-    if (window.playerStats.isUberBoss) {
-      return "VoidTouched";
-    }
-  }
 
-  return setKeys[Math.floor(Math.random() * setKeys.length)];
+    return setKeys[Math.floor(Math.random() * setKeys.length)];
+  },
 };
+
+// Legacy Compatibility Aliases to protect existing cross-file references
+window.rollSetForItem = (isBoss, isRare, isDungeon, currentDungeon) =>
+  window.ItemFactory.rollSetForItem(isBoss, isRare, isDungeon, currentDungeon);
 
 // Calculates gold expenses for set re-resonating
 window.getSetRerollGoldCost = function (item) {
@@ -268,7 +275,7 @@ window.renderForgeTab = function () {
   if (!listEl || !detailEl) return;
 
   let allValidItems = [
-    ...window.inventory.EQUIP,
+    ...window.inventory.EQUIP.filter((item) => item.type !== "sigil"),
     ...(window.inventory.ARTIFACT || []),
   ];
   for (let key in window.equippedSlots) {
@@ -633,306 +640,1243 @@ window.renderForgeTab = function () {
 
 // --- UNIQUE STYLE SYSTEM ---
 
-window.getUniqueItemStyle = function (item) {
-  if (!item) return null;
-  let isUnique =
-    item.isUniqueStaff ||
-    item.isUniqueSword ||
-    item.isUniqueSingularity ||
-    item.isUniqueMaelstrom ||
-    item.isUniqueAegis ||
-    item.isUniqueWatch ||
-    item.isUniqueChronicle ||
-    item.isUniqueWarpCore ||
-    item.isUniqueTempest;
-  if (!isUnique) return null;
+// Append Unique Style System directly inside the ItemFactory namespace
+Object.assign(window.ItemFactory, {
+  getUniqueItemStyle(item) {
+    if (!item) return null;
+    let isUnique =
+      item.isUniqueStaff ||
+      item.isUniqueSword ||
+      item.isUniqueSingularity ||
+      item.isUniqueMaelstrom ||
+      item.isUniqueAegis ||
+      item.isUniqueWatch ||
+      item.isUniqueChronicle ||
+      item.isUniqueWarpCore ||
+      item.isUniqueTempest;
+    if (!isUnique) return null;
 
-  let bg = "";
-  let border = "";
-  let shadow = "";
-  let glow = "";
-  let lore = "";
+    let bg = "";
+    let border = "";
+    let shadow = "";
+    let glow = "";
+    let lore = "";
 
-  if (item.isUniqueSword) {
-    bg = "linear-gradient(135deg, #1f0303, #070000)";
-    border = "#960018";
-    shadow = "#5c000c";
-    glow = "rgba(150,0,24,0.4)";
-    lore = `"Forged in the veins of the first red dragon, this blade sings a silent, thirsty song. It does not merely cut flesh; it harvests the soul's very current."`;
-  } else if (item.isUniqueStaff) {
-    bg = "linear-gradient(135deg, #1c0e00, #070200)";
-    border = "#e67e22";
-    shadow = "#853c00";
-    glow = "rgba(230,126,34,0.4)";
-    lore = `"Born of a feather plucked from the solar phoenix, its core burns with the warmth of a thousand dying suns. Even in the deepest cold of the void, its fire never falters."`;
-  } else if (item.isUniqueSingularity) {
-    bg = "linear-gradient(135deg, #150326, #030008)";
-    border = "#8e44ad";
-    shadow = "#510a74";
-    glow = "rgba(142,68,173,0.4)";
-    lore = `"This colossal blade harbors the core of a collapsed dying star, pulling the surrounding space into a constant state of gravitational collapse."`;
-  } else if (item.isUniqueMaelstrom) {
-    bg = "linear-gradient(135deg, #031d0d, #010803)";
-    border = "#2ecc71";
-    shadow = "#145a32";
-    glow = "rgba(46,204,113,0.4)";
-    lore = `"Whispers of forgotten gales dance along its razor edge, gathering strength with every swing until the wind itself becomes a solid, cutting force."`;
-  } else if (item.isUniqueAegis) {
-    bg = "linear-gradient(135deg, #021a2c, #00080f)";
-    border = "#3498db";
-    shadow = "#1a5276";
-    glow = "rgba(52,152,219,0.4)";
-    lore = `"A shield constructed of hyper-dense matter harvested from the Event Horizon. It bends local gravity fields to completely arrest kinetic impacts."`;
-  } else if (item.isUniqueWatch) {
-    bg = "linear-gradient(135deg, #221c03, #0a0800)";
-    border = "#f1c40f";
-    shadow = "#7d6608";
-    glow = "rgba(241,196,15,0.4)";
-    lore = `"A complex clockwork matrix that acts as a localized anchor in time. It beats in harmony with your lifeline, stretching fractions of seconds."`;
-  } else if (item.isUniqueChronicle) {
-    bg = "linear-gradient(135deg, #1f1b0a, #0b0903)";
-    border = "#f39c12";
-    shadow = "#7e5109";
-    glow = "rgba(243,156,18,0.4)";
-    lore = `"An ancient, soul-bound lexicon recording every rise and fall of your past incarnations. To read its pages is to remember power long forgotten."`;
-  } else if (item.isUniqueWarpCore) {
-    bg = "linear-gradient(135deg, #001a1a, #000707)";
-    border = "#1abc9c";
-    shadow = "#0e6251";
-    glow = "rgba(26,188,156,0.4)";
-    lore = `"Fitted with micro-singularity thrusters that distort spatial geometry directly ahead of your stride, allowing you to cross landscapes in a single heartbeat."`;
-  } else if (item.isUniqueTempest) {
-    bg = "linear-gradient(135deg, #03212c, #000c0f)";
-    border = "#00d2ff";
-    shadow = "#005077";
-    glow = "rgba(0,210,255,0.4)";
-    lore = `"Stolen from the peaks of the Storm-Warden's spire, this circlet channels wild static friction, responding to bodily trauma with localized lightning strikes."`;
-  }
-  return { bg, border, shadow, glow, lore };
-};
+    if (item.isUniqueSword) {
+      bg = "linear-gradient(135deg, #1f0303, #070000)";
+      border = "#960018";
+      shadow = "#5c000c";
+      glow = "rgba(150,0,24,0.4)";
+      lore = `"Forged in the veins of the first red dragon, this blade sings a silent, thirsty song. It does not merely cut flesh; it harvests the soul's very current."`;
+    } else if (item.isUniqueStaff) {
+      bg = "linear-gradient(135deg, #1c0e00, #070200)";
+      border = "#e67e22";
+      shadow = "#853c00";
+      glow = "rgba(230,126,34,0.4)";
+      lore = `"Born of a feather plucked from the solar phoenix, its core burns with the warmth of a thousand dying suns. Even in the deepest cold of the void, its fire never falters."`;
+    } else if (item.isUniqueSingularity) {
+      bg = "linear-gradient(135deg, #150326, #030008)";
+      border = "#8e44ad";
+      shadow = "#510a74";
+      glow = "rgba(142,68,173,0.4)";
+      lore = `"This colossal blade harbors the core of a collapsed dying star, pulling the surrounding space into a constant state of gravitational collapse."`;
+    } else if (item.isUniqueMaelstrom) {
+      bg = "linear-gradient(135deg, #031d0d, #010803)";
+      border = "#2ecc71";
+      shadow = "#145a32";
+      glow = "rgba(46,204,113,0.4)";
+      lore = `"Whispers of forgotten gales dance along its razor edge, gathering strength with every swing until the wind itself becomes a solid, cutting force."`;
+    } else if (item.isUniqueAegis) {
+      bg = "linear-gradient(135deg, #021a2c, #00080f)";
+      border = "#3498db";
+      shadow = "#1a5276";
+      glow = "rgba(52,152,219,0.4)";
+      lore = `"A shield constructed of hyper-dense matter harvested from the Event Horizon. It bends local gravity fields to completely arrest kinetic impacts."`;
+    } else if (item.isUniqueWatch) {
+      bg = "linear-gradient(135deg, #221c03, #0a0800)";
+      border = "#f1c40f";
+      shadow = "#7d6608";
+      glow = "rgba(241,196,15,0.4)";
+      lore = `"A complex clockwork matrix that acts as a localized anchor in time. It beats in harmony with your lifeline, stretching fractions of seconds."`;
+    } else if (item.isUniqueChronicle) {
+      bg = "linear-gradient(135deg, #1f1b0a, #0b0903)";
+      border = "#f39c12";
+      shadow = "#7e5109";
+      glow = "rgba(243,156,18,0.4)";
+      lore = `"An ancient, soul-bound lexicon recording every rise and fall of your past incarnations. To read its pages is to remember power long forgotten."`;
+    } else if (item.isUniqueWarpCore) {
+      bg = "linear-gradient(135deg, #001a1a, #000707)";
+      border = "#1abc9c";
+      shadow = "#0e6251";
+      glow = "rgba(26,188,156,0.4)";
+      lore = `"Fitted with micro-singularity thrusters that distort spatial geometry directly ahead of your stride, allowing you to cross landscapes in a single heartbeat."`;
+    } else if (item.isUniqueTempest) {
+      bg = "linear-gradient(135deg, #03212c, #000c0f)";
+      border = "#00d2ff";
+      shadow = "#005077";
+      glow = "rgba(0,210,255,0.4)";
+      lore = `"Stolen from the peaks of the Storm-Warden's spire, this circlet channels wild static friction, responding to bodily trauma with localized lightning strikes."`;
+    }
+    return { bg, border, shadow, glow, lore };
+  },
+});
 
-// --- PROCEDURAL GENERATOR ENGINE ---
+// Legacy Compatibility Aliases to protect references
+window.getUniqueItemStyle = (item) =>
+  window.ItemFactory.getUniqueItemStyle(item);
 
-window.createItemObject = function (
+// Append Item Generation and Procedural Naming inside ItemFactory
+Object.assign(window.ItemFactory, {
+  createItemObject(
+    chosenType,
+    statLinesCount,
+    stageScale,
+    minStars = 0,
+    allowedTraits = null,
+  ) {
+    let item = {
+      id: window.idCounter++,
+      name: "",
+      type: chosenType,
+      statsRolled: statLinesCount,
+      temperLevel: 0,
+      stageLevel: stageScale,
+      atk: 0,
+      maxHp: 0,
+      def: 0,
+      moveSpeed: 0,
+      critChance: 0,
+      critDamage: 0,
+      block: 0,
+      parry: 0,
+      dropRate: 0,
+      quality: 0,
+      goldMulti: 0,
+      rareSpawn: 0,
+      fairySpawn: 0,
+      activeAttackSpeed: 0,
+      idleAttackSpeed: 0,
+      baseAtk: 0,
+      baseMaxHp: 0,
+      baseDef: 0,
+      baseMoveSpeed: 0,
+      baseBlock: 0,
+      baseParry: 0,
+      baseInt: 0,
+      bonusAtk: 0,
+      bonusMaxHp: 0,
+      bonusDef: 0,
+      bonusMoveSpeed: 0,
+      bonusCritChance: 0,
+      bonusCritDamage: 0,
+      bonusBlock: 0,
+      bonusParry: 0,
+      bonusActiveSpeed: 0,
+      bonusIdleSpeed: 0,
+      bonusStr: 0,
+      bonusDex: 0,
+      bonusInt: 0,
+      str: 0,
+      dex: 0,
+      int: 0,
+      trait: null,
+      desc: "",
+      breakdown: "",
+      noun: "",
+      setName: null,
+    };
+
+    if (chosenType === "subweapon") {
+      const subTypes = ["shield", "dagger", "tome"];
+      item.subType = subTypes[Math.floor(Math.random() * subTypes.length)];
+    }
+
+    if (chosenType !== "artifact") {
+      let nounList = window.slotNouns[chosenType];
+      if (chosenType === "subweapon") {
+        nounList = window.slotNouns.subweapon[item.subType];
+      }
+      item.noun = nounList
+        ? nounList[Math.floor(Math.random() * nounList.length)]
+        : chosenType.toUpperCase();
+    }
+
+    let prestigeMult = 1.0;
+
+    // Direct-Alignment Scaling Model: Maps item creation baselines exactly to enemy exponential scale curves
+    let repStage = stageScale * 10;
+    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+    let repScale = Math.pow(repGrowth, repStage);
+
+    let expScale = repScale;
+    let hpDefExpScale = repScale;
+
+    // Apply baseline attribute values matching slot configurations (Slot-Specific Base Stats)
+    if (chosenType !== "artifact") {
+      let baseRarityMult = 1.0 + statLinesCount * 0.3; // Apply same base rarity multiplier immediately on drop
+      if (chosenType === "weapon") {
+        item.baseAtk = Math.ceil(
+          1.5 * expScale * prestigeMult * baseRarityMult,
+        );
+      } else if (chosenType === "chest" || chosenType === "overall") {
+        let overallMult = chosenType === "overall" ? 1.8 : 1.0;
+        item.baseDef = Math.ceil(
+          1.5 * hpDefExpScale * prestigeMult * baseRarityMult * overallMult,
+        );
+        item.baseMaxHp = Math.ceil(
+          6.0 * hpDefExpScale * prestigeMult * baseRarityMult * overallMult,
+        );
+      } else if (chosenType === "helmet" || chosenType === "leggings") {
+        item.baseDef = Math.ceil(
+          0.7 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+        item.baseMaxHp = Math.ceil(
+          3.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+      } else if (chosenType === "boots") {
+        item.baseDef = Math.ceil(
+          0.35 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+        item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
+      } else if (chosenType === "subweapon") {
+        if (item.subType === "shield") {
+          item.baseDef = Math.ceil(
+            1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+          );
+        } else if (item.subType === "dagger") {
+          item.baseAtk = Math.ceil(
+            0.8 * expScale * prestigeMult * baseRarityMult,
+          );
+        } else if (item.subType === "tome") {
+          item.baseInt = Math.ceil(
+            1.5 * stageScale * prestigeMult * baseRarityMult,
+          );
+        }
+      }
+    }
+
+    if (chosenType === "artifact") {
+      let filterPool = window.ARTIFACT_POOL;
+      if (allowedTraits && allowedTraits.length > 0) {
+        filterPool = window.ARTIFACT_POOL.filter((a) =>
+          allowedTraits.includes(a.trait),
+        );
+        if (filterPool.length === 0) filterPool = window.ARTIFACT_POOL;
+      }
+      let chosenArt = filterPool[Math.floor(Math.random() * filterPool.length)];
+      item.name = `${chosenArt.name} (Lv. ${stageScale})`;
+      item.trait = chosenArt.trait;
+      item.desc = chosenArt.desc;
+      item.breakdown = chosenArt.breakdown;
+      item.statsRolled = "UNIQUE";
+      item.baseAtk = chosenArt.atk || 0;
+      item.baseMaxHp = chosenArt.maxHp || 0;
+      item.baseDef = chosenArt.def || 0;
+      item.baseMoveSpeed = chosenArt.moveSpeed || 0;
+      item.baseCritChance = chosenArt.critChance || 0;
+      item.bonusCritDamage = chosenArt.critDamage || 0;
+      item.baseBlock = chosenArt.block || 0;
+      item.baseParry = chosenArt.parry || 0;
+      item.bonusActiveSpeed = chosenArt.activeAttackSpeed || 0;
+      item.bonusIdleSpeed = chosenArt.idleAttackSpeed || 0;
+      item.dropRate = chosenArt.dropRate || 0;
+      item.quality = chosenArt.quality || 0;
+      item.goldMulti = chosenArt.goldMulti || 0;
+      item.rareSpawn = chosenArt.rareSpawn || 0;
+      item.fairySpawn = chosenArt.fairySpawn || 0;
+      item.baseStr = chosenArt.str || 0;
+      item.baseDex = chosenArt.dex || 0;
+      item.baseInt = chosenArt.int || 0;
+      statLinesCount = 3;
+    }
+
+    // Determine target pool configuration matching this slot type (Slot-Specific Pools)
+    let pool = [];
+    if (chosenType === "artifact") {
+      pool = [
+        "dropRate",
+        "quality",
+        "goldMulti",
+        "rareSpawn",
+        "fairySpawn",
+        "str",
+        "dex",
+        "int",
+      ];
+    } else if (chosenType === "weapon") {
+      pool = [
+        "atk",
+        "critChance",
+        "critDamage",
+        "str",
+        "dex",
+        "activeSpd",
+        "idleSpd",
+      ];
+    } else if (chosenType === "chest" || chosenType === "overall") {
+      pool = ["def", "maxHp", "str", "int", "block", "parry"];
+    } else if (chosenType === "helmet") {
+      pool = [
+        "def",
+        "maxHp",
+        "int",
+        "dex",
+        "critChance",
+        "activeSpd",
+        "idleSpd",
+      ];
+    } else if (chosenType === "leggings") {
+      pool = ["def", "maxHp", "str", "dex", "block", "parry"];
+    } else if (chosenType === "boots") {
+      pool = ["moveSpeed", "def", "maxHp", "dex", "idleSpd", "activeSpd"];
+    } else if (chosenType === "subweapon") {
+      if (item.subType === "shield")
+        pool = ["block", "atk", "maxHp", "def", "str", "moveSpeed", "dex"];
+      else if (item.subType === "dagger")
+        pool = ["parry", "atk", "critChance", "dex", "moveSpeed", "str"];
+      else if (item.subType === "tome")
+        pool = [
+          "critDamage",
+          "int",
+          "activeSpd",
+          "idleSpd",
+          "maxHp",
+          "critChance",
+        ];
+    }
+
+    pool.sort(() => Math.random() - 0.5);
+    let rarityMult =
+      chosenType === "artifact" ? 1.45 : 1 + statLinesCount * 0.15;
+    if (chosenType === "overall") rarityMult *= 1.8;
+    let actualStatLines = chosenType === "artifact" ? 3 : statLinesCount + 1;
+
+    for (let i = 0; i < actualStatLines; i++) {
+      if (pool.length === 0) break;
+      let selectedStat = pool.pop();
+      if (selectedStat === "atk")
+        item.bonusAtk += Math.ceil(
+          window.randFloat(0.15, 0.35) * expScale * rarityMult * prestigeMult,
+        );
+      else if (selectedStat === "maxHp")
+        item.bonusMaxHp += Math.ceil(
+          window.randFloat(0.4, 1.2) *
+            hpDefExpScale *
+            rarityMult *
+            prestigeMult,
+        );
+      else if (selectedStat === "def")
+        item.bonusDef += Math.ceil(
+          window.randFloat(0.15, 0.35) *
+            hpDefExpScale *
+            rarityMult *
+            prestigeMult,
+        );
+      else if (selectedStat === "moveSpeed")
+        item.bonusMoveSpeed += Math.ceil(
+          window.randInt(1, 2) * stageScale * rarityMult * prestigeMult,
+        );
+      else if (selectedStat === "critChance") {
+        let rolled =
+          window.randFloat(0.01, 0.025) *
+          Math.sqrt(stageScale) *
+          rarityMult *
+          prestigeMult;
+        item.bonusCritChance += parseFloat(Math.min(0.2, rolled).toFixed(4));
+      } else if (selectedStat === "critDamage") {
+        let rolled =
+          window.randFloat(0.03, 0.06) *
+          Math.sqrt(stageScale) *
+          rarityMult *
+          prestigeMult;
+        item.bonusCritDamage += parseFloat(rolled.toFixed(4));
+      } else if (selectedStat === "block") {
+        let rolled =
+          window.randFloat(0.005, 0.015) *
+          Math.sqrt(stageScale) *
+          rarityMult *
+          prestigeMult;
+        item.bonusBlock += parseFloat(Math.min(0.15, rolled).toFixed(4));
+      } else if (selectedStat === "parry") {
+        let rolled =
+          window.randFloat(0.005, 0.015) *
+          Math.sqrt(stageScale) *
+          rarityMult *
+          prestigeMult;
+        item.bonusParry += parseFloat(Math.min(0.15, rolled).toFixed(4));
+      } else if (selectedStat === "activeSpd") {
+        let sScale = Math.pow(stageScale, 0.3);
+        let rMult = 1 + statLinesCount * 0.08;
+        let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
+        item.bonusActiveSpeed += parseFloat(
+          (window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4),
+        );
+      } else if (selectedStat === "idleSpd") {
+        let sScale = Math.pow(stageScale, 0.3);
+        let rMult = 1 + statLinesCount * 0.08;
+        let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
+        item.bonusIdleSpeed += parseFloat(
+          (window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4),
+        );
+      } else if (selectedStat === "str")
+        item.bonusStr += Math.ceil(
+          window.randInt(1, 3) *
+            Math.pow(stageScale, 1.8) *
+            rarityMult *
+            prestigeMult,
+        );
+      else if (selectedStat === "dex")
+        item.bonusDex += Math.ceil(
+          window.randInt(1, 3) *
+            Math.pow(stageScale, 1.8) *
+            rarityMult *
+            prestigeMult,
+        );
+      else if (selectedStat === "int")
+        item.bonusInt += Math.ceil(
+          window.randInt(1, 3) *
+            Math.pow(stageScale, 1.8) *
+            rarityMult *
+            prestigeMult,
+        );
+      else if (selectedStat === "dropRate")
+        item.dropRate += parseFloat(
+          (window.randFloat(0.02, 0.05) * rarityMult * prestigeMult).toFixed(4),
+        );
+      else if (selectedStat === "quality")
+        item.quality += parseFloat(
+          (window.randFloat(0.01, 0.03) * rarityMult * prestigeMult).toFixed(4),
+        );
+      else if (selectedStat === "goldMulti")
+        item.goldMulti += parseFloat(
+          (window.randFloat(0.02, 0.05) * rarityMult * prestigeMult).toFixed(4),
+        );
+      else if (selectedStat === "rareSpawn")
+        item.rareSpawn += parseFloat(
+          (window.randFloat(0.002, 0.006) * rarityMult * prestigeMult).toFixed(
+            4,
+          ),
+        );
+      else if (selectedStat === "fairySpawn")
+        item.fairySpawn += parseFloat(
+          (window.randFloat(0.02, 0.06) * rarityMult * prestigeMult).toFixed(4),
+        );
+    }
+
+    item.atk = (item.baseAtk || 0) + item.bonusAtk;
+    item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
+    item.def = (item.baseDef || 0) + item.bonusDef;
+    item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
+    item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
+    item.critDamage = item.bonusCritDamage;
+    item.block = (item.baseBlock || 0) + item.bonusBlock;
+    item.parry = (item.baseParry || 0) + item.bonusParry;
+    item.str = (item.baseStr || 0) + item.bonusStr;
+    item.dex = (item.baseDex || 0) + item.bonusDex;
+    item.int = (item.baseInt || 0) + item.bonusInt;
+    item.activeAttackSpeed = item.bonusActiveSpeed;
+    item.idleAttackSpeed = item.bonusIdleSpeed;
+
+    if (chosenType !== "artifact") {
+      let isDungeon = window.playerStats.isDungeonMode;
+      let isBoss =
+        window.playerStats.isBossMode || window.playerStats.isUberBoss;
+      let isRare = window.mob ? !!window.mob.isRare : false;
+      item.setName = window.rollSetForItem(
+        isBoss,
+        isRare,
+        isDungeon,
+        window.playerStats.currentDungeon,
+      );
+    }
+
+    if (statLinesCount === 5 && chosenType !== "artifact") {
+      if (Math.random() < 0.005) {
+        if (chosenType === "weapon") {
+          let weapons = ["staff", "sword", "singularity", "maelstrom"];
+          let selected = weapons[Math.floor(Math.random() * weapons.length)];
+          item.setName = null;
+          if (selected === "staff") {
+            item.isUniqueStaff = true;
+            item.noun = "Phoenix Staff";
+            item.name = `🔥 Phoenix Ignition Staff (Lv. ${stageScale})`;
+            item.desc =
+              "Launches penetrating fireballs that deal 25% Attack damage (3s Cooldown).";
+          } else if (selected === "sword") {
+            item.isUniqueSword = true;
+            item.noun = "Sanguine Reaver";
+            item.name = `🩸 Crimson Sanguine Reaver (Lv. ${stageScale})`;
+            item.desc =
+              "Strikes apply stacking Bleed (Max 5). Strikes at max stacks triggers Rupture, dealing 300% weapon damage and siphoning 10% Max HP.";
+          } else if (selected === "singularity") {
+            item.isUniqueSingularity = true;
+            item.noun = "Singularity Greatsword";
+            item.name = `🌌 Void-Sovereign Greatsword (Lv. ${stageScale})`;
+            item.desc =
+              "Glows for 7s every 30s. Tap during window to enter 5s Storing state, then detonates spatial collapse.";
+          } else if (selected === "maelstrom") {
+            item.isUniqueMaelstrom = true;
+            item.noun = "Maelstrom Glaive";
+            item.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${stageScale})`;
+            item.desc =
+              "Critical strikes project piercing wind gales. Casting gales grants +10% Active & Idle Attack Speed for 6s (stacks up to 3x).";
+          }
+        } else if (chosenType === "subweapon") {
+          let subOptions = ["aegis", "watch", "chronicle"];
+          let selected =
+            subOptions[Math.floor(Math.random() * subOptions.length)];
+          item.setName = null;
+          if (selected === "aegis") {
+            item.subType = "shield";
+            item.isUniqueAegis = true;
+            item.noun = "Void-Warped Aegis";
+            item.name = `🛡️ Void-Warped Bulwark (Lv. ${stageScale})`;
+            item.desc =
+              "Blocks trigger gravity blasts scaling with Defense. Can be absorbed into Singularity vortex.";
+          } else if (selected === "watch") {
+            item.subType = "tome";
+            item.isUniqueWatch = true;
+            item.noun = "Chronos Pocket-Watch";
+            item.name = `⏳ Chronos Dial-Watch (Lv. ${stageScale})`;
+            item.desc =
+              "Triggers 4s Temporal Fracture every 20s. Accelerates attack speeds by 15% and slows enemies by 25%.";
+          } else if (selected === "chronicle") {
+            item.subType = "tome";
+            item.isUniqueChronicle = true;
+            item.noun = "Chronicle of the Ascended";
+            item.name = `📖 Chronicle of past Lives (Lv. ${stageScale})`;
+            item.desc =
+              "Boosts XP gain by +200% and bypasses level locks while below 75% peak level.";
+          }
+        } else if (chosenType === "boots") {
+          item.isUniqueWarpCore = true;
+          item.noun = "Warp-Core Greaves";
+          item.name = `⚡ Warp-Core Greaves (Lv. ${stageScale})`;
+          item.desc =
+            "Time Dilation: Attacks speed up by +1% for every 1% of target missing health (up to +99%). Boss kills grant 4s of Maximum Haste.";
+        } else if (chosenType === "helmet") {
+          item.isUniqueTempest = true;
+          item.noun = "Crown of Tempests";
+          item.name = `👑 Crown of crackling Tempests (Lv. ${stageScale})`;
+          item.desc =
+            "Taking damage has 15% chance to call thunderbolt dealing 150% Attack power and stuns.";
+        }
+      }
+    }
+
+    if (
+      !item.isUniqueStaff &&
+      !item.isUniqueSword &&
+      !item.isUniqueSingularity &&
+      !item.isUniqueMaelstrom &&
+      !item.isUniqueAegis &&
+      !item.isUniqueWatch &&
+      !item.isUniqueChronicle &&
+      !item.isUniqueWarpCore &&
+      !item.isUniqueTempest
+    ) {
+      item.name = this.buildProceduralName(item);
+    }
+    return item;
+  },
+
+  buildProceduralName(item) {
+    if (item.statsRolled === "UNIQUE") return item.name;
+    let stars = item.statsRolled;
+
+    // Prioritize the Set Name as the theme prefix if it exists!
+    let themeName = item.setName || "Standard";
+
+    if (!item.setName && stars > 0) {
+      const nomenclature = {
+        bonusAtk: "Vanguard",
+        bonusMaxHp: "Colossus",
+        bonusDef: "Bastion",
+        bonusMoveSpeed: "Windrunner",
+        bonusCritChance: "Wraith",
+        bonusCritDamage: "Reaver",
+        bonusBlock: "Dreadnought",
+        bonusParry: "Duellist",
+        bonusStr: "Berserker",
+        bonusDex: "Scout",
+        bonusInt: "Scholar",
+      };
+
+      let highestKey = null;
+      let maxVal = -1;
+      Object.keys(nomenclature).forEach((k) => {
+        if (item[k] > maxVal) {
+          maxVal = item[k];
+          highestKey = k;
+        }
+      });
+      if (highestKey) themeName = nomenclature[highestKey];
+    }
+
+    return `${themeName} ${item.noun} (Lv. ${item.stageLevel})`;
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.createItemObject = (
   chosenType,
   statLinesCount,
   stageScale,
   minStars = 0,
   allowedTraits = null,
-) {
-  let isArt = chosenType === "artifact";
-  if (!isArt && statLinesCount < minStars) {
-    statLinesCount = minStars;
-  }
+) =>
+  window.ItemFactory.createItemObject(
+    chosenType,
+    statLinesCount,
+    stageScale,
+    minStars,
+    allowedTraits,
+  );
+window.buildProceduralName = (item) =>
+  window.ItemFactory.buildProceduralName(item);
 
-  let item = {
-    id: window.idCounter++,
-    name: "",
-    type: chosenType,
-    statsRolled: isArt ? "UNIQUE" : statLinesCount,
-    temperLevel: 0,
-    stageLevel: stageScale,
-    atk: 0,
-    maxHp: 0,
-    def: 0,
-    moveSpeed: 0,
-    critChance: 0,
-    critDamage: 0,
-    block: 0,
-    parry: 0,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-    activeAttackSpeed: 0,
-    idleAttackSpeed: 0,
-    baseAtk: 0,
-    baseMaxHp: 0,
-    baseDef: 0,
-    baseMoveSpeed: 0,
-    baseBlock: 0,
-    baseParry: 0,
-    bonusAtk: 0,
-    bonusMaxHp: 0,
-    bonusDef: 0,
-    bonusMoveSpeed: 0,
-    bonusCritChance: 0,
-    bonusCritDamage: 0,
-    bonusBlock: 0,
-    bonusParry: 0,
-    bonusActiveSpeed: 0,
-    bonusIdleSpeed: 0,
-    bonusStr: 0,
-    bonusDex: 0,
-    bonusInt: 0,
-    str: 0,
-    dex: 0,
-    int: 0,
-    trait: null,
-    desc: "",
-    breakdown: "",
-    noun: "",
-    setName: null,
-  };
+// --- STAT RANGES & PREVIEWS ---
+// --- STAT RANGES & PREVIEWS ---
 
-  if (chosenType === "subweapon") {
-    const subTypes = ["shield", "dagger", "tome"];
-    item.subType = subTypes[Math.floor(Math.random() * subTypes.length)];
-  }
+// Encapsulate getStatBaseRange directly inside window.ItemFactory
+Object.assign(window.ItemFactory, {
+  getStatBaseRange(item, statKey) {
+    let stageLevel = item.stageLevel || 1;
+    let isArt = item.type === "artifact";
+    let rarityMult = isArt ? 1.45 : 1 + (item.statsRolled || 0) * 0.15;
 
-  if (!isArt) {
-    let nounList = window.slotNouns[chosenType];
-    if (chosenType === "subweapon") {
-      nounList = window.slotNouns.subweapon[item.subType];
+    // Direct-Alignment Scaling Model: Maps base card ranges exactly to enemy exponential scale curves
+    let repStage = stageLevel * 10;
+    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+    let repScale = Math.pow(repGrowth, repStage);
+
+    let expScale = repScale;
+    let hpDefExpScale = repScale;
+
+    let min = 0;
+    let max = 0;
+
+    // Aligned with core roll ranges (Atk: 0.15~0.35, HP: 0.4~1.2, Def: 0.15~0.35) to prevent out-of-bounds rendering
+    if (
+      statKey === "atk" &&
+      (item.bonusAtk > 0 || item.type === "weapon" || isArt)
+    ) {
+      min += Math.ceil(0.15 * expScale * rarityMult);
+      max += Math.ceil(0.35 * expScale * rarityMult);
+    } else if (statKey === "maxHp" && (item.bonusMaxHp > 0 || isArt)) {
+      min += Math.ceil(0.4 * hpDefExpScale * rarityMult);
+      max += Math.ceil(1.2 * hpDefExpScale * rarityMult);
+    } else if (statKey === "def" && (item.bonusDef > 0 || isArt)) {
+      min += Math.ceil(0.15 * hpDefExpScale * rarityMult);
+      max += Math.ceil(0.35 * hpDefExpScale * rarityMult);
+    } else if (statKey === "moveSpeed" && item.bonusMoveSpeed > 0) {
+      min += Math.ceil(1 * stageLevel * rarityMult);
+      max += Math.ceil(2 * stageLevel * rarityMult);
+    } else if (statKey === "str" && (item.bonusStr > 0 || isArt)) {
+      min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
+      max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
+    } else if (statKey === "dex" && (item.bonusDex > 0 || isArt)) {
+      min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
+      max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
+    } else if (statKey === "int" && (item.bonusInt > 0 || isArt)) {
+      min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
+      max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
+    } else if (statKey === "critChance" && item.bonusCritChance > 0) {
+      min += 0.01 * Math.sqrt(stageLevel) * rarityMult;
+      max += 0.025 * Math.sqrt(stageLevel) * rarityMult;
+    } else if (statKey === "critDamage" && item.bonusCritDamage > 0) {
+      min += 0.03 * Math.sqrt(stageLevel) * rarityMult;
+      max += 0.06 * Math.sqrt(stageLevel) * rarityMult;
+    } else if (statKey === "block" && item.bonusBlock > 0) {
+      min += 0.005 * Math.sqrt(stageLevel) * rarityMult;
+      max += 0.015 * Math.sqrt(stageLevel) * rarityMult;
+    } else if (statKey === "parry" && item.bonusParry > 0) {
+      min += 0.005 * Math.sqrt(stageLevel) * rarityMult;
+      max += 0.015 * Math.sqrt(stageLevel) * rarityMult;
+    } else if (statKey === "activeAttackSpeed" && item.bonusActiveSpeed > 0) {
+      let sScale = Math.pow(stageLevel, 0.3);
+      let rMult = 1 + item.statsRolled * 0.08;
+      min += 0.01 * sScale * rMult;
+      max += 0.03 * sScale * rMult;
+    } else if (statKey === "idleAttackSpeed" && item.bonusIdleSpeed > 0) {
+      let sScale = Math.pow(stageLevel, 0.3);
+      let rMult = 1 + item.statsRolled * 0.08;
+      min += 0.01 * sScale * rMult;
+      max += 0.03 * sScale * rMult;
+    } else if (statKey === "rareSpawn" && item.rareSpawn > 0) {
+      min += 0.002 * rarityMult;
+      max += 0.006 * rarityMult;
+    } else if (statKey === "dropRate" && item.dropRate > 0) {
+      min += 0.02 * rarityMult;
+      max += 0.05 * rarityMult;
+    } else if (statKey === "quality" && item.quality > 0) {
+      min += 0.01 * rarityMult;
+      max += 0.03 * rarityMult;
+    } else if (statKey === "goldMulti" && item.goldMulti > 0) {
+      min += 0.02 * rarityMult;
+      max += 0.05 * rarityMult;
+    } else if (statKey === "fairySpawn" && item.fairySpawn > 0) {
+      min += 0.02 * rarityMult;
+      max += 0.06 * rarityMult;
     }
-    item.noun = nounList
-      ? nounList[Math.floor(Math.random() * nounList.length)]
-      : chosenType.toUpperCase();
-  }
 
-  let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
+    const unscaledStats = ["activeAttackSpeed", "idleAttackSpeed"];
+    if (!unscaledStats.includes(statKey)) {
+      let prestigeMult = 1.0;
+      min *= prestigeMult;
+      max *= prestigeMult;
+    }
 
-  // Direct-Alignment Scaling Model: Maps item creation baselines exactly to enemy exponential scale curves
-  let repStage = stageScale * 10;
-  let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-  let repScale = Math.pow(repGrowth, repStage);
+    let tempers = item.temperLevel || 0;
+    if (tempers > 0) {
+      if (isArt) {
+        let artMultiplier = Math.pow(1.15, tempers);
+        min *= artMultiplier;
+        max *= artMultiplier;
 
-  let expScale = repScale;
-  let hpDefExpScale = repScale;
-
-  // Apply baseline attribute values matching slot configurations (Slot-Specific Base Stats)
-  if (!isArt) {
-    let baseRarityMult = 1.0 + statLinesCount * 0.3; // Apply same base rarity multiplier immediately on drop
-    if (chosenType === "weapon") {
-      item.baseAtk = Math.ceil(1.5 * expScale * prestigeMult * baseRarityMult);
-    } else if (chosenType === "chest" || chosenType === "overall") {
-      let overallMult = chosenType === "overall" ? 1.8 : 1.0;
-      item.baseDef = Math.ceil(
-        1.5 * hpDefExpScale * prestigeMult * baseRarityMult * overallMult,
-      );
-      item.baseMaxHp = Math.ceil(
-        6.0 * hpDefExpScale * prestigeMult * baseRarityMult * overallMult,
-      );
-    } else if (chosenType === "helmet" || chosenType === "leggings") {
-      item.baseDef = Math.ceil(
-        0.7 * hpDefExpScale * prestigeMult * baseRarityMult,
-      );
-      item.baseMaxHp = Math.ceil(
-        3.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-      );
-    } else if (chosenType === "boots") {
-      item.baseDef = Math.ceil(
-        0.35 * hpDefExpScale * prestigeMult * baseRarityMult,
-      );
-      item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
-    } else if (chosenType === "subweapon") {
-      if (item.subType === "shield") {
-        item.baseDef = Math.ceil(
-          1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-        );
-      } else if (item.subType === "dagger") {
-        item.baseAtk = Math.ceil(
-          0.8 * expScale * prestigeMult * baseRarityMult,
-        );
-      } else if (item.subType === "tome") {
-        item.baseInt = Math.ceil(
-          1.5 * stageScale * prestigeMult * baseRarityMult,
-        );
+        if (statKey === "atk") {
+          min += tempers * 15;
+          max += tempers * 15;
+        } else if (statKey === "maxHp") {
+          min += tempers * 100;
+          max += tempers * 100;
+        } else if (statKey === "def") {
+          min += tempers * 10;
+          max += tempers * 10;
+        } else if (["str", "dex", "int"].includes(statKey)) {
+          min += tempers * 3;
+          max += tempers * 3;
+        } else if (statKey === "goldMulti") {
+          min += tempers * 0.05;
+          max += tempers * 0.05;
+        } else if (statKey === "dropRate") {
+          min += tempers * 0.03;
+          max += tempers * 0.03;
+        } else if (statKey === "quality") {
+          min += tempers * 0.02;
+          max += tempers * 0.02;
+        } else if (statKey === "fairySpawn") {
+          min += tempers * 0.02;
+          max += tempers * 0.02;
+        } else if (statKey === "rareSpawn") {
+          min += tempers * 0.01;
+          max += tempers * 0.01;
+        } else if (statKey === "critChance") {
+          min += tempers * 0.01;
+          max += tempers * 0.01;
+        } else if (["parry", "block"].includes(statKey)) {
+          min += tempers * 0.005;
+          max += tempers * 0.005;
+        } else if (["idleAttackSpeed", "activeAttackSpeed"].includes(statKey)) {
+          min += tempers * 0.03;
+          max += tempers * 0.03;
+        } else if (statKey === "moveSpeed") {
+          min += tempers;
+          max += tempers;
+        } else if (statKey === "critDamage") {
+          min += tempers * 0.025;
+          max += tempers * 0.025;
+        }
+      } else {
+        if (
+          [
+            "atk",
+            "maxHp",
+            "def",
+            "str",
+            "dex",
+            "int",
+            "activeAttackSpeed",
+            "idleAttackSpeed",
+          ].includes(statKey)
+        ) {
+          let multiplier = 1 + tempers * 0.08;
+          min *= multiplier;
+          max *= multiplier;
+        }
+        if (statKey === "moveSpeed") {
+          min += tempers;
+          max += tempers;
+        } else if (statKey === "critChance") {
+          min += tempers * 0.005;
+          max += tempers * 0.005;
+        } else if (statKey === "critDamage") {
+          min += tempers * 0.015;
+          max += tempers * 0.015;
+        } else if (statKey === "block") {
+          min += tempers * 0.005;
+          max += tempers * 0.005;
+        } else if (statKey === "parry") {
+          min += tempers * 0.005;
+          max += tempers * 0.005;
+        } else if (statKey === "dropRate") {
+          min += tempers * 0.01;
+          max += tempers * 0.01;
+        } else if (statKey === "quality") {
+          min += tempers * 0.005;
+          max += tempers * 0.005;
+        } else if (statKey === "goldMulti") {
+          min += tempers * 0.01;
+          max += tempers * 0.01;
+        } else if (statKey === "rareSpawn") {
+          min += tempers * 0.001;
+          max += tempers * 0.001;
+        } else if (statKey === "fairySpawn") {
+          min += tempers * 0.01;
+          max += tempers * 0.01;
+        }
       }
     }
-  }
 
-  if (isArt) {
-    let filterPool = window.ARTIFACT_POOL;
-    if (allowedTraits && allowedTraits.length > 0) {
-      filterPool = window.ARTIFACT_POOL.filter((a) =>
-        allowedTraits.includes(a.trait),
-      );
-      if (filterPool.length === 0) filterPool = window.ARTIFACT_POOL;
+    if (item.enchantments && item.enchantments[statKey]) {
+      let count = item.enchantments[statKey];
+      let multiplier = Math.pow(1.25, count);
+      const integerStats = ["atk", "maxHp", "def", "str", "dex", "int"];
+      if (integerStats.includes(statKey)) {
+        min = Math.ceil(min * multiplier);
+        max = Math.ceil(max * multiplier);
+      } else {
+        min = parseFloat((min * multiplier).toFixed(4));
+        max = parseFloat((max * multiplier).toFixed(4));
+      }
     }
-    let chosenArt = filterPool[Math.floor(Math.random() * filterPool.length)];
-    item.name = `${chosenArt.name} (Lv. ${stageScale})`;
-    item.trait = chosenArt.trait;
-    item.desc = chosenArt.desc;
-    item.breakdown = chosenArt.breakdown;
-    item.statsRolled = "UNIQUE";
-    item.baseAtk = chosenArt.atk || 0;
-    item.baseMaxHp = chosenArt.maxHp || 0;
-    item.baseDef = chosenArt.def || 0;
-    item.baseMoveSpeed = chosenArt.moveSpeed || 0;
-    item.baseCritChance = chosenArt.critChance || 0;
-    item.bonusCritDamage = chosenArt.critDamage || 0;
-    item.baseBlock = chosenArt.block || 0;
-    item.baseParry = chosenArt.parry || 0;
-    item.bonusActiveSpeed = chosenArt.activeAttackSpeed || 0;
-    item.bonusIdleSpeed = chosenArt.idleAttackSpeed || 0;
-    item.dropRate = chosenArt.dropRate || 0;
-    item.quality = chosenArt.quality || 0;
-    item.goldMulti = chosenArt.goldMulti || 0;
-    item.rareSpawn = chosenArt.rareSpawn || 0;
-    item.fairySpawn = chosenArt.fairySpawn || 0;
-    item.baseStr = chosenArt.str || 0;
-    item.baseDex = chosenArt.dex || 0;
-    item.baseInt = chosenArt.int || 0;
-    statLinesCount = 3;
-  }
 
-  // Determine target pool configuration matching this slot type (Slot-Specific Pools)
-  let pool = [];
-  if (isArt) {
-    pool = [
-      "dropRate",
-      "quality",
-      "goldMulti",
-      "rareSpawn",
-      "fairySpawn",
+    return { min, max };
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.getStatBaseRange = (item, statKey) =>
+  window.ItemFactory.getStatBaseRange(item, statKey);
+// Encapsulate formatStatRangeStr directly inside window.ItemFactory
+Object.assign(window.ItemFactory, {
+  formatStatRangeStr(item, statKey, isPct = false) {
+    let range = this.getStatBaseRange(item, statKey);
+    if (range.min === 0 && range.max === 0) return "";
+
+    let minStr, maxStr;
+    if (statKey === "rareSpawn") {
+      minStr = (range.min * 100).toFixed(2) + "%";
+      maxStr = (range.max * 100).toFixed(2) + "%";
+    } else if (isPct) {
+      minStr = Math.floor(range.min * 100) + "%";
+      maxStr = Math.floor(range.max * 100) + "%";
+    } else if (
+      statKey === "activeAttackSpeed" ||
+      statKey === "idleAttackSpeed"
+    ) {
+      minStr = Math.round(range.min * 100) + "%";
+      maxStr = Math.round(range.max * 100) + "%";
+    } else if (
+      ["dropRate", "quality", "goldMulti", "fairySpawn"].includes(statKey)
+    ) {
+      minStr = Math.floor(range.min * 100) + "%";
+      maxStr = Math.floor(range.max * 100) + "%";
+    } else {
+      minStr = window.formatNumber(range.min);
+      maxStr = window.formatNumber(range.max);
+    }
+
+    if (minStr === maxStr) {
+      return ` <span style="color:#7f8c8d; font-size:9px;">[${minStr}]</span>`;
+    }
+
+    return ` <span style="color:#7f8c8d; font-size:9px;">[${minStr} - ${maxStr}]</span>`;
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.formatStatRangeStr = (item, statKey, isPct) =>
+  window.ItemFactory.formatStatRangeStr(item, statKey, isPct);
+
+// Append Math Scaling Directly inside window.ItemFactory
+Object.assign(window.ItemFactory, {
+  scaleItemBonusStats(item, oldStars, newStars) {
+    if (
+      item.type === "artifact" ||
+      oldStars === "UNIQUE" ||
+      newStars === "UNIQUE"
+    )
+      return;
+    let oldMult = 1 + oldStars * 0.15;
+    let newMult = 1 + newStars * 0.15;
+    let ratio = newMult / oldMult;
+
+    const scaleKeys = [
+      "bonusAtk",
+      "bonusMaxHp",
+      "bonusDef",
+      "bonusMoveSpeed",
+      "bonusCritChance",
+      "bonusCritDamage",
+      "bonusBlock",
+      "bonusParry",
+      "bonusStr",
+      "bonusDex",
+      "bonusInt",
+      "bonusActiveSpeed",
+      "bonusIdleSpeed",
+    ];
+
+    scaleKeys.forEach((k) => {
+      if (item[k]) {
+        if (
+          [
+            "bonusCritChance",
+            "bonusCritDamage",
+            "bonusBlock",
+            "bonusParry",
+          ].includes(k)
+        ) {
+          item[k] = parseFloat((item[k] * ratio).toFixed(4));
+        } else if (["bonusActiveSpeed", "bonusIdleSpeed"].includes(k)) {
+          item[k] = Math.floor(item[k] * ratio);
+        } else {
+          item[k] = Math.ceil(item[k] * ratio);
+        }
+      }
+    });
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.scaleItemBonusStats = (item, oldStars, newStars) =>
+  window.ItemFactory.scaleItemBonusStats(item, oldStars, newStars);
+
+// Append Stat Recalculation directly inside ItemFactory
+Object.assign(window.ItemFactory, {
+  recalculateItemStats(item) {
+    item.bonusAtk = item.bonusAtk || 0;
+    item.bonusMaxHp = item.bonusMaxHp || 0;
+    item.bonusDef = item.bonusDef || 0;
+    item.bonusMoveSpeed = item.bonusMoveSpeed || 0;
+    item.bonusCritChance = item.bonusCritChance || 0;
+    item.bonusCritDamage = item.bonusCritDamage || 0;
+    item.bonusBlock = item.bonusBlock || 0;
+    item.bonusParry = item.bonusParry || 0;
+    item.bonusActiveSpeed = item.bonusActiveSpeed || 0;
+    item.bonusIdleSpeed = item.bonusIdleSpeed || 0;
+    item.bonusStr = item.bonusStr || 0;
+    item.bonusDex = item.bonusDex || 0;
+    item.bonusInt = item.bonusInt || 0;
+
+    // Direct-Alignment Scaling Model: Maps recalculations exactly to enemy exponential scale curves
+    let repStage = (item.stageLevel || 1) * 10;
+    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+    let repScale = Math.pow(repGrowth, repStage);
+
+    let expScale = repScale;
+    let hpDefExpScale = repScale;
+
+    let prestigeCount = window.playerStats.prestigeCount || 0;
+    let prestigeMult = 1.0;
+
+    // Dynamic base scaling transitions for standard slot configurations
+    if (item.type !== "artifact" && item.statsRolled !== "UNIQUE") {
+      let stars = item.statsRolled || 0;
+      let baseRarityMult = 1.0 + stars * 0.3; // Base stats scale up by 30% per star rarity tier!
+
+      if (
+        item.type === "weapon" &&
+        !item.isUniqueStaff &&
+        !item.isUniqueSword &&
+        !item.isUniqueSingularity &&
+        !item.isUniqueMaelstrom
+      ) {
+        item.baseAtk = Math.ceil(
+          1.5 * expScale * prestigeMult * baseRarityMult,
+        );
+      } else if (item.type === "chest" || item.type === "overall") {
+        let overallMult = item.type === "overall" ? 1.8 : 1.0;
+        item.baseDef = Math.ceil(
+          1.5 * hpDefExpScale * prestigeMult * baseRarityMult * overallMult,
+        );
+        item.baseMaxHp = Math.ceil(
+          6.0 * hpDefExpScale * prestigeMult * baseRarityMult * overallMult,
+        );
+      } else if (item.type === "helmet" && !item.isUniqueTempest) {
+        item.baseDef = Math.ceil(
+          0.7 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+        item.baseMaxHp = Math.ceil(
+          3.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+      } else if (item.type === "leggings") {
+        item.baseDef = Math.ceil(
+          0.7 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+        item.baseMaxHp = Math.ceil(
+          3.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+      } else if (item.type === "boots" && !item.isUniqueWarpCore) {
+        item.baseDef = Math.ceil(
+          0.35 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+        item.baseMoveSpeed = Math.ceil(
+          1.0 * (item.stageLevel || 1) * prestigeMult,
+        );
+      } else if (
+        item.type === "subweapon" &&
+        !item.isUniqueAegis &&
+        !item.isUniqueWatch &&
+        !item.isUniqueChronicle
+      ) {
+        if (item.subType === "shield") {
+          item.baseDef = Math.ceil(
+            1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+          );
+        } else if (item.subType === "dagger") {
+          item.baseAtk = Math.ceil(
+            0.8 * expScale * prestigeMult * baseRarityMult,
+          );
+        } else if (item.subType === "tome") {
+          item.baseInt = Math.ceil(
+            1.5 * (item.stageLevel || 1) * prestigeMult * baseRarityMult,
+          );
+        }
+      }
+    } else if (item.type === "artifact") {
+      // Artifact parameters are managed statically on drop; preserve them as is
+    } else {
+      // Recalculate unique item specific base structures
+      if (item.isUniqueSingularity || item.isUniqueMaelstrom) {
+        item.baseAtk = Math.ceil(3.5 * expScale * prestigeMult);
+      } else if (item.isUniqueAegis) {
+        item.baseDef = Math.ceil(10 * hpDefExpScale * prestigeMult);
+        item.baseBlock = 0.05 * (item.stageLevel || 1);
+      } else if (item.isUniqueWatch || item.isUniqueChronicle) {
+        item.baseInt = Math.ceil(2.5 * (item.stageLevel || 1) * prestigeMult);
+      } else if (item.isUniqueWarpCore) {
+        item.baseMoveSpeed = Math.ceil(
+          3 * (item.stageLevel || 1) * prestigeMult,
+        );
+      } else if (item.isUniqueTempest) {
+        item.baseMaxHp = Math.ceil(12 * hpDefExpScale * prestigeMult);
+        item.baseDef = Math.ceil(4 * hpDefExpScale * prestigeMult);
+      }
+    }
+
+    // Sum combined totals using standard base values
+    item.atk = (item.baseAtk || 0) + item.bonusAtk;
+    item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
+    item.def = (item.baseDef || 0) + item.bonusDef;
+    item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
+    item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
+    item.critDamage = (item.baseCritDamage || 0) + item.bonusCritDamage;
+    item.block = (item.baseBlock || 0) + item.bonusBlock;
+    item.parry = (item.baseParry || 0) + item.bonusParry;
+    item.activeAttackSpeed =
+      (item.baseActiveSpeed || 0) + item.bonusActiveSpeed;
+    item.idleAttackSpeed = (item.baseIdleSpeed || 0) + item.bonusIdleSpeed;
+    item.str = (item.baseStr || 0) + item.bonusStr;
+    item.dex = (item.baseDex || 0) + item.bonusDex;
+    item.int = (item.baseInt || 0) + item.bonusInt;
+
+    let tempers = item.temperLevel || 0;
+    if (tempers > 0) {
+      let isArt = item.type === "artifact";
+      if (isArt) {
+        let artMultiplier = Math.pow(1.15, tempers);
+        item.atk = Math.round(item.atk * artMultiplier) + tempers * 15;
+        item.maxHp = Math.round(item.maxHp * artMultiplier) + tempers * 100;
+        item.def = Math.round(item.def * artMultiplier) + tempers * 10;
+        item.str = Math.round(item.str * artMultiplier) + tempers * 3;
+        item.dex = Math.round(item.dex * artMultiplier) + tempers * 3;
+        item.int = Math.round(item.int * artMultiplier) + tempers * 3;
+
+        if (item.goldMulti > 0)
+          item.goldMulti = parseFloat(
+            (item.goldMulti + tempers * 0.05).toFixed(4),
+          );
+        if (item.dropRate > 0)
+          item.dropRate = parseFloat(
+            (item.dropRate + tempers * 0.03).toFixed(4),
+          );
+        if (item.quality > 0)
+          item.quality = parseFloat((item.quality + tempers * 0.02).toFixed(4));
+        if (item.fairySpawn > 0)
+          item.fairySpawn = parseFloat(
+            (item.fairySpawn + tempers * 0.02).toFixed(4),
+          );
+        if (item.rareSpawn > 0)
+          item.rareSpawn = parseFloat(
+            (item.rareSpawn + tempers * 0.01).toFixed(4),
+          );
+        if (item.critChance > 0)
+          item.critChance = parseFloat(
+            (item.critChance + tempers * 0.01).toFixed(4),
+          );
+        if (item.parry > 0)
+          item.parry = parseFloat((item.parry + tempers * 0.005).toFixed(4));
+        if (item.block > 0)
+          item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
+        if (item.idleAttackSpeed > 0)
+          item.idleAttackSpeed = parseFloat(
+            (item.idleAttackSpeed + tempers * 0.03).toFixed(4),
+          );
+        if (item.activeAttackSpeed > 0)
+          item.activeAttackSpeed = parseFloat(
+            (item.activeAttackSpeed + tempers * 0.03).toFixed(4),
+          );
+        if (item.moveSpeed > 0) item.moveSpeed += tempers;
+        if (item.critDamage > 0)
+          item.critDamage = parseFloat(
+            (item.critDamage + tempers * 0.025).toFixed(4),
+          );
+      } else {
+        let multiplier = 1 + tempers * 0.08;
+        // Scale internal base parameter properties once (no double-scaling!)
+        if (item.baseAtk > 0)
+          item.baseAtk = Math.round(item.baseAtk * multiplier);
+        if (item.baseDef > 0)
+          item.baseDef = Math.round(item.baseDef * multiplier);
+        if (item.baseMaxHp > 0)
+          item.baseMaxHp = Math.round(item.baseMaxHp * multiplier);
+        if (item.baseInt > 0)
+          item.baseInt = Math.round(item.baseInt * multiplier);
+
+        // Scale combined totals once (including bonus components)
+        if (item.atk > 0 || item.type === "weapon")
+          item.atk = Math.round(item.atk * multiplier);
+        if (item.maxHp > 0) item.maxHp = Math.round(item.maxHp * multiplier);
+        if (item.def > 0) item.def = Math.round(item.def * multiplier);
+        if (item.str > 0) item.str = Math.round(item.str * multiplier);
+        if (item.dex > 0) item.dex = Math.round(item.dex * multiplier);
+        if (item.int > 0) item.int = Math.round(item.int * multiplier);
+
+        if (item.moveSpeed > 0) item.moveSpeed += tempers;
+        if (item.critChance > 0)
+          item.critChance = parseFloat(
+            (item.critChance + tempers * 0.005).toFixed(4),
+          );
+        if (item.critDamage > 0)
+          item.critDamage = parseFloat(
+            (item.critDamage + tempers * 0.015).toFixed(4),
+          );
+        if (item.block > 0)
+          item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
+        if (item.parry > 0)
+          item.parry = parseFloat((item.parry + tempers * 0.005).toFixed(4));
+        if (item.dropRate > 0)
+          item.dropRate = parseFloat(
+            (item.dropRate + tempers * 0.01).toFixed(4),
+          );
+        if (item.quality > 0)
+          item.quality = parseFloat(
+            (item.quality + tempers * 0.005).toFixed(4),
+          );
+        if (item.goldMulti > 0)
+          item.goldMulti = parseFloat(
+            (item.goldMulti + tempers * 0.01).toFixed(4),
+          );
+        if (item.rareSpawn > 0)
+          item.rareSpawn = parseFloat(
+            (item.rareSpawn + tempers * 0.001).toFixed(4),
+          );
+        if (item.fairySpawn > 0)
+          item.fairySpawn = parseFloat(
+            (item.fairySpawn + tempers * 0.01).toFixed(4),
+          );
+        if (item.activeAttackSpeed > 0)
+          item.activeAttackSpeed = parseFloat(
+            (item.bonusActiveSpeed * (1 + tempers * 0.08)).toFixed(4),
+          );
+        if (item.idleAttackSpeed > 0)
+          item.idleAttackSpeed = parseFloat(
+            (item.bonusIdleSpeed * (1 + tempers * 0.08)).toFixed(4),
+          );
+      }
+    }
+
+    if (item.enchantments) {
+      for (let statKey in item.enchantments) {
+        let count = item.enchantments[statKey];
+        let multiplier = Math.pow(1.25, count);
+        const integerStats = ["atk", "maxHp", "def", "str", "dex", "int"];
+        if (integerStats.includes(statKey)) {
+          item[statKey] = Math.ceil(item[statKey] * multiplier);
+        } else {
+          item[statKey] = parseFloat((item[statKey] * multiplier).toFixed(4));
+        }
+      }
+    }
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.recalculateItemStats = (item) =>
+  window.ItemFactory.recalculateItemStats(item);
+
+// Append Item Upgrade Logic directly inside ItemFactory
+Object.assign(window.ItemFactory, {
+  addRandomStatLineToItem(item) {
+    let pool = [
+      "critChance",
+      "critDamage",
+      "block",
+      "parry",
+      "atk",
+      "maxHp",
+      "def",
+      "moveSpeed",
+      "activeSpd",
+      "idleSpd",
       "str",
       "dex",
       "int",
     ];
-  } else if (chosenType === "weapon") {
-    pool = [
-      "atk",
-      "critChance",
-      "critDamage",
-      "str",
-      "dex",
-      "activeSpd",
-      "idleSpd",
-    ];
-  } else if (chosenType === "chest" || chosenType === "overall") {
-    pool = ["def", "maxHp", "str", "int", "block", "parry"];
-  } else if (chosenType === "helmet") {
-    pool = ["def", "maxHp", "int", "dex", "critChance", "activeSpd", "idleSpd"];
-  } else if (chosenType === "leggings") {
-    pool = ["def", "maxHp", "str", "dex", "block", "parry"];
-  } else if (chosenType === "boots") {
-    pool = ["moveSpeed", "def", "maxHp", "dex", "idleSpd", "activeSpd"];
-  } else if (chosenType === "subweapon") {
-    if (item.subType === "shield")
-      pool = ["block", "atk", "maxHp", "def", "str", "moveSpeed", "dex"];
-    else if (item.subType === "dagger")
-      pool = ["parry", "atk", "critChance", "dex", "moveSpeed", "str"];
-    else if (item.subType === "tome")
+    if (item.type === "subweapon") {
+      if (item.subType === "shield")
+        pool = ["block", "atk", "maxHp", "def", "str"];
+      else if (item.subType === "dagger")
+        pool = ["parry", "atk", "critChance", "dex"];
+      else if (item.subType === "tome")
+        pool = ["critDamage", "int", "activeSpd", "idleSpd"];
+    }
+
+    pool = pool.filter((stat) => {
+      if (stat === "atk" && item.bonusAtk > 0) return false;
+      if (stat === "maxHp" && item.bonusMaxHp > 0) return false;
+      if (stat === "def" && item.bonusDef > 0) return false;
+      if (stat === "moveSpeed" && item.bonusMoveSpeed > 0) return false;
+      if (stat === "critChance" && item.bonusCritChance > 0) return false;
+      if (stat === "critDamage" && item.bonusCritDamage > 0) return false;
+      if (stat === "block" && item.bonusBlock > 0) return false;
+      if (stat === "parry" && item.bonusParry > 0) return false;
+      if (stat === "activeSpd" && item.bonusActiveSpeed > 0) return false;
+      if (stat === "idleSpd" && item.bonusIdleSpeed > 0) return false;
+      if (stat === "str" && item.bonusStr > 0) return false;
+      if (stat === "dex" && item.bonusDex > 0) return false;
+      if (stat === "int" && item.bonusInt > 0) return false;
+      return true;
+    });
+
+    if (pool.length === 0) {
       pool = [
+        "critChance",
         "critDamage",
-        "int",
+        "block",
+        "parry",
+        "atk",
+        "maxHp",
+        "def",
+        "moveSpeed",
         "activeSpd",
         "idleSpd",
-        "maxHp",
-        "critChance",
+        "str",
+        "dex",
+        "int",
       ];
-  }
+    }
 
-  pool.sort(() => Math.random() - 0.5);
-  let rarityMult = isArt ? 1.45 : 1 + statLinesCount * 0.15;
-  if (chosenType === "overall") rarityMult *= 1.8;
-  let actualStatLines = isArt ? 3 : statLinesCount + 1;
+    let selectedStat = pool[Math.floor(Math.random() * pool.length)];
+    let stageScale = item.stageLevel || 1;
+    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
+    let expScale = Math.pow(1.18, stageScale) * Math.pow(stageScale, 2.2);
+    let hpDefExpScale = Math.pow(1.16, stageScale) * Math.pow(stageScale, 2.2);
+    let rarityMult = 1 + item.statsRolled * 0.15;
+    let prestigeMult = Math.pow(1.08, window.playerStats.prestigeCount || 0);
 
-  for (let i = 0; i < actualStatLines; i++) {
-    if (pool.length === 0) break;
-    let selectedStat = pool.pop();
     if (selectedStat === "atk")
       item.bonusAtk += Math.ceil(
         window.randFloat(0.15, 0.35) * expScale * rarityMult * prestigeMult,
@@ -981,18 +1925,22 @@ window.createItemObject = function (
         prestigeMult;
       item.bonusParry += parseFloat(Math.min(0.15, rolled).toFixed(4));
     } else if (selectedStat === "activeSpd") {
-      let sScale = Math.pow(stageScale, 0.3);
-      let rMult = 1 + statLinesCount * 0.08;
-      let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
       item.bonusActiveSpeed += parseFloat(
-        (window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4),
+        (
+          window.randFloat(0.04, 0.1) *
+          Math.sqrt(stageScale) *
+          rarityMult *
+          prestigeMult
+        ).toFixed(4),
       );
     } else if (selectedStat === "idleSpd") {
-      let sScale = Math.pow(stageScale, 0.3);
-      let rMult = 1 + statLinesCount * 0.08;
-      let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
       item.bonusIdleSpeed += parseFloat(
-        (window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4),
+        (
+          window.randFloat(0.04, 0.1) *
+          Math.sqrt(stageScale) *
+          rarityMult *
+          prestigeMult
+        ).toFixed(4),
       );
     } else if (selectedStat === "str")
       item.bonusStr += Math.ceil(
@@ -1015,855 +1963,14 @@ window.createItemObject = function (
           rarityMult *
           prestigeMult,
       );
-    else if (selectedStat === "dropRate")
-      item.dropRate += parseFloat(
-        (window.randFloat(0.02, 0.05) * rarityMult * prestigeMult).toFixed(4),
-      );
-    else if (selectedStat === "quality")
-      item.quality += parseFloat(
-        (window.randFloat(0.01, 0.03) * rarityMult * prestigeMult).toFixed(4),
-      );
-    else if (selectedStat === "goldMulti")
-      item.goldMulti += parseFloat(
-        (window.randFloat(0.02, 0.05) * rarityMult * prestigeMult).toFixed(4),
-      );
-    else if (selectedStat === "rareSpawn")
-      item.rareSpawn += parseFloat(
-        (window.randFloat(0.002, 0.006) * rarityMult * prestigeMult).toFixed(4),
-      );
-    else if (selectedStat === "fairySpawn")
-      item.fairySpawn += parseFloat(
-        (window.randFloat(0.02, 0.06) * rarityMult * prestigeMult).toFixed(4),
-      );
-  }
 
-  item.atk = (item.baseAtk || 0) + item.bonusAtk;
-  item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
-  item.def = (item.baseDef || 0) + item.bonusDef;
-  item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
-  item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
-  item.critDamage = item.bonusCritDamage;
-  item.block = (item.baseBlock || 0) + item.bonusBlock;
-  item.parry = (item.baseParry || 0) + item.bonusParry;
-  item.str = (item.baseStr || 0) + item.bonusStr;
-  item.dex = (item.baseDex || 0) + item.bonusDex;
-  item.int = (item.baseInt || 0) + item.bonusInt;
-  item.activeAttackSpeed = item.bonusActiveSpeed;
-  item.idleAttackSpeed = item.bonusIdleSpeed;
+    window.recalculateItemStats(item);
+  },
+});
 
-  if (!isArt) {
-    let isDungeon = window.playerStats.isDungeonMode;
-    let isBoss = window.playerStats.isBossMode || window.playerStats.isUberBoss;
-    let isRare = window.mob ? !!window.mob.isRare : false;
-    item.setName = window.rollSetForItem(
-      isBoss,
-      isRare,
-      isDungeon,
-      window.playerStats.currentDungeon,
-    );
-  }
-
-  if (statLinesCount === 5 && !isArt) {
-    if (Math.random() < 0.005) {
-      if (chosenType === "weapon") {
-        let weapons = ["staff", "sword", "singularity", "maelstrom"];
-        let selected = weapons[Math.floor(Math.random() * weapons.length)];
-        item.setName = null;
-        if (selected === "staff") {
-          item.isUniqueStaff = true;
-          item.noun = "Phoenix Staff";
-          item.name = `🔥 Phoenix Ignition Staff (Lv. ${stageScale})`;
-          item.desc =
-            "Launches penetrating fireballs that deal 25% Attack damage (3s Cooldown).";
-        } else if (selected === "sword") {
-          item.isUniqueSword = true;
-          item.noun = "Sanguine Reaver";
-          item.name = `🩸 Crimson Sanguine Reaver (Lv. ${stageScale})`;
-          item.desc =
-            "Strikes apply stacking Bleed (Max 5). Strikes at max stacks triggers Rupture, dealing 300% weapon damage and siphoning 10% Max HP.";
-        } else if (selected === "singularity") {
-          item.isUniqueSingularity = true;
-          item.noun = "Singularity Greatsword";
-          item.name = `🌌 Void-Sovereign Greatsword (Lv. ${stageScale})`;
-          item.desc =
-            "Glows for 7s every 30s. Tap during window to enter 5s Storing state, then detonates spatial collapse.";
-        } else if (selected === "maelstrom") {
-          item.isUniqueMaelstrom = true;
-          item.noun = "Maelstrom Glaive";
-          item.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${stageScale})`;
-          item.desc =
-            "Critical strikes project piercing wind gales. Casting gales grants +10% Active & Idle Attack Speed for 6s (stacks up to 3x).";
-        }
-      } else if (chosenType === "subweapon") {
-        let subOptions = ["aegis", "watch", "chronicle"];
-        let selected =
-          subOptions[Math.floor(Math.random() * subOptions.length)];
-        item.setName = null;
-        if (selected === "aegis") {
-          item.subType = "shield";
-          item.isUniqueAegis = true;
-          item.noun = "Void-Warped Aegis";
-          item.name = `🛡️ Void-Warped Bulwark (Lv. ${stageScale})`;
-          item.desc =
-            "Blocks trigger gravity blasts scaling with Defense. Can be absorbed into Singularity vortex.";
-        } else if (selected === "watch") {
-          item.subType = "tome";
-          item.isUniqueWatch = true;
-          item.noun = "Chronos Pocket-Watch";
-          item.name = `⏳ Chronos Dial-Watch (Lv. ${stageScale})`;
-          item.desc =
-            "Triggers 4s Temporal Fracture every 20s. Accelerates attack speeds by 15% and slows enemies by 25%.";
-        } else if (selected === "chronicle") {
-          item.subType = "tome";
-          item.isUniqueChronicle = true;
-          item.noun = "Chronicle of the Ascended";
-          item.name = `📖 Chronicle of past Lives (Lv. ${stageScale})`;
-          item.desc =
-            "Boosts XP gain by +200% and bypasses level locks while below 75% peak level.";
-        }
-      } else if (chosenType === "boots") {
-        item.isUniqueWarpCore = true;
-        item.noun = "Warp-Core Greaves";
-        item.name = `⚡ Warp-Core Greaves (Lv. ${stageScale})`;
-        item.desc =
-          "Time Dilation: Attacks speed up by +1% for every 1% of target missing health (up to +99%). Boss kills grant 4s of Maximum Haste.";
-      } else if (chosenType === "helmet") {
-        item.isUniqueTempest = true;
-        item.noun = "Crown of Tempests";
-        item.name = `👑 Crown of crackling Tempests (Lv. ${stageScale})`;
-        item.desc =
-          "Taking damage has 15% chance to call thunderbolt dealing 150% Attack power and stuns.";
-      }
-    }
-  }
-
-  if (
-    !item.isUniqueStaff &&
-    !item.isUniqueSword &&
-    !item.isUniqueSingularity &&
-    !item.isUniqueMaelstrom &&
-    !item.isUniqueAegis &&
-    !item.isUniqueWatch &&
-    !item.isUniqueChronicle &&
-    !item.isUniqueWarpCore &&
-    !item.isUniqueTempest
-  ) {
-    item.name = window.buildProceduralName(item);
-  }
-  return item;
-};
-
-window.buildProceduralName = function (item) {
-  if (item.statsRolled === "UNIQUE") return item.name;
-  let stars = item.statsRolled;
-
-  // Prioritize the Set Name as the theme prefix if it exists!
-  let themeName = item.setName || "Standard";
-
-  if (!item.setName && stars > 0) {
-    const nomenclature = {
-      bonusAtk: "Vanguard",
-      bonusMaxHp: "Colossus",
-      bonusDef: "Bastion",
-      bonusMoveSpeed: "Windrunner",
-      bonusCritChance: "Wraith",
-      bonusCritDamage: "Reaver",
-      bonusBlock: "Dreadnought",
-      bonusParry: "Duellist",
-      bonusStr: "Berserker",
-      bonusDex: "Scout",
-      bonusInt: "Scholar",
-    };
-
-    let highestKey = null;
-    let maxVal = -1;
-    Object.keys(nomenclature).forEach((k) => {
-      if (item[k] > maxVal) {
-        maxVal = item[k];
-        highestKey = k;
-      }
-    });
-    if (highestKey) themeName = nomenclature[highestKey];
-  }
-
-  return `${themeName} ${item.noun} (Lv. ${item.stageLevel})`;
-};
-
-// --- STAT RANGES & PREVIEWS ---
-
-window.getStatBaseRange = function (item, statKey) {
-  let stageLevel = item.stageLevel || 1;
-  let isArt = item.type === "artifact";
-  let rarityMult = isArt ? 1.45 : 1 + (item.statsRolled || 0) * 0.15;
-
-  // Direct-Alignment Scaling Model: Maps base card ranges exactly to enemy exponential scale curves
-  let repStage = stageLevel * 10;
-  let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-  let repScale = Math.pow(repGrowth, repStage);
-
-  let expScale = repScale;
-  let hpDefExpScale = repScale;
-
-  let min = 0;
-  let max = 0;
-
-  // Aligned with core roll ranges (Atk: 0.15~0.35, HP: 0.4~1.2, Def: 0.15~0.35) to prevent out-of-bounds rendering
-  if (
-    statKey === "atk" &&
-    (item.bonusAtk > 0 || item.type === "weapon" || isArt)
-  ) {
-    min += Math.ceil(0.15 * expScale * rarityMult);
-    max += Math.ceil(0.35 * expScale * rarityMult);
-  } else if (statKey === "maxHp" && (item.bonusMaxHp > 0 || isArt)) {
-    min += Math.ceil(0.4 * hpDefExpScale * rarityMult);
-    max += Math.ceil(1.2 * hpDefExpScale * rarityMult);
-  } else if (statKey === "def" && (item.bonusDef > 0 || isArt)) {
-    min += Math.ceil(0.15 * hpDefExpScale * rarityMult);
-    max += Math.ceil(0.35 * hpDefExpScale * rarityMult);
-  } else if (statKey === "moveSpeed" && item.bonusMoveSpeed > 0) {
-    min += Math.ceil(1 * stageLevel * rarityMult);
-    max += Math.ceil(2 * stageLevel * rarityMult);
-  } else if (statKey === "str" && (item.bonusStr > 0 || isArt)) {
-    min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
-    max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
-  } else if (statKey === "dex" && (item.bonusDex > 0 || isArt)) {
-    min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
-    max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
-  } else if (statKey === "int" && (item.bonusInt > 0 || isArt)) {
-    min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
-    max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
-  } else if (statKey === "critChance" && item.bonusCritChance > 0) {
-    min += 0.01 * Math.sqrt(stageLevel) * rarityMult;
-    max += 0.025 * Math.sqrt(stageLevel) * rarityMult;
-  } else if (statKey === "critDamage" && item.bonusCritDamage > 0) {
-    min += 0.03 * Math.sqrt(stageLevel) * rarityMult;
-    max += 0.06 * Math.sqrt(stageLevel) * rarityMult;
-  } else if (statKey === "block" && item.bonusBlock > 0) {
-    min += 0.005 * Math.sqrt(stageLevel) * rarityMult;
-    max += 0.015 * Math.sqrt(stageLevel) * rarityMult;
-  } else if (statKey === "parry" && item.bonusParry > 0) {
-    min += 0.005 * Math.sqrt(stageLevel) * rarityMult;
-    max += 0.015 * Math.sqrt(stageLevel) * rarityMult;
-  } else if (statKey === "activeAttackSpeed" && item.bonusActiveSpeed > 0) {
-    let sScale = Math.pow(stageLevel, 0.3);
-    let rMult = 1 + item.statsRolled * 0.08;
-    min += 0.01 * sScale * rMult;
-    max += 0.03 * sScale * rMult;
-  } else if (statKey === "idleAttackSpeed" && item.bonusIdleSpeed > 0) {
-    let sScale = Math.pow(stageLevel, 0.3);
-    let rMult = 1 + item.statsRolled * 0.08;
-    min += 0.01 * sScale * rMult;
-    max += 0.03 * sScale * rMult;
-  } else if (statKey === "rareSpawn" && item.rareSpawn > 0) {
-    min += 0.002 * rarityMult;
-    max += 0.006 * rarityMult;
-  } else if (statKey === "dropRate" && item.dropRate > 0) {
-    min += 0.02 * rarityMult;
-    max += 0.05 * rarityMult;
-  } else if (statKey === "quality" && item.quality > 0) {
-    min += 0.01 * rarityMult;
-    max += 0.03 * rarityMult;
-  } else if (statKey === "goldMulti" && item.goldMulti > 0) {
-    min += 0.02 * rarityMult;
-    max += 0.05 * rarityMult;
-  } else if (statKey === "fairySpawn" && item.fairySpawn > 0) {
-    min += 0.02 * rarityMult;
-    max += 0.06 * rarityMult;
-  }
-
-  const unscaledStats = ["activeAttackSpeed", "idleAttackSpeed"];
-  if (!unscaledStats.includes(statKey)) {
-    let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
-    min *= prestigeMult;
-    max *= prestigeMult;
-  }
-
-  let tempers = item.temperLevel || 0;
-  if (tempers > 0) {
-    if (isArt) {
-      let artMultiplier = Math.pow(1.15, tempers);
-      min *= artMultiplier;
-      max *= artMultiplier;
-
-      if (statKey === "atk") {
-        min += tempers * 15;
-        max += tempers * 15;
-      } else if (statKey === "maxHp") {
-        min += tempers * 100;
-        max += tempers * 100;
-      } else if (statKey === "def") {
-        min += tempers * 10;
-        max += tempers * 10;
-      } else if (["str", "dex", "int"].includes(statKey)) {
-        min += tempers * 3;
-        max += tempers * 3;
-      } else if (statKey === "goldMulti") {
-        min += tempers * 0.05;
-        max += tempers * 0.05;
-      } else if (statKey === "dropRate") {
-        min += tempers * 0.03;
-        max += tempers * 0.03;
-      } else if (statKey === "quality") {
-        min += tempers * 0.02;
-        max += tempers * 0.02;
-      } else if (statKey === "fairySpawn") {
-        min += tempers * 0.02;
-        max += tempers * 0.02;
-      } else if (statKey === "rareSpawn") {
-        min += tempers * 0.01;
-        max += tempers * 0.01;
-      } else if (statKey === "critChance") {
-        min += tempers * 0.01;
-        max += tempers * 0.01;
-      } else if (["parry", "block"].includes(statKey)) {
-        min += tempers * 0.005;
-        max += tempers * 0.005;
-      } else if (["idleAttackSpeed", "activeAttackSpeed"].includes(statKey)) {
-        min += tempers * 0.03;
-        max += tempers * 0.03;
-      } else if (statKey === "moveSpeed") {
-        min += tempers;
-        max += tempers;
-      } else if (statKey === "critDamage") {
-        min += tempers * 0.025;
-        max += tempers * 0.025;
-      }
-    } else {
-      if (
-        [
-          "atk",
-          "maxHp",
-          "def",
-          "str",
-          "dex",
-          "int",
-          "activeAttackSpeed",
-          "idleAttackSpeed",
-        ].includes(statKey)
-      ) {
-        let multiplier = 1 + tempers * 0.08;
-        min *= multiplier;
-        max *= multiplier;
-      }
-      if (statKey === "moveSpeed") {
-        min += tempers;
-        max += tempers;
-      } else if (statKey === "critChance") {
-        min += tempers * 0.005;
-        max += tempers * 0.005;
-      } else if (statKey === "critDamage") {
-        min += tempers * 0.015;
-        max += tempers * 0.015;
-      } else if (statKey === "block") {
-        min += tempers * 0.005;
-        max += tempers * 0.005;
-      } else if (statKey === "parry") {
-        min += tempers * 0.005;
-        max += tempers * 0.005;
-      } else if (statKey === "dropRate") {
-        min += tempers * 0.01;
-        max += tempers * 0.01;
-      } else if (statKey === "quality") {
-        min += tempers * 0.005;
-        max += tempers * 0.005;
-      } else if (statKey === "goldMulti") {
-        min += tempers * 0.01;
-        max += tempers * 0.01;
-      } else if (statKey === "fairySpawn") {
-        min += tempers * 0.01;
-        max += tempers * 0.01;
-      }
-    }
-  }
-
-  if (item.enchantments && item.enchantments[statKey]) {
-    let count = item.enchantments[statKey];
-    let multiplier = Math.pow(1.25, count);
-    min *= multiplier;
-    max *= multiplier;
-  }
-
-  return { min, max };
-};
-
-window.formatStatRangeStr = function (item, statKey, isPct = false) {
-  let range = window.getStatBaseRange(item, statKey);
-  if (range.min === 0 && range.max === 0) return "";
-
-  let minStr, maxStr;
-  if (statKey === "rareSpawn") {
-    minStr = (range.min * 100).toFixed(2) + "%";
-    maxStr = (range.max * 100).toFixed(2) + "%";
-  } else if (isPct) {
-    minStr = Math.floor(range.min * 100) + "%";
-    maxStr = Math.floor(range.max * 100) + "%";
-  } else if (statKey === "activeAttackSpeed" || statKey === "idleAttackSpeed") {
-    minStr = Math.round(range.min * 100) + "%";
-    maxStr = Math.round(range.max * 100) + "%";
-  } else if (
-    ["dropRate", "quality", "goldMulti", "fairySpawn"].includes(statKey)
-  ) {
-    minStr = Math.floor(range.min * 100) + "%";
-    maxStr = Math.floor(range.max * 100) + "%";
-  } else {
-    minStr = window.formatNumber(range.min);
-    maxStr = window.formatNumber(range.max);
-  }
-
-  if (minStr === maxStr) {
-    return ` <span style="color:#7f8c8d; font-size:9px;">[${minStr}]</span>`;
-  }
-
-  return ` <span style="color:#7f8c8d; font-size:9px;">[${minStr} - ${maxStr}]</span>`;
-};
-
-window.scaleItemBonusStats = function (item, oldStars, newStars) {
-  if (
-    item.type === "artifact" ||
-    oldStars === "UNIQUE" ||
-    newStars === "UNIQUE"
-  )
-    return;
-  let oldMult = 1 + oldStars * 0.15;
-  let newMult = 1 + newStars * 0.15;
-  let ratio = newMult / oldMult;
-
-  const scaleKeys = [
-    "bonusAtk",
-    "bonusMaxHp",
-    "bonusDef",
-    "bonusMoveSpeed",
-    "bonusCritChance",
-    "bonusCritDamage",
-    "bonusBlock",
-    "bonusParry",
-    "bonusStr",
-    "bonusDex",
-    "bonusInt",
-    "bonusActiveSpeed",
-    "bonusIdleSpeed",
-  ];
-
-  scaleKeys.forEach((k) => {
-    if (item[k]) {
-      if (
-        [
-          "bonusCritChance",
-          "bonusCritDamage",
-          "bonusBlock",
-          "bonusParry",
-        ].includes(k)
-      ) {
-        item[k] = parseFloat((item[k] * ratio).toFixed(4));
-      } else if (["bonusActiveSpeed", "bonusIdleSpeed"].includes(k)) {
-        item[k] = Math.floor(item[k] * ratio);
-      } else {
-        item[k] = Math.ceil(item[k] * ratio);
-      }
-    }
-  });
-};
-
-window.recalculateItemStats = function (item) {
-  item.bonusAtk = item.bonusAtk || 0;
-  item.bonusMaxHp = item.bonusMaxHp || 0;
-  item.bonusDef = item.bonusDef || 0;
-  item.bonusMoveSpeed = item.bonusMoveSpeed || 0;
-  item.bonusCritChance = item.bonusCritChance || 0;
-  item.bonusCritDamage = item.bonusCritDamage || 0;
-  item.bonusBlock = item.bonusBlock || 0;
-  item.bonusParry = item.bonusParry || 0;
-  item.bonusActiveSpeed = item.bonusActiveSpeed || 0;
-  item.bonusIdleSpeed = item.bonusIdleSpeed || 0;
-  item.bonusStr = item.bonusStr || 0;
-  item.bonusDex = item.bonusDex || 0;
-  item.bonusInt = item.bonusInt || 0;
-
-  // Direct-Alignment Scaling Model: Maps recalculations exactly to enemy exponential scale curves
-  let repStage = (item.stageLevel || 1) * 10;
-  let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-  let repScale = Math.pow(repGrowth, repStage);
-
-  let expScale = repScale;
-  let hpDefExpScale = repScale;
-
-  let prestigeCount = window.playerStats.prestigeCount || 0;
-  let prestigeMult = 1.0; // Disabled automatic scaling to prevent Stage 80 spam exploits
-
-  // Dynamic base scaling transitions for standard slot configurations
-  if (item.type !== "artifact" && item.statsRolled !== "UNIQUE") {
-    let stars = item.statsRolled || 0;
-    let baseRarityMult = 1.0 + stars * 0.3; // Base stats scale up by 30% per star rarity tier!
-
-    if (
-      item.type === "weapon" &&
-      !item.isUniqueStaff &&
-      !item.isUniqueSword &&
-      !item.isUniqueSingularity &&
-      !item.isUniqueMaelstrom
-    ) {
-      item.baseAtk = Math.ceil(1.5 * expScale * prestigeMult * baseRarityMult);
-    } else if (item.type === "chest" || item.type === "overall") {
-      let overallMult = item.type === "overall" ? 1.8 : 1.0;
-      item.baseDef = Math.ceil(
-        1.5 * hpDefExpScale * prestigeMult * baseRarityMult * overallMult,
-      );
-      item.baseMaxHp = Math.ceil(
-        6.0 * hpDefExpScale * prestigeMult * baseRarityMult * overallMult,
-      );
-    } else if (item.type === "helmet" && !item.isUniqueTempest) {
-      item.baseDef = Math.ceil(
-        0.7 * hpDefExpScale * prestigeMult * baseRarityMult,
-      );
-      item.baseMaxHp = Math.ceil(
-        3.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-      );
-    } else if (item.type === "leggings") {
-      item.baseDef = Math.ceil(
-        0.7 * hpDefExpScale * prestigeMult * baseRarityMult,
-      );
-      item.baseMaxHp = Math.ceil(
-        3.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-      );
-    } else if (item.type === "boots" && !item.isUniqueWarpCore) {
-      item.baseDef = Math.ceil(
-        0.35 * hpDefExpScale * prestigeMult * baseRarityMult,
-      );
-      item.baseMoveSpeed = Math.ceil(
-        1.0 * (item.stageLevel || 1) * prestigeMult,
-      );
-    } else if (
-      item.type === "subweapon" &&
-      !item.isUniqueAegis &&
-      !item.isUniqueWatch &&
-      !item.isUniqueChronicle
-    ) {
-      if (item.subType === "shield") {
-        item.baseDef = Math.ceil(
-          1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-        );
-      } else if (item.subType === "dagger") {
-        item.baseAtk = Math.ceil(
-          0.8 * expScale * prestigeMult * baseRarityMult,
-        );
-      } else if (item.subType === "tome") {
-        item.baseInt = Math.ceil(
-          1.5 * (item.stageLevel || 1) * prestigeMult * baseRarityMult,
-        );
-      }
-    }
-  } else if (item.type === "artifact") {
-    // Artifact parameters are managed statically on drop; preserve them as is
-  } else {
-    // Recalculate unique item specific base structures
-    if (item.isUniqueSingularity || item.isUniqueMaelstrom) {
-      item.baseAtk = Math.ceil(3.5 * expScale * prestigeMult);
-    } else if (item.isUniqueAegis) {
-      item.baseDef = Math.ceil(10 * hpDefExpScale * prestigeMult);
-      item.baseBlock = 0.05 * (item.stageLevel || 1);
-    } else if (item.isUniqueWatch || item.isUniqueChronicle) {
-      item.baseInt = Math.ceil(2.5 * (item.stageLevel || 1) * prestigeMult);
-    } else if (item.isUniqueWarpCore) {
-      item.baseMoveSpeed = Math.ceil(3 * (item.stageLevel || 1) * prestigeMult);
-    } else if (item.isUniqueTempest) {
-      item.baseMaxHp = Math.ceil(12 * hpDefExpScale * prestigeMult);
-      item.baseDef = Math.ceil(4 * hpDefExpScale * prestigeMult);
-    }
-  }
-
-  // Sum combined totals using standard base values
-  item.atk = (item.baseAtk || 0) + item.bonusAtk;
-  item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
-  item.def = (item.baseDef || 0) + item.bonusDef;
-  item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
-  item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
-  item.critDamage = (item.baseCritDamage || 0) + item.bonusCritDamage;
-  item.block = (item.baseBlock || 0) + item.bonusBlock;
-  item.parry = (item.baseParry || 0) + item.bonusParry;
-  item.activeAttackSpeed = (item.baseActiveSpeed || 0) + item.bonusActiveSpeed;
-  item.idleAttackSpeed = (item.baseIdleSpeed || 0) + item.bonusIdleSpeed;
-  item.str = (item.baseStr || 0) + item.bonusStr;
-  item.dex = (item.baseDex || 0) + item.bonusDex;
-  item.int = (item.baseInt || 0) + item.bonusInt;
-
-  let tempers = item.temperLevel || 0;
-  if (tempers > 0) {
-    let isArt = item.type === "artifact";
-    if (isArt) {
-      let artMultiplier = Math.pow(1.15, tempers);
-      item.atk = Math.round(item.atk * artMultiplier) + tempers * 15;
-      item.maxHp = Math.round(item.maxHp * artMultiplier) + tempers * 100;
-      item.def = Math.round(item.def * artMultiplier) + tempers * 10;
-      item.str = Math.round(item.str * artMultiplier) + tempers * 3;
-      item.dex = Math.round(item.dex * artMultiplier) + tempers * 3;
-      item.int = Math.round(item.int * artMultiplier) + tempers * 3;
-
-      if (item.goldMulti > 0)
-        item.goldMulti = parseFloat(
-          (item.goldMulti + tempers * 0.05).toFixed(4),
-        );
-      if (item.dropRate > 0)
-        item.dropRate = parseFloat((item.dropRate + tempers * 0.03).toFixed(4));
-      if (item.quality > 0)
-        item.quality = parseFloat((item.quality + tempers * 0.02).toFixed(4));
-      if (item.fairySpawn > 0)
-        item.fairySpawn = parseFloat(
-          (item.fairySpawn + tempers * 0.02).toFixed(4),
-        );
-      if (item.rareSpawn > 0)
-        item.rareSpawn = parseFloat(
-          (item.rareSpawn + tempers * 0.01).toFixed(4),
-        );
-      if (item.critChance > 0)
-        item.critChance = parseFloat(
-          (item.critChance + tempers * 0.01).toFixed(4),
-        );
-      if (item.parry > 0)
-        item.parry = parseFloat((item.parry + tempers * 0.005).toFixed(4));
-      if (item.block > 0)
-        item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
-      if (item.idleAttackSpeed > 0)
-        item.idleAttackSpeed = parseFloat(
-          (item.idleAttackSpeed + tempers * 0.03).toFixed(4),
-        );
-      if (item.activeAttackSpeed > 0)
-        item.activeAttackSpeed = parseFloat(
-          (item.activeAttackSpeed + tempers * 0.03).toFixed(4),
-        );
-      if (item.moveSpeed > 0) item.moveSpeed += tempers;
-      if (item.critDamage > 0)
-        item.critDamage = parseFloat(
-          (item.critDamage + tempers * 0.025).toFixed(4),
-        );
-    } else {
-      let multiplier = 1 + tempers * 0.08;
-      // Scale internal base parameter properties once (no double-scaling!)
-      if (item.baseAtk > 0)
-        item.baseAtk = Math.round(item.baseAtk * multiplier);
-      if (item.baseDef > 0)
-        item.baseDef = Math.round(item.baseDef * multiplier);
-      if (item.baseMaxHp > 0)
-        item.baseMaxHp = Math.round(item.baseMaxHp * multiplier);
-      if (item.baseInt > 0)
-        item.baseInt = Math.round(item.baseInt * multiplier);
-
-      // Scale combined totals once (including bonus components)
-      if (item.atk > 0 || item.type === "weapon")
-        item.atk = Math.round(item.atk * multiplier);
-      if (item.maxHp > 0) item.maxHp = Math.round(item.maxHp * multiplier);
-      if (item.def > 0) item.def = Math.round(item.def * multiplier);
-      if (item.str > 0) item.str = Math.round(item.str * multiplier);
-      if (item.dex > 0) item.dex = Math.round(item.dex * multiplier);
-      if (item.int > 0) item.int = Math.round(item.int * multiplier);
-
-      if (item.moveSpeed > 0) item.moveSpeed += tempers;
-      if (item.critChance > 0)
-        item.critChance = parseFloat(
-          (item.critChance + tempers * 0.005).toFixed(4),
-        );
-      if (item.critDamage > 0)
-        item.critDamage = parseFloat(
-          (item.critDamage + tempers * 0.015).toFixed(4),
-        );
-      if (item.block > 0)
-        item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
-      if (item.parry > 0)
-        item.parry = parseFloat((item.parry + tempers * 0.005).toFixed(4));
-      if (item.dropRate > 0)
-        item.dropRate = parseFloat((item.dropRate + tempers * 0.01).toFixed(4));
-      if (item.quality > 0)
-        item.quality = parseFloat((item.quality + tempers * 0.005).toFixed(4));
-      if (item.goldMulti > 0)
-        item.goldMulti = parseFloat(
-          (item.goldMulti + tempers * 0.01).toFixed(4),
-        );
-      if (item.rareSpawn > 0)
-        item.rareSpawn = parseFloat(
-          (item.rareSpawn + tempers * 0.001).toFixed(4),
-        );
-      if (item.fairySpawn > 0)
-        item.fairySpawn = parseFloat(
-          (item.fairySpawn + tempers * 0.01).toFixed(4),
-        );
-      if (item.activeAttackSpeed > 0)
-        item.activeAttackSpeed = parseFloat(
-          (item.bonusActiveSpeed * (1 + tempers * 0.08)).toFixed(4),
-        );
-      if (item.idleAttackSpeed > 0)
-        item.idleAttackSpeed = parseFloat(
-          (item.bonusIdleSpeed * (1 + tempers * 0.08)).toFixed(4),
-        );
-    }
-  }
-
-  if (item.enchantments) {
-    for (let statKey in item.enchantments) {
-      let count = item.enchantments[statKey];
-      let multiplier = Math.pow(1.25, count);
-      const integerStats = ["atk", "maxHp", "def", "str", "dex", "int"];
-      if (integerStats.includes(statKey)) {
-        item[statKey] = Math.ceil(item[statKey] * multiplier);
-      } else {
-        item[statKey] = parseFloat((item[statKey] * multiplier).toFixed(4));
-      }
-    }
-  }
-};
-
-window.addRandomStatLineToItem = function (item) {
-  let pool = [
-    "critChance",
-    "critDamage",
-    "block",
-    "parry",
-    "atk",
-    "maxHp",
-    "def",
-    "moveSpeed",
-    "activeSpd",
-    "idleSpd",
-    "str",
-    "dex",
-    "int",
-  ];
-  if (item.type === "subweapon") {
-    if (item.subType === "shield")
-      pool = ["block", "atk", "maxHp", "def", "str"];
-    else if (item.subType === "dagger")
-      pool = ["parry", "atk", "critChance", "dex"];
-    else if (item.subType === "tome")
-      pool = ["critDamage", "int", "activeSpd", "idleSpd"];
-  }
-
-  pool = pool.filter((stat) => {
-    if (stat === "atk" && item.bonusAtk > 0) return false;
-    if (stat === "maxHp" && item.bonusMaxHp > 0) return false;
-    if (stat === "def" && item.bonusDef > 0) return false;
-    if (stat === "moveSpeed" && item.bonusMoveSpeed > 0) return false;
-    if (stat === "critChance" && item.bonusCritChance > 0) return false;
-    if (stat === "critDamage" && item.bonusCritDamage > 0) return false;
-    if (stat === "block" && item.bonusBlock > 0) return false;
-    if (stat === "parry" && item.bonusParry > 0) return false;
-    if (stat === "activeSpd" && item.bonusActiveSpeed > 0) return false;
-    if (stat === "idleSpd" && item.bonusIdleSpeed > 0) return false;
-    if (stat === "str" && item.bonusStr > 0) return false;
-    if (stat === "dex" && item.bonusDex > 0) return false;
-    if (stat === "int" && item.bonusInt > 0) return false;
-    return true;
-  });
-
-  if (pool.length === 0) {
-    pool = [
-      "critChance",
-      "critDamage",
-      "block",
-      "parry",
-      "atk",
-      "maxHp",
-      "def",
-      "moveSpeed",
-      "activeSpd",
-      "idleSpd",
-      "str",
-      "dex",
-      "int",
-    ];
-  }
-
-  let selectedStat = pool[Math.floor(Math.random() * pool.length)];
-  let stageScale = item.stageLevel || 1;
-  // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-  let expScale = Math.pow(1.18, stageScale) * Math.pow(stageScale, 2.2);
-  let hpDefExpScale = Math.pow(1.16, stageScale) * Math.pow(stageScale, 2.2);
-  let rarityMult = 1 + item.statsRolled * 0.15;
-  let prestigeMult = Math.pow(1.08, window.playerStats.prestigeCount || 0);
-
-  if (selectedStat === "atk")
-    item.bonusAtk += Math.ceil(
-      window.randFloat(0.15, 0.35) * expScale * rarityMult * prestigeMult,
-    );
-  else if (selectedStat === "maxHp")
-    item.bonusMaxHp += Math.ceil(
-      window.randFloat(0.4, 1.2) * hpDefExpScale * rarityMult * prestigeMult,
-    );
-  else if (selectedStat === "def")
-    item.bonusDef += Math.ceil(
-      window.randFloat(0.15, 0.35) * hpDefExpScale * rarityMult * prestigeMult,
-    );
-  else if (selectedStat === "moveSpeed")
-    item.bonusMoveSpeed += Math.ceil(
-      window.randInt(1, 2) * stageScale * rarityMult * prestigeMult,
-    );
-  else if (selectedStat === "critChance") {
-    let rolled =
-      window.randFloat(0.01, 0.025) *
-      Math.sqrt(stageScale) *
-      rarityMult *
-      prestigeMult;
-    item.bonusCritChance += parseFloat(Math.min(0.2, rolled).toFixed(4));
-  } else if (selectedStat === "critDamage") {
-    let rolled =
-      window.randFloat(0.03, 0.06) *
-      Math.sqrt(stageScale) *
-      rarityMult *
-      prestigeMult;
-    item.bonusCritDamage += parseFloat(rolled.toFixed(4));
-  } else if (selectedStat === "block") {
-    let rolled =
-      window.randFloat(0.005, 0.015) *
-      Math.sqrt(stageScale) *
-      rarityMult *
-      prestigeMult;
-    item.bonusBlock += parseFloat(Math.min(0.15, rolled).toFixed(4));
-  } else if (selectedStat === "parry") {
-    let rolled =
-      window.randFloat(0.005, 0.015) *
-      Math.sqrt(stageScale) *
-      rarityMult *
-      prestigeMult;
-    item.bonusParry += parseFloat(Math.min(0.15, rolled).toFixed(4));
-  } else if (selectedStat === "activeSpd") {
-    item.bonusActiveSpeed += parseFloat(
-      (
-        window.randFloat(0.04, 0.1) *
-        Math.sqrt(stageScale) *
-        rarityMult *
-        prestigeMult
-      ).toFixed(4),
-    );
-  } else if (selectedStat === "idleSpd") {
-    item.bonusIdleSpeed += parseFloat(
-      (
-        window.randFloat(0.04, 0.1) *
-        Math.sqrt(stageScale) *
-        rarityMult *
-        prestigeMult
-      ).toFixed(4),
-    );
-  } else if (selectedStat === "str")
-    item.bonusStr += Math.ceil(
-      window.randInt(1, 3) *
-        Math.pow(stageScale, 1.8) *
-        rarityMult *
-        prestigeMult,
-    );
-  else if (selectedStat === "dex")
-    item.bonusDex += Math.ceil(
-      window.randInt(1, 3) *
-        Math.pow(stageScale, 1.8) *
-        rarityMult *
-        prestigeMult,
-    );
-  else if (selectedStat === "int")
-    item.bonusInt += Math.ceil(
-      window.randInt(1, 3) *
-        Math.pow(stageScale, 1.8) *
-        rarityMult *
-        prestigeMult,
-    );
-
-  window.recalculateItemStats(item);
-};
+// Legacy Compatibility Aliases to protect references
+window.addRandomStatLineToItem = (item) =>
+  window.ItemFactory.addRandomStatLineToItem(item);
 
 // --- INVENTORY LOCKS & EQUIP ACTIONS ---
 
@@ -1871,7 +1978,8 @@ window.toggleLock = function (id) {
   let item =
     window.inventory.EQUIP.find((i) => i.id === id) ||
     (window.inventory.ARTIFACT &&
-      window.inventory.ARTIFACT.find((i) => i.id === id));
+      window.inventory.ARTIFACT.find((i) => i.id === id)) ||
+    (window.inventory.SIGIL && window.inventory.SIGIL.find((i) => i.id === id));
   if (!item) {
     for (let k in window.equippedSlots) {
       if (window.equippedSlots[k] && window.equippedSlots[k].id === id) {
@@ -1894,136 +2002,148 @@ window.toggleLock = function (id) {
   }
 };
 
-window.equipItem = function (id) {
-  if (typeof window.hideTooltip === "function") window.hideTooltip();
-  let isArtifactSack = false;
-  let index = window.inventory.EQUIP.findIndex((i) => i.id === id);
-  if (index === -1 && window.inventory.ARTIFACT) {
-    index = window.inventory.ARTIFACT.findIndex((i) => i.id === id);
-    if (index !== -1) isArtifactSack = true;
-  }
-  if (index === -1) return;
-  let item = isArtifactSack
-    ? window.inventory.ARTIFACT[index]
-    : window.inventory.EQUIP[index];
+// Append equipItem inside window.GameState namespace
+Object.assign(window.GameState, {
+  equipItem(id) {
+    if (typeof window.hideTooltip === "function") window.hideTooltip();
+    let isArtifactSack = false;
+    let index = window.inventory.EQUIP.findIndex((i) => i.id === id);
+    if (index === -1 && window.inventory.ARTIFACT) {
+      index = window.inventory.ARTIFACT.findIndex((i) => i.id === id);
+      if (index !== -1) isArtifactSack = true;
+    }
+    if (index === -1) return;
+    let item = isArtifactSack
+      ? window.inventory.ARTIFACT[index]
+      : window.inventory.EQUIP[index];
 
-  // Level requirements removed
+    // Level requirements removed
 
-  let oldMaxHp = 100;
-  if (typeof window.resolvePlayerStats === "function")
-    oldMaxHp = window.resolvePlayerStats().maxHp;
+    let oldMaxHp = 100;
+    if (typeof window.resolvePlayerStats === "function")
+      oldMaxHp = window.resolvePlayerStats().maxHp;
 
-  if (item.type === "overall") {
-    if (window.equippedSlots.chest) {
-      delete window.equippedSlots.chest.isEquippedSlot;
-      window.inventory.EQUIP.push(window.equippedSlots.chest);
-      window.equippedSlots.chest = null;
-    }
-    if (window.equippedSlots.leggings) {
-      delete window.equippedSlots.leggings.isEquippedSlot;
-      window.inventory.EQUIP.push(window.equippedSlots.leggings);
-      window.equippedSlots.leggings = null;
-    }
-    if (window.equippedSlots.overall) {
-      delete window.equippedSlots.overall.isEquippedSlot;
-      window.inventory.EQUIP.push(window.equippedSlots.overall);
-    }
-    window.equippedSlots.overall = item;
-  } else if (item.type === "chest" || item.type === "leggings") {
-    if (window.equippedSlots.overall) {
-      delete window.equippedSlots.overall.isEquippedSlot;
-      window.inventory.EQUIP.push(window.equippedSlots.overall);
-      window.equippedSlots.overall = null;
-    }
-    if (window.equippedSlots[item.type]) {
-      delete window.equippedSlots[item.type].isEquippedSlot;
-      window.inventory.EQUIP.push(window.equippedSlots[item.type]);
-    }
-    window.equippedSlots[item.type] = item;
-  } else if (item.type === "artifact") {
-    if (!window.equippedSlots.art1) window.equippedSlots.art1 = item;
-    else if (!window.equippedSlots.art2) window.equippedSlots.art2 = item;
-    else {
-      if (window.equippedSlots.art3) {
-        delete window.equippedSlots.art3.isEquippedSlot;
-        window.inventory.ARTIFACT.push(window.equippedSlots.art3);
+    if (item.type === "overall") {
+      if (window.equippedSlots.chest) {
+        delete window.equippedSlots.chest.isEquippedSlot;
+        window.inventory.EQUIP.push(window.equippedSlots.chest);
+        window.equippedSlots.chest = null;
       }
-      window.equippedSlots.art3 = item;
+      if (window.equippedSlots.leggings) {
+        delete window.equippedSlots.leggings.isEquippedSlot;
+        window.inventory.EQUIP.push(window.equippedSlots.leggings);
+        window.equippedSlots.leggings = null;
+      }
+      if (window.equippedSlots.overall) {
+        delete window.equippedSlots.overall.isEquippedSlot;
+        window.inventory.EQUIP.push(window.equippedSlots.overall);
+      }
+      window.equippedSlots.overall = item;
+    } else if (item.type === "chest" || item.type === "leggings") {
+      if (window.equippedSlots.overall) {
+        delete window.equippedSlots.overall.isEquippedSlot;
+        window.inventory.EQUIP.push(window.equippedSlots.overall);
+        window.equippedSlots.overall = null;
+      }
+      if (window.equippedSlots[item.type]) {
+        delete window.equippedSlots[item.type].isEquippedSlot;
+        window.inventory.EQUIP.push(window.equippedSlots[item.type]);
+      }
+      window.equippedSlots[item.type] = item;
+    } else if (item.type === "artifact") {
+      if (!window.equippedSlots.art1) window.equippedSlots.art1 = item;
+      else if (!window.equippedSlots.art2) window.equippedSlots.art2 = item;
+      else {
+        if (window.equippedSlots.art3) {
+          delete window.equippedSlots.art3.isEquippedSlot;
+          window.inventory.ARTIFACT.push(window.equippedSlots.art3);
+        }
+        window.equippedSlots.art3 = item;
+      }
+    } else {
+      if (window.equippedSlots[item.type]) {
+        delete window.equippedSlots[item.type].isEquippedSlot;
+        window.inventory.EQUIP.push(window.equippedSlots[item.type]);
+      }
+      window.equippedSlots[item.type] = item;
     }
-  } else {
-    if (window.equippedSlots[item.type]) {
-      delete window.equippedSlots[item.type].isEquippedSlot;
-      window.inventory.EQUIP.push(window.equippedSlots[item.type]);
+
+    if (isArtifactSack) {
+      window.inventory.ARTIFACT.splice(index, 1);
+    } else {
+      window.inventory.EQUIP.splice(index, 1);
     }
-    window.equippedSlots[item.type] = item;
-  }
 
-  if (isArtifactSack) {
-    window.inventory.ARTIFACT.splice(index, 1);
-  } else {
-    window.inventory.EQUIP.splice(index, 1);
-  }
-
-  if (typeof window.resolvePlayerStats === "function") {
-    let newMaxHp = window.resolvePlayerStats().maxHp;
-    window.playerStats.currentHp = Math.min(
-      window.playerStats.currentHp,
-      newMaxHp,
-    );
-  }
-
-  if (typeof window.checkAchievements === "function")
-    window.checkAchievements();
-  if (typeof window.updateUI === "function") window.updateUI();
-  if (typeof window.renderInventory === "function") window.renderInventory();
-  if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-  if (typeof window.saveGame === "function") window.saveGame();
-};
-
-window.unequipItem = function (slotKey) {
-  let maxBag = window.getMaxBagSlots ? window.getMaxBagSlots() : 20;
-  if (typeof window.hideTooltip === "function") window.hideTooltip();
-  let item = window.equippedSlots[slotKey];
-  if (!item) return;
-
-  delete item.isEquippedSlot;
-  let oldMaxHp = 100;
-  if (typeof window.resolvePlayerStats === "function")
-    oldMaxHp = window.resolvePlayerStats().maxHp;
-
-  if (item.type === "artifact") {
-    if (window.inventory.ARTIFACT.length >= maxBag) {
-      if (typeof window.pushHeaderToast === "function")
-        window.pushHeaderToast(`Artifact Sack Full!`, "#e74c3c");
-      return;
+    if (typeof window.resolvePlayerStats === "function") {
+      let newMaxHp = window.resolvePlayerStats().maxHp;
+      window.playerStats.currentHp = Math.min(
+        window.playerStats.currentHp,
+        newMaxHp,
+      );
     }
-    window.equippedSlots[slotKey] = null;
-    window.inventory.ARTIFACT.push(item);
-  } else {
-    if (window.inventory.EQUIP.length >= maxBag) {
-      if (typeof window.pushHeaderToast === "function")
-        window.pushHeaderToast(`Inventory Full!`, "#e74c3c");
-      return;
+
+    if (typeof window.checkAchievements === "function")
+      window.checkAchievements();
+    if (typeof window.updateUI === "function") window.updateUI();
+    if (typeof window.renderInventory === "function") window.renderInventory();
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+    if (typeof window.saveGame === "function") window.saveGame();
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.equipItem = (id) => window.GameState.equipItem(id);
+
+// Append unequipItem inside window.GameState namespace
+Object.assign(window.GameState, {
+  unequipItem(slotKey) {
+    let maxBag = window.getMaxBagSlots ? window.getMaxBagSlots() : 20;
+    if (typeof window.hideTooltip === "function") window.hideTooltip();
+    let item = window.equippedSlots[slotKey];
+    if (!item) return;
+
+    delete item.isEquippedSlot;
+    let oldMaxHp = 100;
+    if (typeof window.resolvePlayerStats === "function")
+      oldMaxHp = window.resolvePlayerStats().maxHp;
+
+    if (item.type === "artifact") {
+      if (window.inventory.ARTIFACT.length >= maxBag) {
+        if (typeof window.pushHeaderToast === "function")
+          window.pushHeaderToast(`Artifact Sack Full!`, "#e74c3c");
+        return;
+      }
+      window.equippedSlots[slotKey] = null;
+      window.inventory.ARTIFACT.push(item);
+    } else {
+      if (window.inventory.EQUIP.length >= maxBag) {
+        if (typeof window.pushHeaderToast === "function")
+          window.pushHeaderToast(`Inventory Full!`, "#e74c3c");
+        return;
+      }
+      window.equippedSlots[slotKey] = null;
+      window.inventory.EQUIP.push(item);
     }
-    window.equippedSlots[slotKey] = null;
-    window.inventory.EQUIP.push(item);
-  }
 
-  if (typeof window.resolvePlayerStats === "function") {
-    let newMaxHp = window.resolvePlayerStats().maxHp;
-    window.playerStats.currentHp = Math.min(
-      window.playerStats.currentHp,
-      newMaxHp,
-    );
-  }
+    if (typeof window.resolvePlayerStats === "function") {
+      let newMaxHp = window.resolvePlayerStats().maxHp;
+      window.playerStats.currentHp = Math.min(
+        window.playerStats.currentHp,
+        newMaxHp,
+      );
+    }
 
-  if (typeof window.checkAchievements === "function")
-    window.checkAchievements();
-  if (typeof window.updateUI === "function") window.updateUI();
-  if (typeof window.renderInventory === "function") window.renderInventory();
-  if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-  if (typeof window.saveGame === "function") window.saveGame();
-};
+    if (typeof window.checkAchievements === "function")
+      window.checkAchievements();
+    if (typeof window.updateUI === "function") window.updateUI();
+    if (typeof window.renderInventory === "function") window.renderInventory();
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+    if (typeof window.saveGame === "function") window.saveGame();
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.unequipItem = (slotKey) => window.GameState.unequipItem(slotKey);
 
 window.salvageItem = function (id) {
   if (typeof window.hideTooltip === "function") window.hideTooltip();
@@ -2031,10 +2151,15 @@ window.salvageItem = function (id) {
   let isEquipped = false;
   let slotToClear = null;
   let isArtifactSack = false;
+  let isSigilSack = false;
 
   if (!item && window.inventory.ARTIFACT) {
     item = window.inventory.ARTIFACT.find((i) => i.id === id);
     if (item) isArtifactSack = true;
+  }
+  if (!item && window.inventory.SIGIL) {
+    item = window.inventory.SIGIL.find((i) => i.id === id);
+    if (item) isSigilSack = true;
   }
   if (!item) {
     for (let k in window.equippedSlots) {
@@ -2065,6 +2190,8 @@ window.salvageItem = function (id) {
       window.inventory.ARTIFACT.indexOf(item),
       1,
     );
+  } else if (isSigilSack) {
+    window.inventory.SIGIL.splice(window.inventory.SIGIL.indexOf(item), 1);
   } else {
     window.inventory.EQUIP.splice(window.inventory.EQUIP.indexOf(item), 1);
   }
@@ -2147,991 +2274,1147 @@ window.salvageItem = function (id) {
   if (typeof window.saveGame === "function") window.saveGame();
 };
 
-window.checkAutoSalvage = function (item, silent = false) {
-  if (!item || item.type === "artifact" || item.statsRolled === "UNIQUE")
-    return false;
-  if (
-    window.playerStats.autoSalvageThreshold === undefined ||
-    window.playerStats.autoSalvageThreshold < 0
-  )
-    return false;
+// Append checkAutoSalvage inside window.GameState namespace
+Object.assign(window.GameState, {
+  checkAutoSalvage(item, silent = false) {
+    if (!item || item.type === "artifact" || item.statsRolled === "UNIQUE")
+      return false;
+    if (
+      window.playerStats.autoSalvageThreshold === undefined ||
+      window.playerStats.autoSalvageThreshold < 0
+    )
+      return false;
 
-  if (item.statsRolled <= window.playerStats.autoSalvageThreshold) {
-    let rolledTier = item.statsRolled;
-    let scrapName = window.getScrapYieldName(rolledTier);
-    let yieldAmount = Math.floor(Math.random() * 3) + 1;
-    let activeHarvest = [];
+    if (item.statsRolled <= window.playerStats.autoSalvageThreshold) {
+      let rolledTier = item.statsRolled;
+      let scrapName = window.getScrapYieldName(rolledTier);
+      let yieldAmount = Math.floor(Math.random() * 3) + 1;
+      let activeHarvest = [];
 
-    if (typeof window.addEtcDrop === "function")
-      window.addEtcDrop(scrapName, yieldAmount);
-    activeHarvest.push(`x${yieldAmount} ${scrapName}`);
+      if (typeof window.addEtcDrop === "function")
+        window.addEtcDrop(scrapName, yieldAmount);
+      activeHarvest.push(`x${yieldAmount} ${scrapName}`);
 
-    for (let t = rolledTier - 1; t >= 0; t--) {
-      if (Math.random() < 0.6) {
-        let lowerYield = Math.floor(Math.random() * 2) + 1;
-        let lowerName = window.getScrapYieldName(t);
-        if (typeof window.addEtcDrop === "function")
-          window.addEtcDrop(lowerName, lowerYield);
-        activeHarvest.push(`x${lowerYield} ${lowerName}`);
+      for (let t = rolledTier - 1; t >= 0; t--) {
+        if (Math.random() < 0.6) {
+          let lowerYield = Math.floor(Math.random() * 2) + 1;
+          let lowerName = window.getScrapYieldName(t);
+          if (typeof window.addEtcDrop === "function")
+            window.addEtcDrop(lowerName, lowerYield);
+          activeHarvest.push(`x${lowerYield} ${lowerName}`);
+        }
       }
-    }
 
-    window.playerStats.itemsSalvaged =
-      (window.playerStats.itemsSalvaged || 0) + 1;
+      window.playerStats.itemsSalvaged =
+        (window.playerStats.itemsSalvaged || 0) + 1;
 
-    if (!silent) {
-      if (typeof window.pushLog === "function")
-        window.pushLog(
-          `<span style='color:#e74c3c;'>[AUTO-SALVAGE]</span> Automatically deconstructed ${item.name} into: ${activeHarvest.join(", ")}`,
-        );
-      if (typeof window.pushToast === "function")
-        window.pushToast(
-          item.name,
-          item.statsRolled,
-          window.getTierColor(item.statsRolled),
-          true,
-          1,
-          `⚡ Auto-Salvaged: <span style="color:#e74c3c;">${item.name}</span>`,
-        );
+      if (!silent) {
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            `<span style='color:#e74c3c;'>[AUTO-SALVAGE]</span> Automatically deconstructed ${item.name} into: ${activeHarvest.join(", ")}`,
+          );
+        if (typeof window.pushToast === "function")
+          window.pushToast(
+            item.name,
+            item.statsRolled,
+            window.getTierColor(item.statsRolled),
+            true,
+            1,
+            `⚡ Auto-Salvaged: <span style="color:#e74c3c;">${item.name}</span>`,
+          );
+      }
+      return true;
     }
-    return true;
-  }
-  return false;
-};
+    return false;
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.checkAutoSalvage = (item, silent) =>
+  window.GameState.checkAutoSalvage(item, silent);
 
 // --- FORGE ENGINE ACTIONS & CRAFTING MATH ---
 
-window.getMaxTemper = function (stars, type = "") {
-  if (stars === "UNIQUE") return 6;
-  // Shifted design restriction: maximum temper matches stars rating tier + 1
-  return stars + 1;
+// Initialize the ForgeManager namespace and define getMaxTemper
+window.ForgeManager = {
+  getMaxTemper(stars, type = "") {
+    if (stars === "UNIQUE") return 6;
+    // Shifted design restriction: maximum temper matches stars rating tier + 1
+    return stars + 1;
+  },
 };
 
-window.getRequiredScrapForTemper = function (item) {
-  if (!item) return "Monster Soul";
-  if (item.type === "artifact" || item.statsRolled === "UNIQUE")
-    return "Overlord's Sigil";
+// Legacy Compatibility Aliases to protect references
+window.getMaxTemper = (stars, type = "") =>
+  window.ForgeManager.getMaxTemper(stars, type);
 
-  const scraps = [
-    "Monster Soul",
-    "Rare Scrap",
-    "Magic Scrap",
-    "Epic Scrap",
-    "Legendary Scrap",
-    "Mythic Scrap",
-  ];
-  let tierIndex = item.temperLevel || 0;
-  return scraps[tierIndex] || "Mythic Scrap";
-};
+// Append getRequiredScrapForTemper inside ForgeManager
+Object.assign(window.ForgeManager, {
+  getRequiredScrapForTemper(item) {
+    if (!item) return "Monster Soul";
+    if (item.type === "artifact" || item.statsRolled === "UNIQUE")
+      return "Overlord's Sigil";
 
-window.getRequiredScrapAmountForTemper = function (item) {
-  if (!item) return 1;
-  let isArtifact = item.type === "artifact" || item.statsRolled === "UNIQUE";
-  let targetLevel = (item.temperLevel || 0) + 1;
+    const scraps = [
+      "Monster Soul",
+      "Rare Scrap",
+      "Magic Scrap",
+      "Epic Scrap",
+      "Legendary Scrap",
+      "Mythic Scrap",
+    ];
+    let tierIndex = item.temperLevel || 0;
+    return scraps[tierIndex] || "Mythic Scrap";
+  },
+});
 
-  if (isArtifact) {
-    if (targetLevel <= 2) return 1;
-    if (targetLevel <= 4) return 2;
-    return 3;
-  }
+// Legacy Compatibility Aliases to protect references
+window.getRequiredScrapForTemper = (item) =>
+  window.ForgeManager.getRequiredScrapForTemper(item);
 
-  let stageScaleFactor = 1 + Math.floor((item.stageLevel || 1) / 15);
-  const baseAmounts = [50, 20, 10, 5, 3, 1];
-  let baseAmount = baseAmounts[item.temperLevel] || 1;
-  return baseAmount * stageScaleFactor;
-};
+// Append getRequiredScrapAmountForTemper inside ForgeManager
+Object.assign(window.ForgeManager, {
+  getRequiredScrapAmountForTemper(item) {
+    if (!item) return 1;
+    let isArtifact = item.type === "artifact" || item.statsRolled === "UNIQUE";
+    let targetLevel = (item.temperLevel || 0) + 1;
 
-window.getTemperGoldCost = function (item) {
-  let baseCost = item.type === "artifact" ? 1000 : 100;
-  let itemLvlMultiplier = Math.pow(
-    1.045,
-    Math.max(0, (item.stageLevel - 1) * 5),
-  );
-  return Math.floor(
-    baseCost * Math.pow(1.5, item.temperLevel) * itemLvlMultiplier,
-  );
-};
+    if (isArtifact) {
+      if (targetLevel <= 2) return 1;
+      if (targetLevel <= 4) return 2;
+      return 3;
+    }
 
-window.getTierUpScrapName = function (stars) {
-  if (stars === 5) return "Mythic Scrap";
-  if (stars === 4) return "Legendary Scrap";
-  if (stars === 3) return "Epic Scrap";
-  if (stars === 2) return "Magic Scrap";
-  if (stars === 1) return "Rare Scrap";
-  return "Monster Soul";
-};
+    let stageScaleFactor = 1 + Math.floor((item.stageLevel || 1) / 15);
+    const baseAmounts = [50, 20, 10, 5, 3, 1];
+    let baseAmount = baseAmounts[item.temperLevel] || 1;
+    return baseAmount * stageScaleFactor;
+  },
+});
 
-window.getMaxEnchants = function (item) {
-  if (item.statsRolled === "UNIQUE" || !item.statsRolled) return 0;
-  if (item.statsRolled === 2) return 1;
-  if (item.statsRolled === 3) return 2;
-  if (item.statsRolled === 4) return 3;
-  if (item.statsRolled === 5) return 4;
-  return 0;
-};
+// Legacy Compatibility Aliases to protect references
+window.getRequiredScrapAmountForTemper = (item) =>
+  window.ForgeManager.getRequiredScrapAmountForTemper(item);
 
-window.getEnchantmentSymbol = function (count) {
-  if (!count || count <= 0) return "";
-  if (count === 1) return "✦";
-  if (count === 2) return "✹";
-  if (count === 3) return "❂";
-  return "🌌";
-};
+// Append getTemperGoldCost inside ForgeManager
+Object.assign(window.ForgeManager, {
+  getTemperGoldCost(item) {
+    let baseCost = item.type === "artifact" ? 1000 : 100;
+    let itemLvlMultiplier = Math.pow(
+      1.045,
+      Math.max(0, (item.stageLevel - 1) * 5),
+    );
+    return Math.floor(
+      baseCost * Math.pow(1.5, item.temperLevel) * itemLvlMultiplier,
+    );
+  },
+});
 
-window.getStatEnchantSuffix = function (item, statKey) {
-  if (item.enchantments && item.enchantments[statKey]) {
-    let count = item.enchantments[statKey];
-    let symbol = window.getEnchantmentSymbol(count);
-    return ` <span style="color:#9b59b6; font-weight:bold;" title="Enchanted ${count} time(s)">${symbol}</span>`;
-  }
-  return "";
-};
+// Legacy Compatibility Aliases to protect references
+window.getTemperGoldCost = (item) =>
+  window.ForgeManager.getTemperGoldCost(item);
 
-window.getStatIcon = function (stat) {
-  return window.getUiIconSvg(stat, 12) || "❖";
-};
+// Append getTierUpScrapName inside ForgeManager
+Object.assign(window.ForgeManager, {
+  getTierUpScrapName(stars) {
+    if (stars === 5) return "Mythic Scrap";
+    if (stars === 4) return "Legendary Scrap";
+    if (stars === 3) return "Epic Scrap";
+    if (stars === 2) return "Magic Scrap";
+    if (stars === 1) return "Rare Scrap";
+    return "Monster Soul";
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.getTierUpScrapName = (stars) =>
+  window.ForgeManager.getTierUpScrapName(stars);
+
+// Append getMaxEnchants inside ForgeManager
+Object.assign(window.ForgeManager, {
+  getMaxEnchants(item) {
+    if (item.statsRolled === "UNIQUE" || !item.statsRolled) return 0;
+    if (item.statsRolled === 2) return 1;
+    if (item.statsRolled === 3) return 2;
+    if (item.statsRolled === 4) return 3;
+    if (item.statsRolled === 5) return 4;
+    return 0;
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.getMaxEnchants = (item) => window.ForgeManager.getMaxEnchants(item);
+
+// Append Enchantment Helpers inside ForgeManager
+Object.assign(window.ForgeManager, {
+  getEnchantmentSymbol(count) {
+    if (!count || count <= 0) return "";
+    if (count === 1) return "✦";
+    if (count === 2) return "✹";
+    if (count === 3) return "❂";
+    return "🌌";
+  },
+
+  getStatEnchantSuffix(item, statKey) {
+    if (item.enchantments && item.enchantments[statKey]) {
+      let count = item.enchantments[statKey];
+      let symbol = this.getEnchantmentSymbol(count);
+      return ` <span style="color:#9b59b6; font-weight:bold;" title="Enchanted ${count} time(s)">${symbol}</span>`;
+    }
+    return "";
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.getEnchantmentSymbol = (count) =>
+  window.ForgeManager.getEnchantmentSymbol(count);
+window.getStatEnchantSuffix = (item, statKey) =>
+  window.ForgeManager.getStatEnchantSuffix(item, statKey);
+
+// Append getStatIcon inside ForgeManager
+Object.assign(window.ForgeManager, {
+  getStatIcon(stat) {
+    return window.getUiIconSvg(stat, 12) || "❖";
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.getStatIcon = (stat) => window.ForgeManager.getStatIcon(stat);
 
 // --- FORGE UI INTERACTIONS ---
 
-window.selectForgeItem = function (id) {
-  let item =
-    window.inventory.EQUIP.find((i) => i.id === id) ||
-    (window.inventory.ARTIFACT &&
-      window.inventory.ARTIFACT.find((i) => i.id === id));
-  if (!item) {
-    for (let k in window.equippedSlots) {
-      if (window.equippedSlots[k] && window.equippedSlots[k].id === id) {
-        item = window.equippedSlots[k];
-        break;
+// Append selectForgeItem inside ForgeManager
+Object.assign(window.ForgeManager, {
+  selectForgeItem(id) {
+    let item =
+      window.inventory.EQUIP.find((i) => i.id === id) ||
+      (window.inventory.ARTIFACT &&
+        window.inventory.ARTIFACT.find((i) => i.id === id));
+    if (!item) {
+      for (let k in window.equippedSlots) {
+        if (window.equippedSlots[k] && window.equippedSlots[k].id === id) {
+          item = window.equippedSlots[k];
+          break;
+        }
       }
     }
-  }
-  window.forgeSelectedItem = item;
-  if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-};
+    window.forgeSelectedItem = item;
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+  },
+});
 
-window.setForgeMode = function (mode) {
-  window.forgeMode = mode;
-  const modes = [
-    "temper",
-    "reforge",
-    "tier",
-    "enchant",
-    "reset_enchant",
-    "set",
-  ];
-  modes.forEach((m) => {
-    let el = document.getElementById(
-      "btn-mode-" + (m === "reset_enchant" ? "reset-enchant" : m),
-    );
-    if (el) {
-      el.className = "btn-toggle";
-      el.style.background = "transparent";
-    }
-  });
+// Legacy Compatibility Aliases to protect references
+window.selectForgeItem = (id) => window.ForgeManager.selectForgeItem(id);
 
-  let activeEl = document.getElementById(
-    "btn-mode-" + (mode === "reset_enchant" ? "reset-enchant" : mode),
-  );
-  if (activeEl) {
-    activeEl.className = "btn-toggle active";
-    if (mode === "temper") activeEl.style.background = "#2980b9";
-    if (mode === "reforge") activeEl.style.background = "#8e44ad";
-    if (mode === "tier") activeEl.style.background = "#e67e22";
-    if (mode === "enchant") activeEl.style.background = "#9b59b6";
-    if (mode === "reset_enchant") activeEl.style.background = "#c0392b";
-    if (mode === "set") activeEl.style.background = "#2ecc71";
-  }
-  if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-};
-
-window.switchForgeStation = function (station) {
-  let bm = document.getElementById("blacksmith-modes");
-  let em = document.getElementById("enchanter-modes");
-  if (station === "blacksmith") {
-    if (bm) bm.style.display = "flex";
-    if (em) em.style.display = "none";
-    window.setForgeMode("temper");
-  } else {
-    if (bm) bm.style.display = "none";
-    if (em) em.style.display = "flex";
-    window.setForgeMode("enchant");
-  }
-};
-
-window.changeAutoSalvage = function (val) {
-  window.playerStats.autoSalvageThreshold = parseInt(val, 10);
-  if (typeof window.saveGame === "function") window.saveGame();
-  if (typeof window.updateSalvagePadUI === "function")
-    window.updateSalvagePadUI();
-  if (typeof window.pushHeaderToast === "function") {
-    let tierText = val == -1 ? "Disabled" : `${val}★ and under`;
-    window.pushHeaderToast(
-      `Auto-Salvage Threshold set to: ${tierText}`,
-      "#2ecc71",
-    );
-  }
-};
-
-window.selectBulkSalvageRarity = function (val) {
-  window.state.bulkSalvageTarget = parseInt(val, 10);
-  if (typeof window.updateSalvagePadUI === "function")
-    window.updateSalvagePadUI();
-};
-
-window.triggerBulkSalvage = function () {
-  if (typeof window.hideTooltip === "function") window.hideTooltip();
-  let maxStars =
-    window.state.bulkSalvageTarget !== undefined
-      ? window.state.bulkSalvageTarget
-      : 0;
-
-  let targetItems = window.inventory.EQUIP.filter(
-    (item) =>
-      !item.locked &&
-      item.statsRolled !== "UNIQUE" &&
-      item.statsRolled <= maxStars,
-  );
-  if (targetItems.length === 0) {
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast(
-        "No eligible unlocked items found under this rarity!",
-        "#e74c3c",
+// Append setForgeMode inside ForgeManager
+Object.assign(window.ForgeManager, {
+  setForgeMode(mode) {
+    window.forgeMode = mode;
+    const modes = [
+      "temper",
+      "reforge",
+      "tier",
+      "enchant",
+      "reset_enchant",
+      "set",
+    ];
+    modes.forEach((m) => {
+      let el = document.getElementById(
+        "btn-mode-" + (m === "reset_enchant" ? "reset-enchant" : m),
       );
-    return;
-  }
-
-  let label =
-    maxStars === 0
-      ? "Common Gear (0★)"
-      : window.getTierName(maxStars) + " & Under";
-
-  if (typeof window.showCustomConfirm === "function") {
-    window.showCustomConfirm(
-      "Bulk Deconstruct",
-      `Are you sure you want to bulk salvage ${targetItems.length} unlocked items (${label})?`,
-      "Deconstruct",
-      "Cancel",
-      "#e74c3c",
-      function () {
-        let bulkScrapsHarvested = {};
-        function incrementScrap(name, amount) {
-          if (!bulkScrapsHarvested[name]) bulkScrapsHarvested[name] = 0;
-          bulkScrapsHarvested[name] += amount;
-          if (typeof window.addEtcDrop === "function")
-            window.addEtcDrop(name, amount);
-        }
-
-        targetItems.forEach((item) => {
-          let rolledTier = item.statsRolled;
-          let scrapName = window.getScrapYieldName(rolledTier);
-          let yieldAmount = Math.floor(Math.random() * 3) + 1;
-
-          incrementScrap(scrapName, yieldAmount);
-
-          for (let t = rolledTier - 1; t >= 0; t--) {
-            if (Math.random() < 0.6) {
-              let lowerYield = Math.floor(Math.random() * 2) + 1;
-              let lowerName = window.getScrapYieldName(t);
-              incrementScrap(lowerName, lowerYield);
-            }
-          }
-
-          if (
-            window.forgeSelectedItem &&
-            window.forgeSelectedItem.id === item.id
-          ) {
-            window.forgeSelectedItem = null;
-          }
-        });
-
-        window.playerStats.itemsSalvaged =
-          (window.playerStats.itemsSalvaged || 0) + targetItems.length;
-
-        if (typeof window.progressMission === "function") {
-          window.progressMission("salvage", targetItems.length);
-        }
-        if (window.playerStats.pendingClanProgress) {
-          window.playerStats.pendingClanProgress.salvage =
-            (window.playerStats.pendingClanProgress.salvage || 0) +
-            targetItems.length;
-        }
-
-        let targetIds = new Set(targetItems.map((item) => item.id));
-        window.inventory.EQUIP = window.inventory.EQUIP.filter(
-          (item) => !targetIds.has(item.id),
-        );
-
-        let cvs = document.getElementById("gameCanvas");
-        let w = cvs ? cvs.width : 750;
-        let h = cvs ? cvs.height : 250;
-        for (let i = 0; i < 45; i++) {
-          if (window.particles) {
-            window.particles.push({
-              x: w / 2 + (Math.random() - 0.5) * 120,
-              y: h / 2 + (Math.random() - 0.5) * 40,
-              vx: (Math.random() - 0.5) * 12,
-              vy: (Math.random() - 0.7) * 9,
-              radius: Math.random() * 3.5 + 1.5,
-              color: Math.random() > 0.5 ? "#7f8c8d" : "#e74c3c",
-              alpha: 1,
-              life: Math.random() * 30 + 15,
-            });
-          }
-        }
-
-        let outputReport = Object.keys(bulkScrapsHarvested)
-          .map((k) => `x${bulkScrapsHarvested[k]} ${k}`)
-          .join(", ");
-
-        if (typeof window.pushLog === "function")
-          window.pushLog(
-            `<span style='color:#e74c3c;'>[BULK SALVAGE]</span> Dismantled ${targetItems.length} items. Harvested: ${outputReport}`,
-          );
-        if (typeof window.pushHeaderToast === "function")
-          window.pushHeaderToast(
-            "♻️ Bulk Salvaged " + targetItems.length + " Items!",
-            "#e74c3c",
-          );
-
-        if (typeof window.resolvePlayerStats === "function") {
-          let newMaxHp = window.resolvePlayerStats().maxHp;
-          window.playerStats.currentHp = Math.min(
-            window.playerStats.currentHp,
-            newMaxHp,
-          );
-        }
-
-        if (typeof window.checkAchievements === "function")
-          window.checkAchievements();
-        if (typeof window.updateUI === "function") window.updateUI();
-        if (typeof window.renderInventory === "function")
-          window.renderInventory();
-        if (typeof window.renderForgeTab === "function")
-          window.renderForgeTab();
-        if (typeof window.saveGame === "function") window.saveGame();
-      },
-    );
-  }
-};
-
-// --- FORGE CRAFTING PROCESSES ---
-
-window.temperItem = function () {
-  if (!window.forgeSelectedItem) return;
-  let isArt = window.forgeSelectedItem.type === "artifact";
-  if (window.playerStats.pendingClanProgress) {
-    window.playerStats.pendingClanProgress.tempers =
-      (window.playerStats.pendingClanProgress.tempers || 0) + 1;
-  }
-
-  if (window.forgeMode === "temper") {
-    let maxT = window.getMaxTemper(
-      window.forgeSelectedItem.statsRolled,
-      window.forgeSelectedItem.type,
-    );
-    if (window.forgeSelectedItem.temperLevel >= maxT) return;
-    let costGold = window.getTemperGoldCost(window.forgeSelectedItem);
-    let scrapReqAmount = window.getRequiredScrapAmountForTemper(
-      window.forgeSelectedItem,
-    );
-    let scrapReq = window.getRequiredScrapForTemper(window.forgeSelectedItem);
-
-    if (window.playerStats.coins < costGold) {
-      if (typeof window.pushLog === "function")
-        window.pushLog(
-          `<span style='color:#e74c3c;'>Not enough Gold to temper!</span>`,
-        );
-      return;
-    }
-    if (
-      !window.inventory.ETC[scrapReq] ||
-      window.inventory.ETC[scrapReq] < scrapReqAmount
-    ) {
-      if (typeof window.pushLog === "function")
-        window.pushLog(
-          `<span style='color:#e74c3c;'>Not enough ${scrapReq} to temper!</span>`,
-        );
-      return;
-    }
-
-    let failChance = window.forgeSelectedItem.temperLevel * 5;
-    let isSuccess = Math.random() >= failChance / 100;
-
-    window.playerStats.coins -= costGold;
-    window.inventory.ETC[scrapReq] -= scrapReqAmount;
-    if (window.inventory.ETC[scrapReq] === 0)
-      delete window.inventory.ETC[scrapReq];
-
-    if (window.playerStats.coins === 0) {
-      window.playerStats.hasTriggeredExactChange = true;
-    }
-
-    if (isSuccess) {
-      window.forgeSelectedItem.temperLevel++;
-      window.forgeSelectedItem.consecutiveFailures = 0;
-      window.recalculateItemStats(window.forgeSelectedItem);
-      window.playerStats.totalTempers =
-        (window.playerStats.totalTempers || 0) + 1;
-      if (typeof window.progressMission === "function")
-        window.progressMission("tempers", 1);
-      if (typeof window.pushLog === "function")
-        window.pushLog(
-          `<span style='color:#e67e22;'>[FORGE]</span> Successfully tempered ${window.forgeSelectedItem.name} to [+${window.forgeSelectedItem.temperLevel}]!`,
-        );
-      if (typeof window.pushHeaderToast === "function")
-        window.pushHeaderToast(
-          "🔨 Success! [+" + window.forgeSelectedItem.temperLevel + "]",
-          "#2ecc71",
-        );
-      if (typeof window.spawnTemperParticles === "function")
-        window.spawnTemperParticles(true);
-      if (typeof window.checkAchievements === "function")
-        window.checkAchievements();
-    } else {
-      if (failChance <= 10) window.playerStats.hasTriggeredMurphysLaw = true;
-      if (window.forgeSelectedItem.temperLevel < 9) {
-        window.forgeSelectedItem.consecutiveFailures =
-          (window.forgeSelectedItem.consecutiveFailures || 0) + 1;
-        if (window.forgeSelectedItem.consecutiveFailures >= 3)
-          window.playerStats.hasTriggeredUnfortunateSoul = true;
+      if (el) {
+        el.className = "btn-toggle";
+        el.style.background = "transparent";
       }
-      if (typeof window.pushLog === "function")
-        window.pushLog(
-          `<span style='color:#e74c3c;'>[FORGE]</span> Temper failed on ${window.forgeSelectedItem.name}! Materials lost.`,
-        );
-      if (typeof window.pushHeaderToast === "function")
-        window.pushHeaderToast(`💥 Temper Failed!`, "#e74c3c");
-      if (typeof window.spawnTemperParticles === "function")
-        window.spawnTemperParticles(false);
-    }
-  } else if (window.forgeMode === "tier") {
-    if (window.forgeSelectedItem.statsRolled >= 5) return;
-    let currentStars = window.forgeSelectedItem.statsRolled;
-    let targetStars = currentStars + 1;
-    let costGold = targetStars * 2500;
-    let shardReq = targetStars;
-    let scrapReqAmount = targetStars * 5;
-    let targetScrapName = window.getScrapYieldName(targetStars);
+    });
 
-    let playerShards = window.inventory.ETC["Eridium Shard"] || 0;
-    let playerScraps = window.inventory.ETC[targetScrapName] || 0;
-
-    if (window.playerStats.coins < costGold) {
-      if (typeof window.pushLog === "function")
-        window.pushLog(
-          `<span style='color:#e74c3c;'>Not enough Gold to Tier Up!</span>`,
-        );
-      return;
-    }
-    if (playerShards < shardReq) {
-      if (typeof window.pushLog === "function")
-        window.pushLog(
-          `<span style='color:#e74c3c;'>Not enough Eridium Shards!</span>`,
-        );
-      return;
-    }
-    if (playerScraps < scrapReqAmount) {
-      if (typeof window.pushLog === "function")
-        window.pushLog(
-          `<span style='color:#e74c3c;'>Not enough ${targetScrapName}!</span>`,
-        );
-      return;
-    }
-
-    window.playerStats.coins -= costGold;
-    window.inventory.ETC["Eridium Shard"] -= shardReq;
-    if (window.inventory.ETC["Eridium Shard"] === 0)
-      delete window.inventory.ETC["Eridium Shard"];
-
-    window.inventory.ETC[targetScrapName] -= scrapReqAmount;
-    if (window.inventory.ETC[targetScrapName] === 0)
-      delete window.inventory.ETC[targetScrapName];
-
-    window.scaleItemBonusStats(
-      window.forgeSelectedItem,
-      currentStars,
-      targetStars,
+    let activeEl = document.getElementById(
+      "btn-mode-" + (mode === "reset_enchant" ? "reset-enchant" : mode),
     );
+    if (activeEl) {
+      activeEl.className = "btn-toggle active";
+      if (mode === "temper") activeEl.style.background = "#2980b9";
+      if (mode === "reforge") activeEl.style.background = "#8e44ad";
+      if (mode === "tier") activeEl.style.background = "#e67e22";
+      if (mode === "enchant") activeEl.style.background = "#9b59b6";
+      if (mode === "reset_enchant") activeEl.style.background = "#c0392b";
+      if (mode === "set") activeEl.style.background = "#2ecc71";
+    }
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+  },
+});
 
-    window.forgeSelectedItem.statsRolled++;
-    window.addRandomStatLineToItem(window.forgeSelectedItem);
-    window.forgeSelectedItem.name = window.buildProceduralName(
-      window.forgeSelectedItem,
-    );
+// Legacy Compatibility Aliases to protect references
+window.setForgeMode = (mode) => window.ForgeManager.setForgeMode(mode);
 
-    if (typeof window.pushLog === "function")
-      window.pushLog(
-        `<span style='color:#e67e22;'>[FORGE]</span> Successfully Tiered Up ${window.forgeSelectedItem.name} to ${window.forgeSelectedItem.statsRolled}★!`,
-      );
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast(
-        "⭐ Tier Up! " + window.forgeSelectedItem.statsRolled + "★",
-        "#e67e22",
-      );
-    if (typeof window.spawnTemperParticles === "function")
-      window.spawnTemperParticles(true);
-  }
-
-  if (typeof window.updateUI === "function") window.updateUI();
-  if (typeof window.renderInventory === "function") window.renderInventory();
-  if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-  if (typeof window.saveGame === "function") window.saveGame();
-};
-
-window.enchantItem = function () {
-  if (!window.forgeSelectedItem) return;
-  let item = window.forgeSelectedItem;
-
-  let maxT = window.getMaxTemper(item.statsRolled, item.type);
-  if (item.temperLevel < maxT) {
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast(
-        `Item must be fully Tempered first! (+${maxT})`,
-        "#e74c3c",
-      );
-    return;
-  }
-
-  let maxEnchants = window.getMaxEnchants(item);
-  let currentEnchants = item.totalEnchants || 0;
-  if (currentEnchants >= maxEnchants) {
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast("Max Enchantments Reached!", "#e74c3c");
-    return;
-  }
-
-  let playerEssence = window.inventory.ETC["Astral Essence"] || 0;
-  if (playerEssence < 1) {
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast("Requires 1 Astral Essence!", "#e74c3c");
-    return;
-  }
-
-  let validStats = [];
-  const ENCHANTABLE_STATS = [
-    "atk",
-    "maxHp",
-    "def",
-    "moveSpeed",
-    "critChance",
-    "critDamage",
-    "block",
-    "parry",
-    "str",
-    "dex",
-    "int",
-    "activeAttackSpeed",
-    "idleAttackSpeed",
-  ];
-  ENCHANTABLE_STATS.forEach((stat) => {
-    if (stat === "activeAttackSpeed" || stat === "idleAttackSpeed") {
-      if (item[stat] < 0) validStats.push(stat);
+// Append switchForgeStation inside ForgeManager
+Object.assign(window.ForgeManager, {
+  switchForgeStation(station) {
+    let bm = document.getElementById("blacksmith-modes");
+    let em = document.getElementById("enchanter-modes");
+    if (station === "blacksmith") {
+      if (bm) bm.style.display = "flex";
+      if (em) em.style.display = "none";
+      window.setForgeMode("temper");
     } else {
-      if (item[stat] > 0) validStats.push(stat);
+      if (bm) bm.style.display = "none";
+      if (em) em.style.display = "flex";
+      window.setForgeMode("enchant");
     }
-  });
+  },
+});
 
-  if (validStats.length === 0) {
-    if (typeof window.pushHeaderToast === "function")
+// Legacy Compatibility Aliases to protect references
+window.switchForgeStation = (station) =>
+  window.ForgeManager.switchForgeStation(station);
+
+// Append changeAutoSalvage inside ForgeManager
+Object.assign(window.ForgeManager, {
+  changeAutoSalvage(val) {
+    window.playerStats.autoSalvageThreshold = parseInt(val, 10);
+    if (typeof window.saveGame === "function") window.saveGame();
+    if (typeof window.updateSalvagePadUI === "function")
+      window.updateSalvagePadUI();
+    if (typeof window.pushHeaderToast === "function") {
+      let tierText = val == -1 ? "Disabled" : `${val}★ and under`;
       window.pushHeaderToast(
-        "This item has no stat lines to enchant!",
-        "#e74c3c",
+        `Auto-Salvage Threshold set to: ${tierText}`,
+        "#2ecc71",
       );
-    return;
-  }
-
-  window.inventory.ETC["Astral Essence"]--;
-  if (window.inventory.ETC["Astral Essence"] === 0)
-    delete window.inventory.ETC["Astral Essence"];
-
-  if (!item.originalStats) {
-    item.originalStats = {
-      atk: item.atk,
-      maxHp: item.maxHp,
-      def: item.def,
-      moveSpeed: item.moveSpeed,
-      critChance: item.critChance,
-      critDamage: item.critDamage,
-      block: item.block,
-      parry: item.parry,
-      activeAttackSpeed: item.activeAttackSpeed,
-      idleAttackSpeed: item.idleAttackSpeed,
-      str: item.str,
-      dex: item.dex,
-      int: item.int,
-    };
-  }
-
-  let selectedStat = validStats[Math.floor(Math.random() * validStats.length)];
-
-  item.enchantments = item.enchantments || {};
-  item.enchantments[selectedStat] = (item.enchantments[selectedStat] || 0) + 1;
-  item.totalEnchants = (item.totalEnchants || 0) + 1;
-  window.playerStats.totalEnchants =
-    (window.playerStats.totalEnchants || 0) + 1;
-  if (typeof window.checkAchievements === "function")
-    window.checkAchievements();
-
-  const integerStats = ["atk", "maxHp", "def", "str", "dex", "int"];
-  if (integerStats.includes(selectedStat)) {
-    item[selectedStat] = Math.ceil(item[selectedStat] * 1.25);
-  } else {
-    item[selectedStat] = parseFloat((item[selectedStat] * 1.25).toFixed(4));
-  }
-
-  if (typeof window.pushLog === "function")
-    window.pushLog(
-      `<span style='color:#9b59b6;'>[ENCHANTER]</span> Successfully infused <strong style='color:#9b59b6;'>${window.getStatIcon(selectedStat)} ${selectedStat.toUpperCase()}</strong> by 25% on ${item.name}!`,
-    );
-  if (typeof window.pushHeaderToast === "function")
-    window.pushHeaderToast(
-      `🔮 Enchanted: +25% ${selectedStat.toUpperCase()}!`,
-      "#9b59b6",
-    );
-
-  let cvs = document.getElementById("gameCanvas");
-  let w = cvs ? cvs.width : 750;
-  let h = cvs ? cvs.height : 250;
-  for (let i = 0; i < 35; i++) {
-    if (window.particles) {
-      window.particles.push({
-        x: w / 2,
-        y: h / 2,
-        vx: (Math.random() - 0.5) * 10,
-        vy: (Math.random() - 0.5) * 10,
-        radius: Math.random() * 3 + 1,
-        color: "#9b59b6",
-        alpha: 1,
-        life: 40,
-      });
     }
-  }
+  },
+});
 
-  if (typeof window.resolvePlayerStats === "function") {
-    let newMaxHp = window.resolvePlayerStats().maxHp;
-    window.playerStats.currentHp = Math.min(
-      window.playerStats.currentHp,
-      newMaxHp,
+// Legacy Compatibility Aliases to protect references
+window.changeAutoSalvage = (val) => window.ForgeManager.changeAutoSalvage(val);
+
+// Append selectBulkSalvageRarity inside ForgeManager
+Object.assign(window.ForgeManager, {
+  selectBulkSalvageRarity(val) {
+    window.state.bulkSalvageTarget = parseInt(val, 10);
+    if (typeof window.updateSalvagePadUI === "function")
+      window.updateSalvagePadUI();
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.selectBulkSalvageRarity = (val) =>
+  window.ForgeManager.selectBulkSalvageRarity(val);
+
+// Append triggerBulkSalvage inside ForgeManager
+Object.assign(window.ForgeManager, {
+  triggerBulkSalvage() {
+    if (typeof window.hideTooltip === "function") window.hideTooltip();
+    let maxStars =
+      window.state.bulkSalvageTarget !== undefined
+        ? window.state.bulkSalvageTarget
+        : 0;
+
+    let targetItems = window.inventory.EQUIP.filter(
+      (item) =>
+        !item.locked &&
+        item.statsRolled !== "UNIQUE" &&
+        item.statsRolled <= maxStars,
     );
-  }
-
-  if (typeof window.updateUI === "function") window.updateUI();
-  if (typeof window.renderInventory === "function") window.renderInventory();
-  if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-  if (typeof window.saveGame === "function") window.saveGame();
-};
-
-window.resetItemEnchants = function () {
-  if (!window.forgeSelectedItem) return;
-  let item = window.forgeSelectedItem;
-  if (!item.totalEnchants || item.totalEnchants === 0) {
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast("No enchants to reset!", "#e74c3c");
-    return;
-  }
-
-  let resetGoldCost = 1000 * item.stageLevel * (item.statsRolled || 1);
-  if (window.playerStats.coins < resetGoldCost) {
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast("Not enough Gold to reset!", "#e74c3c");
-    return;
-  }
-
-  window.playerStats.coins -= resetGoldCost;
-
-  if (item.originalStats) {
-    for (let key in item.originalStats) {
-      item[key] = item.originalStats[key];
-    }
-    delete item.originalStats;
-  }
-  delete item.enchantments;
-  item.totalEnchants = 0;
-
-  if (typeof window.pushLog === "function")
-    window.pushLog(
-      `<span style='color:#e74c3c;'>[ENCHANTER]</span> Purged all enchantments from ${item.name}!`,
-    );
-  if (typeof window.pushHeaderToast === "function")
-    window.pushHeaderToast(`🧹 Purged Enchantments!`, "#e74c3c");
-
-  let cvs = document.getElementById("gameCanvas");
-  let w = cvs ? cvs.width : 750;
-  let h = cvs ? cvs.height : 250;
-  for (let i = 0; i < 35; i++) {
-    if (window.particles) {
-      window.particles.push({
-        x: w / 2,
-        y: h / 2,
-        vx: (Math.random() - 0.5) * 8,
-        vy: (Math.random() - 0.5) * 8,
-        radius: Math.random() * 2 + 1,
-        color: "#7f8c8d",
-        alpha: 1,
-        life: 30,
-      });
-    }
-  }
-
-  if (typeof window.resolvePlayerStats === "function") {
-    let newMaxHp = window.resolvePlayerStats().maxHp;
-    window.playerStats.currentHp = Math.min(
-      window.playerStats.currentHp,
-      newMaxHp,
-    );
-  }
-
-  if (typeof window.updateUI === "function") window.updateUI();
-  if (typeof window.renderInventory === "function") window.renderInventory();
-  if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-  if (typeof window.saveGame === "function") window.saveGame();
-};
-
-window.getStatLabel = function (propKey) {
-  const labels = {
-    bonusAtk: "Attack",
-    bonusMaxHp: "Max HP",
-    bonusDef: "Defense",
-    bonusMoveSpeed: "Move Speed",
-    bonusCritChance: "Crit Chance",
-    bonusCritDamage: "Crit Multi",
-    bonusBlock: "Block Rate",
-    bonusParry: "Parry Rate",
-    bonusActiveSpeed: "Active Atk Spd",
-    bonusIdleSpeed: "Idle Atk Spd",
-    bonusStr: "Strength",
-    bonusDex: "Dexterity",
-    bonusInt: "Intelligence",
-
-    atk: "Attack",
-    maxHp: "Max HP",
-    def: "Defense",
-    moveSpeed: "Move Speed",
-    critChance: "Crit Chance",
-    critDamage: "Crit Multi",
-    block: "Block Rate",
-    parry: "Parry Rate",
-    activeAttackSpeed: "Active Atk Spd",
-    idleAttackSpeed: "Idle Atk Spd",
-    str: "Strength",
-    dex: "Dexterity",
-    int: "Intelligence",
-
-    // Medal/Title stats mapping
-    drop: "Drop Rate",
-    qly: "Drop Quality",
-    gold: "Gold Multiplier",
-    xpRate: "XP Rate",
-    fairySpawn: "Fairy Spawn Rate",
-    rareSpawn: "Rare Spawn Rate",
-  };
-  return labels[propKey] || propKey;
-};
-
-window.lockForgeStat = function (propKey) {
-  if (!window.forgeSelectedItem) return;
-  window.forgeSelectedItem.reforgedProperty = propKey;
-  if (typeof window.pushHeaderToast === "function")
-    window.pushHeaderToast("Stat line locked for Reforging!", "#f1c40f");
-  if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-};
-
-window.selectReforgeStat = function (propKey) {
-  if (!window.forgeSelectedItem) return;
-  window.forgeSelectedItem.tempReforgeProp = propKey;
-  if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-};
-
-window.reforgeItemStat = function () {
-  if (!window.forgeSelectedItem) return;
-  let item = window.forgeSelectedItem;
-  if (window.playerStats.pendingClanProgress) {
-    window.playerStats.pendingClanProgress.reforges =
-      (window.playerStats.pendingClanProgress.reforges || 0) + 1;
-  }
-
-  if (!item.reforgedProperty) {
-    if (!item.tempReforgeProp) {
+    if (targetItems.length === 0) {
       if (typeof window.pushHeaderToast === "function")
         window.pushHeaderToast(
-          "Select a stat line to re-roll first!",
+          "No eligible unlocked items found under this rarity!",
           "#e74c3c",
         );
       return;
     }
-    item.reforgedProperty = item.tempReforgeProp;
-  }
 
-  let rProp = item.reforgedProperty;
-  let itemLvlMultiplier = Math.pow(
-    1.045,
-    Math.max(0, (item.stageLevel - 1) * 5),
-  );
-  let costGold = Math.floor(
-    150 * itemLvlMultiplier * Math.pow(2, item.statsRolled),
-  );
+    let label =
+      maxStars === 0
+        ? "Common Gear (0★)"
+        : window.getTierName(maxStars) + " & Under";
 
-  let ownedCores = window.inventory.ETC["Catalyst Core"] || 0;
+    if (typeof window.showCustomConfirm === "function") {
+      window.showCustomConfirm(
+        "Bulk Deconstruct",
+        `Are you sure you want to bulk salvage ${targetItems.length} unlocked items (${label})?`,
+        "Deconstruct",
+        "Cancel",
+        "#e74c3c",
+        () => {
+          let bulkScrapsHarvested = {};
+          function incrementScrap(name, amount) {
+            if (!bulkScrapsHarvested[name]) bulkScrapsHarvested[name] = 0;
+            bulkScrapsHarvested[name] += amount;
+            if (typeof window.addEtcDrop === "function")
+              window.addEtcDrop(name, amount);
+          }
 
-  if (window.playerStats.coins < costGold) {
+          targetItems.forEach((item) => {
+            let rolledTier = item.statsRolled;
+            let scrapName = window.getScrapYieldName(rolledTier);
+            let yieldAmount = Math.floor(Math.random() * 3) + 1;
+
+            incrementScrap(scrapName, yieldAmount);
+
+            for (let t = rolledTier - 1; t >= 0; t--) {
+              if (Math.random() < 0.6) {
+                let lowerYield = Math.floor(Math.random() * 2) + 1;
+                let lowerName = window.getScrapYieldName(t);
+                incrementScrap(lowerName, lowerYield);
+              }
+            }
+
+            if (
+              window.forgeSelectedItem &&
+              window.forgeSelectedItem.id === item.id
+            ) {
+              window.forgeSelectedItem = null;
+            }
+          });
+
+          window.playerStats.itemsSalvaged =
+            (window.playerStats.itemsSalvaged || 0) + targetItems.length;
+
+          if (typeof window.progressMission === "function") {
+            window.progressMission("salvage", targetItems.length);
+          }
+          if (window.playerStats.pendingClanProgress) {
+            window.playerStats.pendingClanProgress.salvage =
+              (window.playerStats.pendingClanProgress.salvage || 0) +
+              targetItems.length;
+          }
+
+          let targetIds = new Set(targetItems.map((item) => item.id));
+          window.inventory.EQUIP = window.inventory.EQUIP.filter(
+            (item) => !targetIds.has(item.id),
+          );
+
+          let cvs = document.getElementById("gameCanvas");
+          let w = cvs ? cvs.width : 750;
+          let h = cvs ? cvs.height : 250;
+          for (let i = 0; i < 45; i++) {
+            if (window.particles) {
+              window.particles.push({
+                x: w / 2 + (Math.random() - 0.5) * 120,
+                y: h / 2 + (Math.random() - 0.5) * 40,
+                vx: (Math.random() - 0.5) * 12,
+                vy: (Math.random() - 0.7) * 9,
+                radius: Math.random() * 3.5 + 1.5,
+                color: Math.random() > 0.5 ? "#7f8c8d" : "#e74c3c",
+                alpha: 1,
+                life: Math.random() * 30 + 15,
+              });
+            }
+          }
+
+          let outputReport = Object.keys(bulkScrapsHarvested)
+            .map((k) => `x${bulkScrapsHarvested[k]} ${k}`)
+            .join(", ");
+
+          if (typeof window.pushLog === "function")
+            window.pushLog(
+              `<span style='color:#e74c3c;'>[BULK SALVAGE]</span> Dismantled ${targetItems.length} items. Harvested: ${outputReport}`,
+            );
+          if (typeof window.pushHeaderToast === "function")
+            window.pushHeaderToast(
+              "♻️ Bulk Salvaged " + targetItems.length + " Items!",
+              "#e74c3c",
+            );
+
+          if (typeof window.resolvePlayerStats === "function") {
+            let newMaxHp = window.resolvePlayerStats().maxHp;
+            window.playerStats.currentHp = Math.min(
+              window.playerStats.currentHp,
+              newMaxHp,
+            );
+          }
+
+          if (typeof window.checkAchievements === "function")
+            window.checkAchievements();
+          if (typeof window.updateUI === "function") window.updateUI();
+          if (typeof window.renderInventory === "function")
+            window.renderInventory();
+          if (typeof window.renderForgeTab === "function")
+            window.renderForgeTab();
+          if (typeof window.saveGame === "function") window.saveGame();
+        },
+      );
+    }
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.triggerBulkSalvage = () => window.ForgeManager.triggerBulkSalvage();
+
+// --- FORGE CRAFTING PROCESSES ---
+
+// Append temperItem inside ForgeManager
+Object.assign(window.ForgeManager, {
+  temperItem() {
+    if (!window.forgeSelectedItem) return;
+    let isArt = window.forgeSelectedItem.type === "artifact";
+    if (window.playerStats.pendingClanProgress) {
+      window.playerStats.pendingClanProgress.tempers =
+        (window.playerStats.pendingClanProgress.tempers || 0) + 1;
+    }
+
+    if (window.forgeMode === "temper") {
+      let maxT = this.getMaxTemper(
+        window.forgeSelectedItem.statsRolled,
+        window.forgeSelectedItem.type,
+      );
+      if (window.forgeSelectedItem.temperLevel >= maxT) return;
+      let costGold = this.getTemperGoldCost(window.forgeSelectedItem);
+      let scrapReqAmount = this.getRequiredScrapAmountForTemper(
+        window.forgeSelectedItem,
+      );
+      let scrapReq = this.getRequiredScrapForTemper(window.forgeSelectedItem);
+
+      if (window.playerStats.coins < costGold) {
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            `<span style='color:#e74c3c;'>Not enough Gold to temper!</span>`,
+          );
+        return;
+      }
+      if (
+        !window.inventory.ETC[scrapReq] ||
+        window.inventory.ETC[scrapReq] < scrapReqAmount
+      ) {
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            `<span style='color:#e74c3c;'>Not enough ${scrapReq} to temper!</span>`,
+          );
+        return;
+      }
+
+      let failChance = window.forgeSelectedItem.temperLevel * 5;
+      let isSuccess = Math.random() >= failChance / 100;
+
+      window.playerStats.coins -= costGold;
+      window.inventory.ETC[scrapReq] -= scrapReqAmount;
+      if (window.inventory.ETC[scrapReq] === 0)
+        delete window.inventory.ETC[scrapReq];
+
+      if (window.playerStats.coins === 0) {
+        window.playerStats.hasTriggeredExactChange = true;
+      }
+
+      if (isSuccess) {
+        window.forgeSelectedItem.temperLevel++;
+        window.forgeSelectedItem.consecutiveFailures = 0;
+        window.recalculateItemStats(window.forgeSelectedItem);
+        window.playerStats.totalTempers =
+          (window.playerStats.totalTempers || 0) + 1;
+        if (typeof window.progressMission === "function")
+          window.progressMission("tempers", 1);
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            `<span style='color:#e67e22;'>[FORGE]</span> Successfully tempered ${window.forgeSelectedItem.name} to [+${window.forgeSelectedItem.temperLevel}]!`,
+          );
+        if (typeof window.pushHeaderToast === "function")
+          window.pushHeaderToast(
+            "🔨 Success! [+" + window.forgeSelectedItem.temperLevel + "]",
+            "#2ecc71",
+          );
+        if (typeof window.spawnTemperParticles === "function")
+          window.spawnTemperParticles(true);
+        if (typeof window.checkAchievements === "function")
+          window.checkAchievements();
+      } else {
+        if (failChance <= 10) window.playerStats.hasTriggeredMurphysLaw = true;
+        if (window.forgeSelectedItem.temperLevel < 9) {
+          window.forgeSelectedItem.consecutiveFailures =
+            (window.forgeSelectedItem.consecutiveFailures || 0) + 1;
+          if (window.forgeSelectedItem.consecutiveFailures >= 3)
+            window.playerStats.hasTriggeredUnfortunateSoul = true;
+        }
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            `<span style='color:#e74c3c;'>[FORGE]</span> Temper failed on ${window.forgeSelectedItem.name}! Materials lost.`,
+          );
+        if (typeof window.pushHeaderToast === "function")
+          window.pushHeaderToast(`💥 Temper Failed!`, "#e74c3c");
+        if (typeof window.spawnTemperParticles === "function")
+          window.spawnTemperParticles(false);
+      }
+    } else if (window.forgeMode === "tier") {
+      if (window.forgeSelectedItem.statsRolled >= 5) return;
+      let currentStars = window.forgeSelectedItem.statsRolled;
+      let targetStars = currentStars + 1;
+      let costGold = targetStars * 2500;
+      let shardReq = targetStars;
+      let scrapReqAmount = targetStars * 5;
+      let targetScrapName = this.getScrapYieldName
+        ? window.getScrapYieldName(targetStars)
+        : window.ItemFactory.getScrapYieldName(targetStars);
+
+      let playerShards = window.inventory.ETC["Eridium Shard"] || 0;
+      let playerScraps = window.inventory.ETC[targetScrapName] || 0;
+
+      if (window.playerStats.coins < costGold) {
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            `<span style='color:#e74c3c;'>Not enough Gold to Tier Up!</span>`,
+          );
+        return;
+      }
+      if (playerShards < shardReq) {
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            `<span style='color:#e74c3c;'>Not enough Eridium Shards!</span>`,
+          );
+        return;
+      }
+      if (playerScraps < scrapReqAmount) {
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            `<span style='color:#e74c3c;'>Not enough ${targetScrapName}!</span>`,
+          );
+        return;
+      }
+
+      window.playerStats.coins -= costGold;
+      window.inventory.ETC["Eridium Shard"] -= shardReq;
+      if (window.inventory.ETC["Eridium Shard"] === 0)
+        delete window.inventory.ETC["Eridium Shard"];
+
+      window.inventory.ETC[targetScrapName] -= scrapReqAmount;
+      if (window.inventory.ETC[targetScrapName] === 0)
+        delete window.inventory.ETC[targetScrapName];
+
+      window.scaleItemBonusStats(
+        window.forgeSelectedItem,
+        currentStars,
+        targetStars,
+      );
+
+      window.forgeSelectedItem.statsRolled++;
+      window.addRandomStatLineToItem(window.forgeSelectedItem);
+      window.forgeSelectedItem.name = window.buildProceduralName(
+        window.forgeSelectedItem,
+      );
+
+      if (typeof window.pushLog === "function")
+        window.pushLog(
+          `<span style='color:#e67e22;'>[FORGE]</span> Successfully Tiered Up ${window.forgeSelectedItem.name} to ${window.forgeSelectedItem.statsRolled}★!`,
+        );
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast(
+          "⭐ Tier Up! " + window.forgeSelectedItem.statsRolled + "★",
+          "#e67e22",
+        );
+      if (typeof window.spawnTemperParticles === "function")
+        window.spawnTemperParticles(true);
+    }
+
+    if (typeof window.updateUI === "function") window.updateUI();
+    if (typeof window.renderInventory === "function") window.renderInventory();
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+    if (typeof window.saveGame === "function") window.saveGame();
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.temperItem = () => window.ForgeManager.temperItem();
+
+// Append enchantItem inside ForgeManager
+Object.assign(window.ForgeManager, {
+  enchantItem() {
+    if (!window.forgeSelectedItem) return;
+    let item = window.forgeSelectedItem;
+
+    let maxT = this.getMaxTemper(item.statsRolled, item.type);
+    if (item.temperLevel < maxT) {
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast(
+          `Item must be fully Tempered first! (+${maxT})`,
+          "#e74c3c",
+        );
+      return;
+    }
+
+    let maxEnchants = this.getMaxEnchants(item);
+    let currentEnchants = item.totalEnchants || 0;
+    if (currentEnchants >= maxEnchants) {
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast("Max Enchantments Reached!", "#e74c3c");
+      return;
+    }
+
+    let playerEssence = window.inventory.ETC["Astral Essence"] || 0;
+    if (playerEssence < 1) {
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast("Requires 1 Astral Essence!", "#e74c3c");
+      return;
+    }
+
+    let validStats = [];
+    const ENCHANTABLE_STATS = [
+      "atk",
+      "maxHp",
+      "def",
+      "moveSpeed",
+      "critChance",
+      "critDamage",
+      "block",
+      "parry",
+      "str",
+      "dex",
+      "int",
+      "activeAttackSpeed",
+      "idleAttackSpeed",
+    ];
+    ENCHANTABLE_STATS.forEach((stat) => {
+      if (stat === "activeAttackSpeed" || stat === "idleAttackSpeed") {
+        if (item[stat] < 0) validStats.push(stat);
+      } else {
+        if (item[stat] > 0) validStats.push(stat);
+      }
+    });
+
+    if (validStats.length === 0) {
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast(
+          "This item has no stat lines to enchant!",
+          "#e74c3c",
+        );
+      return;
+    }
+
+    window.inventory.ETC["Astral Essence"]--;
+    if (window.inventory.ETC["Astral Essence"] === 0)
+      delete window.inventory.ETC["Astral Essence"];
+
+    if (!item.originalStats) {
+      item.originalStats = {
+        atk: item.atk,
+        maxHp: item.maxHp,
+        def: item.def,
+        moveSpeed: item.moveSpeed,
+        critChance: item.critChance,
+        critDamage: item.critDamage,
+        block: item.block,
+        parry: item.parry,
+        activeAttackSpeed: item.activeAttackSpeed,
+        idleAttackSpeed: item.idleAttackSpeed,
+        str: item.str,
+        dex: item.dex,
+        int: item.int,
+      };
+    }
+
+    let selectedStat =
+      validStats[Math.floor(Math.random() * validStats.length)];
+
+    item.enchantments = item.enchantments || {};
+    item.enchantments[selectedStat] =
+      (item.enchantments[selectedStat] || 0) + 1;
+    item.totalEnchants = (item.totalEnchants || 0) + 1;
+    window.playerStats.totalEnchants =
+      (window.playerStats.totalEnchants || 0) + 1;
+    if (typeof window.checkAchievements === "function")
+      window.checkAchievements();
+
+    const integerStats = ["atk", "maxHp", "def", "str", "dex", "int"];
+    if (integerStats.includes(selectedStat)) {
+      item[selectedStat] = Math.ceil(item[selectedStat] * 1.25);
+    } else {
+      item[selectedStat] = parseFloat((item[selectedStat] * 1.25).toFixed(4));
+    }
+
+    if (typeof window.pushLog === "function")
+      window.pushLog(
+        `<span style='color:#9b59b6;'>[ENCHANTER]</span> Successfully infused <strong style='color:#9b59b6;'>${this.getStatIcon(selectedStat)} ${selectedStat.toUpperCase()}</strong> by 25% on ${item.name}!`,
+      );
     if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast("Not enough Gold!", "#e74c3c");
-    return;
-  }
-  if (ownedCores < 1) {
+      window.pushHeaderToast(
+        `🔮 Enchanted: +25% ${selectedStat.toUpperCase()}!`,
+        "#9b59b6",
+      );
+
+    let cvs = document.getElementById("gameCanvas");
+    let w = cvs ? cvs.width : 750;
+    let h = cvs ? cvs.height : 250;
+    for (let i = 0; i < 35; i++) {
+      if (window.particles) {
+        window.particles.push({
+          x: w / 2,
+          y: h / 2,
+          vx: (Math.random() - 0.5) * 10,
+          vy: (Math.random() - 0.5) * 10,
+          radius: Math.random() * 3 + 1,
+          color: "#9b59b6",
+          alpha: 1,
+          life: 40,
+        });
+      }
+    }
+
+    if (typeof window.resolvePlayerStats === "function") {
+      let newMaxHp = window.resolvePlayerStats().maxHp;
+      window.playerStats.currentHp = Math.min(
+        window.playerStats.currentHp,
+        newMaxHp,
+      );
+    }
+
+    if (typeof window.updateUI === "function") window.updateUI();
+    if (typeof window.renderInventory === "function") window.renderInventory();
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+    if (typeof window.saveGame === "function") window.saveGame();
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.enchantItem = () => window.ForgeManager.enchantItem();
+
+// Append resetItemEnchants inside ForgeManager
+Object.assign(window.ForgeManager, {
+  resetItemEnchants() {
+    if (!window.forgeSelectedItem) return;
+    let item = window.forgeSelectedItem;
+    if (!item.totalEnchants || item.totalEnchants === 0) {
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast("No enchants to reset!", "#e74c3c");
+      return;
+    }
+
+    let resetGoldCost = 1000 * item.stageLevel * (item.statsRolled || 1);
+    if (window.playerStats.coins < resetGoldCost) {
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast("Not enough Gold to reset!", "#e74c3c");
+      return;
+    }
+
+    window.playerStats.coins -= resetGoldCost;
+
+    if (item.originalStats) {
+      for (let key in item.originalStats) {
+        item[key] = item.originalStats[key];
+      }
+      delete item.originalStats;
+    }
+    delete item.enchantments;
+    item.totalEnchants = 0;
+
+    if (typeof window.pushLog === "function")
+      window.pushLog(
+        `<span style='color:#e74c3c;'>[ENCHANTER]</span> Purged all enchantments from ${item.name}!`,
+      );
     if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast("Requires 1 Catalyst Core!", "#e74c3c");
-    return;
-  }
+      window.pushHeaderToast(`🧹 Purged Enchantments!`, "#e74c3c");
 
-  window.playerStats.coins -= costGold;
-  window.inventory.ETC["Catalyst Core"]--;
-  if (window.inventory.ETC["Catalyst Core"] === 0)
-    delete window.inventory.ETC["Catalyst Core"];
+    let cvs = document.getElementById("gameCanvas");
+    let w = cvs ? cvs.width : 750;
+    let h = cvs ? cvs.height : 250;
+    for (let i = 0; i < 35; i++) {
+      if (window.particles) {
+        window.particles.push({
+          x: w / 2,
+          y: h / 2,
+          vx: (Math.random() - 0.5) * 8,
+          vy: (Math.random() - 0.5) * 8,
+          radius: Math.random() * 2 + 1,
+          color: "#7f8c8d",
+          alpha: 1,
+          life: 30,
+        });
+      }
+    }
 
-  item[rProp] = 0;
+    if (typeof window.resolvePlayerStats === "function") {
+      let newMaxHp = window.resolvePlayerStats().maxHp;
+      window.playerStats.currentHp = Math.min(
+        window.playerStats.currentHp,
+        newMaxHp,
+      );
+    }
 
-  let mapping = {
-    bonusAtk: "atk",
-    bonusMaxHp: "maxHp",
-    bonusDef: "def",
-    bonusMoveSpeed: "moveSpeed",
-    bonusCritChance: "critChance",
-    bonusCritDamage: "critDamage",
-    bonusBlock: "block",
-    bonusParry: "parry",
-    bonusActiveSpeed: "activeAttackSpeed",
-    bonusIdleSpeed: "idleAttackSpeed",
-    bonusStr: "str",
-    bonusDex: "dex",
-    bonusInt: "int",
-  };
+    if (typeof window.updateUI === "function") window.updateUI();
+    if (typeof window.renderInventory === "function") window.renderInventory();
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+    if (typeof window.saveGame === "function") window.saveGame();
+  },
+});
 
-  let possiblePool = Object.keys(mapping);
-  if (item.type === "subweapon") {
-    if (item.subType === "shield")
-      possiblePool = [
-        "bonusBlock",
-        "bonusAtk",
-        "bonusMaxHp",
-        "bonusDef",
-        "bonusStr",
-      ];
-    else if (item.subType === "dagger")
-      possiblePool = ["bonusParry", "bonusAtk", "bonusCritChance", "bonusDex"];
-    else if (item.subType === "tome")
-      possiblePool = [
-        "bonusCritDamage",
-        "bonusInt",
-        "bonusActiveSpeed",
-        "bonusIdleSpeed",
-      ];
-  }
+// Legacy Compatibility Aliases to protect references
+window.resetItemEnchants = () => window.ForgeManager.resetItemEnchants();
 
-  let activeBonuses = possiblePool.filter(
-    (k) =>
-      k !== rProp && item[k] !== 0 && item[k] !== undefined && item[k] !== null,
-  );
-  let eligiblePool = possiblePool.filter((k) => !activeBonuses.includes(k));
-  if (eligiblePool.length === 0) eligiblePool = possiblePool;
+// Append getStatLabel inside ForgeManager
+Object.assign(window.ForgeManager, {
+  getStatLabel(propKey) {
+    const labels = {
+      bonusAtk: "Attack",
+      bonusMaxHp: "Max HP",
+      bonusDef: "Defense",
+      bonusMoveSpeed: "Move Speed",
+      bonusCritChance: "Crit Chance",
+      bonusCritDamage: "Crit Multi",
+      bonusBlock: "Block Rate",
+      bonusParry: "Parry Rate",
+      bonusActiveSpeed: "Active Atk Spd",
+      bonusIdleSpeed: "Idle Atk Spd",
+      bonusStr: "Strength",
+      bonusDex: "Dexterity",
+      bonusInt: "Intelligence",
 
-  let newProp = eligiblePool[Math.floor(Math.random() * eligiblePool.length)];
-  let stageScale = item.stageLevel || 1;
-  // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-  let expScale = Math.pow(1.58, stageScale);
-  let hpDefExpScale = Math.pow(1.56, stageScale);
-  let rarityMult = 1 + item.statsRolled * 0.15;
-  let rolledValue = 0;
+      atk: "Attack",
+      maxHp: "Max HP",
+      def: "Defense",
+      moveSpeed: "Move Speed",
+      critChance: "Crit Chance",
+      critDamage: "Crit Multi",
+      block: "Block Rate",
+      parry: "Parry Rate",
+      activeAttackSpeed: "Active Atk Spd",
+      idleAttackSpeed: "Idle Atk Spd",
+      str: "Strength",
+      dex: "Dexterity",
+      int: "Intelligence",
 
-  if (newProp === "bonusAtk")
-    rolledValue = Math.ceil(
-      window.randFloat(0.15, 0.35) * expScale * rarityMult,
+      // Medal/Title stats mapping
+      drop: "Drop Rate",
+      qly: "Drop Quality",
+      gold: "Gold Multiplier",
+      xpRate: "XP Rate",
+      fairySpawn: "Fairy Spawn Rate",
+      rareSpawn: "Rare Spawn Rate",
+    };
+    return labels[propKey] || propKey;
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.getStatLabel = (propKey) => window.ForgeManager.getStatLabel(propKey);
+
+// Append lockForgeStat inside ForgeManager
+Object.assign(window.ForgeManager, {
+  lockForgeStat(propKey) {
+    if (!window.forgeSelectedItem) return;
+    window.forgeSelectedItem.reforgedProperty = propKey;
+    if (typeof window.pushHeaderToast === "function")
+      window.pushHeaderToast("Stat line locked for Reforging!", "#f1c40f");
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.lockForgeStat = (propKey) => window.ForgeManager.lockForgeStat(propKey);
+
+// Append selectReforgeStat inside ForgeManager
+Object.assign(window.ForgeManager, {
+  selectReforgeStat(propKey) {
+    if (!window.forgeSelectedItem) return;
+    window.forgeSelectedItem.tempReforgeProp = propKey;
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.selectReforgeStat = (propKey) =>
+  window.ForgeManager.selectReforgeStat(propKey);
+
+// Append reforgeItemStat inside ForgeManager
+Object.assign(window.ForgeManager, {
+  reforgeItemStat() {
+    if (!window.forgeSelectedItem) return;
+    let item = window.forgeSelectedItem;
+    if (window.playerStats.pendingClanProgress) {
+      window.playerStats.pendingClanProgress.reforges =
+        (window.playerStats.pendingClanProgress.reforges || 0) + 1;
+    }
+
+    if (!item.reforgedProperty) {
+      if (!item.tempReforgeProp) {
+        if (typeof window.pushHeaderToast === "function")
+          window.pushHeaderToast(
+            "Select a stat line to re-roll first!",
+            "#e74c3c",
+          );
+        return;
+      }
+      item.reforgedProperty = item.tempReforgeProp;
+    }
+
+    let rProp = item.reforgedProperty;
+    let itemLvlMultiplier = Math.pow(
+      1.045,
+      Math.max(0, (item.stageLevel - 1) * 5),
     );
-  else if (newProp === "bonusMaxHp")
-    rolledValue = Math.ceil(
-      window.randFloat(0.4, 1.2) * hpDefExpScale * rarityMult,
+    let costGold = Math.floor(
+      150 * itemLvlMultiplier * Math.pow(2, item.statsRolled),
     );
-  else if (newProp === "bonusDef")
-    rolledValue = Math.ceil(
-      window.randFloat(0.15, 0.35) * hpDefExpScale * rarityMult,
-    );
-  else if (newProp === "bonusMoveSpeed")
-    rolledValue = Math.ceil(window.randInt(1, 2) * stageScale * rarityMult);
-  else if (newProp === "bonusCritChance")
-    rolledValue = parseFloat(
-      Math.min(
-        0.2,
-        window.randFloat(0.01, 0.025) * Math.sqrt(stageScale) * rarityMult,
-      ).toFixed(4),
-    );
-  else if (newProp === "bonusCritDamage")
-    rolledValue = parseFloat(
-      (
-        window.randFloat(0.03, 0.06) *
-        Math.sqrt(stageScale) *
-        rarityMult
-      ).toFixed(4),
-    );
-  else if (newProp === "bonusBlock")
-    rolledValue = parseFloat(
-      Math.min(
-        0.15,
-        window.randFloat(0.005, 0.015) * Math.sqrt(stageScale) * rarityMult,
-      ).toFixed(4),
-    );
-  else if (newProp === "bonusParry")
-    rolledValue = parseFloat(
-      Math.min(
-        0.15,
-        window.randFloat(0.005, 0.015) * Math.sqrt(stageScale) * rarityMult,
-      ).toFixed(4),
-    );
-  else if (newProp === "bonusActiveSpeed") {
-    let sScale = Math.pow(stageScale, 0.3);
-    let rMult = 1 + item.statsRolled * 0.08;
-    let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
-    rolledValue = parseFloat(
-      (window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4),
-    );
-  } else if (newProp === "bonusIdleSpeed") {
-    let sScale = Math.pow(stageScale, 0.3);
-    let rMult = 1 + item.statsRolled * 0.08;
-    let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
-    rolledValue = parseFloat(
-      (window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4),
-    );
-  } else if (newProp === "bonusStr")
-    rolledValue = Math.ceil(window.randInt(1, 3) * stageScale * rarityMult);
-  else if (newProp === "bonusDex")
-    rolledValue = Math.ceil(window.randInt(1, 3) * stageScale * rarityMult);
-  else if (newProp === "bonusInt")
-    rolledValue = Math.ceil(window.randInt(1, 3) * stageScale * rarityMult);
 
-  item[newProp] = rolledValue;
-  item.reforgedProperty = newProp;
+    let ownedCores = window.inventory.ETC["Catalyst Core"] || 0;
 
-  window.recalculateItemStats(item);
-  item.name = window.buildProceduralName(item);
-  window.playerStats.totalReforges =
-    (window.playerStats.totalReforges || 0) + 1;
-  if (typeof window.progressMission === "function")
-    window.progressMission("reforges", 1);
+    if (window.playerStats.coins < costGold) {
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast("Not enough Gold!", "#e74c3c");
+      return;
+    }
+    if (ownedCores < 1) {
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast("Requires 1 Catalyst Core!", "#e74c3c");
+      return;
+    }
 
-  if (typeof window.pushLog === "function")
-    window.pushLog(
-      `<span style='color:#e67e22;'>[FORGE]</span> Reforged modifier into <strong style='color:#2ecc71;'>${window.getStatLabel(newProp)} (+${rolledValue})</strong> on ${item.name}!`,
+    window.playerStats.coins -= costGold;
+    window.inventory.ETC["Catalyst Core"]--;
+    if (window.inventory.ETC["Catalyst Core"] === 0)
+      delete window.inventory.ETC["Catalyst Core"];
+
+    item[rProp] = 0;
+
+    let mapping = {
+      bonusAtk: "atk",
+      bonusMaxHp: "maxHp",
+      bonusDef: "def",
+      bonusMoveSpeed: "moveSpeed",
+      bonusCritChance: "critChance",
+      bonusCritDamage: "critDamage",
+      bonusBlock: "block",
+      bonusParry: "parry",
+      bonusActiveSpeed: "activeAttackSpeed",
+      bonusIdleSpeed: "idleAttackSpeed",
+      bonusStr: "str",
+      bonusDex: "dex",
+      bonusInt: "int",
+    };
+
+    let possiblePool = Object.keys(mapping);
+    if (item.type === "subweapon") {
+      if (item.subType === "shield")
+        possiblePool = [
+          "bonusBlock",
+          "bonusAtk",
+          "bonusMaxHp",
+          "bonusDef",
+          "bonusStr",
+        ];
+      else if (item.subType === "dagger")
+        possiblePool = [
+          "bonusParry",
+          "bonusAtk",
+          "bonusCritChance",
+          "bonusDex",
+        ];
+      else if (item.subType === "tome")
+        possiblePool = [
+          "bonusCritDamage",
+          "bonusInt",
+          "bonusActiveSpeed",
+          "bonusIdleSpeed",
+        ];
+    }
+
+    let activeBonuses = possiblePool.filter(
+      (k) =>
+        k !== rProp &&
+        item[k] !== 0 &&
+        item[k] !== undefined &&
+        item[k] !== null,
     );
-  if (typeof window.pushHeaderToast === "function")
-    window.pushHeaderToast("🔨 Stat Reforged!", "#2ecc71");
+    let eligiblePool = possiblePool.filter((k) => !activeBonuses.includes(k));
+    if (eligiblePool.length === 0) eligiblePool = possiblePool;
 
-  if (typeof window.spawnTemperParticles === "function")
-    window.spawnTemperParticles(true);
-  if (typeof window.updateUI === "function") window.updateUI();
-  if (typeof window.renderInventory === "function") window.renderInventory();
-  if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-  if (typeof window.saveGame === "function") window.saveGame();
-};
+    let newProp = eligiblePool[Math.floor(Math.random() * eligiblePool.length)];
+    let stageScale = item.stageLevel || 1;
+    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
+    let expScale = Math.pow(1.58, stageScale);
+    let hpDefExpScale = Math.pow(1.56, stageScale);
+    let rarityMult = 1 + item.statsRolled * 0.15;
+    let rolledValue = 0;
+
+    if (newProp === "bonusAtk")
+      rolledValue = Math.ceil(
+        window.randFloat(0.15, 0.35) * expScale * rarityMult,
+      );
+    else if (newProp === "bonusMaxHp")
+      rolledValue = Math.ceil(
+        window.randFloat(0.4, 1.2) * hpDefExpScale * rarityMult,
+      );
+    else if (newProp === "bonusDef")
+      rolledValue = Math.ceil(
+        window.randFloat(0.15, 0.35) * hpDefExpScale * rarityMult,
+      );
+    else if (newProp === "bonusMoveSpeed")
+      rolledValue = Math.ceil(window.randInt(1, 2) * stageScale * rarityMult);
+    else if (newProp === "bonusCritChance")
+      rolledValue = parseFloat(
+        Math.min(
+          0.2,
+          window.randFloat(0.01, 0.025) * Math.sqrt(stageScale) * rarityMult,
+        ).toFixed(4),
+      );
+    else if (newProp === "bonusCritDamage")
+      rolledValue = parseFloat(
+        (
+          window.randFloat(0.03, 0.06) *
+          Math.sqrt(stageScale) *
+          rarityMult
+        ).toFixed(4),
+      );
+    else if (newProp === "bonusBlock")
+      rolledValue = parseFloat(
+        Math.min(
+          0.15,
+          window.randFloat(0.005, 0.015) * Math.sqrt(stageScale) * rarityMult,
+        ).toFixed(4),
+      );
+    else if (newProp === "bonusParry")
+      rolledValue = parseFloat(
+        Math.min(
+          0.15,
+          window.randFloat(0.005, 0.015) * Math.sqrt(stageScale) * rarityMult,
+        ).toFixed(4),
+      );
+    else if (newProp === "bonusActiveSpeed") {
+      let sScale = Math.pow(stageScale, 0.3);
+      let rMult = 1 + item.statsRolled * 0.08;
+      let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
+      rolledValue = parseFloat(
+        (window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4),
+      );
+    } else if (newProp === "bonusIdleSpeed") {
+      let sScale = Math.pow(stageScale, 0.3);
+      let rMult = 1 + item.statsRolled * 0.08;
+      let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
+      rolledValue = parseFloat(
+        (window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4),
+      );
+    } else if (newProp === "bonusStr")
+      rolledValue = Math.ceil(window.randInt(1, 3) * stageScale * rarityMult);
+    else if (newProp === "bonusDex")
+      rolledValue = Math.ceil(window.randInt(1, 3) * stageScale * rarityMult);
+    else if (newProp === "bonusInt")
+      rolledValue = Math.ceil(window.randInt(1, 3) * stageScale * rarityMult);
+
+    item[newProp] = rolledValue;
+    item.reforgedProperty = newProp;
+
+    window.recalculateItemStats(item);
+    item.name = window.buildProceduralName(item);
+    window.playerStats.totalReforges =
+      (window.playerStats.totalReforges || 0) + 1;
+    if (typeof window.progressMission === "function")
+      window.progressMission("reforges", 1);
+
+    if (typeof window.pushLog === "function")
+      window.pushLog(
+        `<span style='color:#e67e22;'>[FORGE]</span> Reforged modifier into <strong style='color:#2ecc71;'>${this.getStatLabel(newProp)} (+${rolledValue})</strong> on ${item.name}!`,
+      );
+    if (typeof window.pushHeaderToast === "function")
+      window.pushHeaderToast("🔨 Stat Reforged!", "#2ecc71");
+
+    if (typeof window.spawnTemperParticles === "function")
+      window.spawnTemperParticles(true);
+    if (typeof window.updateUI === "function") window.updateUI();
+    if (typeof window.renderInventory === "function") window.renderInventory();
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+    if (typeof window.saveGame === "function") window.saveGame();
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.reforgeItemStat = () => window.ForgeManager.reforgeItemStat();
 
 // ==========================================================================
 // --- MARKET & SHOP TRANSACTION LOGIC ---
@@ -3282,6 +3565,7 @@ window.buyShopItem = function (index) {
 
   window.playerStats.coins -= item.cost;
   item.purchased = true;
+  item.justPurchased = true;
 
   if (window.playerStats.coins === 0) {
     window.playerStats.hasTriggeredExactChange = true;
@@ -3302,14 +3586,13 @@ window.buyShopItem = function (index) {
   }
 
   window.updateUI();
+  if (typeof window.renderMarketShop === "function") window.renderMarketShop();
   window.renderInventory();
   window.saveGame();
 };
 
 window.buyMysticalItem = function (index) {
   let item = window.MYSTICAL_STOCK[index];
-  if (!item) return;
-
   let cost = item.cost;
   let currency = item.currency;
 
@@ -3361,6 +3644,8 @@ window.buyMysticalItem = function (index) {
   }
 
   window.updateUI();
+  if (typeof window.renderMysticalShop === "function")
+    window.renderMysticalShop();
   window.renderInventory();
   window.saveGame();
 };
@@ -3402,6 +3687,17 @@ window.buyGoldUpgrade = function (type) {
 
   window.updateUI();
   window.renderGoldUpgrades();
+
+  // Find newly rendered card and trigger physical purchase slam flash!
+  let cardEl = document.getElementById(`sink-card-${type}`);
+  if (cardEl) {
+    cardEl.classList.add("sink-upgraded-flash");
+    setTimeout(() => {
+      let checkEl = document.getElementById(`sink-card-${type}`);
+      if (checkEl) checkEl.classList.remove("sink-upgraded-flash");
+    }, 600);
+  }
+
   window.saveGame();
 };
 
@@ -3435,77 +3731,83 @@ window.transmutePotion = function (index) {
   window.saveGame();
 };
 
-window.rerollItemSet = function () {
-  if (!window.forgeSelectedItem) return;
-  let item = window.forgeSelectedItem;
-  if (item.type === "artifact" || item.statsRolled === "UNIQUE") return;
+// Append rerollItemSet inside ForgeManager
+Object.assign(window.ForgeManager, {
+  rerollItemSet() {
+    if (!window.forgeSelectedItem) return;
+    let item = window.forgeSelectedItem;
+    if (item.type === "artifact" || item.statsRolled === "UNIQUE") return;
 
-  let costGold = window.getSetRerollGoldCost(item);
-  let soulCost = 25 + item.statsRolled * 25;
-  let ownedSouls = window.inventory.ETC["Monster Soul"] || 0;
+    let costGold = window.getSetRerollGoldCost(item);
+    let soulCost = 25 + item.statsRolled * 25;
+    let ownedSouls = window.inventory.ETC["Monster Soul"] || 0;
 
-  if (window.playerStats.coins < costGold) {
+    if (window.playerStats.coins < costGold) {
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast("❌ Not enough Gold!", "#e74c3c");
+      return;
+    }
+    if (ownedSouls < soulCost) {
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast("❌ Not enough Monster Souls!", "#e74c3c");
+      return;
+    }
+
+    window.playerStats.coins -= costGold;
+    window.inventory.ETC["Monster Soul"] -= soulCost;
+    if (window.inventory.ETC["Monster Soul"] === 0) {
+      delete window.inventory.ETC["Monster Soul"];
+    }
+
+    let setKeys = [
+      "Vanguard",
+      "Colossus",
+      "Bastion",
+      "Windrunner",
+      "Wraith",
+      "Reaver",
+      "Dreadnought",
+      "Duellist",
+      "Scholar",
+      "Berserker",
+      "Scout",
+      "Fortune",
+      "Mystic",
+      "Alchemist",
+      "Midas",
+      "Biohazard",
+      "Warlord",
+      "VoidTouched",
+    ];
+
+    // Roll a set that is different from the current one
+    let filtered = setKeys.filter((k) => k !== item.setName);
+    if (filtered.length === 0) filtered = setKeys;
+    let newSet = filtered[Math.floor(Math.random() * filtered.length)];
+
+    item.setName = newSet;
+    item.name = window.buildProceduralName(item);
+
+    if (typeof window.pushLog === "function")
+      window.pushLog(
+        `<span style='color:#2ecc71;'>[FORGE]</span> Successfully re-rolled set resonance of ${item.noun} to <strong style='color:#2ecc71;'>${newSet} Set</strong>!`,
+      );
     if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast("❌ Not enough Gold!", "#e74c3c");
-    return;
-  }
-  if (ownedSouls < soulCost) {
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast("❌ Not enough Monster Souls!", "#e74c3c");
-    return;
-  }
+      window.pushHeaderToast(`✨ Set Resonated: ${newSet}!`, "#2ecc71");
 
-  window.playerStats.coins -= costGold;
-  window.inventory.ETC["Monster Soul"] -= soulCost;
-  if (window.inventory.ETC["Monster Soul"] === 0) {
-    delete window.inventory.ETC["Monster Soul"];
-  }
+    if (typeof window.spawnTemperParticles === "function")
+      window.spawnTemperParticles(true);
+    if (window.SoundManager) window.SoundManager.play("spell");
 
-  let setKeys = [
-    "Vanguard",
-    "Colossus",
-    "Bastion",
-    "Windrunner",
-    "Wraith",
-    "Reaver",
-    "Dreadnought",
-    "Duellist",
-    "Scholar",
-    "Berserker",
-    "Scout",
-    "Fortune",
-    "Mystic",
-    "Alchemist",
-    "Midas",
-    "Biohazard",
-    "Warlord",
-    "VoidTouched",
-  ];
+    window.updateUI();
+    window.renderInventory();
+    window.renderForgeTab();
+    window.saveGame();
+  },
+});
 
-  // Roll a set that is different from the current one
-  let filtered = setKeys.filter((k) => k !== item.setName);
-  if (filtered.length === 0) filtered = setKeys;
-  let newSet = filtered[Math.floor(Math.random() * filtered.length)];
-
-  item.setName = newSet;
-  item.name = window.buildProceduralName(item);
-
-  if (typeof window.pushLog === "function")
-    window.pushLog(
-      `<span style='color:#2ecc71;'>[FORGE]</span> Successfully re-rolled set resonance of ${item.noun} to <strong style='color:#2ecc71;'>${newSet} Set</strong>!`,
-    );
-  if (typeof window.pushHeaderToast === "function")
-    window.pushHeaderToast(`✨ Set Resonated: ${newSet}!`, "#2ecc71");
-
-  if (typeof window.spawnTemperParticles === "function")
-    window.spawnTemperParticles(true);
-  if (window.SoundManager) window.SoundManager.play("spell");
-
-  window.updateUI();
-  window.renderInventory();
-  window.renderForgeTab();
-  window.saveGame();
-};
+// Legacy Compatibility Aliases to protect references
+window.rerollItemSet = () => window.ForgeManager.rerollItemSet();
 
 window.buyAstralShopItem = function (index) {
   let item = window.ASTRAL_SHOP_STOCK[index];
@@ -3535,7 +3837,7 @@ window.buyAstralShopItem = function (index) {
 
 // --- PROC-GEN CAVERN SIGIL APPLICATION SLOTTER ---
 window.executeSlotCavernSigil = function (id) {
-  let sigil = window.inventory.EQUIP.find((item) => item.id === id);
+  let sigil = window.inventory.SIGIL.find((item) => item.id === id);
   if (!sigil) return;
 
   window.state.slottedCavernSigil = sigil;

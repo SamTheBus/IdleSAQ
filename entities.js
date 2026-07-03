@@ -60,327 +60,371 @@
   window.penHero = 1.8;
   window.penBoss = 2.4;
 
-  window.getStageTier = function () {
-    let st = window.playerStats.stage;
-    if (st <= 100) return 0; // Forest (Stages 1-100)
-    if (st <= 200) return 1; // Peaks/Ruins (Stages 101-200)
-    if (st <= 300) return 2; // Inferno (Stages 201-300)
-    if (st <= 400) return 3; // Swamp (Stages 301-400)
-    if (st <= 500) return 4; // Void (Stages 401-500)
-    if (st <= 600) return 5; // Temporal Sanctorum (Stages 501-600)
-    return 6; // Cyberspace Nexus (Stages 601+)
+  // Initialize central RenderEngine Namespace
+  window.RenderEngine = {
+    getStageTier() {
+      let st = window.playerStats.stage;
+      if (st <= 100) return 0; // Forest (Stages 1-100)
+      if (st <= 200) return 1; // Peaks/Ruins (Stages 101-200)
+      if (st <= 300) return 2; // Inferno (Stages 201-300)
+      if (st <= 400) return 3; // Swamp (Stages 301-400)
+      if (st <= 500) return 4; // Void (Stages 401-500)
+      if (st <= 600) return 5; // Temporal Sanctorum (Stages 501-600)
+      return 6; // Cyberspace Nexus (Stages 601+)
+    },
   };
+
+  // Legacy Compatibility Aliases to protect references
+  window.getStageTier = () => window.RenderEngine.getStageTier();
 
   // --- VISUAL EFFECT & PARTICLE SPAWNERS ---
 
-  window.spawnDeathParticles = function (x, y, mobType) {
-    if (window.particles.length > 250) return;
-    let count = 15;
-    let colors = ["#2ecc71", "#27ae60", "#a3fd83"]; // Default Slime Green
-    let speed = 4;
+  // Append spawnDeathParticles inside window.RenderEngine
+  Object.assign(window.RenderEngine, {
+    spawnDeathParticles(x, y, mobType) {
+      if (window.particles.length > 250) return;
+      let count = 15;
+      let colors = ["#2ecc71", "#27ae60", "#a3fd83"]; // Default Slime Green
+      let speed = 4;
 
-    // Dynamically match debris colors to the exact monster type / theme
-    if (window.mob) {
-      let vType = window.mob.visualType;
-      let isGoldDungeon =
-        window.playerStats.currentDungeon === "gold" &&
-        window.playerStats.isDungeonMode;
-      let isMatDungeon =
-        window.playerStats.currentDungeon === "mat" &&
-        window.playerStats.isDungeonMode;
-      let isEquipDungeon =
-        window.playerStats.currentDungeon === "equip" &&
-        window.playerStats.isDungeonMode;
+      // Dynamically match debris colors to the exact monster type / theme
+      if (window.mob) {
+        let vType = window.mob.visualType;
+        let isGoldDungeon =
+          window.playerStats.currentDungeon === "gold" &&
+          window.playerStats.isDungeonMode;
+        let isMatDungeon =
+          window.playerStats.currentDungeon === "mat" &&
+          window.playerStats.isDungeonMode;
+        let isEquipDungeon =
+          window.playerStats.currentDungeon === "equip" &&
+          window.playerStats.isDungeonMode;
 
-      if (isGoldDungeon) {
-        colors = window.PARTICLE_THEMES.gold_dungeon;
-      } else if (isMatDungeon) {
-        colors = window.PARTICLE_THEMES.mat_dungeon;
-      } else if (isEquipDungeon) {
-        colors = window.PARTICLE_THEMES.equip_dungeon;
-      } else if (vType && window.PARTICLE_THEMES[vType]) {
-        colors = window.PARTICLE_THEMES[vType];
-      } else if (window.mob.type && window.PARTICLE_THEMES[window.mob.type]) {
-        colors = window.PARTICLE_THEMES[window.mob.type];
-      } else if (
-        mobType === "rift_guardian" ||
-        mobType === "void_spectre" ||
-        mobType === "void_crawler" ||
-        mobType === "void_orb"
-      ) {
-        count = 45;
-        colors = window.PARTICLE_THEMES.void_orb;
-        speed = 6;
-      } else if (mobType === "boss" || mobType === "dungeon_boss") {
-        count = 40;
-        colors = ["#e74c3c", "#e67e22", "#f1c40f", "#ffffff"];
-        speed = 7;
-      } else if (mobType === "prestige_boss") {
-        count = 60;
-        colors = window.PARTICLE_THEMES.prestige_boss;
+        if (isGoldDungeon) {
+          colors = window.PARTICLE_THEMES.gold_dungeon;
+        } else if (isMatDungeon) {
+          colors = window.PARTICLE_THEMES.mat_dungeon;
+        } else if (isEquipDungeon) {
+          colors = window.PARTICLE_THEMES.equip_dungeon;
+        } else if (vType && window.PARTICLE_THEMES[vType]) {
+          colors = window.PARTICLE_THEMES[vType];
+        } else if (window.mob.type && window.PARTICLE_THEMES[window.mob.type]) {
+          colors = window.PARTICLE_THEMES[window.mob.type];
+        } else if (
+          mobType === "rift_guardian" ||
+          mobType === "void_spectre" ||
+          mobType === "void_crawler" ||
+          mobType === "void_orb"
+        ) {
+          count = 45;
+          colors = window.PARTICLE_THEMES.void_orb;
+          speed = 6;
+        } else if (mobType === "boss" || mobType === "dungeon_boss") {
+          count = 40;
+          colors = ["#e74c3c", "#e67e22", "#f1c40f", "#ffffff"];
+          speed = 7;
+        } else if (mobType === "prestige_boss") {
+          count = 60;
+          colors = window.PARTICLE_THEMES.prestige_boss;
+          speed = 8;
+        } else if (mobType === "dungeon_miniboss") {
+          count = 25;
+          colors = ["#1abc9c", "#16a085", "#34495e"];
+          speed = 5;
+        } else {
+          let tier = window.getStageTier();
+          if (tier === 1) colors = window.PARTICLE_THEMES.tier1;
+          else if (tier === 2) colors = window.PARTICLE_THEMES.tier2;
+          else if (tier === 3) colors = window.PARTICLE_THEMES.tier3;
+          else if (tier === 4) colors = window.PARTICLE_THEMES.tier4;
+        }
+      }
+
+      for (let i = 0; i < count; i++) {
+        let angle = Math.random() * Math.PI * 2;
+        let velocity = window.randFloat(1, speed);
+        window.particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity - window.randFloat(1, 3),
+          radius: window.randFloat(1.5, 4.5),
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1,
+          fade: true,
+          maxLife: window.randInt(25, 45),
+          life: window.randInt(25, 45),
+        });
+      }
+    },
+  });
+
+  // Legacy Compatibility Aliases to protect references
+  window.spawnDeathParticles = (x, y, mobType) =>
+    window.RenderEngine.spawnDeathParticles(x, y, mobType);
+
+  // Append spawnTemperParticles inside window.RenderEngine
+  Object.assign(window.RenderEngine, {
+    spawnTemperParticles(isSuccess) {
+      let cvs = document.getElementById("gameCanvas");
+      let w = cvs ? cvs.width : 750;
+      let h = cvs ? cvs.height : 250;
+      let colors = isSuccess
+        ? ["#f1c40f", "#2ecc71", "#ffffff"]
+        : ["#7f8c8d", "#c0392b", "#2c3e50"];
+
+      for (let i = 0; i < 50; i++) {
+        window.particles.push({
+          x: w / 2,
+          y: h / 2,
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.5) * 16,
+          radius: Math.random() * 4 + 1.5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1,
+          life: isSuccess ? 45 : 30,
+        });
+      }
+    },
+  });
+
+  // Legacy Compatibility Aliases to protect references
+  window.spawnTemperParticles = (isSuccess) =>
+    window.RenderEngine.spawnTemperParticles(isSuccess);
+
+  // Append spawnPurchaseCelebration inside window.RenderEngine
+  Object.assign(window.RenderEngine, {
+    spawnPurchaseCelebration(theme, color, rarity) {
+      if (window.particles.length > 300) return;
+      let cvs = document.getElementById("gameCanvas");
+      let spawnX = cvs ? cvs.width / 2 : 375;
+      let spawnY = cvs ? cvs.height / 2 : 125;
+
+      let count = 25;
+      let speed = 5;
+      let text = "PURCHASED!";
+
+      if (theme === "gacha") {
+        count = 55;
         speed = 8;
-      } else if (mobType === "dungeon_miniboss") {
-        count = 25;
-        colors = ["#1abc9c", "#16a085", "#34495e"];
-        speed = 5;
-      } else {
-        let tier = window.getStageTier();
-        if (tier === 1) colors = window.PARTICLE_THEMES.tier1;
-        else if (tier === 2) colors = window.PARTICLE_THEMES.tier2;
-        else if (tier === 3) colors = window.PARTICLE_THEMES.tier3;
-        else if (tier === 4) colors = window.PARTICLE_THEMES.tier4;
+        text = "🎰 DISPENSED! 🎰";
+      } else if (theme === "altar") {
+        count = 65;
+        speed = 11;
+        text = "🔮 RIFT OPENED! 🔮";
+      } else if (theme === "alchemy") {
+        count = 20;
+        speed = 4;
+        text = "🧪 BREWED!";
       }
-    }
 
-    for (let i = 0; i < count; i++) {
-      let angle = Math.random() * Math.PI * 2;
-      let velocity = window.randFloat(1, speed);
-      window.particles.push({
-        x: x,
-        y: y,
-        vx: Math.cos(angle) * velocity,
-        vy: Math.sin(angle) * velocity - window.randFloat(1, 3),
-        radius: window.randFloat(1.5, 4.5),
-        color: colors[Math.floor(Math.random() * colors.length)],
-        alpha: 1,
-        fade: true,
-        maxLife: window.randInt(25, 45),
-        life: window.randInt(25, 45),
-      });
-    }
-  };
-
-  window.spawnTemperParticles = function (isSuccess) {
-    let cvs = document.getElementById("gameCanvas");
-    let w = cvs ? cvs.width : 750;
-    let h = cvs ? cvs.height : 250;
-    let colors = isSuccess
-      ? ["#f1c40f", "#2ecc71", "#ffffff"]
-      : ["#7f8c8d", "#c0392b", "#2c3e50"];
-
-    for (let i = 0; i < 50; i++) {
-      window.particles.push({
-        x: w / 2,
-        y: h / 2,
-        vx: (Math.random() - 0.5) * 16,
-        vy: (Math.random() - 0.5) * 16,
-        radius: Math.random() * 4 + 1.5,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        alpha: 1,
-        life: isSuccess ? 45 : 30,
-      });
-    }
-  };
-
-  window.spawnPurchaseCelebration = function (theme, color, rarity) {
-    if (window.particles.length > 300) return;
-    let cvs = document.getElementById("gameCanvas");
-    let spawnX = cvs ? cvs.width / 2 : 375;
-    let spawnY = cvs ? cvs.height / 2 : 125;
-
-    let count = 25;
-    let speed = 5;
-    let text = "PURCHASED!";
-
-    if (theme === "gacha") {
-      count = 55;
-      speed = 8;
-      text = "🎰 DISPENSED! 🎰";
-    } else if (theme === "altar") {
-      count = 65;
-      speed = 11;
-      text = "🔮 RIFT OPENED! 🔮";
-    } else if (theme === "alchemy") {
-      count = 20;
-      speed = 4;
-      text = "🧪 BREWED!";
-    }
-
-    if (rarity === 5 || rarity === "UNIQUE") {
-      count = Math.floor(count * 2.5);
-      speed *= 1.4;
-      text =
-        rarity === "UNIQUE" ? "✨ UNIQUE TROPHY! ✨" : "🔥 MYTHIC PULL! 🔥";
-    } else if (rarity === 4) {
-      count = Math.floor(count * 1.8);
-      speed *= 1.2;
-      text = "🌟 LEGENDARY PULL! 🌟";
-    }
-
-    for (let i = 0; i < count; i++) {
-      window.particles.push({
-        x: spawnX + window.randFloat(-15, 15),
-        y: spawnY + window.randFloat(-10, 10),
-        vx: (Math.random() - 0.5) * speed,
-        vy: (Math.random() - 0.7) * speed - 2.5,
-        radius: window.randFloat(
-          1.5,
-          rarity === 5 || rarity === "UNIQUE" ? 5.0 : 3.5,
-        ),
-        color: color || "#f1c40f",
-        alpha: 1,
-        life: window.randInt(25, 60),
-      });
-    }
-
-    window.effects.push({
-      x: spawnX - 70,
-      y: spawnY - 15,
-      text: text,
-      color: color || "#f1c40f",
-      life: 80,
-    });
-
-    if (
-      rarity === 5 ||
-      rarity === 4 ||
-      rarity === "UNIQUE" ||
-      theme === "altar"
-    ) {
-      window.beams.push({
-        x: spawnX,
-        color: color || "#f1c40f",
-        life: 50,
-        maxLife: 50,
-      });
-      if (cvs) {
-        cvs.classList.add("shake");
-        setTimeout(() => cvs.classList.remove("shake"), 400);
+      if (rarity === 5 || rarity === "UNIQUE") {
+        count = Math.floor(count * 2.5);
+        speed *= 1.4;
+        text =
+          rarity === "UNIQUE" ? "✨ UNIQUE TROPHY! ✨" : "🔥 MYTHIC PULL! 🔥";
+      } else if (rarity === 4) {
+        count = Math.floor(count * 1.8);
+        speed *= 1.2;
+        text = "🌟 LEGENDARY PULL! 🌟";
       }
-    }
-  };
 
-  window.spawnDamageEffect = function (amount, type, isCrit) {
-    if (!window.mob) return;
+      for (let i = 0; i < count; i++) {
+        window.particles.push({
+          x: spawnX + window.randFloat(-15, 15),
+          y: spawnY + window.randFloat(-10, 10),
+          vx: (Math.random() - 0.5) * speed,
+          vy: (Math.random() - 0.7) * speed - 2.5,
+          radius: window.randFloat(
+            1.5,
+            rarity === 5 || rarity === "UNIQUE" ? 5.0 : 3.5,
+          ),
+          color: color || "#f1c40f",
+          alpha: 1,
+          life: window.randInt(25, 60),
+        });
+      }
 
-    const isBoss =
-      window.mob.type === "boss" ||
-      window.mob.type === "dungeon_boss" ||
-      window.mob.type === "prestige_boss" ||
-      window.mob.type === "rift_guardian" ||
-      window.mob.type === "aegis_goliath" ||
-      window.mob.type === "chronos_arbitrator" ||
-      window.mob.type === "nexus_overseer";
-    if (isBoss && amount >= window.mob.maxHp * 0.6) {
-      const funnyPhrases = [
-        "OUCH!!",
-        "OW!!!",
-        "OWWY!!",
-        "OOF",
-        "MY SPINE!!",
-        "NOT THE FACE!!",
-        "STOP IT!!",
-        "BRUH!!!",
-        "REALLY?!",
-        "HELP!!",
-        "BOB SAGET!!",
-        "WTF?!",
-        "RUDE!!",
-        "EMOTIONAL DAMAGE",
-        "MY LEG!",
-        "STOP HITTING ME",
-      ];
-      window.mob.funnyText =
-        funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)];
-      window.mob.funnyTextTimer = 60;
-    }
-
-    let hitColor = "#ecf0f1";
-    let hitText = window.formatNumber(amount);
-    const icons = {
-      slash: "⚔️",
-      dagger: "🗡️",
-      lightning: "⚡",
-      fire: "🔥",
-      frost: "❄️",
-      echo: "👻",
-      counter: "🛡️",
-      bleed: "🩸",
-    };
-
-    if (isCrit) {
-      hitColor = "#e74c3c";
-      hitText = "💥 " + window.formatNumber(amount);
-    } else {
-      if (type === "lightning") hitColor = "#f1c40f";
-      else if (type === "fire") hitColor = "#e67e22";
-      else if (type === "frost") hitColor = "#3498db";
-      else if (type === "echo") hitColor = "#9b59b6";
-      else if (type === "counter") hitColor = "#f1c40f";
-      else if (type === "bleed") hitColor = "#960018";
-    }
-
-    if (type !== "slash") hitText = `${icons[type]} ${hitText}`;
-
-    let offsetX = window.randFloat(-40, 40);
-    let offsetY = window.randFloat(-50, 15);
-
-    window.effects.push({
-      x: window.mob.x + window.mob.w / 2 + offsetX,
-      y: window.mob.y + offsetY,
-      vx: window.randFloat(-1.2, 1.2),
-      vy: window.randFloat(-1.5, -0.6),
-      text: hitText,
-      color: hitColor,
-      life: 40,
-    });
-
-    let existingTotal = window.effects.find(
-      (e) => e.isCumulative && e.life > 0,
-    );
-    if (existingTotal) {
-      existingTotal.amount += amount;
-      existingTotal.text = `TOTAL: ${window.formatNumber(existingTotal.amount)}`;
-      existingTotal.life = 55;
-      existingTotal.x = window.mob.x + window.mob.w / 2 - 25;
-      existingTotal.y = window.mob.y - 25;
-    } else {
       window.effects.push({
-        x: window.mob.x + window.mob.w / 2 - 25,
-        y: window.mob.y - 25,
-        vx: 0,
-        vy: -0.4,
-        text: `TOTAL: ${window.formatNumber(amount)}`,
-        color: "#f1c40f",
-        life: 55,
-        isCumulative: true,
-        amount: amount,
+        x: spawnX - 70,
+        y: spawnY - 15,
+        text: text,
+        color: color || "#f1c40f",
+        life: 80,
       });
-    }
-  };
 
-  window.renderNemesisPreview = function (mobData) {
-    const dCanvas = document.getElementById("death-enemy-canvas");
-    if (!dCanvas) return;
-    const dCtx = dCanvas.getContext("2d");
-    dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+      if (
+        rarity === 5 ||
+        rarity === 4 ||
+        rarity === "UNIQUE" ||
+        theme === "altar"
+      ) {
+        window.beams.push({
+          x: spawnX,
+          color: color || "#f1c40f",
+          life: 50,
+          maxLife: 50,
+        });
+        if (cvs) {
+          cvs.classList.add("shake");
+          setTimeout(() => cvs.classList.remove("shake"), 400);
+        }
+      }
+    },
+  });
 
-    if (!mobData) {
-      dCtx.fillStyle = "#c0392b";
-      dCtx.font = "bold 20px sans-serif";
-      dCtx.textAlign = "center";
-      dCtx.textBaseline = "middle";
-      dCtx.fillText("💀", 30, 30);
-      return;
-    }
+  // Legacy Compatibility Aliases to protect references
+  window.spawnPurchaseCelebration = (theme, color, rarity) =>
+    window.RenderEngine.spawnPurchaseCelebration(theme, color, rarity);
 
-    let renderMob = JSON.parse(JSON.stringify(mobData));
-    renderMob.flashTimer = 0;
-    let maxDim = Math.max(renderMob.w, renderMob.h);
-    let scale = maxDim > 0 ? 40 / maxDim : 1.0;
+  // Append spawnDamageEffect inside window.RenderEngine
+  Object.assign(window.RenderEngine, {
+    spawnDamageEffect(amount, type, isCrit) {
+      if (!window.mob) return;
 
-    dCtx.save();
-    dCtx.translate(30, 30);
-    dCtx.scale(scale, scale);
-    dCtx.translate(
-      -(renderMob.x + renderMob.w / 2),
-      -(renderMob.y + renderMob.h / 2),
-    );
-    window.drawSingleMob(dCtx, renderMob);
-    dCtx.restore();
-  };
+      const isBoss =
+        window.mob.type === "boss" ||
+        window.mob.type === "dungeon_boss" ||
+        window.mob.type === "prestige_boss" ||
+        window.mob.type === "rift_guardian" ||
+        window.mob.type === "aegis_goliath" ||
+        window.mob.type === "chronos_arbitrator" ||
+        window.mob.type === "nexus_overseer";
+      if (isBoss && amount >= window.mob.maxHp * 0.6) {
+        const funnyPhrases = [
+          "OUCH!!",
+          "OW!!!",
+          "OWWY!!",
+          "OOF",
+          "MY SPINE!!",
+          "NOT THE FACE!!",
+          "STOP IT!!",
+          "BRUH!!!",
+          "REALLY?!",
+          "HELP!!",
+          "BOB SAGET!!",
+          "WTF?!",
+          "RUDE!!",
+          "EMOTIONAL DAMAGE",
+          "MY LEG!",
+          "STOP HITTING ME",
+        ];
+        window.mob.funnyText =
+          funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)];
+        window.mob.funnyTextTimer = 60;
+      }
+
+      let hitColor = "#ecf0f1";
+      let hitText = window.formatNumber(amount);
+      const icons = {
+        slash: "⚔️",
+        dagger: "🗡️",
+        lightning: "⚡",
+        fire: "🔥",
+        frost: "❄️",
+        echo: "👻",
+        counter: "🛡️",
+        bleed: "🩸",
+      };
+
+      if (isCrit) {
+        hitColor = "#e74c3c";
+        hitText = "💥 " + window.formatNumber(amount);
+      } else {
+        if (type === "lightning") hitColor = "#f1c40f";
+        else if (type === "fire") hitColor = "#e67e22";
+        else if (type === "frost") hitColor = "#3498db";
+        else if (type === "echo") hitColor = "#9b59b6";
+        else if (type === "counter") hitColor = "#f1c40f";
+        else if (type === "bleed") hitColor = "#960018";
+      }
+
+      if (type !== "slash") hitText = `${icons[type]} ${hitText}`;
+
+      let offsetX = window.randFloat(-40, 40);
+      let offsetY = window.randFloat(-50, 15);
+
+      window.effects.push({
+        x: window.mob.x + window.mob.w / 2 + offsetX,
+        y: window.mob.y + offsetY,
+        vx: window.randFloat(-1.2, 1.2),
+        vy: window.randFloat(-1.5, -0.6),
+        text: hitText,
+        color: hitColor,
+        life: 40,
+      });
+
+      let existingTotal = window.effects.find(
+        (e) => e.isCumulative && e.life > 0,
+      );
+      if (existingTotal) {
+        existingTotal.amount += amount;
+        existingTotal.text = `TOTAL: ${window.formatNumber(existingTotal.amount)}`;
+        existingTotal.life = 55;
+        existingTotal.x = window.mob.x + window.mob.w / 2 - 25;
+        existingTotal.y = window.mob.y - 25;
+      } else {
+        window.effects.push({
+          x: window.mob.x + window.mob.w / 2 - 25,
+          y: window.mob.y - 25,
+          vx: 0,
+          vy: -0.4,
+          text: `TOTAL: ${window.formatNumber(amount)}`,
+          color: "#f1c40f",
+          life: 55,
+          isCumulative: true,
+          amount: amount,
+        });
+      }
+    },
+  });
+
+  // Legacy Compatibility Aliases to protect references
+  window.spawnDamageEffect = (amount, type, isCrit) =>
+    window.RenderEngine.spawnDamageEffect(amount, type, isCrit);
+
+  // Append renderNemesisPreview inside window.RenderEngine
+  Object.assign(window.RenderEngine, {
+    renderNemesisPreview(mobData) {
+      const dCanvas = document.getElementById("death-enemy-canvas");
+      if (!dCanvas) return;
+      const dCtx = dCanvas.getContext("2d");
+      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+
+      if (!mobData) {
+        dCtx.fillStyle = "#c0392b";
+        dCtx.font = "bold 20px sans-serif";
+        dCtx.textAlign = "center";
+        dCtx.textBaseline = "middle";
+        dCtx.fillText("💀", 30, 30);
+        return;
+      }
+
+      let renderMob = JSON.parse(JSON.stringify(mobData));
+      renderMob.flashTimer = 0;
+      let maxDim = Math.max(renderMob.w, renderMob.h);
+      let scale = maxDim > 0 ? 40 / maxDim : 1.0;
+
+      dCtx.save();
+      dCtx.translate(30, 30);
+      dCtx.scale(scale, scale);
+      dCtx.translate(
+        -(renderMob.x + renderMob.w / 2),
+        -(renderMob.y + renderMob.h / 2),
+      );
+      window.RenderEngine.drawSingleMob(dCtx, renderMob);
+      dCtx.restore();
+    },
+  });
+
+  // Legacy Compatibility Aliases to protect references
+  window.renderNemesisPreview = (mobData) =>
+    window.RenderEngine.renderNemesisPreview(mobData);
 
   // --- CORE MOB DRAWING ENGINE ---
+
+  // Bind high-performance delegated proxy method to window.RenderEngine
+  window.RenderEngine.drawSingleMob = (c, m) => window.drawSingleMob(c, m);
 
   window.drawSingleMob = function (c, m) {
     if (!m) return;
@@ -6973,6 +7017,23 @@
     }
   };
 
+  window.toggleEcoMode = function () {
+    window.playerStats.ecoMode = !window.playerStats.ecoMode;
+    window.updateEcoModeStyle();
+    window.invalidatePlayerStats();
+    if (typeof window.updateUI === "function") window.updateUI();
+    if (typeof window.saveGame === "function") window.saveGame();
+  };
+
+  window.updateEcoModeStyle = function () {
+    let active = window.playerStats.ecoMode === true;
+    let btn = document.getElementById("settings-toggle-eco");
+    if (btn) {
+      btn.innerText = active ? "Saver: ON" : "Saver: OFF";
+      btn.className = active ? "btn-action" : "btn-action un";
+    }
+  };
+
   window.updateTitleSelector = function () {
     let selector = document.getElementById("title-selector");
     if (!selector) return;
@@ -7028,5 +7089,116 @@
           "Select an unlocked title from the drop-down to equip it.";
       }
     }
+  };
+
+  window.openCavernSigilSackAnimation = function (newItem) {
+    let overlay = document.createElement("div");
+    overlay.id = "sack-opening-overlay";
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.backgroundColor = "rgba(0,0,0,0.92)";
+    overlay.style.display = "flex";
+    overlay.style.justifyContent = "center";
+    overlay.style.alignItems = "center";
+    overlay.style.zIndex = "45000";
+    overlay.style.backdropFilter = "blur(8px)";
+    document.body.appendChild(overlay);
+
+    let color = window.getTierColor(newItem.statsRolled);
+    let stars = newItem.statsRolled;
+
+    overlay.innerHTML = `
+                  <style>
+                    .sack-anim-container {
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      height: 180px;
+                      margin-bottom: 10px;
+                    }
+                    .sack-svg {
+                      animation: sackShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+                      overflow: visible !important;
+                    }
+                    .sack-string {
+                      animation: stringUntie 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+                      animation-delay: 0.42s;
+                    }
+                    .sack-neck {
+                      animation: neckOpen 0.5s cubic-bezier(0.25, 0.8, 0.25, 1.25) forwards;
+                      animation-delay: 0.44s;
+                    }
+                    .sparkle {
+                      opacity: 0;
+                      animation: sparkleUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+                      animation-delay: 0.5s;
+                      transform-origin: 16px 14px;
+                    }
+                    .s1 { --dx: 0px; --dy: -38px; --ds: 1.4; }
+                    .s2 { --dx: -28px; --dy: -28px; --ds: 1.2; }
+                    .s3 { --dx: 28px; --dy: -28px; --ds: 1.2; }
+                    .s4 { --dx: -14px; --dy: -42px; --ds: 1.1; }
+                    .s5 { --dx: 14px; --dy: -42px; --ds: 1.1; }
+                  </style>
+                  <div style="text-align:center; color:white; animation: toastFadeIn 0.3s ease-out;">
+                    <div class="sack-anim-container">
+                      <svg class="sack-svg" width="150" height="150" viewBox="0 0 32 32">
+                        <ellipse cx="16" cy="28" rx="10" ry="2" fill="rgba(0,0,0,0.5)" />
+                        <g class="sack-neck" style="transform-origin: 16px 14px;">
+                          <path d="M12,14 L10,8 C12,6 20,6 22,8 L20,14 Z" fill="#9b59b6" stroke="#000" stroke-width="1.5" />
+                        </g>
+                        <path d="M16 8 C10 8, 6 11, 6 19 C6 26, 10 30, 16 30 C22 30, 26 26, 26 19 C26 11, 22 8, 16 8 Z" fill="#4a154b" stroke="#000" stroke-width="2" />
+                        <g class="sack-string" style="transform-origin: 16px 14px;">
+                          <path d="M11 14 Q16 16, 21 14" fill="none" stroke="#f1c40f" stroke-width="1.8" />
+                          <circle cx="16" cy="14" r="2" fill="#f1c40f" stroke="#000" stroke-width="1" />
+                        </g>
+                        <g class="sparkle s1"><circle cx="16" cy="8" r="2" fill="#00d2ff" /></g>
+                        <g class="sparkle s2"><circle cx="10" cy="10" r="1.5" fill="#00d2ff" /></g>
+                        <g class="sparkle s3"><circle cx="22" cy="10" r="1.5" fill="#00d2ff" /></g>
+                      </svg>
+                    </div>
+                    <div style="font-size: 15px; font-weight: 900; color:#9b59b6; letter-spacing: 2px; text-shadow: 0 0 6px rgba(155,89,182,0.3);">TRANSMUTING CAVERN SIGIL...</div>
+                  </div>
+                `;
+
+    setTimeout(() => {
+      let buffDescs = newItem.buffs
+        .map(
+          (b) =>
+            `<span style="color:#2ecc71; display:block; font-size:10px; margin-bottom:2px;">• ☀️ ${b.name}: ${b.desc}</span>`,
+        )
+        .join("");
+      let debuffDescs = newItem.debuffs
+        .map(
+          (d) =>
+            `<span style="color:#e74c3c; display:block; font-size:10px; margin-bottom:2px;">• 🌑 ${d.name}: ${d.desc}</span>`,
+        )
+        .join("");
+
+      overlay.innerHTML = `
+                    <div style="background:#15121b; border:3px solid ${color}; border-radius:12px; width:95%; max-width:400px; box-shadow:0 15px 45px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s;">
+                      <h2 style="margin:0 0 10px 0; color:${color}; letter-spacing:2px; text-transform:uppercase; font-size:18px;">🔮 SIGIL UNBOXED!</h2>
+                      <div style="height:2px; background:linear-gradient(90deg, transparent, ${color}, transparent); margin-bottom:15px;"></div>
+                      <div style="text-align:center; margin-bottom:12px;">${window.getEquipIconHtml(newItem, 48)}</div>
+                      <h3 style="color:${color}; font-size:14px; margin:0 0 4px 0;">${newItem.name}</h3>
+                      <span style="font-size:10px; color:#aaa; font-family:monospace; display:block; margin-bottom:12px;">Quality: ${stars}★ ${window.getTierName(stars)}</span>
+
+                      <div style="background:#090610; border:1px solid #333; border-radius:6px; padding:12px; text-align:left; margin-bottom:15px; line-height:1.45;">
+                        <strong style="color:#f1c40f; font-family:monospace; display:block; margin-bottom:6px; text-transform:uppercase; font-size:10px; letter-spacing:0.5px;">⚡ SIGIL MODIFIERS:</strong>
+                        ${buffDescs}
+                        ${debuffDescs}
+                        <div style="border-top:1px dashed #333; margin-top:8px; padding-top:6px; display:flex; flex-direction:column; gap:2px; font-family:monospace; font-size:9.5px;">
+                          <span style="color:#3498db; font-weight:bold;">💎 Focus Rewards: +${(newItem.rewardMultiplier * 100).toFixed(0)}% Loot Multiplier</span>
+                          ${newItem.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold;">✨ Quality Boost: +${(newItem.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
+                        </div>
+                      </div>
+
+                      <button onclick="document.getElementById('sack-opening-overlay').remove(); window.setPauseState(false); window.updateUI(); window.renderInventory();" style="background:${color}; color:${stars === 4 || stars === 1 ? "#fff" : "#111"}; border:none; padding:10px; font-weight:bold; font-size:12px; border-radius:4px; cursor:pointer; width:100%; box-shadow:0 0 10px ${color}55;">Store in Sigil Sack</button>
+                    </div>
+                  `;
+    }, 1000);
   };
 })();

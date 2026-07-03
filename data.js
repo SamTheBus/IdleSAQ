@@ -3,7 +3,7 @@
    initial global state, and system utility functions.
    ========================================================================= */
 
-window.GAME_VERSION = 0.97; // Pre-release Alpha 0.9.7 // Increment this whenever you push a new release
+window.GAME_VERSION = 0.98; // Pre-release Alpha 0.9.8 // Increment this whenever you push a new release
 
 // Core Security: HTML Sanitizer to prevent XSS injection in user lists
 window.escapeHTML = function (str) {
@@ -18,77 +18,9 @@ window.escapeHTML = function (str) {
 };
 
 window.getUiIconSvg = function (key, size = 12) {
-  const colors = {
-    atk: "#e74c3c",
-    maxHp: "#e74c3c",
-    def: "#3498db",
-    moveSpeed: "#3498db",
-    critChance: "#f1c40f",
-    critDamage: "#e67e22",
-    block: "#3498db",
-    parry: "#9b59b6",
-    str: "#e74c3c",
-    dex: "#e67e22",
-    int: "#9b59b6",
-    activeAttackSpeed: "#e74c3c",
-    idleAttackSpeed: "#3498db",
-    dropRate: "#2ecc71",
-    quality: "#ec4899",
-    goldMulti: "#f1c40f",
-    gold: "#f1c40f",
-    rareSpawn: "#e67e22",
-    fairySpawn: "#ffb6c1",
-    barrier: "#9b59b6",
-    xpRate: "#a855f7",
-  };
-
-  const svgPaths = {
-    atk: `<path d="M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2" />`,
-    maxHp: `<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />`,
-    def: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />`,
-    moveSpeed: `<path d="M6 5h5v6l8 4c2 1 2 4-1 4H6V5zm3 2h2M9 9h2" />`,
-    critChance: `<path d="M12 2 Q12 12, 2 12 Q12 12, 12 22 Q12 12, 22 12 Z" />`,
-    critDamage: `<path d="M12 2l3 5.5 5.5-3-3 5.5 5.5 3-5.5 3 3 5.5-5.5-3-3 5.5-3-5.5-5.5 3 3-5.5-5.5-3 5.5-3-3-5.5 5.5 3z" />`,
-    block: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />`,
-    parry: `<path d="M4 20L20 4M4 20L2 22M5 15L9 19M20 20L4 4M20 20L22 22M15 19L19 15" />`,
-    str: `<path d="M18 10h-2V8c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H6c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h2v2c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2v-2h2c1.1 0 2-.9 2-2v-2c0-1.1-.9-2-2-2z" />`,
-    dex: `<circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="3" /><path d="M12 1v4 M12 19v4 M1 12h4 M19 12h4" />`,
-    int: `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /><path d="M12 8v8 M8 12h8" />`,
-    activeAttackSpeed: `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />`,
-    idleAttackSpeed: `<circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />`,
-    dropRate: `<path d="M16 10c-1-1.5-2.5-2-4-2s-3 .5-4 2C6 12, 4 15, 4 19c0 4 3.5 6 8 6s8-2 8-6C20 15, 18 12, 16 10z M12 6a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 12 6z" />`,
-    quality: `<path d="M6 3h12l4 6-10 12L2 9z" />`,
-    goldMulti: `<circle cx="12" cy="12" r="10" /><path d="M12 8v8M9 10h6M9 13h6" />`,
-    gold: `<circle cx="12" cy="12" r="10" /><path d="M12 8v8M9 10h6M9 13h6" />`,
-    rareSpawn: `<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-5.82 2.15L7 14.14 2 9.27l6.91-1.01L12 2z" />`,
-    fairySpawn: `<path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z" />`,
-    barrier: `<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />`,
-    xpRate: `<circle cx="12" cy="12" r="10" /><path d="M17 13l-5-5-5 5M17 17l-5-5-5 5" />`,
-  };
-
-  let c = colors[key] || "#ffffff";
-  let p = svgPaths[key] || "";
-  let fillOpacity = [
-    "def",
-    "block",
-    "maxHp",
-    "dex",
-    "int",
-    "str",
-    "activeAttackSpeed",
-    "dropRate",
-    "quality",
-    "goldMulti",
-    "gold",
-    "rareSpawn",
-    "fairySpawn",
-    "barrier",
-    "xpRate",
-  ].includes(key)
-    ? "0.15"
-    : "0";
-
-  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${c}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; transform: translateY(-1.5px); line-height: 1; margin-right: 3px;">${p}</svg>`;
+  let icon = window.AssetCatalog.uiIcons[key];
+  if (!icon) return "";
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${icon.color}" fill-opacity="${icon.opacity}" stroke="${icon.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; transform: translateY(-1.5px); line-height: 1; margin-right: 3px;">${icon.path}</svg>`;
 };
 
 // --- SYSTEM UTILS ---
@@ -175,2996 +107,94 @@ window.calculateRarityProbabilities = function (qly, isGacha = false) {
   return weights.map((w) => (w / totalWeight) * 100);
 };
 
-// --- STATIC DATA POOLS ---
-
-window.MYSTICAL_STOCK = [
-  {
-    name: "SP Reset Scroll",
-    cost: 2500,
-    currency: "Gold",
-    color: "#9b59b6",
-    desc: "Refunds spent Skill Points from the Attribute Matrix.",
-  },
-  {
-    name: "PP Reset Scroll",
-    cost: 5000,
-    currency: "Gold",
-    color: "#e67e22",
-    desc: "Refunds spent Prestige Points from the Ascension Altar.",
-  },
-  {
-    name: "Gacha Key",
-    cost: 15,
-    currency: "Luminous Soul",
-    color: "#f1c40f",
-    desc: "Trade 15 rare Luminous Souls for 1 Vending Gacha Key.",
-  },
-  {
-    name: "Astral Essence",
-    cost: 10,
-    currency: "Luminous Soul",
-    color: "#9b59b6",
-    desc: "Trade 10 rare Luminous Souls for 1 Astral Essence.",
-  },
-  {
-    name: "Catalyst Core",
-    cost: 15,
-    currency: "Astral Shards",
-    color: "#2ecc71",
-    desc: "Trade 15 Astral Crucible Shards for 1 Catalyst Core.",
-  },
-];
-
-window.POTION_TRANSMUTATIONS = [
-  {
-    result: "Greater Attack Elixir",
-    req: "Attack Elixir",
-    amount: 3,
-    color: "#27ae60",
-    desc: "Transmute 3x Attack Elixir into 1x Greater Attack Elixir.",
-  },
-  {
-    result: "Supernal Attack Elixir",
-    req: "Greater Attack Elixir",
-    amount: 3,
-    color: "#1e824c",
-    desc: "Transmute 3x Greater Attack Elixir into 1x Supernal Attack Elixir.",
-  },
-  {
-    result: "Greater Vitality Elixir",
-    req: "Vitality Elixir",
-    amount: 3,
-    color: "#c0392b",
-    desc: "Transmute 3x Vitality Elixir into 1x Greater Vitality Elixir.",
-  },
-  {
-    result: "Supernal Vitality Elixir",
-    req: "Greater Vitality Elixir",
-    amount: 3,
-    color: "#962d22",
-    desc: "Transmute 3x Greater Vitality Elixir into 1x Supernal Vitality Elixir.",
-  },
-  {
-    result: "Greater Armored Elixir",
-    req: "Armored Elixir",
-    amount: 3,
-    color: "#2980b9",
-    desc: "Transmute 3x Armored Elixir into 1x Greater Armored Elixir.",
-  },
-  {
-    result: "Supernal Armored Elixir",
-    req: "Greater Armored Elixir",
-    amount: 3,
-    color: "#1f3a52",
-    desc: "Transmute 3x Greater Armored Elixir into 1x Supernal Armored Elixir.",
-  },
-  {
-    result: "Greater Haste Elixir",
-    req: "Haste Elixir",
-    amount: 3,
-    color: "#f39c12",
-    desc: "Transmute 3x Haste Elixir into 1x Greater Haste Elixir.",
-  },
-  {
-    result: "Supernal Haste Elixir",
-    req: "Greater Haste Elixir",
-    amount: 3,
-    color: "#d35400",
-    desc: "Transmute 3x Greater Haste Elixir into 1x Supernal Haste Elixir.",
-  },
-];
-
-window.etcDex = {
-  "Eridium Shard":
-    "A glowing, alien fragment used in the Forge to Tier Up an item's Star Rarity.",
-  "Glimmering Gachapon Key":
-    "Premium fused Key. Guarantees 3-5★ Equipment drops with a heavily elevated 5.0% Unique Artifact chance.",
-  "Gacha Key":
-    "Guaranteed drop from Guardians. Used at the Vending Machine for a gear roll.",
-  "Ancient Core":
-    "Rare drop from Stage Bosses. Sacrifice 1 at the Altar to summon a Guardian.",
-  "Overlord's Sigil":
-    "Guaranteed drop from the Equipment Dungeon Overlord. Used to temper Unique Artifacts at the Forge.",
-  "Astral Essence":
-    "A pulsing, cosmic residue extracted by salvaging Unique Artifacts. Exceedingly rare.",
-  "Catalyst Core":
-    "Earned in the Crucible or bought from the Alchemy Shop. Spent at the Forge to re-roll and lock select weapon and armor attributes.",
-  "Monster Soul":
-    "A dark, swirling essence harvested from fallen standard monsters. Spent for basic forging and trades.",
-  "Luminous Soul":
-    "A radiant, pure soul dropped by rare monsters. Extremely valuable for advanced mystical trades.",
-  "Mythic Scrap":
-    "A perfect fragment of mythic-tier gear. Highly sought after for end-game tempering.",
-  "Legendary Scrap":
-    "A piece of legendary-tier material, essential for high-level tempering.",
-  "Epic Scrap":
-    "A sturdy piece of epic-tier material used in mid-to-high level tempering.",
-  "Magic Scrap": "A glowing magical fragment utilized for mid-tier tempering.",
-  "Rare Scrap":
-    "A clean scrap of rare metal, useful for early-to-mid-tier tempering.",
+window.getDepthQualityMultiplier = function (stage) {
+  let s = Number(stage);
+  if (isNaN(s) || s < 1) s = 1;
+  // Asymptotic scaling: smoothly scales from 1.0 up to a hard cap of 2.0
+  // Half-height of the maximum bonus is reached at stage 150
+  return 1.0 + (s - 1) / (s + 150);
 };
 
-window.useDex = {
-  "Weekly Clan Supply Crate": {
-    desc: "A special supply crate issued weekly to active guild members. Can be upgraded through the Clan Skills 'Supply Depot' research card to unlock massive bonus rewards like Catalyst Cores, Ancient Cores, and guaranteed high-rarity item rolls!",
-    color: "#ffaa00",
+// Initialize transaction-safe GameState manager
+window.GameState = {
+  gainXp(amount, isOffline = false) {
+    if (isNaN(amount) || amount <= 0) return;
+
+    window.playerStats.xp += amount;
+    let leveledUp = false;
+
+    // Process potential consecutive level-ups via a loop (important for offline catch-up)
+    while (window.playerStats.xp >= window.playerStats.xpReq) {
+      window.playerStats.xp -= window.playerStats.xpReq;
+      window.playerStats.level++;
+      window.playerStats.sp++; // Award 1 Skill Point per level up
+
+      // Exponential scaling thresholds prevent runaway level inflation
+      window.playerStats.xpReq = Math.floor(
+        250 * Math.pow(1.2, window.playerStats.level - 1),
+      );
+      leveledUp = true;
+
+      // Keep active UI Attribute Matrix draft allocations in sync
+      if (window.draftAllocations !== null) {
+        window.draftSP++;
+      }
+    }
+
+    if (leveledUp) {
+      window.invalidatePlayerStats();
+      let p = window.resolvePlayerStats();
+      window.playerStats.currentHp = p.maxHp; // Fully heal to new Max HP
+
+      if (!isOffline) {
+        if (window.SoundManager) window.SoundManager.play("revive");
+        if (typeof window.pushLog === "function") {
+          window.pushLog(
+            `<strong style="color:#d946ef;">🎉 LEVEL UP! Reached Level ${window.playerStats.level}! (+1 SP)</strong>`,
+          );
+        }
+        if (typeof window.pushHeaderToast === "function") {
+          window.pushHeaderToast(
+            `🎉 Level Up! Reached Level ${window.playerStats.level}!`,
+            "#d946ef",
+          );
+        }
+      }
+      if (typeof window.checkAchievements === "function") {
+        window.checkAchievements();
+      }
+    }
+
+    if (typeof window.updateUI === "function") {
+      window.updateUI();
+    }
   },
-  "Clan Reward Sack": {
-    desc: "Standardised Clan Reward. Consume to initiate untying. Guarantees 1 MP, 1x Equipment scaled to Lifetime Peak Stage, and rolls extra loot with consecutive item chances!",
-    color: "#f1c40f",
+
+  addCoins(amount) {
+    if (isNaN(amount) || amount <= 0) return;
+    window.playerStats.coins += amount;
+    window.playerStats.totalGoldEarned =
+      (window.playerStats.totalGoldEarned || 0) + amount;
+    if (typeof window.updateUI === "function") window.updateUI();
   },
-  "Clan Weekly Sack": {
-    desc: "Venerable Clan Weekly Reward. Consume to break the seal. Guarantees 3 MP, 1x Ancient Core, 1x Overlord's Sigil, 1x Eridium Shard, and 3x Legendary Scraps!",
-    color: "#9b59b6",
-  },
-  "Daily Reward Sack": {
-    desc: "Standardised Daily Reward. Consume to initiate untying. Guarantees 1 MP, 1x Equipment scaled to Lifetime Peak Stage, and rolls extra loot with consecutive item chances!",
-    color: "#f1c40f",
-  },
-  "Weekly Reward Sack": {
-    desc: "Venerable Weekly Reward. Consume to break the seal. Guarantees 3 MP, 1x Ancient Core, 1x Overlord's Sigil, 1x Eridium Shard, and 3x Legendary Scraps!",
-    color: "#9b59b6",
-  },
-  "Guild Reward Sack": {
-    desc: "Legacy Guild Reward Sack. Consume to open.",
-    color: "#f1c40f",
-  },
-  "Daily Guild Reward Sack": {
-    desc: "Legacy Daily Guild Reward Sack. Consume to open.",
-    color: "#f1c40f",
-  },
-  "Guild Weekly Sack": {
-    desc: "Legacy Guild Weekly Sack. Consume to open.",
-    color: "#9b59b6",
-  },
-  "SP Reset Scroll": {
-    desc: "Refunds spent Skill Points from the Attribute Matrix.",
-    color: "#9b59b6",
-  },
-  "PP Reset Scroll": {
-    desc: "Refunds spent Prestige Points from the Ascension Altar.",
-    color: "#e67e22",
-  },
-  "Attack Elixir": {
-    desc: "Increases Attack Power by +10% for 5 minutes (scales with INT).",
-    color: "#2ecc71",
-  },
-  "Greater Attack Elixir": {
-    desc: "Increases Attack Power by +20% for 5 minutes (scales with INT).",
-    color: "#27ae60",
-  },
-  "Supernal Attack Elixir": {
-    desc: "Increases Attack Power by +35% for 5 minutes (scales with INT).",
-    color: "#1e824c",
-  },
-  "Vitality Elixir": {
-    desc: "Increases Max HP by +10% for 5 minutes (scales with INT).",
-    color: "#e74c3c",
-  },
-  "Greater Vitality Elixir": {
-    desc: "Increases Max HP by +20% for 5 minutes (scales with INT).",
-    color: "#c0392b",
-  },
-  "Supernal Vitality Elixir": {
-    desc: "Increases Max HP by +35% for 5 minutes (scales with INT).",
-    color: "#962d22",
-  },
-  "Armored Elixir": {
-    desc: "Increases Defense by +10% for 5 minutes (scales with INT).",
-    color: "#3498db",
-  },
-  "Greater Armored Elixir": {
-    desc: "Increases Defense by +20% for 5 minutes (scales with INT).",
-    color: "#2980b9",
-  },
-  "Supernal Armored Elixir": {
-    desc: "Increases Defense by +35% for 5 minutes (scales with INT).",
-    color: "#1f3a52",
-  },
-  "Haste Elixir": {
-    desc: "Increases movement speed and attack recovery (reduces delay frames) by +10% for 5 minutes (scales with INT).",
-    color: "#f1c40f",
-  },
-  "Greater Haste Elixir": {
-    desc: "Increases movement speed and attack recovery (reduces delay frames) by +20% for 5 minutes (scales with INT).",
-    color: "#f39c12",
-  },
-  "Supernal Haste Elixir": {
-    desc: "Increases movement speed and attack recovery (reduces delay frames) by +35% for 5 minutes (scales with INT).",
-    color: "#d35400",
-  },
-  "Double XP Elixir": {
-    desc: "Doubles all acquired experience gains (+100% EXP) for 5 minutes (scales with INT).",
-    color: "#a855f7",
-  },
-  "Double Drop Elixir": {
-    desc: "Doubles current drop rate multiplier (+100%) for 5 minutes (scales with INT).",
-    color: "#22c55e",
-  },
-  "Drop Quality Elixir": {
-    desc: "Boosts item drop quality checks by +50% for 5 minutes (scales with INT).",
-    color: "#3b82f6",
+
+  spendCoins(amount) {
+    if (isNaN(amount) || amount <= 0) return false;
+    if (window.playerStats.coins < amount) return false;
+    window.playerStats.coins -= amount;
+    if (window.playerStats.coins === 0) {
+      window.playerStats.hasTriggeredExactChange = true;
+    }
+    if (typeof window.updateUI === "function") window.updateUI();
+    return true;
   },
 };
 
-window.ARTIFACT_POOL = [
-  {
-    name: "Berserker Stone",
-    trait: "frenzy",
-    desc: "Grants Frenzy Mode for 5s every 15 kills. Passive +3% Crit Chance.",
-    breakdown:
-      "<strong>Frenzy Buff Breakdown:</strong><br>• Trigger Requirement: <span style='color:#2ecc71;'>Reduced to 15 kills</span><br>• Active Atk Spd: Max Haste (4-frame cap)<br>• Crit Chance: <span style='color:#e67e22;'>100% Guaranteed</span><br>• Crit Multi: <span style='color:#f1c40f;'>+30% Extra Multiplier</span><br>• Passive: <span style='color:#e67e22;'>+3% Base Crit Chance</span>",
-    critChance: 0.03,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Blood-Soaked Chalice",
-    trait: "vampirism",
-    desc: "Heals 0.5% of damage dealt on hit (Capped at 3% Max HP per second globally). Passive +20 Max HP.",
-    breakdown:
-      "<strong>Vampirism Breakdown:</strong><br>• Life Steal: <span style='color:#e74c3c;'>0.5% of total slash damage</span> directly heals your HP pool.<br>• Global Ceiling: <span style='color:#aaa;'>Capped at 3% of Max HP per second</span> to prevent speed-exploited immortality.<br>• Passive: <span style='color:#e74c3c;'>+20 Flat Max HP</span>",
-    maxHp: 20,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Philosopher's Anchor",
-    trait: "gold_hoard",
-    desc: "Permanent x1.30 Gold Multiplier bonus. Passive +10 Attack.",
-    breakdown:
-      "<strong>Hoard Breakdown:</strong><br>• Gold: Multiplies direct gold drops from mobs and bosses by flat <span style='color:#f1c40f;'>+30%</span>.<br>• Passive: <span style='color:#f1c40f;'>+10 Flat Attack</span> to support combat pacing.",
-    atk: 10,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0.3,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Gilded Scarab",
-    trait: "magic_find",
-    desc: "+25% Drop Rate and +15% Drop Quality. Passive +5 DEX.",
-    breakdown:
-      "<strong>Scarab Hunting Breakdown:</strong><br>• Drop Rate: <span style='color:#2ecc71;'>+25% Item Frequency</span><br>• Drop Quality: <span style='color:#9b59b6;'>+15% Higher Stat Line Probability</span><br>• Passive: <span style='color:#3498db;'>+5 Flat DEX</span>",
-    dex: 5,
-    dropRate: 0.25,
-    quality: 0.15,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Windwalker Boots",
-    trait: "move_speed",
-    desc: "Grants +10% Movement Speed and +3% Parry Rate.",
-    breakdown:
-      "<strong>Fleet Footed:</strong><br>• Movement: Grants a massive <span style='color:#3498db;'>+10% Movement Speed</span> multiplier.<br>• Defensive: Grants <span style='color:#e74c3c;'>+3% Parry Rate</span> to evade high-stage damage.",
-    moveSpeedPct: 0.1,
-    parry: 0.03,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Aegis Core",
-    trait: "defense",
-    desc: "Grants +6% Max HP and +8% Defense.",
-    breakdown:
-      "<strong>Iron Clad:</strong><br>• Mitigation: Grants a sturdy <span style='color:#3498db;'>+8% Defense</span> multiplier.<br>• Pool: Grants a hearty <span style='color:#e74c3c;'>+6% Max HP</span> multiplier.",
-    maxHpPct: 0.06,
-    defPct: 0.08,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Riposte Gauntlet",
-    trait: "parry_strike",
-    desc: "Parrying instantly counters for 50% damage. Passive +2% Parry Rate.",
-    breakdown:
-      "<strong>Lethal Deflection:</strong><br>• Counter Strike: Successful parries immediately hit back for 50% weapon power.<br>• Passive: Increases your base chance to parry by <span style='color:#e74c3c;'>+2%</span>.",
-    parry: 0.02,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Phantom Blade",
-    trait: "echo_strike",
-    desc: "Attacks have 30% chance to hit a second time for 25% damage. Passive +3 Attack.",
-    breakdown:
-      "<strong>Echo Strike:</strong><br>• Phantom Hit: Every swing has a <span style='color:#9b59b6;'>30% chance</span> to trigger a secondary hit for 25% damage.<br>• Passive: <span style='color:#f1c40f;'>+3 Flat Attack</span>",
-    atk: 3,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Sloth's Blessing",
-    trait: "idle_spd",
-    desc: "Increases Idle Attack Speed by +15%. Passive +5% Gold Multiplier.",
-    breakdown:
-      "<strong>Lazy Haste:</strong><br>• Speed Increase: Attacks automatically trigger <span style='color:#3498db;'>15% faster</span>.<br>• Passive: Adds <span style='color:#f1c40f;'>+5% Gold Multiplier</span>.",
-    idleAttackSpeed: 0.15,
-    goldMulti: 0.05,
-    dropRate: 0,
-    quality: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Zealot's Charm",
-    trait: "active_spd",
-    desc: "Increases Active Attack Speed limit by +10%. Passive +3% Crit Chance.",
-    breakdown:
-      "<strong>Feverish Swings:</strong><br>• Speed Increase: Increases active clicking speed limit by <span style='color:#2ecc71;'>10%</span>.<br>• Passive: <span style='color:#e67e22;'>+3% Base Crit Chance</span>",
-    activeAttackSpeed: 0.1,
-    critChance: 0.03,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Survivor's Adrenaline",
-    trait: "dodge_buff",
-    desc: "Blocking/Parrying grants +30% Dmg for 6s. Passive +2% Block & Parry.",
-    breakdown:
-      "<strong>Adrenaline Rush:</strong><br>• Buff: +30% damage output temporarily on defensive procs.<br>• Passive: Adds <span style='color:#3498db;'>+2% Block Rate</span> and <span style='color:#e74c3c;'>+2% Parry Rate</span>.",
-    block: 0.02,
-    parry: 0.02,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Chrono Hourglass",
-    trait: "extend_buffs",
-    desc: "Extends all temporary buffs by 3 seconds. Passive +3 INT.",
-    breakdown:
-      "<strong>Chronology:</strong><br>• Buff Hold: Extends active Frenzy or Adrenaline by <span style='color:#f1c40f;'>3s</span>.<br>• Passive: Adds <span style='color:#9b59b6;'>+3 INT</span> to extend potion durations and boost defense.",
-    int: 3,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Dimensional Pouch",
-    trait: "bag_space",
-    desc: "Expands equipment sack capacity to 50. Passive +10% Drop Rate.",
-    breakdown:
-      "<strong>Bottomless Bag:</strong><br>• Space: Expanded bag capacity.<br>• Passive: Adds <span style='color:#2ecc71;'>+10% Drop Rate</span> to help fill your larger satchel.",
-    dropRate: 0.1,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Phoenix Ankh",
-    trait: "second_wind",
-    desc: "Ignore a fatal blow once per run (25% Heal). Passive +5 STR & +30 Max HP.",
-    breakdown:
-      "<strong>Second Wind:</strong><br>• Survive fatal blows with <span style='color:#e74c3c;'>25% HP restored</span>.<br>• Passive: Grants <span style='color:#e74c3c;'>+5 STR</span> (+50 Max HP and +7.5 Atk) and <span style='color:#2ecc71;'>+30 Flat Max HP</span>.",
-    str: 5,
-    maxHp: 30,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Golem's Core",
-    trait: "golem_stance",
-    desc: "+20% Attack while healthy (>80% HP). Passive +5 STR.",
-    breakdown:
-      "<strong>Golem's Stance Breakdown:</strong><br>• High-HP Benefit: Gain a massive <span style='color:#2ecc71;'>+20% Attack Power</span> bonus while sitting above 80% HP.<br>• Passive: Adds <span style='color:#e74c3c;'>+5 STR</span> (+50 Max HP and +7.5 Atk).",
-    str: 5,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Fairy Queen's Crown",
-    trait: "fairy_wealth",
-    desc: "+15% Fairy Spawn. Fairies have 8% chance to drop 1 Luminous Soul. Passive +6% Gold.",
-    breakdown:
-      "<strong>Crown of Nymphs Breakdown:</strong><br>• Pixie Swarm: Multiplies wild fairy appearance rates by <span style='color:#2ecc71;'>+15%</span>.<br>• Magical Attunement: Fairies have an <span style='color:#ffb6c1;'>8% chance</span> to drop a rare Luminous Soul when caught.<br>• Passive: Adds <span style='color:#f1c40f;'>+6% Gold Multiplier</span>.",
-    goldMulti: 0.06,
-    dropRate: 0,
-    quality: 0,
-    rareSpawn: 0,
-    fairySpawn: 0.15,
-  },
-  {
-    name: "Void Core",
-    trait: "void_pull",
-    desc: "+20% Rare Spawn. Defeating Rares heals 15% Max HP. Passive +3 DEX.",
-    breakdown:
-      "<strong>Void Pull Breakdown:</strong><br>• Hunting Grounds: Enhances rare creature spawn frequencies by <span style='color:#9b59b6;'>+20%</span>.<br>• Singularity Syphon: Slaying any Rare target immediately syphon-heals <span style='color:#e74c3c;'>15% of your Max HP</span>.<br>• Passive: Adds <span style='color:#3498db;'>+3 DEX</span>.",
-    dex: 3,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0.2,
-    fairySpawn: 0,
-  },
-  {
-    name: "Titan's Shield Grip",
-    trait: "titan_grip",
-    desc: "Increases Block Cap to 25% (with Shield) and Parry Cap to 30% (with Dagger). Passive +4% Block & Parry.",
-    breakdown:
-      "<strong>Titan's Grip Breakdown:</strong><br>• Raising Caps: Increases your Block ceiling to <span style='color:#3498db;'>25%</span> (with Shield) and Parry ceiling to <span style='color:#e74c3c;'>30%</span> (with Dagger).<br>• Passive: Adds <span style='color:#3498db;'>+4% base Block Rate</span> and <span style='color:#e74c3c;'>+4% base Parry Rate</span>.",
-    block: 0.04,
-    parry: 0.04,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Alchemist's Alembic",
-    trait: "alchemist_alembic",
-    desc: "All consumed elixirs are 15% more potent. Passive +3 INT.",
-    breakdown:
-      "<strong>Alchemist's Alembic Breakdown:</strong><br>• Potion Potency: Amplifies the base multipliers of all consumed potions by <span style='color:#2ecc71;'>+15%</span>.<br>• Passive: Adds <span style='color:#9b59b6;'>+3 INT</span>.",
-    int: 3,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Philosopher's Catalyst",
-    trait: "philosopher_catalyst",
-    desc: "Consuming an elixir has a 12% chance to not consume the item. Passive +4 INT.",
-    breakdown:
-      "<strong>Philosopher's Catalyst Breakdown:</strong><br>• Sparing Effect: Sparing consumption check with <span style='color:#2ecc71;'>12% free use probability</span>.<br>• Passive: Adds <span style='color:#9b59b6;'>+4 INT</span>.",
-    int: 4,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-  {
-    name: "Cauldron of Eternity",
-    trait: "cauldron_eternity",
-    desc: "While any potion buff is active, reduces Idle Attack delay by 2 frames. Passive +5% Max HP.",
-    breakdown:
-      "<strong>Cauldron of Eternity Breakdown:</strong><br>• Haste Trigger: Attacks automatically <span style='color:#3498db;'>2 frames faster</span> while any potion effect is running.<br>• Passive: Adds a <span style='color:#e74c3c;'>+5% Max HP</span> multiplier.",
-    maxHpPct: 0.05,
-    dropRate: 0,
-    quality: 0,
-    goldMulti: 0,
-    rareSpawn: 0,
-    fairySpawn: 0,
-  },
-];
-
-window.SET_DEFINITIONS = {
-  Vanguard: {
-    bonuses: [
-      {
-        count: 2,
-        desc: "+5% Attack Power",
-        apply: (p) => {
-          p.atkPctBonus = (p.atkPctBonus || 0) + 0.05;
-        },
-      },
-      {
-        count: 3,
-        desc: "+10% Attack Power, +15 Flat Attack",
-        apply: (p) => {
-          p.atkPctBonus = (p.atkPctBonus || 0) + 0.1;
-          p.atk += 15;
-        },
-      },
-    ],
-  },
-  Colossus: {
-    name: "Colossus",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+8% Max HP",
-        apply: (p) => {
-          p.maxHpPctBonus = (p.maxHpPctBonus || 0) + 0.08;
-        },
-      },
-      {
-        count: 3,
-        desc: "+15% Max HP, +50 Flat Max HP",
-        apply: (p) => {
-          p.maxHpPctBonus = (p.maxHpPctBonus || 0) + 0.15;
-          p.maxHp += 50;
-        },
-      },
-    ],
-  },
-  Bastion: {
-    name: "Bastion",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+5% Defense",
-        apply: (p) => {
-          p.defPctBonus = (p.defPctBonus || 0) + 0.05;
-        },
-      },
-      {
-        count: 3,
-        desc: "+12% Defense, +10 Flat Defense",
-        apply: (p) => {
-          p.defPctBonus = (p.defPctBonus || 0) + 0.12;
-          p.flatDefBonus = (p.flatDefBonus || 0) + 10;
-        },
-      },
-    ],
-  },
-  Windrunner: {
-    name: "Windrunner",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+5 Move Speed",
-        apply: (p) => {
-          p.moveSpeed += 5;
-        },
-      },
-      {
-        count: 3,
-        desc: "+15 Move Speed, +15% Idle Attack Speed",
-        apply: (p) => {
-          p.moveSpeed += 15;
-          p.idleSpeedPct = (p.idleSpeedPct || 0) + 0.15;
-        },
-      },
-    ],
-  },
-  Wraith: {
-    name: "Wraith",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+3% Crit Chance",
-        apply: (p) => {
-          p.critChance += 0.03;
-        },
-      },
-      {
-        count: 3,
-        desc: "+8% Crit Chance, +15% Crit Multiplier",
-        apply: (p) => {
-          p.critChance += 0.08;
-          p.critDamage += 0.15;
-        },
-      },
-    ],
-  },
-  Reaver: {
-    name: "Reaver",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+15% Crit Multiplier",
-        apply: (p) => {
-          p.critDamage += 0.15;
-        },
-      },
-      {
-        count: 3,
-        desc: "+35% Crit Multiplier, +2% Crit Chance",
-        apply: (p) => {
-          p.critDamage += 0.35;
-          p.critChance += 0.02;
-        },
-      },
-    ],
-  },
-  Dreadnought: {
-    name: "Dreadnought",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+3% Block Rate",
-        apply: (p) => {
-          p.block += 0.03;
-        },
-      },
-      {
-        count: 3,
-        desc: "+8% Block Rate, +5 Flat Defense",
-        apply: (p) => {
-          p.block += 0.08;
-          p.flatDefBonus = (p.flatDefBonus || 0) + 5;
-        },
-      },
-    ],
-  },
-  Duellist: {
-    name: "Duellist",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+2% Parry Rate",
-        apply: (p) => {
-          p.parry += 0.02;
-        },
-      },
-      {
-        count: 3,
-        desc: "+6% Parry Rate, +10% Active Attack Speed",
-        apply: (p) => {
-          p.parry += 0.06;
-          p.activeSpeedPct = (p.activeSpeedPct || 0) + 0.1;
-        },
-      },
-    ],
-  },
-  Scholar: {
-    name: "Scholar",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+5 INT",
-        apply: (p) => {
-          p.int += 5;
-        },
-      },
-      {
-        count: 3,
-        desc: "+15 INT, +10% Active Attack Speed",
-        apply: (p) => {
-          p.int += 15;
-          p.activeSpeedPct = (p.activeSpeedPct || 0) + 0.1;
-        },
-      },
-    ],
-  },
-  Berserker: {
-    name: "Berserker",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+5 STR",
-        apply: (p) => {
-          p.str += 5;
-        },
-      },
-      {
-        count: 3,
-        desc: "+15 STR, +10% Idle Attack Speed",
-        apply: (p) => {
-          p.str += 15;
-          p.idleSpeedPct = (p.idleSpeedPct || 0) + 0.1;
-        },
-      },
-    ],
-  },
-  Scout: {
-    name: "Scout",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+5 DEX",
-        apply: (p) => {
-          p.dex += 5;
-        },
-      },
-      {
-        count: 3,
-        desc: "+15 DEX, +8 Move Speed",
-        apply: (p) => {
-          p.dex += 15;
-          p.moveSpeed += 8;
-        },
-      },
-    ],
-  },
-  Fortune: {
-    name: "Fortune",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+15% Gold Multiplier",
-        apply: (p) => {
-          p.gold += 0.15;
-        },
-      },
-      {
-        count: 3,
-        desc: "+30% Gold Multiplier, +10% Drop Rate Mod",
-        apply: (p) => {
-          p.gold += 0.3;
-          p.drop += 0.1;
-        },
-      },
-    ],
-  },
-  Mystic: {
-    name: "Mystic",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+5% Drop Quality Mod",
-        apply: (p) => {
-          p.qly += 0.05;
-        },
-      },
-      {
-        count: 3,
-        desc: "+15% Drop Quality Mod, +5 INT",
-        apply: (p) => {
-          p.qly += 0.15;
-          p.int += 5;
-        },
-      },
-    ],
-  },
-  Alchemist: {
-    name: "Alchemist",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+10% Max HP",
-        apply: (p) => {
-          p.maxHpPctBonus = (p.maxHpPctBonus || 0) + 0.1;
-        },
-      },
-      {
-        count: 3,
-        desc: "+10% Attack Power, +10% Potion Duration",
-        apply: (p) => {
-          p.atkPctBonus = (p.atkPctBonus || 0) + 0.1;
-        },
-      },
-    ],
-  },
-  Midas: {
-    name: "Midas' Legacy",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+20% Gold Multiplier",
-        apply: (p) => {
-          p.gold += 0.2;
-        },
-      },
-      {
-        count: 3,
-        desc: "+40% Gold Multiplier. (Midas Touch: +1% Attack per 10% Gold Mult)",
-        apply: (p) => {
-          p.gold += 0.4;
-          let goldBonusPct = Math.floor(p.gold * 10) * 0.01;
-          p.atkPctBonus = (p.atkPctBonus || 0) + goldBonusPct;
-        },
-      },
-    ],
-  },
-  Biohazard: {
-    name: "Biohazard",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+10% Max HP",
-        apply: (p) => {
-          p.maxHpPctBonus = (p.maxHpPctBonus || 0) + 0.1;
-        },
-      },
-      {
-        count: 3,
-        desc: "Corrosive Spores: 20% chance to poison targets for DoT & Life-stealing",
-        apply: (p) => {
-          p.hasCorrosiveSet = true;
-        },
-      },
-    ],
-  },
-  Warlord: {
-    name: "Warlord",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+12% Crit Damage",
-        apply: (p) => {
-          p.critDamage += 0.12;
-        },
-      },
-      {
-        count: 3,
-        desc: "Shattering Blows: Crits have 25% chance to trigger unblockable secondary hits",
-        apply: (p) => {
-          p.hasShatterSet = true;
-        },
-      },
-    ],
-  },
-  VoidTouched: {
-    name: "Void-Touched",
-    bonuses: [
-      {
-        count: 2,
-        desc: "+1.5% Rare Spawn Rate",
-        apply: (p) => {
-          p.rareSpawn += 0.015;
-        },
-      },
-      {
-        count: 3,
-        desc: "Singularity: Spawning a Rare instantly triggers a 5s Frenzy Mode",
-        apply: (p) => {
-          p.hasSingularitySet = true;
-        },
-      },
-    ],
-  },
-};
-
-window.AchievementsData = [
-  // 1. SLAYERS (Kills) - Bridged Geometric Curve (Flat Atk + % Atk)
-  {
-    id: "slayer_1",
-    name: "Novice Slayer",
-    icon: "⚔️",
-    desc: "Slay 100 total enemies",
-    reqType: "kills",
-    reqValue: 100,
-    stats: { atk: 1, atkPct: 0.01 },
-  },
-  {
-    id: "slayer_2",
-    name: "Adept Slayer",
-    icon: "💀",
-    desc: "Slay 1,000 total enemies",
-    reqType: "kills",
-    reqValue: 1000,
-    stats: { atk: 2, atkPct: 0.02 },
-  },
-  {
-    id: "slayer_3",
-    name: "Elite Slayer",
-    icon: "🔥",
-    desc: "Slay 10,000 total enemies",
-    reqType: "kills",
-    reqValue: 10000,
-    stats: { atk: 4, atkPct: 0.03 },
-  },
-  {
-    id: "slayer_4",
-    name: "Deathbringer",
-    icon: "😈",
-    desc: "Slay 100,000 total enemies",
-    reqType: "kills",
-    reqValue: 100000,
-    stats: { atk: 8, atkPct: 0.04 },
-  },
-  {
-    id: "slayer_5",
-    name: "God of War",
-    icon: "🥊",
-    desc: "Slay 1,000,000 total enemies",
-    reqType: "kills",
-    reqValue: 1000000,
-    stats: { atk: 16, atkPct: 0.05 },
-  },
-  {
-    id: "slayer_6",
-    name: "Void Reaper",
-    icon: "🌌",
-    desc: "Slay 10,000,000 total enemies",
-    reqType: "kills",
-    reqValue: 10000000,
-    stats: { atk: 32, atkPct: 0.06 },
-  },
-  {
-    id: "slayer_7",
-    name: "Harbinger of Ruin",
-    icon: "☄️",
-    desc: "Slay 25,000,000 total enemies",
-    reqType: "kills",
-    reqValue: 25000000,
-    stats: { atk: 64, atkPct: 0.08 },
-  },
-  {
-    id: "slayer_8",
-    name: "Star Crusher",
-    icon: "🌟",
-    desc: "Slay 50,000,000 total enemies",
-    reqType: "kills",
-    reqValue: 50000000,
-    stats: { atk: 128, atkPct: 0.1 },
-  },
-  {
-    id: "slayer_9",
-    name: "Galaxy Devourer",
-    icon: "🌀",
-    desc: "Slay 100,000,000 total enemies",
-    reqType: "kills",
-    reqValue: 100000000,
-    stats: { atk: 256, atkPct: 0.12 },
-  },
-  {
-    id: "slayer_10",
-    name: "Universal Eraser",
-    icon: "♾️",
-    desc: "Slay 250,000,000 total enemies",
-    reqType: "kills",
-    reqValue: 250000000,
-    stats: { atk: 512, atkPct: 0.15 },
-  },
-
-  // 2. TREASURE HUNTERS (Gold) - Bridged Geometric Curve (Flat HP + % Gold)
-  {
-    id: "hoarder_1",
-    name: "Penny Pincher",
-    icon: "💰",
-    desc: "Collect 5,000 total gold",
-    reqType: "gold",
-    reqValue: 5000,
-    stats: { gold: 0.01, maxHp: 5 },
-  },
-  {
-    id: "hoarder_2",
-    name: "Merchant's Trust",
-    icon: "💰",
-    desc: "Collect 50,000 total gold",
-    reqType: "gold",
-    reqValue: 50000,
-    stats: { gold: 0.02, maxHp: 10 },
-  },
-  {
-    id: "hoarder_3",
-    name: "Capitalist",
-    icon: "💼",
-    desc: "Collect 500,000 total gold",
-    reqType: "gold",
-    reqValue: 500000,
-    stats: { gold: 0.03, maxHp: 20 },
-  },
-  {
-    id: "hoarder_4",
-    name: "Guild Patron",
-    icon: "🏛️",
-    desc: "Collect 5,000,000 total gold",
-    reqType: "gold",
-    reqValue: 5000000,
-    stats: { gold: 0.04, maxHp: 40 },
-  },
-  {
-    id: "hoarder_5",
-    name: "Vault Guardian",
-    icon: "🏰",
-    desc: "Collect 50,000,000 total gold",
-    reqType: "gold",
-    reqValue: 50000000,
-    stats: { gold: 0.05, maxHp: 80 },
-  },
-  {
-    id: "hoarder_6",
-    name: "Golden Deity",
-    icon: "👑",
-    desc: "Collect 500,000,000 total gold",
-    reqType: "gold",
-    reqValue: 500000000,
-    stats: { gold: 0.06, maxHp: 160 },
-  },
-  {
-    id: "hoarder_7",
-    name: "Treasury Overlord",
-    icon: "🏺",
-    desc: "Collect 1,000,000,000 total gold",
-    reqType: "gold",
-    reqValue: 1000000000,
-    stats: { gold: 0.08, maxHp: 320 },
-  },
-  {
-    id: "hoarder_8",
-    name: "Midas' Equal",
-    icon: "🌟",
-    desc: "Collect 5,000,000,000 total gold",
-    reqType: "gold",
-    reqValue: 5000000000,
-    stats: { gold: 0.1, maxHp: 640 },
-  },
-  {
-    id: "hoarder_9",
-    name: "Plutus' Architect",
-    icon: "🏛️",
-    desc: "Collect 25,000,000,000 total gold",
-    reqType: "gold",
-    reqValue: 25000000000,
-    stats: { gold: 0.12, maxHp: 1280 },
-  },
-  {
-    id: "hoarder_10",
-    name: "Infinite Hoarder",
-    icon: "♾️",
-    desc: "Collect 100,000,000,000 total gold",
-    reqType: "gold",
-    reqValue: 100000000000,
-    stats: { gold: 0.15, maxHp: 2560 },
-  },
-
-  // 3. PIONEERS (Stages) - Bridged Geometric Curve (Flat Def + % Def)
-  {
-    id: "stage_1",
-    name: "Greenhorn Explorer",
-    icon: "🗺️",
-    desc: "Reach Stage 10",
-    reqType: "stage",
-    reqValue: 10,
-    stats: { def: 1, defPct: 0.01 },
-  },
-  {
-    id: "stage_2",
-    name: "Seasoned Ranger",
-    icon: "🧭",
-    desc: "Reach Stage 50",
-    reqType: "stage",
-    reqValue: 50,
-    stats: { def: 2, defPct: 0.02 },
-  },
-  {
-    id: "stage_3",
-    name: "Abyss Crawler",
-    icon: "🌋",
-    desc: "Reach Stage 100",
-    reqType: "stage",
-    reqValue: 100,
-    stats: { def: 4, defPct: 0.03 },
-  },
-  {
-    id: "stage_4",
-    name: "Slayer of Giants",
-    icon: "🛡️",
-    desc: "Reach Stage 200",
-    reqType: "stage",
-    reqValue: 200,
-    stats: { def: 8, defPct: 0.04 },
-  },
-  {
-    id: "stage_5",
-    name: "The Unstoppable",
-    icon: "🔱",
-    desc: "Reach Stage 350",
-    reqType: "stage",
-    reqValue: 350,
-    stats: { def: 16, defPct: 0.05 },
-  },
-  {
-    id: "stage_6",
-    name: "Voidwalker",
-    icon: "🌌",
-    desc: "Reach Stage 500",
-    reqType: "stage",
-    reqValue: 500,
-    stats: { def: 32, defPct: 0.06 },
-  },
-  {
-    id: "stage_7",
-    name: "Dimensional Pioneer",
-    icon: "🌀",
-    desc: "Reach Stage 650",
-    reqType: "stage",
-    reqValue: 650,
-    stats: { def: 64, defPct: 0.08 },
-  },
-  {
-    id: "stage_8",
-    name: "Aether Lord",
-    icon: "🪐",
-    desc: "Reach Stage 800",
-    reqType: "stage",
-    reqValue: 800,
-    stats: { def: 128, defPct: 0.1 },
-  },
-  {
-    id: "stage_9",
-    name: "Galaxy Warden",
-    icon: "🌟",
-    desc: "Reach Stage 900",
-    reqType: "stage",
-    reqValue: 900,
-    stats: { def: 256, defPct: 0.12 },
-  },
-  {
-    id: "stage_10",
-    name: "Master of the Cosmos",
-    icon: "♾️",
-    desc: "Reach Stage 1,000",
-    reqType: "stage",
-    reqValue: 1000,
-    stats: { def: 512, defPct: 0.15 },
-  },
-
-  // 4. VENERABLE SAGES (Level) - Percentage only (Smooth Bridge)
-  {
-    id: "level_1",
-    name: "Novice Adventurer",
-    icon: "🔰",
-    desc: "Reach Level 10",
-    reqType: "level",
-    reqValue: 10,
-    stats: { atkPct: 0.02, maxHpPct: 0.02 },
-  },
-  {
-    id: "level_2",
-    name: "Elite Hero",
-    icon: "🛡️",
-    desc: "Reach Level 30",
-    reqType: "level",
-    reqValue: 30,
-    stats: { atkPct: 0.03, maxHpPct: 0.03 },
-  },
-  {
-    id: "level_3",
-    name: "Champion Sage",
-    icon: "🎖️",
-    desc: "Reach Level 75",
-    reqType: "level",
-    reqValue: 75,
-    stats: { atkPct: 0.04, maxHpPct: 0.04 },
-  },
-  {
-    id: "level_4",
-    name: "Transcendent",
-    icon: "🌟",
-    desc: "Reach Level 150",
-    reqType: "level",
-    reqValue: 150,
-    stats: { atkPct: 0.05, maxHpPct: 0.05 },
-  },
-  {
-    id: "level_5",
-    name: "Immortal Legend",
-    icon: "👑",
-    desc: "Reach Level 250",
-    reqType: "level",
-    reqValue: 250,
-    stats: { atkPct: 0.06, maxHpPct: 0.06 },
-  },
-  {
-    id: "level_6",
-    name: "Level Tactician",
-    icon: "⚡",
-    desc: "Reach Level 350",
-    reqType: "level",
-    reqValue: 350,
-    stats: { atkPct: 0.08, maxHpPct: 0.08 },
-  },
-  {
-    id: "level_7",
-    name: "Mortal Ascendant",
-    icon: "💫",
-    desc: "Reach Level 500",
-    reqType: "level",
-    reqValue: 500,
-    stats: { atkPct: 0.1, maxHpPct: 0.1 },
-  },
-  {
-    id: "level_8",
-    name: "Cosmic Paragon",
-    icon: "🪐",
-    desc: "Reach Level 650",
-    reqType: "level",
-    reqValue: 650,
-    stats: { atkPct: 0.12, maxHpPct: 0.12 },
-  },
-  {
-    id: "level_9",
-    name: "Eldritch Scholar",
-    icon: "🌌",
-    desc: "Reach Level 800",
-    reqType: "level",
-    reqValue: 800,
-    stats: { atkPct: 0.15, maxHpPct: 0.15 },
-  },
-  {
-    id: "level_10",
-    name: "Apex Deity",
-    icon: "♾️",
-    desc: "Reach Level 1,000",
-    reqType: "level",
-    reqValue: 1000,
-    stats: { atkPct: 0.2, maxHpPct: 0.2 },
-  },
-
-  // 5. MASTERWORK (Tempers) - Smooth Bridge
-  {
-    id: "forge_1",
-    name: "Bronze Anvil",
-    icon: "🔨",
-    desc: "Temper items 1 time",
-    reqType: "temper",
-    reqValue: 1,
-    stats: { str: 1, strPct: 0.01 },
-  },
-  {
-    id: "forge_2",
-    name: "Iron Hammer",
-    icon: "⚒️",
-    desc: "Temper items 10 times",
-    reqType: "temper",
-    reqValue: 10,
-    stats: { str: 2, strPct: 0.02 },
-  },
-  {
-    id: "forge_3",
-    name: "Steel Melter",
-    icon: "🔥",
-    desc: "Temper items 50 times",
-    reqType: "temper",
-    reqValue: 50,
-    stats: { str: 4, strPct: 0.03 },
-  },
-  {
-    id: "forge_4",
-    name: "Master Blacksmith",
-    icon: "🔱",
-    desc: "Temper items 250 times",
-    reqType: "temper",
-    reqValue: 250,
-    stats: { str: 8, strPct: 0.04 },
-  },
-  {
-    id: "forge_5",
-    name: "God of the Forge",
-    icon: "🌋",
-    desc: "Temper items 500 times",
-    reqType: "temper",
-    reqValue: 500,
-    stats: { str: 16, strPct: 0.05 },
-  },
-  {
-    id: "forge_6",
-    name: "Celestial Smelter",
-    icon: "☄️",
-    desc: "Temper items 1,000 times",
-    reqType: "temper",
-    reqValue: 1000,
-    stats: { str: 32, strPct: 0.06 },
-  },
-  {
-    id: "forge_7",
-    name: "Starmetal Shaper",
-    icon: "🪐",
-    desc: "Temper items 2,500 times",
-    reqType: "temper",
-    reqValue: 2500,
-    stats: { str: 64, strPct: 0.08 },
-  },
-  {
-    id: "forge_8",
-    name: "Eternity Architect",
-    icon: "♾️",
-    desc: "Temper items 5,000 times",
-    reqType: "temper",
-    reqValue: 5000,
-    stats: { str: 128, strPct: 0.12 },
-  },
-
-  // 6. RUNIC SCRIBES (Enchants) - Smooth Bridge
-  {
-    id: "enchant_1",
-    name: "Magic Infusion",
-    icon: "🔮",
-    desc: "Enchant 1 time",
-    reqType: "enchant",
-    reqValue: 1,
-    stats: { int: 1, intPct: 0.01 },
-  },
-  {
-    id: "enchant_2",
-    name: "Mystic Scholar",
-    icon: "📜",
-    desc: "Enchant items 5 times",
-    reqType: "enchant",
-    reqValue: 5,
-    stats: { int: 2, intPct: 0.02 },
-  },
-  {
-    id: "enchant_3",
-    name: "Eldritch Weaver",
-    icon: "🕸️",
-    desc: "Enchant items 20 times",
-    reqType: "enchant",
-    reqValue: 20,
-    stats: { int: 4, intPct: 0.03 },
-  },
-  {
-    id: "enchant_4",
-    name: "Runic Architect",
-    icon: "🧙",
-    desc: "Enchant items 100 times",
-    reqType: "enchant",
-    reqValue: 100,
-    stats: { int: 8, intPct: 0.04 },
-  },
-  {
-    id: "enchant_5",
-    name: "Enchantment Sage",
-    icon: "🏗️",
-    desc: "Enchant items 250 times",
-    reqType: "enchant",
-    reqValue: 250,
-    stats: { int: 16, intPct: 0.05 },
-  },
-  {
-    id: "enchant_6",
-    name: "Aether Scribe",
-    icon: "🌌",
-    desc: "Enchant items 500 times",
-    reqType: "enchant",
-    reqValue: 500,
-    stats: { int: 32, intPct: 0.06 },
-  },
-  {
-    id: "enchant_7",
-    name: "Chronos Sigil Weaver",
-    icon: "⏳",
-    desc: "Enchant items 1,000 times",
-    reqType: "enchant",
-    reqValue: 1000,
-    stats: { int: 64, intPct: 0.08 },
-  },
-  {
-    id: "enchant_8",
-    name: "Arcane Singularity",
-    icon: "⚡",
-    desc: "Enchant items 2,000 times",
-    reqType: "enchant",
-    reqValue: 2000,
-    stats: { int: 128, intPct: 0.12 },
-  },
-
-  // 7. VOID CLEANSERS (Rifts) - Smooth Bridge
-  {
-    id: "rift_1",
-    name: "Reality Breaker",
-    icon: "🌌",
-    desc: "Slay 1 Rift Guardian",
-    reqType: "rift",
-    reqValue: 1,
-    stats: { dex: 1, dexPct: 0.01 },
-  },
-  {
-    id: "rift_2",
-    name: "Rift Conqueror",
-    icon: "🌀",
-    desc: "Slay 5 Rift Guardians",
-    reqType: "rift",
-    reqValue: 5,
-    stats: { dex: 2, dexPct: 0.02 },
-  },
-  {
-    id: "rift_3",
-    name: "Guardian's Bane",
-    icon: "⚔️",
-    desc: "Slay 25 Rift Guardians",
-    reqType: "rift",
-    reqValue: 25,
-    stats: { dex: 4, dexPct: 0.03 },
-  },
-  {
-    id: "rift_4",
-    name: "Cosmic Arbiter",
-    icon: "🛸",
-    desc: "Slay 100 Rift Guardians",
-    reqType: "rift",
-    reqValue: 100,
-    stats: { dex: 8, dexPct: 0.04 },
-  },
-  {
-    id: "rift_5",
-    name: "Aether Sovereign",
-    icon: "🪐",
-    desc: "Slay 250 Rift Guardians",
-    reqType: "rift",
-    reqValue: 250,
-    stats: { dex: 16, dexPct: 0.05 },
-  },
-  {
-    id: "rift_6",
-    name: "Galaxy Purger",
-    icon: "☄️",
-    desc: "Slay 500 Rift Guardians",
-    reqType: "rift",
-    reqValue: 500,
-    stats: { dex: 32, dexPct: 0.06 },
-  },
-  {
-    id: "rift_7",
-    name: "Singularity Watcher",
-    icon: "🌌",
-    desc: "Slay 1,000 Rift Guardians",
-    reqType: "rift",
-    reqValue: 1000,
-    stats: { dex: 64, dexPct: 0.08 },
-  },
-  {
-    id: "rift_8",
-    name: "Shatterer of Realities",
-    icon: "💫",
-    desc: "Slay 2,500 Rift Guardians",
-    reqType: "rift",
-    reqValue: 2500,
-    stats: { dex: 128, dexPct: 0.12 },
-  },
-
-  // 8. REBORN LEGENDS (Prestige) - Smooth Bridge
-  {
-    id: "prestige_1",
-    name: "Mortal Ascension",
-    icon: "🐉",
-    desc: "Ascend 1 time at the Altar",
-    reqType: "prestige",
-    reqValue: 1,
-    stats: { expPct: 0.01, gold: 0.01 },
-  },
-  {
-    id: "prestige_2",
-    name: "Chrono Rebirth",
-    icon: "⌛",
-    desc: "Ascend 5 times at the Altar",
-    reqType: "prestige",
-    reqValue: 5,
-    stats: { expPct: 0.02, gold: 0.02 },
-  },
-  {
-    id: "prestige_3",
-    name: "Eternal Cycle",
-    icon: "🌀",
-    desc: "Ascend 10 times at the Altar",
-    reqType: "prestige",
-    reqValue: 10,
-    stats: { expPct: 0.03, gold: 0.03 },
-  },
-  {
-    id: "prestige_4",
-    name: "Dimensional Shifter",
-    icon: "🌌",
-    desc: "Ascend 25 times at the Altar",
-    reqType: "prestige",
-    reqValue: 25,
-    stats: { expPct: 0.04, gold: 0.04 },
-  },
-  {
-    id: "prestige_5",
-    name: "Aetheric Soul",
-    icon: "☄️",
-    desc: "Ascend 50 times at the Altar",
-    reqType: "prestige",
-    reqValue: 50,
-    stats: { expPct: 0.05, gold: 0.05 },
-  },
-  {
-    id: "prestige_6",
-    name: "Shattered Reality",
-    icon: "💫",
-    desc: "Ascend 100 times at the Altar",
-    reqType: "prestige",
-    reqValue: 100,
-    stats: { expPct: 0.06, gold: 0.06 },
-  },
-  {
-    id: "prestige_7",
-    name: "Timeless Deity",
-    icon: "⏳",
-    desc: "Ascend 175 times at the Altar",
-    reqType: "prestige",
-    reqValue: 175,
-    stats: { expPct: 0.07, gold: 0.07 },
-  },
-  {
-    id: "prestige_8",
-    name: "Quantum Reborn",
-    icon: "🌟",
-    desc: "Ascend 250 times at the Altar",
-    reqType: "prestige",
-    reqValue: 250,
-    stats: { expPct: 0.08, gold: 0.08 },
-  },
-  {
-    id: "prestige_9",
-    name: "Cosmic Reincarnated",
-    icon: "🪐",
-    desc: "Ascend 375 times at the Altar",
-    reqType: "prestige",
-    reqValue: 375,
-    stats: { expPct: 0.1, gold: 0.1 },
-  },
-  {
-    id: "prestige_10",
-    name: "Omnipresent Overlord",
-    icon: "♾️",
-    desc: "Ascend 500 times at the Altar",
-    reqType: "prestige",
-    reqValue: 500,
-    stats: { expPct: 0.15, gold: 0.15 },
-  },
-
-  // 9. ARSENAL KINGS (Equip Dungeon) - Smooth Bridge
-  {
-    id: "d_eq_1",
-    name: "Steel Miner",
-    icon: "⛏️",
-    desc: "Reach Floor 10 in Equip Dungeon",
-    reqType: "dungeon_equip",
-    reqValue: 10,
-    stats: { atk: 2, atkPct: 0.01 },
-  },
-  {
-    id: "d_eq_2",
-    name: "Armory Sentry",
-    icon: "🗡️",
-    desc: "Reach Floor 30 in Equip Dungeon",
-    reqType: "dungeon_equip",
-    reqValue: 30,
-    stats: { atk: 4, atkPct: 0.02 },
-  },
-  {
-    id: "d_eq_3",
-    name: "Knight Defender",
-    icon: "🛡️",
-    desc: "Reach Floor 50 in Equip Dungeon",
-    reqType: "dungeon_equip",
-    reqValue: 50,
-    stats: { atk: 8, atkPct: 0.03 },
-  },
-  {
-    id: "d_eq_4",
-    name: "Armory Tyrant",
-    icon: "⚔️",
-    desc: "Reach Floor 100 in Equip Dungeon",
-    reqType: "dungeon_equip",
-    reqValue: 100,
-    stats: { atk: 16, atkPct: 0.04 },
-  },
-  {
-    id: "d_eq_5",
-    name: "Obsidian Guard",
-    icon: "🌋",
-    desc: "Reach Floor 150 in Equip Dungeon",
-    reqType: "dungeon_equip",
-    reqValue: 150,
-    stats: { atk: 32, atkPct: 0.05 },
-  },
-  {
-    id: "d_eq_6",
-    name: "Paladin General",
-    icon: "🎖️",
-    desc: "Reach Floor 250 in Equip Dungeon",
-    reqType: "dungeon_equip",
-    reqValue: 250,
-    stats: { atk: 64, atkPct: 0.06 },
-  },
-  {
-    id: "d_eq_7",
-    name: "Bastion Commander",
-    icon: "🏰",
-    desc: "Reach Floor 400 in Equip Dungeon",
-    reqType: "dungeon_equip",
-    reqValue: 400,
-    stats: { atk: 128, atkPct: 0.08 },
-  },
-  {
-    id: "d_eq_8",
-    name: "Armory God",
-    icon: "👑",
-    desc: "Reach Floor 600 in Equip Dungeon",
-    reqType: "dungeon_equip",
-    reqValue: 600,
-    stats: { atk: 256, atkPct: 0.1 },
-  },
-  {
-    id: "d_eq_9",
-    name: "Astral Sentry",
-    icon: "🪐",
-    desc: "Reach Floor 800 in Equip Dungeon",
-    reqType: "dungeon_equip",
-    reqValue: 800,
-    stats: { atk: 512, atkPct: 0.12 },
-  },
-  {
-    id: "d_eq_10",
-    name: "Arsenal Prime",
-    icon: "♾️",
-    desc: "Reach Floor 1,000 in Equip Dungeon",
-    reqType: "dungeon_equip",
-    reqValue: 1000,
-    stats: { atk: 1024, atkPct: 0.15 },
-  },
-
-  // 10. MIDAS' HAND (Gold Dungeon) - Smooth Bridge
-  {
-    id: "d_go_1",
-    name: "Sooty Pockets",
-    icon: "💰",
-    desc: "Reach Floor 10 in Gold Mine",
-    reqType: "dungeon_gold",
-    reqValue: 10,
-    stats: { gold: 0.01, goldMulti: 0.01 },
-  },
-  {
-    id: "d_go_2",
-    name: "Lode Prospector",
-    icon: "⛏️",
-    desc: "Reach Floor 30 in Gold Mine",
-    reqType: "dungeon_gold",
-    reqValue: 30,
-    stats: { gold: 0.02, goldMulti: 0.02 },
-  },
-  {
-    id: "d_go_3",
-    name: "Ore Overlord",
-    icon: "💰",
-    desc: "Reach Floor 50 in Gold Mine",
-    reqType: "dungeon_gold",
-    reqValue: 50,
-    stats: { gold: 0.03, goldMulti: 0.03 },
-  },
-  {
-    id: "d_go_4",
-    name: "Midas' Disciple",
-    icon: "👑",
-    desc: "Reach Floor 100 in Gold Mine",
-    reqType: "dungeon_gold",
-    reqValue: 100,
-    stats: { gold: 0.04, goldMulti: 0.04 },
-  },
-  {
-    id: "d_go_5",
-    name: "Vast Coffers",
-    icon: "🏦",
-    desc: "Reach Floor 150 in Gold Mine",
-    reqType: "dungeon_gold",
-    reqValue: 150,
-    stats: { gold: 0.05, goldMulti: 0.05 },
-  },
-  {
-    id: "d_go_6",
-    name: "Plutus' Architect",
-    icon: "🏛️",
-    desc: "Reach Floor 250 in Gold Mine",
-    reqType: "dungeon_gold",
-    reqValue: 250,
-    stats: { gold: 0.06, goldMulti: 0.06 },
-  },
-  {
-    id: "d_go_7",
-    name: "Aurum Monarch",
-    icon: "🏺",
-    desc: "Reach Floor 400 in Gold Mine",
-    reqType: "dungeon_gold",
-    reqValue: 400,
-    stats: { gold: 0.08, goldMulti: 0.08 },
-  },
-  {
-    id: "d_go_8",
-    name: "Sovereign Treasury",
-    icon: "🏰",
-    desc: "Reach Floor 600 in Gold Mine",
-    reqType: "dungeon_gold",
-    reqValue: 600,
-    stats: { gold: 0.1, goldMulti: 0.1 },
-  },
-  {
-    id: "d_go_9",
-    name: "Galactic Cartel",
-    icon: "🪐",
-    desc: "Reach Floor 800 in Gold Mine",
-    reqType: "dungeon_gold",
-    reqValue: 800,
-    stats: { gold: 0.12, goldMulti: 0.12 },
-  },
-  {
-    id: "d_go_10",
-    name: "Vault of Eternity",
-    icon: "♾️",
-    desc: "Reach Floor 1,000 in Gold Mine",
-    reqType: "dungeon_gold",
-    reqValue: 1000,
-    stats: { gold: 0.15, goldMulti: 0.15 },
-  },
-
-  // 11. TOXIC PURIFIERS (Material Dungeon) - Smooth Bridge
-  {
-    id: "d_ma_1",
-    name: "Toxic Scavenger",
-    icon: "🧪",
-    desc: "Reach Floor 10 in Material Pit",
-    reqType: "dungeon_mat",
-    reqValue: 10,
-    stats: { maxHp: 15, maxHpPct: 0.01 },
-  },
-  {
-    id: "d_ma_2",
-    name: "Sludge Dredger",
-    icon: "🦠",
-    desc: "Reach Floor 30 in Material Pit",
-    reqType: "dungeon_mat",
-    reqValue: 30,
-    stats: { maxHp: 30, maxHpPct: 0.02 },
-  },
-  {
-    id: "d_ma_3",
-    name: "Plague Alchemist",
-    icon: "☣️",
-    desc: "Reach Floor 50 in Material Pit",
-    reqType: "dungeon_mat",
-    reqValue: 50,
-    stats: { maxHp: 60, maxHpPct: 0.03 },
-  },
-  {
-    id: "d_ma_4",
-    name: "Contagion Master",
-    icon: "🧫",
-    desc: "Reach Floor 100 in Material Pit",
-    reqType: "dungeon_mat",
-    reqValue: 100,
-    stats: { maxHp: 120, maxHpPct: 0.04 },
-  },
-  {
-    id: "d_ma_5",
-    name: "Bio-Hazard Specialist",
-    icon: "☢️",
-    desc: "Reach Floor 150 in Material Pit",
-    reqType: "dungeon_mat",
-    reqValue: 150,
-    stats: { maxHp: 240, maxHpPct: 0.05 },
-  },
-  {
-    id: "d_ma_6",
-    name: "Vector Prime",
-    icon: "🧬",
-    desc: "Reach Floor 250 in Material Pit",
-    reqType: "dungeon_mat",
-    reqValue: 250,
-    stats: { maxHp: 480, maxHpPct: 0.06 },
-  },
-  {
-    id: "d_ma_7",
-    name: "Quarantine Warden",
-    icon: "🏥",
-    desc: "Reach Floor 400 in Material Pit",
-    reqType: "dungeon_mat",
-    reqValue: 400,
-    stats: { maxHp: 960, maxHpPct: 0.08 },
-  },
-  {
-    id: "d_ma_8",
-    name: "Biosphere Custodian",
-    icon: "🪐",
-    desc: "Reach Floor 600 in Material Pit",
-    reqType: "dungeon_mat",
-    reqValue: 600,
-    stats: { maxHp: 1920, maxHpPct: 0.1 },
-  },
-  {
-    id: "d_ma_9",
-    name: "Aether Alchemist",
-    icon: "🌌",
-    desc: "Reach Floor 800 in Material Pit",
-    reqType: "dungeon_mat",
-    reqValue: 800,
-    stats: { maxHp: 3840, maxHpPct: 0.12 },
-  },
-  {
-    id: "d_ma_10",
-    name: "Great Purifier",
-    icon: "♾️",
-    desc: "Reach Floor 1,000 in Material Pit",
-    reqType: "dungeon_mat",
-    reqValue: 1000,
-    stats: { maxHp: 8000, maxHpPct: 0.15 },
-  },
-
-  // 12. CRUCIBLE GLADIATORS (Crucible Waves) - Smooth Bridge
-  {
-    id: "d_cr_1",
-    name: "Spark of Survival",
-    icon: "🔥",
-    desc: "Survive to Wave 15 in Crucible",
-    reqType: "crucible",
-    reqValue: 15,
-    stats: { block: 0.005, parry: 0.005 },
-  },
-  {
-    id: "d_cr_2",
-    name: "Gladiator Recruit",
-    icon: "🛡️",
-    desc: "Survive to Wave 30 in Crucible",
-    reqType: "crucible",
-    reqValue: 30,
-    stats: { block: 0.01, parry: 0.01 },
-  },
-  {
-    id: "d_cr_3",
-    name: "Crucible Crusader",
-    icon: "💥",
-    desc: "Survive to Wave 50 in Crucible",
-    reqType: "crucible",
-    reqValue: 50,
-    stats: { block: 0.015, parry: 0.015 },
-  },
-  {
-    id: "d_cr_4",
-    name: "Astral Sentinel",
-    icon: "🪐",
-    desc: "Survive to Wave 100 in Crucible",
-    reqType: "crucible",
-    reqValue: 100,
-    stats: { block: 0.02, parry: 0.02 },
-  },
-  {
-    id: "d_cr_5",
-    name: "Cosmic Knight",
-    icon: "🌠",
-    desc: "Survive to Wave 200 in Crucible",
-    reqType: "crucible",
-    reqValue: 200,
-    stats: { block: 0.025, parry: 0.025 },
-  },
-  {
-    id: "d_cr_6",
-    name: "Rift Gladiator",
-    icon: "🌀",
-    desc: "Survive to Wave 350 in Crucible",
-    reqType: "crucible",
-    reqValue: 350,
-    stats: { block: 0.03, parry: 0.03 },
-  },
-  {
-    id: "d_cr_7",
-    name: "Crucible Veteran",
-    icon: "🤺",
-    desc: "Survive to Wave 500 in Crucible",
-    reqType: "crucible",
-    reqValue: 500,
-    stats: { block: 0.04, parry: 0.04 },
-  },
-  {
-    id: "d_cr_8",
-    name: "Aether Champion",
-    icon: "☄️",
-    desc: "Survive to Wave 650 in Crucible",
-    reqType: "crucible",
-    reqValue: 650,
-    stats: { block: 0.05, parry: 0.05 },
-  },
-  {
-    id: "d_cr_9",
-    name: "Eternity Gladiator",
-    icon: "🌟",
-    desc: "Survive to Wave 800 in Crucible",
-    reqType: "crucible",
-    reqValue: 800,
-    stats: { block: 0.06, parry: 0.06 },
-  },
-  {
-    id: "d_cr_10",
-    name: "Crucible Overlord",
-    icon: "♾️",
-    desc: "Survive to Wave 1,000 in Crucible",
-    reqType: "crucible",
-    reqValue: 1000,
-    stats: { block: 0.08, parry: 0.08 },
-  },
-
-  // 13. COLOSSUS STRIKE (Single Hit) - Smooth Bridge
-  {
-    id: "hit_1",
-    name: "Flesh Wound",
-    icon: "⚔️",
-    desc: "Deal 150 single hit damage",
-    reqType: "single_hit",
-    reqValue: 150,
-    stats: { critChance: 0.002, critDamage: 0.01 },
-  },
-  {
-    id: "hit_2",
-    name: "Deep Gash",
-    icon: "💥",
-    desc: "Deal 1,500 single hit damage",
-    reqType: "single_hit",
-    reqValue: 1500,
-    stats: { critChance: 0.004, critDamage: 0.02 },
-  },
-  {
-    id: "hit_3",
-    name: "Heavy Slam",
-    icon: "🔨",
-    desc: "Deal 15,000 single hit damage",
-    reqType: "single_hit",
-    reqValue: 15000,
-    stats: { critChance: 0.006, critDamage: 0.03 },
-  },
-  {
-    id: "hit_4",
-    name: "Annihilation",
-    icon: "☄️",
-    desc: "Deal 150,000 single hit damage",
-    reqType: "single_hit",
-    reqValue: 150000,
-    stats: { critChance: 0.008, critDamage: 0.04 },
-  },
-  {
-    id: "hit_5",
-    name: "Mountain Shatterer",
-    icon: "⛰️",
-    desc: "Deal 1,500,000 single hit damage",
-    reqType: "single_hit",
-    reqValue: 1500000,
-    stats: { critChance: 0.01, critDamage: 0.05 },
-  },
-  {
-    id: "hit_6",
-    name: "Continent Smasher",
-    icon: "🌋",
-    desc: "Deal 10,000,000 single hit damage",
-    reqType: "single_hit",
-    reqValue: 10000000,
-    stats: { critChance: 0.015, critDamage: 0.06 },
-  },
-  {
-    id: "hit_7",
-    name: "Planet Cracker",
-    icon: "🪐",
-    desc: "Deal 50,000,000 single hit damage",
-    reqType: "single_hit",
-    reqValue: 50000000,
-    stats: { critChance: 0.02, critDamage: 0.08 },
-  },
-  {
-    id: "hit_8",
-    name: "Supernova Strike",
-    icon: "🌟",
-    desc: "Deal 250,000,000 single hit damage",
-    reqType: "single_hit",
-    reqValue: 250000000,
-    stats: { critChance: 0.03, critDamage: 0.12 },
-  },
-
-  // 14. NYMPH WHISPERERS (Fairies) - Smooth Bridge
-  {
-    id: "fairy_1",
-    name: "Sprite Chaser",
-    icon: "🧚",
-    desc: "Capture 5 wild fairies",
-    reqType: "fairies_clicked",
-    reqValue: 5,
-    stats: { fairySpawn: 0.01, moveSpeedPct: 0.01 },
-  },
-  {
-    id: "fairy_2",
-    name: "Pixie Wrangler",
-    icon: "✨",
-    desc: "Capture 25 wild fairies",
-    reqType: "fairies_clicked",
-    reqValue: 25,
-    stats: { fairySpawn: 0.02, moveSpeedPct: 0.02 },
-  },
-  {
-    id: "fairy_3",
-    name: "Forest Friend",
-    icon: "🌳",
-    desc: "Capture 100 wild fairies",
-    reqType: "fairies_clicked",
-    reqValue: 100,
-    stats: { fairySpawn: 0.03, moveSpeedPct: 0.03 },
-  },
-  {
-    id: "fairy_4",
-    name: "Nymph Nabber",
-    icon: "🎐",
-    desc: "Capture 500 wild fairies",
-    reqType: "fairies_clicked",
-    reqValue: 500,
-    stats: { fairySpawn: 0.04, moveSpeedPct: 0.04 },
-  },
-  {
-    id: "fairy_5",
-    name: "Sylph Sovereign",
-    icon: "🌟",
-    desc: "Capture 2,000 wild fairies",
-    reqType: "fairies_clicked",
-    reqValue: 2000,
-    stats: { fairySpawn: 0.05, moveSpeedPct: 0.05 },
-  },
-  {
-    id: "fairy_6",
-    name: "Aether Whisperer",
-    icon: "🌀",
-    desc: "Capture 5,000 wild fairies",
-    reqType: "fairies_clicked",
-    reqValue: 5000,
-    stats: { fairySpawn: 0.06, moveSpeedPct: 0.06 },
-  },
-  {
-    id: "fairy_7",
-    name: "Nebula Friend",
-    icon: "🪐",
-    desc: "Capture 10,000 wild fairies",
-    reqType: "fairies_clicked",
-    reqValue: 10000,
-    stats: { fairySpawn: 0.08, moveSpeedPct: 0.08 },
-  },
-  {
-    id: "fairy_8",
-    name: "Faerie Monarch",
-    icon: "👑",
-    desc: "Capture 25,000 wild fairies",
-    reqType: "fairies_clicked",
-    reqValue: 25000,
-    stats: { fairySpawn: 0.12, moveSpeedPct: 0.12 },
-  },
-
-  // 15. UNYIELDING WILL (Defeats) - Smooth Bridge
-  {
-    id: "death_1",
-    name: "Flesh & Blood",
-    icon: "🩸",
-    desc: "Suffer defeat 1 time",
-    reqType: "death_count",
-    reqValue: 1,
-    stats: { maxHp: 5, maxHpPct: 0.01 },
-  },
-  {
-    id: "death_2",
-    name: "Struggler's Path",
-    icon: "🥀",
-    desc: "Suffer defeat 10 times",
-    reqType: "death_count",
-    reqValue: 10,
-    stats: { maxHp: 10, maxHpPct: 0.02 },
-  },
-  {
-    id: "death_3",
-    name: "Death's Familiar",
-    icon: "💀",
-    desc: "Suffer defeat 50 times",
-    reqType: "death_count",
-    reqValue: 50,
-    stats: { maxHp: 20, maxHpPct: 0.03 },
-  },
-  {
-    id: "death_4",
-    name: "Reborn Resolve",
-    icon: "🌅",
-    desc: "Suffer defeat 200 times",
-    reqType: "death_count",
-    reqValue: 200,
-    stats: { maxHp: 40, maxHpPct: 0.04 },
-  },
-  {
-    id: "death_5",
-    name: "Ashen Spirit",
-    icon: "🪵",
-    desc: "Suffer defeat 500 times",
-    reqType: "death_count",
-    reqValue: 500,
-    stats: { maxHp: 80, maxHpPct: 0.05 },
-  },
-  {
-    id: "death_6",
-    name: "Eternal Phoenix",
-    icon: "🔥",
-    desc: "Suffer defeat 1,000 times",
-    reqType: "death_count",
-    reqValue: 1000,
-    stats: { maxHp: 160, maxHpPct: 0.06 },
-  },
-  {
-    id: "death_7",
-    name: "Valiant Reclaim",
-    icon: "🌟",
-    desc: "Suffer defeat 2,500 times",
-    reqType: "death_count",
-    reqValue: 2500,
-    stats: { maxHp: 320, maxHpPct: 0.08 },
-  },
-  {
-    id: "death_8",
-    name: "Undying Transcendence",
-    icon: "♾️",
-    desc: "Suffer defeat 5,000 times",
-    reqType: "death_count",
-    reqValue: 5000,
-    stats: { maxHp: 640, maxHpPct: 0.12 },
-  },
-
-  // 16. SCRAP COLLECTORS (Salvages) - Smooth Bridge
-  {
-    id: "salvage_1",
-    name: "Scrap Collector",
-    icon: "♻️",
-    desc: "Salvage 10 items",
-    reqType: "salvage",
-    reqValue: 10,
-    stats: { drop: 0.01, qly: 0.01 },
-  },
-  {
-    id: "salvage_2",
-    name: "Deconstruction Derby",
-    icon: "🚜",
-    desc: "Salvage 100 items",
-    reqType: "salvage",
-    reqValue: 100,
-    stats: { drop: 0.02, qly: 0.02 },
-  },
-  {
-    id: "salvage_3",
-    name: "Infinite Recycler",
-    icon: "⚙️",
-    desc: "Salvage 500 items",
-    reqType: "salvage",
-    reqValue: 500,
-    stats: { drop: 0.03, qly: 0.03 },
-  },
-  {
-    id: "salvage_4",
-    name: "Scrap Colossus",
-    icon: "🤖",
-    desc: "Salvage 2,000 items",
-    reqType: "salvage",
-    reqValue: 2000,
-    stats: { drop: 0.04, qly: 0.04 },
-  },
-  {
-    id: "salvage_5",
-    name: "Meltdown Engineer",
-    icon: "🌋",
-    desc: "Salvage 5,000 items",
-    reqType: "salvage",
-    reqValue: 5000,
-    stats: { drop: 0.05, qly: 0.05 },
-  },
-  {
-    id: "salvage_6",
-    name: "Nanotech Recycler",
-    icon: "🧬",
-    desc: "Salvage 10,000 items",
-    reqType: "salvage",
-    reqValue: 10000,
-    stats: { drop: 0.06, qly: 0.06 },
-  },
-  {
-    id: "salvage_7",
-    name: "Atomic Disassembler",
-    icon: "🪐",
-    desc: "Salvage 25,000 items",
-    reqType: "salvage",
-    reqValue: 25000,
-    stats: { drop: 0.08, qly: 0.08 },
-  },
-  {
-    id: "salvage_8",
-    name: "Quantum Disassembler",
-    icon: "♾️",
-    desc: "Salvage 50,000 items",
-    reqType: "salvage",
-    reqValue: 50000,
-    stats: { drop: 0.12, qly: 0.12 },
-  },
-
-  // 17. FAIRY BLITZ (Speed Fairy captures) - Clean progression
-  {
-    id: "f_spd_1",
-    name: "Nymph Chaser",
-    icon: "🧚",
-    desc: "Click 2 fairies in 10s",
-    reqType: "fairy_speed",
-    reqValue: 2,
-    stats: { fairySpawn: 0.01, moveSpeedPct: 0.01 },
-  },
-  {
-    id: "f_spd_2",
-    name: "Swift Fingers",
-    icon: "⚡",
-    desc: "Click 3 fairies in 10s",
-    reqType: "fairy_speed",
-    reqValue: 3,
-    stats: { fairySpawn: 0.02, moveSpeedPct: 0.02 },
-  },
-  {
-    id: "f_spd_3",
-    name: "Pixie Cyclone",
-    icon: "🌀",
-    desc: "Click 4 fairies in 10s",
-    reqType: "fairy_speed",
-    reqValue: 4,
-    stats: { fairySpawn: 0.03, moveSpeedPct: 0.03 },
-  },
-  {
-    id: "f_spd_4",
-    name: "Sprite Hurricane",
-    icon: "🌪️",
-    desc: "Click 5 fairies in 10s",
-    reqType: "fairy_speed",
-    reqValue: 5,
-    stats: { fairySpawn: 0.04, moveSpeedPct: 0.04 },
-  },
-  {
-    id: "f_spd_5",
-    name: "Chronos Reflexes",
-    icon: "⌛",
-    desc: "Click 6 fairies in 10s",
-    reqType: "fairy_speed",
-    reqValue: 6,
-    stats: { fairySpawn: 0.06, moveSpeedPct: 0.06 },
-  },
-  {
-    id: "f_spd_6",
-    name: "Aetherial Velocity",
-    icon: "🌌",
-    desc: "Click 8 fairies in 10s",
-    reqType: "fairy_speed",
-    reqValue: 8,
-    stats: { fairySpawn: 0.1, moveSpeedPct: 0.1 },
-  },
-
-  // 18. UNBREAKABLE AEGIS (Deflections) - Smooth Bridge
-  {
-    id: "defl_1",
-    name: "Parry Practice",
-    icon: "🤺",
-    desc: "Deflect 100 attacks",
-    reqType: "deflections",
-    reqValue: 100,
-    stats: { def: 2, defPct: 0.01 },
-  },
-  {
-    id: "defl_2",
-    name: "Deflector Shield",
-    icon: "🛡️",
-    desc: "Deflect 500 attacks",
-    reqType: "deflections",
-    reqValue: 500,
-    stats: { def: 4, defPct: 0.02 },
-  },
-  {
-    id: "defl_3",
-    name: "Phalanx Wall",
-    icon: "🧱",
-    desc: "Deflect 2,000 attacks",
-    reqType: "deflections",
-    reqValue: 2000,
-    stats: { def: 8, defPct: 0.03 },
-  },
-  {
-    id: "defl_4",
-    name: "Aegis Sentinel",
-    icon: "🛡️",
-    desc: "Deflect 10,000 attacks",
-    reqType: "deflections",
-    reqValue: 10000,
-    stats: { def: 16, defPct: 0.04 },
-  },
-  {
-    id: "defl_5",
-    name: "Bastion Wall",
-    icon: "🏰",
-    desc: "Deflect 25,000 attacks",
-    reqType: "deflections",
-    reqValue: 25000,
-    stats: { def: 32, defPct: 0.05 },
-  },
-  {
-    id: "defl_6",
-    name: "Titan Fortress",
-    icon: "🤖",
-    desc: "Deflect 50,000 attacks",
-    reqType: "deflections",
-    reqValue: 50000,
-    stats: { def: 64, defPct: 0.06 },
-  },
-  {
-    id: "defl_7",
-    name: "Aetherial Bulwark",
-    icon: "🪐",
-    desc: "Deflect 75,000 attacks",
-    reqType: "deflections",
-    reqValue: 75000,
-    stats: { def: 128, defPct: 0.08 },
-  },
-  {
-    id: "defl_8",
-    name: "Impenetrable Anomaly",
-    icon: "🌀",
-    desc: "Deflect 100,000 attacks",
-    reqType: "deflections",
-    reqValue: 100000,
-    stats: { def: 256, defPct: 0.12 },
-  },
-
-  // 19. POLYMORPH COCKTAIL (Simultaneous active buffs) - Cap is 6
-  {
-    id: "buff_1",
-    name: "Doped",
-    icon: "🧪",
-    desc: "Have 1 active buff",
-    reqType: "buff_stack",
-    reqValue: 1,
-    stats: { potDurationPct: 0.01, potStrengthPct: 0.01 },
-  },
-  {
-    id: "buff_2",
-    name: "Double Dose",
-    icon: "🍺",
-    desc: "Have 2 active buffs",
-    reqType: "buff_stack",
-    reqValue: 2,
-    stats: { potDurationPct: 0.02, potStrengthPct: 0.02 },
-  },
-  {
-    id: "buff_3",
-    name: "Stimulated",
-    icon: "🍷",
-    desc: "Have 3 active buffs",
-    reqType: "buff_stack",
-    reqValue: 3,
-    stats: { potDurationPct: 0.03, potStrengthPct: 0.03 },
-  },
-  {
-    id: "buff_4",
-    name: "Cocktail Shaker",
-    icon: "🍸",
-    desc: "Have 4 active buffs",
-    reqType: "buff_stack",
-    reqValue: 4,
-    stats: { potDurationPct: 0.04, potStrengthPct: 0.04 },
-  },
-  {
-    id: "buff_5",
-    name: "Hyper Charged",
-    icon: "⚡",
-    desc: "Have 5 active buffs",
-    reqType: "buff_stack",
-    reqValue: 5,
-    stats: { potDurationPct: 0.06, potStrengthPct: 0.06 },
-  },
-  {
-    id: "buff_6",
-    name: "Ultimate Panacea",
-    icon: "🌌",
-    desc: "Have 6 active buffs",
-    reqType: "buff_stack",
-    reqValue: 6,
-    stats: { potDurationPct: 0.1, potStrengthPct: 0.1 },
-  },
-
-  // 20. ELITE REFORGING (Total Reforges via Catalyst Cores) - Smooth Bridge
-  {
-    id: "refo_1",
-    name: "Tinker",
-    icon: "🔧",
-    desc: "Reforge modifiers 5 times",
-    reqType: "reforges",
-    reqValue: 5,
-    stats: { dex: 1, dexPct: 0.01 },
-  },
-  {
-    id: "refo_2",
-    name: "Locksmith",
-    icon: "🔒",
-    desc: "Reforge modifiers 15 times",
-    reqType: "reforges",
-    reqValue: 15,
-    stats: { dex: 2, dexPct: 0.02 },
-  },
-  {
-    id: "refo_3",
-    name: "Optimizer",
-    icon: "⚙️",
-    desc: "Reforge modifiers 50 times",
-    reqType: "reforges",
-    reqValue: 50,
-    stats: { dex: 4, dexPct: 0.03 },
-  },
-  {
-    id: "refo_4",
-    name: "Modifier Master",
-    icon: "🛠️",
-    desc: "Reforge modifiers 150 times",
-    reqType: "reforges",
-    reqValue: 150,
-    stats: { dex: 8, dexPct: 0.04 },
-  },
-  {
-    id: "refo_5",
-    name: "Core Siphon",
-    icon: "🔋",
-    desc: "Reforge modifiers 300 times",
-    reqType: "reforges",
-    reqValue: 300,
-    stats: { dex: 16, dexPct: 0.05 },
-  },
-  {
-    id: "refo_6",
-    name: "Cosmic Calibration",
-    icon: "💫",
-    desc: "Reforge modifiers 500 times",
-    reqType: "reforges",
-    reqValue: 500,
-    stats: { dex: 32, dexPct: 0.06 },
-  },
-  {
-    id: "refo_7",
-    name: "Matrix Adjuster",
-    icon: "🛸",
-    desc: "Reforge modifiers 750 times",
-    reqType: "reforges",
-    reqValue: 750,
-    stats: { dex: 64, dexPct: 0.08 },
-  },
-  {
-    id: "refo_8",
-    name: "Paradox Adjuster",
-    icon: "🌌",
-    desc: "Reforge modifiers 1,000 times",
-    reqType: "reforges",
-    reqValue: 1000,
-    stats: { dex: 128, dexPct: 0.12 },
-  },
-
-  // 21. GUILD INVESTMENTS (Combined levels of permanent Gold Sinks) - Smooth Bridge
-  {
-    id: "g_up_1",
-    name: "Smart Spender",
-    icon: "💰",
-    desc: "Combined Gold Upgrade level 5",
-    reqType: "gold_upgrades",
-    reqValue: 5,
-    stats: { gold: 0.01, int: 1 },
-  },
-  {
-    id: "g_up_2",
-    name: "Capital Allocator",
-    icon: "💼",
-    desc: "Combined Gold Upgrade level 15",
-    reqType: "gold_upgrades",
-    reqValue: 15,
-    stats: { gold: 0.02, int: 2 },
-  },
-  {
-    id: "g_up_3",
-    name: "Guild Associate",
-    icon: "🏛️",
-    desc: "Combined Gold Upgrade level 30",
-    reqType: "gold_upgrades",
-    reqValue: 30,
-    stats: { gold: 0.03, int: 4 },
-  },
-  {
-    id: "g_up_4",
-    name: "Monopoly Holder",
-    icon: "🏦",
-    desc: "Combined Gold Upgrade level 50",
-    reqType: "gold_upgrades",
-    reqValue: 50,
-    stats: { gold: 0.04, int: 8 },
-  },
-  {
-    id: "g_up_5",
-    name: "Market Mogul",
-    icon: "💹",
-    desc: "Combined Gold Upgrade level 70",
-    reqType: "gold_upgrades",
-    reqValue: 70,
-    stats: { gold: 0.05, int: 16 },
-  },
-  {
-    id: "g_up_6",
-    name: "High Financier",
-    icon: "👑",
-    desc: "Combined Gold Upgrade level 90",
-    reqType: "gold_upgrades",
-    reqValue: 90,
-    stats: { gold: 0.06, int: 32 },
-  },
-  {
-    id: "g_up_7",
-    name: "Venture Captain",
-    icon: "🪐",
-    desc: "Combined Gold Upgrade level 120",
-    reqType: "gold_upgrades",
-    reqValue: 120,
-    stats: { gold: 0.08, int: 64 },
-  },
-  {
-    id: "g_up_8",
-    name: "Midas' Treasurer",
-    icon: "🌌",
-    desc: "Combined Gold Upgrade level 150",
-    reqType: "gold_upgrades",
-    reqValue: 150,
-    stats: { gold: 0.12, int: 128 },
-  },
-
-  // 22. JACKPOT (Gold Earned in a single drop) - Smooth Bridge
-  {
-    id: "drop_g_1",
-    name: "Spare Coins",
-    icon: "💰",
-    desc: "Earn 1,000 gold from a single drop",
-    reqType: "single_gold_drop",
-    reqValue: 1000,
-    stats: { gold: 0.01, critDamage: 0.01 },
-  },
-  {
-    id: "drop_g_2",
-    name: "Pouch of Silver",
-    icon: "💰",
-    desc: "Earn 10,000 gold from a single drop",
-    reqType: "single_gold_drop",
-    reqValue: 10000,
-    stats: { gold: 0.02, critDamage: 0.02 },
-  },
-  {
-    id: "drop_g_3",
-    name: "Heavy Satchel",
-    icon: "💼",
-    desc: "Earn 100,000 gold from a single drop",
-    reqType: "single_gold_drop",
-    reqValue: 100000,
-    stats: { gold: 0.03, critDamage: 0.03 },
-  },
-  {
-    id: "drop_g_4",
-    name: "Vault Breaker",
-    icon: "🏦",
-    desc: "Earn 1,000,000 gold from a single drop",
-    reqType: "single_gold_drop",
-    reqValue: 1000000,
-    stats: { gold: 0.04, critDamage: 0.04 },
-  },
-  {
-    id: "drop_g_5",
-    name: "Royal Treasury",
-    icon: "🏰",
-    desc: "Earn 5,000,000 gold from a single drop",
-    reqType: "single_gold_drop",
-    reqValue: 5000000,
-    stats: { gold: 0.05, critDamage: 0.05 },
-  },
-  {
-    id: "drop_g_6",
-    name: "Dragon's Hoard",
-    icon: "🐉",
-    desc: "Earn 10,000,000 gold from a single drop",
-    reqType: "single_gold_drop",
-    reqValue: 10000000,
-    stats: { gold: 0.06, critDamage: 0.06 },
-  },
-  {
-    id: "drop_g_7",
-    name: "Celestial Fortune",
-    icon: "🪐",
-    desc: "Earn 50,000,000 gold from a single drop",
-    reqType: "single_gold_drop",
-    reqValue: 50000000,
-    stats: { gold: 0.08, critDamage: 0.08 },
-  },
-  {
-    id: "drop_g_8",
-    name: "Cosmic Treasury",
-    icon: "🌌",
-    desc: "Earn 100,000,000 gold from a single drop",
-    reqType: "single_gold_drop",
-    reqValue: 100000000,
-    stats: { gold: 0.12, critDamage: 0.12 },
-  },
-
-  // 23. RARE SIGHTINGS (Rare Spawns Slayed) - Smooth Bridge
-  {
-    id: "rare_s_1",
-    name: "Uncommon Encounter",
-    icon: "✨",
-    desc: "Slay 5 Rare Spawns",
-    reqType: "rare_spawns",
-    reqValue: 5,
-    stats: { rareSpawn: 0.001, qly: 0.01 },
-  },
-  {
-    id: "rare_s_2",
-    name: "Rarity Hunter",
-    icon: "🧭",
-    desc: "Slay 25 Rare Spawns",
-    reqType: "rare_spawns",
-    reqValue: 25,
-    stats: { rareSpawn: 0.002, qly: 0.02 },
-  },
-  {
-    id: "rare_s_3",
-    name: "Shimmering Predator",
-    icon: "🐅",
-    desc: "Slay 100 Rare Spawns",
-    reqType: "rare_spawns",
-    reqValue: 100,
-    stats: { rareSpawn: 0.003, qly: 0.03 },
-  },
-  {
-    id: "rare_s_4",
-    name: "Elite Exterminator",
-    icon: "⚔️",
-    desc: "Slay 500 Rare Spawns",
-    reqType: "rare_spawns",
-    reqValue: 500,
-    stats: { rareSpawn: 0.004, qly: 0.04 },
-  },
-  {
-    id: "rare_s_5",
-    name: "Stardust Tracker",
-    icon: "🌌",
-    desc: "Slay 1,000 Rare Spawns",
-    reqType: "rare_spawns",
-    reqValue: 1000,
-    stats: { rareSpawn: 0.005, qly: 0.05 },
-  },
-  {
-    id: "rare_s_6",
-    name: "Chronos Stalker",
-    icon: "⏳",
-    desc: "Slay 2,000 Rare Spawns",
-    reqType: "rare_spawns",
-    reqValue: 2000,
-    stats: { rareSpawn: 0.006, qly: 0.06 },
-  },
-  {
-    id: "rare_s_7",
-    name: "Nebula Hunter",
-    icon: "🪐",
-    desc: "Slay 5,000 Rare Spawns",
-    reqType: "rare_spawns",
-    reqValue: 5000,
-    stats: { rareSpawn: 0.008, qly: 0.08 },
-  },
-  {
-    id: "rare_s_8",
-    name: "Mythic Hunter of Legend",
-    icon: "👑",
-    desc: "Slay 10,000 Rare Spawns",
-    reqType: "rare_spawns",
-    reqValue: 10000,
-    stats: { rareSpawn: 0.012, qly: 0.12 },
-  },
-
-  // ==========================================================================
-  // SINGLE TIER ACHIEVEMENTS / VALOR FEATS (isSingleTier: true)
-  // ==========================================================================
-  {
-    id: "sing_murphys_law",
-    name: "Murphy's Law",
-    icon: "🍀",
-    desc: "Fail a tempering attempt with a success rate of 90% or higher",
-    isSingleTier: true,
-    stats: { qly: 0.05, maxHpPct: 0.03 },
-  },
-  {
-    id: "sing_against_odds",
-    name: "Against All Odds",
-    icon: "🌟",
-    desc: "Obtain a 5★ Mythic item from a standard campaign non-boss monster",
-    isSingleTier: true,
-    stats: { qly: 0.05, atkPct: 0.03 },
-  },
-  {
-    id: "sing_lucky_seven",
-    name: "Lucky Seven",
-    icon: "🎲",
-    desc: "Roll a crit, block, and parry all within a 1-second window",
-    isSingleTier: true,
-    stats: { atkPct: 0.05, defPct: 0.05 },
-  },
-  {
-    id: "sing_back_brink",
-    name: "Back from the Brink",
-    icon: "🩸",
-    desc: "Trigger Second Wind (Ankh) and successfully defeat that same boss",
-    isSingleTier: true,
-    stats: { maxHpPct: 0.05, defPct: 0.05 },
-  },
-  {
-    id: "sing_elemental_conv",
-    name: "Elemental Convergence",
-    icon: "🌀",
-    desc: "Trigger Lightning, Fire, and Frost tome spells simultaneously",
-    isSingleTier: true,
-    stats: { intPct: 0.1, potStrengthPct: 0.05 },
-  },
-  {
-    id: "sing_no_hands",
-    name: "Look Ma, No Hands",
-    icon: "⚔️",
-    desc: "Defeat a boss stage without clicking/pressing space once in that battle",
-    isSingleTier: true,
-    stats: { idleSpeedPct: 0.05, expPct: 0.05 },
-  },
-  {
-    id: "sing_poly_cocktail",
-    name: "Polymorph Cocktail",
-    icon: "🧪",
-    desc: "Have 6 distinct potion/relic buffs active at the same time",
-    isSingleTier: true,
-    stats: { potDurationPct: 0.1, potStrengthPct: 0.05 },
-  },
-  {
-    id: "sing_hoarder",
-    name: "Paranoid Hoarder",
-    icon: "🎒",
-    desc: "Fill your equipment bag to maximum capacity with entirely LOCKED gear",
-    isSingleTier: true,
-    stats: { qly: 0.05, gold: 0.05 },
-  },
-  {
-    id: "sing_unified_set",
-    name: "Unified Aesthetics",
-    icon: "🎨",
-    desc: "Equip 6 armor/weapon slots from the exact same named Dungeon Set",
-    isSingleTier: true,
-    stats: { atkPct: 0.08, defPct: 0.08 },
-  },
-  {
-    id: "sing_golden_touch",
-    name: "Golden Touch",
-    icon: "👑",
-    desc: "Equip 3 Gold-boosting Unique Artifacts simultaneously",
-    isSingleTier: true,
-    stats: { gold: 0.15, goldMulti: 0.1 },
-  },
-  {
-    id: "sing_untouchable",
-    name: "Untouchable",
-    icon: "🛡️",
-    desc: "Defeat a Campaign or Dungeon Boss taking exactly 0 damage",
-    isSingleTier: true,
-    stats: { parry: 0.02, block: 0.02, defPct: 0.05 },
-  },
-  {
-    id: "sing_overkill",
-    name: "Overkill",
-    icon: "💥",
-    desc: "Deal a critical hit that exceeds a route monster's max HP by 1,000,000%+",
-    isSingleTier: true,
-    stats: { critDamage: 0.15, atkPct: 0.05 },
-  },
-  {
-    id: "sing_speedrun",
-    name: "Speedrunner's Delight",
-    icon: "⏱️",
-    desc: "Ascend at the Altar within 15 minutes of your previous Ascension",
-    isSingleTier: true,
-    stats: { expPct: 0.1, gold: 0.05 },
-  },
-  {
-    id: "sing_exact_change",
-    name: "Exact Change",
-    icon: "💰",
-    desc: "Buy an item or upgrade that brings your gold balance to exactly 0",
-    isSingleTier: true,
-    stats: { gold: 0.1, goldMulti: 0.05 },
-  },
-  {
-    id: "sing_unfortunate_soul",
-    name: "Unfortunate Soul",
-    icon: "💔",
-    desc: "Suffer three consecutive tempering failures on the same item at +9 or below",
-    isSingleTier: true,
-    stats: { qly: 0.05, drop: 0.05 },
-  },
-  {
-    id: "sing_alchemical_synth",
-    name: "Alchemical Override",
-    icon: "🔮",
-    desc: "Override an active potion with a higher tier of the same type",
-    isSingleTier: true,
-    stats: { potStrengthPct: 0.05, potDurationPct: 0.05 },
-  },
-  {
-    id: "sing_patient_shepherd",
-    name: "Patient Shepherd",
-    icon: "🧚",
-    desc: "Let 3 fairies fly simultaneously, then capture all of them in 2 seconds",
-    isSingleTier: true,
-    stats: { fairySpawn: 0.1, moveSpeedPct: 0.05 },
-  },
-  {
-    id: "sing_battlemage",
-    name: "Battlemage's Legacy",
-    icon: "🧙",
-    desc: "Equip heavy plate armor in every slot while wielding the unique Staff",
-    isSingleTier: true,
-    stats: { atkPct: 0.05, defPct: 0.05, intPct: 0.05 },
-  },
-  {
-    id: "sing_bare_fists",
-    name: "Bare Fists",
-    icon: "🥊",
-    desc: "Defeat any Stage or Dungeon Boss with no weapon equipped",
-    isSingleTier: true,
-    stats: { atk: 10, atkPct: 0.02 },
-  },
-  {
-    id: "sing_perfect_deflection",
-    name: "Perfect Deflection",
-    icon: "⚡",
-    desc: "Parry three consecutive attacks without taking damage or blocking",
-    isSingleTier: true,
-    stats: { parry: 0.01, dexPct: 0.05 },
-  },
-  {
-    id: "sing_night_owl",
-    name: "Night Owl",
-    icon: "🦉",
-    desc: "Slay any monster between 12:00 AM and 4:00 AM local time",
-    isSingleTier: true,
-    stats: { critDamage: 0.05, atkPct: 0.03 },
-  },
-  {
-    id: "sing_early_bird",
-    name: "Early Bird",
-    icon: "🌅",
-    desc: "Slay any monster between 5:00 AM and 8:00 AM local time",
-    isSingleTier: true,
-    stats: { expPct: 0.05, maxHpPct: 0.03 },
-  },
-  {
-    id: "sing_coffee_run",
-    name: "Coffee Run",
-    icon: "☕",
-    desc: "Consume a Haste Elixir between 7:00 AM and 9:00 AM local time",
-    isSingleTier: true,
-    stats: { potDurationPct: 0.05, moveSpeedPct: 0.03 },
-  },
-  {
-    id: "sing_high_noon",
-    name: "High Noon",
-    icon: "☀️",
-    desc: "Defeat any Boss between 12:00 PM and 1:00 PM local time",
-    isSingleTier: true,
-    stats: { gold: 0.05, goldMulti: 0.03 },
-  },
-  {
-    id: "sing_witching_hour",
-    name: "The Witching Hour",
-    icon: "🧙‍♀️",
-    desc: "Defeat a Rift Guardian between 3:00 AM and 4:00 AM local time",
-    isSingleTier: true,
-    stats: { qly: 0.05, drop: 0.05 },
-  },
-  {
-    id: "sing_weekend_warrior",
-    name: "Weekend Warrior",
-    icon: "🗓️",
-    desc: "Active in Dungeons or Crucible on Saturday or Sunday",
-    isSingleTier: true,
-    stats: { drop: 0.1, gold: 0.05 },
-  },
-  {
-    id: "sing_time_capsule",
-    name: "Time Capsule",
-    icon: "⏳",
-    desc: "Claim maximum 8-hour offline gains",
-    isSingleTier: true,
-    stats: { expPct: 0.05, gold: 0.05 },
-  },
-  {
-    id: "sing_long_run",
-    name: "The Long Run",
-    icon: "♾️",
-    desc: "Keep the game running continuously in an active tab for 1 hour",
-    isSingleTier: true,
-    stats: { atk: 25, def: 25, maxHpPct: 0.05 },
-  },
-  {
-    id: "sing_clicking_tempest",
-    name: "Clicking Tempest",
-    icon: "⚡",
-    desc: "Click/Tap the canvas exactly 100 times in a 10-second window",
-    isSingleTier: true,
-    stats: { critChance: 0.02, moveSpeedPct: 0.03 },
-  },
-  {
-    id: "sing_aetheric_recharge",
-    name: "Aetheric Recharge",
-    icon: "🌀",
-    desc: "Spend 10 minutes continuously inside any Dungeon or Crucible run",
-    isSingleTier: true,
-    stats: { drop: 0.05, qly: 0.05 },
-  },
-];
-
-window.slotNouns = {
-  weapon: [
-    "Greatsword",
-    "Longsword",
-    "Halberd",
-    "Warhammer",
-    "Battleaxe",
-    "Broadsword",
-    "Flanged Mace",
-    "Claymore",
-  ],
-  subweapon: {
-    shield: [
-      "Kite Shield",
-      "Tower Shield",
-      "Buckler",
-      "Aegis",
-      "Heater Shield",
-    ],
-    dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"],
-    tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"],
-  },
-  helmet: [
-    "Greathelm",
-    "Armet",
-    "Bascinet",
-    "Coif",
-    "Barbuta",
-    "Circlet",
-    "Visor",
-  ],
-  chest: [
-    "Hauberk",
-    "Cuirass",
-    "Brigandine",
-    "Plate Mail",
-    "Chain Mail",
-    "Doublet",
-  ],
-  leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"],
-  boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"],
-  overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"],
-};
-
-// --- CORE DATA HELPERS ---
+// Legacy Compatibility Aliases to protect references
+window.gainXp = (amount, isOffline) =>
+  window.GameState.gainXp(amount, isOffline);
+window.addCoins = (amount) => window.GameState.addCoins(amount);
+window.spendCoins = (amount) => window.GameState.spendCoins(amount);
 
 window.getAchievementProgress = function (ach) {
   if (ach.reqType === "kills")
@@ -4351,6 +1381,10 @@ window.playerStats = {
   volumeMaster: 0.5,
   volumeSFX: 0.8,
   mute: false,
+  ecoMode:
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    ),
   fairiesClicked: 0,
   deathCount: 0,
   dungeonPeaks: { equip: 1, gold: 1, mat: 1 },
@@ -4468,480 +1502,272 @@ window.playerStats = {
   paragonLevel: 0,
 };
 
-// --- CLIENT-SIDE COSMETIC REGISTRY ---
-window.COSMETIC_SKINS = {
-  default: {
-    id: "default",
-    name: "Default Steel Armor",
-    desc: "The standard plate armor issued to all newly recruited kingdom guardians.",
-    color: "#bdc3c7",
-    cost: 0,
-    currency: "Gold",
-  },
-  void: {
-    id: "void",
-    name: "Void Sovereign",
-    desc: "Plate mail corrupted by the deep pressure of the Event Horizon. Emits a dark purple aura.",
-    color: "#8e44ad",
-    cost: 500,
-    currency: "Luminous Soul",
-  },
-  crimson: {
-    id: "crimson",
-    name: "Sanguine Dreadnought",
-    desc: "Drenched in the blood of ancient drakes. Its steel has stained a permanent crimson.",
-    color: "#e74c3c",
-    cost: 500,
-    currency: "Luminous Soul",
-  },
-  gilded: {
-    id: "gilded",
-    name: "Gilded Emperor",
-    desc: "Pure aurum plate armor forged for high-ranking monarchs. Blindingly brilliant.",
-    color: "#f1c40f",
-    cost: 750,
-    currency: "Luminous Soul",
-  },
-  celestial: {
-    id: "celestial",
-    name: "Celestial Arbiter",
-    desc: "Forged in the stellar nurseries of the Aether. Pulsates with clean cosmic starlight.",
-    color: "#00d2ff",
-    cost: 1000,
-    currency: "Luminous Soul",
+// Initialize the QuestSystem namespace and define generateDailyMissions
+window.QuestSystem = {
+  generateDailyMissions() {
+    let pool = [
+      {
+        type: "kills",
+        label: "Slay monsters",
+        targetBase: 300,
+        unit: "monsters",
+      },
+      {
+        type: "rares",
+        label: "Slay rare spawns",
+        targetBase: 5,
+        unit: "rares",
+      },
+      {
+        type: "gold",
+        label: "Collect Gold",
+        targetBase: 2500,
+        stageScale: true,
+        unit: "Gold",
+      },
+      {
+        type: "fairies",
+        label: "Catch wild fairies",
+        targetBase: 8,
+        unit: "fairies",
+      },
+      {
+        type: "tempers",
+        label: "Successfully temper gear",
+        targetBase: 1,
+        unit: "tempers",
+      },
+      {
+        type: "reforges",
+        label: "Reforge gear modifiers",
+        targetBase: 2,
+        unit: "reforges",
+      },
+      {
+        type: "dungeons",
+        label: "Clear Dungeon floors",
+        targetBase: 5,
+        unit: "floors",
+      },
+      {
+        type: "salvage",
+        label: "Salvage gear items",
+        targetBase: 15,
+        unit: "items",
+      },
+      {
+        type: "elixirs",
+        label: "Consume active elixirs",
+        targetBase: 3,
+        unit: "elixirs",
+      },
+      {
+        type: "active_clicks",
+        label: "Manually click canvas",
+        targetBase: 250,
+        unit: "clicks",
+      },
+    ];
+
+    pool.sort(() => Math.random() - 0.5);
+    let selected = pool.slice(0, 6);
+
+    let stage = window.playerStats.stage || 1;
+    window.playerStats.dailyMissions = selected.map((m, idx) => {
+      let target = m.targetBase;
+      if (m.stageScale) {
+        target = Math.ceil(m.targetBase * Math.pow(1.045, stage));
+      }
+      return {
+        id: `daily_${idx + 1}`,
+        type: m.type,
+        desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
+        current: 0,
+        target: target,
+        treat: "Daily Reward Sack",
+        treatQty: 1,
+        completed: false,
+        claimed: false,
+      };
+    });
   },
 };
 
-// --- ROGUE-LITE CAVERN SIGIL MODIFIER AFFIXES ---
-window.CAVERN_BUFFS = [
-  {
-    id: "swift_strikes",
-    name: "Swift Strikes",
-    desc: "Active & Idle Attack Speed increased by +25%",
-  },
-  {
-    id: "giant_might",
-    name: "Giant Might",
-    desc: "Attack power increased by +30%",
-  },
-  { id: "iron_aegis", name: "Iron Aegis", desc: "Defense increased by +35%" },
-  {
-    id: "vital_fountain",
-    name: "Vital Fountain",
-    desc: "Max HP increased by +40%",
-  },
-  {
-    id: "unstable_surge",
-    name: "Unstable Surge",
-    desc: "Critical Strike Chance increased by +15%",
-  },
-  {
-    id: "shatter_frenzy",
-    name: "Shatter Frenzy",
-    desc: "Critical Strike Damage increased by +50%",
-  },
-  {
-    id: "deflection_vortex",
-    name: "Deflection Vortex",
-    desc: "Block Rate and Parry Rate increased by +10%",
-  },
-  {
-    id: "arcane_infusion",
-    name: "Arcane Infusion",
-    desc: "Spell & Tome absorption increased by +15%",
-  },
-  {
-    id: "sanguine_feast",
-    name: "Sanguine Feast",
-    desc: "Restores 2% Max HP on every Critical Strike",
-  },
-  {
-    id: "treasure_finder",
-    name: "Treasure Finder",
-    desc: "Gold Multiplier increased by +50%",
-  },
-  {
-    id: "lucky_winds",
-    name: "Lucky Winds",
-    desc: "Fairy Spawn Rate increased by +40%",
-  },
-  {
-    id: "void_call",
-    name: "Void Call",
-    desc: "Rare Spawn Rate increased by +50%",
-  },
-  {
-    id: "scavenger_insight",
-    name: "Scavenger Insight",
-    desc: "Equipment Drop Rate increased by +50%",
-  },
-  {
-    id: "artisan_luck",
-    name: "Artisan Luck",
-    desc: "Equipment Drop Quality increased by +25%",
-  },
-  {
-    id: "echoing_step",
-    name: "Echoing Step",
-    desc: "Parry triggers a 100% Attack damage counter-attack",
-  },
-];
+// Legacy Compatibility Aliases to protect cross-file references
+window.generateDailyMissions = () => window.QuestSystem.generateDailyMissions();
 
-window.CAVERN_DEBUFFS = [
-  {
-    id: "withering_decay",
-    name: "Withering Decay",
-    desc: "Lose 1.5% of current HP every second in combat",
-  },
-  {
-    id: "iron_gaze",
-    name: "Iron Gaze",
-    desc: "Active & Idle Attack Speed decreased by -20%",
-  },
-  {
-    id: "shattered_armour",
-    name: "Shattered Armour",
-    desc: "Defense decreased by -25%",
-  },
-  {
-    id: "frail_vessel",
-    name: "Frail Vessel",
-    desc: "Max HP decreased by -20%",
-  },
-  {
-    id: "dull_blades",
-    name: "Dull Blades",
-    desc: "Attack power decreased by -20%",
-  },
-  {
-    id: "volatile_sparks",
-    name: "Volatile Sparks",
-    desc: "Mobs explode on death dealing 18% player Max HP (Evadable via Block/Parry)",
-  },
-  {
-    id: "obsidian_skin",
-    name: "Obsidian Skin",
-    desc: "Enemies have +35% Defense",
-  },
-  {
-    id: "blood_tax",
-    name: "Blood Tax",
-    desc: "Critical Strikes deal 5% player Max HP as recoil damage to self",
-  },
-  {
-    id: "static_feedback",
-    name: "Static Feedback",
-    desc: "Every active click deals 2% player Max HP as damage to self",
-  },
-  {
-    id: "feeble_mind",
-    name: "Feeble Mind",
-    desc: "Spell & Tome absorption completely disabled (0%)",
-  },
-  {
-    id: "curse_greed",
-    name: "Curse of Greed",
-    desc: "Gold Multiplier decreased by -40%",
-  },
-  {
-    id: "heavy_mist",
-    name: "Heavy Mist",
-    desc: "Movement Speed decreased by -30%",
-  },
-  {
-    id: "blind_spot",
-    name: "Blind Spot",
-    desc: "Critical Strike Chance decreased by -10%",
-  },
-  {
-    id: "kinetic_recoil",
-    name: "Kinetic Recoil",
-    desc: "Receive 15% of all damage dealt as reflection damage",
-  },
-  {
-    id: "lead_boots",
-    name: "Lead Boots",
-    desc: "Dodge, Block, and Parry rates decreased by -8%",
-  },
-];
+// Append generateWeeklyMissions inside window.QuestSystem
+Object.assign(window.QuestSystem, {
+  generateWeeklyMissions() {
+    let pool = [
+      {
+        type: "rifts",
+        label: "Slay Rift Guardians",
+        targetBase: 3,
+        unit: "guardians",
+      },
+      {
+        type: "dungeons",
+        label: "Ascend Dungeon floors",
+        targetBase: 15,
+        unit: "floors",
+      },
+      {
+        type: "gold",
+        label: "Amass extreme wealth",
+        targetBase: 15000,
+        stageScale: true,
+        unit: "Gold",
+      },
+      {
+        type: "kills",
+        label: "Execute massive purges",
+        targetBase: 1500,
+        unit: "enemies",
+      },
+      {
+        type: "tempers",
+        label: "Master blacksmithing",
+        targetBase: 15,
+        unit: "tempers",
+      },
+    ];
 
-// --- ASTRAL REAGENT SHOP STOCK ---
-window.ASTRAL_SHOP_STOCK = [
-  {
-    name: "Catalyst Core",
-    cost: 120,
-    color: "#2ecc71",
-    desc: "Spent at the Forge to lock and re-roll equipment modifiers.",
+    pool.sort(() => Math.random() - 0.5);
+    let selected = pool.slice(0, 3);
+
+    let peakStage =
+      window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+    window.playerStats.weeklyMissions = selected.map((m, idx) => {
+      let target = m.targetBase;
+      if (m.stageScale) {
+        target = Math.ceil(m.targetBase * Math.pow(1.045, peakStage));
+      }
+      return {
+        id: `weekly_${idx + 1}`,
+        type: m.type,
+        desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
+        current: 0,
+        target: target,
+        treat: "Weekly Reward Sack",
+        treatQty: 1,
+        completed: false,
+        claimed: false,
+      };
+    });
   },
-  {
-    name: "Ancient Core",
-    cost: 80,
-    color: "#e74c3c",
-    desc: "Sacrifice at the Altar to summon a Guardian.",
-  },
-  {
-    name: "Overlord's Sigil",
-    cost: 180,
-    color: "#1abc9c",
-    desc: "Material required for unique artifact tempering.",
-  },
-  {
-    name: "Luminous Soul",
-    cost: 150,
-    color: "#ffb6c1",
-    desc: "A radiant, pure soul used for advanced mystical trades.",
-  },
-];
+});
 
-// --- CLIENT-SIDE TITLE DATABASE ---
-window.TITLES_DATA = {
-  hoors_beta_boi: {
-    name: "Hoor's Beta Boi",
-    desc: "A prestigious badge of honor for Hoor's elite close-circle testers.",
-    received: "Participating in the Closed Beta Phase (June 2026)",
-    color: "#ff007f", // Hot Neon Pink
-    stats: { drop: 0.5, qly: 0.5 },
-    icon: `<svg width="14" height="14" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 3px; filter: drop-shadow(0 0 4px #ff007f);"><polygon points="5,0 11,0 11,6 8,4 5,6" fill="#ff007f" /><polygon points="6,0 10,0 10,6 8,4.5 6,6" fill="#d946ef" /><circle cx="8" cy="9" r="4.5" fill="#f1c40f" stroke="#000" stroke-width="0.8" /><polygon points="8,7 8.5,8.5 10,8.7 8.8,9.7 9.2,11 8,10.2 6.8,11 7.2,9.7 6,8.7 7.5,8.5" fill="#fff" /></svg>`,
-  },
-};
+// Legacy Compatibility Aliases to protect references
+window.generateWeeklyMissions = () =>
+  window.QuestSystem.generateWeeklyMissions();
 
-// --- PROCEDURAL MISSION & QUEST SYSTEM ---
+// Append checkAndResetMissions inside window.QuestSystem
+Object.assign(window.QuestSystem, {
+  checkAndResetMissions() {
+    let now = Date.now();
 
-window.generateDailyMissions = function () {
-  let pool = [
-    {
-      type: "kills",
-      label: "Slay monsters",
-      targetBase: 300,
-      unit: "monsters",
-    },
-    { type: "rares", label: "Slay rare spawns", targetBase: 5, unit: "rares" },
-    {
-      type: "gold",
-      label: "Collect Gold",
-      targetBase: 2500,
-      stageScale: true,
-      unit: "Gold",
-    },
-    {
-      type: "fairies",
-      label: "Catch wild fairies",
-      targetBase: 8,
-      unit: "fairies",
-    },
-    {
-      type: "tempers",
-      label: "Successfully temper gear",
-      targetBase: 1,
-      unit: "tempers",
-    },
-    {
-      type: "reforges",
-      label: "Reforge gear modifiers",
-      targetBase: 2,
-      unit: "reforges",
-    },
-    {
-      type: "dungeons",
-      label: "Clear Dungeon floors",
-      targetBase: 5,
-      unit: "floors",
-    },
-    {
-      type: "salvage",
-      label: "Salvage gear items",
-      targetBase: 15,
-      unit: "items",
-    },
-    {
-      type: "elixirs",
-      label: "Consume active elixirs",
-      targetBase: 3,
-      unit: "elixirs",
-    },
-    {
-      type: "active_clicks",
-      label: "Manually click canvas",
-      targetBase: 250,
-      unit: "clicks",
-    },
-  ];
+    // Fully Timezone-Aware PST/PDT Date Resolution
+    let ptString = new Date(now).toLocaleString("en-US", {
+      timeZone: "America/Los_Angeles",
+    });
+    let ptDate = new Date(ptString);
+    let currentDayStr = ptDate.toLocaleDateString("en-US"); // e.g. "6/25/2026"
 
-  pool.sort(() => Math.random() - 0.5);
-  let selected = pool.slice(0, 6);
-
-  let stage = window.playerStats.stage || 1;
-  window.playerStats.dailyMissions = selected.map((m, idx) => {
-    let target = m.targetBase;
-    if (m.stageScale) {
-      target = Math.ceil(m.targetBase * Math.pow(1.045, stage));
-    }
-    return {
-      id: `daily_${idx + 1}`,
-      type: m.type,
-      desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
-      current: 0,
-      target: target,
-      treat: "Daily Reward Sack",
-      treatQty: 1,
-      completed: false,
-      claimed: false,
-    };
-  });
-};
-
-window.generateWeeklyMissions = function () {
-  let pool = [
-    {
-      type: "rifts",
-      label: "Slay Rift Guardians",
-      targetBase: 3,
-      unit: "guardians",
-    },
-    {
-      type: "dungeons",
-      label: "Ascend Dungeon floors",
-      targetBase: 15,
-      unit: "floors",
-    },
-    {
-      type: "gold",
-      label: "Amass extreme wealth",
-      targetBase: 15000,
-      stageScale: true,
-      unit: "Gold",
-    },
-    {
-      type: "kills",
-      label: "Execute massive purges",
-      targetBase: 1500,
-      unit: "enemies",
-    },
-    {
-      type: "tempers",
-      label: "Master blacksmithing",
-      targetBase: 15,
-      unit: "tempers",
-    },
-  ];
-
-  pool.sort(() => Math.random() - 0.5);
-  let selected = pool.slice(0, 3);
-
-  let peakStage =
-    window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-  window.playerStats.weeklyMissions = selected.map((m, idx) => {
-    let target = m.targetBase;
-    if (m.stageScale) {
-      target = Math.ceil(m.targetBase * Math.pow(1.045, peakStage));
-    }
-    return {
-      id: `weekly_${idx + 1}`,
-      type: m.type,
-      desc: `${m.label} (${target.toLocaleString()} ${m.unit})`,
-      current: 0,
-      target: target,
-      treat: "Weekly Reward Sack",
-      treatQty: 1,
-      completed: false,
-      claimed: false,
-    };
-  });
-};
-
-window.checkAndResetMissions = function () {
-  let now = Date.now();
-
-  // Fully Timezone-Aware PST/PDT Date Resolution
-  let ptString = new Date(now).toLocaleString("en-US", {
-    timeZone: "America/Los_Angeles",
-  });
-  let ptDate = new Date(ptString);
-  let currentDayStr = ptDate.toLocaleDateString("en-US"); // e.g. "6/25/2026"
-
-  // Check Daily reset against absolute Pacific date string
-  if (
-    !window.playerStats.lastDailyResetDayStr ||
-    window.playerStats.lastDailyResetDayStr !== currentDayStr
-  ) {
-    window.generateDailyMissions();
-    window.playerStats.lastDailyResetDayStr = currentDayStr;
-    window.playerStats.lastDailyResetTime = now;
-    window.playerStats.dailyRewardClaimed = false;
-    window.playerStats.dailyRerollsDone = 0; // Reset active re-roll tracker daily
-    if (typeof window.pushLog === "function")
-      window.pushLog(
-        "<span style='color:#2ecc71; font-weight:bold;'>📅 [SYSTEM] Clan Daily Board refreshed! Reset at 12:00 AM PST/PDT. Complete at least 5 for a grand treat!</span>",
-      );
-  }
-
-  // Check Weekly reset (Monday 12:00 AM PST/PDT)
-  let dayOfWeek = ptDate.getDay(); // 0 is Sunday, 1 is Monday...
-  let daysSinceMonday = (dayOfWeek + 6) % 7; // Days elapsed since last Monday
-  let lastMondayDate = new Date(ptDate);
-  lastMondayDate.setDate(ptDate.getDate() - daysSinceMonday);
-  let lastMondayStr = lastMondayDate.toLocaleDateString("en-US");
-
-  if (window.playerStats.prestigeCount > 0) {
+    // Check Daily reset against absolute Pacific date string
     if (
-      !window.playerStats.lastWeeklyResetMondayStr ||
-      window.playerStats.lastWeeklyResetMondayStr !== lastMondayStr
+      !window.playerStats.lastDailyResetDayStr ||
+      window.playerStats.lastDailyResetDayStr !== currentDayStr
     ) {
-      window.generateWeeklyMissions();
-      window.playerStats.lastWeeklyResetMondayStr = lastMondayStr;
-      window.playerStats.lastWeeklyResetTime = now;
-      window.playerStats.weeklyRewardClaimed = false;
+      this.generateDailyMissions();
+      window.playerStats.lastDailyResetDayStr = currentDayStr;
+      window.playerStats.lastDailyResetTime = now;
+      window.playerStats.dailyRewardClaimed = false;
+      window.playerStats.dailyRerollsDone = 0; // Reset active re-roll tracker daily
       if (typeof window.pushLog === "function")
         window.pushLog(
-          "<span style='color:#9b59b6; font-weight:bold;'>📅 [SYSTEM] Clan Weekly Board refreshed! Reset Monday at 12:00 AM PST/PDT. Slay Rift targets and complete objectives.</span>",
+          "<span style='color:#2ecc71; font-weight:bold;'>📅 [SYSTEM] Clan Daily Board refreshed! Reset at 12:00 AM PST/PDT. Complete at least 5 for a grand treat!</span>",
         );
     }
-  } else {
-    window.playerStats.weeklyMissions = [];
-  }
-};
 
-window.progressMission = function (type, amount) {
-  if (window.isGamePaused) return;
-  let updated = false;
+    // Check Weekly reset (Monday 12:00 AM PST/PDT)
+    let dayOfWeek = ptDate.getDay(); // 0 is Sunday, 1 is Monday...
+    let daysSinceMonday = (dayOfWeek + 6) % 7; // Days elapsed since last Monday
+    let lastMondayDate = new Date(ptDate);
+    lastMondayDate.setDate(ptDate.getDate() - daysSinceMonday);
+    let lastMondayStr = lastMondayDate.toLocaleDateString("en-US");
 
-  if (window.playerStats.dailyMissions) {
-    window.playerStats.dailyMissions.forEach((m) => {
-      if (m.type === type && !m.completed) {
-        m.current = Math.min(m.target, m.current + amount);
-        if (m.current >= m.target) {
-          m.completed = true;
-          if (typeof window.pushHeaderToast === "function") {
-            window.pushHeaderToast(`📅 Daily Done: ${m.desc}!`, "#2ecc71");
-          }
-        }
-        updated = true;
+    if (window.playerStats.prestigeCount > 0) {
+      if (
+        !window.playerStats.lastWeeklyResetMondayStr ||
+        window.playerStats.lastWeeklyResetMondayStr !== lastMondayStr
+      ) {
+        this.generateWeeklyMissions();
+        window.playerStats.lastWeeklyResetMondayStr = lastMondayStr;
+        window.playerStats.lastWeeklyResetTime = now;
+        window.playerStats.weeklyRewardClaimed = false;
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            "<span style='color:#9b59b6; font-weight:bold;'>📅 [SYSTEM] Clan Weekly Board refreshed! Reset Monday at 12:00 AM PST/PDT. Slay Rift targets and complete objectives.</span>",
+          );
       }
-    });
-  }
+    } else {
+      window.playerStats.weeklyMissions = [];
+    }
+  },
+});
 
-  if (
-    window.playerStats.prestigeCount > 0 &&
-    window.playerStats.weeklyMissions
-  ) {
-    window.playerStats.weeklyMissions.forEach((m) => {
-      if (m.type === type && !m.completed) {
-        m.current = Math.min(m.target, m.current + amount);
-        if (m.current >= m.target) {
-          m.completed = true;
-          if (typeof window.pushHeaderToast === "function") {
-            window.pushHeaderToast(`📆 Weekly Done: ${m.desc}!`, "#9b59b6");
+// Legacy Compatibility Aliases to protect references
+window.checkAndResetMissions = () => window.QuestSystem.checkAndResetMissions();
+
+// Append progressMission inside window.QuestSystem
+Object.assign(window.QuestSystem, {
+  progressMission(type, amount) {
+    if (window.isGamePaused) return;
+    let updated = false;
+
+    if (window.playerStats.dailyMissions) {
+      window.playerStats.dailyMissions.forEach((m) => {
+        if (m.type === type && !m.completed) {
+          m.current = Math.min(m.target, m.current + amount);
+          if (m.current >= m.target) {
+            m.completed = true;
+            if (typeof window.pushHeaderToast === "function") {
+              window.pushHeaderToast(`📅 Daily Done: ${m.desc}!`, "#2ecc71");
+            }
           }
+          updated = true;
         }
-        updated = true;
-      }
-    });
-  }
+      });
+    }
 
-  if (updated) {
-    if (typeof window.updateUI === "function") window.updateUI();
-  }
-};
+    if (
+      window.playerStats.prestigeCount > 0 &&
+      window.playerStats.weeklyMissions
+    ) {
+      window.playerStats.weeklyMissions.forEach((m) => {
+        if (m.type === type && !m.completed) {
+          m.current = Math.min(m.target, m.current + amount);
+          if (m.current >= m.target) {
+            m.completed = true;
+            if (typeof window.pushHeaderToast === "function") {
+              window.pushHeaderToast(`📆 Weekly Done: ${m.desc}!`, "#9b59b6");
+            }
+          }
+          updated = true;
+        }
+      });
+    }
+
+    if (updated) {
+      if (typeof window.updateUI === "function") window.updateUI();
+    }
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.progressMission = (type, amount) =>
+  window.QuestSystem.progressMission(type, amount);
 
 window.equippedSlots = {
   weapon: null,

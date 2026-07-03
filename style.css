@@ -690,6 +690,54 @@ canvas {
   border: 1px solid #e74c3c;
 }
 
+@keyframes pulseBtnTeal {
+  0% {
+    background: #16a085;
+    box-shadow: 0 0 10px rgba(26, 188, 156, 0.4);
+  }
+  50% {
+    background: #1abc9c;
+    box-shadow: 0 0 20px rgba(26, 188, 156, 0.75);
+  }
+  100% {
+    background: #16a085;
+    box-shadow: 0 0 10px rgba(26, 188, 156, 0.4);
+  }
+}
+.btn-pulse-teal {
+  animation: pulseBtnTeal 1.5s infinite;
+  border: 1px solid #1abc9c !important;
+}
+
+@keyframes stampSlam {
+  0% {
+    transform: scale(3.5) rotate(calc(var(--final-rot, -5deg) - 20deg));
+    opacity: 0;
+    filter: blur(3px);
+  }
+  70% {
+    transform: scale(0.9) rotate(calc(var(--final-rot, -5deg) + 2deg));
+    opacity: 0.95;
+    filter: none;
+  }
+  100% {
+    transform: scale(1) rotate(var(--final-rot, -5deg));
+    opacity: 1;
+  }
+}
+.stamp-base {
+  transform: rotate(var(--final-rot, -5deg));
+  opacity: 1;
+  transform-origin: center center;
+  display: inline-block;
+}
+.stamp-slam {
+  animation: stampSlam 0.28s cubic-bezier(0.25, 0.8, 0.25, 1.15) forwards;
+  transform-origin: center center;
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
 /* --- MARKET SHRINKS & SLOTS --- */
 .market-grid {
   display: grid;
@@ -2527,4 +2575,329 @@ canvas {
     grid-template-columns: 1fr;
     gap: 8px;
   }
+}
+
+/* ==========================================================================
+   GACHA & SHOP PREMIUM SYSTEM STYLING
+   ========================================================================== */
+
+/* 1. Sinks: Slate Panels & Thin Glowing Tracks */
+.sink-slate-panel {
+  background: linear-gradient(180deg, #131720 0%, #0b0e14 100%) !important;
+  border: 1.5px solid #202632 !important;
+  border-radius: 8px !important;
+  padding: 10px !important;
+  position: relative !important;
+  transition:
+    transform 0.22s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.22s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  text-align: left !important;
+}
+.sink-slate-panel:hover {
+  transform: translateY(-3.5px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75) !important;
+}
+/* Shimmer Reflection Sweep on Hover */
+.sink-slate-panel:hover .sink-shimmer {
+  left: 100% !important;
+  top: 100% !important;
+  transition: all 0.75s ease-in-out !important;
+}
+/* Gentle Icon scale upward on Card Hover */
+.sink-slate-panel:hover .sink-icon-container {
+  transform: scale(1.05) translateY(-2px) !important;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.85),
+    inset 0 0 8px rgba(255, 255, 255, 0.1) !important;
+}
+.sink-slate-panel button.btn-action:hover:not(:disabled) {
+  filter: brightness(1.1) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+.sink-slate-panel button.btn-action:active:not(:disabled) {
+  transform: translateY(1px) !important;
+}
+/* Tactile Upgrade slam-flash keyframes */
+@keyframes sinkUpgradedFlash {
+  0% {
+    transform: scale(1);
+    filter: brightness(1) contrast(1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.65);
+  }
+  15% {
+    transform: scale(1.035);
+    filter: brightness(1.35) contrast(1.15);
+    box-shadow: 0 0 25px currentColor;
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1) contrast(1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.65);
+  }
+}
+.sink-upgraded-flash {
+  animation: sinkUpgradedFlash 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+  z-index: 10;
+}
+.sink-accent-vending {
+  border-left: 4px solid #f1c40f !important;
+}
+.sink-accent-shop {
+  border-left: 4px solid #3498db !important;
+}
+.sink-accent-global {
+  border-left: 4px solid #2ecc71 !important;
+}
+
+.sink-prog-track {
+  height: 5px !important;
+  background: #06080c !important;
+  border-radius: 20px !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  margin-top: 8px !important;
+  margin-bottom: 2px !important;
+  border: 1px solid #1a202c !important;
+}
+.sink-prog-fill {
+  height: 100% !important;
+  width: 0%;
+  transition: width 0.35s ease !important;
+}
+.sink-prog-fill.vending {
+  background: linear-gradient(90deg, #f1c40f, #e67e22) !important;
+  box-shadow: 0 0 6px rgba(241, 196, 15, 0.4) !important;
+}
+.sink-prog-fill.shop {
+  background: linear-gradient(90deg, #3498db, #1d4ed8) !important;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4) !important;
+}
+.sink-prog-fill.global {
+  background: linear-gradient(90deg, #2ecc71, #27ae60) !important;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.4) !important;
+}
+
+/* 2. Astral Crucible Shop: Celestial Altar Cards */
+@keyframes rotateStars {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.runic-altar-card {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 2px double #9b59b6 !important;
+  background: #0a0512 !important;
+  border-radius: 8px !important;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+.runic-altar-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 0 15px rgba(155, 89, 182, 0.45) !important;
+}
+.starry-bg {
+  position: absolute !important;
+  top: -50% !important;
+  left: -50% !important;
+  width: 200% !important;
+  height: 200% !important;
+  background:
+    radial-gradient(1.5px 1.5px at 20px 30px, #eee, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1.1px at 50px 160px, #ddd, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 80px 120px, #fff, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 110px 220px, #df9ffb, rgba(0, 0, 0, 0)) !important;
+  background-repeat: repeat !important;
+  background-size: 150px 150px !important;
+  opacity: 0.12 !important;
+  animation: rotateStars 180s linear infinite !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+.rune-price-badge {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  background: rgba(155, 89, 182, 0.15) !important;
+  border: 1px solid #9b59b6 !important;
+  color: #df9ffb !important;
+  font-family: monospace !important;
+  font-size: 9.5px !important;
+  font-weight: bold !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 8px rgba(155, 89, 182, 0.35) !important;
+  z-index: 2 !important;
+}
+@keyframes pulseInfuse {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(155, 89, 182, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(155, 89, 182, 0.65);
+  }
+}
+.btn-infuse-shards {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad) !important;
+  border: 1px solid #df9ffb !important;
+  color: #fff !important;
+  box-shadow: 0 0 8px rgba(155, 89, 182, 0.3) !important;
+  transition:
+    transform 0.1s ease,
+    filter 0.15s !important;
+  cursor: pointer !important;
+}
+.btn-infuse-shards:not(:disabled) {
+  animation: pulseInfuse 2s infinite !important;
+}
+.btn-infuse-shards:disabled {
+  background: #333 !important;
+  border-color: #444 !important;
+  color: #777 !important;
+  box-shadow: none !important;
+  animation: none !important;
+  cursor: not-allowed !important;
+}
+
+/* 3. Gold Shop: Merchant Shelves */
+.merchant-shelf-hero {
+  position: relative !important;
+  border: 3px double #d4af37 !important;
+  border-radius: 8px !important;
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(241, 196, 15, 0.12) 0%,
+    #0a0d13 100%
+  ) !important;
+  box-shadow:
+    0 0 20px rgba(241, 196, 15, 0.18),
+    inset 0 0 12px rgba(241, 196, 15, 0.08) !important;
+  overflow: hidden !important;
+}
+.merchant-shelf-hero::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 3px solid #5c3a21 !important; /* Elegant wood frame */
+  border-radius: 6px !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+}
+.merchant-shelf-hero::after {
+  content: "•   •" !important;
+  color: #d4af37 !important; /* Brass rivets */
+  font-family: monospace !important;
+  font-size: 14px !important;
+  position: absolute !important;
+  bottom: 4px;
+  left: 12px;
+  right: 12px;
+  display: flex !important;
+  justify-content: space-between !important;
+  opacity: 0.5 !important;
+  z-index: 4 !important;
+  pointer-events: none !important;
+}
+.merchant-shelves-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+@media (max-width: 580px) {
+  .merchant-shelves-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+.merchant-shelf-row {
+  background: rgba(15, 17, 26, 0.65) !important;
+  border: 1.5px solid #222530 !important;
+  border-bottom: 3.5px solid #5c3a21 !important; /* Wood shelf support */
+  position: relative !important;
+  overflow: hidden !important;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease !important;
+}
+.merchant-shelf-row:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45) !important;
+}
+.rarity-glow-4 {
+  box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.12) !important;
+}
+.rarity-glow-4:hover {
+  box-shadow:
+    0 4px 14px rgba(241, 196, 15, 0.22),
+    inset 0 0 10px rgba(241, 196, 15, 0.12) !important;
+  border-color: #f1c40f !important;
+}
+.rarity-glow-5 {
+  box-shadow: inset 0 0 12px rgba(231, 76, 60, 0.15) !important;
+}
+.rarity-glow-5:hover {
+  box-shadow:
+    0 4px 16px rgba(231, 76, 60, 0.25),
+    inset 0 0 12px rgba(231, 76, 60, 0.15) !important;
+  border-color: #e74c3c !important;
+}
+
+/* 4. Alchemy: Brewing Workbenches */
+.alchemy-workbench-panel {
+  background: linear-gradient(135deg, #10141a 0%, #06080c 100%) !important;
+  border: 2px solid #232a35 !important;
+  border-radius: 8px !important;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.65),
+    inset 0 0 12px rgba(0, 0, 0, 0.5) !important;
+  padding: 14px !important;
+  position: relative !important;
+}
+.alchemy-workbench-panel::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.02) !important;
+  pointer-events: none !important;
+}
+.split-reagent-card {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #06080c !important;
+  border: 1px solid #1e2530 !important;
+  border-radius: 6px !important;
+  padding: 5px 10px !important;
+  margin-top: 8px !important;
+  font-family: monospace !important;
+  font-size: 10px !important;
+  gap: 6px !important;
+}
+.reagent-indicator {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+  flex-shrink: 0 !important;
+}
+.reagent-indicator.available {
+  background: #2ecc71 !important;
+  box-shadow: 0 0 6px #2ecc71 !important;
+}
+.reagent-indicator.missing {
+  background: #e74c3c !important;
+  box-shadow: 0 0 6px #e74c3c !important;
 }

@@ -14,24 +14,35 @@ window.SoundManager = {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return false;
     if (!this.ctx) {
-      this.ctx = new AudioContextClass();
-      this.masterGain = this.ctx.createGain();
-      this.sfxGain = this.ctx.createGain();
-      this.sfxGain.connect(this.masterGain);
+      try {
+        this.ctx = new AudioContextClass();
+        this.masterGain = this.ctx.createGain();
+        this.sfxGain = this.ctx.createGain();
+        this.sfxGain.connect(this.masterGain);
 
-      const compressor = this.ctx.createDynamicsCompressor();
-      compressor.threshold.setValueAtTime(-18, this.ctx.currentTime);
-      compressor.knee.setValueAtTime(20, this.ctx.currentTime);
-      compressor.ratio.setValueAtTime(10, this.ctx.currentTime);
-      compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
-      compressor.release.setValueAtTime(0.08, this.ctx.currentTime);
+        const compressor = this.ctx.createDynamicsCompressor();
+        compressor.threshold.setValueAtTime(-18, this.ctx.currentTime);
+        compressor.knee.setValueAtTime(20, this.ctx.currentTime);
+        compressor.ratio.setValueAtTime(10, this.ctx.currentTime);
+        compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
+        compressor.release.setValueAtTime(0.08, this.ctx.currentTime);
 
-      this.masterGain.connect(compressor);
-      compressor.connect(this.ctx.destination);
-      this.updateVolumes();
+        this.masterGain.connect(compressor);
+        compressor.connect(this.ctx.destination);
+        this.updateVolumes();
+      } catch (e) {
+        console.warn("Failed to initialize Web AudioContext:", e);
+        return false;
+      }
     }
-    if (this.ctx.state === "suspended") {
-      this.ctx.resume();
+    // Secure AudioContext state transitions for mobile background throttling
+    if (this.ctx && this.ctx.state === "suspended") {
+      this.ctx.resume().catch((err) => {
+        console.warn(
+          "AudioContext resume postponed (waiting for user gesture):",
+          err,
+        );
+      });
     }
     return true;
   },

@@ -3,6 +3,28 @@
    tooltips, and modal displays.
    ========================================================================= */
 
+// Global Touch-Tracking Event Listener to prevent mouse-hover simulation double-triggers
+window.state = window.state || {};
+window.state.lastTouchTime = 0;
+document.addEventListener(
+  "touchstart",
+  () => {
+    window.state.lastTouchTime = Date.now();
+  },
+  { passive: true },
+);
+
+// Validates whether an incoming hover event is a simulated mobile ghost-trigger
+window.isSimulatedMouseEvent = function (e) {
+  if (e && (e.type === "mouseenter" || e.type === "mouseover")) {
+    let lastTouch = window.state.lastTouchTime || 0;
+    if (Date.now() - lastTouch < 500) {
+      return true; // Discard simulated hover triggers on touchscreens
+    }
+  }
+  return false;
+};
+
 window.getEquipIconHtml = function (item, size = 32) {
   if (!item) return "";
   let isUnique =
@@ -23,601 +45,171 @@ window.getEquipIconHtml = function (item, size = 32) {
     return window.getUniqueIconHtml(item, size);
   }
 
-  // Draw custom procedural generic equipment icons based on slot!
   let color = window.getTierColor(item.statsRolled);
-  // Guarantee a globally unique ID suffix to prevent DOM duplicate ID collisions (which fall back to black fills)
   let id =
     (item.id || Math.floor(Math.random() * 100000)) +
     "_" +
     Math.floor(Math.random() * 1000000);
-  let svg = "";
+  let innerHtml = "";
 
-  if (item.type === "weapon") {
-    svg = `<svg viewBox="0 0 32 32" width="100%" height="100%">
-                <defs>
-                    <linearGradient id="gen_w_blade_${id}" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#ffffff"/>
-                        <stop offset="50%" stop-color="${color}"/>
-                        <stop offset="100%" stop-color="#555555"/>
-                    </linearGradient>
-                </defs>
-                <path d="M16 3 L19 8 L18 21 L14 21 L13 8 Z" fill="url(#gen_w_blade_${id})" stroke="#000" stroke-width="1.8" />
-                <rect x="11" y="21" width="10" height="2.5" rx="0.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />
-                <rect x="14.5" y="23.5" width="3" height="5" fill="#5c3a21" stroke="#000" stroke-width="1" />
-                <circle cx="16" cy="29.5" r="1.5" fill="#f1c40f" stroke="#000" stroke-width="1" />
-            </svg>`;
-  } else if (item.type === "subweapon") {
-    if (item.subType === "shield") {
-      svg = `<svg viewBox="0 0 32 32" width="100%" height="100%">
-                    <defs>
-                        <linearGradient id="gen_w_sh_${id}" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="${color}"/>
-                            <stop offset="100%" stop-color="#2c3e50"/>
-                        </linearGradient>
-                    </defs>
-                    <path d="M6 6 Q16 4, 26 6 Q25 18, 16 28 Q7 18, 6 6 Z" fill="url(#gen_w_sh_${id})" stroke="#000" stroke-width="1.8" />
-                    <path d="M11 11 Q16 9, 21 11 L19 19 Q16 23, 16 23 Q16 23, 13 19 Z" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.55" />
-                </svg>`;
-    } else if (item.subType === "dagger") {
-      svg = `<svg viewBox="0 0 32 32" width="100%" height="100%">
-                    <path d="M16 4 L18 9 L17 19 L15 19 L14 9 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.8" />
-                    <rect x="12" y="19" width="8" height="2" fill="${color}" stroke="#000" stroke-width="1.2" />
-                    <rect x="14.5" y="21" width="3" height="4" fill="#3b2f2f" stroke="#000" stroke-width="1" />
-                </svg>`;
-    } else {
-      // tome
-      svg = `<svg viewBox="0 0 32 32" width="100%" height="100%">
-                    <rect x="8" y="6" width="16" height="20" rx="1.5" fill="${color}" stroke="#000" stroke-width="2" />
-                    <rect x="10" y="8" width="12" height="16" fill="#ffffff" opacity="0.9" rx="1" />
-                    <line x1="12" y1="12" x2="20" y2="12" stroke="#444444" stroke-width="1.2" />
-                    <line x1="12" y1="16" x2="18" y2="16" stroke="#444444" stroke-width="1.2" />
-                </svg>`;
-    }
-  } else if (item.type === "helmet") {
-    svg = `<svg viewBox="0 0 32 32" width="100%" height="100%">
-                  <defs>
-                      <linearGradient id="gen_w_helm_${id}" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stop-color="#f8fafc"/>
-                          <stop offset="60%" stop-color="#94a3b8"/>
-                          <stop offset="100%" stop-color="#475569"/>
-                      </linearGradient>
-                  </defs>
-                  <!-- Knight Great Helm Body -->
-                  <path d="M8 12 C8 6, 24 6, 24 12 L25 24 L16 30 L7 24 Z" fill="url(#gen_w_helm_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
-                  <!-- Reinforced Cross Plates (Vertical and Horizontal) -->
-                  <path d="M15 6 L17 6 L17 30 L15 30 Z" fill="${color}" stroke="#000" stroke-width="1" />
-                  <path d="M8 14 L24 14 L24 17 L8 17 Z" fill="${color}" stroke="#000" stroke-width="1" />
-                  <!-- T-Visor Slits -->
-                  <path d="M10 15 H14 V21 H10 Z M18 15 H22 V21 H18 Z" fill="#000" />
-                  <!-- Breathing Vent Holes -->
-                  <circle cx="11" cy="24" r="1" fill="#000" />
-                  <circle cx="13" cy="24" r="1" fill="#000" />
-                  <circle cx="11" cy="26" r="1" fill="#000" />
-                  <circle cx="13" cy="26" r="1" fill="#000" />
-                  <circle cx="19" cy="24" r="1" fill="#000" />
-                  <circle cx="21" cy="24" r="1" fill="#000" />
-                  <circle cx="19" cy="26" r="1" fill="#000" />
-                  <circle cx="21" cy="26" r="1" fill="#000" />
-              </svg>`;
-  } else if (item.type === "chest") {
-    svg = `<svg viewBox="0 0 32 32" width="100%" height="100%">
-                  <defs>
-                      <linearGradient id="gen_w_chest_${id}" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stop-color="#f8fafc"/>
-                          <stop offset="60%" stop-color="#94a3b8"/>
-                          <stop offset="100%" stop-color="#475569"/>
-                      </linearGradient>
-                  </defs>
-                  <!-- Flared Pauldrons (Shoulders) -->
-                  <path d="M4 11 C4 6, 11 8, 11 13 Z" fill="url(#gen_w_chest_${id})" stroke="#000" stroke-width="1.5" />
-                  <path d="M28 11 C28 6, 21 8, 21 13 Z" fill="url(#gen_w_chest_${id})" stroke="#000" stroke-width="1.5" />
-                  <!-- Steel Cuirass (Breastplate) -->
-                  <path d="M8 8 Q16 11, 24 8 L25 21 C25 26, 16 29, 16 29 C16 29, 7 26, 7 21 Z" fill="url(#gen_w_chest_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
-                  <!-- Center Tapul Crest (Vertical Ridge) -->
-                  <path d="M15.5 10 L16.5 10 L16.5 28 L15.5 28 Z" fill="${color}" stroke="#000" stroke-width="0.8" />
-                  <!-- Heavy Neck Collar Rim -->
-                  <path d="M11 8 Q16 12, 21 8" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" />
-              </svg>`;
-  } else if (item.type === "leggings") {
-    svg = `<svg viewBox="0 0 32 32" width="100%" height="100%">
-                  <defs>
-                      <linearGradient id="gen_w_legs_${id}" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stop-color="#f8fafc"/>
-                          <stop offset="60%" stop-color="#94a3b8"/>
-                          <stop offset="100%" stop-color="#475569"/>
-                      </linearGradient>
-                  </defs>
-                  <!-- Fauld (Waist Plate & Belt) -->
-                  <rect x="7" y="6" width="18" height="5" rx="1.5" fill="${color}" stroke="#000" stroke-width="1.5" />
-                  <!-- Overlapping Tasset Plates (Thighs) -->
-                  <path d="M7 11 L13 11 L12 18 L7 17 Z M19 11 L25 11 L25 17 L20 18 Z" fill="url(#gen_w_legs_${id})" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
-                  <!-- Left Leg Greave + Knee Cop -->
-                  <path d="M9 18 L14 18 L13 28 L9 28 Z" fill="url(#gen_w_legs_${id})" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
-                  <circle cx="11.5" cy="20" r="2.2" fill="${color}" stroke="#000" stroke-width="1" />
-                  <!-- Right Leg Greave + Knee Cop -->
-                  <path d="M18 18 L23 18 L23 28 L19 28 Z" fill="url(#gen_w_legs_${id})" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
-                  <circle cx="20.5" cy="20" r="2.2" fill="${color}" stroke="#000" stroke-width="1" />
-              </svg>`;
-  } else if (item.type === "overall") {
-    svg = `<svg viewBox="0 0 32 32" width="100%" height="100%">
-                  <defs>
-                      <linearGradient id="gen_w_overall_${id}" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stop-color="#f8fafc"/>
-                          <stop offset="60%" stop-color="#94a3b8"/>
-                          <stop offset="100%" stop-color="#475569"/>
-                      </linearGradient>
-                  </defs>
-                  <!-- Heavy Pauldrons with Lames -->
-                  <path d="M3 11 Q10 8, 10 14 Z M29 11 Q22 8, 22 14 Z" fill="url(#gen_w_overall_${id})" stroke="#000" stroke-width="1.5" />
-                  <path d="M4 14 Q10 12, 10 17 Z M28 14 Q22 12, 22 17 Z" fill="url(#gen_w_overall_${id})" stroke="#000" stroke-width="1.2" />
-
-                  <!-- Torso Breastplate Cuirass -->
-                  <path d="M8 8 L24 8 L22 20 L16 24 L10 20 Z" fill="url(#gen_w_overall_${id})" stroke="#000" stroke-width="1.8" />
-
-                  <!-- Center Plated Ribbing / Reinforcement -->
-                  <path d="M12 12 H20 M11 16 H21" stroke="${color}" stroke-width="1.8" stroke-linecap="round" />
-
-                  <!-- Waist Faulds & Tassets Skirt -->
-                  <path d="M10 20 H22 L24 28 H8 Z" fill="url(#gen_w_overall_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
-                  <line x1="13" y1="20" x2="11" y2="28" stroke="#000" stroke-width="1.5" />
-                  <line x1="19" y1="20" x2="21" y2="28" stroke="#000" stroke-width="1.5" />
-
-                  <!-- High collar matching rarity tier -->
-                  <path d="M12 8 C12 11, 20 11, 20 8" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" />
-              </svg>`;
-  } else if (item.type === "boots") {
-    svg = `<svg viewBox="0 0 32 32" width="100%" height="100%">
-                  <defs>
-                      <linearGradient id="gen_w_boots_${id}" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stop-color="#f8fafc"/>
-                          <stop offset="60%" stop-color="#94a3b8"/>
-                          <stop offset="100%" stop-color="#475569"/>
-                      </linearGradient>
-                  </defs>
-                  <!-- Overlapping plated boots (Left and Right) -->
-                  <!-- Left Boot -->
-                  <path d="M4 11 L10 7 L12 18 L16 23 L15 27 L4 26 Z" fill="url(#gen_w_boots_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
-                  <!-- Right Boot -->
-                  <path d="M16 11 L22 7 L24 18 L28 23 L27 27 L16 26 Z" fill="url(#gen_w_boots_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
-
-                  <!-- Articulated steel plates (Lames) ridges -->
-                  <path d="M4 16 H10 M16 16 H22 M4 21 H12 M16 21 H24" stroke="#000" stroke-width="1.2" />
-                  <!-- Spur buckles & straps matching rarity tier -->
-                  <rect x="4" y="12" width="6" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
-                  <rect x="16" y="12" width="6" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
-                  <circle cx="6" cy="24" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
-                  <circle cx="18" cy="24" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
-              </svg>`;
-  } else {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="10" fill="${color}" stroke="#000000" stroke-width="1.5"/>
-            </svg>`;
+  let type = item.type;
+  if (type === "subweapon") {
+    type = item.subType || "shield";
   }
 
-  let bg = "rgba(170, 170, 170, 0.12)";
-  let border = "#444";
-  return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; display: inline-flex; align-items: center; justify-content: center; width: ${size}px; height: ${size}px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${svg}</span>`;
+  if (window.AssetCatalog.genericEquipment[type]) {
+    innerHtml = window.AssetCatalog.genericEquipment[type](id, color);
+  } else {
+    innerHtml = `<circle cx="16" cy="16" r="10" fill="${color}" stroke="#000000" stroke-width="1.5"/>`;
+  }
+
+  return window.AssetCatalog.compile("0 0 32 32", innerHtml, size);
 };
 
 window.getBossIconHtml = function (bossType) {
   let uid = Math.floor(Math.random() * 10000000);
-  if (bossType === "guardian") {
-    return `
-              <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(52, 152, 219, 0.45));">
-                  <defs>
-                      <linearGradient id="g_goliath_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#34495e"/><stop offset="100%" stop-color="#1a252f"/></linearGradient>
-                      <radialGradient id="g_core_${uid}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff"/><stop offset="40%" stop-color="#00d2ff"/><stop offset="100%" stop-color="#003755"/></radialGradient>
-                  </defs>
-                  <path d="M32 4 L52 14 L46 44 L32 58 L18 44 L12 14 Z" fill="url(#g_goliath_${uid})" stroke="#00d2ff" stroke-width="2.5" stroke-linejoin="round" />
-                  <circle cx="32" cy="30" r="10" fill="url(#g_core_${uid})" stroke="#fff" stroke-width="1.5" />
-                  <polygon points="26,24 20,22 24,28" fill="#e74c3c" />
-                  <polygon points="38,24 44,22 40,28" fill="#e74c3c" />
-              </svg>`;
-  } else if (bossType === "chronos") {
-    return `
-              <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(241, 196, 15, 0.45));">
-                  <defs><linearGradient id="g_chron_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#b7950b"/></linearGradient></defs>
-                  <circle cx="32" cy="32" r="24" fill="none" stroke="url(#g_chron_${uid})" stroke-width="3" />
-                  <g stroke="url(#g_chron_${uid})" stroke-width="3" stroke-linecap="round"><line x1="32" y1="4" x2="32" y2="8" /><line x1="32" y1="56" x2="32" y2="60" /><line x1="4" y1="32" x2="8" y2="32" /><line x1="56" y1="32" x2="60" y2="32" /></g>
-                  <circle cx="32" cy="32" r="16" fill="#111" stroke="url(#g_chron_${uid})" stroke-width="1.5" />
-                  <line x1="32" y1="32" x2="32" y2="20" stroke="#fff" stroke-width="2" stroke-linecap="round" />
-                  <line x1="32" y1="32" x2="40" y2="32" stroke="#e67e22" stroke-width="1.5" stroke-linecap="round" />
-              </svg>`;
-  } else if (bossType === "nexus") {
-    return `
-              <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(255, 0, 127, 0.45));">
-                  <defs><linearGradient id="g_nex_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff007f"/><stop offset="100%" stop-color="#00d2ff"/></linearGradient></defs>
-                  <rect x="14" y="14" width="36" height="36" fill="none" stroke="url(#g_nex_${uid})" stroke-width="2" />
-                  <rect x="20" y="20" width="24" height="24" fill="none" stroke="#00b894" stroke-width="1.5" />
-                  <circle cx="32" cy="32" r="4" fill="#fff" stroke="#ff007f" stroke-width="1" />
-              </svg>`;
+  let innerHtml = "";
+  if (window.AssetCatalog.bosses[bossType]) {
+    innerHtml = window.AssetCatalog.bosses[bossType](uid);
+  } else {
+    return "🔮";
   }
-  return `🔮`;
+  return `
+    <svg width="56" height="56" viewBox="0 0 64 64" style="display:block; margin: 0 auto; filter: drop-shadow(0 0 6px rgba(52, 152, 219, 0.45));">
+        ${innerHtml}
+    </svg>
+  `;
 };
 
-window.getEtcIconHtml = function (key) {
+window.getEtcIconHtml = function (key, size = 32) {
   let uid = Math.floor(Math.random() * 10000000);
   let bg = "rgba(170, 170, 170, 0.12)";
   let border = "#444";
-  let svgContent = "";
+  let innerHtml = "";
 
   if (key === "Eridium Shard") {
     bg = "rgba(155, 89, 182, 0.25)";
     border = "#9b59b6";
-    svgContent = `
-          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-              <defs>
-                  <linearGradient id="grad_EridiumShard_${uid}" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stop-color="#e84393" />
-                      <stop offset="100%" stop-color="#8e44ad" />
-                  </linearGradient>
-              </defs>
-              <path d="M16 2 L26 16 L16 30 L6 16 Z" fill="url(#grad_EridiumShard_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-              <path d="M16 2 L16 30" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-              <path d="M6 16 L26 16" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>
-          </svg>`;
   } else if (key === "Glimmering Gachapon Key") {
     bg = "rgba(0, 210, 255, 0.18)";
     border = "#00d2ff";
-    svgContent = `
-          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block; filter: drop-shadow(0 0 4px #00d2ff);">
-              <defs>
-                  <linearGradient id="grad_GlimmeringKey_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#00d2ff" />
-                      <stop offset="50%" stop-color="#e84393" />
-                      <stop offset="100%" stop-color="#9b59b6" />
-                  </linearGradient>
-              </defs>
-              <path d="M11 4 L14 11 L21 11 L15 15 L18 22 L11 17 L4 22 L7 15 L1 11 L8 11 Z" fill="url(#grad_GlimmeringKey_${uid})" stroke="#000" stroke-width="1.8" />
-              <circle cx="11" cy="12" r="2.5" fill="#111" stroke="#000" stroke-width="1" />
-              <path d="M15 15 L27 27 L25 29 L23 27" stroke="#000" stroke-width="2" stroke-linecap="round" fill="none" />
-              <path d="M15.5 15.5 L26.5 26.5" stroke="url(#grad_GlimmeringKey_${uid})" stroke-width="3" stroke-linecap="round" fill="none"/>
-              <path d="M23.5 23.5 L21.5 25.5 M25.5 25.5 L23.5 27.5" stroke="url(#grad_GlimmeringKey_${uid})" stroke-width="2" stroke-linecap="round"/>
-          </svg>`;
   } else if (key === "Gacha Key") {
     bg = "rgba(241, 196, 15, 0.25)";
     border = "#f1c40f";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_GachaKey_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ffd700" />
-                    <stop offset="100%" stop-color="#b7950b" />
-                </linearGradient>
-            </defs>
-            <circle cx="11" cy="21" r="6" fill="url(#grad_GachaKey_${uid})" stroke="#000" stroke-width="2" />
-            <circle cx="11" cy="21" r="2.5" fill="#111" stroke="#000" stroke-width="1.5" />
-            <path d="M15 17 L27 5 L30 8 L28 10 L26 8 L24 12 L22 10" stroke="#000" stroke-width="2" stroke-linejoin="round" fill="none" />
-            <path d="M15.5 16.5 L26.5 5.5" stroke="url(#grad_GachaKey_${uid})" stroke-width="3" stroke-linecap="round" fill="none"/>
-            <path d="M26.5 5.5 L28.5 7.5 M24.5 7.5 L26.5 9.5" stroke="url(#grad_GachaKey_${uid})" stroke-width="2" stroke-linecap="round"/>
-        </svg>`;
   } else if (key === "Ancient Core") {
     bg = "rgba(231, 76, 60, 0.25)";
     border = "#e74c3c";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <radialGradient id="grad_AncientCore_${uid}" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stop-color="#ffffff" />
-                    <stop offset="30%" stop-color="#e74c3c" />
-                    <stop offset="100%" stop-color="#960018" />
-                </radialGradient>
-            </defs>
-            <circle cx="16" cy="16" r="11" fill="url(#grad_AncientCore_${uid})" stroke="#000" stroke-width="2" />
-            <path d="M5 16 L27 16" stroke="#000" stroke-width="2" />
-            <path d="M16 5 L16 27" stroke="#000" stroke-width="2" />
-            <circle cx="16" cy="16" r="4" fill="#fff" opacity="0.8" />
-        </svg>`;
   } else if (key === "Overlord's Sigil") {
     bg = "rgba(26, 188, 156, 0.25)";
     border = "#1abc9c";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_OverlordsSigil_${uid}" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#1abc9c" />
-                    <stop offset="100%" stop-color="#16a085" />
-                </linearGradient>
-            </defs>
-            <path d="M16 4 L19 14 L27 10 L24 20 L16 28 L8 20 L5 10 L13 14 Z" fill="url(#grad_OverlordsSigil_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <circle cx="16" cy="16" r="3.5" fill="#fff" stroke="#000" stroke-width="1.5" />
-        </svg>`;
   } else if (key === "Astral Essence") {
     bg = "rgba(142, 68, 173, 0.25)";
     border = "#8e44ad";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_AstralEssence_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#e84393" />
-                    <stop offset="50%" stop-color="#9b59b6" />
-                    <stop offset="100%" stop-color="#3498db" />
-                </linearGradient>
-            </defs>
-            <path d="M16 3 L19 13 L29 16 L19 19 L16 29 L13 19 L3 16 L13 13 Z" fill="url(#grad_AstralEssence_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round" />
-            <circle cx="16" cy="16" r="3" fill="#ffffff" opacity="0.9" />
-        </svg>`;
-  } else if (key === "Mythic Scrap") {
-    bg = "rgba(231, 76, 60, 0.25)";
-    border = "#e74c3c";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_MythicScrap_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ff7675" />
-                    <stop offset="100%" stop-color="#d63031" />
-                </linearGradient>
-            </defs>
-            <path d="M6 10 L18 4 L28 14 L24 26 L10 28 L4 18 Z" fill="url(#grad_MythicScrap_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M14 8 L24 16 M10 18 L20 22" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>`;
-  } else if (key === "Legendary Scrap") {
-    bg = "rgba(241, 196, 15, 0.25)";
-    border = "#f1c40f";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_LegendaryScrap_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ffeaa7" />
-                    <stop offset="100%" stop-color="#fdcb6e" />
-                </linearGradient>
-            </defs>
-            <path d="M8 6 L22 8 L26 22 L14 28 L4 16 Z" fill="url(#grad_LegendaryScrap_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M12 10 L20 18" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>`;
-  } else if (key === "Epic Scrap") {
-    bg = "rgba(230, 126, 34, 0.25)";
-    border = "#e67e22";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_EpicScrap_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ffbe76" />
-                    <stop offset="100%" stop-color="#e67e22" />
-                </linearGradient>
-            </defs>
-            <path d="M10 4 L26 8 L22 24 L8 26 Z" fill="url(#grad_EpicScrap_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M12 12 L20 16" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>`;
-  } else if (key === "Magic Scrap") {
-    bg = "rgba(155, 89, 182, 0.25)";
-    border = "#9b59b6";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_MagicScrap_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#a29bfe" />
-                    <stop offset="100%" stop-color="#6c5ce7" />
-                </linearGradient>
-            </defs>
-            <path d="M6 14 L16 4 L28 12 L22 26 L10 24 Z" fill="url(#grad_MagicScrap_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M12 10 L18 20" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>`;
-  } else if (key === "Rare Scrap") {
-    bg = "rgba(52, 152, 219, 0.25)";
-    border = "#3498db";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_RareScrap_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#74b9ff" />
-                    <stop offset="100%" stop-color="#0984e3" />
-                </linearGradient>
-            </defs>
-            <path d="M4 8 L18 6 L28 16 L16 28 L6 20 Z" fill="url(#grad_RareScrap_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M10 12 L20 18" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>`;
   } else if (key === "Luminous Soul") {
     bg = "rgba(255, 182, 193, 0.25)";
     border = "#ffb6c1";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_LuminousSoul_${uid}" x1="0%" y1="100%" x2="0%" y2="0%">
-                    <stop offset="0%" stop-color="#fd79a8" />
-                    <stop offset="100%" stop-color="#ffb6c1" />
-                </linearGradient>
-            </defs>
-            <path d="M16 3 C16 3, 6 15, 6 22 C6 27, 10.5 30, 16 30 C21.5 30, 26 27, 26 22 C26 15, 16 3, 16 3 Z" fill="url(#grad_LuminousSoul_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <circle cx="13" cy="20" r="3" fill="#fff" opacity="0.6"/>
-        </svg>`;
   } else if (key === "Monster Soul") {
     bg = "rgba(170, 170, 170, 0.25)";
     border = "#888";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_MonsterSoul_${uid}" x1="0%" y1="100%" x2="0%" y2="0%">
-                    <stop offset="0%" stop-color="#2d3436" />
-                    <stop offset="100%" stop-color="#636e72" />
-                </linearGradient>
-            </defs>
-            <path d="M16 3 C16 3, 6 15, 6 22 C6 27, 10.5 30, 16 30 C21.5 30, 26 27, 26 22 C26 15, 16 3, 16 3 Z" fill="url(#grad_MonsterSoul_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M11 19 L14 17" stroke="#e74c3c" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M21 19 L18 17" stroke="#e74c3c" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>`;
   } else if (key === "Catalyst Core") {
     bg = "rgba(46, 204, 113, 0.25)";
     border = "#2ecc71";
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <defs>
-                <linearGradient id="grad_CatalystCore_${uid}" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#2ecc71" />
-                    <stop offset="50%" stop-color="#a3fd83" />
-                    <stop offset="100%" stop-color="#27ae60" />
-                </linearGradient>
-            </defs>
-            <rect x="9" y="4" width="14" height="24" rx="3" fill="url(#grad_CatalystCore_${uid})" stroke="#000" stroke-width="2"/>
-            <line x1="9" y1="10" x2="23" y2="10" stroke="#000" stroke-width="2"/>
-            <line x1="9" y1="22" x2="23" y2="22" stroke="#000" stroke-width="2"/>
-            <rect x="13" y="13" width="6" height="6" fill="#fff" opacity="0.9" rx="1"/>
-        </svg>`;
-  } else {
-    svgContent = `
-        <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-            <rect x="6" y="8" width="20" height="18" rx="2" fill="#7f8c8d" stroke="#000" stroke-width="2"/>
-            <path d="M6 14 L26 14" stroke="#000" stroke-width="2"/>
-            <rect x="13" y="10" width="6" height="8" fill="#d5dbdb" stroke="#000" stroke-width="1.5" />
-        </svg>`;
+  } else if (key.includes("Scrap")) {
+    let stop1 = "#bdc3c7",
+      stop2 = "#7f8c8d";
+    if (key === "Mythic Scrap") {
+      bg = "rgba(231, 76, 60, 0.25)";
+      border = "#e74c3c";
+      stop1 = "#ff7675";
+      stop2 = "#d63031";
+    } else if (key === "Legendary Scrap") {
+      bg = "rgba(241, 196, 15, 0.25)";
+      border = "#f1c40f";
+      stop1 = "#ffeaa7";
+      stop2 = "#fdcb6e";
+    } else if (key === "Epic Scrap") {
+      bg = "rgba(230, 126, 34, 0.25)";
+      border = "#e67e22";
+      stop1 = "#ffbe76";
+      stop2 = "#e67e22";
+    } else if (key === "Magic Scrap") {
+      bg = "rgba(155, 89, 182, 0.25)";
+      border = "#9b59b6";
+      stop1 = "#a29bfe";
+      stop2 = "#6c5ce7";
+    } else if (key === "Rare Scrap") {
+      bg = "rgba(52, 152, 219, 0.25)";
+      border = "#3498db";
+      stop1 = "#74b9ff";
+      stop2 = "#0984e3";
+    }
+    innerHtml = window.AssetCatalog.materials.Scrap(uid, stop1, stop2);
   }
 
-  return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; margin-right: 12px; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${svgContent}</span>`;
+  if (!innerHtml && window.AssetCatalog.materials[key]) {
+    innerHtml = window.AssetCatalog.materials[key](uid);
+  } else if (!innerHtml) {
+    innerHtml = `
+      <rect x="6" y="8" width="20" height="18" rx="2" fill="#7f8c8d" stroke="#000" stroke-width="2"/>
+      <path d="M6 14 L26 14" stroke="#000" stroke-width="2"/>
+      <rect x="13" y="10" width="6" height="8" fill="#d5dbdb" stroke="#000" stroke-width="1.5" />
+    `;
+  }
+
+  return window.AssetCatalog.compile("0 0 32 32", innerHtml, size, bg, border);
 };
 
-window.getUseIconHtml = function (key) {
+window.getUseIconHtml = function (key, size = 32) {
+  let uid = Math.floor(Math.random() * 10000000);
   let bg = "rgba(170, 170, 170, 0.12)";
   let border = "#444";
-  let svgContent = "";
-
-  const getPotionSvg = (liquidColor) => {
-    let uid = Math.floor(Math.random() * 10000000);
-    let uniqueId = "liq_" + liquidColor.replace("#", "") + "_" + uid;
-    let glassId = "glass_base_" + uid;
-    return `
-          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-              <defs>
-                  <linearGradient id="${glassId}" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stop-color="#475569" />
-                      <stop offset="50%" stop-color="#334155" />
-                      <stop offset="100%" stop-color="#1e293b" />
-                  </linearGradient>
-                  <linearGradient id="${uniqueId}" x1="0%" y1="100%" x2="0%" y2="0%">
-                      <stop offset="0%" stop-color="rgba(0,0,0,0.3)" />
-                      <stop offset="30%" stop-color="${liquidColor}" />
-                      <stop offset="85%" stop-color="${liquidColor}" />
-                      <stop offset="100%" stop-color="#ffffff" />
-                  </linearGradient>
-              </defs>
-              <!-- Bottle Glass Body with Solid Glass Gradient -->
-              <path d="M13 5 L19 5 L19 12 L26 23 C28 26, 26 29, 21 29 L11 29 C6 29, 4 26, 6 23 L13 12 Z" fill="url(#${glassId})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-              <!-- Liquid Fill -->
-              <path d="M8.5 21 L23.5 21 L25 24 C26.2 26.2, 25 28, 21 28 L11 28 C7 28, 5.8 26.2, 7 24 Z" fill="url(#${uniqueId})" stroke="#000" stroke-width="1.5"/>
-              <!-- Cork Stopper -->
-              <rect x="13.5" y="2" width="5" height="4" fill="#a0522d" stroke="#000" stroke-width="1.5"/>
-              <!-- Left Neck Specular Highlight -->
-              <path d="M14.5 6 L14.5 11" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1" stroke-linecap="round" fill="none" />
-              <!-- Right Shoulder Specular Highlight -->
-              <path d="M22 14 C23.5 17, 23.5 21, 22 24" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1" stroke-linecap="round" fill="none" />
-              <!-- Bottom Liquid Glow Highlight -->
-              <path d="M9 22 C8 24, 9 26, 11 27" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.65"/>
-          </svg>`;
-  };
+  let innerHtml = "";
 
   if (key === "SP Reset Scroll") {
     bg = "rgba(155, 89, 182, 0.25)";
     border = "#9b59b6";
-    svgContent = `
-          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-              <defs>
-                  <linearGradient id="grad_Scroll_SP" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#fdf6e2" />
-                      <stop offset="100%" stop-color="#d5dbdb" />
-                  </linearGradient>
-              </defs>
-              <path d="M6 10 L26 6 L26 22 L6 26 Z" fill="url(#grad_Scroll_SP)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-              <rect x="13" y="11" width="6" height="11" transform="rotate(-11 16 16)" fill="#9b59b6" stroke="#000" stroke-width="1.5" />
-              <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
-              <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
-          </svg>`;
+  } else if (key === "PP Reset Scroll") {
+    bg = "rgba(230, 126, 34, 0.25)";
+    border = "#e67e22";
+  } else if (key === "Cavern Sigil Sack") {
+    bg = "rgba(155, 89, 182, 0.25)";
+    border = "#9b59b6";
+    innerHtml = window.AssetCatalog.consumables.cavern_sigil_sack(uid);
   } else if (
     key === "Guild Reward Sack" ||
     key === "Daily Reward Sack" ||
-    key === "Clan Reward Sack"
-  ) {
-    bg = "rgba(241, 196, 15, 0.25)";
-    border = "#f1c40f";
-    svgContent = `
-              <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-                <defs>
-                    <linearGradient id="grad_RewardSack" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#f1c40f" />
-                        <stop offset="100%" stop-color="#d35400" />
-                    </linearGradient>
-                </defs>
-                <path d="M16 8 C10 8, 6 11, 6 18 C6 25, 10 29, 16 29 C22 29, 26 25, 26 18 C26 11, 22 8, 16 8 Z" fill="url(#grad_RewardSack)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-                <ellipse cx="16" cy="10" rx="5" ry="1.8" fill="#d35400" stroke="#000" stroke-width="1.5" />
-                <path d="M14 10 L10 14 M18 10 L22 14" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round"/>
-                <polygon points="16,13 18,17 22,17 19,20 20,24 16,22 12,24 13,20 10,17 14,17" fill="#fff" opacity="0.9" stroke="#000" stroke-width="0.8"/>
-            </svg>`;
-  } else if (
+    key === "Clan Reward Sack" ||
     key === "Weekly Reward Sack" ||
     key === "Guild Weekly Sack" ||
     key === "Clan Weekly Sack"
   ) {
-    bg = "rgba(155, 89, 182, 0.25)";
-    border = "#9b59b6";
-    svgContent = `
-            <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-                <defs>
-                    <linearGradient id="grad_WeeklySack" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#9b59b6" />
-                        <stop offset="100%" stop-color="#3a045c" />
-                    </linearGradient>
-                </defs>
-                <path d="M16 8 C10 8, 6 11, 6 18 C6 25, 10 29, 16 29 C22 29, 26 25, 26 18 C26 11, 22 8, 16 8 Z" fill="url(#grad_WeeklySack)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-                <ellipse cx="16" cy="10" rx="5" ry="1.8" fill="#3a045c" stroke="#000" stroke-width="1.5" />
-                <path d="M14 10 L10 14 M18 10 L22 14" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round"/>
-                <circle cx="16" cy="18" r="4.5" fill="#f1c40f" stroke="#000" stroke-width="1"/>
-                <path d="M16 15.5 L16 20.5 M13.5 18 L18.5 18" stroke="#3a045c" stroke-width="1" stroke-linecap="round"/>
-            </svg>`;
-  } else if (key === "PP Reset Scroll") {
-    bg = "rgba(230, 126, 34, 0.25)";
-    border = "#e67e22";
-    svgContent = `
-          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-              <defs>
-                  <linearGradient id="grad_Scroll_PP" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#fdf6e2" />
-                      <stop offset="100%" stop-color="#d5dbdb" />
-                  </linearGradient>
-              </defs>
-              <path d="M6 10 L26 6 L26 22 L6 26 Z" fill="url(#grad_Scroll_PP)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-              <rect x="13" y="11" width="6" height="11" transform="rotate(-11 16 16)" fill="#e67e22" stroke="#000" stroke-width="1.5" />
-              <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
-              <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
-          </svg>`;
+    bg = key.includes("Weekly")
+      ? "rgba(155, 89, 182, 0.25)"
+      : "rgba(241, 196, 15, 0.25)";
+    border = key.includes("Weekly") ? "#9b59b6" : "#f1c40f";
   } else if (key === "Weekly Clan Supply Crate") {
-    let uid = Math.floor(Math.random() * 10000000);
     bg = "rgba(255, 170, 0, 0.25)";
     border = "#ffaa00";
-    svgContent = `
-          <svg width="24" height="24" viewBox="0 0 32 32" style="display:block;">
-              <defs>
-                  <linearGradient id="grad_Crate_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#d35400" />
-                      <stop offset="100%" stop-color="#5c3a21" />
-                  </linearGradient>
-              </defs>
-              <rect x="5" y="8" width="22" height="20" rx="3" fill="url(#grad_Crate_${uid})" stroke="#000" stroke-width="2"/>
-              <line x1="5" y1="8" x2="27" y2="28" stroke="#3e2723" stroke-width="2.5"/>
-              <line x1="27" y1="8" x2="5" y2="28" stroke="#3e2723" stroke-width="2.5"/>
-              <rect x="5" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1"/>
-              <rect x="22" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1"/>
-              <rect x="5" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1"/>
-              <rect x="22" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1"/>
-              <rect x="13" y="15" width="6" height="6" fill="#ffd700" stroke="#000" stroke-width="1.5" rx="1"/>
-          </svg>`;
   } else if (key.includes("Attack")) {
     bg = "rgba(46, 204, 113, 0.25)";
     border = "#2ecc71";
-    svgContent = getPotionSvg("#2ecc71");
+    innerHtml = window.AssetCatalog.consumables.potion(uid, "#2ecc71");
   } else if (key.includes("Vitality")) {
     bg = "rgba(231, 76, 60, 0.25)";
     border = "#e74c3c";
-    svgContent = getPotionSvg("#e74c3c");
+    innerHtml = window.AssetCatalog.consumables.potion(uid, "#e74c3c");
   } else if (key.includes("Armored")) {
     bg = "rgba(52, 152, 219, 0.25)";
     border = "#3498db";
-    svgContent = getPotionSvg("#3498db");
+    innerHtml = window.AssetCatalog.consumables.potion(uid, "#3498db");
   } else if (key.includes("Haste")) {
     bg = "rgba(241, 196, 15, 0.25)";
     border = "#f1c40f";
-    svgContent = getPotionSvg("#f1c40f");
+    innerHtml = window.AssetCatalog.consumables.potion(uid, "#f1c40f");
   } else if (key.includes("XP") || key.includes("Double XP")) {
     bg = "rgba(168, 85, 247, 0.25)";
     border = "#a855f7";
-    svgContent = getPotionSvg("#a855f7");
+    innerHtml = window.AssetCatalog.consumables.potion(uid, "#a855f7");
   } else if (
     key.includes("Drop Rate") ||
     key.includes("Double Drop") ||
@@ -625,295 +217,70 @@ window.getUseIconHtml = function (key) {
   ) {
     bg = "rgba(34, 197, 94, 0.25)";
     border = "#22c55e";
-    svgContent = getPotionSvg("#22c55e");
+    innerHtml = window.AssetCatalog.consumables.potion(uid, "#22c55e");
   } else if (key.includes("Quality")) {
     bg = "rgba(236, 72, 153, 0.25)";
     border = "#ec4899";
-    svgContent = getPotionSvg("#ec4899");
-  } else {
-    svgContent = getPotionSvg("#bdc3c7");
+    innerHtml = window.AssetCatalog.consumables.potion(uid, "#ec4899");
   }
 
-  return `<span style="background: ${bg}; border: 1px solid ${border}; border-radius: 4px; padding: 4px; margin-right: 12px; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);">${svgContent}</span>`;
+  if (!innerHtml && window.AssetCatalog.materials[key]) {
+    innerHtml = window.AssetCatalog.materials[key](uid);
+  } else if (!innerHtml) {
+    innerHtml = window.AssetCatalog.consumables.potion(uid, "#bdc3c7");
+  }
+
+  return window.AssetCatalog.compile("0 0 32 32", innerHtml, size, bg, border);
 };
 
 window.getArtifactIconHtml = function (trait, size = 24) {
   let uid = Math.floor(Math.random() * 10000000);
-  let svg = "";
-  if (trait === "frenzy") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><radialGradient id="g_frenzy_${uid}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff5555"/><stop offset="100%" stop-color="#4a0008"/></radialGradient></defs>
-                <rect x="3" y="3" width="26" height="26" rx="6" fill="url(#g_frenzy_${uid})" stroke="#111" stroke-width="1.8"/>
-                <path d="M16 6 L12 16 L20 18 L16 26" fill="none" stroke="#f1c40f" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" style="filter: drop-shadow(0 0 3px #ff3300);"/>
-                <circle cx="16" cy="16" r="3" fill="#ffffff" stroke="#ff3333" stroke-width="1"/>
-            </svg>`;
-  } else if (trait === "vampirism") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs>
-                    <linearGradient id="g_gold_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff59d"/><stop offset="50%" stop-color="#f1c40f"/><stop offset="100%" stop-color="#9a7d0a"/></linearGradient>
-                    <radialGradient id="g_blood_${uid}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff4d4d"/><stop offset="100%" stop-color="#7a0010"/></radialGradient>
-                </defs>
-                <path d="M8 6 L24 6 L22 16 C22 22, 16 24, 16 24 C16 24, 10 22, 10 16 Z" fill="url(#g_gold_${uid})" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
-                <path d="M9.5 8 L22.5 8 C21 13, 11 13, 9.5 8 Z" fill="url(#g_blood_${uid})" stroke="#111" stroke-width="1"/>
-                <line x1="16" y1="24" x2="16" y2="28" stroke="url(#g_gold_${uid})" stroke-width="3" stroke-linecap="round"/>
-                <path d="M9 28 L23 28 Q16 31, 9 28 Z" fill="url(#g_gold_${uid})" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/>
-            </svg>`;
-  } else if (trait === "gold_hoard") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_bronze_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffd54f"/><stop offset="100%" stop-color="#a77c00"/></linearGradient></defs>
-                <circle cx="16" cy="8" r="4.5" fill="none" stroke="url(#g_bronze_${uid})" stroke-width="2.5"/>
-                <line x1="16" y1="11" x2="16" y2="25" stroke="url(#g_bronze_${uid})" stroke-width="3.5" stroke-linecap="round"/>
-                <line x1="9" y1="15" x2="23" y2="15" stroke="url(#g_bronze_${uid})" stroke-width="3" stroke-linecap="round"/>
-                <path d="M7 20 C7 27, 25 27, 25 20" fill="none" stroke="url(#g_bronze_${uid})" stroke-width="3.5" stroke-linecap="round"/>
-                <polygon points="7,19 4,22 9,21" fill="url(#g_bronze_${uid})" stroke="#111" stroke-width="1"/>
-                <polygon points="25,19 28,22 23,21" fill="url(#g_bronze_${uid})" stroke="#111" stroke-width="1"/>
-            </svg>`;
-  } else if (trait === "magic_find") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs>
-                    <linearGradient id="g_sc_gold_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff1a8"/><stop offset="100%" stop-color="#d4af37"/></linearGradient>
-                    <linearGradient id="g_sc_emerald_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#55efc4"/><stop offset="100%" stop-color="#00b894"/></linearGradient>
-                </defs>
-                <ellipse cx="16" cy="18" rx="8" ry="10" fill="url(#g_sc_gold_${uid})" stroke="#111" stroke-width="2"/>
-                <circle cx="16" cy="10" r="4.2" fill="url(#g_sc_gold_${uid})" stroke="#111" stroke-width="1.8"/>
-                <line x1="16" y1="10" x2="16" y2="28" stroke="#111" stroke-width="1.8"/>
-                <rect x="13.2" y="13.5" width="5.6" height="8.5" rx="1.5" fill="url(#g_sc_emerald_${uid})" stroke="#111" stroke-width="1"/>
-                <path d="M8 14 Q3 15, 6 9.5 M24 14 Q29 15, 26 9.5 M7 21 Q3 23, 5 27 M25 21 Q29 23, 27 27" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/>
-            </svg>`;
-  } else if (trait === "move_speed") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs>
-                    <linearGradient id="g_silver_metal_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#7f8c8d"/></linearGradient>
-                    <linearGradient id="g_sky_wings_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#81ecec"/><stop offset="100%" stop-color="#0984e3"/></linearGradient>
-                </defs>
-                <!-- Heavy metallic winged greave -->
-                <path d="M10 24 L15 9 L24 15 L19 26 Z" fill="url(#g_silver_metal_${uid})" stroke="#111" stroke-width="1.8"/>
-                <path d="M5 14 C5 10, 11 8, 14 15 C11 15, 7 13, 5 14 Z" fill="url(#g_sky_wings_${uid})" stroke="#111" stroke-width="1.2"/>
-                <path d="M3 18 C3 14, 9 12, 12 19 C9 19, 5 17, 3 18 Z" fill="url(#g_sky_wings_${uid})" stroke="#111" stroke-width="1.2"/>
-            </svg>`;
-  } else if (trait === "defense") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs>
-                    <linearGradient id="g_cob_inner_${uid}" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#4ba3e3"/><stop offset="100%" stop-color="#1c304a"/></linearGradient>
-                </defs>
-                <!-- Cobalt shield matrix -->
-                <path d="M16 3 L27 9 L23 23 L16 29 L9 23 L5 9 Z" fill="url(#g_cob_inner_${uid})" stroke="#111" stroke-width="2.2" stroke-linejoin="round"/>
-                <path d="M16 7 L23 11 L20 20 L16 25 L12 20 L9 11 Z" fill="none" stroke="#fff" opacity="0.3" stroke-width="1.8"/>
-                <circle cx="16" cy="15" r="3.2" fill="#fff" style="filter: drop-shadow(0 0 4px #fff);"/>
-            </svg>`;
-  } else if (trait === "parry_strike") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_riposte_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#555555"/></linearGradient></defs>
-                <!-- Heavy counter gauntlet -->
-                <path d="M7 10 L16 5 L25 10 L23 22 L16 28 L9 22 Z" fill="url(#g_riposte_${uid})" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
-                <line x1="8" y1="14" x2="24" y2="14" stroke="#c0392b" stroke-width="3" stroke-linecap="round"/>
-                <path d="M16 10 L16 22" stroke="#111" stroke-width="3" stroke-linecap="round"/>
-                <path d="M16 10 L16 22" stroke="#fff" stroke-width="1" stroke-linecap="round"/>
-            </svg>`;
-  } else if (trait === "echo_strike") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs>
-                    <linearGradient id="g_blue_echo_${uid}" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#020d1a"/><stop offset="100%" stop-color="#00ffcc"/></linearGradient>
-                </defs>
-                <!-- Translucent phantom twin blades -->
-                <path d="M4 28 L24 8 L28 12 L8 32 Z" fill="url(#g_blue_echo_${uid})" stroke="rgba(0, 255, 204, 0.4)" stroke-width="1.5" style="opacity:0.45;"/>
-                <path d="M8 24 L24 8 L28 12 L12 28 Z" fill="url(#g_blue_echo_${uid})" stroke="#111" stroke-width="1.8"/>
-                <path d="M12 28 L28 12" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>`;
-  } else if (trait === "idle_spd") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_obsid_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2c3e50"/><stop offset="100%" stop-color="#07090c"/></linearGradient></defs>
-                <!-- Clockwork suspended inside obsidian ring -->
-                <circle cx="16" cy="16" r="11" fill="url(#g_obsid_${uid})" stroke="#ffd700" stroke-width="2.2"/>
-                <circle cx="16" cy="16" r="8" fill="none" stroke="#e67e22" stroke-width="1" stroke-dasharray="3 3"/>
-                <line x1="16" y1="16" x2="16" y2="9.5" stroke="#f1c40f" stroke-width="2.2" stroke-linecap="round"/>
-                <line x1="16" y1="16" x2="21.5" y2="16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>`;
-  } else if (trait === "active_spd") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs>
-                    <linearGradient id="g_fever_flare_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff9a6"/><stop offset="50%" stop-color="#f39c12"/><stop offset="100%" stop-color="#d35400"/></linearGradient>
-                </defs>
-                <!-- Sun-spiked active crest -->
-                <path d="M16 2 L20 10 L28 10 L22 16 L25 24 L16 19 L7 24 L10 16 L4 10 L12 10 Z" fill="url(#g_fever_flare_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
-                <circle cx="16" cy="13.5" r="4.2" fill="#fff" opacity="0.3"/>
-            </svg>`;
-  } else if (trait === "dodge_buff") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs>
-                    <linearGradient id="g_adrenaline_core_${uid}" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#2ecc71"/><stop offset="100%" stop-color="#145a32"/></linearGradient>
-                </defs>
-                <!-- Emerald adrenaline injector -->
-                <rect x="11.5" y="4" width="9" height="22" rx="4.5" fill="url(#g_adrenaline_core_${uid})" stroke="#111" stroke-width="1.8"/>
-                <rect x="13.5" y="7" width="5" height="16" fill="#fff" opacity="0.25"/>
-                <line x1="10" y1="12" x2="22" y2="12" stroke="#111" stroke-width="2"/>
-                <line x1="10" y1="18" x2="22" y2="18" stroke="#111" stroke-width="2"/>
-                <line x1="16" y1="26" x2="16" y2="29" stroke="#bdc3c7" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>`;
-  } else if (trait === "extend_buffs") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs>
-                    <linearGradient id="g_chrono_glass_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffeaa7"/><stop offset="100%" stop-color="#d35400"/></linearGradient>
-                </defs>
-                <!-- Glowing starry hourglass -->
-                <path d="M7 6 L25 6 L16 16 Z" fill="url(#g_chrono_glass_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
-                <path d="M16 16 L7 26 L25 26 Z" fill="url(#g_chrono_glass_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
-                <circle cx="16" cy="11" r="2.2" fill="#fff" style="filter: drop-shadow(0 0 3px #fff);"/>
-                <path d="M13 23 Q16 18, 19 23 Z" fill="#fff" opacity="0.8"/>
-            </svg>`;
-  } else if (trait === "bag_space") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_dim_bag_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a29bfe"/><stop offset="100%" stop-color="#6c5ce7"/></linearGradient></defs>
-                <!-- Violet runic satchel -->
-                <rect x="6.5" y="11" width="19" height="15" rx="3.5" fill="url(#g_dim_bag_${uid})" stroke="#111" stroke-width="1.8"/>
-                <path d="M11.5 11 C11.5 6, 20.5 6, 20.5 11" fill="none" stroke="#111" stroke-width="2.2"/>
-                <circle cx="16" cy="18.5" r="3" fill="#111" stroke="#fff" stroke-width="1.2"/>
-            </svg>`;
-  } else if (trait === "second_wind") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_solar_ankh_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff7675"/><stop offset="100%" stop-color="#d63031"/></linearGradient></defs>
-                <!-- Radiant solar sun-ankh -->
-                <circle cx="16" cy="10" r="5" fill="none" stroke="url(#g_solar_ankh_${uid})" stroke-width="2.5" style="filter: drop-shadow(0 0 3px #ff3300);"/>
-                <path d="M11 15.5 L21 15.5 L16 28.5 Z" fill="url(#g_solar_ankh_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
-            </svg>`;
-  } else if (trait === "golem_stance") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_granite_${uid}" x1="0%" y1="0%" x2="1" y2="1"><stop offset="0%" stop-color="#95a5a6"/><stop offset="100%" stop-color="#34495e"/></linearGradient></defs>
-                <!-- Runic stone core -->
-                <polygon points="16,3 27,10.5 27,23.5 16,29 5,23.5 5,10.5" fill="url(#g_granite_${uid})" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
-                <path d="M16 7 L23 11 L23 19 M9 19 L9 11 L16 7" fill="none" stroke="#e74c3c" stroke-width="1.8" style="filter: drop-shadow(0 0 2px #ff2200);"/>
-            </svg>`;
-  } else if (trait === "fairy_wealth") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_pixie_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff9ff3"/><stop offset="100%" stop-color="#f368e0"/></linearGradient></defs>
-                <!-- Flower Crown with gems -->
-                <circle cx="16" cy="16" r="10" fill="none" stroke="url(#g_pixie_${uid})" stroke-width="2.8"/>
-                <path d="M12 9 Q16 3, 20 9 M9 16 Q16 23, 23 16" fill="none" stroke="#fff" opacity="0.65" stroke-width="1.8" stroke-linecap="round"/>
-                <circle cx="16" cy="16" r="3.2" fill="#ffd700" stroke="#111" stroke-width="1.2"/>
-            </svg>`;
-  } else if (trait === "void_pull") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <!-- Space singularity pulling light -->
-                <circle cx="16" cy="16" r="11" fill="#0c001a" stroke="#8e44ad" stroke-width="2.2" style="filter: drop-shadow(0 0 5px #8e44ad);"/>
-                <circle cx="16" cy="16" r="5" fill="#ff007f" style="filter: drop-shadow(0 0 4px #ff007f);"/>
-            </svg>`;
-  } else if (trait === "titan_grip") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_rivets_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#bdc3c7"/><stop offset="100%" stop-color="#2c3e50"/></linearGradient></defs>
-                <!-- Heavy gauntlet built with rivets -->
-                <rect x="8.5" y="11" width="15" height="11.5" rx="3" fill="url(#g_rivets_${uid})" stroke="#111" stroke-width="1.8"/>
-                <path d="M11 11 C11 5, 21 5, 21 11" fill="none" stroke="#ffd700" stroke-width="2.2"/>
-                <circle cx="11.5" cy="16.5" r="1" fill="#fff"/><circle cx="20.5" cy="16.5" r="1" fill="#fff"/>
-            </svg>`;
-  } else if (trait === "alchemist_alembic") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_chem_${uid}" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#1abc9c"/><stop offset="100%" stop-color="#a3fd83"/></linearGradient></defs>
-                <!-- Copper distillation beaker with heat glows -->
-                <circle cx="16" cy="19.5" r="8.2" fill="url(#g_chem_${uid})" stroke="#111" stroke-width="1.8"/>
-                <rect x="14.5" y="6.5" width="3" height="6.5" fill="#bdc3c7" stroke="#111" stroke-width="1.2"/>
-                <path d="M12 21 C12 21, 14 24, 16 24 C18 24, 20 21, 20 21" fill="none" stroke="#fff" opacity="0.4" stroke-width="1.2"/>
-            </svg>`;
-  } else if (trait === "philosopher_catalyst") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_catalyst_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2ecc71"/><stop offset="100%" stop-color="#27ae60"/></linearGradient></defs>
-                <!-- Jade triangular talisman -->
-                <polygon points="16,3.5 27.5,25 4.5,25" fill="url(#g_catalyst_${uid})" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
-                <circle cx="16" cy="17.8" r="4.2" fill="#fff" stroke="#111" stroke-width="1.2" style="filter: drop-shadow(0 0 3px #fff);"/>
-            </svg>`;
-  } else if (trait === "cauldron_eternity") {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="g_cauld_purple_${uid}" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#3a045c"/><stop offset="100%" stop-color="#9b59b6"/></linearGradient></defs>
-                <!-- Boiling iron cauldron of starlight broth -->
-                <path d="M8 10.5 C8 10.5, 4 23, 16 25.5 C28 23, 24 10.5, 24 10.5 Z" fill="#1b212c" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
-                <ellipse cx="16" cy="10.5" rx="10" ry="2.8" fill="url(#g_cauld_purple_${uid})" stroke="#111" stroke-width="1.8"/>
-                <circle cx="12" cy="10" r="1.2" fill="#fff" opacity="0.6"/><circle cx="18" cy="11" r="1.5" fill="#fff" opacity="0.8"/>
-            </svg>`;
+  let innerHtml = "";
+
+  if (window.AssetCatalog.artifacts[trait]) {
+    innerHtml = window.AssetCatalog.artifacts[trait](uid);
   } else {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="10" fill="#7f8c8d" stroke="#111" stroke-width="1.5"/>
-            </svg>`;
+    innerHtml = `<circle cx="16" cy="16" r="10" fill="#7f8c8d" stroke="#111" stroke-width="1.5"/>`;
   }
-  return `<span style="display:inline-flex; align-items:center; justify-content:center; width:${size}px; height:${size}px; background:#111; border:1px solid #444; border-radius:4px; padding:2px; box-shadow:inset 0 0 4px #000;">${svg}</span>`;
+
+  return window.AssetCatalog.compile(
+    "0 0 32 32",
+    innerHtml,
+    size,
+    "#111",
+    "#444",
+  );
 };
 
 window.getUniqueIconHtml = function (item, size = 32) {
   let uid = Math.floor(Math.random() * 10000000);
-  let svg = "";
-  if (item.isUniqueStaff) {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="u_staff_ruby_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#e67e22"/></linearGradient></defs>
-                <!-- Gold-coiled staff with ruby solar gem -->
-                <line x1="6" y1="26" x2="26" y2="6" stroke="#853c00" stroke-width="3" stroke-linecap="round"/>
-                <line x1="6" y1="26" x2="26" y2="6" stroke="url(#u_staff_ruby_${uid})" stroke-width="1" stroke-linecap="round" style="opacity:0.4;"/>
-                <circle cx="26" cy="6" r="5.2" fill="#e74c3c" stroke="#111" stroke-width="1.5" style="filter: drop-shadow(0 0 4px #e74c3c);"/>
-                <circle cx="25" cy="5" r="1.2" fill="#fff"/>
-            </svg>`;
-  } else if (item.isUniqueSword) {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="u_reaver_${uid}" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#3a0202"/><stop offset="100%" stop-color="#ff0000"/></linearGradient></defs>
-                <!-- Red Damascus blade with bleeding runs -->
-                <path d="M5 27 L25 7 L27 9 L7 29 Z" fill="url(#u_reaver_${uid})" stroke="#111" stroke-width="1.8"/>
-                <line x1="8" y1="24" x2="24" y2="8" stroke="#ff3333" stroke-width="1"/>
-                <rect x="3.5" y="25" width="7" height="3.5" rx="0.5" fill="#f1c40f" stroke="#111" stroke-width="1.2" transform="rotate(45 7 27)"/>
-            </svg>`;
-  } else if (item.isUniqueSingularity) {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="u_sing_purple_${uid}" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#0b0116"/><stop offset="100%" stop-color="#8e44ad"/></linearGradient></defs>
-                <!-- Star Core sword -->
-                <path d="M5 27 L25 7 L27 9 L7 29 Z" fill="url(#u_sing_purple_${uid})" stroke="#111" stroke-width="1.8"/>
-                <circle cx="26" cy="6" r="4" fill="#ff007f" style="filter: drop-shadow(0 0 4px #ff007f);"/>
-            </svg>`;
-  } else if (item.isUniqueMaelstrom) {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="u_mael_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#55efc4"/><stop offset="100%" stop-color="#00b894"/></linearGradient></defs>
-                <!-- Curved tempest polearm -->
-                <line x1="6" y1="26" x2="26" y2="6" stroke="#2c3e50" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M22 10 Q28 6, 28 4 Q25 4, 18 8 Z" fill="url(#u_mael_${uid})" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/>
-            </svg>`;
-  } else if (item.isUniqueAegis) {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="u_aegis_blue_${uid}" x1="0" y1="0" x2="0" y2="100%"><stop offset="0%" stop-color="#0984e3"/><stop offset="100%" stop-color="#1b1c1e"/></linearGradient></defs>
-                <!-- Heavy event horizon barrier shield -->
-                <path d="M16 3 L27 9 L23 23 L16 29 L9 23 L5 9 Z" fill="url(#u_aegis_blue_${uid})" stroke="#3498db" stroke-width="2" stroke-linejoin="round" style="filter: drop-shadow(0 0 3px #3498db);"/>
-                <circle cx="16" cy="16" r="3.2" fill="#fff" opacity="0.8"/>
-            </svg>`;
-  } else if (item.isUniqueWatch) {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="u_watch_dial_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#d5dbdb"/></linearGradient></defs>
-                <!-- Temporal dial pocket-watch -->
-                <circle cx="16" cy="16" r="10" fill="#221c03" stroke="#f1c40f" stroke-width="1.8"/>
-                <circle cx="16" cy="16" r="7.5" fill="url(#u_watch_dial_${uid})" stroke="#111" stroke-width="1"/>
-                <line x1="16" y1="16" x2="16" y2="10.5" stroke="#111" stroke-width="1.8" stroke-linecap="round"/>
-                <line x1="16" y1="16" x2="20" y2="16" stroke="#c0392b" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>`;
-  } else if (item.isUniqueChronicle) {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="u_chron_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fdf6e2"/><stop offset="100%" stop-color="#d5dbdb"/></linearGradient></defs>
-                <!-- Leather bound lexicon with gold inlays -->
-                <rect x="7.5" y="5" width="17" height="22" rx="2.5" fill="#2c1d11" stroke="#ffd700" stroke-width="1.8" style="filter: drop-shadow(0 0 3px #f1c40f);"/>
-                <rect x="11.5" y="8" width="9" height="16" fill="url(#u_chron_${uid})" stroke="#111" stroke-width="1"/>
-            </svg>`;
-  } else if (item.isUniqueWarpCore) {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="u_core_teal_${uid}" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#002b2b"/><stop offset="100%" stop-color="#1abc9c"/></linearGradient></defs>
-                <!-- High tech spatial thruster boots -->
-                <path d="M8 23 L14 8 L22 14 L16 27 Z" fill="url(#u_core_teal_${uid})" stroke="#111" stroke-width="1.8"/>
-                <rect x="10" y="16" width="3" height="5" rx="0.5" fill="#fff" style="filter: drop-shadow(0 0 3px #00ffcc);"/>
-            </svg>`;
-  } else if (item.isUniqueTempest) {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <defs><linearGradient id="u_tempest_crown_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a0f0ff"/><stop offset="100%" stop-color="#0080b0"/></linearGradient></defs>
-                <!-- Spiked lightning thunder crown -->
-                <path d="M6 21 L10 7 L14 15 L16 4 L18 15 L22 7 L26 21 Z" fill="url(#u_tempest_crown_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px #00d2ff);"/>
-                <rect x="6" y="21" width="20" height="4" fill="url(#u_tempest_crown_${uid})" stroke="#111" stroke-width="1.8"/>
-            </svg>`;
+  let innerHtml = "";
+  let sub = "";
+  if (item.isUniqueStaff) sub = "staff";
+  else if (item.isUniqueSword) sub = "sword";
+  else if (item.isUniqueSingularity) sub = "singularity";
+  else if (item.isUniqueMaelstrom) sub = "maelstrom";
+  else if (item.isUniqueAegis) sub = "aegis";
+  else if (item.isUniqueWatch) sub = "watch";
+  else if (item.isUniqueChronicle) sub = "chronicle";
+  else if (item.isUniqueWarpCore) sub = "warpcore";
+  else if (item.isUniqueTempest) sub = "tempest";
+
+  if (window.AssetCatalog.uniques[sub]) {
+    innerHtml = window.AssetCatalog.uniques[sub](uid);
   } else {
-    svg = `<svg width="100%" height="100%" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="10" fill="#444" stroke="#888" stroke-width="1.5"/>
-            </svg>`;
+    innerHtml = `<circle cx="16" cy="16" r="10" fill="#444" stroke="#888" stroke-width="1.5"/>`;
   }
-  return `<span style="display:inline-flex; align-items:center; justify-content:center; width:${size}px; height:${size}px; background:#111; border:1px solid #444; border-radius:4px; padding:3px; box-shadow:inset 0 0 6px #000;">${svg}</span>`;
+  return window.AssetCatalog.compile(
+    "0 0 32 32",
+    innerHtml,
+    size,
+    "#111",
+    "#444",
+  );
 };
+
+window.draftAllocations = null;
 
 window.draftAllocations = null;
 window.draftSP = 0;
@@ -935,45 +302,6 @@ window.validateGuildNameInput = function (name) {
   );
 };
 
-// Procedural SVG Shield Emblem Generator using mathematically deterministic properties
-window.getClanEmblemHtml = function (emblemSeed, size = 18) {
-  let seed = parseInt(emblemSeed, 10) || 0;
-  let colors = [
-    "#8e44ad",
-    "#f1c40f",
-    "#e74c3c",
-    "#2ecc71",
-    "#00d2ff",
-    "#34495e",
-  ];
-  let bgCol = colors[seed % colors.length];
-  let fgCol = colors[(seed + 2) % colors.length];
-  if (bgCol === fgCol) fgCol = "#ffffff";
-
-  let charges = [
-    `<path d="M4 4 Q16 2, 28 4 Q26 18, 16 28 Q6 18, 4 4 Z" fill="${bgCol}" stroke="#000" stroke-width="1.8"/>`,
-    `<path d="M6 6 Q16 2, 26 6 Q24 20, 16 28 Q8 20, 6 6 Z" fill="${bgCol}" stroke="#000" stroke-width="1.8"/>`,
-    `<rect x="4" y="4" width="24" height="24" rx="4" fill="${bgCol}" stroke="#000" stroke-width="1.8"/>`,
-    `<circle cx="16" cy="16" r="12" fill="${bgCol}" stroke="#000" stroke-width="1.8"/>`,
-  ];
-
-  let symbols = [
-    `<polygon points="16,6 19,13 26,13 21,18 23,25 16,21 9,25 11,18 6,13 13,13" fill="${fgCol}" stroke="#000" stroke-width="0.8"/>`,
-    `<path d="M16 8 L18 12 L17 22 L15 22 L14 12 Z M12 22 H20 V23.5 H12 Z M14.5 23.5 H17.5 V27 H14.5 Z" fill="${fgCol}" stroke="#000" stroke-width="0.8"/>`,
-    `<path d="M11 11 Q16 9, 21 11 L20 18 Q16 22, 16 22 Q16 22, 12 18 Z" fill="${fgCol}" stroke="#000" stroke-width="0.8"/>`,
-    `<path d="M10 22 L12 14 L14 18 L16 11 L18 18 L20 14 L22 22 Z" fill="${fgCol}" stroke="#000" stroke-width="0.8"/>`,
-    `<path d="M16 21 C16 21 10 16 10 12 C10 9 12 7 14.5 9 C16 11 16 11 16 11 C16 11 16 11 17.5 9 C20 7 22 9 22 12 C22 16 16 21 16 21 Z" fill="${fgCol}" stroke="#000" stroke-width="0.8"/>`,
-  ];
-
-  let bgPath = charges[seed % charges.length];
-  let symPath = symbols[(seed + 1) % symbols.length];
-
-  return `<svg width="${size}" height="${size}" viewBox="0 0 32 32" style="display:inline-block; vertical-align:middle; flex-shrink:0;">
-    ${bgPath}
-    ${symPath}
-  </svg>`;
-};
-window.getGuildEmblemHtml = window.getClanEmblemHtml; // Fallback alias for legacy/leaderboard compatibility
 window.draftHoldTimeout = null;
 window.didFastDump = false;
 
@@ -1156,24 +484,9 @@ window.renderRiftConsole = function () {
   let maxLvl = (window.playerStats.highestRiftLevel || 0) + 5;
   let coresOwned = window.inventory.ETC["Ancient Core"] || 0;
 
-  let targetBoss = window.playerStats.activeRift;
-  if (isRiftActive && targetBoss) {
-    let activeIndex = window.riftBossesMetadata.findIndex(
-      (item) => item.type === targetBoss,
-    );
-    if (activeIndex !== -1) window.riftSlideIndex = activeIndex;
-  } else {
-    let selectedType =
-      window.riftBossesMetadata[window.altarSlideIndex || 0].type;
-    let foundIdx = window.riftBossesMetadata.findIndex(
-      (item) => item.type === selectedType,
-    );
-    if (foundIdx !== -1) window.riftSlideIndex = foundIdx;
-  }
-
   let headerTitle = isRiftActive
-    ? `🌌 Reality Rift: Active Hunt`
-    : `🔮 Rift Altar: Prepare Hunt`;
+    ? `Reality Rift: Active Hunt`
+    : `Rift Altar: Prepare Hunt`;
 
   let levelSelectorHtml = "";
   if (isRiftActive) {
@@ -1282,8 +595,8 @@ window.renderRiftConsole = function () {
   }
 
   modal.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
-            <h3 style="margin:0; color:#9b59b6; font-size:14px; display:flex; align-items:center; gap:6px;">🔮 ${headerTitle}</h3>
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
+              <h3 style="margin:0; color:#9b59b6; font-size:14px; display:flex; align-items:center; gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle;"><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg> ${headerTitle}</h3>
             <button onclick="document.getElementById('rift-console-modal').style.display='none'; window.setPauseState(false); window.hideTooltip();" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 12px; font-weight:bold; cursor:pointer; font-size:11px;">Close</button>
         </div>
 
@@ -1374,6 +687,19 @@ window.setRiftSlide = function (idx) {
 };
 
 window.executeRiftSummon = function (isReentry = false) {
+  if (
+    !isReentry &&
+    (window.playerStats.isDungeonMode ||
+      window.playerStats.isCrucibleMode ||
+      window.playerStats.isPrestigeBossMode ||
+      window.playerStats.isUberBoss)
+  ) {
+    window.pushHeaderToast(
+      "Cannot summon: already in another activity!",
+      "#e74c3c",
+    );
+    return;
+  }
   let cores = window.inventory.ETC["Ancient Core"] || 0;
   let boss = window.riftBossesMetadata[window.riftSlideIndex];
   let lvl = isReentry
@@ -1441,60 +767,75 @@ window.executeAbandonRiftConsole = function () {
   );
 };
 
-// Helper to safely update text nodes using the element cache
-window.setText = function (id, text) {
-  let el = window.getCachedEl(id);
-  if (el) el.innerText = text;
+// Initialize the direct DOM, Tooltip and Viewport Manager namespace
+window.UIManager = {
+  // Helper to safely update text nodes using the element cache
+  setText(id, text) {
+    let el = window.getCachedEl(id);
+    if (el) el.innerText = text;
+  },
 };
+
+// Legacy Compatibility Aliases to protect cross-file references
+window.setText = (id, text) => window.UIManager.setText(id, text);
 
 // --- CORE UI REFRESHER ---
 
-window.updateScrollLock = function () {
-  const idsToCheck = [
-    "menu-hub-overlay",
-    "settings-modal",
-    "achievements-modal",
-    "mailbox-modal",
-    "leaderboard-modal",
-    "inspect-modal",
-  ];
-  const selectorsToCheck = [
-    "#gacha-modal-overlay",
-    "#equip-swap-window",
-    "#medal-swap-window",
-    "#rates-draggable-window",
-    "#missions-draggable-window",
-    "#clan-draggable-window",
-    "#supply-crate-overlay",
-    "#sack-opening-overlay",
-    "#sp-confirm-modal",
-  ];
+// Append updateScrollLock inside window.UIManager
+Object.assign(window.UIManager, {
+  updateScrollLock() {
+    const idsToCheck = [
+      "menu-hub-overlay",
+      "settings-modal",
+      "achievements-modal",
+      "mailbox-modal",
+      "leaderboard-modal",
+      "inspect-modal",
+    ];
+    const selectorsToCheck = [
+      "#gacha-modal-overlay",
+      "#equip-swap-window",
+      "#medal-swap-window",
+      "#rates-draggable-window",
+      "#missions-draggable-window",
+      "#clan-draggable-window",
+      "#supply-crate-overlay",
+      "#sack-opening-overlay",
+      "#sp-confirm-modal",
+    ];
 
-  let isAnyOpen = false;
+    let isAnyOpen = false;
 
-  for (let id of idsToCheck) {
-    let el = document.getElementById(id);
-    if (el && el.style.display !== "none" && el.style.display !== "") {
-      isAnyOpen = true;
-      break;
-    }
-  }
-
-  if (!isAnyOpen) {
-    for (let sel of selectorsToCheck) {
-      if (document.querySelector(sel)) {
+    for (let id of idsToCheck) {
+      let el = document.getElementById(id);
+      if (el && el.style.display !== "none" && el.style.display !== "") {
         isAnyOpen = true;
         break;
       }
     }
-  }
 
-  if (isAnyOpen) {
-    document.body.classList.add("scroll-lock");
-  } else {
-    document.body.classList.remove("scroll-lock");
-  }
-};
+    if (!isAnyOpen) {
+      for (let sel of selectorsToCheck) {
+        if (document.querySelector(sel)) {
+          isAnyOpen = true;
+          break;
+        }
+      }
+    }
+
+    if (isAnyOpen) {
+      document.body.classList.add("scroll-lock");
+    } else {
+      document.body.classList.remove("scroll-lock");
+    }
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.updateScrollLock = () => window.UIManager.updateScrollLock();
+
+// Bind high-performance delegated proxy method to window.UIManager
+window.UIManager.updateUI = () => window.updateUI();
 
 window.updateUI = function () {
   window.updateScrollLock();
@@ -1771,6 +1112,10 @@ window.updateUI = function () {
     window.renderCavernSigilConsole();
   }
 
+  if (typeof window.updateEcoModeStyle === "function") {
+    window.updateEcoModeStyle();
+  }
+
   // Refresh core SP allocations button display
   const updateSPButtonStates = () => {
     let statsKeys = ["spStr", "spDex", "spInt"];
@@ -1927,7 +1272,7 @@ window.updateUI = function () {
 
     window.setText("vending-rate-5", probs[5].toFixed(2) + "%");
     window.setText("vending-rate-4", probs[4].toFixed(2) + "%");
-    window.setText("vending-rate-3", probs[3].toFixed(2) + "%");
+    window.setText("vending-rate-3", probs[3].toFixed(1) + "%");
     window.setText("vending-rate-2", probs[2].toFixed(2) + "%");
     window.setText("vending-rate-1", probs[1].toFixed(2) + "%");
   }
@@ -2058,6 +1403,12 @@ window.updateUI = function () {
   if (artBtn) artBtn.innerText = artCount;
   let artMaxBtn = document.getElementById("btn-art-max");
   if (artMaxBtn) artMaxBtn.innerText = capMax;
+
+  let sigilCount = window.inventory.SIGIL ? window.inventory.SIGIL.length : 0;
+  let sigilBtn = document.getElementById("btn-sigil-count");
+  if (sigilBtn) sigilBtn.innerText = sigilCount;
+  let sigilMaxBtn = document.getElementById("btn-sigil-max");
+  if (sigilMaxBtn) sigilMaxBtn.innerText = capMax;
 
   window.renderPaperDoll();
   window.renderInventory();
@@ -2600,11 +1951,11 @@ window.setPauseState = function (paused) {
   let btn = document.getElementById("btn-pause");
   if (btn) {
     if (window.isGamePaused) {
-      btn.innerText = "⏸️ PAUSED";
+      btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:4px;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> PAUSED`;
       btn.classList.add("active");
       btn.style.background = "#e74c3c";
     } else {
-      btn.innerText = "▶️ Pause";
+      btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:4px;"><polygon points="5 3 19 12 5 21 5 3"/></svg> Pause`;
       btn.classList.remove("active");
       btn.style.background = "#34495e";
     }
@@ -2674,6 +2025,7 @@ window.toggleSettings = function () {
     modal.style.display = "block";
     window.updateAudioUI();
     window.updateStickyCanvasStyle();
+    window.updateEcoModeStyle();
 
     // Populate and display current character name
     let nameInput = document.getElementById("settings-player-name");
@@ -2785,6 +2137,7 @@ window.leaveActivity = function () {
 // --- DYNAMIC ATTRIBUTE HOVER TOOLTIPS ---
 
 window.showStatBreakdown = function (e, statKey, isPct = false) {
+  if (window.isSimulatedMouseEvent && window.isSimulatedMouseEvent(e)) return;
   e.stopPropagation();
   let tt = document.getElementById("stat-tooltip");
   if (!tt) return;
@@ -3163,7 +2516,7 @@ window.renderMarketShop = function () {
 
   let html = "";
 
-  // Render Hero Card for Item of the Day
+  // Render Golden Spotlight Awning for Item of the Day
   if (iotdItem) {
     let nameColor = window.getTierColor(iotdItem.statsRolled);
     let costColor =
@@ -3174,31 +2527,36 @@ window.renderMarketShop = function () {
         ? "background: #333; color: #666; cursor: not-allowed; border-color: #444;"
         : "background: linear-gradient(180deg, #f1c40f 0%, #d4af37 100%); color: #000; font-weight: 900; border-color: #fff; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);";
 
+    let stampClass = "stamp-base";
+    if (iotdItem.justPurchased) {
+      stampClass += " stamp-slam";
+      delete iotdItem.justPurchased;
+    }
     let soldOverlay = isSold
-      ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); backdrop-filter: blur(1.5px); display:flex; justify-content:center; align-items:center; border-radius:8px; z-index:5;"><span style="color:#e74c3c; font-size:18px; font-weight:900; border: 2.5px solid #e74c3c; padding: 6px 16px; border-radius:4px; transform: rotate(-8deg); font-family:'Arial Black',Impact,sans-serif; text-shadow: 0 2px 4px #000; letter-spacing:2px; box-shadow: 0 0 15px rgba(231,76,60,0.35);">PURCHASED</span></div>`
+      ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter: blur(1.5px); display:flex; justify-content:center; align-items:center; border-radius:8px; z-index:5;"><span class="${stampClass}" style="--final-rot:-8deg; color:#e74c3c; font-size:18px; font-weight:900; border: 2.5px solid #e74c3c; padding: 6px 16px; border-radius:4px; font-family:'Arial Black',Impact,sans-serif; text-shadow: 0 2px 4px #000; letter-spacing:2px; box-shadow: 0 0 15px rgba(231,76,60,0.35);">PURCHASED</span></div>`
       : "";
 
     html += `
-        <div class="gold-shop-iotd-hero"
-             style="position:relative; background: radial-gradient(circle at 50% 30%, rgba(241, 196, 15, 0.08) 0%, rgba(12, 14, 19, 0.95) 100%); border: 2px solid #f1c40f; border-radius:8px; padding:15px; margin-bottom:12px; box-shadow: 0 0 18px rgba(241, 196, 15, 0.15), inset 0 0 12px rgba(241, 196, 15, 0.08); display:flex; flex-direction:column; justify-content:space-between;"
+        <div class="merchant-shelf-hero"
+             style="display:flex; flex-direction:column; justify-content:space-between; padding:15px; margin-bottom:14px;"
              onmouseenter="window.showMarketTooltip(event, ${window.playerStats.shopItems.indexOf(iotdItem)})"
              onmouseleave="window.hideTooltip()"
              ontouchstart="window.showMarketTooltip(event, ${window.playerStats.shopItems.indexOf(iotdItem)})">
             ${soldOverlay}
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+            <div style="position:relative; z-index:2; display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; padding:0 4px;">
                 <div style="background: linear-gradient(90deg, #f1c40f, #e67e22); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size:9.5px; font-weight:900; letter-spacing:2px; text-transform:uppercase; text-shadow: 0 0 8px rgba(241, 196, 15, 0.2);">★ Item of the Day ★</div>
-                <div style="font-family:monospace; font-size:9.5px; color:#aaa; background:rgba(255,255,255,0.04); padding:2px 6px; border-radius:3px; border:1px solid #222;">SPECIAL VALUE</div>
+                <div style="font-family:monospace; font-size:9.5px; color:#f1c40f; background:rgba(241, 196, 15, 0.08); padding:2px 6px; border-radius:3px; border:1px solid rgba(241, 196, 15, 0.3);">SPECIAL VALUE</div>
             </div>
-            <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                            <div style="flex-shrink:0;">
-                                ${window.getEquipIconHtml(iotdItem, 42)}
-                            </div>
-                            <div style="flex:1; min-width:0; text-align:left;">
-                                <strong style="color:${nameColor}; font-size:14px; text-shadow:0 0 8px rgba(${window.hexToRgbValues(nameColor)},0.25); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px;">${iotdItem.name}</strong>
-                                <span style="font-size:10px; color:#94a3b8; font-family:monospace;">${iotdItem.statsRolled}★ Quality</span>
-                            </div>
-                        </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #333; padding-top:10px; position:relative; z-index:4;">
+            <div style="position:relative; z-index:2; display:flex; align-items:center; gap:12px; margin-bottom:12px; padding:0 4px;">
+                <div style="flex-shrink:0;">
+                    ${window.getEquipIconHtml(iotdItem, 40)}
+                </div>
+                <div style="flex:1; min-width:0; text-align:left;">
+                    <strong style="color:${nameColor}; font-size:14px; text-shadow:0 0 8px rgba(${window.hexToRgbValues(nameColor)},0.25); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px;">${iotdItem.name}</strong>
+                    <span style="font-size:10px; color:#94a3b8; font-family:monospace;">${iotdItem.statsRolled === "UNIQUE" ? "UNIQUE" : iotdItem.statsRolled + "★"} Quality</span>
+                </div>
+            </div>
+            <div style="position:relative; z-index:4; display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(255,255,255,0.08); padding-top:10px; padding-left:4px; padding-right:4px;">
                 <div>
                     <span style="font-size:9.5px; color:#888; display:block; text-align:left;">MERCHANT COST</span>
                     <strong style="color:${costColor}; font-size:14px; font-family:monospace;">${window.formatNumber(iotdItem.cost)} Gold</strong>
@@ -3211,10 +2569,10 @@ window.renderMarketShop = function () {
       `;
   }
 
-  // Render Standard Items list
+  // Render Standard Items in a divided columns grid (The "Shelf")
   html += `
-      <div style="font-size:9.5px; color:#888; font-weight:bold; letter-spacing:1px; text-transform:uppercase; text-align:left; margin-bottom:8px; border-bottom:1px solid #222; padding-bottom:4px;">🛒 Standard Stock</div>
-      <div style="display:flex; flex-direction:column; gap:6px;">
+      <div style="font-size:9.5px; color:#888; font-weight:bold; letter-spacing:1px; text-transform:uppercase; text-align:left; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:4px;">🛒 Standard Stock</div>
+      <div class="merchant-shelves-grid">
     `;
 
   standardItems.forEach((shopItem) => {
@@ -3224,8 +2582,13 @@ window.renderMarketShop = function () {
       window.playerStats.coins >= shopItem.cost ? "#2ecc71" : "#e74c3c";
     let isSold = shopItem.purchased;
 
+    let stampClass = "stamp-base";
+    if (shopItem.justPurchased) {
+      stampClass += " stamp-slam";
+      delete shopItem.justPurchased;
+    }
     let soldOverlay = isSold
-      ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:12px; font-weight:900; border: 1.5px solid #e74c3c; padding: 2px 10px; border-radius:3px; transform: rotate(-5deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1px;">PURCHASED</span></div>`
+      ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter: blur(1.5px); display:flex; justify-content:center; align-items:center; border-radius:8px; z-index:5;"><span class="${stampClass}" style="--final-rot:-8deg; color:#e74c3c; font-size:16px; font-weight:900; border: 2.5px solid #e74c3c; padding: 6px 16px; border-radius:4px; font-family:'Arial Black',Impact,sans-serif; text-shadow: 0 2px 4px #000; letter-spacing:2px; box-shadow: 0 0 15px rgba(231,76,60,0.35);">PURCHASED</span></div>`
       : "";
 
     let btnStyle =
@@ -3233,25 +2596,30 @@ window.renderMarketShop = function () {
         ? "background: #333; color: #666; cursor: not-allowed; border-color: #444;"
         : `background: transparent; color: #fff; border: 1.5px solid ${nameColor}; box-shadow: 0 0 6px rgba(${window.hexToRgbValues(nameColor)},0.15);`;
 
+    // Apply rarity responsive visual background classes
+    let glowClass = "merchant-shelf-row";
+    if (shopItem.statsRolled === 4) glowClass += " rarity-glow-4";
+    if (shopItem.statsRolled === 5) glowClass += " rarity-glow-5";
+
     html += `
-        <div class="shop-row"
-             style="position:relative; display:flex; align-items:center; justify-content:space-between; background:rgba(15,17,26,0.5); border:1.5px solid #222; border-left:4px solid ${nameColor} !important; border-radius:6px; padding:8px 10px; gap:8px;"
+        <div class="${glowClass}"
+             style="display:flex; flex-direction:column; justify-content:space-between; border-radius:6px; padding:10px; gap:8px;"
              onmouseenter="window.showMarketTooltip(event, ${idx})"
              onmouseleave="window.hideTooltip()"
              ontouchstart="window.showMarketTooltip(event, ${idx})">
             ${soldOverlay}
-            <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; text-align:left;">
-                            <div style="flex-shrink:0;">
-                                ${window.getEquipIconHtml(shopItem, 34)}
-                            </div>
-                            <div style="flex:1; min-width:0;">
-                                <strong style="color:${nameColor}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px;">${shopItem.name}</strong>
-                                <span style="font-size:9.5px; color:#aaa; font-family:monospace;">${shopItem.statsRolled}★ Quality</span>
-                            </div>
-                        </div>
-            <div style="display:flex; align-items:center; gap:12px; position:relative; z-index:4;">
+            <div style="display:flex; align-items:center; gap:10px; text-align:left; position:relative; z-index:2;">
+                <div style="flex-shrink:0;">
+                    ${window.getEquipIconHtml(shopItem, 32)}
+                </div>
+                <div style="flex:1; min-width:0;">
+                    <strong style="color:${nameColor}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px;">${shopItem.name}</strong>
+                    <span style="font-size:9.5px; color:#94a3b8; font-family:monospace;">${shopItem.statsRolled === "UNIQUE" ? "UNIQUE" : shopItem.statsRolled + "★"} Quality</span>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:4; border-top:1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:2px;">
                 <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(shopItem.cost)} Gold</span>
-                <button class="btn-action" style="${btnStyle} font-size:10px; padding:4px 10px;" onclick="window.buyShopItem(${idx})">
+                <button class="btn-action" style="${btnStyle} font-size:10px; padding:4px 8px; border-radius:4px;" onclick="window.buyShopItem(${idx})">
                     ${isSold ? "SOLD" : "BUY"}
                 </button>
             </div>
@@ -3260,46 +2628,6 @@ window.renderMarketShop = function () {
   });
 
   html += `</div>`;
-  el.innerHTML = html;
-};
-
-window.renderAstralShop = function () {
-  let el = document.getElementById("astral-shop-list");
-  if (!el) return;
-
-  let ownedShards = window.playerStats.astralShards || 0;
-  let html = "";
-
-  window.ASTRAL_SHOP_STOCK.forEach((item, index) => {
-    let canAfford = ownedShards >= item.cost;
-    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-    let iconHtml = window
-      .getEtcIconHtml(item.name)
-      .replace("margin-right: 12px;", "margin-right: 6px;");
-    let bgStyle = window.hexToRgba(item.color, 0.04);
-    let btnStyle = canAfford
-      ? `background: ${item.color}; color: ${item.color === "#f1c40f" ? "#111" : "#fff"}; font-weight: bold;`
-      : "background: #333; color: #666; cursor: not-allowed; border-color: #444;";
-
-    html += `
-      <div class="shop-row" style="border-color: ${item.color}; background: ${bgStyle}; flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 10px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0;" onmouseenter="window.showAstralShopItemTooltip(event, ${index})" onmouseleave="window.hideTooltip()" ontouchstart="window.showAstralShopItemTooltip(event, ${index})">
-          <div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                  <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
-                      ${iconHtml}
-                      <strong style="font-size:11.5px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</strong>
-                  </div>
-              </div>
-              <p style="font-size:10px; color:#aaa; margin-bottom:8px; line-height:1.35; white-space:normal;">${item.desc}</p>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px dashed #333; padding-top:6px; margin-top:6px;">
-              <span style="font-size:10.5px; font-family:monospace; font-weight:bold; color:${costColor};">${item.cost} Shards</span>
-              <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 10px;" ${canAfford ? "" : "disabled"} onclick="window.buyAstralShopItem(${index})">Purchase</button>
-          </div>
-      </div>
-    `;
-  });
-
   el.innerHTML = html;
 };
 
@@ -3333,11 +2661,258 @@ window.showAstralShopItemTooltip = function (e, index) {
   window.positionTooltip(e, tt);
 };
 
+window.renderGoldUpgrades = function () {
+  let el = document.getElementById("gold-upgrades-list");
+  if (!el) return;
+
+  // Utilize the pre-configured fluid CSS Grid
+  el.style.display = "grid";
+  el.style.gridTemplateColumns = "repeat(auto-fit, minmax(280px, 1fr))";
+  el.style.gap = "12px";
+
+  let p = window.playerStats;
+
+  let gachaIconSvg = `
+    <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="gacha_dome" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffea75" />
+          <stop offset="100%" stop-color="#f39c12" />
+        </linearGradient>
+        <linearGradient id="gacha_base" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e67e22" />
+          <stop offset="100%" stop-color="#d35400" />
+        </linearGradient>
+        <radialGradient id="gacha_glass" cx="50%" cy="40%" r="50%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+          <stop offset="60%" stop-color="#74b9ff" stop-opacity="0.15" />
+          <stop offset="100%" stop-color="#0984e3" stop-opacity="0.3" />
+        </radialGradient>
+      </defs>
+      <ellipse cx="32" cy="56" rx="20" ry="4" fill="rgba(0,0,0,0.5)" />
+      <rect x="16" y="34" width="32" height="20" rx="3" fill="url(#gacha_base)" stroke="#000000" stroke-width="2.5" />
+      <rect x="25" y="44" width="14" height="10" rx="2" fill="#2c3e50" stroke="#000000" stroke-width="1.8" />
+      <path d="M25 44 L39 44 L35 54 L29 54 Z" fill="#111111" />
+      <rect x="14" y="30" width="36" height="5" fill="#f1c40f" stroke="#000000" stroke-width="2.2" />
+      <circle cx="32" cy="20" r="14" fill="url(#gacha_glass)" stroke="#000000" stroke-width="2.5" />
+      <circle cx="26" cy="22" r="3.5" fill="#e74c3c" stroke="#000000" stroke-width="1" />
+      <circle cx="26" cy="22" r="1.5" fill="#ffffff" opacity="0.6" />
+      <circle cx="38" cy="22" r="3.5" fill="#3498db" stroke="#000000" stroke-width="1" />
+      <circle cx="38" cy="22" r="1.5" fill="#ffffff" opacity="0.6" />
+      <circle cx="32" cy="15" r="3.5" fill="#9b59b6" stroke="#000000" stroke-width="1" />
+      <circle cx="32" cy="15" r="1.5" fill="#ffffff" opacity="0.6" />
+      <circle cx="32" cy="25" r="3.5" fill="#2ecc71" stroke="#000000" stroke-width="1" />
+      <circle cx="32" cy="25" r="1.5" fill="#ffffff" opacity="0.6" />
+      <path d="M20 10 C20 4, 44 4, 44 10 Z" fill="url(#gacha_dome)" stroke="#000000" stroke-width="2.5" />
+      <circle cx="32" cy="38" r="4" fill="#bdc3c7" stroke="#000000" stroke-width="1.8" />
+      <line x1="32" y1="34" x2="32" y2="42" stroke="#000000" stroke-width="2" />
+      <line x1="28" y1="38" x2="36" y2="38" stroke="#000000" stroke-width="2" />
+      <circle cx="32" cy="38" r="1" fill="#111111" />
+    </svg>
+  `;
+
+  let shopIconSvg = `
+    <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="shop_wood" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#873600" />
+          <stop offset="100%" stop-color="#5c2e16" />
+        </linearGradient>
+        <linearGradient id="shop_awning_blue" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#2980b9" />
+          <stop offset="100%" stop-color="#3498db" />
+        </linearGradient>
+        <linearGradient id="shop_awning_white" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#bdc3c7" />
+          <stop offset="100%" stop-color="#ffffff" />
+        </linearGradient>
+      </defs>
+      <ellipse cx="32" cy="56" rx="22" ry="4" fill="rgba(0,0,0,0.5)" />
+      <rect x="14" y="24" width="36" height="28" fill="#1b2631" stroke="#000000" stroke-width="2" />
+      <rect x="10" y="34" width="44" height="20" rx="3" fill="url(#shop_wood)" stroke="#000000" stroke-width="2.5" />
+      <rect x="14" y="38" width="10" height="12" fill="#5c2e16" stroke="#000000" stroke-width="1.5" />
+      <rect x="40" y="38" width="10" height="12" fill="#5c2e16" stroke="#000000" stroke-width="1.5" />
+      <circle cx="32" cy="44" r="5" fill="#f1c40f" stroke="#000000" stroke-width="1.5" />
+      <path d="M32 41 v6 M29 43 h6" stroke="#000000" stroke-width="1.5" stroke-linecap="round" />
+      <line x1="12" y1="18" x2="12" y2="34" stroke="#000" stroke-width="2.5" />
+      <line x1="52" y1="18" x2="52" y2="34" stroke="#000" stroke-width="2.5" />
+      <path d="M6 10 L58 10 L50 24 L14 24 Z" fill="url(#shop_awning_blue)" stroke="#000000" stroke-width="2.5" stroke-linejoin="round" />
+      <path d="M12 10 L19 10 L19 24 L12 24 Z" fill="url(#shop_awning_white)" stroke="#000000" stroke-width="1.5" />
+      <path d="M26 10 L33 10 L31 24 L24 24 Z" fill="url(#shop_awning_white)" stroke="#000000" stroke-width="1.5" />
+      <path d="M40 10 L47 10 L43 24 L36 24 Z" fill="url(#shop_awning_white)" stroke="#000000" stroke-width="1.5" />
+      <rect x="8" y="30" width="48" height="4" fill="#a04000" stroke="#000000" stroke-width="2" />
+    </svg>
+  `;
+
+  let globalIconSvg = `
+    <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="clover_leaf" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#a3fd83" />
+          <stop offset="50%" stop-color="#2ecc71" />
+          <stop offset="100%" stop-color="#27ae60" />
+        </linearGradient>
+        <linearGradient id="clover_pot" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#2c3e50" />
+          <stop offset="100%" stop-color="#0f171e" />
+        </linearGradient>
+      </defs>
+      <ellipse cx="32" cy="56" rx="20" ry="4" fill="rgba(0,0,0,0.5)" />
+      <path d="M18 42 L46 42 L42 54 L22 54 Z" fill="url(#clover_pot)" stroke="#000000" stroke-width="2.5" stroke-linejoin="round" />
+      <ellipse cx="32" cy="42" rx="14" ry="3.5" fill="#34495e" stroke="#000000" stroke-width="2.5" />
+      <ellipse cx="32" cy="42" rx="12" ry="2.2" fill="#5c2e16" />
+      <path d="M32 41 Q32 24, 27 18" fill="none" stroke="#27ae60" stroke-width="3.5" stroke-linecap="round" />
+      <g transform="translate(25, 16)">
+        <path d="M0,0 C-12,-12 -12,4 0,0" fill="url(#clover_leaf)" stroke="#000000" stroke-width="1.8" stroke-linejoin="round" />
+        <path d="M0,0 C-12,-12 -12,4 0,0" fill="#a3fd83" opacity="0.3" />
+        <path d="M0,0 C12,-12 12,4 0,0" fill="url(#clover_leaf)" stroke="#000000" stroke-width="1.8" stroke-linejoin="round" />
+        <path d="M0,0 C12,-12 12,4 0,0" fill="#a3fd83" opacity="0.3" />
+        <path d="M0,0 C-12,12 -12,-4 0,0" fill="url(#clover_leaf)" stroke="#000000" stroke-width="1.8" stroke-linejoin="round" />
+        <path d="M0,0 C-12,12 -12,-4 0,0" fill="#a3fd83" opacity="0.3" />
+        <path d="M0,0 C12,12 12,-4 0,0" fill="url(#clover_leaf)" stroke="#000000" stroke-width="1.8" stroke-linejoin="round" />
+        <path d="M0,0 C12,12 12,-4 0,0" fill="#a3fd83" opacity="0.3" />
+        <circle cx="0" cy="0" r="1.5" fill="#f1c40f" />
+      </g>
+      <g stroke="#f1c40f" stroke-width="1.2" stroke-linecap="round">
+        <path d="M12 14 L12 8 M10 11 L14 12" />
+        <path d="M52 18 L52 12 M50 15 L54 15" />
+        <path d="M16 30 L16 26 M14 28 L18 28" />
+      </g>
+    </svg>
+  `;
+
+  let upgrades = [
+    {
+      id: "vending",
+      name: "Gacha Calibration",
+      level: p.vendingQLevel || 0,
+      effectPerLevel: 1.0,
+      cost: Math.floor(15000 * Math.pow(1.18, p.vendingQLevel || 0)),
+      color: "#f1c40f",
+      desc: "Calibrates the Gachapon vending machine, permanently increasing base roll quality multipliers by +1% per level.",
+      accentClass: "sink-accent-vending",
+      iconSvg: gachaIconSvg,
+    },
+    {
+      id: "shop",
+      name: "Merchant Investment",
+      level: p.shopQLevel || 0,
+      effectPerLevel: 1.0,
+      cost: Math.floor(30000 * Math.pow(1.22, p.shopQLevel || 0)),
+      color: "#3498db",
+      desc: "Invests in the local merchant guild, permanently improving the base quality of restocked shop items by +1% per level.",
+      accentClass: "sink-accent-shop",
+      iconSvg: shopIconSvg,
+    },
+    {
+      id: "global",
+      name: "Aura of Fortune",
+      level: p.globalQLevel || 0,
+      effectPerLevel: 1.5,
+      cost: Math.floor(100000 * Math.pow(1.28, p.globalQLevel || 0)),
+      color: "#2ecc71",
+      desc: "Projects a global aura of pure probability, permanently boosting world drop rates and quality parameters by +1% per level.",
+      accentClass: "sink-accent-global",
+      iconSvg: globalIconSvg,
+    },
+  ];
+
+  el.innerHTML = upgrades
+    .map((u) => {
+      let canAfford = p.coins >= u.cost;
+      let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+
+      let btnHtml = "";
+      if (canAfford) {
+        btnHtml = `
+        <button class="btn-action"
+                style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
+                onclick="window.buyGoldUpgrade('${u.id}')">
+            Upgrade Sink
+        </button>
+      `;
+      } else {
+        btnHtml = `
+        <button class="btn-action"
+                style="background: #242933; color: #5c6370; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #2d3139; cursor: not-allowed; opacity: 0.8;"
+                disabled>
+            🔒 Lacking Gold
+        </button>
+      `;
+      }
+
+      // Segment milestone calculations
+      let currentMilestoneProgress = u.level % 10;
+      let nextMilestone = Math.ceil((u.level + 1) / 10) * 10;
+      let progressPercent = (currentMilestoneProgress / 10) * 100;
+      if (u.level > 0 && u.level % 10 === 0) {
+        progressPercent = 100;
+        currentMilestoneProgress = 10;
+      }
+
+      return `
+      <div id="sink-card-${u.id}" class="sink-slate-panel ${u.accentClass}"
+           style="display: flex; flex-direction: column; justify-content: space-between; border: 1.5px solid ${u.color}50; border-radius: 12px; padding: 16px; position: relative; overflow: hidden; background: linear-gradient(180deg, #161a23 0%, #0c0f17 100%); transition: all 0.25s ease-in-out; min-height: 290px; box-shadow: 0 4px 15px rgba(0,0,0,0.65), inset 0 0 10px rgba(${window.hexToRgbValues(u.color)}, 0.05);">
+
+          <!-- Holographic sweep shine overlay -->
+          <div class="sink-shimmer" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(135deg, rgba(255,255,255,0) 45%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 55%); transform: rotate(-15deg); pointer-events: none; z-index: 1; transition: all 0.75s ease-in-out;"></div>
+
+          <div>
+              <!-- Top Row Header: Name & Cost Badge -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; position: relative; z-index: 2;">
+                  <strong style="color: ${u.color}; font-size: 14.5px; font-weight: bold; text-shadow: 0 0 10px ${u.color}35;">${u.name}</strong>
+                  <span style="background: ${costColor}12; border: 1.5px solid ${costColor}80; color: ${costColor}; font-family: monospace; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px; box-shadow: 0 0 8px ${costColor}1a;">
+                      ${window.formatNumber(u.cost)} G
+                  </span>
+              </div>
+
+              <!-- Content Row: Vector Icon and Stat Block Matrix -->
+              <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px; position: relative; z-index: 2;">
+                  <div class="sink-icon-container" style="width: 76px; height: 72px; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55); border: 2px solid ${u.color}; border-radius: 10px; flex-shrink: 0; box-shadow: inset 0 0 10px #000; transition: transform 0.2s ease;">
+                      ${u.iconSvg}
+                  </div>
+
+                  <div style="flex: 1; display: grid; grid-template-columns: 1fr; gap: 4px; background: rgba(0,0,0,0.3); border: 1px solid #222; border-radius: 6px; padding: 6px 10px;">
+                      <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; line-height:1;">
+                          <span>RANK TIER:</span>
+                          <span style="color: #fff; font-weight: bold; font-family: monospace;">Lv. ${u.level} ➔ <span style="color:#2ecc71;">${u.level + 1}</span></span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; line-height:1;">
+                          <span>EFFECTIVE:</span>
+                          <span style="color: #fff; font-weight: bold; font-family: monospace;">
+                              +${(u.level * u.effectPerLevel).toFixed(1)}% ➔ <span style="color:#2ecc71;">+${((u.level + 1) * u.effectPerLevel).toFixed(1)}%</span>
+                          </span>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Description Block -->
+              <div style="font-size: 11px; color: #cbd5e1; line-height: 1.45; text-align: left; white-space: normal; margin-bottom: 12px; position: relative; z-index: 2; min-height: 38px;">
+                  ${u.desc}
+              </div>
+          </div>
+
+          <!-- Bottom Area: Milestone segment bar & Button -->
+          <div style="position: relative; z-index: 2; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 12px; margin-top: auto;">
+              <div style="display: flex; justify-content: space-between; font-size: 9px; color: #aaa; font-family: monospace; margin-bottom: 4px; line-height: 1;">
+                  <span>MILESTONE PROGRESS:</span>
+                  <span style="color: #df9ffb; font-weight: bold;">${currentMilestoneProgress} / 10</span>
+              </div>
+              <div class="sink-prog-track" style="margin-top: 0; margin-bottom: 12px;">
+                  <div class="sink-prog-fill ${u.id}" style="width: ${progressPercent}%; height: 100%; transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
+              </div>
+              ${btnHtml}
+          </div>
+      </div>
+    `;
+    })
+    .join("");
+};
+
 window.renderMysticalShop = function () {
   let el = document.getElementById("mystical-shop-list");
   if (!el) return;
 
-  // Override the raw inline grid to prevent squeezed column overlaps!
   el.style.display = "flex";
   el.style.flexDirection = "column";
   el.style.gap = "16px";
@@ -3345,9 +2920,10 @@ window.renderMysticalShop = function () {
   let stockHtml =
     `
     <div style="font-size:11px; color:#9b59b6; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase; text-align:left; border-bottom:1px solid #333; padding-bottom:6px; width:100%; display:flex; align-items:center; gap:6px;">
-        <span>🌌 Celestial Stock</span>
+        <span>🔮 Celestial Stock</span>
     </div>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:8px; width:100%;">
+    <div class="alchemy-workbench-panel">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:10px; width:100%; position:relative; z-index:2;">
   ` +
     window.MYSTICAL_STOCK.map((item, index) => {
       let costColor = "#e74c3c";
@@ -3377,34 +2953,34 @@ window.renderMysticalShop = function () {
           ? getEtcIconHtml(item.name)
           : getUseIconHtml(item.name);
       iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 6px;");
-      let bgStyle = window.hexToRgba(item.color, 0.04);
 
       let btnStyle = `background: ${item.color}; color: ${item.color === "#f1c40f" ? "#111" : "#fff"}; font-weight: bold;`;
 
       return `
-      <div class="shop-row" style="border-color: ${item.color}; background: ${bgStyle}; flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 10px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0;" onmouseenter="window.showMysticalShopTooltip(event, ${index})" ontouchstart="window.showMysticalShopTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
+      <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(180deg, #161921 0%, #0d0f14 100%); box-shadow: 0 4px 15px rgba(0,0,0,0.85), inset 0 0 10px rgba(${window.hexToRgbValues ? window.hexToRgbValues(item.color) : "255,255,255"}, 0.05); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;" onmouseenter="window.showMysticalShopTooltip(event, ${index})" ontouchstart="window.showMysticalShopTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
           <div>
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                  <div style="display:flex; align-items:center; gap:6px; min-width:0;">
+                  <div style="display:flex; align-items:center; gap:8px; min-width:0;">
                       ${iconHtml}
-                      <strong style="color:${item.color}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</strong>
+                      <strong style="color:${item.color}; font-size:12.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px ${item.color}35;">${item.name}</strong>
                   </div>
               </div>
-              <div style="font-size:10px; color:#aaa; margin-bottom:10px; line-height:1.35; white-space:normal;">${item.desc}</div>
+              <div style="font-size:10px; color:#94a3b8; margin-bottom:10px; line-height:1.4; white-space:normal;">${item.desc}</div>
           </div>
-          <div style="border-top:1px dashed #333; padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+          <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
               <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(displayCost)} ${currencyLabel}</span>
-              <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 10px;" onclick="window.buyMysticalItem(${index})">Purchase</button>
+              <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px; box-shadow:0 0 6px ${item.color}33;" onclick="window.buyMysticalItem(${index})">Purchase</button>
           </div>
       </div>
     `;
     }).join("") +
-    `</div>`;
+    `</div></div>`;
 
   let transHtml =
     `
-    <div style="font-size:9.5px; color:#2ecc71; font-weight:bold; letter-spacing:1.1px; text-transform:uppercase; text-align:left; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:4px; width:100%;">🧪 Alchemical Transmutations</div>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:6px; width:100%;">
+    <div style="font-size:11px; color:#2ecc71; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase; text-align:left; border-bottom:1px solid #333; padding-bottom:6px; width:100%;">🧪 Alchemical Transmutations</div>
+    <div class="alchemy-workbench-panel" style="border-color:#2ecc71; background: linear-gradient(135deg, #0a110f 0%, #030605 100%);">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:10px; width:100%; position:relative; z-index:2;">
   ` +
     window.POTION_TRANSMUTATIONS.map((recipe, index) => {
       let ownedCount = window.inventory.USE[recipe.req] || 0;
@@ -3413,122 +2989,94 @@ window.renderMysticalShop = function () {
 
       let iconHtml = getUseIconHtml(recipe.result);
       iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 6px;");
-      let bgStyle = window.hexToRgba(recipe.color, 0.03);
 
       let btnStyle = canAfford
-        ? `background: ${recipe.color}; color: #fff; font-weight: bold;`
-        : "background: #333; color: #666; cursor: not-allowed; border-color: #444;";
+        ? `background: ${recipe.color}; color: #fff; font-weight: bold; box-shadow:0 0 8px ${recipe.color}33;`
+        : "background: #252830; color: #555; cursor: not-allowed; border: 1px solid #3c4454;";
+
+      let indicatorClass = canAfford
+        ? "reagent-indicator available"
+        : "reagent-indicator missing";
 
       return `
-      <div class="shop-row" style="border-color: ${recipe.color}; background: ${bgStyle}; flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 10px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0;" onmouseenter="window.showTransmuteTooltip(event, ${index})" ontouchstart="window.showTransmuteTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
+      <div class="shop-row" style="border-color: ${recipe.color}; background: rgba(0,0,0,0.5); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;" onmouseenter="window.showTransmuteTooltip(event, ${index})" ontouchstart="window.showTransmuteTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
            <div>
                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                   <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
+                   <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
                        ${iconHtml}
-                       <strong style="color:${recipe.color}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">Brew: ${recipe.result}</strong>
+                       <strong style="color:${recipe.color}; font-size:12.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; text-shadow:0 0 8px ${recipe.color}35;">Brew: ${recipe.result}</strong>
                    </div>
                </div>
-               <div style="font-size:10px; color:#aaa; margin-bottom:10px; line-height:1.35; white-space:normal;">${recipe.desc} (Owned: ${ownedCount})</div>
+               <div style="font-size:10px; color:#94a3b8; margin-bottom:6px; line-height:1.4; white-space:normal;">${recipe.desc} (Owned: ${ownedCount})</div>
            </div>
-           <div style="border-top:1px dashed #333; padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+
+           <!-- Reagent Split Card Layout with Active Status indicators -->
+           <div class="split-reagent-card" style="border-color:${canAfford ? "rgba(46,204,113,0.3)" : "rgba(231,76,60,0.3)"};">
+               <div style="display:flex; align-items:center; gap:6px;">
+                   <span class="${indicatorClass}"></span>
+                   <span style="color:#888;">Need:</span>
+                   <span style="color:${costColor}; font-weight:bold;">${recipe.amount}x ${recipe.req.replace(" Elixir", "")}</span>
+               </div>
+               <span style="color:#555;">➔</span>
+               <span style="color:#fff; font-weight:bold;">1x ${recipe.result.replace(" Elixir", "")}</span>
+           </div>
+
+           <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
                <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${recipe.amount}x Ingredients</span>
-               <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 10px;" ${canAfford ? "" : "disabled"} onclick="window.transmutePotion(${index})">Transmute</button>
+               <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.transmutePotion(${index})">Transmute</button>
            </div>
        </div>
      `;
     }).join("") +
-    `</div>`;
+    `</div></div>`;
 
   el.innerHTML = stockHtml + transHtml;
 };
 
-window.renderGoldUpgrades = function () {
-  let el = document.getElementById("gold-upgrades-list");
+window.renderAstralShop = function () {
+  let el = document.getElementById("astral-shop-list");
   if (!el) return;
-  let p = window.playerStats;
 
-  let upgrades = [
-    {
-      id: "vending",
-      name: "Gacha Calibration",
-      level: p.vendingQLevel || 0,
-      cost: Math.floor(15000 * Math.pow(1.18, p.vendingQLevel || 0)),
-      desc: "Increases Vending Machine loot quality by +1% per level.",
-      color: "#f1c40f",
-      icon: `
-        <svg viewBox="0 0 32 32" width="36" height="36" style="filter: drop-shadow(0 0 6px rgba(241,196,15,0.35));">
-            <rect x="4" y="4" width="24" height="24" rx="3" fill="#2c3e50" stroke="#f1c40f" stroke-width="1.5" />
-            <rect x="8" y="8" width="16" height="8" fill="#111" stroke="#444" stroke-width="1" />
-            <circle cx="11" cy="12" r="2.2" fill="#e74c3c" />
-            <circle cx="16" cy="12" r="2.2" fill="#2ecc71" />
-            <circle cx="21" cy="12" r="2.2" fill="#3498db" />
-            <path d="M28 10 L30 12 L30 18 L28 20" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" />
-            <circle cx="30" cy="12" r="2" fill="#e74c3c" />
-        </svg>
-      `,
-    },
-    {
-      id: "shop",
-      name: "Merchant Investment",
-      level: p.shopQLevel || 0,
-      cost: Math.floor(30000 * Math.pow(1.22, p.shopQLevel || 0)),
-      desc: "Increases Gold Shop stock quality by +1% per level.",
-      color: "#3498db",
-      icon: `
-        <svg viewBox="0 0 32 32" width="36" height="36" style="filter: drop-shadow(0 0 6px rgba(52,152,219,0.35));">
-            <path d="M6 12 L26 12 L28 26 C28 28, 26 29, 21 29 L11 29 C6 29, 4 28, 4 26 Z" fill="#7f8c8d" stroke="#3498db" stroke-width="1.5" />
-            <path d="M4 12 L16 4 L28 12 Z" fill="#34495e" stroke="#111" stroke-width="1.5" />
-            <circle cx="16" cy="20" r="4.5" fill="#f1c40f" stroke="#000" stroke-width="1" />
-            <path d="M16 17 L16 23 M14 20 L18 20" stroke="#fff" stroke-width="1" />
-        </svg>
-      `,
-    },
-    {
-      id: "global",
-      name: "Aura of Fortune",
-      level: p.globalQLevel || 0,
-      cost: Math.floor(100000 * Math.pow(1.28, p.globalQLevel || 0)),
-      desc: "Increases all global and dungeon drop quality by +1.5% per level.",
-      color: "#2ecc71",
-      icon: `
-        <svg viewBox="0 0 32 32" width="36" height="36" style="filter: drop-shadow(0 0 6px rgba(46,204,113,0.35));">
-            <path d="M16 16 Q11 11, 11 16 Q11 21, 16 16 Q21 11, 21 16 Q21 21, 16 16" fill="#2ecc71" stroke="#111" stroke-width="1" />
-            <path d="M16 16 Q11 21, 16 21 Q21 21, 16 16 Q11 11, 16 11 Q21 11, 16 16" fill="#2ecc71" stroke="#111" stroke-width="1" />
-            <path d="M16 16 Q16 26, 13 28" fill="none" stroke="#27ae60" stroke-width="2" stroke-linecap="round" />
-            <circle cx="16" cy="16" r="1.5" fill="#fff" />
-        </svg>
-      `,
-    },
-  ];
+  let ownedShards = window.playerStats.astralShards || 0;
+  let html = "";
 
-  el.innerHTML = upgrades
-    .map((up) => {
-      let costColor = p.coins >= up.cost ? "#2ecc71" : "#e74c3c";
-      let bgStyle = window.hexToRgba(up.color, 0.04);
-      let bonusPct = up.level * (up.id === "global" ? 1.5 : 1);
-      let btnStyle =
-        p.coins < up.cost
-          ? "background: #333; color: #666; cursor: not-allowed; border-color: #444;"
-          : `background: ${up.color}; color: #111; font-weight: bold; box-shadow: 0 0 8px ${up.color}33;`;
+  window.ASTRAL_SHOP_STOCK.forEach((item, index) => {
+    let canAfford = ownedShards >= item.cost;
+    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+    let iconHtml = window
+      .getEtcIconHtml(item.name)
+      .replace("margin-right: 12px;", "margin-right: 6px;");
 
-      return `
-        <div class="shop-row" style="border-color: ${up.color}; background: ${bgStyle}; flex-direction: column; align-items: stretch; text-align: left; gap: 6px; padding: 10px; cursor: help; position: relative;" onmouseenter="window.showGoldUpgradeTooltip(event, '${up.id}')" onmouseleave="window.hideTooltip()" ontouchstart="window.showGoldUpgradeTooltip(event, '${up.id}')">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    ${up.icon}
-                    <div>
-                        <strong style="color:${up.color}; font-size:12.5px;">${up.name}</strong>
-                        <span style="font-size:9.5px; color:#aaa; display:block; font-family:monospace;">Level ${up.level} (Current: +${bonusPct.toFixed(1)}%)</span>
-                    </div>
-                </div>
-                <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(up.cost)} Gold</span>
-            </div>
-            <div style="font-size:10px; color:#aaa; margin-top:2px; line-height:1.35; white-space:normal;">${up.desc}</div>
-            <button class="btn-action" style="${btnStyle} font-size:10px; padding:5px 0; margin-top:4px;" onclick="window.buyGoldUpgrade('${up.id}')">Upgrade</button>
-        </div>
-      `;
-    })
-    .join("");
+    let btnStyle = canAfford
+      ? `background: ${item.color}; color: ${item.color === "#f1c40f" ? "#111" : "#fff"}; font-weight: bold;`
+      : "";
+
+    html += `
+      <div class="runic-altar-card" style="flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0;" onmouseenter="window.showAstralShopItemTooltip(event, ${index})" onmouseleave="window.hideTooltip()" ontouchstart="window.showAstralShopItemTooltip(event, ${index})">
+          <!-- Animated rotating stars background -->
+          <div class="starry-bg"></div>
+
+          <!-- Floating glowing rune price tag -->
+          <span class="rune-price-badge" style="color:${costColor};">${item.cost} Shards</span>
+
+          <div style="position:relative; z-index:2;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
+                      ${iconHtml}
+                      <strong style="font-size:11.5px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</strong>
+                  </div>
+              </div>
+              <p style="font-size:10px; color:#94a3b8; margin-bottom:8px; line-height:1.35; white-space:normal;">${item.desc}</p>
+          </div>
+
+          <div style="position:relative; z-index:2; border-top: 1px dashed rgba(255,255,255,0.08); padding-top:8px; margin-top:6px;">
+              <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.buyAstralShopItem(${index})">Infuse Shards</button>
+          </div>
+      </div>
+    `;
+  });
+
+  el.innerHTML = html;
 };
 
 window.getPrestigeUpgradeCost = function (type, currentLevel) {
@@ -3895,7 +3443,8 @@ window.challengeHooktail = function () {
   if (
     window.playerStats.isDungeonMode ||
     window.playerStats.isCrucibleMode ||
-    window.playerStats.isPrestigeBossMode
+    window.playerStats.isPrestigeBossMode ||
+    window.playerStats.isUberBoss
   ) {
     window.pushHeaderToast(
       "Cannot challenge while in another activity!",
@@ -4654,6 +4203,44 @@ window.renderInventory = function () {
     }
   }
 
+  // 2.5. Sigils Sack
+  let sigilBox = document.getElementById("bag-sigil");
+  if (sigilBox) {
+    if (!window.inventory.SIGIL) window.inventory.SIGIL = [];
+    if (window.inventory.SIGIL.length === 0) {
+      sigilBox.innerHTML =
+        "<div style='color:#666;text-align:center;padding-top:40px;'>No Cavern Sigils in sack. Explore Infinite Caverns to find them!</div>";
+    } else {
+      sigilBox.innerHTML = window.inventory.SIGIL.map((item) => {
+        let nameColor = window.getTierColor(item.statsRolled);
+        let starLabel = `${item.statsRolled}★`;
+        let lockTag = item.locked ? " 🔒" : "";
+        let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
+        let lockIcon = item.locked ? "🔒" : "🔓";
+
+        let buffList = item.buffs.map((b) => `☀️ ${b.name}`).join(", ");
+        let debuffList = item.debuffs.map((d) => `🌑 ${d.name}`).join(", ");
+
+        let details = `<span style="font-size:10px;color:#9b59b6;font-weight:bold;">${buffList} | ${debuffList}</span>`;
+        let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center;">${window.getEquipIconHtml(item, 28)}</div>`;
+
+        return `<div class="bag-item" style="border-left: 4.5px solid ${nameColor} !important;">
+                    <div style="flex:1; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
+                        ${iconBox}
+                        <div style="flex:1;">
+                            <strong style="color:${nameColor};">${item.name}${lockTag}</strong><br>${details}
+                        </div>
+                    </div>
+                    <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
+                        <button class="btn-action" style="background:#9b59b6;" onclick="window.executeSlotCavernSigil(${item.id})">Slot</button>
+                        <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
+                        <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})">Salvage</button>
+                    </div>
+                </div>`;
+      }).join("");
+    }
+  }
+
   // 3. Materials Sacks
   const getEtcIconHtml = window.getEtcIconHtml;
   const getUseIconHtml = window.getUseIconHtml;
@@ -4768,64 +4355,117 @@ window.renderInventory = function () {
   }
 };
 
-window.hideTooltip = function () {
-  ["game-tooltip", "etc-tooltip", "stat-tooltip", "log-item-tooltip"].forEach(
-    (id) => {
-      let el = window.getCachedEl(id);
-      if (el) el.style.display = "none";
-    },
-  );
-  window.activeStatTooltip = null;
-};
+// Append hideTooltip inside window.UIManager
+Object.assign(window.UIManager, {
+  hideTooltip() {
+    ["game-tooltip", "etc-tooltip", "stat-tooltip", "log-item-tooltip"].forEach(
+      (id) => {
+        let el = window.getCachedEl(id);
+        if (el) el.style.display = "none";
+      },
+    );
+    window.activeStatTooltip = null;
+  },
+});
+
+// Legacy Compatibility Aliases to protect references
+window.hideTooltip = () => window.UIManager.hideTooltip();
 
 // Calculates optimal tooltip placement to prevent clipping off the visible browser viewport
-window.positionTooltip = function (e, tt) {
-  let container = document
-    .getElementById("game-container")
-    .getBoundingClientRect();
-  let clientX =
-    e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-  let clientY =
-    e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+// Append positionTooltip inside window.UIManager
+Object.assign(window.UIManager, {
+  positionTooltip(e, tt) {
+    let container = document
+      .getElementById("game-container")
+      .getBoundingClientRect();
+    let clientX =
+      e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    let clientY =
+      e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
 
-  let ttWidth = tt.offsetWidth;
-  let ttHeight = tt.offsetHeight;
-  let padding = 10;
+    let ttWidth = tt.offsetWidth;
+    let ttHeight = tt.offsetHeight;
+    let padding = 10;
 
-  let vx, vy;
+    let vx, vy;
 
-  const isLandscapeMobile =
-    window.innerHeight <= 550 && window.innerWidth > window.innerHeight;
-  const isMobile = window.innerWidth <= 600 || isLandscapeMobile;
+    const isLandscapeMobile =
+      window.innerHeight <= 550 && window.innerWidth > window.innerHeight;
+    const isMobile = window.innerWidth <= 600 || isLandscapeMobile;
 
-  if (isMobile) {
-    // Check if displaying a comparison layout to shrink sizing safely on mobile
-    let isComparison = tt.querySelector(".compare-border") !== null;
-    if (isComparison) {
-      tt.style.fontSize = "9.5px";
-      tt.querySelectorAll(".tooltip-card").forEach((card) => {
-        card.style.padding = "6px 8px";
-      });
-      tt.querySelectorAll(".tt-title").forEach((title) => {
-        title.style.fontSize = "10.5px";
-        title.style.marginBottom = "2px";
-      });
-      tt.querySelectorAll(".tt-subtitle").forEach((sub) => {
-        sub.style.fontSize = "8.5px";
-        sub.style.marginBottom = "2px";
-      });
-      tt.querySelectorAll(".tt-stat-line").forEach((line) => {
-        line.style.fontSize = "9px";
-        line.style.marginBottom = "1px";
-      });
-      // Hides descriptive lore on compact comparisons tooltips to save vertical viewport space
-      tt.querySelectorAll('div[style*="lore"]').forEach((lore) => {
-        lore.style.display = "none";
-      });
-      ttWidth = tt.offsetWidth;
-      ttHeight = tt.offsetHeight;
+    if (isMobile) {
+      // Check if displaying a comparison layout to shrink sizing safely on mobile
+      let isComparison = tt.querySelector(".compare-border") !== null;
+      if (isComparison) {
+        tt.style.fontSize = "9.5px";
+        tt.querySelectorAll(".tooltip-card").forEach((card) => {
+          card.style.padding = "6px 8px";
+        });
+        tt.querySelectorAll(".tt-title").forEach((title) => {
+          title.style.fontSize = "10.5px";
+          title.style.marginBottom = "2px";
+        });
+        tt.querySelectorAll(".tt-subtitle").forEach((sub) => {
+          sub.style.fontSize = "8.5px";
+          sub.style.marginBottom = "2px";
+        });
+        tt.querySelectorAll(".tt-stat-line").forEach((line) => {
+          line.style.fontSize = "9px";
+          line.style.marginBottom = "1px";
+        });
+        // Hides descriptive lore on compact comparisons tooltips to save vertical viewport space
+        tt.querySelectorAll('div[style*="lore"]').forEach((lore) => {
+          lore.style.display = "none";
+        });
+        ttWidth = tt.offsetWidth;
+        ttHeight = tt.offsetHeight;
+      } else {
+        tt.style.fontSize = "";
+        tt.querySelectorAll(".tooltip-card").forEach(
+          (card) => (card.style.padding = ""),
+        );
+        tt.querySelectorAll(".tt-title").forEach((title) => {
+          title.style.fontSize = "";
+          title.style.marginBottom = "";
+        });
+        tt.querySelectorAll(".tt-subtitle").forEach((sub) => {
+          sub.style.fontSize = "";
+          sub.style.marginBottom = "";
+        });
+        tt.querySelectorAll(".tt-stat-line").forEach((line) => {
+          line.style.fontSize = "";
+          line.style.marginBottom = "";
+        });
+        tt.querySelectorAll('div[style*="lore"]').forEach((lore) => {
+          lore.style.display = "";
+        });
+      }
+
+      // Centering alignment preventing layout cutting-off
+      vx = (window.innerWidth - ttWidth) / 2;
+      vy = clientY + 18;
+
+      if (vy + ttHeight > window.innerHeight) {
+        vy = clientY - ttHeight - 18;
+      }
+      if (vy < padding) {
+        vy = padding;
+      }
+
+      let spaceAvailable = window.innerHeight - 2 * padding;
+      if (ttHeight > spaceAvailable) {
+        tt.style.maxHeight = spaceAvailable + "px";
+        tt.style.overflowY = "auto";
+        vy = padding;
+      } else {
+        tt.style.maxHeight = "";
+        tt.style.overflowY = "";
+      }
     } else {
+      // Restore standard desktop layout sizes
       tt.style.fontSize = "";
+      tt.style.maxHeight = "";
+      tt.style.overflowY = "";
       tt.querySelectorAll(".tooltip-card").forEach(
         (card) => (card.style.padding = ""),
       );
@@ -4844,74 +4484,34 @@ window.positionTooltip = function (e, tt) {
       tt.querySelectorAll('div[style*="lore"]').forEach((lore) => {
         lore.style.display = "";
       });
+
+      vx = clientX + 15;
+      vy = clientY + 15;
+
+      if (vx + ttWidth > window.innerWidth) {
+        vx = clientX - ttWidth - 15;
+      }
+      if (vy + ttHeight > window.innerHeight) {
+        vy = clientY - ttHeight - 15;
+      }
+
+      if (vx < 5) vx = 5;
+      if (vy < 5) vy = 5;
     }
 
-    // Centering alignment preventing layout cutting-off
-    vx = (window.innerWidth - ttWidth) / 2;
-    vy = clientY + 18;
+    let x = vx - container.left;
+    let y = vy - container.top;
 
-    if (vy + ttHeight > window.innerHeight) {
-      vy = clientY - ttHeight - 18;
-    }
-    if (vy < padding) {
-      vy = padding;
-    }
+    tt.style.left = x + "px";
+    tt.style.top = y + "px";
+  },
+});
 
-    let spaceAvailable = window.innerHeight - 2 * padding;
-    if (ttHeight > spaceAvailable) {
-      tt.style.maxHeight = spaceAvailable + "px";
-      tt.style.overflowY = "auto";
-      vy = padding;
-    } else {
-      tt.style.maxHeight = "";
-      tt.style.overflowY = "";
-    }
-  } else {
-    // Restore standard desktop layout sizes
-    tt.style.fontSize = "";
-    tt.style.maxHeight = "";
-    tt.style.overflowY = "";
-    tt.querySelectorAll(".tooltip-card").forEach(
-      (card) => (card.style.padding = ""),
-    );
-    tt.querySelectorAll(".tt-title").forEach((title) => {
-      title.style.fontSize = "";
-      title.style.marginBottom = "";
-    });
-    tt.querySelectorAll(".tt-subtitle").forEach((sub) => {
-      sub.style.fontSize = "";
-      sub.style.marginBottom = "";
-    });
-    tt.querySelectorAll(".tt-stat-line").forEach((line) => {
-      line.style.fontSize = "";
-      line.style.marginBottom = "";
-    });
-    tt.querySelectorAll('div[style*="lore"]').forEach((lore) => {
-      lore.style.display = "";
-    });
-
-    vx = clientX + 15;
-    vy = clientY + 15;
-
-    if (vx + ttWidth > window.innerWidth) {
-      vx = clientX - ttWidth - 15;
-    }
-    if (vy + ttHeight > window.innerHeight) {
-      vy = clientY - ttHeight - 15;
-    }
-
-    if (vx < 5) vx = 5;
-    if (vy < 5) vy = 5;
-  }
-
-  let x = vx - container.left;
-  let y = vy - container.top;
-
-  tt.style.left = x + "px";
-  tt.style.top = y + "px";
-};
+// Legacy Compatibility Aliases to protect references
+window.positionTooltip = (e, tt) => window.UIManager.positionTooltip(e, tt);
 
 window.showInventoryTooltip = function (e, itemId) {
+  if (window.isSimulatedMouseEvent && window.isSimulatedMouseEvent(e)) return;
   e.stopPropagation();
   let item =
     window.inventory.EQUIP.find((i) => i.id === itemId) ||
@@ -5648,6 +5248,8 @@ window.switchSubTab = function (subTabId) {
     subTabId === "EQUIP" ? "block" : "none";
   document.getElementById("bag-art").style.display =
     subTabId === "ART" ? "block" : "none";
+  document.getElementById("bag-sigil").style.display =
+    subTabId === "SIGIL" ? "block" : "none";
   document.getElementById("bag-etc").style.display =
     subTabId === "ETC" ? "block" : "none";
   document.getElementById("bag-use").style.display =
@@ -6800,10 +6402,10 @@ window.devSpawnUnique = function () {
       newItem.desc =
         "Glows for 7s every 30s. Tap during window to enter 5s Storing state, then detonates spatial collapse.";
     } else if (sub === "maelstrom") {
-      item.isUniqueMaelstrom = true;
-      item.noun = "Maelstrom Glaive";
-      item.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${lvl})`;
-      item.desc =
+      newItem.isUniqueMaelstrom = true;
+      newItem.noun = "Maelstrom Glaive";
+      newItem.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${lvl})`;
+      newItem.desc =
         "Critical strikes project piercing wind gales. Casting gales grants +10% Active & Idle Attack Speed for 6s (stacks up to 3x).";
     } else if (sub === "aegis") {
       newItem.subType = "shield";
@@ -6830,10 +6432,10 @@ window.devSpawnUnique = function () {
       newItem.desc =
         "Boosts XP gain by +200% and bypasses level locks while below 75% peak level.";
     } else if (sub === "warpcore") {
-      item.isUniqueWarpCore = true;
-      item.noun = "Warp-Core Greaves";
-      item.name = `⚡ Warp-Core Greaves (Lv. ${lvl})`;
-      item.desc =
+      newItem.isUniqueWarpCore = true;
+      newItem.noun = "Warp-Core Greaves";
+      newItem.name = `⚡ Warp-Core Greaves (Lv. ${lvl})`;
+      newItem.desc =
         "Time Dilation: Attacks speed up by +1% for every 1% of target missing health (up to +99%). Boss kills grant 4s of Maximum Haste.";
     } else if (sub === "tempest") {
       newItem.isUniqueTempest = true;
@@ -7905,6 +7507,19 @@ window.setAltarSlide = function (idx) {
 };
 
 window.executeAltarSummon = function (isReentry = false) {
+  if (
+    !isReentry &&
+    (window.playerStats.isDungeonMode ||
+      window.playerStats.isCrucibleMode ||
+      window.playerStats.isPrestigeBossMode ||
+      window.playerStats.isUberBoss)
+  ) {
+    window.pushHeaderToast(
+      "Cannot summon: already in another activity!",
+      "#e74c3c",
+    );
+    return;
+  }
   let cores = window.inventory.ETC["Ancient Core"] || 0;
   let boss = window.riftBossesMetadata[window.altarSlideIndex];
   let lvl = isReentry
@@ -8082,7 +7697,7 @@ window.renderGachaModal = function () {
         </svg>
         <div class="${cabinetClass} gacha-cabinet-enter" onanimationend="this.classList.remove('gacha-cabinet-enter')">
             <div style="display:flex; justify-content:space-between; align-items:center; width:100%; border-bottom:1px solid ${titleColor}; padding-bottom:6px; margin-bottom:10px;">
-                <h3 style="margin:0; color:${titleColor}; font-size:13px; letter-spacing:1px; display:flex; align-items:center; gap:6px;">🎰 ARCADE GACHAPON</h3>
+                <h3 style="margin:0; color:${titleColor}; font-size:13px; letter-spacing:1px; display:flex; align-items:center; gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="12" y1="12" x2="12" y2="22"/><circle cx="12" cy="7" r="2"/></svg> ARCADE GACHAPON</h3>
                 <button onclick="document.getElementById('gacha-modal-overlay').remove(); window.setPauseState(false); window.hideTooltip();" style="background:#222; border:1px solid #444; color:#aaa; font-weight:bold; cursor:pointer; font-size:10px; padding:3px 8px; border-radius:4px;">Close</button>
             </div>
 
@@ -8510,6 +8125,8 @@ window.claimMissionReward = function (missionId, isWeekly = false) {
   if (!m || !m.completed || m.claimed) return;
 
   m.claimed = true;
+  window.justClaimedMissionIds = window.justClaimedMissionIds || new Set();
+  window.justClaimedMissionIds.add(missionId);
 
   if (typeof window.addEtcDrop === "function") {
     if (m.treat === "Gold") {
@@ -8764,10 +8381,14 @@ window.renderMissionsWindow = function () {
   let currentTab = window.state.missionsTab || "BOARD";
   let tokenBalance = window.playerStats.missionTokens || 0;
 
+  // Custom Inline SVG Vector Badges for Premium tab Headers
+  let boardIconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>`;
+  let shopIconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`;
+
   let tabHeaderHtml = `
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:12px; padding:0 2px;">
-        <button onclick="window.switchMissionsTab('BOARD')" class="sub-tab-btn ${currentTab === "BOARD" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">📋 Mission Board</button>
-        <button onclick="window.switchMissionsTab('SHOP')" class="sub-tab-btn ${currentTab === "SHOP" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">🏪 Mission Shop</button>
+        <button onclick="window.switchMissionsTab('BOARD')" class="sub-tab-btn ${currentTab === "BOARD" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">${boardIconSvg}Mission Board</button>
+        <button onclick="window.switchMissionsTab('SHOP')" class="sub-tab-btn ${currentTab === "SHOP" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">${shopIconSvg}Mission Shop</button>
     </div>
   `;
 
@@ -8792,16 +8413,16 @@ window.renderMissionsWindow = function () {
       if (m.claimed) {
         btnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
       } else if (m.completed) {
-        btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71; color:white;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
+        btnHtml = `<button class="btn-action btn-pulse" style="padding:4px 10px; font-size:10px; background:${color}; color:white; border: 1px solid #fff; box-shadow:0 0 8px ${color}55;" onclick="window.claimMissionReward('${m.id}', ${isWeekly})">Claim</button>`;
       } else {
-        btnHtml = `<span style="color:#2ecc71; font-size:10px; font-family:monospace; font-weight:bold;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
+        btnHtml = `<span style="color:#fff; font-size:10.5px; font-family:monospace; font-weight:bold; background:rgba(0,0,0,0.4); border: 1px solid #222; padding:3px 8px; border-radius:4px;">${m.current.toLocaleString()}/${m.target.toLocaleString()}</span>`;
 
         // Dynamic single-mission Re-roll system
         if (!isWeekly) {
           let rerollsDone = window.playerStats.dailyRerollsDone || 0;
           if (rerollsDone < 2) {
             let costLabel = rerollsDone === 0 ? "🔄 Free" : "🔄 50 Souls";
-            rerollBtnHtml = `<button onclick="window.rerollDailyMission('${m.id}')" class="btn-action" style="padding:2px 5px; font-size:8.5px; margin-left:6px; background:#4b5563; font-family:monospace; line-height:1;" title="Re-roll Daily Mission (${rerollsDone === 0 ? "Free" : "Costs 50 Monster Souls"})">${costLabel}</button>`;
+            rerollBtnHtml = `<button onclick="window.rerollDailyMission('${m.id}')" class="btn-action" style="padding:3px 8px; font-size:9px; margin-left:6px; background:#2d3139; border: 1px solid #444; font-family:monospace; line-height:1;" title="Re-roll Daily Mission (${rerollsDone === 0 ? "Free" : "Costs 50 Monster Souls"})">${costLabel}</button>`;
           }
         }
       }
@@ -8811,35 +8432,64 @@ window.renderMissionsWindow = function () {
         rewardText += ` & 3x ${m.potionAward.replace(" Elixir", "")}`;
       }
 
+      window.justClaimedMissionIds = window.justClaimedMissionIds || new Set();
+      let isJustClaimed = window.justClaimedMissionIds.has(m.id);
+      let stampClass = "stamp-base";
+      if (isJustClaimed) {
+        stampClass += " stamp-slam";
+        window.justClaimedMissionIds.delete(m.id);
+      }
       let claimedOverlay = m.claimed
-        ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:12px; font-weight:900; border: 1.5px solid #e74c3c; padding: 2px 10px; border-radius:3px; transform: rotate(-4deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1px; box-shadow: 0 0 8px rgba(231,76,60,0.25);">CLAIMED</span></div>`
+        ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.72); backdrop-filter: blur(1.5px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span class="${stampClass}" style="--final-rot:-4deg; color:#e74c3c; font-size:12px; font-weight:900; border: 1.5px solid #e74c3c; padding: 3px 12px; border-radius:3px; font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1px; box-shadow: 0 0 10px rgba(231,76,60,0.35);">CLAIMED</span></div>`
         : "";
 
+      // High-Fidelity rewards icon resolver (Bypasses grey placeholder bug)
+      let rewardIconHtml = "";
+      if (
+        window.getUseIconHtml &&
+        (m.treat.includes("Sack") ||
+          m.treat.includes("Crate") ||
+          m.treat.includes("Elixir") ||
+          m.treat.includes("Scroll"))
+      ) {
+        rewardIconHtml = window.getUseIconHtml(m.treat, 22);
+      } else if (window.getEtcIconHtml) {
+        rewardIconHtml = window.getEtcIconHtml(m.treat, 22);
+      }
+      if (rewardIconHtml) {
+        rewardIconHtml = rewardIconHtml
+          .replace("margin-right: 12px;", "margin-right: 4px;")
+          .replace("margin-right: 8px;", "margin-right: 4px;");
+      }
+
       return `
-                      <div style="position:relative; background:#111; border:1.5px solid ${m.completed ? "#2ecc71" : "#2d3748"}; border-radius:6px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px; ${m.completed ? "border-color: " + color + ";" : ""}">
-                ${claimedOverlay}
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                    <div style="display:flex; align-items:center; gap:8px; text-align:left; min-width:0; flex:1;">
-                        ${window.getEtcIconHtml ? window.getEtcIconHtml(m.treat).replace("width: 32px; height: 32px;", "width: 22px; height: 22px; padding: 2px; margin-right: 4px;").replace("margin-right: 12px;", "margin-right: 4px;") : ""}
-                        <strong style="font-size:11.5px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:help;" onmouseenter="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" ontouchstart="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" onmouseleave="window.hideTooltip()">${m.desc}</strong>
-                    </div>
-                    <div style="display:flex; align-items:center;">${btnHtml}${rerollBtnHtml}</div>
+        <div style="position:relative; background:linear-gradient(180deg, #131720 0%, #0c0f16 100%); border:1px solid #2d3748; border-left: 4px solid ${color} !important; border-radius:6px; padding:10px; margin-bottom:6px; display:flex; flex-direction:column; gap:6px;">
+            ${claimedOverlay}
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div style="display:flex; align-items:center; gap:6px; text-align:left; min-width:0; flex:1;">
+                    ${window.getMissionIconSvg ? window.getMissionIconSvg(m.type, color) : ""}
+                    <strong style="font-size:11.5px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:help;" onmouseenter="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" ontouchstart="window.showMissionTooltip(event, '${m.id}', ${isWeekly})" onmouseleave="window.hideTooltip()">${m.desc}</strong>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#aaa; margin-top:2px;">
-                    <span>Reward: <span style="color:#f1c40f;">${rewardText}</span></span>
-                </div>
-                <div style="width:100%; height:4.5px; background:#1c1e24; border-radius:2px; overflow:hidden; border:1px solid #2d3748; margin-top:2px;">
-                    <div style="width:${pct}%; height:100%; background:${isWeekly ? "#9b59b6" : "#2ecc71"};"></div>
-                </div>
+                <div style="display:flex; align-items:center; flex-shrink:0;">${btnHtml}${rerollBtnHtml}</div>
             </div>
-          `;
+
+            <div style="display:flex; align-items:center; gap:6px; font-size:10px; color:#aaa; margin-top:1px;">
+                ${rewardIconHtml}
+                <span>Reward: <span style="color:#f1c40f; font-weight:bold;">${rewardText}</span></span>
+            </div>
+
+            <div class="sink-prog-track" style="margin-top:2px; margin-bottom:0;">
+                <div style="width:${pct}%; height:100%; background:${color}; transition: width 0.4s ease;"></div>
+            </div>
+        </div>
+      `;
     };
 
     let dailyMasterBtnHtml = "";
     if (dailyMasterClaimed) {
-      dailyMasterBtnHtml = `<button class="btn-action" style="background:#333; color:#777; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Grand Treat Claimed ✓</button>`;
+      dailyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Grand Treat Claimed ✓</button>`;
     } else if (dailyDoneCount >= 5) {
-      dailyMasterBtnHtml = `<button class="btn-action btn-pulse" style="width:100%; font-size:10.5px;" onclick="window.claimMasterMissionReward(false)">🎁 Claim Daily Grand Treat!</button>`;
+      dailyMasterBtnHtml = `<button class="btn-action btn-pulse-teal" style="width:100%; font-size:11px; padding:10px;" onclick="window.claimMasterMissionReward(false)">🎁 Claim Daily Grand Treat!</button>`;
     } else {
       dailyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Complete at least 5 (${dailyDoneCount}/5)</button>`;
     }
@@ -8848,15 +8498,15 @@ window.renderMissionsWindow = function () {
     let scalingPPText = 2 + Math.floor(window.playerStats.prestigeCount / 5);
     if (window.playerStats.prestigeCount === 0) {
       weeklyMasterBtnHtml = `
-                                                <div style="background:rgba(231,76,60,0.08); border:1px dashed #e74c3c; border-radius:6px; padding:10px; text-align:center; color:#e74c3c; font-size:10.5px; font-weight:bold; width:100%;">
-                                                    🔒 Weekly Board unlocks after your first Ascension at the Altar of Ascension.
-                                                </div>
-                                            `;
+        <div style="background:rgba(231,76,60,0.08); border:1px dashed #e74c3c; border-radius:6px; padding:10px; text-align:center; color:#e74c3c; font-size:10.5px; font-weight:bold; width:100%;">
+            🔒 Weekly Board unlocks after your first Ascension at the Altar of Ascension.
+        </div>
+      `;
     } else {
       if (weeklyMasterClaimed) {
-        weeklyMasterBtnHtml = `<button class="btn-action" style="background:#333; color:#777; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Grand Treat Claimed ✓</button>`;
+        weeklyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Grand Treat Claimed ✓</button>`;
       } else if (weeklyDoneCount === 3) {
-        weeklyMasterBtnHtml = `<button class="btn-action btn-pulse" style="width:100%; font-size:10.5px; background:#9b59b6; border-color:#8e44ad;" onclick="window.claimMasterMissionReward(true)">🎁 Claim Weekly Grand Treat!</button>`;
+        weeklyMasterBtnHtml = `<button class="btn-action btn-pulse" style="width:100%; font-size:11px; padding:10px; background:#9b59b6; border-color:#fff; box-shadow:0 0 10px rgba(155,89,182,0.4);" onclick="window.claimMasterMissionReward(true)">🎁 Claim Weekly Grand Treat!</button>`;
       } else {
         weeklyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Complete all 3 (${weeklyDoneCount}/3)</button>`;
       }
@@ -8865,261 +8515,292 @@ window.renderMissionsWindow = function () {
     let weekliesCardHtml = "";
     if (window.playerStats.prestigeCount === 0) {
       weekliesCardHtml = `
-                                                <div style="border:1px solid #444; border-radius:6px; padding:12px; background:rgba(0,0,0,0.4); text-align:center; color:#aaa; font-size:11px; font-style:italic;">
-                                                    Weekly board locked until Ascension. Slay Hooktail to claim your destiny.
-                                                </div>
-                                            `;
+        <div style="border:1px solid #444; border-radius:6px; padding:12px; background:rgba(0,0,0,0.4); text-align:center; color:#aaa; font-size:11px; font-style:italic;">
+            Weekly board locked until Ascension. Slay Hooktail to claim your destiny.
+        </div>
+      `;
     } else {
       weekliesCardHtml = `
-                                                      <div style="border:1px solid #9b59b6; border-radius:6px; padding:10px; background:rgba(155,89,182,0.03);">
-                                                          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #9b59b6; padding-bottom:4px; margin-bottom:8px;">
-                                                              <strong style="color:#9b59b6; font-size:12px; text-transform:uppercase;">📆 Weekly Clan Quests</strong>
-                                                              <span style="font-size:9.5px; color:#aaa; font-family:monospace;" id="weekly-timer-val">Refreshing...</span>
-                                                          </div>
-                                                          <div>
-                                                              ${weeklies.map((m) => getMissionRowHtml(m, true)).join("")}
-                                                          </div>
-                                                          <div style="margin-top:10px;">
-                                                              ${weeklyMasterBtnHtml}
-                                                              ${weeklyMasterClaimed ? "" : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:4px;">Grand treat: +${scalingPPText} PP (scales with prestiges), 3x Gacha Keys, 1x Catalyst Core, and a high-tier guaranteed Gear Drop!</div>`}
-                                                          </div>
-                                                      </div>
-                                                  `;
+        <div style="border:1.5px solid #9b59b680; border-radius:8px; padding:12px; background:rgba(155,89,182,0.03); box-shadow:0 4px 15px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #9b59b644; padding-bottom:6px; margin-bottom:10px;">
+                <strong style="color:#df9ffb; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">📆 Weekly Clan Quests</strong>
+                <span style="font-size:9.5px; color:#aaa; font-family:monospace;" id="weekly-timer-val">Refreshing...</span>
+            </div>
+            <div>
+                ${weeklies.map((m) => getMissionRowHtml(m, true)).join("")}
+            </div>
+            <div style="margin-top:12px;">
+                ${weeklyMasterBtnHtml}
+                ${weeklyMasterClaimed ? "" : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:5px; line-height:1.35; white-space:normal;">Grand treat: +${scalingPPText} PP (scales with prestiges), 3x Gacha Keys, 1x Catalyst Core, and a high-tier guaranteed Gear Drop!</div>`}
+            </div>
+        </div>
+      `;
     }
 
     contentHtml = `
-                                            <!-- DAILY MISSIONS PANEL -->
-                                            <div style="border:1px solid #2ecc71; border-radius:6px; padding:10px; background:rgba(46,204,113,0.03); margin-bottom:12px;">
-                                                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2ecc71; padding-bottom:4px; margin-bottom:8px;">
-                                                    <strong style="color:#2ecc71; font-size:12px; text-transform:uppercase;">📅 Daily Objectives</strong>
-                                                    <span style="font-size:9.5px; color:#aaa; font-family:monospace;" id="daily-timer-val">Refreshing...</span>
-                                                </div>
-                                                <div>
-                                                    ${dailies.map((m) => getMissionRowHtml(m, false)).join("")}
-                                                </div>
-                                                <div style="margin-top:10px;">
-                                                                                                    ${dailyMasterBtnHtml}
-                                                                                                    ${dailyMasterClaimed ? "" : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:4px;">Grand treat: 1x Gacha Key, 1x Catalyst Core, 2x Eridium Shards (Only requires 5/6 completed!)</div>`}
-                                                                                                </div>
-                                                                                            </div>
+      <!-- DAILY MISSIONS PANEL -->
+      <div style="border:1.5px solid #2ecc7180; border-radius:8px; padding:12px; background:rgba(46,204,113,0.03); margin-bottom:14px; box-shadow:0 4px 15px rgba(0,0,0,0.5);">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #2ecc7144; padding-bottom:6px; margin-bottom:10px;">
+              <strong style="color:#2ecc71; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">📅 Daily Objectives</strong>
+              <span style="font-size:9.5px; color:#aaa; font-family:monospace;" id="daily-timer-val">Refreshing...</span>
+          </div>
+          <div>
+              ${dailies.map((m) => getMissionRowHtml(m, false)).join("")}
+          </div>
+          <div style="margin-top:12px;">
+              ${dailyMasterBtnHtml}
+              ${dailyMasterClaimed ? "" : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:5px; line-height:1.35; white-space:normal;">Grand treat: 1x Gacha Key, 1x Catalyst Core, 2x Eridium Shards (Only requires 5/6 completed!)</div>`}
+          </div>
+      </div>
 
-                                            <!-- WEEKLY MISSIONS PANEL -->
-                                            ${weekliesCardHtml}
-                                        `;
+      <!-- WEEKLY MISSIONS PANEL -->
+      ${weekliesCardHtml}
+    `;
   } else {
     // MISSION SHOP LAYOUT
     let p = window.playerStats;
-    p.missionUpgrades = p.missionUpgrades || { gold: 0, atk: 0, hp: 0 };
+    p.missionUpgrades = p.missionUpgrades || { gold: 0, atk: 0, hp: 0, bag: 0 };
 
     let lvlGold = p.missionUpgrades.gold || 0;
-    let costGold = 5; // Flat cost
+    let costGold = 5;
     let canAffordGold = tokenBalance >= costGold;
 
     let lvlAtk = p.missionUpgrades.atk || 0;
-    let costAtk = 5; // Flat cost (down from 8)
+    let costAtk = 5;
     let canAffordAtk = tokenBalance >= costAtk;
 
     let lvlHp = p.missionUpgrades.hp || 0;
-    let costHp = 5; // Flat cost (down from 8)
+    let costHp = 5;
     let canAffordHp = tokenBalance >= costHp;
 
     let lvlBag = p.missionUpgrades.bag || 0;
-    let costBag = 4 + lvlBag * 3; // Scaling cost: 4, 7, 10, 13...
+    let costBag = 4 + lvlBag * 3;
     let canAffordBag = tokenBalance >= costBag;
 
+    // Mini vector SVGs for Permanent Upgrade Icons
+    let satchelSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M16 16v1a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-1"/><rect x="4" y="6" width="16" height="10" rx="2"/><path d="M9 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
+    let midasSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #f1c40f);"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h6M9 13h6"/></svg>`;
+    let gladiatorSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #e74c3c);"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/></svg>`;
+    let constitutionSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+
+    let bagBtnHtml = canAffordBag
+      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('bag')">Upgrade (${costBag} MP)</button>`
+      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139;" disabled>Lacking MP</button>`;
+
+    let goldBtnHtml = canAffordGold
+      ? `<button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('gold')">Upgrade (5 MP)</button>`
+      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139;" disabled>Lacking MP</button>`;
+
+    let atkBtnHtml = canAffordAtk
+      ? `<button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('atk')">Upgrade (5 MP)</button>`
+      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139;" disabled>Lacking MP</button>`;
+
+    let hpBtnHtml = canAffordHp
+      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('hp')">Upgrade (5 MP)</button>`
+      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139;" disabled>Lacking MP</button>`;
+
+    let reagents = [
+      {
+        key: "Eridium Shard",
+        cost: 4,
+        color: "#8e44ad",
+        desc: "Awaken equipment star ratings (rarities)",
+      },
+      {
+        key: "Ancient Core",
+        cost: 2,
+        color: "#e74c3c",
+        desc: "Activate the Altar of Rifts",
+      },
+      {
+        key: "Overlord's Sigil",
+        queryKey: "Overlords Sigil",
+        cost: 6,
+        color: "#1abc9c",
+        desc: "Material required for unique artifact tempering",
+      },
+      {
+        key: "Gacha Key",
+        cost: 4,
+        color: "#f1c40f",
+        desc: "Roll standard vending crate",
+      },
+      {
+        key: "Catalyst Core",
+        cost: 3,
+        color: "#2ecc71",
+        desc: "Lock & re-roll item properties",
+      },
+      {
+        key: "Astral Essence",
+        cost: 4,
+        color: "#9b59b6",
+        desc: "Infuse powerful gear enchantments",
+      },
+      {
+        key: "Double XP Elixir",
+        cost: 3,
+        color: "#a855f7",
+        desc: "Doubles monster EXP gains (+100% EXP)",
+      },
+      {
+        key: "Double Drop Elixir",
+        cost: 4,
+        color: "#22c55e",
+        desc: "Doubles global drop rate modifier (+100%)",
+      },
+      {
+        key: "Drop Quality Elixir",
+        cost: 5,
+        color: "#3b82f6",
+        desc: "Boosts drop quality checks (+50% Qly)",
+      },
+    ];
+
+    let reagentsHtml = reagents
+      .map((r) => {
+        let isAfford = tokenBalance >= r.cost;
+        let costColor = isAfford ? "#2ecc71" : "#e74c3c";
+        let btnClass = isAfford ? "" : "disabled";
+
+        let iconHtml = r.key.includes("Elixir")
+          ? window.getUseIconHtml(r.key, 24)
+          : window.getEtcIconHtml(r.key, 24);
+        iconHtml = iconHtml
+          .replace("margin-right: 12px;", "margin-right: 4px;")
+          .replace("margin-right: 8px;", "margin-right: 4px;");
+
+        let finalKey = r.queryKey || r.key;
+        let ownedCount =
+          window.inventory.ETC[r.key] || window.inventory.USE[r.key] || 0;
+
+        return `
+        <div class="merchant-shelf-row" style="display:flex; flex-direction:column; justify-content:space-between; border-radius:6px; padding:10px; gap:8px;"
+             onmouseenter="window.showMissionShopItemTooltip(event, '${finalKey}')"
+             ontouchstart="window.showMissionShopItemTooltip(event, '${finalKey}')"
+             onmouseleave="window.hideTooltip()">
+            <div style="display:flex; align-items:center; gap:8px; text-align:left; position:relative; z-index:2;">
+                <div style="flex-shrink:0;">${iconHtml}</div>
+                <div style="min-width:0; flex:1;">
+                    <strong style="color:${r.color}; font-size:11.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px ${r.color}35;">${r.key}</strong>
+                    <span style="font-size:9px; color:#aaa; font-family:monospace;">Owned: ${ownedCount}</span>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:4; border-top:1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:2px;">
+                <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${r.cost} MP</span>
+                <button class="btn-action" style="font-size:9.5px; padding:4px 8px; border-radius:4px; ${isAfford ? "background:" + r.color + "; color:" + (r.color === "#f1c40f" ? "#111" : "#fff") + "; border: 1px solid #fff;" : "background:#222; color:#555; border:1px solid #333; cursor:not-allowed;"}" ${isAfford ? "" : "disabled"} onclick="window.buyMissionItem('${finalKey}', ${r.cost})">
+                    Buy
+                </button>
+            </div>
+        </div>
+      `;
+      })
+      .join("");
+
     contentHtml = `
-                                                                                <div style="display:flex; flex-direction:column; gap:8px;">
-                                                                                    <div style="background:#111; border:1px solid #2ecc71; border-radius:6px; padding:10px;">
-                                                                                        <strong style="color:#2ecc71; font-size:12px; display:block; margin-bottom:4px;">🎖️ PERMANENT GUILD UPGRADES</strong>
-                                                                                        <span style="font-size:9.5px; color:#aaa; display:block; margin-bottom:8px; line-height:1.4;">These bonuses persist permanently and are NOT reset upon Prestige Ascension.</span>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+          <!-- UPGRADE GRID -->
+          <div style="background:#111; border:1.5px solid #2ecc7180; border-radius:8px; padding:12px; box-shadow:0 4px 15px rgba(0,0,0,0.5);">
+              <strong style="color:#2ecc71; font-size:12px; display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">🎖️ PERMANENT GUILD UPGRADES</strong>
+              <span style="font-size:9.5px; color:#aaa; display:block; margin-bottom:10px; line-height:1.4;">These bonuses persist permanently and are NOT reset upon Prestige Ascension.</span>
 
-                                                                                        <!-- Bag Space Upgrade -->
-                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; cursor:help;"
-                                                                                                                                                                                     onmouseenter="window.showMissionShopUpgradeTooltip(event, 'bag')"
-                                                                                                                                                                                     ontouchstart="window.showMissionShopUpgradeTooltip(event, 'bag')"
-                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
-                                                                                                                                                                                    <div>
-                                                                                                                                                                                        <strong style="color:#3498db; font-size:11px;">Dimensional Satchel</strong>
-                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">+10 permanent equipment and artifact slots</div>
-                                                                                                                                                                                        <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlBag} (Current: +${lvlBag * 10} slots)</span>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                    <button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:4px 8px;" ${canAffordBag ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('bag')">
-                                                                                                                                                                                        Cost: ${costBag}
-                                                                                                                                                                                    </button>
-                                                                                                                                                                                </div>
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:8px;">
+                  <!-- Satchel -->
+                  <div class="sink-slate-panel" style="border: 1px solid #3498db44; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px;">
+                      <div>
+                          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                              <strong style="color:#3498db; font-size:11px;">Dimensional Satchel</strong>
+                              <div style="width:24px; height:24px; background:#000; border:1px solid #3498db; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                  ${satchelSvg}
+                              </div>
+                          </div>
+                          <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Expands unequipped bag limits by +10 slots per rank.</div>
+                          <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
+                              <span style="color:#888;">CAPACITY:</span><br>
+                              ${lvlBag * 10} ➔ <span style="color:#2ecc71; font-weight:bold;">${(lvlBag + 1) * 10}</span>
+                          </div>
+                      </div>
+                      ${bagBtnHtml}
+                  </div>
 
-                                                                                                                                                                                <!-- Gold % Upgrade -->
-                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; cursor:help;"
-                                                                                                                                                                                     onmouseenter="window.showMissionShopUpgradeTooltip(event, 'gold')"
-                                                                                                                                                                                     ontouchstart="window.showMissionShopUpgradeTooltip(event, 'gold')"
-                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
-                                                                                                                                                                                    <div>
-                                                                                                                                                                                        <strong style="color:#f1c40f; font-size:11px;">Midas Training</strong>
-                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">+5% permanent Gold Multiplier</div>
-                                                                                                                                                                                        <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlGold} (Current: +${lvlGold * 5}%)</span>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                    <button class="btn-action" style="background:#f1c40f; color:#000; font-size:10px; padding:4px 8px;" ${canAffordGold ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('gold')">
-                                                                                                                                                                                        Cost: ${costGold}
-                                                                                                                                                                                    </button>
-                                                                                                                                                                                </div>
+                  <!-- Midas -->
+                  <div class="sink-slate-panel" style="border: 1px solid #f1c40f44; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px;">
+                      <div>
+                          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                              <strong style="color:#f1c40f; font-size:11px;">Midas Training</strong>
+                              <div style="width:24px; height:24px; background:#000; border:1px solid #f1c40f; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                  ${midasSvg}
+                              </div>
+                          </div>
+                          <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Permanently increases global Gold drop multiplier.</div>
+                          <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
+                              <span style="color:#888;">GOLD MULT:</span><br>
+                              +${lvlGold * 5}% ➔ <span style="color:#2ecc71; font-weight:bold;">+${(lvlGold + 1) * 5}%</span>
+                          </div>
+                      </div>
+                      ${goldBtnHtml}
+                  </div>
 
-                                                                                                                                            <!-- Attack % Upgrade -->
-                                                                                                                                            <div class="shop-row" style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; cursor:help;"
-                                                                                                                                                 onmouseenter="window.showMissionShopUpgradeTooltip(event, 'atk')"
-                                                                                                                                                 ontouchstart="window.showMissionShopUpgradeTooltip(event, 'atk')"
-                                                                                                                                                 onmouseleave="window.hideTooltip()">
-                                                                                                                                                <div>
-                                                                                                                                                    <strong style="color:#e74c3c; font-size:11px;">Gladiator Mastery</strong>
-                                                                                                                                                    <div style="font-size:9px; color:#aaa;">+2% permanent Attack power</div>
-                                                                                                                                                    <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlAtk} (Current: +${lvlAtk * 2}%)</span>
-                                                                                                                                                </div>
-                                                                                                                                                <button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:4px 8px;" ${canAffordAtk ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('atk')">
-                                                                                                                                                    Cost: ${costAtk}
-                                                                                                                                                </button>
-                                                                                                                                            </div>
+                  <!-- Gladiator -->
+                  <div class="sink-slate-panel" style="border: 1px solid #e74c3c44; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px;">
+                      <div>
+                          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                              <strong style="color:#e74c3c; font-size:11px;">Gladiator Mastery</strong>
+                              <div style="width:24px; height:24px; background:#000; border:1px solid #e74c3c; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                  ${gladiatorSvg}
+                              </div>
+                          </div>
+                          <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Permanently increases global raw Attack power.</div>
+                          <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
+                              <span style="color:#888;">ATTACK:</span><br>
+                              +${lvlAtk * 2}% ➔ <span style="color:#2ecc71; font-weight:bold;">+${(lvlAtk + 1) * 2}%</span>
+                          </div>
+                      </div>
+                      ${atkBtnHtml}
+                  </div>
 
-                                                                                                                                            <!-- HP % Upgrade -->
-                                                                                                                                            <div class="shop-row" style="background:#07030b; border:1px solid #333; padding:8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; cursor:help;"
-                                                                                                                                                 onmouseenter="window.showMissionShopUpgradeTooltip(event, 'hp')"
-                                                                                                                                                 ontouchstart="window.showMissionShopUpgradeTooltip(event, 'hp')"
-                                                                                                                                                 onmouseleave="window.hideTooltip()">
-                                                                                                                                                <div>
-                                                                                                                                                    <strong style="color:#3498db; font-size:11px;">Iron Constitution</strong>
-                                                                                                                                                    <div style="font-size:9px; color:#aaa;">+3% permanent Max HP</div>
-                                                                                                                                                    <span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Lv. ${lvlHp} (Current: +${lvlHp * 3}%)</span>
-                                                                                                                                                </div>
-                                                                                                                                                <button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:4px 8px;" ${canAffordHp ? "" : 'disabled style="opacity:0.5;"'} onclick="window.buyMissionUpgrade('hp')">
-                                                                                                                                                    Cost: ${costHp}
-                                                                                                                                                </button>
-                                                                                                                                            </div>
-                                                                                                                                        </div>
+                  <!-- HP / Constitution -->
+                  <div class="sink-slate-panel" style="border: 1px solid #3498db44; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px;">
+                      <div>
+                          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                              <strong style="color:#3498db; font-size:11px;">Iron Constitution</strong>
+                              <div style="width:24px; height:24px; background:#000; border:1px solid #3498db; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                  ${constitutionSvg}
+                              </div>
+                          </div>
+                          <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Permanently increases global raw Maximum HP.</div>
+                          <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
+                              <span style="color:#888;">MAX HEALTH:</span><br>
+                              +${lvlHp * 3}% ➔ <span style="color:#2ecc71; font-weight:bold;">+${(lvlHp + 1) * 3}%</span>
+                          </div>
+                      </div>
+                      ${hpBtnHtml}
+                  </div>
+              </div>
+          </div>
 
-                                                                                                                                        <div style="background:#111; border:1px solid #3498db; border-radius:6px; padding:10px;">
-                                                                                                                                                                                            <strong style="color:#3498db; font-size:12px; display:block; margin-bottom:8px;">💎 CONSUMABLES & REAGENTS</strong>
-
-                                                                                                                                                                                            <!-- Eridium Shard -->
-                                                                                                                                                                                            <div class="shop-row" style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
-                                                                                                                                                                                                 onmouseenter="window.showMissionShopItemTooltip(event, 'Eridium Shard')"
-                                                                                                                                                                                                 ontouchstart="window.showMissionShopItemTooltip(event, 'Eridium Shard')"
-                                                                                                                                                                                                 onmouseleave="window.hideTooltip()">
-                                                                                                                                                                                                <div>
-                                                                                                                                                                                                    <strong style="color:#8e44ad; font-size:10.5px;">🔮 Eridium Shard</strong>
-                                                                                                                                                                                                    <div style="font-size:9px; color:#aaa;">Awaken equipment star ratings (rarities)</div>
-                                                                                                                                                                                                </div>
-                                                                                                                                                                                                <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Eridium Shard', 4)">Buy (4 MP)</button>
-                                                                                                                                                                                            </div>
-
-                                                                                                                                                                                            <!-- Ancient Core -->
-                                                                                                                                                                                            <div class="shop-row" style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
-                                                                                                                                                                                                 onmouseenter="window.showMissionShopItemTooltip(event, 'Ancient Core')"
-                                                                                                                                                                                                 ontouchstart="window.showMissionShopItemTooltip(event, 'Ancient Core')"
-                                                                                                                                                                                                 onmouseleave="window.hideTooltip()">
-                                                                                                                                                                                                <div>
-                                                                                                                                                                                                    <strong style="color:#e74c3c; font-size:10.5px;">🔴 Ancient Core</strong>
-                                                                                                                                                                                                    <div style="font-size:9px; color:#aaa;">Activate the Altar of Rifts</div>
-                                                                                                                                                                                                </div>
-                                                                                                                                                                                                <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 2 ? "" : "disabled"} onclick="window.buyMissionItem('Ancient Core', 2)">Buy (2 MP)</button>
-                                                                                                                                                                                            </div>
-
-                                                                                                                                                                                            <!-- Overlord's Sigil -->
-                                                                                                                                                                                                                                                                                            <div class="shop-row" style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
-                                                                                                                                                                                                                                                                                                 onmouseenter="window.showMissionShopItemTooltip(event, 'Overlords Sigil')"
-                                                                                                                                                                                                                                                                                                 ontouchstart="window.showMissionShopItemTooltip(event, 'Overlords Sigil')"
-                                                                                                                                                                                                                                                                                                 onmouseleave="window.hideTooltip()">
-                                                                                                                                                                                                                                                                                                <div>
-                                                                                                                                                                                                                                                                                                    <strong style="color:#1abc9c; font-size:10.5px;">🔱 Overlord's Sigil</strong>
-                                                                                                                                                                                                                                                                                                    <div style="font-size:9px; color:#aaa;">Material required for unique artifact tempering</div>
-                                                                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                                                                                <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 6 ? "" : "disabled"} onclick="window.buyMissionItem('Overlords Sigil', 6)">Buy (6 MP)</button>
-                                                                                                                                                                                                                                                                                            </div>
-
-                                                                                                                                                                                            <!-- Gacha Key -->
-                                                                                                                                                                                            <div class="shop-row" style="background:#07030b; border:1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
-                                                                                                                                                                                                 onmouseenter="window.showMissionShopItemTooltip(event, 'Gacha Key')"
-                                                                                                                                                                                                 ontouchstart="window.showMissionShopItemTooltip(event, 'Gacha Key')"
-                                                                                                                                                                                                 onmouseleave="window.hideTooltip()">
-                                                                                                                                                                                    <div>
-                                                                                                                                                                                        <strong style="color:#f1c40f; font-size:10.5px;">🔑 Gacha Key</strong>
-                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Roll standard vending crate</div>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Gacha Key', 4)">Buy (4 MP)</button>
-                                                                                                                                                                                </div>
-
-                                                                                                                                                                                <!-- Catalyst Core -->
-                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
-                                                                                                                                                                                     onmouseenter="window.showMissionShopItemTooltip(event, 'Catalyst Core')"
-                                                                                                                                                                                     ontouchstart="window.showMissionShopItemTooltip(event, 'Catalyst Core')"
-                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
-                                                                                                                                                                                    <div>
-                                                                                                                                                                                        <strong style="color:#2ecc71; font-size:10.5px;">🔋 Catalyst Core</strong>
-                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Lock & re-roll item properties</div>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 3 ? "" : "disabled"} onclick="window.buyMissionItem('Catalyst Core', 3)">Buy (3 MP)</button>
-                                                                                                                                                                                </div>
-
-                                                                                                                                                                                <!-- Astral Essence -->
-                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border: 1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
-                                                                                                                                                                                     onmouseenter="window.showMissionShopItemTooltip(event, 'Astral Essence')"
-                                                                                                                                                                                     ontouchstart="window.showMissionShopItemTooltip(event, 'Astral Essence')"
-                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
-                                                                                                                                                                                    <div>
-                                                                                                                                                                                        <strong style="color:#9b59b6; font-size:10.5px;">🌌 Astral Essence</strong>
-                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Infuse powerful gear enchantments</div>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Astral Essence', 4)">Buy (4 MP)</button>
-                                                                                                                                                                                </div>
-
-                                                                                                                                                                                <!-- Double XP Elixir -->
-                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border:1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
-                                                                                                                                                                                     onmouseenter="window.showMissionShopItemTooltip(event, 'Double XP Elixir')"
-                                                                                                                                                                                     ontouchstart="window.showMissionShopItemTooltip(event, 'Double XP Elixir')"
-                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
-                                                                                                                                                                                    <div>
-                                                                                                                                                                                        <strong style="color:#a855f7; font-size:10.5px;">🧪 Double XP Elixir</strong>
-                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Doubles monster EXP gains (+100% EXP)</div>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 3 ? "" : "disabled"} onclick="window.buyMissionItem('Double XP Elixir', 3)">Buy (3 MP)</button>
-                                                                                                                                                                                </div>
-
-                                                                                                                                                                                <!-- Double Drop Elixir -->
-                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border:1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; cursor:help;"
-                                                                                                                                                                                     onmouseenter="window.showMissionShopItemTooltip(event, 'Double Drop Elixir')"
-                                                                                                                                                                                     ontouchstart="window.showMissionShopItemTooltip(event, 'Double Drop Elixir')"
-                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
-                                                                                                                                                                                    <div>
-                                                                                                                                                                                        <strong style="color:#22c55e; font-size:10.5px;">🧪 Double Drop Elixir</strong>
-                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Doubles global drop rate modifier (+100%)</div>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 4 ? "" : "disabled"} onclick="window.buyMissionItem('Double Drop Elixir', 4)">Buy (4 MP)</button>
-                                                                                                                                                                                </div>
-
-                                                                                                                                                                                <!-- Drop Quality Elixir -->
-                                                                                                                                                                                <div class="shop-row" style="background:#07030b; border:1px solid #222; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; cursor:help;"
-                                                                                                                                                                                     onmouseenter="window.showMissionShopItemTooltip(event, 'Drop Quality Elixir')"
-                                                                                                                                                                                     ontouchstart="window.showMissionShopItemTooltip(event, 'Drop Quality Elixir')"
-                                                                                                                                                                                     onmouseleave="window.hideTooltip()">
-                                                                                                                                                                                    <div>
-                                                                                                                                                                                        <strong style="color:#3b82f6; font-size:10.5px;">🧪 Drop Quality Elixir</strong>
-                                                                                                                                                                                        <div style="font-size:9px; color:#aaa;">Boosts drop quality checks (+50% Qly)</div>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                    <button class="btn-action" style="background:#bdc3c7; color:#111; padding:3px 8px; font-size:9.5px;" ${tokenBalance >= 5 ? "" : "disabled"} onclick="window.buyMissionItem('Drop Quality Elixir', 5)">Buy (5 MP)</button>
-                                                                                                                                                                                </div>
-                                                                                                                                                                            </div>
-                                                                                                                                                                        </div>
-                                                                            `;
+          <!-- REAGENTS BOARD -->
+          <div style="background:#111; border:1px solid #3498db80; border-radius:8px; padding:12px; box-shadow:0 4px 15px rgba(0,0,0,0.5);">
+              <strong style="color:#3498db; font-size:12px; display:block; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">💎 CONSUMABLES & REAGENTS</strong>
+              <div class="merchant-shelves-grid">
+                  ${reagentsHtml}
+              </div>
+          </div>
+      </div>
+    `;
   }
 
   contentEl.innerHTML = `
-                                              ${tabHeaderHtml}
+    ${tabHeaderHtml}
 
-                                              <!-- Mission Points Balance Bar -->
-                                              <div style="background:#111; border:1px solid #333; padding:8px; border-radius:6px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px;">
-                                                  <span>Mission Points:</span>
-                                                  <strong style="color:#f1c40f; font-size:13px;" id="mission-point-lbl">${tokenBalance} MP</strong>
-                                              </div>
+    <!-- Mission Points Balance Bar -->
+    <div style="background:#111; border:1px solid #333; padding:8px; border-radius:6px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px;">
+        <span>Mission Points:</span>
+        <strong style="color:#f1c40f; font-size:13px;" id="mission-point-lbl">${tokenBalance} MP</strong>
+    </div>
 
-                                              ${contentHtml}
-                                      `;
+    ${contentHtml}
+  `;
 
   if (currentTab === "BOARD") {
     // Dynamic countdown timer calculations locked to Pacific Time (PST/PDT)
@@ -10182,40 +9863,6 @@ window.toggleMailbox = function () {
   }
 };
 
-window.getWeeklyClanMail = function () {
-  if (!window.playerStats.clanId || !window.playerStats.clanName) return null;
-
-  // Resolve current last Monday string
-  let now = Date.now();
-  let ptString = new Date(now).toLocaleString("en-US", {
-    timeZone: "America/Los_Angeles",
-  });
-  let ptDate = new Date(ptString);
-  let dayOfWeek = ptDate.getDay();
-  let daysSinceMonday = (dayOfWeek + 6) % 7;
-  let lastMondayDate = new Date(ptDate);
-  lastMondayDate.setDate(ptDate.getDate() - daysSinceMonday);
-  let lastMondayStr = lastMondayDate
-    .toLocaleDateString("en-US")
-    .replace(/\//g, "_");
-
-  let mailId = `clan_weekly_mail_${lastMondayStr}`;
-  let claimedMailIds = window.playerStats.claimedMailIds || [];
-  let isClaimed = claimedMailIds.includes(mailId);
-
-  return {
-    id: mailId,
-    title: "Weekly Clan Supply Crate",
-    message: `Greetings, Hero! Here is your weekly share of supplies from the **${window.playerStats.clanName}** supply depot. Keep supporting your guild!`,
-    rewards: {
-      use: {
-        "Weekly Clan Supply Crate": 1,
-      },
-    },
-    claimed: isClaimed,
-  };
-};
-
 window.fetchMailboxData = function () {
   const listEl = document.getElementById("mailbox-list");
   if (!listEl) return;
@@ -10294,8 +9941,15 @@ window.renderMailboxItems = function (mailbox) {
         buttonHtml = `<button class="btn-action" style="background:#e74c3c; color:white; font-size:11px; padding:4px 10px;" onclick="window.claimMailReward('${mail.id}')">Claim</button>`;
       }
 
+      window.justClaimedMailIds = window.justClaimedMailIds || new Set();
+      let isJustClaimed = window.justClaimedMailIds.has(mail.id);
+      let stampClass = "stamp-base";
+      if (isJustClaimed) {
+        stampClass += " stamp-slam";
+        window.justClaimedMailIds.delete(mail.id);
+      }
       let claimedOverlay = mail.claimed
-        ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.68); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span style="color:#e74c3c; font-size:16px; font-weight:900; border: 2.5px solid #e74c3c; padding: 4px 14px; border-radius:4px; transform: rotate(-5deg); font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1.5px; box-shadow: 0 0 12px rgba(231,76,60,0.35);">CLAIMED</span></div>`
+        ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.68); backdrop-filter: blur(1px); display:flex; justify-content:center; align-items:center; border-radius:6px; z-index:5;"><span class="${stampClass}" style="--final-rot:-5deg; color:#e74c3c; font-size:16px; font-weight:900; border: 2.5px solid #e74c3c; padding: 4px 14px; border-radius:4px; font-family:Impact,sans-serif; text-shadow: 0 1px 2px #000; letter-spacing:1.5px; box-shadow: 0 0 12px rgba(231,76,60,0.35);">CLAIMED</span></div>`
         : "";
 
       // Build highly optimized, stylized HTML badges using native visual generators
@@ -10394,6 +10048,9 @@ window.renderMailboxItems = function (mailbox) {
 };
 
 window.claimMailReward = function (mailId) {
+  window.justClaimedMailIds = window.justClaimedMailIds || new Set();
+  window.justClaimedMailIds.add(mailId);
+
   // Catch client-side weekly clan mail claim
   if (mailId.startsWith("clan_weekly_mail_")) {
     let localMail = window.getWeeklyClanMail();
@@ -11334,7 +10991,7 @@ window.renderInspectModal = function (profile) {
     let tData = window.TITLES_DATA[stats.equippedTitle];
     titleBadgeHtml = ` <span style="color:${tData.color || "#ff007f"}; font-weight:bold;">[${tData.name}]</span>`;
   }
-  titleEl.innerHTML = `🔍 Inspecting: ${stats.playerName || "Legend"}${titleBadgeHtml}`;
+  titleEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Inspecting: ${stats.playerName || "Legend"}${titleBadgeHtml}`;
 
   // Store inspected slots globally in window so hover tooltips can resolve comparison
   window.inspectedSlots = equipped;
@@ -11673,990 +11330,14 @@ window.resolveInspectedPlayerStats = function (profile) {
   return p;
 };
 
-// --- ROYAL CLAN HALL CONTROLLER ---
-window.clanActiveTab = "OVERVIEW";
-
-window.toggleClanHall = function () {
-  if (window.playerStats.level < 25) {
-    window.pushHeaderToast("🔒 Clan Hall unlocks at Level 25!", "#e74c3c");
-    return;
-  }
-  let modal = document.getElementById("clan-draggable-window");
-  if (modal) {
-    modal.remove();
-    window.hideTooltip();
-  } else {
-    window.hideTooltip();
-    window.clanActiveTab = "OVERVIEW";
-
-    let win = document.createElement("div");
-    win.id = "clan-draggable-window";
-    win.className = "draggable-window";
-    win.style.left = "80px";
-    win.style.top = "60px";
-    win.style.width = "390px";
-
-    win.innerHTML = `
-      <div class="draggable-header" id="clan-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
-          <span style="display:flex; align-items:center; gap:6px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  <path d="M12 8v8M9 11h6"/>
-              </svg>
-              Clan Hall
-          </span>
-          <button onclick="document.getElementById('clan-draggable-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
-      </div>
-      <div class="draggable-content" id="clan-win-content" style="max-height: 440px; padding: 12px; background:#07030b;">
-          <!-- Injected dynamically -->
-      </div>
-    `;
-
-    document.getElementById("game-container").appendChild(win);
-    window.fetchClanData();
-    window.makeWindowDraggable(win, document.getElementById("clan-win-handle"));
-  }
-};
-
-window.fetchClanData = function () {
-  const contentEl = document.getElementById("clan-win-content");
-  if (!contentEl) return;
-
-  if (!window.GAME_SERVER_URL) {
-    contentEl.innerHTML = `<div style="color:#666; text-align:center; padding: 20px 0; font-size:11px; font-style:italic;">Clan Hall is offline in offline/GitHub mode.</div>`;
-    return;
-  }
-
-  const userId = window.getGameUserId();
-  contentEl.innerHTML = `<div style="color:#aaa; text-align:center; padding: 20px 0; font-size:11px;">Connecting to Clan Sanctum...</div>`;
-
-  fetch(`${window.GAME_SERVER_URL}/api/clan/info`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.success) {
-        if (data.clan) {
-          window.playerStats.clanId = data.clan.id;
-          window.playerStats.clanName = data.clan.name;
-          window.playerStats.clanEmblem =
-            data.clan.leader_id.charCodeAt(0) || 0;
-          window.playerStats.clanLevel = data.clan.level || 1;
-          window.playerStats.clanSkills = {
-            steel_phalanx: data.clan.skill_steel_phalanx,
-            vitality_well: data.clan.skill_vitality_well,
-            prosperity_accord: data.clan.skill_prosperity_accord,
-            voyagers_guidance: data.clan.skill_voyagers_guidance,
-            aetheric_wisdom: data.clan.skill_aetheric_wisdom || 0,
-          };
-          window.renderClanDashboard(
-            data.clan,
-            data.members,
-            data.invitations || [],
-          );
-        } else {
-          window.playerStats.clanId = null;
-          window.playerStats.clanName = null;
-          window.renderClanCreation(
-            data.clansList || [],
-            data.invitations || [],
-          );
-        }
-      } else {
-        contentEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Error loading clan matrix.</div>`;
-      }
-    })
-    .catch((err) => {
-      console.error("Clan fetch failed:", err);
-      contentEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Could not connect to the Clan Sanctum server.</div>`;
-    });
-};
-
-window.joinOpenClan = function (clanId) {
-  const userId = window.getGameUserId();
-  fetch(`${window.GAME_SERVER_URL}/api/clan/join-open`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, clanId }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.success) {
-        window.pushHeaderToast("🎉 Welcome to your new Clan!", "#2ecc71");
-        window.fetchClanData();
-        window.updateUI();
-        window.saveGame();
-      } else {
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-      }
-    })
-    .catch(() => {
-      window.pushHeaderToast("❌ Connection error joining clan.", "#e74c3c");
-    });
-};
-
-window.renderClanCreation = function (clansList, invitations) {
-  const contentEl = document.getElementById("clan-win-content");
-  if (!contentEl) return;
-
-  let inviteHtml = "";
-  if (invitations.length > 0) {
-    inviteHtml = `
-      <div style="border: 1px solid #9b59b6; border-radius: 6px; padding: 10px; background: rgba(155, 89, 182, 0.05); margin-bottom: 12px; text-align:left;">
-          <strong style="color:#df9ffb; font-size:11.5px; display:flex; align-items:center; gap:6px; margin-bottom:6px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              Pending Clan Invitations:
-          </strong>
-          ${invitations
-            .map(
-              (inv) => `
-              <div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:6px; border-radius:4px; margin-bottom:4px; border:1px solid #333;">
-                  <span style="font-size:11px; color:#fff; font-weight:bold;">${window.escapeHTML(inv.clanName)}</span>
-                  <button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71;" onclick="window.acceptClanInvitation(${inv.id})">Join</button>
-              </div>
-          `,
-            )
-            .join("")}
-      </div>
-    `;
-  }
-
-  contentEl.innerHTML = `
-    ${inviteHtml}
-    <div style="border:1px solid #333; border-radius:6px; padding:10px; background:rgba(0,0,0,0.5); text-align:center; margin-bottom:12px;">
-        <strong style="color:#f1c40f; font-size:12.5px; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v8M9 11h6"/></svg>
-            Found a New Clan
-        </strong>
-        <p style="font-size:10px; color:#aaa; margin-bottom:10px; line-height:1.45;">Establish a cooperative Clan. Costs <span style="color:#f1c40f; font-weight:bold;">100,000 Gold</span>. Name length limited to 3-16 chars, alphanumeric characters only.</p>
-        <div style="display:flex; gap:6px;">
-            <input type="text" id="clan-create-name" placeholder="Clan Name" maxlength="16" style="flex:1; background:#111; color:#fff; border:1px solid #444; padding:4px; font-size:11px; border-radius:4px;">
-            <button class="btn-action" style="background:#f1c40f; color:#111;" onclick="window.executeCreateClan()">Found Clan</button>
-        </div>
-    </div>
-
-    <strong style="color:#df9ffb; font-size:11px; display:inline-flex; align-items:center; gap:4px; margin-bottom:6px; text-align:left; text-transform:uppercase; letter-spacing:0.5px;">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v8M9 11h6"/></svg>
-        Available Clans (${clansList.length})
-    </strong>
-    <div style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
-        ${
-          clansList.length === 0
-            ? `<div style="font-size:10.5px; color:#666; font-style:italic; padding:15px; text-align:center;">No open clans found. Try founding one!</div>`
-            : clansList
-                .map((g) => {
-                  let emblem = window.getClanEmblemHtml(
-                    g.leader_id.charCodeAt(0) || 0,
-                    14,
-                  );
-                  let btnHtml = "";
-                  let pLvl = window.playerStats.level || 1;
-                  if (g.join_policy === "open") {
-                    let canJoin = pLvl >= g.min_level;
-                    btnHtml = `<button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71;" ${canJoin ? "" : "disabled style='opacity:0.5; cursor:not-allowed;' title='Requires Level " + g.min_level + "'"} onclick="window.joinOpenClan(${g.id})">Join</button>`;
-                  } else {
-                    btnHtml = `<span style="font-size:9.5px; color:#666;" title="This clan requires an explicit invitation from the founder.">Invite-Only</span>`;
-                  }
-                  return `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#111; border:1px solid #222; padding:6px 10px; border-radius:4px; gap:8px;">
-                <div style="display:flex; align-items:center; gap:6px; text-align:left; min-width:0; flex:1;">
-                    ${emblem}
-                    <div style="min-width:0; flex:1;">
-                        <strong style="font-size:11.5px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${window.escapeHTML(g.name)}</strong>
-                        <span style="font-size:9px; color:#aaa; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Level ${g.level} ${g.min_level > 1 ? "• Min Lv. " + g.min_level : ""}</span>
-                    </div>
-                </div>
-                ${btnHtml}
-            </div>
-          `;
-                })
-                .join("")
-        }
-    </div>
-  `;
-};
-
-window.executeCreateClan = function () {
-  let nameInput = document.getElementById("clan-create-name");
-  if (!nameInput) return;
-  let name = nameInput.value.trim();
-
-  if (!window.validateGuildNameInput(name)) {
-    window.pushHeaderToast(
-      "❌ Invalid Clan Name! 3-16 chars, letters/numbers and single spaces only.",
-      "#e74c3c",
-    );
-    return;
-  }
-
-  if (window.playerStats.coins < 100000) {
-    window.pushHeaderToast(
-      "❌ Insufficient Gold! Foundation requires 100,000 Gold.",
-      "#e74c3c",
-    );
-    return;
-  }
-
-  const userId = window.getGameUserId();
-  fetch(`${window.GAME_SERVER_URL}/api/clan/create`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, name }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.success) {
-        window.playerStats.coins -= 100000;
-        window.pushHeaderToast(
-          `🏰 Clan ${name} successfully founded!`,
-          "#2ecc71",
-        );
-        window.fetchClanData();
-        window.updateUI();
-        window.saveGame();
-      } else {
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-      }
-    })
-    .catch(() => {
-      window.pushHeaderToast("❌ Network error founding clan.", "#e74c3c");
-    });
-};
-
-window.acceptClanInvitation = function (inviteId) {
-  const userId = window.getGameUserId();
-  fetch(`${window.GAME_SERVER_URL}/api/clan/join`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, inviteId }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.success) {
-        window.pushHeaderToast("🎉 Welcome to your new Clan!", "#2ecc71");
-        window.fetchClanData();
-        window.updateUI();
-        window.saveGame();
-      } else {
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-      }
-    })
-    .catch(() => {
-      window.pushHeaderToast("❌ Network error joining clan.", "#e74c3c");
-    });
-};
-
-window.renderClanDashboard = function (clan, members, invitations) {
-  const contentEl = document.getElementById("clan-win-content");
-  if (!contentEl) return;
-
-  const currentTab = window.clanActiveTab || "OVERVIEW";
-  const userId = window.getGameUserId();
-  const isLeader = clan.leader_id === userId;
-
-  let unclaimedQuestsCount = 0;
-  if (clan.quests && clan.quests.activeList) {
-    clan.quests.activeList.forEach((q) => {
-      if (
-        q.completed &&
-        q.claimedUserIds &&
-        !q.claimedUserIds.includes(userId)
-      ) {
-        unclaimedQuestsCount++;
-      }
-    });
-  }
-  window.playerStats.pendingClanQuestsCompletedCount = unclaimedQuestsCount;
-
-  let tabHeaderHtml = `
-    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:2px; margin-bottom:12px;">
-        <button onclick="window.switchClanTab('OVERVIEW')" class="sub-tab-btn ${currentTab === "OVERVIEW" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
-            Overview
-        </button>
-        <button onclick="window.switchClanTab('MEMBERS')" class="sub-tab-btn ${currentTab === "MEMBERS" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
-            Members
-        </button>
-        <button onclick="window.switchClanTab('QUESTS')" class="sub-tab-btn ${currentTab === "QUESTS" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px; position:relative;">
-            Quests
-            ${unclaimedQuestsCount > 0 ? `<span style="position:absolute; top:-1px; right:-1px; width:6px; height:6px; background:#e74c3c; border-radius:50%; box-shadow:0 0 4px #e74c3c;"></span>` : ""}
-        </button>
-        <button onclick="window.switchClanTab('DONATE')" class="sub-tab-btn ${currentTab === "DONATE" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
-            Donation
-        </button>
-        <button onclick="window.switchClanTab('RESEARCH')" class="sub-tab-btn ${currentTab === "RESEARCH" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
-            Research
-        </button>
-        <button onclick="window.switchClanTab('SETTINGS')" class="sub-tab-btn ${currentTab === "SETTINGS" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
-            Settings
-        </button>
-    </div>
-  `;
-
-  let tabContentHtml = "";
-
-  if (currentTab === "OVERVIEW") {
-    let nextXp = Math.floor(100 * Math.pow(clan.level, 1.8));
-    let xpPct = Math.min(100, (clan.xp / nextXp) * 100);
-    let emblem = window.getClanEmblemHtml(
-      clan.leader_id.charCodeAt(0) || 0,
-      32,
-    );
-
-    tabContentHtml = `
-      <div style="background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; align-items:center; gap:12px; text-align:left;">
-          ${emblem}
-          <div style="flex:1; min-width:0;">
-              <strong style="font-size:14px; color:#df9ffb; text-shadow: 0 0 6px rgba(142,68,173,0.3);">${window.escapeHTML(clan.name)}</strong>
-              <div style="font-size:10px; color:#aaa; margin-top:2px; font-family:monospace;">Clan Level ${clan.level} (${clan.xp}/${nextXp} XP)</div>
-              <div style="width:100%; height:4px; background:#222; border-radius:2px; overflow:hidden; border:1px solid #333; margin-top:4px;">
-                  <div style="width:${xpPct}%; height:100%; background:#9b59b6;"></div>
-              </div>
-          </div>
-      </div>
-
-      <div style="background:#111; border:1px solid #222; border-radius:6px; padding:8px 10px; margin-bottom:12px; font-size:11px; text-align:left; line-height:1.4; color:#ddd; white-space:normal;">
-          <span style="color:#888; font-size:9px; font-weight:bold; display:block; margin-bottom:2px; text-transform:uppercase;">📜 CLAN ANNOUNCEMENT:</span>
-          "${window.escapeHTML(clan.description || "Welcome to our Clan!")}"
-      </div>
-
-      <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:6px; padding:8px; margin-bottom:12px; font-size:10.5px; text-align:left;">
-          <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:3px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace;">🏛️ Clan Vault Balances:</div>
-          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; text-align:center; font-family:monospace;">
-              <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #333;"><span style="color:#888; font-size:8px;">GOLD</span><strong style="color:#f1c40f; display:block; margin-top:2px;">${window.formatNumber(clan.gold_bank)}</strong></div>
-              <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #333;"><span style="color:#888; font-size:8px;">SOULS</span><strong style="color:#ffb6c1; display:block; margin-top:2px;">${window.formatNumber(clan.souls_bank)}</strong></div>
-              <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #333;"><span style="color:#888; font-size:8px;">LUMINOUS</span><strong style="color:#ffb6c1; display:block; margin-top:1px;">${window.formatNumber(clan.luminous_bank)}</strong></div>
-          </div>
-      </div>
-
-      <div style="background:#111; border:1px solid #222; border-radius:6px; padding:10px; font-size:11px; text-align:left; line-height:1.45; white-space:normal; color:#aaa;">
-          <strong style="color:#df9ffb;">💡 CLAN INFO:</strong><br>
-          • Join Policy: <span style="color:#fff; font-weight:bold;">${clan.join_policy === "open" ? "Open (Join Instantly)" : "Invite Only"}</span><br>
-          • Minimum Level Requirement: <span style="color:#fff; font-weight:bold;">Lv. ${clan.min_level}</span><br>
-          • Members Enrolled: <span style="color:#fff; font-weight:bold;">${members.length} / 20</span>
-      </div>
-    `;
-  } else if (currentTab === "DONATE") {
-    let goldOwned = window.playerStats.coins || 0;
-    let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
-    let luminousOwned = window.inventory.ETC["Luminous Soul"] || 0;
-
-    tabContentHtml = `
-      <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.45;">
-          <strong style="color:#f1c40f; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6M9 13h6"/></svg>
-              Contribution Chamber
-          </strong>
-          Donating resources grows the shared **Clan Vault treasury**, enabling the Clan Founder to initiate powerful skill passive research. (Clan XP is earned through weekly cooperative quests).
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:6px; text-align:left;">
-          <!-- Gold Donation -->
-          <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                  <strong style="color:#f1c40f; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6M9 13h6"/></svg>
-                      Donate Gold
-                  </strong>
-                  <div style="font-size:9.5px; color:#aaa;">Owned: ${window.formatNumber(goldOwned)} Gold</div>
-              </div>
-              <div style="display:flex; gap:4px;">
-                  <button class="btn-action" style="background:#f1c40f; color:#111; font-size:9.5px; padding:4px 8px;" ${goldOwned >= 10000 ? "" : "disabled"} onclick="window.executeClanDonate('gold', 10000)">10K</button>
-                  <button class="btn-action" style="background:#f1c40f; color:#111; font-size:9.5px; padding:4px 8px;" ${goldOwned >= 100000 ? "" : "disabled"} onclick="window.executeClanDonate('gold', 100000)">100K</button>
-              </div>
-          </div>
-
-          <!-- Monster Souls Donation -->
-          <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                  <strong style="color:#bdc3c7; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
-                      Donate Monster Souls
-                  </strong>
-                  <div style="font-size:9.5px; color:#aaa;">Owned: ${soulsOwned.toLocaleString()} Souls</div>
-              </div>
-              <div style="display:flex; gap:4px;">
-                  <button class="btn-action" style="background:#bdc3c7; color:#111; font-size:9.5px; padding:4px 8px;" ${soulsOwned >= 50 ? "" : "disabled"} onclick="window.executeClanDonate('souls', 50)">50</button>
-                  <button class="btn-action" style="background:#bdc3c7; color:#111; font-size:9.5px; padding:4px 8px;" ${soulsOwned >= 250 ? "" : "disabled"} onclick="window.executeClanDonate('souls', 250)">250</button>
-              </div>
-          </div>
-
-          <!-- Luminous Souls Donation -->
-          <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                  <strong style="color:#ffb6c1; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
-                      Donate Luminous Souls
-                  </strong>
-                  <div style="font-size:9.5px; color:#aaa;">Owned: ${luminousOwned.toLocaleString()} Souls</div>
-              </div>
-              <div style="display:flex; gap:4px;">
-                  <button class="btn-action" style="background:#ffb6c1; color:#111; font-size:9.5px; padding:4px 8px;" ${luminousOwned >= 5 ? "" : "disabled"} onclick="window.executeClanDonate('luminous', 5)">5</button>
-                  <button class="btn-action" style="background:#ffb6c1; color:#111; font-size:9.5px; padding:4px 8px;" ${luminousOwned >= 25 ? "" : "disabled"} onclick="window.executeClanDonate('luminous', 25)">25</button>
-              </div>
-          </div>
-      </div>
-    `;
-  } else if (currentTab === "MEMBERS") {
-    function formatRelativeTime(timestamp) {
-      let diff = Date.now() - timestamp;
-      if (diff < 15000) return "Active now";
-      let secs = Math.floor(diff / 1000);
-      if (secs < 60) return `${secs}s ago`;
-      let mins = Math.floor(secs / 60);
-      if (mins < 60) return `${mins}m ago`;
-      let hours = Math.floor(mins / 60);
-      if (hours < 24) return `${hours}h ago`;
-      let days = Math.floor(hours / 24);
-      return `${days}d ago`;
-    }
-
-    tabContentHtml = `
-      <div style="display:flex; flex-direction:column; gap:4px; max-height: 280px; overflow-y:auto; padding-right:4px;">
-          ${members
-            .map((m, idx) => {
-              let isLeaderRow = m.userId === clan.leader_id;
-              let rankTag = isLeaderRow
-                ? `<span style="color:#f1c40f; font-weight:bold;">Founder</span>`
-                : `<span style="color:#888;">Member</span>`;
-              let canvasId = `clan-member-canvas-${m.userId}`;
-
-              let titleTextHtml = "";
-              if (m.equippedTitle && window.TITLES_DATA[m.equippedTitle]) {
-                let tData = window.TITLES_DATA[m.equippedTitle];
-                titleTextHtml = `<span style="color:${tData.color || "#ff007f"}; font-size:8px; font-weight:bold; margin-left:4px;">[${tData.name}]</span>`;
-              }
-
-              let showKickBtn = isLeader && !isLeaderRow;
-              return `
-              <div style="background:#111; border:1px solid #222; border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                  <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; text-align:left;">
-                      <canvas id="${canvasId}" width="30" height="40" style="width:30px; height:40px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:4px; flex-shrink:0; pointer-events:none;"></canvas>
-                      <div style="min-width:0; flex:1;">
-                          <div style="display:flex; align-items:center; flex-wrap:wrap; line-height:1.1;">
-                              <strong style="font-size:11.5px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">${window.escapeHTML(m.name)}</strong>
-                              ${titleTextHtml}
-                          </div>
-                          <span style="font-size:9px; color:#aaa; font-family:monospace; display:block; margin-top:2px;">Lv. ${m.level} • Peak Stg ${m.lifetimePeakStage} • Contribution: <span style="color:#2ecc71;">${window.formatNumber(m.clanContribution)}</span></span>
-                          <span style="font-size:8px; color:#7f8c8d; font-family:monospace;">${formatRelativeTime(Number(m.lastActive))}</span>
-                      </div>
-                  </div>
-                  <div style="display:flex; align-items:center; gap:4px;">
-                      <button class="btn-action" style="background:#3498db; font-size:9.5px; padding:3px 6px;" onclick="window.inspectPlayer('${m.userId}')">Inspect</button>
-                      ${showKickBtn ? `<button class="btn-action un" style="background:#c0392b; font-size:9.5px; padding:3px 6px;" onclick="window.executeKickMember('${m.userId}', '${window.escapeHTML(m.name)}')">Kick</button>` : ""}
-                  </div>
-              </div>
-            `;
-            })
-            .join("")}
-      </div>
-    `;
-
-    setTimeout(() => {
-      members.forEach((m) => {
-        let canvas = document.getElementById(`clan-member-canvas-${m.userId}`);
-        if (canvas) {
-          let ctx = canvas.getContext("2d");
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.imageSmoothingEnabled = false;
-          window.drawSingleHero(ctx, 15, 14, 0.55, m.equippedSlots, m, 0, {
-            slashFrame: false,
-            deathAnimationTimer: 0,
-            isMainHero: false,
-          });
-        }
-      });
-    }, 50);
-  } else if (currentTab === "QUESTS") {
-    let questsData = clan.quests;
-    let listHtml = "";
-
-    if (
-      !questsData ||
-      !questsData.activeList ||
-      questsData.activeList.length === 0
-    ) {
-      listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
-    } else {
-      let stgScale = Math.max(
-        1,
-        Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1,
-      );
-      let calculatedGoldMult = Math.pow(1.8, stgScale);
-
-      listHtml = questsData.activeList
-        .map((q) => {
-          let pct = Math.min(100, (q.current / q.target) * 100);
-          let hasClaimed =
-            q.claimedUserIds && q.claimedUserIds.includes(userId);
-
-          let claimBtnHtml = "";
-          if (hasClaimed) {
-            claimBtnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
-          } else if (q.completed) {
-            claimBtnHtml = `<button class="btn-action btn-pulse" style="padding:4px 10px; font-size:10px; background:#2ecc71; border-color:#fff;" onclick="window.executeClaimClanQuestReward('${q.id}')">Claim</button>`;
-          } else {
-            claimBtnHtml = `<span style="color:#aaa; font-size:10px; font-family:monospace;">${q.current.toLocaleString()} / ${q.target.toLocaleString()}</span>`;
-          }
-
-          let rewardItems = [];
-          if (q.rewards.keys > 0)
-            rewardItems.push(
-              `<span style="color:#f1c40f;">+${q.rewards.keys} Keys</span>`,
-            );
-          if (q.rewards.cores > 0)
-            rewardItems.push(
-              `<span style="color:#2ecc71;">+${q.rewards.cores} Cores</span>`,
-            );
-          if (q.rewards.essence > 0)
-            rewardItems.push(
-              `<span style="color:#9b59b6;">+${q.rewards.essence} Essence</span>`,
-            );
-          if (q.rewards.shards > 0)
-            rewardItems.push(
-              `<span style="color:#8e44ad;">+${q.rewards.shards} Shards</span>`,
-            );
-          if (q.rewards.souls > 0)
-            rewardItems.push(
-              `<span style="color:#ffb6c1;">+${q.rewards.souls} Souls</span>`,
-            );
-          if (q.rewards.pp > 0)
-            rewardItems.push(
-              `<span style="color:#ff007f;">+${q.rewards.pp} PP</span>`,
-            );
-          if (q.rewards.sacks > 0)
-            rewardItems.push(
-              `<span style="color:#f1c40f;">+${q.rewards.sacks}x Clan Sack</span>`,
-            );
-
-          if (q.rewards.goldBase > 0) {
-            let actualGoldReward = Math.ceil(
-              q.rewards.goldBase * calculatedGoldMult,
-            );
-            rewardItems.push(
-              `<span style="color:#ffd700;">+${window.formatNumber(actualGoldReward)} Gold</span>`,
-            );
-          }
-
-          let completedOverlay = q.completed
-            ? `<div style="position:absolute; top:2px; right:8px; width:12px; height:12px; background:#2ecc71; border-radius:50%; box-shadow:0 0 6px #2ecc71; display:flex; align-items:center; justify-content:center; color:#fff; font-size:8px; font-weight:bold;">✓</div>`
-            : "";
-
-          return `
-          <div style="position:relative; background:#111; border:1.5px solid ${q.completed ? "#2ecc71" : "#2d3748"}; border-radius:6px; padding:10px; margin-bottom:8px; text-align:left;">
-              ${completedOverlay}
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:8px;">
-                  <strong style="font-size:12.5px; color:#fff; display:block;">${q.label}</strong>
-                  ${claimBtnHtml}
-              </div>
-              <p style="font-size:10px; color:#aaa; margin-bottom:8px; line-height:1.35; white-space:normal;">${q.desc}</p>
-
-              <div style="background:#090a0f; border:1px solid #222; border-radius:4px; padding:6px; font-size:9.5px; margin-bottom:8px; display:flex; flex-wrap:wrap; gap:4px 8px; font-family:monospace; line-height:1.2;">
-                  <div style="width:100%; color:#9b59b6; font-weight:bold; margin-bottom:2px;">🎁 Quest Rewards (Completed):</div>
-                  <div style="color:#df9ffb; font-weight:bold;">+${q.xpReward} Clan XP</div>
-                  ${rewardItems.map((item) => `<div>${item}</div>`).join("")}
-              </div>
-
-              <div style="width:100%; height:6px; background:#222; border-radius:3px; overflow:hidden; border:1px solid #333; margin-top:2px;">
-                  <div style="width:${pct}%; height:100%; background:${q.completed ? "#2ecc71" : "#9b59b6"};"></div>
-              </div>
-          </div>
-        `;
-        })
-        .join("");
-    }
-
-    tabContentHtml = `
-              <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.4;">
-                  <strong style="color:#df9ffb; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z"/></svg>
-                      Weekly Clan Quests
-                  </strong>
-                  Cooperate with your Clan to achieve these weekly active goals. Completing quests is the <strong style="color:#df9ffb;">only way</strong> to gain Clan XP and level up! Each completed quest yields massive rewards like **Gacha Keys, Catalyst Cores, Astral Essence, Eridium Shards, or PP** for every single member!
-              </div>
-              <div style="max-height: 280px; overflow-y:auto; padding-right:4px;">
-                  ${listHtml}
-              </div>
-            `;
-  } else if (currentTab === "SETTINGS") {
-    let isJoinOpen = clan.join_policy === "open";
-    tabContentHtml = `
-      <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.45;">
-          <strong style="color:#f1c40f; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
-              ⚙️ Clan Settings
-          </strong>
-          Founder control board to customize description, toggle entry policy, edit emblem seeds, promote members, or disband.
-      </div>
-
-      ${
-        isLeader
-          ? `
-          <div style="display:flex; flex-direction:column; gap:8px; text-align:left; max-height:280px; overflow-y:auto; padding-right:4px;">
-              <!-- Description -->
-              <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px;">
-                  <label for="settings-clan-desc" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Custom Announcement / Desc:</label>
-                  <textarea id="settings-clan-desc" style="width:100%; height:45px; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px; font-family:sans-serif; resize:none;" maxlength="120">${window.escapeHTML(clan.description || "")}</textarea>
-              </div>
-
-              <!-- Join Policy & Min Lvl -->
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; background:#111; border:1px solid #222; padding:8px; border-radius:6px;">
-                  <div>
-                      <label for="settings-clan-policy" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Join Policy:</label>
-                      <select id="settings-clan-policy" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px;">
-                          <option value="invite_only" ${!isJoinOpen ? "selected" : ""}>Invite Only</option>
-                          <option value="open" ${isJoinOpen ? "selected" : ""}>Open Join</option>
-                      </select>
-                  </div>
-                  <div>
-                      <label for="settings-clan-minlevel" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Min Level:</label>
-                      <input type="number" id="settings-clan-minlevel" value="${clan.min_level || 1}" min="1" max="1000" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px; font-family:monospace;">
-                  </div>
-              </div>
-
-              <button class="btn-action" style="width:100%; margin-bottom: 10px; background:#2ecc71; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeSaveClanSettings()">Save Clan Customizations</button>
-
-              <button class="btn-action un" style="width:100%; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeDisbandClan()">Disband Clan</button>
-          </div>
-      `
-          : `
-          <div style="border:1px solid #222; border-radius:6px; padding:15px; text-align:center; color:#888; font-style:italic; font-size:11px; white-space:normal; line-height:1.45;">
-              🔐 Founder lock enabled. Only the Founder/Leader can modify settings, change description, or set join policy limitations.
-          </div>
-      `
-      }
-    `;
-  } else if (currentTab === "RESEARCH") {
-    let getSkillUpgradeCardHtml = (
-      key,
-      label,
-      bonusText,
-      currentL,
-      maxL,
-      col,
-    ) => {
-      let costGold = 0;
-      let costSoul = 0;
-      let soulName = "";
-
-      if (key === "steel_phalanx" || key === "vitality_well") {
-        costGold = Math.floor(
-          (key === "steel_phalanx" ? 25000 : 20000) * Math.pow(1.35, currentL),
-        );
-        costSoul = Math.floor(200 * Math.pow(1.25, currentL));
-        soulName = "Monster Souls";
-      } else {
-        let baseG =
-          key === "prosperity_accord"
-            ? 40000
-            : key === "voyagers_guidance"
-              ? 50000
-              : key === "clan_supply_depot"
-                ? 55000
-                : 45000;
-        let baseS =
-          key === "aetheric_wisdom" ? 6 : key === "clan_supply_depot" ? 8 : 5;
-        let scaleG = key === "clan_supply_depot" ? 1.45 : 1.4;
-        let scaleS = key === "clan_supply_depot" ? 1.35 : 1.3;
-        costGold = Math.floor(baseG * Math.pow(scaleG, currentL));
-        costSoul = Math.floor(baseS * Math.pow(scaleS, currentL));
-        soulName = "Luminous Souls";
-      }
-
-      let isMaxed = currentL >= maxL;
-      let clanLevel = clan.level || 1;
-      let isGated = currentL >= clanLevel * 2;
-      let canAffordGold = clan.gold_bank >= costGold;
-      let canAffordSoul =
-        key === "steel_phalanx" || key === "vitality_well"
-          ? clan.souls_bank >= costSoul
-          : clan.luminous_bank >= costSoul;
-
-      let canUpgrade =
-        isLeader && !isMaxed && !isGated && canAffordGold && canAffordSoul;
-      let bgStyle = window.hexToRgba
-        ? window.hexToRgba(col, 0.04)
-        : "rgba(255,255,255,0.02)";
-      let btnTextColor =
-        col === "#f1c40f" || col === "#ffb6c1" ? "#111" : "#fff";
-
-      let icon = "";
-      if (key === "steel_phalanx")
-        icon =
-          window.getUiIconSvg("atk", 13) + " " + window.getUiIconSvg("def", 13);
-      else if (key === "vitality_well") icon = window.getUiIconSvg("maxHp", 13);
-      else if (key === "prosperity_accord")
-        icon = window.getUiIconSvg("gold", 13);
-      else if (key === "voyagers_guidance")
-        icon = window.getUiIconSvg("dropRate", 13);
-      else if (key === "aetheric_wisdom")
-        icon = window.getUiIconSvg("xpRate", 13);
-
-      let gateText = "";
-      if (isGated && !isMaxed) {
-        gateText = `<br><span style="color:#e74c3c; font-weight:bold;">🔒 BLOCKED: Level up Clan to ${Math.ceil((currentL + 1) / 2)} to upgrade further!</span>`;
-      }
-
-      return `
-        <div class="shop-row" style="border-color:${col}; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:4px; padding:10px; margin-bottom:6px; cursor:help;">
-                          <div style="display:flex; justify-content:space-between; align-items:center;">
-                              <strong style="color:${col}; font-size:11.5px; display:inline-flex; align-items:center; gap:4px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${currentL}/${maxL})</span></strong>
-                              <span style="color:#aaa; font-size:9px; font-family:monospace;">${isMaxed ? "MAXED" : "RESEARCH"}</span>
-                          </div>
-                          <div style="font-size:9.5px; color:#aaa; line-height:1.35; margin-bottom:6px;">
-                              Current active bonus: <strong style="color:#fff;">${bonusText}</strong>${gateText}<br>
-                              ${
-                                isMaxed
-                                  ? `<span style="color:#2ecc71; font-weight:bold;">Shared research cap reached!</span>`
-                                  : `
-                              Cost: <span style="${canAffordGold ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costGold)} Gold</span> &
-                              <span style="${canAffordSoul ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costSoul)} ${soulName}</span>`
-                              }
-                          </div>
-            ${
-              isLeader
-                ? `
-                <button class="btn-action" style="background:${col}; color:${btnTextColor}; font-weight:bold; font-size:10px; padding:4px;" ${canUpgrade ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeUpgradeClanSkill('${key}')">Upgrade Research</button>
-            `
-                : `<div style="font-size:8.5px; color:#888; font-style:italic; text-align:center;">* Only the Clan Founder can initiate research upgrades.</div>`
-            }
-        </div>
-      `;
-    };
-
-    tabContentHtml = `
-                                  <div style="display:flex; flex-direction:column; gap:4px;">
-                                      ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", "+" + ((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1) + "% Attack & Defense", clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
-                                      ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", "+" + ((clan.skill_vitality_well || 0) * 0.8).toFixed(1) + "% Max HP", clan.skill_vitality_well || 0, 50, "#3498db")}
-                                      ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", "+" + ((clan.skill_prosperity_accord || 0) * 1.0).toFixed(1) + "% Gold Multiplier", clan.skill_prosperity_accord || 0, 30, "#f1c40f")}
-                                      ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager's Guidance", "+" + ((clan.skill_voyagers_guidance || 0) * 0.5).toFixed(1) + "% Drop Rate & Quality", clan.skill_voyagers_guidance || 0, 30, "#2ecc71")}
-                                      ${getSkillUpgradeCardHtml("aetheric_wisdom", "Aetheric Wisdom", "+" + ((clan.skill_aetheric_wisdom || 0) * 1.0).toFixed(1) + "% XP Rate", clan.skill_aetheric_wisdom || 0, 30, "#9b59b6")}
-                                      ${getSkillUpgradeCardHtml("clan_supply_depot", "Supply Depot", "Crate yields: " + (clan.skill_clan_supply_depot || 0) * 20 + "% Gold & " + (clan.skill_clan_supply_depot || 0) * 10 + "% Souls", clan.skill_clan_supply_depot || 0, 30, "#ffaa00")}
-                                  </div>
-                                `;
-  }
-
-  contentEl.innerHTML = `
-    ${tabHeaderHtml}
-    ${tabContentHtml}
-  `;
-};
-
-window.switchClanTab = function (tabId) {
-  window.clanActiveTab = tabId;
-  window.fetchClanData();
-};
-
-window.executeClaimClanQuestReward = function (questId) {
-  const userId = window.getGameUserId();
-  fetch(`${window.GAME_SERVER_URL}/api/clan/quests-claim`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, questId }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.success && data.rewards) {
-        let r = data.rewards;
-        let claimsReport = [];
-
-        if (r.keys > 0) {
-          window.addEtcDrop("Gacha Key", r.keys);
-          claimsReport.push(`+${r.keys} Gacha Keys`);
-        }
-        if (r.cores > 0) {
-          window.addEtcDrop("Catalyst Core", r.cores);
-          claimsReport.push(`+${r.cores} Catalyst Cores`);
-        }
-        if (r.essence > 0) {
-          window.addEtcDrop("Astral Essence", r.essence);
-          claimsReport.push(`+${r.essence} Astral Essence`);
-        }
-        if (r.shards > 0) {
-          window.addEtcDrop("Eridium Shard", r.shards);
-          claimsReport.push(`+${r.shards} Eridium Shards`);
-        }
-        if (r.souls > 0) {
-          window.addEtcDrop("Monster Soul", r.souls);
-          claimsReport.push(`+${r.souls} Monster Souls`);
-        }
-        if (r.pp > 0) {
-          window.playerStats.prestigePoints =
-            (window.playerStats.prestigePoints || 0) + r.pp;
-          claimsReport.push(`+${r.pp} Prestige Points (PP)`);
-        }
-        if (r.sacks > 0) {
-          window.addUseDrop("Clan Reward Sack", r.sacks);
-          claimsReport.push(`+${r.sacks}x Clan Sacks`);
-        }
-        if (r.goldBase > 0) {
-          let stgScale = Math.max(
-            1,
-            Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) +
-              1,
-          );
-          let calculatedGold = Math.ceil(r.goldBase * Math.pow(1.8, stgScale));
-          window.playerStats.coins += calculatedGold;
-          window.playerStats.totalGoldEarned =
-            (window.playerStats.totalGoldEarned || 0) + calculatedGold;
-          claimsReport.push(`+${window.formatNumber(calculatedGold)} Gold`);
-        }
-
-        window.pushHeaderToast(
-          `🎁 Quest Claimed: ${claimsReport.join(", ")}!`,
-          "#2ecc71",
-        );
-        if (window.SoundManager) window.SoundManager.play("revive");
-
-        // Particle burst
-        let cvs = document.getElementById("gameCanvas");
-        let w = cvs ? cvs.width : 750;
-        let h = cvs ? cvs.height : 250;
-        for (let i = 0; i < 30; i++) {
-          window.particles.push({
-            x: w / 2,
-            y: h / 2,
-            vx: (Math.random() - 0.5) * 10,
-            vy: (Math.random() - 0.5) * 10,
-            radius: Math.random() * 3 + 1,
-            color: "#f1c40f",
-            alpha: 1,
-            life: 30,
-          });
-        }
-
-        window.fetchClanData();
-        window.updateUI();
-        window.renderInventory();
-        window.saveGame();
-      } else {
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-      }
-    })
-    .catch(() => {
-      window.pushHeaderToast(
-        "❌ Network error claiming quest reward.",
-        "#e74c3c",
-      );
-    });
-};
-
-window.executeSaveClanSettings = function () {
-  let descInput = document.getElementById("settings-clan-desc");
-  let policySelect = document.getElementById("settings-clan-policy");
-  let minLvlInput = document.getElementById("settings-clan-minlevel");
-
-  if (!descInput || !policySelect || !minLvlInput) return;
-
-  const userId = window.getGameUserId();
-  const description = descInput.value.trim();
-  const joinPolicy = policySelect.value;
-  const minLevel = parseInt(minLvlInput.value, 10) || 1;
-
-  fetch(`${window.GAME_SERVER_URL}/api/clan/update-settings`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, description, joinPolicy, minLevel }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.success) {
-        window.pushHeaderToast(`✓ Clan settings customized!`, "#2ecc71");
-        window.fetchClanData();
-        window.saveGame();
-      } else {
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-      }
-    })
-    .catch(() => {
-      window.pushHeaderToast(
-        "❌ Network error customizing settings.",
-        "#e74c3c",
-      );
-    });
-};
-
-window.executeKickMember = function (targetUserId, targetName) {
-  window.showCustomConfirm(
-    "Expel Member",
-    `Are you sure you want to expel **${targetName}** from the Clan? Their contribution stats will be lost permanently.`,
-    "Expel Member",
-    "Cancel",
-    "#c0392b",
-    function () {
-      const userId = window.getGameUserId();
-      fetch(`${window.GAME_SERVER_URL}/api/clan/kick`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, targetUserId }),
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.success) {
-            window.pushHeaderToast(
-              `🏃 Expelled member: ${targetName}.`,
-              "#e67e22",
-            );
-            window.fetchClanData();
-          } else {
-            window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-          }
-        })
-        .catch(() => {
-          window.pushHeaderToast(
-            "❌ Network error expelling member.",
-            "#e74c3c",
-          );
-        });
-    },
-  );
-};
-
-window.executeUpgradeClanSkill = function (skillKey) {
-  if (!window.GAME_SERVER_URL) {
-    let currentL = window.playerStats.clanSkills[skillKey] || 0;
-    window.playerStats.clanSkills[skillKey] = currentL + 1;
-    window.pushHeaderToast(`✓ Research upgraded! (Offline)`, "#2ecc71");
-    window.updateUI();
-    window.saveGame();
-    return;
-  }
-
-  const userId = window.getGameUserId();
-  fetch(`${window.GAME_SERVER_URL}/api/clan/upgrade-skill`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, skillKey }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.success) {
-        window.pushHeaderToast(`✓ Research upgraded!`, "#2ecc71");
-        if (window.playerStats.clanSkills) {
-          window.playerStats.clanSkills[skillKey] =
-            (window.playerStats.clanSkills[skillKey] || 0) + 1;
-        }
-        window.fetchClanData();
-        window.updateUI();
-        window.saveGame();
-      } else {
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-      }
-    })
-    .catch(() => {
-      let currentL = window.playerStats.clanSkills[skillKey] || 0;
-      window.playerStats.clanSkills[skillKey] = currentL + 1;
-      window.pushHeaderToast(`✓ Research upgraded! (Offline)`, "#2ecc71");
-      window.updateUI();
-      window.saveGame();
-    });
-};
+// --- ACTIVITIES & RUNS CONTROLLER (CRUCIBLE, CAVERNS & AUTO-SALVAGE) ---
 
 window.openCrucibleDraftModal = function () {
   if (
     window.playerStats.isDungeonMode ||
     window.playerStats.isCrucibleMode ||
-    window.playerStats.isPrestigeBossMode
+    window.playerStats.isPrestigeBossMode ||
+    window.playerStats.isUberBoss
   ) {
     window.pushHeaderToast(
       "Cannot enter: already in another activity!",
@@ -12785,8 +11466,8 @@ window.openCrucibleDraftModal = function () {
           <strong style="color:#df9ffb; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">🔮 INFUSE SELECTION (1x Limit)</strong>
           <span style="font-size:9.5px; color:#aaa; display:block; margin-bottom:8px;">Spend 1 Luminous Soul to empower a card's baseline properties.</span>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
-            <button class="btn-action" style="background:#2980b9; font-size:10px; padding:6px;" ${canInfuse && draftState.selectedBuff && draftState.infusedType !== "buff" ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.infuseDraftCard('buff')">Infuse Buff (+50% strength)</button>
-            <button class="btn-action" style="background:#c0392b; font-size:10px; padding:6px;" ${canInfuse && draftState.selectedDebuff && draftState.infusedType !== "debuff" ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.infuseDraftCard('debuff')">Infuse Debuff (+Loot Mult)</button>
+            <button class="btn-action" style="background:#2980b9; font-size:10px; padding:6px;" ${canInfuse && draftState.selectedBuff && draftState.infusedType !== "buff" ? "" : 'disabled style="opacity:0.5;"'} onclick="window.infuseDraftCard('buff')">Infuse Buff (+50% strength)</button>
+            <button class="btn-action" style="background:#c0392b; font-size:10px; padding:6px;" ${canInfuse && draftState.selectedDebuff && draftState.infusedType !== "debuff" ? "" : 'disabled style="opacity:0.5;"'} onclick="window.infuseDraftCard('debuff')">Infuse Debuff (+Loot Mult)</button>
           </div>
           ${draftState.infusedType !== "none" ? `<span style="display:block; margin-top:6px; font-size:10px; color:#2ecc71; font-weight:bold;">Active Infusion: ${draftState.infusedType.toUpperCase()} (+1 Luminous Soul spent)</span>` : ""}
         </div>
@@ -12997,7 +11678,7 @@ window.renderCavernSigilConsole = function () {
   }
 
   // Search if any sigils exist
-  let sigils = window.inventory.EQUIP.filter(
+  let sigils = window.inventory.SIGIL.filter(
     (item) => item && item.type === "sigil",
   );
 
@@ -13009,7 +11690,7 @@ window.renderCavernSigilConsole = function () {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 2px rgba(155, 89, 182, 0.4));"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l1.5 1.5M17 6l2 2"/></svg>
               Optional Cavern Sigils
             </strong>
-            <span style="font-size:9.5px; color:#aaa;">No Cavern Sigils owned. Slay Dungeon/Stage Bosses, or Guardians to drop Sacks!</span>
+            <span style="font-size:9.5px; color:#aaa;">No Cavern Sigils owned. Slay Dungeon/Stage Bosses or Guardians to drop Sacks!</span>
           </div>
           <span style="font-size:9.5px; color:#666; font-style:italic;">0 owned</span>
         </div>
@@ -13041,7 +11722,7 @@ window.openCavernSigilSelectorModal = function (e) {
   win.style.left = "40px";
   win.style.top = "110px";
 
-  let sigils = window.inventory.EQUIP.filter(
+  let sigils = window.inventory.SIGIL.filter(
     (item) => item && item.type === "sigil",
   );
 
@@ -13073,7 +11754,7 @@ window.openCavernSigilSelectorModal = function (e) {
               Slot Cavern Sigil
           </span>
           <button onclick="document.getElementById('sigil-swap-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
-        </div>
+      </div>
       <div class="draggable-content">
           ${contentHtml}
       </div>
@@ -13086,172 +11767,6 @@ window.openCavernSigilSelectorModal = function (e) {
 window.unslotCavernSigil = function () {
   window.state.slottedCavernSigil = null;
   window.updateUI();
-};
-
-window.selectDraftCard = function (type, idx) {
-  // Bound mutator placeholder mapping for card selectors
-};
-
-window.infuseDraftCard = function (type) {
-  // Bound mutator placeholder
-};
-
-window.executeUpgradeClanSkill = function (skillKey) {
-  if (!window.GAME_SERVER_URL) {
-    let currentL = window.playerStats.clanSkills[skillKey] || 0;
-    window.playerStats.clanSkills[skillKey] = currentL + 1;
-    window.pushHeaderToast(`✓ Research upgraded! (Offline)`, "#2ecc71");
-    window.updateUI();
-    window.saveGame();
-    return;
-  }
-
-  const userId = window.getGameUserId();
-  fetch(`${window.GAME_SERVER_URL}/api/clan/upgrade-skill`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, skillKey }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.success) {
-        window.pushHeaderToast(`✓ Research upgraded!`, "#2ecc71");
-        if (window.playerStats.clanSkills) {
-          window.playerStats.clanSkills[skillKey] =
-            (window.playerStats.clanSkills[skillKey] || 0) + 1;
-        }
-        window.fetchClanData();
-        window.updateUI();
-        window.saveGame();
-      } else {
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-      }
-    })
-    .catch(() => {
-      let currentL = window.playerStats.clanSkills[skillKey] || 0;
-      window.playerStats.clanSkills[skillKey] = currentL + 1;
-      window.pushHeaderToast(`✓ Research upgraded! (Offline)`, "#2ecc71");
-      window.updateUI();
-      window.saveGame();
-    });
-};
-
-window.executeDisbandClan = function () {
-  let modal = document.getElementById("clan-draggable-window");
-  let label = window.playerStats.clanName || "Clan";
-
-  window.showCustomConfirm(
-    "Leave Clan",
-    `Are you sure you want to exit ${label}? If you are the founder and sole member, this action will completely dissolve the Clan. Contribution ranks will be lost.`,
-    "Leave Clan",
-    "Cancel",
-    "#e74c3c",
-    function () {
-      const userId = window.getGameUserId();
-      fetch(`${window.GAME_SERVER_URL}/api/clan/leave`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.success) {
-            window.playerStats.clanId = null;
-            window.playerStats.clanName = null;
-            window.playerStats.clanSkills = {
-              steel_phalanx: 0,
-              vitality_well: 0,
-              prosperity_accord: 0,
-              voyagers_guidance: 0,
-            };
-            window.pushHeaderToast("🏃 You have departed the Clan.", "#7f8c8d");
-            if (modal) modal.remove();
-            window.hideTooltip();
-            window.setPauseState(false);
-            window.updateUI();
-            window.saveGame();
-          } else {
-            window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-          }
-        })
-        .catch(() => {
-          window.pushHeaderToast("❌ Network error exiting clan.", "#e74c3c");
-        });
-    },
-  );
-};
-
-window.executeClanDonate = function (type, amount) {
-  const userId = window.getGameUserId();
-  let balance = 0;
-
-  if (type === "gold") {
-    balance = window.playerStats.coins || 0;
-  } else if (type === "souls") {
-    balance = window.inventory.ETC["Monster Soul"] || 0;
-  } else if (type === "luminous") {
-    balance = window.inventory.ETC["Luminous Soul"] || 0;
-  }
-
-  if (balance < amount) {
-    window.pushHeaderToast("❌ Insufficient funds for donation!", "#e74c3c");
-    return;
-  }
-
-  // Deduct locally first
-  if (type === "gold") {
-    window.playerStats.coins -= amount;
-    if (window.playerStats.coins === 0) {
-      window.playerStats.hasTriggeredExactChange = true;
-    }
-  } else if (type === "souls") {
-    window.inventory.ETC["Monster Soul"] -= amount;
-    if (window.inventory.ETC["Monster Soul"] === 0) {
-      delete window.inventory.ETC["Monster Soul"];
-    }
-  } else if (type === "luminous") {
-    window.inventory.ETC["Luminous Soul"] -= amount;
-    if (window.inventory.ETC["Luminous Soul"] === 0) {
-      delete window.inventory.ETC["Luminous Soul"];
-    }
-  }
-
-  // Hit network endpoint
-  fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, type, amount }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.success) {
-        window.pushHeaderToast(
-          `🙏 Contribution Recorded! +${amount.toLocaleString()}`,
-          "#2ecc71",
-        );
-        window.fetchClanData();
-        window.updateUI();
-        window.saveGame();
-      } else {
-        // Rollback local deduction
-        if (type === "gold") {
-          window.playerStats.coins += amount;
-        } else if (type === "souls") {
-          window.inventory.ETC["Monster Soul"] =
-            (window.inventory.ETC["Monster Soul"] || 0) + amount;
-        } else if (type === "luminous") {
-          window.inventory.ETC["Luminous Soul"] =
-            (window.inventory.ETC["Luminous Soul"] || 0) + amount;
-        }
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-      }
-    })
-    .catch(() => {
-      // Keep local change if we want it to work offline, but warn user
-      window.pushHeaderToast(`🙏 Contribution Recorded Offline!`, "#2ecc71");
-      window.updateUI();
-      window.saveGame();
-    });
 };
 
 window.updateSalvagePadUI = function () {
@@ -13364,47 +11879,20 @@ window.updateSalvagePadUI = function () {
   }
 };
 
-window.executeDisbandClan = function () {
-  window.showCustomConfirm(
-    "DISBAND CLAN",
-    "WARNING: This will permanently dissolve the clan, wipe the vault, and remove all members. This action is IRREVERSIBLE.",
-    "Disband Clan",
-    "Cancel",
-    "#e74c3c",
-    function () {
-      const userId = window.getGameUserId();
-      fetch(`${window.GAME_SERVER_URL}/api/clan/disband`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.success) {
-            window.pushHeaderToast("🏰 Clan disbanded.", "#e74c3c");
-            window.playerStats.clanId = null;
-            window.playerStats.clanName = null;
-            let modal = document.getElementById("clan-draggable-window");
-            if (modal) modal.remove();
-            window.hideTooltip();
-            window.updateUI();
-            window.saveGame();
-          } else {
-            window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-          }
-        })
-        .catch(() => {
-          window.pushHeaderToast(
-            "❌ Network error disbanding clan.",
-            "#e74c3c",
-          );
-        });
-    },
-  );
-};
-
 // --- CAVERNS DESCENT PREPARATION PORTAL ---
 window.openCavernsPreparationModal = function () {
+  if (
+    window.playerStats.isDungeonMode ||
+    window.playerStats.isCrucibleMode ||
+    window.playerStats.isPrestigeBossMode ||
+    window.playerStats.isUberBoss
+  ) {
+    window.pushHeaderToast(
+      "Cannot enter: already in another activity!",
+      "#e74c3c",
+    );
+    return;
+  }
   window.setPauseState(true);
 
   if (!window.state.selectedCavernsMode) {
@@ -13602,6 +12090,18 @@ window.unslotCavernSigilInline = function (event) {
 };
 
 window.executeCavernsDescent = function () {
+  if (
+    window.playerStats.isDungeonMode ||
+    window.playerStats.isCrucibleMode ||
+    window.playerStats.isPrestigeBossMode ||
+    window.playerStats.isUberBoss
+  ) {
+    window.pushHeaderToast(
+      "Cannot enter: already in another activity!",
+      "#e74c3c",
+    );
+    return;
+  }
   let mode = window.state.selectedCavernsMode || "equip";
   let keys = window.playerStats.dungeonKeys || 0;
 
@@ -13667,4 +12167,67 @@ window.executeCavernsDescent = function () {
   window.updateUI();
   window.renderInventory();
   window.saveGame();
+};
+
+window.requestRename = function () {
+  const inputEl = document.getElementById("settings-player-name");
+  if (!inputEl) return;
+  const newName = inputEl.value.trim();
+
+  if (!window.validateNameInput(newName)) {
+    window.pushHeaderToast(
+      "❌ Invalid Name! 3-14 characters, letters/numbers and single spaces only.",
+      "#e74c3c",
+    );
+    return;
+  }
+
+  if (!window.GAME_SERVER_URL) {
+    // Offline / local fallback mode
+    window.playerStats.playerName = newName;
+    const currentLabel = document.getElementById("current-name-label");
+    if (currentLabel) {
+      currentLabel.innerText = `(Current: ${newName})`;
+    }
+    const headerName = document.getElementById("header-player-name");
+    if (headerName) {
+      headerName.innerHTML = `<span>${newName}</span>`;
+    }
+    window.pushHeaderToast(
+      "👤 Name changed successfully (Offline)!",
+      "#2ecc71",
+    );
+    window.updateUI();
+    window.saveGame();
+    return;
+  }
+
+  const userId = window.getGameUserId();
+  fetch(`${window.GAME_SERVER_URL}/api/register-name`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, name: newName }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.success) {
+        window.playerStats.playerName = newName;
+        const currentLabel = document.getElementById("current-name-label");
+        if (currentLabel) {
+          currentLabel.innerText = `(Current: ${newName})`;
+        }
+        window.pushHeaderToast(
+          "👤 Character name registered successfully!",
+          "#2ecc71",
+        );
+        window.updateUI();
+        window.saveGame();
+      } else {
+        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+      }
+    })
+    .catch((err) => {
+      console.error("Rename failed:", err);
+      window.pushHeaderToast("❌ Network error registering name.", "#e74c3c");
+    });
 };

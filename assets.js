@@ -1,0 +1,711 @@
+/* ==========================================================================
+   PRIMARY PURPOSE: Centralized Declarative Vector Asset Catalog (AssetCatalog).
+   Houses all procedural paths, gradients, and rendering blueprints.
+   ========================================================================= */
+
+window.AssetCatalog = {
+  // Helper to compile inner SVG pathways into a unified, responsive HTML wrapper
+  compile(
+    viewBox,
+    innerHtml,
+    size = 32,
+    bg = "rgba(170, 170, 170, 0.12)",
+    border = "#444",
+  ) {
+    const shadow = "inset 0 0 6px rgba(0, 0, 0, 0.6)";
+    return `
+      <span style="
+        background: ${bg}; 
+        border: 1px solid ${border}; 
+        border-radius: 4px; 
+        padding: 4px; 
+        display: inline-flex; 
+        align-items: center; 
+        justify-content: center; 
+        width: ${size}px; 
+        height: ${size}px; 
+        box-shadow: ${shadow};
+      ">
+        <svg viewBox="${viewBox}" width="100%" height="100%" style="display:block;">
+          ${innerHtml}
+        </svg>
+      </span>
+    `;
+  },
+
+  uiIcons: {
+    atk: {
+      color: "#e74c3c",
+      path: `<path d="M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2" />`,
+      opacity: "0",
+    },
+    maxHp: {
+      color: "#e74c3c",
+      path: `<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />`,
+      opacity: "0.15",
+    },
+    def: {
+      color: "#3498db",
+      path: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />`,
+      opacity: "0.15",
+    },
+    moveSpeed: {
+      color: "#3498db",
+      path: `<path d="M6 5h5v6l8 4c2 1 2 4-1 4H6V5zm3 2h2M9 9h2" />`,
+      opacity: "0",
+    },
+    critChance: {
+      color: "#f1c40f",
+      path: `<path d="M12 2 Q12 12, 2 12 Q12 12, 12 22 Q12 12, 22 12 Z" />`,
+      opacity: "0",
+    },
+    critDamage: {
+      color: "#e67e22",
+      path: `<path d="M12 2l3 5.5 5.5-3-3 5.5 5.5 3-5.5 3 3 5.5-5.5-3-3 5.5-3-5.5-5.5 3 3-5.5-5.5-3 5.5-3-3-5.5 5.5 3z" />`,
+      opacity: "0",
+    },
+    block: {
+      color: "#3498db",
+      path: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />`,
+      opacity: "0.15",
+    },
+    parry: {
+      color: "#9b59b6",
+      path: `<path d="M4 20L20 4M4 20L2 22M5 15L9 19M20 20L4 4M20 20L22 22M15 19L19 15" />`,
+      opacity: "0",
+    },
+    str: {
+      color: "#e74c3c",
+      path: `<path d="M18 10h-2V8c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H6c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h2v2c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2v-2h2c1.1 0 2-.9 2-2v-2c0-1.1-.9-2-2-2z" />`,
+      opacity: "0.15",
+    },
+    dex: {
+      color: "#e67e22",
+      path: `<circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="3" /><path d="M12 1v4 M12 19v4 M1 12h4 M19 12h4" />`,
+      opacity: "0.15",
+    },
+    int: {
+      color: "#9b59b6",
+      path: `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /><path d="M12 8v8 M8 12h8" />`,
+      opacity: "0.15",
+    },
+    activeAttackSpeed: {
+      color: "#e74c3c",
+      path: `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />`,
+      opacity: "0.15",
+    },
+    idleAttackSpeed: {
+      color: "#3498db",
+      path: `<circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />`,
+      opacity: "0",
+    },
+    dropRate: {
+      color: "#2ecc71",
+      path: `<path d="M16 10c-1-1.5-2.5-2-4-2s-3 .5-4 2C6 12, 4 15, 4 19c0 4 3.5 6 8 6s8-2 8-6C20 15, 18 12, 16 10z M12 6a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 12 6z" />`,
+      opacity: "0.15",
+    },
+    quality: {
+      color: "#ec4899",
+      path: `<path d="M6 3h12l4 6-10 12L2 9z" />`,
+      opacity: "0.15",
+    },
+    goldMulti: {
+      color: "#f1c40f",
+      path: `<circle cx="12" cy="12" r="10" /><path d="M12 8v8M9 10h6M9 13h6" />`,
+      opacity: "0.15",
+    },
+    gold: {
+      color: "#f1c40f",
+      path: `<circle cx="12" cy="12" r="10" /><path d="M12 8v8M9 10h6M9 13h6" />`,
+      opacity: "0.15",
+    },
+    rareSpawn: {
+      color: "#e67e22",
+      path: `<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-5.82 2.15L7 14.14 2 9.27l6.91-1.01L12 2z" />`,
+      opacity: "0.15",
+    },
+    fairySpawn: {
+      color: "#ffb6c1",
+      path: `<path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z" />`,
+      opacity: "0.15",
+    },
+    barrier: {
+      color: "#9b59b6",
+      path: `<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />`,
+      opacity: "0.15",
+    },
+    xpRate: {
+      color: "#a855f7",
+      path: `<circle cx="12" cy="12" r="10" /><path d="M17 13l-5-5-5 5M17 17l-5-5-5 5" />`,
+      opacity: "0.15",
+    },
+  },
+
+  // Declarative database of custom multi-stop gradients
+  gradients: {
+    equip(id, color) {
+      return `
+        <defs>
+          <linearGradient id="grad_eq_${id}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f8fafc"/>
+            <stop offset="60%" stop-color="${color}"/>
+            <stop offset="100%" stop-color="#475569"/>
+          </linearGradient>
+        </defs>
+      `;
+    },
+    weapon(id, color) {
+      return `
+        <defs>
+          <linearGradient id="grad_weap_${id}" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="50%" stop-color="${color}"/>
+            <stop offset="100%" stop-color="#555555"/>
+          </linearGradient>
+        </defs>
+      `;
+    },
+    shield(id, color) {
+      return `
+        <defs>
+          <linearGradient id="grad_sh_${id}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${color}"/>
+            <stop offset="100%" stop-color="#2c3e50"/>
+          </linearGradient>
+        </defs>
+      `;
+    },
+    liquid(id, color) {
+      return `
+        <defs>
+          <linearGradient id="grad_liq_${id}" x1="0" y1="100%" x2="0" y2="0%">
+            <stop offset="0%" stop-color="rgba(0,0,0,0.3)"/>
+            <stop offset="30%" stop-color="${color}"/>
+            <stop offset="85%" stop-color="${color}"/>
+            <stop offset="100%" stop-color="#ffffff"/>
+          </linearGradient>
+        </defs>
+      `;
+    },
+  },
+
+  // Blueprints for procedurally rendering generic equipment based on slots
+  genericEquipment: {
+    weapon(id, color) {
+      return `
+        ${window.AssetCatalog.gradients.weapon(id, color)}
+        <path d="M16 3 L19 8 L18 21 L14 21 L13 8 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.8" />
+        <rect x="11" y="21" width="10" height="2.5" rx="0.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />
+        <rect x="14.5" y="23.5" width="3" height="5" fill="#5c3a21" stroke="#000" stroke-width="1" />
+        <circle cx="16" cy="29.5" r="1.5" fill="#f1c40f" stroke="#000" stroke-width="1" />
+      `;
+    },
+    shield(id, color) {
+      return `
+        ${window.AssetCatalog.gradients.shield(id, color)}
+        <path d="M6 6 Q16 4, 26 6 Q25 18, 16 28 Q7 18, 6 6 Z" fill="url(#grad_sh_${id})" stroke="#000" stroke-width="1.8" />
+        <path d="M11 11 Q16 9, 21 11 L19 19 Q16 23, 16 23 Q16 23, 13 19 Z" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.55" />
+      `;
+    },
+    dagger(id, color) {
+      return `
+        <path d="M16 4 L18 9 L17 19 L15 19 L14 9 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.8" />
+        <rect x="12" y="19" width="8" height="2" fill="${color}" stroke="#000" stroke-width="1.2" />
+        <rect x="14.5" y="21" width="3" height="4" fill="#3b2f2f" stroke="#000" stroke-width="1" />
+      `;
+    },
+    tome(id, color) {
+      return `
+        <rect x="8" y="6" width="16" height="20" rx="1.5" fill="${color}" stroke="#000" stroke-width="2" />
+        <rect x="10" y="8" width="12" height="16" fill="#ffffff" opacity="0.9" rx="1" />
+        <line x1="12" y1="12" x2="20" y2="12" stroke="#444444" stroke-width="1.2" />
+        <line x1="12" y1="16" x2="18" y2="16" stroke="#444444" stroke-width="1.2" />
+      `;
+    },
+    helmet(id, color) {
+      return `
+        ${window.AssetCatalog.gradients.equip(id, color)}
+        <path d="M8 12 C8 6, 24 6, 24 12 L25 24 L16 30 L7 24 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+        <path d="M15 6 L17 6 L17 30 L15 30 Z" fill="${color}" stroke="#000" stroke-width="1" />
+        <path d="M8 14 L24 14 L24 17 L8 17 Z" fill="${color}" stroke="#000" stroke-width="1" />
+        <path d="M10 15 H14 V21 H10 Z M18 15 H22 V21 H18 Z" fill="#000" />
+        <circle cx="11" cy="24" r="1" fill="#000" /><circle cx="13" cy="24" r="1" fill="#000" />
+        <circle cx="11" cy="26" r="1" fill="#000" /><circle cx="13" cy="26" r="1" fill="#000" />
+        <circle cx="19" cy="24" r="1" fill="#000" /><circle cx="21" cy="24" r="1" fill="#000" />
+        <circle cx="19" cy="26" r="1" fill="#000" /><circle cx="21" cy="26" r="1" fill="#000" />
+      `;
+    },
+    chest(id, color) {
+      return `
+        ${window.AssetCatalog.gradients.equip(id, color)}
+        <path d="M4 11 C4 6, 11 8, 11 13 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" />
+        <path d="M28 11 C28 6, 21 8, 21 13 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" />
+        <path d="M8 8 Q16 11, 24 8 L25 21 C25 26, 16 29, 16 29 C16 29, 7 26, 7 21 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+        <path d="M15.5 10 L16.5 10 L16.5 28 L15.5 28 Z" fill="${color}" stroke="#000" stroke-width="0.8" />
+        <path d="M11 8 Q16 12, 21 8" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" />
+      `;
+    },
+    leggings(id, color) {
+      return `
+        ${window.AssetCatalog.gradients.equip(id, color)}
+        <rect x="7" y="6" width="18" height="5" rx="1.5" fill="${color}" stroke="#000" stroke-width="1.5" />
+        <path d="M7 11 L13 11 L12 18 L7 17 Z M19 11 L25 11 L25 17 L20 18 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
+        <path d="M9 18 L14 18 L13 28 L9 28 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
+        <circle cx="11.5" cy="20" r="2.2" fill="${color}" stroke="#000" stroke-width="1" />
+        <path d="M18 18 L23 18 L23 28 L19 28 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
+        <circle cx="20.5" cy="20" r="2.2" fill="${color}" stroke="#000" stroke-width="1" />
+      `;
+    },
+    overall(id, color) {
+      return `
+        ${window.AssetCatalog.gradients.equip(id, color)}
+        <path d="M3 11 Q10 8, 10 14 Z M29 11 Q22 8, 22 14 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" />
+        <path d="M4 14 Q10 12, 10 17 Z M28 14 Q22 12, 22 17 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.2" />
+        <path d="M8 8 L24 8 L22 20 L16 24 L10 20 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" />
+        <path d="M12 12 H20 M11 16 H21" stroke="${color}" stroke-width="1.8" stroke-linecap="round" />
+        <path d="M10 20 H22 L24 28 H8 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+        <line x1="13" y1="20" x2="11" y2="28" stroke="#000" stroke-width="1.5" /><line x1="19" y1="20" x2="21" y2="28" stroke="#000" stroke-width="1.5" />
+        <path d="M12 8 C12 11, 20 11, 20 8" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" />
+      `;
+    },
+    boots(id, color) {
+      return `
+        ${window.AssetCatalog.gradients.equip(id, color)}
+        <path d="M4 11 L10 7 L12 18 L16 23 L15 27 L4 26 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+        <path d="M16 11 L22 7 L24 18 L28 23 L27 27 L16 26 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+        <path d="M4 16 H10 M16 16 H22 M4 21 H12 M16 21 H24" stroke="#000" stroke-width="1.2" />
+        <rect x="4" y="12" width="6" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
+        <rect x="16" y="12" width="6" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
+        <circle cx="6" cy="24" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
+        <circle cx="18" cy="24" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
+      `;
+    },
+  },
+
+  // Blueprints for procedurally rendering bosses on indicators or consoles
+  bosses: {
+    guardian(uid) {
+      return `
+        <defs>
+          <linearGradient id="g_goliath_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#34495e"/><stop offset="100%" stop-color="#1a252f"/></linearGradient>
+          <radialGradient id="g_core_${uid}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff"/><stop offset="40%" stop-color="#00d2ff"/><stop offset="100%" stop-color="#003755"/></radialGradient>
+        </defs>
+        <path d="M32 4 L52 14 L46 44 L32 58 L18 44 L12 14 Z" fill="url(#g_goliath_${uid})" stroke="#00d2ff" stroke-width="2.5" stroke-linejoin="round" />
+        <circle cx="32" cy="30" r="10" fill="url(#g_core_${uid})" stroke="#fff" stroke-width="1.5" />
+        <polygon points="26,24 20,22 24,28" fill="#e74c3c" /><polygon points="38,24 44,22 40,28" fill="#e74c3c" />
+      `;
+    },
+    chronos(uid) {
+      return `
+        <defs><linearGradient id="g_chron_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#b7950b"/></linearGradient></defs>
+        <circle cx="32" cy="32" r="24" fill="none" stroke="url(#g_chron_${uid})" stroke-width="3" />
+        <g stroke="url(#g_chron_${uid})" stroke-width="3" stroke-linecap="round"><line x1="32" y1="4" x2="32" y2="8" /><line x1="32" y1="56" x2="32" y2="60" /><line x1="4" y1="32" x2="8" y2="32" /><line x1="56" y1="32" x2="60" y2="32" /></g>
+        <circle cx="32" cy="32" r="16" fill="#111" stroke="url(#g_chron_${uid})" stroke-width="1.5" />
+        <line x1="32" y1="32" x2="32" y2="20" stroke="#fff" stroke-width="2" stroke-linecap="round" />
+        <line x1="32" y1="32" x2="40" y2="32" stroke="#e67e22" stroke-width="1.5" stroke-linecap="round" />
+      `;
+    },
+    nexus(uid) {
+      return `
+        <defs><linearGradient id="g_nex_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff007f"/><stop offset="100%" stop-color="#00d2ff"/></linearGradient></defs>
+        <rect x="14" y="14" width="36" height="36" fill="none" stroke="url(#g_nex_${uid})" stroke-width="2" />
+        <rect x="20" y="20" width="24" height="24" fill="none" stroke="#00b894" stroke-width="1.5" />
+        <circle cx="32" cy="32" r="4" fill="#fff" stroke="#ff007f" stroke-width="1" />
+      `;
+    },
+  },
+
+  // Centralized configurations of materials and generic items
+  materials: {
+    "Eridium Shard"(uid) {
+      return `
+        <defs><linearGradient id="g_es_${uid}" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#e84393" /><stop offset="100%" stop-color="#8e44ad" /></linearGradient></defs>
+        <path d="M16 2 L26 16 L16 30 L6 16 Z" fill="url(#g_es_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M16 2 L16 30" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/><path d="M6 16 L26 16" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>
+      `;
+    },
+    "Glimmering Gachapon Key"(uid) {
+      return `
+        <defs><linearGradient id="g_gk_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00d2ff" /><stop offset="50%" stop-color="#e84393" /><stop offset="100%" stop-color="#9b59b6" /></linearGradient></defs>
+        <path d="M11 4 L14 11 L21 11 L15 15 L18 22 L11 17 L4 22 L7 15 L1 11 L8 11 Z" fill="url(#g_gk_${uid})" stroke="#000" stroke-width="1.8" />
+        <circle cx="11" cy="12" r="2.5" fill="#111" stroke="#000" stroke-width="1" />
+        <path d="M15 15 L27 27 L25 29 L23 27" stroke="#000" stroke-width="2" stroke-linecap="round" fill="none" />
+        <path d="M15.5 15.5 L26.5 26.5" stroke="url(#g_gk_${uid})" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M23.5 23.5 L21.5 25.5 M25.5 25.5 L23.5 27.5" stroke="url(#g_gk_${uid})" stroke-width="2" stroke-linecap="round"/>
+      `;
+    },
+    "Gacha Key"(uid) {
+      return `
+        <defs><linearGradient id="g_gkey_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700" /><stop offset="100%" stop-color="#b7950b" /></linearGradient></defs>
+        <circle cx="11" cy="21" r="6" fill="url(#g_gkey_${uid})" stroke="#000" stroke-width="2" />
+        <circle cx="11" cy="21" r="2.5" fill="#111" stroke="#000" stroke-width="1.5" />
+        <path d="M15 17 L27 5 L30 8 L28 10 L26 8 L24 12 L22 10" stroke="#000" stroke-width="2" stroke-linejoin="round" fill="none" />
+        <path d="M15.5 16.5 L26.5 5.5" stroke="url(#g_gkey_${uid})" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M26.5 5.5 L28.5 7.5 M24.5 7.5 L26.5 9.5" stroke="url(#g_gkey_${uid})" stroke-width="2" stroke-linecap="round"/>
+      `;
+    },
+    "Ancient Core"(uid) {
+      return `
+        <defs><radialGradient id="g_ac_${uid}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff" /><stop offset="30%" stop-color="#e74c3c" /><stop offset="100%" stop-color="#960018" /></radialGradient></defs>
+        <circle cx="16" cy="16" r="11" fill="url(#g_ac_${uid})" stroke="#000" stroke-width="2" />
+        <path d="M5 16 L27 16" stroke="#000" stroke-width="2" /><path d="M16 5 L16 27" stroke="#000" stroke-width="2" />
+        <circle cx="16" cy="16" r="4" fill="#fff" opacity="0.8" />
+      `;
+    },
+    "Overlord's Sigil"(uid) {
+      return `
+        <defs><linearGradient id="g_os_${uid}" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#1abc9c" /><stop offset="100%" stop-color="#16a085" /></linearGradient></defs>
+        <path d="M16 4 L19 14 L27 10 L24 20 L16 28 L8 20 L5 10 L13 14 Z" fill="url(#g_os_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="16" cy="16" r="3.5" fill="#fff" stroke="#000" stroke-width="1.5" />
+      `;
+    },
+    "Astral Essence"(uid) {
+      return `
+        <defs><linearGradient id="g_ae_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e84393" /><stop offset="50%" stop-color="#9b59b6" /><stop offset="100%" stop-color="#3498db" /></linearGradient></defs>
+        <path d="M16 3 L19 13 L29 16 L19 19 L16 29 L13 19 L3 16 L13 13 Z" fill="url(#g_ae_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round" />
+        <circle cx="16" cy="16" r="3" fill="#ffffff" opacity="0.9" />
+      `;
+    },
+    Scrap(uid, stop1, stop2) {
+      return `
+        <defs><linearGradient id="g_sc_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${stop1}" /><stop offset="100%" stop-color="${stop2}" /></linearGradient></defs>
+        <path d="M6 14 L16 4 L28 12 L22 26 L10 24 Z" fill="url(#g_sc_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M12 10 L18 20" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+      `;
+    },
+    "Luminous Soul"(uid) {
+      return `
+        <defs><linearGradient id="g_ls_${uid}" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#fd79a8" /><stop offset="100%" stop-color="#ffb6c1" /></linearGradient></defs>
+        <path d="M16 3 C16 3, 6 15, 6 22 C6 27, 10.5 30, 16 30 C21.5 30, 26 27, 26 22 C26 15, 16 3, 16 3 Z" fill="url(#g_ls_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="13" cy="20" r="3" fill="#fff" opacity="0.6"/>
+      `;
+    },
+    "Monster Soul"(uid) {
+      return `
+        <defs><linearGradient id="g_ms_${uid}" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#2d3436" /><stop offset="100%" stop-color="#636e72" /></linearGradient></defs>
+        <path d="M16 3 C16 3, 6 15, 6 22 C6 27, 10.5 30, 16 30 C21.5 30, 26 27, 26 22 C26 15, 16 3, 16 3 Z" fill="url(#g_ms_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M11 19 L14 17" stroke="#e74c3c" stroke-width="1.8" stroke-linecap="round"/><path d="M21 19 L18 17" stroke="#e74c3c" stroke-width="1.8" stroke-linecap="round"/>
+      `;
+    },
+    "Catalyst Core"(uid) {
+      return `
+        <defs><linearGradient id="g_cc_${uid}" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2ecc71" /><stop offset="50%" stop-color="#a3fd83" /><stop offset="100%" stop-color="#27ae60" /></linearGradient></defs>
+        <rect x="9" y="4" width="14" height="24" rx="3" fill="url(#g_cc_${uid})" stroke="#000" stroke-width="2"/>
+        <line x1="9" y1="10" x2="23" y2="10" stroke="#000" stroke-width="2"/><line x1="9" y1="22" x2="23" y2="22" stroke="#000" stroke-width="2"/>
+        <rect x="13" y="13" width="6" height="6" fill="#fff" opacity="0.9" rx="1"/>
+      `;
+    },
+  },
+
+  // Centralized configurations of consumables, scrolls, crates, and sacks
+  consumables: {
+    potion(uid, color) {
+      return `
+        ${window.AssetCatalog.gradients.liquid(uid, color)}
+        <path d="M13 5 L19 5 L19 12 L26 23 C28 26, 26 29, 21 29 L11 29 C6 29, 4 26, 6 23 L13 12 Z" fill="#334155" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M8.5 21 L23.5 21 L25 24 C26.2 26.2, 25 28, 21 28 L11 28 C7 28, 5.8 26.2, 7 24 Z" fill="url(#grad_liq_${uid})" stroke="#000" stroke-width="1.5"/>
+        <rect x="13.5" y="2" width="5" height="4" fill="#a0522d" stroke="#000" stroke-width="1.5"/>
+        <path d="M14.5 6 L14.5 11" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1" stroke-linecap="round" fill="none" />
+        <path d="M22 14 C23.5 17, 23.5 21, 22 24" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1" stroke-linecap="round" fill="none" />
+        <path d="M9 22 C8 24, 9 26, 11 27" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.65"/>
+      `;
+    },
+    scroll(uid, color) {
+      return `
+        <path d="M6 10 L26 6 L26 22 L6 26 Z" fill="#fdf6e2" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+        <rect x="13" y="11" width="6" height="11" transform="rotate(-11 16 16)" fill="${color}" stroke="#000" stroke-width="1.5" />
+        <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
+        <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
+      `;
+    },
+    sack(uid, stopColor) {
+      return `
+        <defs><linearGradient id="g_sk_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f1c40f" /><stop offset="100%" stop-color="${stopColor}" /></linearGradient></defs>
+        <path d="M16 8 C10 8, 6 11, 6 18 C6 25, 10 29, 16 29 C22 29, 26 25, 26 18 C26 11, 22 8, 16 8 Z" fill="url(#g_sk_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+        <ellipse cx="16" cy="10" rx="5" ry="1.8" fill="${stopColor}" stroke="#000" stroke-width="1.5" />
+        <path d="M14 10 L10 14 M18 10 L22 14" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round"/>
+      `;
+    },
+    crate(uid) {
+      return `
+            <defs><linearGradient id="g_cr_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d35400" /><stop offset="100%" stop-color="#5c3a21" /></linearGradient></defs>
+            <rect x="5" y="8" width="22" height="20" rx="3" fill="url(#g_cr_${uid})" stroke="#000" stroke-width="2"/>
+            <line x1="5" y1="8" x2="27" y2="28" stroke="#3e2723" stroke-width="2.5"/>
+            <line x1="27" y1="8" x2="5" y2="28" stroke="#3e2723" stroke-width="2.5"/>
+            <rect x="5" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
+            <rect x="22" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
+            <rect x="5" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
+            <rect x="22" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
+            <rect x="13" y="15" width="6" height="6" fill="#ffd700" stroke="#000" stroke-width="1.5" rx="1"/>
+          `;
+    },
+    cavern_sigil_sack(uid) {
+      return `
+            <defs>
+              <linearGradient id="g_css_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#9b59b6" />
+                <stop offset="100%" stop-color="#4a154b" />
+              </linearGradient>
+            </defs>
+            <path d="M16 8 C10 8, 6 11, 6 19 C6 26, 10 30, 16 30 C22 30, 26 26, 26 19 C26 11, 22 8, 16 8 Z" fill="url(#g_css_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M11 11 Q16 13, 21 11" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round"/>
+            <path d="M16 13 v12 M11 18 h10" stroke="#00d2ff" stroke-width="1.8" stroke-linecap="round" style="filter: drop-shadow(0 0 3px #00d2ff);" />
+          `;
+    },
+  },
+
+  // Centralized configurations of unique artifacts
+  artifacts: {
+    frenzy(uid) {
+      return `
+        <defs><radialGradient id="g_fz_${uid}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff5555"/><stop offset="100%" stop-color="#4a0008"/></radialGradient></defs>
+        <rect x="3" y="3" width="26" height="26" rx="6" fill="url(#g_fz_${uid})" stroke="#111" stroke-width="1.8"/>
+        <path d="M16 6 L12 16 L20 18 L16 26" fill="none" stroke="#f1c40f" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" style="filter: drop-shadow(0 0 3px #ff3300);"/>
+        <circle cx="16" cy="16" r="3" fill="#ffffff" stroke="#ff3333" stroke-width="1"/>
+      `;
+    },
+    vampirism(uid) {
+      return `
+        <defs>
+          <linearGradient id="g_vp_g_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff59d"/><stop offset="50%" stop-color="#f1c40f"/><stop offset="100%" stop-color="#9a7d0a"/></linearGradient>
+          <radialGradient id="g_vp_b_${uid}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff4d4d"/><stop offset="100%" stop-color="#7a0010"/></radialGradient>
+        </defs>
+        <path d="M8 6 L24 6 L22 16 C22 22, 16 24, 16 24 C16 24, 10 22, 10 16 Z" fill="url(#g_vp_g_${uid})" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M9.5 8 L22.5 8 C21 13, 11 13, 9.5 8 Z" fill="url(#g_vp_b_${uid})" stroke="#111" stroke-width="1"/>
+        <line x1="16" y1="24" x2="16" y2="28" stroke="url(#g_vp_g_${uid})" stroke-width="3" stroke-linecap="round"/>
+        <path d="M9 28 L23 28 Q16 31, 9 28 Z" fill="url(#g_vp_g_${uid})" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/>
+      `;
+    },
+    gold_hoard(uid) {
+      return `
+        <defs><linearGradient id="g_gh_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffd54f"/><stop offset="100%" stop-color="#a77c00"/></linearGradient></defs>
+        <circle cx="16" cy="8" r="4.5" fill="none" stroke="url(#g_gh_${uid})" stroke-width="2.5"/>
+        <line x1="16" y1="11" x2="16" y2="25" stroke="url(#g_gh_${uid})" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="9" y1="15" x2="23" y2="15" stroke="url(#g_gh_${uid})" stroke-width="3" stroke-linecap="round"/>
+        <path d="M7 20 C7 27, 25 27, 25 20" fill="none" stroke="url(#g_gh_${uid})" stroke-width="3.5" stroke-linecap="round"/>
+        <polygon points="7,19 4,22 9,21" fill="url(#g_gh_${uid})" stroke="#111" stroke-width="1"/>
+        <polygon points="25,19 28,22 23,21" fill="url(#g_gh_${uid})" stroke="#111" stroke-width="1"/>
+      `;
+    },
+    magic_find(uid) {
+      return `
+        <defs>
+          <linearGradient id="g_mf_gd_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff1a8"/><stop offset="100%" stop-color="#d4af37"/></linearGradient>
+          <linearGradient id="g_mf_em_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#55efc4"/><stop offset="100%" stop-color="#00b894"/></linearGradient>
+        </defs>
+        <ellipse cx="16" cy="18" rx="8" ry="10" fill="url(#g_mf_gd_${uid})" stroke="#111" stroke-width="2"/>
+        <circle cx="16" cy="10" r="4.2" fill="url(#g_mf_gd_${uid})" stroke="#111" stroke-width="1.8"/>
+        <line x1="16" y1="10" x2="16" y2="28" stroke="#111" stroke-width="1.8"/>
+        <rect x="13.2" y="13.5" width="5.6" height="8.5" rx="1.5" fill="url(#g_mf_em_${uid})" stroke="#111" stroke-width="1"/>
+        <path d="M8 14 Q3 15, 6 9.5 M24 14 Q29 15, 26 9.5 M7 21 Q3 23, 5 27 M25 21 Q29 23, 27 27" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+      `;
+    },
+    move_speed(uid) {
+      return `
+        <defs>
+          <linearGradient id="g_ms_s_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#7f8c8d"/></linearGradient>
+          <linearGradient id="g_ms_w_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#81ecec"/><stop offset="100%" stop-color="#0984e3"/></linearGradient>
+        </defs>
+        <path d="M10 24 L15 9 L24 15 L19 26 Z" fill="url(#g_ms_s_${uid})" stroke="#111" stroke-width="1.8"/>
+        <path d="M5 14 C5 10, 11 8, 14 15 C11 15, 7 13, 5 14 Z" fill="url(#g_ms_w_${uid})" stroke="#111" stroke-width="1.2"/>
+        <path d="M3 18 C3 14, 9 12, 12 19 C9 19, 5 17, 3 18 Z" fill="url(#g_ms_w_${uid})" stroke="#111" stroke-width="1.2"/>
+      `;
+    },
+    defense(uid) {
+      return `
+        <defs><linearGradient id="g_df_${uid}" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#4ba3e3"/><stop offset="100%" stop-color="#1c304a"/></linearGradient></defs>
+        <path d="M16 3 L27 9 L23 23 L16 29 L9 23 L5 9 Z" fill="url(#g_df_${uid})" stroke="#111" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M16 7 L23 11 L20 20 L16 25 L12 20 L9 11 Z" fill="none" stroke="#fff" opacity="0.3" stroke-width="1.8"/>
+        <circle cx="16" cy="15" r="3.2" fill="#fff" style="filter: drop-shadow(0 0 4px #fff);"/>
+      `;
+    },
+    parry_strike(uid) {
+      return `
+        <defs><linearGradient id="g_ps_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#555555"/></linearGradient></defs>
+        <path d="M7 10 L16 5 L25 10 L23 22 L16 28 L9 22 Z" fill="url(#g_ps_${uid})" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+        <line x1="8" y1="14" x2="24" y2="14" stroke="#c0392b" stroke-width="3" stroke-linecap="round"/>
+        <path d="M16 10 L16 22" stroke="#111" stroke-width="3" stroke-linecap="round"/><path d="M16 10 L16 22" stroke="#fff" stroke-width="1" stroke-linecap="round"/>
+      `;
+    },
+    echo_strike(uid) {
+      return `
+        <defs><linearGradient id="g_es_b_${uid}" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#020d1a"/><stop offset="100%" stop-color="#00ffcc"/></linearGradient></defs>
+        <path d="M4 28 L24 8 L28 12 L8 32 Z" fill="url(#g_es_b_${uid})" stroke="rgba(0, 255, 204, 0.4)" stroke-width="1.5" style="opacity:0.45;"/>
+        <path d="M8 24 L24 8 L28 12 L12 28 Z" fill="url(#g_es_b_${uid})" stroke="#111" stroke-width="1.8"/>
+        <path d="M12 28 L28 12" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+      `;
+    },
+    idle_spd(uid) {
+      return `
+        <defs><linearGradient id="g_is_${uid}" x1="0%" y1="0%" x2="1" y2="1"><stop offset="0%" stop-color="#2c3e50"/><stop offset="100%" stop-color="#07090c"/></linearGradient></defs>
+        <circle cx="16" cy="16" r="11" fill="url(#g_is_${uid})" stroke="#ffd700" stroke-width="2.2"/>
+        <circle cx="16" cy="16" r="8" fill="none" stroke="#e67e22" stroke-width="1" stroke-dasharray="3 3"/>
+        <line x1="16" y1="16" x2="16" y2="9.5" stroke="#f1c40f" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="16" y1="16" x2="21.5" y2="16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+      `;
+    },
+    active_spd(uid) {
+      return `
+        <defs><linearGradient id="g_as_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff9a6"/><stop offset="50%" stop-color="#f39c12"/><stop offset="100%" stop-color="#d35400"/></linearGradient></defs>
+        <path d="M16 2 L20 10 L28 10 L22 16 L25 24 L16 19 L7 24 L10 16 L4 10 L12 10 Z" fill="url(#g_as_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+        <circle cx="16" cy="13.5" r="4.2" fill="#fff" opacity="0.3"/>
+      `;
+    },
+    dodge_buff(uid) {
+      return `
+        <defs><linearGradient id="g_db_${uid}" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#2ecc71"/><stop offset="100%" stop-color="#145a32"/></linearGradient></defs>
+        <rect x="11.5" y="4" width="9" height="22" rx="4.5" fill="url(#g_db_${uid})" stroke="#111" stroke-width="1.8"/>
+        <rect x="13.5" y="7" width="5" height="16" fill="#fff" opacity="0.25"/>
+        <line x1="10" y1="12" x2="22" y2="12" stroke="#111" stroke-width="2"/><line x1="10" y1="18" x2="22" y2="18" stroke="#111" stroke-width="2"/>
+        <line x1="16" y1="26" x2="16" y2="29" stroke="#bdc3c7" stroke-width="2.5" stroke-linecap="round"/>
+      `;
+    },
+    extend_buffs(uid) {
+      return `
+        <defs><linearGradient id="g_eb_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffeaa7"/><stop offset="100%" stop-color="#d35400"/></linearGradient></defs>
+        <path d="M7 6 L25 6 L16 16 Z" fill="url(#g_eb_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M16 16 L7 26 L25 26 Z" fill="url(#g_eb_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+        <circle cx="16" cy="11" r="2.2" fill="#fff" style="filter: drop-shadow(0 0 3px #fff);"/>
+        <path d="M13 23 Q16 18, 19 23 Z" fill="#fff" opacity="0.8"/>
+      `;
+    },
+    bag_space(uid) {
+      return `
+        <defs><linearGradient id="g_bs_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a29bfe"/><stop offset="100%" stop-color="#6c5ce7"/></linearGradient></defs>
+        <rect x="6.5" y="11" width="19" height="15" rx="3.5" fill="url(#g_bs_${uid})" stroke="#111" stroke-width="1.8"/>
+        <path d="M11.5 11 C11.5 6, 20.5 6, 20.5 11" fill="none" stroke="#111" stroke-width="2.2"/>
+        <circle cx="16" cy="18.5" r="3" fill="#111" stroke="#fff" stroke-width="1.2"/>
+      `;
+    },
+    second_wind(uid) {
+      return `
+        <defs><linearGradient id="g_sw_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff7675"/><stop offset="100%" stop-color="#d63031"/></linearGradient></defs>
+        <circle cx="16" cy="10" r="5" fill="none" stroke="url(#g_sw_${uid})" stroke-width="2.5" style="filter: drop-shadow(0 0 3px #ff3300);"/>
+        <path d="M11 15.5 L21 15.5 L16 28.5 Z" fill="url(#g_sw_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+      `;
+    },
+    golem_stance(uid) {
+      return `
+        <defs><linearGradient id="g_gs_${uid}" x1="0%" y1="0%" x2="1" y2="1"><stop offset="0%" stop-color="#95a5a6"/><stop offset="100%" stop-color="#34495e"/></linearGradient></defs>
+        <polygon points="16,3 27,10.5 27,23.5 16,29 5,23.5 5,10.5" fill="url(#g_gs_${uid})" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M16 7 L23 11 L23 19 M9 19 L9 11 L16 7" fill="none" stroke="#e74c3c" stroke-width="1.8" style="filter: drop-shadow(0 0 2px #ff2200);"/>
+      `;
+    },
+    fairy_wealth(uid) {
+      return `
+        <defs><linearGradient id="g_fw_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff9ff3"/><stop offset="100%" stop-color="#f368e0"/></linearGradient></defs>
+        <circle cx="16" cy="16" r="10" fill="none" stroke="url(#g_fw_${uid})" stroke-width="2.8"/>
+        <path d="M12 9 Q16 3, 20 9 M9 16 Q16 23, 23 16" fill="none" stroke="#fff" opacity="0.65" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="16" cy="16" r="3.2" fill="#ffd700" stroke="#111" stroke-width="1.2"/>
+      `;
+    },
+    void_pull(uid) {
+      return `
+        <circle cx="16" cy="16" r="11" fill="#0c001a" stroke="#8e44ad" stroke-width="2.2" style="filter: drop-shadow(0 0 5px #8e44ad);"/>
+        <circle cx="16" cy="16" r="5" fill="#ff007f" style="filter: drop-shadow(0 0 4px #ff007f);"/>
+      `;
+    },
+    titan_grip(uid) {
+      return `
+        <defs><linearGradient id="g_tg_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#bdc3c7"/><stop offset="100%" stop-color="#2c3e50"/></linearGradient></defs>
+        <rect x="8.5" y="11" width="15" height="11.5" rx="3" fill="url(#g_tg_${uid})" stroke="#111" stroke-width="1.8"/>
+        <path d="M11 11 C11 5, 21 5, 21 11" fill="none" stroke="#ffd700" stroke-width="2.2"/>
+        <circle cx="11.5" cy="16.5" r="1" fill="#fff"/><circle cx="20.5" cy="16.5" r="1" fill="#fff"/>
+      `;
+    },
+    alchemist_alembic(uid) {
+      return `
+        <defs><linearGradient id="g_aa_${uid}" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#1abc9c"/><stop offset="100%" stop-color="#a3fd83"/></linearGradient></defs>
+        <circle cx="16" cy="19.5" r="8.2" fill="url(#g_aa_${uid})" stroke="#111" stroke-width="1.8"/>
+        <rect x="14.5" y="6.5" width="3" height="6.5" fill="#bdc3c7" stroke="#111" stroke-width="1.2"/>
+        <path d="M12 21 C12 21, 14 24, 16 24 C18 24, 20 21, 20 21" fill="none" stroke="#fff" opacity="0.4" stroke-width="1.2"/>
+      `;
+    },
+    philosopher_catalyst(uid) {
+      return `
+        <defs><linearGradient id="g_pc_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2ecc71"/><stop offset="100%" stop-color="#27ae60"/></linearGradient></defs>
+        <polygon points="16,3.5 27.5,25 4.5,25" fill="url(#g_pc_${uid})" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="16" cy="17.8" r="4.2" fill="#fff" stroke="#111" stroke-width="1.2" style="filter: drop-shadow(0 0 3px #fff);"/>
+      `;
+    },
+    cauldron_eternity(uid) {
+      return `
+        <defs><linearGradient id="g_ce_${uid}" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#3a045c"/><stop offset="100%" stop-color="#9b59b6"/></linearGradient></defs>
+        <path d="M8 10.5 C8 10.5, 4 23, 16 25.5 C28 23, 24 10.5, 24 10.5 Z" fill="#1b212c" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+        <ellipse cx="16" cy="10.5" rx="10" ry="2.8" fill="url(#g_ce_${uid})" stroke="#111" stroke-width="1.8"/>
+        <circle cx="12" cy="10" r="1.2" fill="#fff" opacity="0.6"/><circle cx="18" cy="11" r="1.5" fill="#fff" opacity="0.8"/>
+      `;
+    },
+  },
+
+  // Centralized configurations of unique weapons
+  uniques: {
+    staff(uid) {
+      return `
+        <defs><linearGradient id="g_un_st_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#e67e22"/></linearGradient></defs>
+        <line x1="6" y1="26" x2="26" y2="6" stroke="#853c00" stroke-width="3" stroke-linecap="round"/>
+        <line x1="6" y1="26" x2="26" y2="6" stroke="url(#g_un_st_${uid})" stroke-width="1" stroke-linecap="round" style="opacity:0.4;"/>
+        <circle cx="26" cy="6" r="5.2" fill="#e74c3c" stroke="#111" stroke-width="1.5" style="filter: drop-shadow(0 0 4px #e74c3c);"/><circle cx="25" cy="5" r="1.2" fill="#fff"/>
+      `;
+    },
+    sword(uid) {
+      return `
+        <defs><linearGradient id="g_un_sw_${uid}" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#3a0202"/><stop offset="100%" stop-color="#ff0000"/></linearGradient></defs>
+        <path d="M5 27 L25 7 L27 9 L7 29 Z" fill="url(#g_un_sw_${uid})" stroke="#111" stroke-width="1.8"/>
+        <line x1="8" y1="24" x2="24" y2="8" stroke="#ff3333" stroke-width="1"/>
+        <rect x="3.5" y="25" width="7" height="3.5" rx="0.5" fill="#f1c40f" stroke="#111" stroke-width="1.2" transform="rotate(45 7 27)"/>
+      `;
+    },
+    singularity(uid) {
+      return `
+        <defs><linearGradient id="g_un_sg_${uid}" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#0b0116"/><stop offset="100%" stop-color="#8e44ad"/></linearGradient></defs>
+        <path d="M5 27 L25 7 L27 9 L7 29 Z" fill="url(#g_un_sg_${uid})" stroke="#111" stroke-width="1.8"/>
+        <circle cx="26" cy="6" r="4" fill="#ff007f" style="filter: drop-shadow(0 0 4px #ff007f);"/>
+      `;
+    },
+    maelstrom(uid) {
+      return `
+        <defs><linearGradient id="g_un_ml_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#55efc4"/><stop offset="100%" stop-color="#00b894"/></linearGradient></defs>
+        <line x1="6" y1="26" x2="26" y2="6" stroke="#2c3e50" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M22 10 Q28 6, 28 4 Q25 4, 18 8 Z" fill="url(#g_un_ml_${uid})" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/>
+      `;
+    },
+    aegis(uid) {
+      return `
+        <defs><linearGradient id="g_un_ag_${uid}" x1="0" y1="0" x2="0" y2="100%"><stop offset="0%" stop-color="#0984e3"/><stop offset="100%" stop-color="#1b1c1e"/></linearGradient></defs>
+        <path d="M16 3 L27 9 L23 23 L16 29 L9 23 L5 9 Z" fill="url(#g_un_ag_${uid})" stroke="#3498db" stroke-width="2" stroke-linejoin="round" style="filter: drop-shadow(0 0 3px #3498db);"/>
+        <circle cx="16" cy="16" r="3.2" fill="#fff" opacity="0.8"/>
+      `;
+    },
+    watch(uid) {
+      return `
+        <defs><linearGradient id="g_un_wt_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#d5dbdb"/></linearGradient></defs>
+        <circle cx="16" cy="16" r="10" fill="#221c03" stroke="#f1c40f" stroke-width="1.8"/>
+        <circle cx="16" cy="16" r="7.5" fill="url(#g_un_wt_${uid})" stroke="#111" stroke-width="1"/>
+        <line x1="16" y1="16" x2="16" y2="10.5" stroke="#111" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="16" y1="16" x2="20" y2="16" stroke="#c0392b" stroke-width="1.2" stroke-linecap="round"/>
+      `;
+    },
+    chronicle(uid) {
+      return `
+        <defs><linearGradient id="g_un_ch_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fdf6e2"/><stop offset="100%" stop-color="#d5dbdb"/></linearGradient></defs>
+        <rect x="7.5" y="5" width="17" height="22" rx="2.5" fill="#2c1d11" stroke="#ffd700" stroke-width="1.8" style="filter: drop-shadow(0 0 3px #f1c40f);"/>
+        <rect x="11.5" y="8" width="9" height="16" fill="url(#g_un_ch_${uid})" stroke="#111" stroke-width="1"/>
+      `;
+    },
+    warpcore(uid) {
+      return `
+        <defs><linearGradient id="g_un_wc_${uid}" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#002b2b"/><stop offset="100%" stop-color="#1abc9c"/></linearGradient></defs>
+        <path d="M8 23 L14 8 L22 14 L16 27 Z" fill="url(#g_un_wc_${uid})" stroke="#111" stroke-width="1.8"/>
+        <rect x="10" y="16" width="3" height="5" rx="0.5" fill="#fff" style="filter: drop-shadow(0 0 3px #00ffcc);"/>
+      `;
+    },
+    tempest(uid) {
+      return `
+        <defs><linearGradient id="g_un_tp_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a0f0ff"/><stop offset="100%" stop-color="#0080b0"/></linearGradient></defs>
+        <path d="M6 21 L10 7 L14 15 L16 4 L18 15 L22 7 L26 21 Z" fill="url(#g_un_tp_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px #00d2ff);"/>
+        <rect x="6" y="21" width="20" height="4" fill="url(#g_un_tp_${uid})" stroke="#111" stroke-width="1.8"/>
+      `;
+    },
+  },
+};

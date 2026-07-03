@@ -627,8 +627,33 @@
             margin-bottom: 15px;
           "
         >
-          <h3 style="margin: 0; color: var(--accent-blue); font-size: 14px">
-            ⚙️ Game Settings
+          <h3
+            style="
+              margin: 0;
+              color: var(--accent-blue);
+              font-size: 14px;
+              display: flex;
+              align-items: center;
+              gap: 4px;
+            "
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="display: inline-block; vertical-align: middle"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+              />
+            </svg>
+            Game Settings
           </h3>
           <button
             onclick="window.toggleSettings()"
@@ -752,6 +777,37 @@
             onclick="window.toggleStickyCanvas()"
           >
             Sticky: ON
+          </button>
+        </div>
+
+        <!-- Battery Saver (Eco Mode) -->
+        <div
+          style="
+            background: #151515;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <div style="text-align: left">
+            <span style="font-size: 12px; font-weight: bold; color: #fff"
+              >🔋 Battery Saver (Eco Mode)</span
+            >
+            <span style="font-size: 9.5px; color: #aaa; display: block"
+              >Throttles rendering to 30 FPS & disables shadows</span
+            >
+          </div>
+          <button
+            id="settings-toggle-eco"
+            class="btn-action"
+            style="font-size: 11px"
+            onclick="window.toggleEcoMode()"
+          >
+            Saver: OFF
           </button>
         </div>
 
@@ -944,7 +1000,32 @@
             margin-bottom: 10px;
           "
         >
-          <h3 style="margin: 0; color: #f1c40f">🏆 Trophies & Milestones</h3>
+          <h3
+            style="
+              margin: 0;
+              color: #f1c40f;
+              display: flex;
+              align-items: center;
+              gap: 4px;
+            "
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="display: inline-block; vertical-align: middle"
+            >
+              <path
+                d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6 M18 9h1.5a2.5 2.5 0 0 0 0-5H18 M4 22h16 M10 14.66V17c0 .55-.45 1-1 1H4 M14 14.66V17c0 .55 1-1 1-1h5 M12 2a4 4 0 0 0-4 4v7c0 2.2 1.8 4 4 4s4-1.8 4-4V6a4 4 0 0 0-4-4z"
+              />
+            </svg>
+            Trophies & Milestones
+          </h3>
           <button
             onclick="window.toggleAchievements()"
             style="
@@ -1016,7 +1097,23 @@
               gap: 6px;
             "
           >
-            📬 Royal Mailbox
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="display: inline-block; vertical-align: middle"
+            >
+              <path
+                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+              />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+            Royal Mailbox
           </h3>
           <button
             onclick="window.toggleMailbox()"
@@ -1087,7 +1184,22 @@
               gap: 6px;
             "
           >
-            🏆 Hall of Legends
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="display: inline-block; vertical-align: middle"
+            >
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-5.82 2.15L7 14.14 2 9.27l6.91-1.01L12 2z"
+              />
+            </svg>
+            Hall of Legends
           </h3>
           <button
             onclick="window.toggleLeaderboard()"
@@ -1159,7 +1271,21 @@
               gap: 6px;
             "
           >
-            🔍 Inspecting Legend
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="display: inline-block; vertical-align: middle"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            Inspecting Legend
           </h3>
           <button
             onclick="
@@ -2545,7 +2671,26 @@
               padding: 6px 10px;
             "
           >
-            🏃 Leave
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="
+                display: inline-block;
+                vertical-align: middle;
+                margin-right: 4px;
+              "
+            >
+              <path
+                d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
+              />
+            </svg>
+            Leave
           </button>
           <button
             id="btn-pause"
@@ -2558,7 +2703,22 @@
               padding: 6px 10px;
             "
           >
-            ▶️ Pause
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              stroke="currentColor"
+              stroke-width="2"
+              style="
+                display: inline-block;
+                vertical-align: middle;
+                margin-right: 4px;
+              "
+            >
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            Pause
           </button>
           <button
             id="toggle-auto"
@@ -3367,17 +3527,19 @@
               style="
                 background: radial-gradient(
                   circle at 50% 25%,
-                  rgba(142, 68, 173, 0.12) 0%,
-                  #0a0f1d 100%
+                  rgba(26, 188, 156, 0.12) 0%,
+                  #060a0f 100%
                 );
-                border: 2px solid #9b59b6;
+                border: 2px solid #1abc9c;
                 border-radius: 12px;
                 padding: 24px;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
                 text-align: center;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+                box-shadow:
+                  0 4px 20px rgba(0, 0, 0, 0.75),
+                  inset 0 0 15px rgba(26, 188, 156, 0.12);
                 max-width: 580px;
                 margin: 6px auto;
                 min-height: 275px;
@@ -3386,44 +3548,128 @@
               <div>
                 <div
                   style="
-                    margin-bottom: 8px;
+                    margin-bottom: 12px;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                   "
                 >
+                  <!-- Glowing Crystal Cavern Entrance -->
                   <svg
-                    width="52"
-                    height="52"
+                    width="56"
+                    height="56"
                     viewBox="0 0 32 32"
-                    style="filter: drop-shadow(0 0 6px #9b59b6)"
+                    style="filter: drop-shadow(0 0 8px #1abc9c)"
                   >
+                    <defs>
+                      <linearGradient
+                        id="cav_stone"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop offset="0%" stop-color="#4a5568" />
+                        <stop offset="100%" stop-color="#1a202c" />
+                      </linearGradient>
+                      <linearGradient
+                        id="cav_crystal"
+                        x1="0"
+                        y1="0"
+                        x2="1"
+                        y2="1"
+                      >
+                        <stop offset="0%" stop-color="#ffffff" />
+                        <stop offset="30%" stop-color="#55efc4" />
+                        <stop offset="100%" stop-color="#00b894" />
+                      </linearGradient>
+                      <radialGradient id="cav_void" cx="50%" cy="100%" r="90%">
+                        <stop offset="0%" stop-color="#00ffcc" />
+                        <stop offset="35%" stop-color="#006652" />
+                        <stop offset="100%" stop-color="#050a0f" />
+                      </radialGradient>
+                    </defs>
+                    <!-- Glowing Void inside Cave -->
                     <path
-                      d="M16 2 L2 22h28L16 2z"
-                      fill="rgba(155, 89, 182, 0.15)"
-                      stroke="#9b59b6"
-                      stroke-width="2.5"
+                      d="M 6 30 C 6 12, 26 12, 26 30 Z"
+                      fill="url(#cav_void)"
+                      stroke="#000"
+                      stroke-width="1.2"
+                    />
+
+                    <!-- Stalactites -->
+                    <polygon
+                      points="12,12 14,20 16,12"
+                      fill="url(#cav_stone)"
+                      stroke="#000"
+                      stroke-width="1"
+                    />
+                    <polygon
+                      points="17,13 18.5,18 20,13"
+                      fill="url(#cav_stone)"
+                      stroke="#000"
+                      stroke-width="1"
+                    />
+
+                    <!-- Outer Cave Rocky Arch -->
+                    <path
+                      d="M 4 30 L 6 16 L 11 8 L 16 6 L 21 8 L 26 16 L 28 30 H 24 L 23 18 L 19 12 L 16 11 L 13 12 L 9 18 L 8 30 Z"
+                      fill="url(#cav_stone)"
+                      stroke="#000"
+                      stroke-width="1.8"
                       stroke-linejoin="round"
                     />
-                    <circle
-                      cx="16"
-                      cy="15"
-                      r="4.5"
-                      fill="#fff"
-                      stroke="#8e44ad"
-                      stroke-width="1.5"
+
+                    <!-- Glowing Crystal Clusters -->
+                    <polygon
+                      points="5,30 7,22 10,25 9,30"
+                      fill="url(#cav_crystal)"
+                      stroke="#000"
+                      stroke-width="0.8"
+                    />
+                    <polygon
+                      points="8,30 11,20 13,30"
+                      fill="url(#cav_crystal)"
+                      stroke="#000"
+                      stroke-width="0.8"
+                    />
+                    <polygon
+                      points="27,30 25,22 22,25 23,30"
+                      fill="url(#cav_crystal)"
+                      stroke="#000"
+                      stroke-width="0.8"
+                    />
+                    <polygon
+                      points="24,30 21,20 19,30"
+                      fill="url(#cav_crystal)"
+                      stroke="#000"
+                      stroke-width="0.8"
+                    />
+
+                    <!-- Cave Shimmers -->
+                    <path
+                      d="M 12 7 L 15 6 L 16 6"
+                      stroke="rgba(255, 255, 255, 0.4)"
+                      stroke-width="1.2"
+                      fill="none"
+                    />
+                    <path
+                      d="M 20 7 L 17 6"
+                      stroke="rgba(255, 255, 255, 0.4)"
+                      stroke-width="1.2"
+                      fill="none"
                     />
                   </svg>
                 </div>
                 <strong
                   style="
-                    color: #df9ffb;
+                    color: #1abc9c;
                     font-size: 16px;
                     display: block;
                     margin-bottom: 6px;
                     text-transform: uppercase;
                     letter-spacing: 1px;
-                    text-shadow: 0 0 8px rgba(142, 68, 173, 0.35);
+                    text-shadow: 0 0 8px rgba(26, 188, 156, 0.4);
                   "
                   >The Infinite Caverns</strong
                 >
@@ -3443,7 +3689,7 @@
               </div>
               <div
                 style="
-                  border-top: 1px dashed #4a154b;
+                  border-top: 1px dashed #16a085;
                   padding-top: 12px;
                   margin-top: auto;
                 "
@@ -3458,9 +3704,9 @@
                 >
                   Dungeon Keys Available:
                   <strong
-                    style="color: #9b59b6; font-size: 13.5px"
+                    style="color: #1abc9c; font-size: 13.5px"
                     id="tab-dk-generic"
-                    >5</strong
+                    >4</strong
                   >
                   / 5
                   <span
@@ -3475,9 +3721,9 @@
                 </div>
                 <button
                   onclick="window.openCavernsPreparationModal()"
-                  class="btn-action btn-pulse"
+                  class="btn-action btn-pulse-teal"
                   style="
-                    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+                    background: linear-gradient(135deg, #1abc9c, #16a085);
                     width: 100%;
                     max-width: 280px;
                     padding: 11px;
@@ -3485,7 +3731,7 @@
                     font-weight: bold;
                     border-radius: 8px;
                     border: 1px solid #fff;
-                    box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+                    box-shadow: 0 4px 15px rgba(26, 188, 156, 0.4);
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
                   "
@@ -3756,7 +4002,24 @@
             "
             onclick="window.rechallengeBoss()"
           >
-            ⚔️ RECHALLENGE STAGE
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="
+                display: inline-block;
+                vertical-align: middle;
+                margin-right: 4px;
+              "
+            >
+              <path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4" />
+            </svg>
+            RECHALLENGE STAGE
           </button>
           <div class="hero-tab-layout">
             <!-- Left Side: Equipment Grid & Medal Display in clean vertical flow -->
@@ -5129,6 +5392,16 @@
               >)
             </button>
             <button
+              id="sub-tab-sigil"
+              class="sub-tab-btn"
+              onclick="window.switchSubTab('SIGIL')"
+            >
+              Sigils (<span id="btn-sigil-count">0</span>/<span
+                id="btn-sigil-max"
+                >20</span
+              >)
+            </button>
+            <button
               id="sub-tab-use"
               class="sub-tab-btn"
               onclick="window.switchSubTab('USE')"
@@ -5371,6 +5644,13 @@
             ontouchmove="window.hideTooltip()"
           ></div>
           <div
+            id="bag-sigil"
+            class="bag-container"
+            style="display: none"
+            onscroll="window.hideTooltip()"
+            ontouchmove="window.hideTooltip()"
+          ></div>
+          <div
             id="bag-etc"
             class="bag-container"
             style="display: none"
@@ -5554,42 +5834,398 @@
               class="sub-tab-btn active"
               onclick="window.switchMarketSubTab('GACHA')"
             >
-              🎰 Gacha
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                style="
+                  display: inline-block;
+                  vertical-align: middle;
+                  margin-right: 4px;
+                "
+              >
+                <defs>
+                  <linearGradient
+                    id="sub_gacha_base"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="0%" stop-color="#ff7675" />
+                    <stop offset="100%" stop-color="#d63031" />
+                  </linearGradient>
+                  <linearGradient
+                    id="sub_gacha_glass"
+                    x1="0"
+                    y1="0"
+                    x2="1"
+                    y2="1"
+                  >
+                    <stop offset="0%" stop-color="#74b9ff" stop-opacity="0.8" />
+                    <stop
+                      offset="100%"
+                      stop-color="#0984e3"
+                      stop-opacity="0.3"
+                    />
+                  </linearGradient>
+                </defs>
+                <rect
+                  x="5"
+                  y="11"
+                  width="14"
+                  height="11"
+                  rx="1.5"
+                  fill="url(#sub_gacha_base)"
+                  stroke="#000"
+                  stroke-width="1.2"
+                />
+                <rect
+                  x="9.5"
+                  y="16"
+                  width="5"
+                  height="4"
+                  rx="0.5"
+                  fill="#2d3436"
+                  stroke="#000"
+                  stroke-width="1"
+                />
+                <circle
+                  cx="12"
+                  cy="7.5"
+                  r="5.5"
+                  fill="url(#sub_gacha_glass)"
+                  stroke="#000"
+                  stroke-width="1.2"
+                />
+                <circle cx="10" cy="8" r="1.2" fill="#ffeaa7" />
+                <circle cx="14" cy="7.5" r="1.2" fill="#ff7675" />
+                <circle cx="12" cy="6" r="1.2" fill="#55efc4" />
+                <circle
+                  cx="12"
+                  cy="13.5"
+                  r="1.5"
+                  fill="#f1c40f"
+                  stroke="#000"
+                  stroke-width="0.8"
+                />
+              </svg>
+              Gacha
             </button>
             <button
               id="market-sub-tab-sinks"
               class="sub-tab-btn"
               onclick="window.switchMarketSubTab('SINKS')"
             >
-              💰 Sinks
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                style="
+                  display: inline-block;
+                  vertical-align: middle;
+                  margin-right: 4px;
+                "
+              >
+                <defs>
+                  <linearGradient
+                    id="sub_sinks_gold"
+                    x1="0"
+                    y1="0"
+                    x2="1"
+                    y2="1"
+                  >
+                    <stop offset="0%" stop-color="#ffeaa7" />
+                    <stop offset="100%" stop-color="#fdcb6e" />
+                  </linearGradient>
+                </defs>
+                <ellipse
+                  cx="12"
+                  cy="18"
+                  rx="7"
+                  ry="2.5"
+                  fill="url(#sub_sinks_gold)"
+                  stroke="#000"
+                  stroke-width="1.2"
+                />
+                <ellipse
+                  cx="12"
+                  cy="15"
+                  rx="7"
+                  ry="2.5"
+                  fill="url(#sub_sinks_gold)"
+                  stroke="#000"
+                  stroke-width="1.2"
+                />
+                <ellipse
+                  cx="12"
+                  cy="12"
+                  rx="7"
+                  ry="2.5"
+                  fill="url(#sub_sinks_gold)"
+                  stroke="#000"
+                  stroke-width="1.2"
+                />
+                <circle
+                  cx="12"
+                  cy="10"
+                  r="5"
+                  fill="url(#sub_sinks_gold)"
+                  stroke="#000"
+                  stroke-width="1.2"
+                />
+                <circle
+                  cx="12"
+                  cy="10"
+                  r="3"
+                  fill="none"
+                  stroke="#e67e22"
+                  stroke-width="0.8"
+                />
+                <path
+                  d="M12 8v4M10.5 10h3"
+                  stroke="#e67e22"
+                  stroke-width="1"
+                  stroke-linecap="round"
+                />
+              </svg>
+              Sinks
             </button>
             <button
               id="market-sub-tab-alchemy"
               class="sub-tab-btn"
               onclick="window.switchMarketSubTab('ALCHEMY')"
             >
-              🧪 Alchemy
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                style="
+                  display: inline-block;
+                  vertical-align: middle;
+                  margin-right: 4px;
+                "
+              >
+                <defs>
+                  <linearGradient id="sub_alch_liq" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stop-color="#2ecc71" />
+                    <stop offset="80%" stop-color="#a3fd83" />
+                    <stop offset="100%" stop-color="#ffffff" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M10.5,3 h3 v5.5 L19,17 C20,19, 19,21, 16.5,21 H7.5 C5,21, 4,19, 5,17 L10.5,8.5 Z"
+                  fill="#2d3436"
+                  stroke="#000"
+                  stroke-width="1.2"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M7 13 L17 13 C18.5,15.5, 18,20, 16.5,20.2 H7.5 C6,20, 5.5,15.5, 7,13 Z"
+                  fill="url(#sub_alch_liq)"
+                  stroke="#000"
+                  stroke-width="0.8"
+                />
+                <rect
+                  x="10"
+                  y="1"
+                  width="4"
+                  height="2"
+                  rx="0.5"
+                  fill="#a0522d"
+                  stroke="#000"
+                  stroke-width="0.8"
+                />
+                <circle cx="10" cy="11" r="1" fill="#fff" opacity="0.8" />
+                <circle cx="14" cy="14" r="0.8" fill="#fff" opacity="0.6" />
+              </svg>
+              Alchemy
             </button>
             <button
               id="market-sub-tab-shop"
               class="sub-tab-btn"
               onclick="window.switchMarketSubTab('GOLD_SHOP')"
             >
-              🛒 Gold Shop
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                style="
+                  display: inline-block;
+                  vertical-align: middle;
+                  margin-right: 4px;
+                "
+              >
+                <defs>
+                  <linearGradient
+                    id="sub_shop_awning"
+                    x1="0"
+                    y1="0"
+                    x2="1"
+                    y2="0"
+                  >
+                    <stop offset="0%" stop-color="#e74c3c" />
+                    <stop offset="33%" stop-color="#e74c3c" />
+                    <stop offset="33%" stop-color="#fff" />
+                    <stop offset="66%" stop-color="#fff" />
+                    <stop offset="66%" stop-color="#e74c3c" />
+                    <stop offset="100%" stop-color="#e74c3c" />
+                  </linearGradient>
+                </defs>
+                <rect
+                  x="5"
+                  y="14"
+                  width="14"
+                  height="7"
+                  rx="1"
+                  fill="#873600"
+                  stroke="#000"
+                  stroke-width="1.2"
+                />
+                <line
+                  x1="7"
+                  y1="14"
+                  x2="7"
+                  y2="8"
+                  stroke="#000"
+                  stroke-width="1.2"
+                />
+                <line
+                  x1="17"
+                  y1="14"
+                  x2="17"
+                  y2="8"
+                  stroke="#000"
+                  stroke-width="1.2"
+                />
+                <path
+                  d="M4,8 L20,8 L18,4 L6,4 Z"
+                  fill="url(#sub_shop_awning)"
+                  stroke="#000"
+                  stroke-width="1.2"
+                  stroke-linejoin="round"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="1.5"
+                  fill="#f1c40f"
+                  stroke="#000"
+                  stroke-width="0.6"
+                />
+              </svg>
+              Gold Shop
             </button>
             <button
               id="market-sub-tab-boutique"
               class="sub-tab-btn"
               onclick="window.switchMarketSubTab('BOUTIQUE')"
             >
-              🎨 Wardrobe
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                style="
+                  display: inline-block;
+                  vertical-align: middle;
+                  margin-right: 4px;
+                "
+              >
+                <defs>
+                  <linearGradient
+                    id="sub_ward_mask"
+                    x1="0"
+                    y1="0"
+                    x2="1"
+                    y2="1"
+                  >
+                    <stop offset="0%" stop-color="#ff7675" />
+                    <stop offset="100%" stop-color="#e84393" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M4,5 C6,2 18,2 20,5 C21,8 19,16 12,21 C5,16 3,8 4,5 Z"
+                  fill="url(#sub_ward_mask)"
+                  stroke="#000"
+                  stroke-width="1.2"
+                  stroke-linejoin="round"
+                />
+                <ellipse
+                  cx="8.5"
+                  cy="9.5"
+                  rx="2"
+                  ry="1.2"
+                  fill="#111"
+                  stroke="#000"
+                  stroke-width="0.8"
+                />
+                <ellipse
+                  cx="15.5"
+                  cy="9.5"
+                  rx="2"
+                  ry="1.2"
+                  fill="#111"
+                  stroke="#000"
+                  stroke-width="0.8"
+                />
+                <polygon
+                  points="12,3 14,5 12,7 10,5"
+                  fill="#f1c40f"
+                  stroke="#000"
+                  stroke-width="0.6"
+                />
+              </svg>
+              Wardrobe
             </button>
             <button
               id="market-sub-tab-astral"
               class="sub-tab-btn"
               onclick="window.switchMarketSubTab('ASTRAL')"
             >
-              🌌 Astral
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                style="
+                  display: inline-block;
+                  vertical-align: middle;
+                  margin-right: 4px;
+                "
+              >
+                <defs>
+                  <linearGradient
+                    id="sub_astral_portal"
+                    x1="0"
+                    y1="0"
+                    x2="1"
+                    y2="1"
+                  >
+                    <stop offset="0%" stop-color="#a29bfe" />
+                    <stop offset="50%" stop-color="#9b59b6" />
+                    <stop offset="100%" stop-color="#3498db" />
+                  </linearGradient>
+                </defs>
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="7"
+                  fill="url(#sub_astral_portal)"
+                  stroke="#000"
+                  stroke-width="1.2"
+                />
+                <circle cx="12" cy="12" r="2.2" fill="#ffffff" />
+                <ellipse
+                  cx="12"
+                  cy="12"
+                  rx="10"
+                  ry="2.8"
+                  fill="none"
+                  stroke="#fff"
+                  stroke-width="1"
+                  transform="rotate(-15 12 12)"
+                />
+              </svg>
+              Astral
             </button>
           </div>
 
@@ -5641,9 +6277,26 @@
                     margin-bottom: 10px;
                     text-shadow: 0 0 8px rgba(255, 0, 127, 0.45);
                     text-align: center;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 4px;
                   "
                 >
-                  ⚡ RECENT DISPENSES
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    style="display: inline-block; vertical-align: middle"
+                  >
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                  </svg>
+                  RECENT DISPENSES
                 </div>
                 <div
                   style="
@@ -5731,9 +6384,35 @@
                         font-size: 13px;
                         text-transform: uppercase;
                         letter-spacing: 0.5px;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
                       "
                     >
-                      🎰 GACHAPON VAULT
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        style="display: inline-block; vertical-align: middle"
+                      >
+                        <rect
+                          x="5"
+                          y="2"
+                          width="14"
+                          height="20"
+                          rx="2"
+                          ry="2"
+                        />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <line x1="12" y1="12" x2="12" y2="22" />
+                        <circle cx="12" cy="7" r="2" />
+                      </svg>
+                      GACHAPON VAULT
                     </h4>
                     <span
                       style="
@@ -5854,9 +6533,26 @@
                         font-weight: bold;
                         letter-spacing: 1px;
                         margin-bottom: 2px;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
                       "
                     >
-                      🏆 Showcase Jackpots
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        style="display: inline-block; vertical-align: middle"
+                      >
+                        <circle cx="12" cy="8" r="7" />
+                        <path d="M4.3 16l-2 6 4.3-2M19.7 16l2 6-4.3-2" />
+                      </svg>
+                      Showcase Jackpots
                     </div>
                     <div
                       class="marquee-track-horizontal"
@@ -5942,8 +6638,37 @@
                 margin-bottom: 10px;
               "
             >
-              <h3 style="margin: 0; color: #2ecc71; font-size: 14px">
-                💰 GOLD QUALITY SINKS
+              <h3
+                style="
+                  margin: 0;
+                  color: #2ecc71;
+                  font-size: 14px;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                "
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2ecc71"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="display: inline-block; vertical-align: middle"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    fill="#2ecc71"
+                    fill-opacity="0.15"
+                  />
+                  <path d="M12 8v8M9 10h6M9 13h6" />
+                </svg>
+                GOLD QUALITY SINKS
               </h3>
             </div>
             <div
@@ -5971,8 +6696,30 @@
                 margin-bottom: 10px;
               "
             >
-              <h3 style="margin: 0; color: #9b59b6; font-size: 14px">
-                🔮 MYSTICAL ALCHEMY SHOP
+              <h3
+                style="
+                  margin: 0;
+                  color: #9b59b6;
+                  font-size: 14px;
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                "
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="display: inline-block; vertical-align: middle"
+                >
+                  <path d="M10 2h4M12 2v7M6 21h12L12 9z" />
+                </svg>
+                MYSTICAL ALCHEMY SHOP
               </h3>
             </div>
             <div
@@ -6003,8 +6750,33 @@
                 align-items: center;
               "
             >
-              <h3 style="margin: 0; color: #f1c40f; font-size: 14px">
-                🛒 GOLD SHOP
+              <h3
+                style="
+                  margin: 0;
+                  color: #f1c40f;
+                  font-size: 14px;
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                "
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="display: inline-block; vertical-align: middle"
+                >
+                  <path
+                    d="M6 2L3 6v14a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6l-3-4z"
+                  />
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                </svg>
+                GOLD SHOP
               </h3>
               <span id="market-timer" style="font-size: 11px; color: #aaa"
                 >Refreshes in: 30:00</span
@@ -6034,8 +6806,32 @@
                 align-items: center;
               "
             >
-              <h3 style="margin: 0; color: #ff007f; font-size: 14px">
-                🎨 Royal Wardrobe & Boutique
+              <h3
+                style="
+                  margin: 0;
+                  color: #ff007f;
+                  font-size: 14px;
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                "
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="display: inline-block; vertical-align: middle"
+                >
+                  <path
+                    d="M12 2a3 3 0 0 0-3 3h6a3 3 0 0 0-3-3zm-9 7h18l-3 12H6z"
+                  />
+                </svg>
+                Royal Wardrobe & Boutique
               </h3>
               <span style="font-size: 11px; color: #aaa"
                 >Customize your avatar appearance</span
@@ -6174,9 +6970,27 @@
                 margin-bottom: 8px;
                 border-bottom: 1px solid #222;
                 padding-bottom: 4px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
               "
             >
-              🎭 Available Wardrobe Skins
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="display: inline-block; vertical-align: middle"
+              >
+                <path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-11.4 8.38 8.38 0 0 1 3.8.9L21 4.5z"
+                />
+              </svg>
+              Available Wardrobe Skins
             </div>
             <div
               id="boutique-skins-list"
@@ -6206,8 +7020,32 @@
                 align-items: center;
               "
             >
-              <h3 style="margin: 0; color: #9b59b6; font-size: 14px">
-                🌌 Astral Crucible Shop
+              <h3
+                style="
+                  margin: 0;
+                  color: #9b59b6;
+                  font-size: 14px;
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                "
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="display: inline-block; vertical-align: middle"
+                >
+                  <circle cx="12" cy="12" r="10" stroke-dasharray="3 3" />
+                  <circle cx="12" cy="12" r="5" />
+                  <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                </svg>
+                Astral Crucible Shop
               </h3>
               <span style="font-size: 11px; color: #aaa"
                 >Purchase endgame reagents using Astral Shards</span
@@ -6588,11 +7426,14 @@
     </div>
 
     <!-- Core Modular JavaScript Hierarchy Load Sequence -->
-    <script src="data.js?v=0.97"></script>
-    <script src="audio.js?v=0.97"></script>
-    <script src="items.js?v=0.97"></script>
-    <script src="entities.js?v=0.97"></script>
-    <script src="ui.js?v=0.97"></script>
-    <script src="game.js?v=0.97"></script>
+    <script src="constants.js?v=0.98"></script>
+    <script src="data.js?v=0.98"></script>
+    <script src="assets.js?v=0.98"></script>
+    <script src="audio.js?v=0.98"></script>
+    <script src="items.js?v=0.98"></script>
+    <script src="entities.js?v=0.98"></script>
+    <script src="ui.js?v=0.98"></script>
+    <script src="clan.js?v=0.98"></script>
+    <script src="game.js?v=0.98"></script>
   </body>
 </html>
