@@ -6132,19 +6132,22 @@ window.rollEquipmentDrop = function (isBossKill, silent = false, minStars = 0, i
     let p = window.resolvePlayerStats();
     let maxBag = window.getMaxBagSlots();
 
-    let baseDropRate = window.playerStats.isUberBoss ? 1.0 : isBossKill ? 0.01 : isRareMob ? 0.005 : 0.001;
-    let effectiveRate = window.PitySystem.getEffectiveRate(baseDropRate * p.drop * window.state.efficiency);
+    // Milestone drops are 100% guaranteed and bypass the standard probability/pity checks
+    if (!isMilestone) {
+        let baseDropRate = window.playerStats.isUberBoss ? 1.0 : isBossKill ? 0.01 : isRareMob ? 0.005 : 0.001;
+        let effectiveRate = window.PitySystem.getEffectiveRate(baseDropRate * p.drop * window.state.efficiency);
 
-    // Roll Logic
-    if (Math.random() >= effectiveRate) {
-        if (window.playerStats.isDungeonMode) {
-            window.PitySystem.increment();
+        // Roll Logic
+        if (Math.random() >= effectiveRate) {
+            if (window.playerStats.isDungeonMode) {
+                window.PitySystem.increment();
+            }
+            return;
         }
-        return;
-    }
 
-    // SUCCESS: Reset Pity
-    window.PitySystem.reset();
+        // SUCCESS: Reset Pity
+        window.PitySystem.reset();
+    }
 
     // Setup logic moved outside the if block or placed correctly
     let allowArtifact = window.playerStats.isUberBoss && Math.random() < 0.05;
@@ -6166,7 +6169,7 @@ window.rollEquipmentDrop = function (isBossKill, silent = false, minStars = 0, i
     }
 
     let chosenType = allowArtifact ? "artifact" : types[Math.floor(Math.random() * types.length)];
-        let statLinesCount = 0;
+    let statLinesCount = 0;
 
   let probs = window.calculateRarityProbabilities(p.qly, false);
 
