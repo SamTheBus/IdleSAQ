@@ -1,6 +1,6 @@
 /* ==========================================================================
    PRIMARY PURPOSE: Stores global game state, constant dictionaries,
-   initial global state, and system utility functions.
+   initial global state, and system utility functions. 
    ========================================================================= */
 
 window.GAME_VERSION = 0.98; // Pre-release Alpha 0.9.8 // Increment this whenever you push a new release
