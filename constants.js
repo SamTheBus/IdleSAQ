@@ -3305,7 +3305,7 @@ window.MONSTER_CARDS_DATA = {
   // Fungal Swamp (T3)
   "swamp_basilisk": { name: "Swamp Basilisk Card", baseStat: "maxHp", baseVal: 0.025, isPct: true, desc: "Primordial swamp vigor inflates Maximum HP.", set: "Fungal Swamp" },
   "toxic_fly": { name: "Toxic Fly Card", baseStat: "moveSpeed", baseVal: 1.5, isPct: false, desc: "Wing flutter speeds up your Movement Speed.", set: "Fungal Swamp" },
-  "marsh_ghost": { name: "Marsh Ghost Card", baseStat: "int", baseVal: 2.0, isPct: false, desc: "Ethereal wisdom channels into your base Intelligence.", set: "Fungal Swamp" },
+  "marsh_ghost": { name: "Marsh Ghost Card", baseStat: "xpRate", baseVal: 0.02, isPct: true, desc: "Ethereal wisdom amplifies your acquired experience (XP Rate).", set: "Fungal Swamp" },
 
   // Void Singularity (T4)
   "void_orb": { name: "Void Orb Card", baseStat: "dropRate", baseVal: 0.02, isPct: true, desc: "Gravitational collapse pulls more loot into your sack.", set: "Void Singularity" },

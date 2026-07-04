@@ -12696,14 +12696,24 @@ window.renderBestiaryAlbum = function () {
       if (t < minTierInSet) minTierInSet = t;
     });
 
-  let setMultiplierLabel = "No Set Bonus (Unlock all cards)";
-  let setBonusCol = "#888";
-  if (!anyLocked && minTierInSet >= 0) {
-    const setMultipliers = [20, 35, 50, 65, 80, 100];
-    let mult = setMultipliers[minTierInSet] || 20;
-    setMultiplierLabel = `+${mult}% ${sData.theme} ${minTierInSet === 5 ? " Awakened! 🔥" : "Active"}`;
-    setBonusCol = window.getTierColor(minTierInSet);
-  }
+  let minCopiesInSet = 999999;
+    sData.cards.forEach((cKey) => {
+      let count = cardsOwned[cKey] || 0;
+      if (count < minCopiesInSet) minCopiesInSet = count;
+    });
+
+    let setMultiplierLabel = "No Set Bonus (Requires 10+ copies of each card)";
+    let setBonusCol = "#888";
+
+    if (minCopiesInSet >= 10 && !anyLocked && minTierInSet >= 0) {
+      const setMultipliers = [20, 35, 50, 65, 80, 100];
+      let mult = setMultipliers[minTierInSet] || 20;
+      setMultiplierLabel = `+${mult}% ${sData.theme} ${minTierInSet === 5 ? " Awakened! 🔥" : "Active"}`;
+      setBonusCol = window.getTierColor(minTierInSet);
+    } else if (!anyLocked && minTierInSet === 0) {
+      setMultiplierLabel = `LOCKED: Need 10+ copies of each card (Min: ${minCopiesInSet}/10)`;
+      setBonusCol = "#7f8c8d";
+    }
 
   let rightPageHtml = `
     <div class="bestiary-page-right" style="flex: 1.25; padding-left: 12px; display:flex; flex-direction:column; justify-content:space-between; height:100%;">
@@ -12779,7 +12789,7 @@ window.renderBestiaryAlbum = function () {
         if (isLocked) {
           statsDisplayLabelShort = `<span style="color:#7f8c8d; font-style:italic; font-size:9.5px;">Sacks to unlock!</span>`;
         } else {
-          let isUtility = ["critChance", "critDamage", "block", "parry", "dropRate", "quality", "goldMulti", "rareSpawn", "fairySpawn"].includes(cData.baseStat);
+          let isUtility = ["critChance", "critDamage", "block", "parry", "dropRate", "quality", "goldMulti", "rareSpawn", "fairySpawn", "xpRate"].includes(cData.baseStat);
           let val = isUtility ? window.getUtilityCardValue(tier) : window.getCardValue(cData.baseVal, tier);
           let formattedVal = cData.isPct
             ? `+${(val * 100).toFixed(1)}%`
@@ -13121,7 +13131,7 @@ window.showCardTooltip = function (e, cardKey) {
   let nextTierName = window.getTierName(currentTier + 1);
   let nextThreshold = thresholds[currentTier + 1] || 600;
 
-  let isUtility = ["critChance", "critDamage", "block", "parry", "dropRate", "quality", "goldMulti", "rareSpawn", "fairySpawn"].includes(cData.baseStat);
+  let isUtility = ["critChance", "critDamage", "block", "parry", "dropRate", "quality", "goldMulti", "rareSpawn", "fairySpawn", "xpRate"].includes(cData.baseStat);
       let curVal = isUtility ? window.getUtilityCardValue(currentTier) : window.getCardValue(cData.baseVal, currentTier);
       let nextVal = isUtility ? window.getUtilityCardValue(currentTier + 1) : window.getCardValue(cData.baseVal, currentTier + 1);
 
