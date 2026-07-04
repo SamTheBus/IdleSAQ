@@ -701,11 +701,269 @@ window.AssetCatalog = {
       `;
     },
     tempest(uid) {
+          return `
+            <defs><linearGradient id="g_un_tp_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a0f0ff"/><stop offset="100%" stop-color="#0080b0"/></linearGradient></defs>
+            <path d="M6 21 L10 7 L14 15 L16 4 L18 15 L22 7 L26 21 Z" fill="url(#g_un_tp_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px #00d2ff);"/>
+            <rect x="6" y="21" width="20" height="4" fill="url(#g_un_tp_${uid})" stroke="#111" stroke-width="1.8"/>
+          `;
+        },
+      },
+    };
+
+    window.getAchievementBadgeHtml = function (ach, unlocked, size = 32) {
+      let id = ach.id;
+      let isSingle = !!ach.isSingleTier;
+
+      let category = "";
+      let tierNum = 0;
+
+      if (isSingle) {
+        category = "sing";
+      } else {
+        let lastUnderscore = id.lastIndexOf("_");
+        if (lastUnderscore !== -1) {
+          category = id.substring(0, lastUnderscore);
+          tierNum = parseInt(id.substring(lastUnderscore + 1), 10);
+        } else {
+          category = id;
+        }
+      }
+
+      let iconSvg = "";
+      let glowColor = unlocked ? "#f1c40f" : "#444";
+      let bgGradient = unlocked
+        ? "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"
+        : "linear-gradient(135deg, #151515 0%, #0d0d0d 100%)";
+
+      switch (category) {
+        case "slayer":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linecap="round" fill="none">
+              <path d="M6 26 L26 6" />
+              <path d="M26 26 L6 6" />
+              <path d="M12 9 L23 20" />
+              <path d="M20 9 L9 20" />
+            </g>
+          `;
+          break;
+        case "hoarder":
+        case "drop_g":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <ellipse cx="16" cy="22" rx="8" ry="3" />
+              <ellipse cx="16" cy="16" rx="8" ry="3" />
+              <ellipse cx="16" cy="10" rx="8" ry="3" />
+              <path d="M8 10 V22 M24 10 V22" />
+            </g>
+          `;
+          break;
+        case "stage":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" fill="none">
+              <circle cx="16" cy="16" r="10" />
+              <path d="M16 6 V26 M6 16 H26" stroke-dasharray="2 2" />
+              <polygon points="16,10 19,16 16,14 13,16" fill="${unlocked ? glowColor : 'none'}" />
+            </g>
+          `;
+          break;
+        case "level":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <path d="M6 24 L10 10 L16 16 L22 10 L26 24 Z" />
+              <circle cx="16" cy="24" r="1.5" fill="${unlocked ? glowColor : 'none'}" />
+            </g>
+          `;
+          break;
+        case "forge":
+        case "refo":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <path d="M10 20 L22 10" />
+              <path d="M6 24 L10 20 L12 22 Z" fill="${unlocked ? glowColor : 'none'}" />
+              <rect x="18" y="4" width="8" height="8" rx="1.5" transform="rotate(45 22 8)" fill="${unlocked ? glowColor : 'none'}" />
+            </g>
+          `;
+          break;
+        case "enchant":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <rect x="8" y="6" width="16" height="20" rx="1" />
+              <line x1="12" y1="12" x2="20" y2="12" />
+              <line x1="12" y1="16" x2="18" y2="16" />
+              <circle cx="16" cy="16" r="2" stroke-dasharray="2 2" />
+            </g>
+          `;
+          break;
+        case "rift":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" fill="none">
+              <circle cx="16" cy="16" r="10" stroke-dasharray="4 2" />
+              <circle cx="16" cy="16" r="5" fill="${unlocked ? glowColor : 'none'}" />
+            </g>
+          `;
+          break;
+        case "prestige":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <path d="M16 28 C10 28, 6 22, 16 12 C26 22, 22 28, 16 28 Z" fill="${unlocked ? glowColor : 'none'}" fill-opacity="0.15" />
+              <path d="M10 18 Q16 12, 22 18" />
+            </g>
+          `;
+          break;
+        case "d_eq":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="1.8" stroke-linejoin="round" fill="none">
+              <path d="M8 8 Q16 6, 24 8 Q23 18, 16 25 Q9 18, 8 8 Z" fill="${unlocked ? glowColor : 'none'}" fill-opacity="0.15" />
+              <path d="M16 5 L16 25" />
+            </g>
+          `;
+          break;
+        case "d_go":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <rect x="6" y="10" width="20" height="16" rx="2" />
+              <path d="M6 16 H26" />
+              <circle cx="16" cy="13" r="1.5" />
+            </g>
+          `;
+          break;
+        case "d_ma":
+        case "buff":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <path d="M12 6 H18 M13 6 V12 L8 22 A2 2 0 0 0 10 25 H22 A2 2 0 0 0 24 22 L19 12 V6" fill="${unlocked ? glowColor : 'none'}" fill-opacity="0.15" />
+            </g>
+          `;
+          break;
+        case "d_cr":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <polygon points="6,24 9,14 16,19 23,14 26,24" />
+              <line x1="6" y1="24" x2="26" y2="24" />
+            </g>
+          `;
+          break;
+        case "hit":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="1.8" stroke-linejoin="round" fill="none">
+              <path d="M16 4 L19 12 L27 10 L21 16 L26 24 L16 19 L6 24 L11 16 L5 10 L13 12 Z" fill="${unlocked ? glowColor : 'none'}" fill-opacity="0.15" />
+            </g>
+          `;
+          break;
+        case "fairy":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="1.8" stroke-linejoin="round" fill="none">
+              <path d="M16 16 C10 16, 6 12, 11 8 C16 4, 16 16, 16 16 Z" />
+              <path d="M16 16 C22 16, 26 12, 21 8 C16 4, 16 16, 16 16 Z" />
+              <circle cx="16" cy="16" r="2.5" fill="${unlocked ? glowColor : 'none'}" />
+            </g>
+          `;
+          break;
+        case "death":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <rect x="10" y="8" width="12" height="12" rx="4" />
+              <rect x="12" y="18" width="8" height="6" rx="1" />
+              <circle cx="13" cy="12" r="1.5" />
+              <circle cx="19" cy="12" r="1.5" />
+            </g>
+          `;
+          break;
+        case "salvage":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <circle cx="16" cy="16" r="8" />
+              <path d="M12 12 H20 M12 20 H20 M16 12 V20" />
+            </g>
+          `;
+          break;
+        case "f_spd":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <path d="M19 4 L9 14 H16 L13 22 L23 12 H16 Z" />
+            </g>
+          `;
+          break;
+        case "defl":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
+              <path d="M8 6 H24 L21 21 L16 26 L11 21 Z" />
+            </g>
+          `;
+          break;
+        case "g_up":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="1.8" stroke-linejoin="round" fill="none">
+              <path d="M6 10 H26 V24 H6 Z M11 16 H15 V24 H11 Z" />
+              <path d="M9 10 V6 M23 10 V6" />
+            </g>
+          `;
+          break;
+        case "rare_s":
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="1.8" fill="none">
+              <circle cx="16" cy="16" r="9" />
+              <circle cx="16" cy="16" r="5" />
+              <circle cx="16" cy="16" r="1.5" fill="${unlocked ? glowColor : 'none'}" />
+            </g>
+          `;
+          break;
+        case "sing":
+        default:
+          iconSvg = `
+            <g stroke="${glowColor}" stroke-width="1.8" stroke-linejoin="round" fill="none">
+              <polygon points="16,3 27,10.5 27,23.5 16,29 5,23.5 5,10.5" fill="${unlocked ? glowColor : 'none'}" fill-opacity="0.1" />
+              <circle cx="16" cy="16" r="5.5" />
+            </g>
+          `;
+          break;
+      }
+
+      let romanNum = "";
+      if (tierNum > 0) {
+        const rom = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+        romanNum = rom[tierNum] || tierNum.toString();
+      }
+
+      let romanOverlay = romanNum
+        ? `<span style="
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            background: ${unlocked ? '#f1c40f' : '#222'};
+            color: ${unlocked ? '#000' : '#888'};
+            font-family: monospace;
+            font-size: 8px;
+            font-weight: 900;
+            padding: 1px 3.5px;
+            border-radius: 3px;
+            border: 1px solid ${unlocked ? '#fff' : '#444'};
+            box-shadow: ${unlocked ? '0 0 6px rgba(241,196,15,0.4)' : 'none'};
+            line-height: 1;
+            z-index: 2;
+          ">${romanNum}</span>`
+        : "";
+
       return `
-        <defs><linearGradient id="g_un_tp_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a0f0ff"/><stop offset="100%" stop-color="#0080b0"/></linearGradient></defs>
-        <path d="M6 21 L10 7 L14 15 L16 4 L18 15 L22 7 L26 21 Z" fill="url(#g_un_tp_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px #00d2ff);"/>
-        <rect x="6" y="21" width="20" height="4" fill="url(#g_un_tp_${uid})" stroke="#111" stroke-width="1.8"/>
+        <span style="
+          background: ${bgGradient};
+          border: 1.5px solid ${unlocked ? '#f1c40f' : '#333'};
+          border-radius: 8px;
+          padding: 3px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: ${size}px;
+          height: ${size}px;
+          position: relative;
+          box-shadow: ${unlocked ? 'inset 0 0 8px rgba(241,196,15,0.15)' : 'none'};
+          box-sizing: border-box;
+          flex-shrink: 0;
+        ">
+          <svg viewBox="0 0 32 32" width="100%" height="100%" style="display:block;">
+            ${iconSvg}
+          </svg>
+          ${romanOverlay}
+        </span>
       `;
-    },
-  },
-};
+    };

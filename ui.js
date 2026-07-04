@@ -5850,14 +5850,14 @@ window.buildAchievementsModal = function () {
 
     let borderStyle = unlocked
       ? "border-color: #f1c40f; background: rgba(241, 196, 15, 0.05); color: #fff;"
-      : "border-color: #333; opacity: 0.5; filter: grayscale(100%); color: #7f8c8d;";
-    let iconDisplay = unlocked ? ach.icon : "🔒";
+      : "border-color: #333; opacity: 0.5; color: #7f8c8d;";
+    let iconDisplay = window.getAchievementBadgeHtml(ach, unlocked, 36);
 
     let glowStyle = isUnviewed
       ? "animation: glowGold 1.5s infinite; border-color: #f1c40f !important; position: relative;"
       : "position: relative;";
     let newRibbon = isUnviewed
-      ? `<span class="badge-exclamation" style="position: absolute; top: -1px; right: -1px; background: #f1c40f; color: #111; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 0 4px 0 4px; text-transform: uppercase; box-shadow: 0 0 8px #f1c40f; letter-spacing: 0.5px;">NEW</span>`
+      ? `<span class="badge-exclamation" style="position: absolute; top: -1px; right: -1px; background: #f1c40f; color: #111; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 0 4px 0 4px; text-transform: uppercase; box-shadow: 0 0 8px #f1c40f; letter-spacing: 0.5px; z-index: 10;">NEW</span>`
       : "";
 
     return `<div id="ach-card-${ach.id}" class="bag-item" style="cursor:help; display:flex; flex-direction:row; justify-content:flex-start; align-items:center; gap:10px; ${borderStyle} ${glowStyle} padding:8px;"
@@ -5865,7 +5865,7 @@ window.buildAchievementsModal = function () {
             ontouchstart="window.showAchievementTooltip(event, '${ach.id}'); window.viewAchievement('${ach.id}');"
             onmouseleave="window.hideTooltip()">
             ${newRibbon}
-            <span style="font-size:22px; width:30px; text-align:center;">${iconDisplay}</span>
+            ${iconDisplay}
             <div style="flex:1; text-align:left;">
                 <strong style="color:${unlocked ? "#f1c40f" : "#666"}; font-size:12px;">${ach.name}</strong>
                 <div style="font-size:9px; color:#aaa; margin-top:2px; line-height:1.2;">${ach.desc}</div>
@@ -5965,8 +5965,10 @@ window.showAchievementTooltip = function (e, achId) {
   let targetValue = ach.isSingleTier ? 1 : ach.reqValue;
   let percentDone = Math.min(100, (progressValue / targetValue) * 100);
 
+  let iconHtml = window.getAchievementBadgeHtml(ach, unlocked, 28);
+
   let html = `<div style="padding: 10px; width: 230px; box-sizing: border-box;">
-        <div class="tt-title" style="color:${unlocked ? "#f1c40f" : "#aaa"};">${ach.icon} ${ach.name}</div>
+        <div class="tt-title" style="color:${unlocked ? "#f1c40f" : "#aaa"}; display:flex; align-items:center; gap:8px;">${iconHtml}<span>${ach.name}</span></div>
         <div class="tt-subtitle" style="color:${unlocked ? "#2ecc71" : "#e74c3c"}; font-weight:bold;">${unlocked ? "🔓 UNLOCKED" : "🔒 LOCKED"}</div>
         <div style="color:#ddd; font-size:11px; margin-bottom:6px; white-space:normal; line-height:1.3;">${ach.desc}</div>
         <div style="font-size:10px; color:#aaa; margin-bottom:4px; font-family:monospace;">Progress: ${progressValue.toLocaleString()} / ${targetValue.toLocaleString()} (${percentDone.toFixed(1)}%)</div>
