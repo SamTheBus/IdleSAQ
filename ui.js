@@ -4241,10 +4241,9 @@ window.renderInventory = function () {
                         </div>
                     </div>
                     <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
-                        <button class="btn-action" style="background:#9b59b6;" onclick="window.executeSlotCavernSigil(${item.id})">Slot</button>
-                        <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
-                        <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})">Salvage</button>
-                    </div>
+                                              <button class="btn-action" style="background:${lockBg};" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
+                                              <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})">Salvage</button>
+                                          </div>
                 </div>`;
       }).join("");
     }
@@ -12420,7 +12419,7 @@ window.selectCavernsMode = function (mode) {
 window.slotCavernSigilInline = function (sigilId) {
   if (!sigilId) return;
   let id = parseInt(sigilId, 10);
-  let sigil = window.inventory.EQUIP.find((item) => item.id === id);
+  let sigil = window.inventory.SIGIL.find((item) => item.id === id);
   if (sigil) {
     window.state.slottedCavernSigil = sigil;
   }
