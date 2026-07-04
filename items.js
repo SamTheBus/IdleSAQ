@@ -4161,19 +4161,20 @@ window.executeParagonUpgrade = function () {
       p.paragonLevel = parLevel + 1;
 
       window.pushHeaderToast(
-        `🧬 Paragon Infused to Level ${p.paragonLevel}!`,
-        "#ff007f",
-      );
-      if (window.SoundManager) window.SoundManager.play("revive");
-      if (window.spawnPurchaseCelebration) {
-        window.spawnPurchaseCelebration("alchemy", "#ff007f", 5);
-      }
+              `🧬 Paragon Infused to Level ${p.paragonLevel}!`,
+              "#ff007f",
+            );
+            if (window.SoundManager) window.SoundManager.play("revive");
+            if (window.spawnPurchaseCelebration) {
+              window.spawnPurchaseCelebration("alchemy", "#ff007f", 5);
+            }
+            window.invalidatePlayerStats();
+            window.updateUI();
+            window.renderPrestigeTab();
+            window.renderInventory();
+            window.saveGame();
+          }
+        );
+      };
 
-      window.invalidatePlayerStats();
-      window.updateUI();
-      window.renderPrestigeTab();
-      window.renderInventory();
-      window.saveGame();
-    },
-  );
-};
+

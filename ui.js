@@ -231,11 +231,11 @@ window.getUseIconHtml = function (key, size = 32) {
     innerHtml = window.AssetCatalog.consumables.potion(uid, "#ec4899");
   }
 
-  if (!innerHtml && window.AssetCatalog.materials[key]) {
-    innerHtml = window.AssetCatalog.materials[key](uid);
-  } else if (!innerHtml) {
-    innerHtml = window.AssetCatalog.consumables.potion(uid, "#bdc3c7");
-  }
+  if (key === "Monster Card Sack") {
+      bg = "rgba(168, 85, 247, 0.25)";
+      border = "#a855f7";
+      innerHtml = window.AssetCatalog.consumables.monster_card_sack(uid);
+    }
 
   return window.AssetCatalog.compile("0 0 32 32", innerHtml, size, bg, border);
 };
@@ -8271,21 +8271,32 @@ window.claimMasterMissionReward = function (isWeekly = false) {
     );
     window.inventory.EQUIP.push(grandItem);
 
-    if (typeof window.pushLog === "function")
-      window.pushLog(
-        `<strong style="color:#f1c40f;">🏆 [MISSION BOARD] Beaten Weekly Board! Earned +${scalingPP} PP, Gacha Keys, 10x Mission Tokens, and ${grandItem.name}!</strong>`,
-      );
-  } else {
-    window.playerStats.dailyRewardClaimed = true;
+    // Award 1x guaranteed Monster Card Sack for completing the Weekly Board
+        window.addUseDrop("Monster Card Sack", 1);
 
-    // Award 3 Mission Tokens for Daily Board completion
-    window.playerStats.missionTokens =
-      (window.playerStats.missionTokens || 0) + 3;
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            `<strong style="color:#f1c40f;">🏆 [MISSION BOARD] Beaten Weekly Board! Earned +${scalingPPText} PP, 1x Card Sack, Gacha Keys, 10x Mission Tokens, and ${grandItem.name}!</strong>`,
+          );
+      } else {
+        window.playerStats.dailyRewardClaimed = true;
 
-    window.addEtcDrop("Gacha Key", 1);
-    window.addEtcDrop("Catalyst Core", 1);
-    window.addEtcDrop("Eridium Shard", 2);
-  }
+        // Award 3 Mission Tokens for Daily Board completion
+        window.playerStats.missionTokens =
+          (window.playerStats.missionTokens || 0) + 3;
+
+        window.addEtcDrop("Gacha Key", 1);
+        window.addEtcDrop("Catalyst Core", 1);
+        window.addEtcDrop("Eridium Shard", 2);
+
+        // Award 5% chance of 1x Card Sack for completing the Daily Board
+        if (Math.random() < 0.05) {
+          window.addUseDrop("Monster Card Sack", 1);
+          if (typeof window.pushLog === "function") {
+            window.pushLog("<span style='color:#a855f7;'>[MISSION BOARD] Lucky roll! Awarded 1x Monster Card Sack from Daily Board!</span>");
+          }
+        }
+      }
 
   if (window.SoundManager) window.SoundManager.play("revive");
 
@@ -8542,39 +8553,39 @@ window.renderMissionsWindow = function () {
         </div>
       `;
     } else {
-      if (weeklyMasterClaimed) {
-        weeklyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Grand Treat Claimed ✓</button>`;
-      } else if (weeklyDoneCount === 3) {
-        weeklyMasterBtnHtml = `<button class="btn-action btn-pulse" style="width:100%; font-size:11px; padding:10px; background:#9b59b6; border-color:#fff; box-shadow:0 0 10px rgba(155,89,182,0.4);" onclick="window.claimMasterMissionReward(true)">🎁 Claim Weekly Grand Treat!</button>`;
-      } else {
-        weeklyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Complete all 3 (${weeklyDoneCount}/3)</button>`;
-      }
-    }
+          if (weeklyMasterClaimed) {
+            weeklyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Grand Treat Claimed ✓</button>`;
+          } else if (weeklyDoneCount === 3) {
+            weeklyMasterBtnHtml = `<button class="btn-action btn-pulse" style="width:100%; font-size:11px; padding:10px; background:#9b59b6; border-color:#fff; box-shadow:0 0 10px rgba(155,89,182,0.4);" onclick="window.claimMasterMissionReward(true)">🎁 Claim Weekly Grand Treat!</button>`;
+          } else {
+            weeklyMasterBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; width:100%; font-size:10.5px; cursor:not-allowed;" disabled>Complete all 3 (${weeklyDoneCount}/3)</button>`;
+          }
+        }
 
-    let weekliesCardHtml = "";
-    if (window.playerStats.prestigeCount === 0) {
-      weekliesCardHtml = `
-        <div style="border:1px solid #444; border-radius:6px; padding:12px; background:rgba(0,0,0,0.4); text-align:center; color:#aaa; font-size:11px; font-style:italic;">
-            Weekly board locked until Ascension. Slay Hooktail to claim your destiny.
-        </div>
-      `;
-    } else {
-      weekliesCardHtml = `
-        <div style="border:1.5px solid #9b59b680; border-radius:8px; padding:12px; background:rgba(155,89,182,0.03); box-shadow:0 4px 15px rgba(0,0,0,0.5);">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #9b59b644; padding-bottom:6px; margin-bottom:10px;">
-                <strong style="color:#df9ffb; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">📆 Weekly Clan Quests</strong>
-                <span style="font-size:9.5px; color:#aaa; font-family:monospace;" id="weekly-timer-val">Refreshing...</span>
+        let weekliesCardHtml = "";
+        if (window.playerStats.prestigeCount === 0) {
+          weekliesCardHtml = `
+            <div style="border:1px solid #444; border-radius:6px; padding:12px; background:rgba(0,0,0,0.4); text-align:center; color:#aaa; font-size:11px; font-style:italic;">
+                Weekly board locked until Ascension. Slay Hooktail to claim your destiny.
             </div>
-            <div>
-                ${weeklies.map((m) => getMissionRowHtml(m, true)).join("")}
+          `;
+        } else {
+          weekliesCardHtml = `
+            <div style="border:1.5px solid #9b59b680; border-radius:8px; padding:12px; background:rgba(155,89,182,0.03); box-shadow:0 4px 15px rgba(0,0,0,0.5);">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #9b59b644; padding-bottom:6px; margin-bottom:10px;">
+                    <strong style="color:#df9ffb; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">📆 Weekly Clan Quests</strong>
+                    <span style="font-size:9.5px; color:#aaa; font-family:monospace;" id="weekly-timer-val">Refreshing...</span>
+                </div>
+                <div>
+                    ${weeklies.map((m) => getMissionRowHtml(m, true)).join("")}
+                </div>
+                <div style="margin-top:12px;">
+                    ${weeklyMasterBtnHtml}
+                    ${weeklyMasterClaimed ? "" : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:5px; line-height:1.35; white-space:normal;">Grand treat: +${scalingPP} PP (scales with prestiges), 3x Gacha Keys, 1x Catalyst Core, and a high-tier guaranteed Gear Drop!</div>`}
+                </div>
             </div>
-            <div style="margin-top:12px;">
-                ${weeklyMasterBtnHtml}
-                ${weeklyMasterClaimed ? "" : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:5px; line-height:1.35; white-space:normal;">Grand treat: +${scalingPPText} PP (scales with prestiges), 3x Gacha Keys, 1x Catalyst Core, and a high-tier guaranteed Gear Drop!</div>`}
-            </div>
-        </div>
-      `;
-    }
+          `;
+        }
 
     contentHtml = `
       <!-- DAILY MISSIONS PANEL -->
@@ -9319,18 +9330,29 @@ window.openDailyRewardSack = function (specificName) {
 
   let receivedRewards = [];
 
-  // Add the guaranteed equipment!
-  receivedRewards.push({
-    name: newEquip.name,
-    qty: 1,
-    color: window.getTierColor(newEquip.statsRolled),
-    type: "equip",
-    item: newEquip,
-  });
+    // Add the guaranteed equipment!
+    receivedRewards.push({
+      name: newEquip.name,
+      qty: 1,
+      color: window.getTierColor(newEquip.statsRolled),
+      type: "equip",
+      item: newEquip,
+    });
 
-  // Roll 1: 100% chance
-  let reward1 = rollFromPool();
-  receivedRewards.push(reward1);
+    // Roll 1: 100% chance
+    let reward1 = rollFromPool();
+    receivedRewards.push(reward1);
+
+    // 1% rare chance to find a Monster Card Sack in any Daily/Guild Reward Sack
+    if (Math.random() < 0.01) {
+      window.addUseDrop("Monster Card Sack", 1);
+      receivedRewards.push({
+        name: "Monster Card Sack",
+        qty: 1,
+        color: "#a855f7",
+        type: "use"
+      });
+    }
 
   // Roll 2: 20% chance
   let hasRoll2 = Math.random() < 0.2;
@@ -9587,11 +9609,22 @@ window.openWeeklyRewardSack = function (specificName) {
   let scrapQty = 3 + Math.floor(clanLvl * 0.5);
 
   let receivedRewards = [
-    { name: "Ancient Core", qty: coreQty, color: "#e74c3c", type: "etc" },
-    { name: "Overlord's Sigil", qty: sigilQty, color: "#1abc9c", type: "etc" },
-    { name: "Eridium Shard", qty: shardQty, color: "#8e44ad", type: "etc" },
-    { name: "Legendary Scrap", qty: scrapQty, color: "#f1c40f", type: "etc" },
-  ];
+      { name: "Ancient Core", qty: coreQty, color: "#e74c3c", type: "etc" },
+      { name: "Overlord's Sigil", qty: sigilQty, color: "#1abc9c", type: "etc" },
+      { name: "Eridium Shard", qty: shardQty, color: "#8e44ad", type: "etc" },
+      { name: "Legendary Scrap", qty: scrapQty, color: "#f1c40f", type: "etc" },
+    ];
+
+    // 10% epic chance to find a Monster Card Sack in any Weekly/Guild Weekly Sack
+    if (Math.random() < 0.10) {
+      window.addUseDrop("Monster Card Sack", 1);
+      receivedRewards.push({
+        name: "Monster Card Sack",
+        qty: 1,
+        color: "#a855f7",
+        type: "use"
+      });
+    }
 
   // Double XP Potion (Chance scales up with Clan level)
   let xpChance = Math.min(0.6, 0.1 + clanLvl * 0.04);
@@ -10703,10 +10736,15 @@ window.updateHubAlerts = function () {
   let hasClanAlert = clanBadge && clanBadge.style.display === "inline-block";
 
   // 5. Evaluate Settings / Name Setup Alert
-  let hasSettingsAlert =
-    window.playerStats && window.playerStats.playerName === "Guest";
-  let sBadge = document.getElementById("hub-card-settings-badge");
-  if (sBadge) sBadge.style.display = hasSettingsAlert ? "inline-block" : "none";
+    let hasSettingsAlert =
+      window.playerStats && window.playerStats.playerName === "Guest";
+    let sBadge = document.getElementById("hub-card-settings-badge");
+    if (sBadge) sBadge.style.display = hasSettingsAlert ? "inline-block" : "none";
+
+    // Evaluate Bestiary Card Upgrades Alert
+    let hasBestiaryAlert = typeof window.checkBestiaryAlerts === "function" ? window.checkBestiaryAlerts() : false;
+    let bBadge = document.getElementById("hub-card-bestiary-badge");
+    if (bBadge) bBadge.style.display = hasBestiaryAlert ? "inline-block" : "none";
 
   let renameContainer = document.getElementById("settings-rename-container");
   if (renameContainer) {
@@ -10720,17 +10758,18 @@ window.updateHubAlerts = function () {
   }
 
   // 6. Update Main Top Bar Hub Button Dot
-  let mainDot = document.getElementById("hub-menu-alert-dot");
-  if (mainDot) {
-    mainDot.style.display =
-      hasMissionsAlert ||
-      hasTrophiesAlert ||
-      hasMailAlert ||
-      hasClanAlert ||
-      hasSettingsAlert
-        ? "inline-block"
-        : "none";
-  }
+    let mainDot = document.getElementById("hub-menu-alert-dot");
+    if (mainDot) {
+      mainDot.style.display =
+        hasMissionsAlert ||
+        hasTrophiesAlert ||
+        hasMailAlert ||
+        hasClanAlert ||
+        hasSettingsAlert ||
+        hasBestiaryAlert
+          ? "inline-block"
+          : "none";
+    }
 };
 
 window.checkUnreadMail = function () {
@@ -12536,6 +12575,601 @@ window.requestRename = function () {
     })
     .catch((err) => {
       console.error("Rename failed:", err);
-      window.pushHeaderToast("❌ Network error registering name.", "#e74c3c");
+            window.pushHeaderToast("❌ Network error registering name.", "#e74c3c");
+          });
+      };
+
+      // ==========================================================================
+      // --- BESTIARY Album SYSTEM (BOOK INTERFACE) ---
+      // ==========================================================================
+
+window.selectedBestiarySetKey = window.selectedBestiarySetKey || "Whispering Woods";
+
+window.toggleBestiaryAlbum = function () {
+  let modal = document.getElementById("bestiary-modal");
+  if (!modal) return;
+
+  if (modal.style.display === "none" || modal.style.display === "") {
+    window.hideTooltip();
+    window.renderBestiaryAlbum();
+    modal.style.display = "block";
+    window.setPauseState(true);
+  } else {
+    modal.style.display = "none";
+    window.hideTooltip();
+    window.setPauseState(false);
+  }
+};
+
+window.selectBestiarySet = function (setKey) {
+  window.selectedBestiarySetKey = setKey;
+  window.renderBestiaryAlbum();
+  if (typeof window.hideTooltip === "function") window.hideTooltip();
+};
+
+window.getCardUpgradeCost = function (currentTier) {
+  let mSouls = 0;
+  let lSouls = 0;
+  if (currentTier === -1) { mSouls = 50; lSouls = 0; }
+  else if (currentTier === 0) { mSouls = 150; lSouls = 0; }
+  else if (currentTier === 1) { mSouls = 300; lSouls = 0; }
+  else if (currentTier === 2) { mSouls = 500; lSouls = 2; }
+  else if (currentTier === 3) { mSouls = 1000; lSouls = 5; }
+  else if (currentTier === 4) { mSouls = 2500; lSouls = 10; }
+  return { mSouls, lSouls };
+};
+
+window.renderBestiaryAlbum = function () {
+  let contentEl = document.getElementById("bestiary-content");
+  if (!contentEl) return;
+
+  let activeSetKey = window.selectedBestiarySetKey;
+  let pStats = window.playerStats;
+  let cardsOwned = pStats.monsterCards || {};
+  let thresholds = window.CARD_UPGRADE_THRESHOLDS || [25, 50, 150, 300, 750, 1800];
+
+  // --- LEFT PAGE: SET SELECTOR (TABS) ----
+  let leftPageHtml = `
+    <div class="bestiary-page-left" style="flex: 1; border-right: 1px dashed #4a154b; padding-right: 12px; display:flex; flex-direction:column; gap:6px; min-height: 380px;">
+      <h4 style="margin: 0 0 8px 0; color:#df9ffb; font-size:12px; text-transform:uppercase; letter-spacing:1px; text-align:left; border-bottom:1px solid #333; padding-bottom:4px;">📜 Album Directory</h4>
+  `;
+
+  for (let sKey in window.CARD_SETS_DATA) {
+    let sData = window.CARD_SETS_DATA[sKey];
+    let minTierInSet = 5;
+    let anyLocked = false;
+    let unlockedCount = 0;
+
+    sData.cards.forEach((cKey) => {
+        let count = cardsOwned[cKey] || 0;
+        let t = window.getCardTier(count);
+        if (t < 0) anyLocked = true;
+        else {
+        unlockedCount++;
+        if (t < minTierInSet) minTierInSet = t;
+      }
     });
+
+    let setBadge = "";
+    if (anyLocked) {
+      setBadge = `<span style="font-size:9px; color:#888;">(${unlockedCount}/${sData.cards.length})</span>`;
+    } else {
+      const setLabels = ["Common", "Rare", "Magic", "Epic", "Legendary", "Mythic"];
+      let setLabelName = setLabels[minTierInSet] || "Unknown";
+      let setCol = window.getTierColor(minTierInSet);
+      setBadge = `<span style="background:${setCol}1a; border:1px solid ${setCol}; color:${setCol}; font-size:8.5px; padding:1px 5px; border-radius:10px; font-weight:bold;">${minTierInSet === 5 ? "AWAKENED 🔥" : setLabelName}</span>`;
+    }
+
+    let isSelected = activeSetKey === sKey;
+    let tabBg = isSelected ? "background:rgba(168, 85, 247, 0.12); border-color:#a855f7;" : "background:#111; border-color:#333;";
+
+    leftPageHtml += `
+      <div class="bag-item" style="${tabBg} padding:8px 10px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; margin-bottom:0;" onclick="window.selectBestiarySet('${sKey}')">
+        <span style="font-size:11.5px; font-weight:bold; color:${isSelected ? "#df9ffb" : "#ccc"};">${sData.name.replace(" Set", "")}</span>
+        ${setBadge}
+      </div>
+    `;
+  }
+
+  leftPageHtml += `</div>`; // Close .bestiary-page-left
+  let dustOwned = pStats.astralDust || 0;
+
+  // --- RIGHT PAGE: CARD DECK ALBUM ---
+  let sData = window.CARD_SETS_DATA[activeSetKey];
+  let minTierInSet = 5;
+  let anyLocked = false;
+  sData.cards.forEach((cKey) => {
+      let count = cardsOwned[cKey] || 0;
+      let t = window.getCardTier(count);
+      if (t < 0) anyLocked = true;
+      if (t < minTierInSet) minTierInSet = t;
+    });
+
+  let setMultiplierLabel = "No Set Bonus (Unlock all cards)";
+  let setBonusCol = "#888";
+  if (!anyLocked && minTierInSet >= 0) {
+    const setMultipliers = [20, 35, 50, 65, 80, 100];
+    let mult = setMultipliers[minTierInSet] || 20;
+    setMultiplierLabel = `+${mult}% ${sData.theme} ${minTierInSet === 5 ? " Awakened! 🔥" : "Active"}`;
+    setBonusCol = window.getTierColor(minTierInSet);
+  }
+
+  let rightPageHtml = `
+    <div class="bestiary-page-right" style="flex: 1.25; padding-left: 12px; display:flex; flex-direction:column; justify-content:space-between; height:100%;">
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #4a154b; padding-bottom:4px; margin-bottom:10px;">
+          <strong style="color:#df9ffb; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">${sData.name}</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.45); border:1px solid ${setBonusCol}; padding:8px 10px; border-radius:6px; text-align:center; font-family:monospace; font-size:11px; margin-bottom:12px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+          <div style="font-size:8.5px; color:#aaa; text-transform:uppercase; margin-bottom:2px;">Set Passive Bonus Matrix:</div>
+          <strong style="color:${setBonusCol}; font-size:12px; text-shadow:0 0 6px ${setBonusCol}33;">${setMultiplierLabel}</strong>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+  `;
+
+  sData.cards.forEach((cKey) => {
+      let cData = window.MONSTER_CARDS_DATA[cKey];
+      let count = cardsOwned[cKey] || 0;
+      let tier = window.getCardTier(count);
+
+      let isLocked = tier < 0;
+      let cardColor = isLocked ? "#444" : window.getTierColor(tier);
+
+      let nextThresholdIndex = tier + 1;
+      let nextThreshold = thresholds[nextThresholdIndex] || 600;
+      let baseThreshold = thresholds[tier] || 0;
+
+      let isMaxed = tier >= 5;
+
+      // Build the duplicate progress tracker values
+            let flatProgressText = "";
+            let fillPct = 0;
+            let firstThreshold = thresholds[0] || 25;
+            if (isLocked) {
+              flatProgressText = `Copies: ${count} / ${firstThreshold}`;
+              fillPct = (count / firstThreshold) * 100;
+            } else if (isMaxed) {
+              flatProgressText = `MAX TIER OWNED`;
+              fillPct = 100;
+            } else {
+              flatProgressText = `Copies: ${count} / ${nextThreshold}`;
+              fillPct = ((count - baseThreshold) / (nextThreshold - baseThreshold)) * 100;
+            }
+
+      // Determine soul requirements to upgrade
+      let costs = window.getCardUpgradeCost(tier);
+      let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
+      let luminousOwned = window.inventory.ETC["Luminous Soul"] || 0;
+
+      let canAffordSouls = soulsOwned >= costs.mSouls && luminousOwned >= costs.lSouls;
+      let canAffordDuplicates = isLocked ? count >= 5 : count >= nextThreshold;
+
+      let canUpgrade = !isMaxed && canAffordDuplicates && canAffordSouls;
+
+      // Shiny progress bar gradients matching card element tier
+      let progressGlow = canUpgrade ? "animation: pulseGlow 1.2s infinite;" : "";
+      let fillGrad = isLocked
+        ? `background:#555;`
+        : isMaxed
+          ? `background:linear-gradient(90deg, #f1c40f, #e74c3c);`
+          : `background:linear-gradient(90deg, #ffd700, #ff007f);`;
+
+      let upgradeBtnHtml = "";
+      if (isMaxed) {
+        upgradeBtnHtml = `<span style="color:#2ecc71; font-weight:bold; font-size:10px; font-family:monospace;">MAX TIER</span>`;
+      } else if (canUpgrade) {
+        upgradeBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:4px 10px; font-size:10px; font-weight:bold;" onclick="window.upgradeBestiaryCard('${cKey}')">Upgrade</button>`;
+      } else if (canAffordDuplicates) {
+        // Shards complete but lacking souls
+        let mColor = soulsOwned >= costs.mSouls ? "#2ecc71" : "#e74c3c";
+        let lColor = luminousOwned >= costs.lSouls ? "#2ecc71" : "#e74c3c";
+        let reqText = costs.lSouls > 0
+          ? `<span style="color:${mColor}">${costs.mSouls} M</span> & <span style="color:${lColor}">${costs.lSouls} L</span>`
+          : `<span style="color:${mColor}">${costs.mSouls} M</span>`;
+        upgradeBtnHtml = `<span style="font-size:8.5px; color:#888; font-family:monospace; line-height:1; display:block; text-align:right;">Req: ${reqText} Souls</span>`;
+      } else {
+        // Lacking shards
+        upgradeBtnHtml = `<span style="font-size:9px; color:#666; font-family:monospace;">Locked</span>`;
+      }
+
+      let statsDisplayLabel = "";
+            if (isLocked) {
+              statsDisplayLabel = `<span style="color:#7f8c8d; font-style:italic;">Padlock Seal: Open Monster Card Sacks to collect!</span>`;
+            } else {
+              let isUtility = ["critChance", "critDamage", "block", "parry", "dropRate", "quality", "goldMulti", "rareSpawn", "fairySpawn"].includes(cData.baseStat);
+              let val = isUtility ? window.getUtilityCardValue(tier) : window.getCardValue(cData.baseVal, tier);
+              let formattedVal = cData.isPct
+                ? `+${(val * 100).toFixed(1)}%`
+                : `+${val.toFixed(1)}`;
+              statsDisplayLabel = `Active Stat Bonus: <strong style="color:#2ecc71;">${formattedVal} ${window.getStatLabel(cData.baseStat)}</strong>`;
+            }
+
+    let cardIconHtml = window.getEquipIconHtml ? window.getEquipIconHtml({ type: cData.baseStat === "atk" ? "weapon" : cData.baseStat === "def" ? "shield" : "overall", statsRolled: isLocked ? 0 : tier }, 28) : "🃏";
+
+    rightPageHtml += `
+      <div class="bag-item" style="position:relative; background:linear-gradient(135deg, #100b1a 0%, #06040c 100%); border:1.5px solid ${cardColor}80; border-left:4.5px solid ${cardColor} !important; border-radius:6px; padding:10px; margin-bottom:0; display:flex; flex-direction:column; justify-content:space-between; min-height:85px;"
+           onmouseenter="window.showCardTooltip(event, '${cKey}')"
+           ontouchstart="window.showCardTooltip(event, '${cKey}')"
+           onmouseleave="window.hideTooltip()">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div style="display:flex; align-items:center; gap:6px; min-width:0; text-align:left;">
+                  <div style="flex-shrink:0;">${cardIconHtml}</div>
+                  <div style="min-width:0;">
+                      <strong style="color:${cardColor}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">${cData.name}</strong>
+                      <span style="font-size:9.5px; color:#aaa; display:block;">${statsDisplayLabel}</span>
+                  </div>
+              </div>
+              <div style="flex-shrink:0;">
+                  ${upgradeBtnHtml}
+              </div>
+          </div>
+          <!-- Progressive star tracker and shiny custom fill -->
+          <div style="margin-top:6px;">
+              <div style="display:flex; justify-content:space-between; font-size:8.5px; color:#888; font-family:monospace; margin-bottom:2px; line-height:1;">
+                  <span>PROGRESS TRACKER:</span>
+                  <span style="color:#df9ffb; font-weight:bold;">${flatProgressText}</span>
+              </div>
+              <div class="sink-prog-track" style="${progressGlow} margin-top:0;">
+                  <div class="sink-prog-fill" style="width:${fillPct}%; height:100%; ${fillGrad}"></div>
+              </div>
+          </div>
+      </div>
+    `;
+  });
+
+  rightPageHtml += `</div></div>`;
+
+  // Join pages together
+    contentEl.innerHTML = `
+      <div class="bestiary-book" style="display:flex; gap:12px; width:100%;">
+          ${leftPageHtml}
+          ${rightPageHtml}
+      </div>
+
+      <!-- Beautiful Separate Lower Section for the Astral Dust Recycling Shop -->
+      ${window.renderAstralRecyclingShop(dustOwned)}
+    `;
+  };
+
+  window.renderAstralRecyclingShop = function (dustOwned) {
+    const items = [
+      {
+        key: "Catalyst Core",
+        cost: 15,
+        color: "#2ecc71",
+        desc: "Spent at the Forge to lock and re-roll equipment modifiers.",
+        icon: window.getEtcIconHtml ? window.getEtcIconHtml("Catalyst Core", 24) : "🟢"
+      },
+      {
+        key: "Eridium Shard",
+        cost: 20,
+        color: "#8e44ad",
+        desc: "Spent at the Forge to Tier Up an item's Star Rarity.",
+        icon: window.getEtcIconHtml ? window.getEtcIconHtml("Eridium Shard", 24) : "🔮"
+      },
+      {
+        key: "Ancient Core",
+        cost: 25,
+        color: "#e74c3c",
+        desc: "Sacrifice at the Altar to summon a Rift Guardian.",
+        icon: window.getEtcIconHtml ? window.getEtcIconHtml("Ancient Core", 24) : "🔴"
+      },
+      {
+        key: "Luminous Soul",
+        cost: 30,
+        color: "#ffb6c1",
+        desc: "A radiant, pure soul dropped by rare monsters, used for advanced trades.",
+        icon: window.getEtcIconHtml ? window.getEtcIconHtml("Luminous Soul", 24) : "💖"
+      },
+      {
+        key: "Wildcard",
+        cost: 50,
+        color: "#ff007f",
+        label: "Fated Memory Wildcard",
+        desc: "Dispenses 1 copy of a random monster card you haven't maxed out yet.",
+        icon: `<span style="font-size: 20px;">🔮</span>`
+      }
+    ];
+
+    let itemsHtml = items.map(item => {
+      let canAfford = dustOwned >= item.cost;
+      let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+      let btnStyle = canAfford
+        ? `background: ${item.color}; color: ${item.color === "#f1c40f" || item.color === "#ffb6c1" ? "#111" : "#fff"}; font-weight: bold; cursor: pointer; border: 1px solid #fff; box-shadow: 0 0 8px ${item.color}44;`
+        : `background: #222; color: #555; border: 1px solid #333; cursor: not-allowed;`;
+
+      let cleanIcon = item.icon.replace("margin-right: 12px;", "margin-right: 4px;").replace("margin-right: 8px;", "margin-right: 4px;");
+
+      return `
+        <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(180deg, #13111c 0%, #08060c 100%); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; transition: transform 0.15s, border-color 0.15s; margin-bottom: 0;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="flex-shrink:0;">${cleanIcon}</div>
+            <div style="min-width:0; flex:1; text-align:left;">
+              <strong style="color:${item.color}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.label || item.key}</strong>
+              <span style="font-size:9.5px; color:#aaa; display:block; margin-top:2px; white-space:normal; line-height:1.3;">${item.desc}</span>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:4px;">
+            <span style="color:${costColor}; font-family:monospace; font-size:10.5px; font-weight:bold;">${item.cost} Dust</span>
+            <button class="btn-action" style="${btnStyle} font-size:9.5px; padding:4px 10px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.buyBestiaryExchangeItem('${item.key}')">Recycle</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <!-- Astral Dust Recycling Shop lower section -->
+      <div style="margin-top: 24px; border-top: 2px solid #a855f7; padding-top: 16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 style="margin:0; color: #df9ffb; font-size:13px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 4px #df9ffb);"><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/><path d="m15 9-6 6M9 9h6v6" stroke="#9b59b6"/></svg>
+            Astral Dust Recycling Shop
+          </h3>
+          <span style="background:rgba(255, 0, 127, 0.1); border:1px solid #ff007f; color:#ffb6c1; font-family:monospace; font-size:10.5px; font-weight:bold; padding:2px 8px; border-radius:4px; box-shadow:0 0 6px rgba(255,0,127,0.25);">
+            Balance: ${dustOwned} Astral Dust
+          </span>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:8px;">
+          ${itemsHtml}
+        </div>
+      </div>
+    `;
+  };
+
+window.upgradeBestiaryCard = function (cardKey) {
+  let pStats = window.playerStats;
+  let cardsOwned = pStats.monsterCards || {};
+  let count = cardsOwned[cardKey] || 0;
+  let cData = window.MONSTER_CARDS_DATA[cardKey];
+  let tier = window.getCardTier(count);
+
+  let thresholds = window.CARD_UPGRADE_THRESHOLDS || [5, 15, 45, 100, 250, 600];
+  let isLocked = tier < 0;
+  let nextThreshold = thresholds[tier + 1] || 600;
+
+  // Double check duplicates requirements
+  let meetsShards = isLocked ? count >= 5 : count >= nextThreshold;
+  if (!meetsShards) return;
+
+  // Double check soul currency requirements
+  let costs = window.getCardUpgradeCost(tier);
+  let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
+  let luminousOwned = window.inventory.ETC["Luminous Soul"] || 0;
+
+  if (soulsOwned < costs.mSouls || luminousOwned < costs.lSouls) {
+    if (typeof window.pushHeaderToast === "function") {
+      window.pushHeaderToast("❌ Lacking Monster/Luminous Souls!", "#e74c3c");
+    }
+    return;
+  }
+
+  // Deduct resources
+  if (costs.mSouls > 0) {
+    window.inventory.ETC["Monster Soul"] -= costs.mSouls;
+    if (window.inventory.ETC["Monster Soul"] === 0) delete window.inventory.ETC["Monster Soul"];
+  }
+  if (costs.lSouls > 0) {
+    window.inventory.ETC["Luminous Soul"] -= costs.lSouls;
+    if (window.inventory.ETC["Luminous Soul"] === 0) delete window.inventory.ETC["Luminous Soul"];
+  }
+
+  // Set card counts directly to threshold boundaries to successfully register the upgrade
+  if (isLocked) {
+    window.playerStats.monsterCards[cardKey] = Math.max(5, count);
+  } else {
+    window.playerStats.monsterCards[cardKey] = Math.max(nextThreshold, count);
+  }
+
+  window.SoundManager.play("spell");
+
+  // Custom successful upgrade feedback burst
+  let cvs = document.getElementById("gameCanvas");
+  let w = cvs ? cvs.width : 750;
+  let h = cvs ? cvs.height : 250;
+  let tColor = window.getTierColor(isLocked ? 0 : tier + 1);
+  for (let i = 0; i < 40; i++) {
+    let angle = Math.random() * Math.PI * 2;
+    let vel = window.randFloat(3, 8);
+    window.particles.push({
+      x: w / 2,
+      y: h / 2,
+      vx: Math.cos(angle) * vel,
+      vy: Math.sin(angle) * vel,
+      radius: window.randFloat(2, 4),
+      color: tColor,
+      alpha: 1,
+      life: 45,
+    });
+  }
+
+  window.invalidatePlayerStats();
+  window.updateUI();
+  window.renderBestiaryAlbum();
+  window.renderInventory();
+  window.saveGame();
+
+  let targetTierName = window.getTierName(isLocked ? 0 : tier + 1);
+  window.pushHeaderToast(`🎉 Infused ${cData.name} to ${targetTierName}!`, tColor);
+  window.pushLog(`<strong style="color:${tColor};">[BESTIARY]</strong> Successfully infused and upgraded <span style="color:${tColor};">${cData.name}</span> to the ${targetTierName} tier!`);
+};
+
+window.showCardTooltip = function (e, cardKey) {
+  if (window.isSimulatedMouseEvent && window.isSimulatedMouseEvent(e)) return;
+  e.stopPropagation();
+  let tt = document.getElementById("game-tooltip");
+  if (!tt) return;
+
+  let cData = window.MONSTER_CARDS_DATA[cardKey];
+  let cardsOwned = window.playerStats.monsterCards || {};
+  let count = cardsOwned[cardKey] || 0;
+  let thresholds = window.CARD_UPGRADE_THRESHOLDS || [5, 15, 45, 100, 250, 600];
+
+  let currentTier = -1;
+  for (let idx = 0; idx < thresholds.length; idx++) {
+    if (count >= thresholds[idx]) currentTier = idx;
+    else break;
+  }
+
+  let color = currentTier < 0 ? "#7f8c8d" : window.getTierColor(currentTier);
+  let tierLabel = currentTier < 0 ? "Locked" : window.getTierName(currentTier);
+
+  let nextTierName = window.getTierName(currentTier + 1);
+  let nextThreshold = thresholds[currentTier + 1] || 600;
+
+  let isUtility = ["critChance", "critDamage", "block", "parry", "dropRate", "quality", "goldMulti", "rareSpawn", "fairySpawn"].includes(cData.baseStat);
+      let curVal = isUtility ? window.getUtilityCardValue(currentTier) : window.getCardValue(cData.baseVal, currentTier);
+      let nextVal = isUtility ? window.getUtilityCardValue(currentTier + 1) : window.getCardValue(cData.baseVal, currentTier + 1);
+
+      let format = (v) => cData.isPct ? `+${(v * 100).toFixed(1)}%` : `+${v.toFixed(1)}`;
+
+  let detailsHtml = "";
+  if (currentTier === -1) {
+    detailsHtml = `
+      <div class="tt-stat-line" style="color:#e74c3c;">• Unlock Threshold: 5 Cards (Owned: ${count})</div>
+      <div class="tt-stat-line" style="color:#2ecc71; margin-top:6px; font-weight:bold;">🎁 Unlock Reward: ${format(nextVal)} ${window.getStatLabel(cData.baseStat)}</div>
+    `;
+  } else if (currentTier >= 5) {
+    detailsHtml = `
+      <div class="tt-stat-line" style="color:#2ecc71;">• Current Bonus: ${format(curVal)} ${window.getStatLabel(cData.baseStat)}</div>
+      <div class="tt-stat-line" style="color:#f1c40f; margin-top:4px; font-weight:bold;">🔥 MAX TIER ACHIEVED!</div>
+    `;
+  } else {
+    detailsHtml = `
+      <div class="tt-stat-line" style="color:#bdc3c7;">• Current Bonus: ${format(curVal)} ${window.getStatLabel(cData.baseStat)}</div>
+      <div class="tt-stat-line" style="color:#9b59b6; margin-top:6px; font-weight:bold;">📈 Next Tier: ${nextTierName} (${format(nextVal)})</div>
+      <div class="tt-stat-line" style="color:#7f8c8d;">(Requires ${nextThreshold} total card duplicates)</div>
+    `;
+  }
+
+  let costs = window.getCardUpgradeCost(currentTier);
+  let upgradeReqsHtml = "";
+  if (currentTier < 5) {
+    upgradeReqsHtml = `
+      <div style="margin-top:8px; border-top:1px dashed #444; padding-top:6px; font-size:10px;">
+        <span style="font-weight:bold; color:#ffb6c1; text-transform:uppercase; letter-spacing:0.5px;">🏥 Soul Infusion Requirements:</span>
+        <div class="tt-stat-line" style="color:#bdc3c7; font-family:monospace; margin-top:2px;">• Monster Souls: ${costs.mSouls}</div>
+        ${costs.lSouls > 0 ? `<div class="tt-stat-line" style="color:#ffb6c1; font-family:monospace;">• Luminous Souls: ${costs.lSouls}</div>` : ""}
+      </div>
+    `;
+  }
+
+  let iconHtml = window.getEquipIconHtml ? window.getEquipIconHtml({ type: cData.baseStat === "atk" ? "weapon" : cData.baseStat === "def" ? "shield" : "overall", statsRolled: currentTier < 0 ? 0 : currentTier }, 28) : "🃏";
+  iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 8px;");
+
+  tt.innerHTML = `
+    <div style="padding: 10px; width: 230px; box-sizing: border-box; font-family:sans-serif;">
+        <div class="tt-title" style="color:${color}; display:flex; align-items:center; gap:8px;">${iconHtml}<span>${cData.name}</span></div>
+        <div class="tt-subtitle" style="color:#9b59b6;">Tier: ${tierLabel} | Total Copies: ${count}</div>
+        <div style="color:#aaa; font-size:10.5px; white-space:normal; line-height:1.4; margin-bottom:8px;">${cData.desc}</div>
+        <div style="border-top:1px dashed #333; padding-top:6px; font-size:10.5px;">
+            ${detailsHtml}
+        </div>
+        ${upgradeReqsHtml}
+    </div>
+  `;
+  tt.style.borderColor = color;
+  tt.style.display = "block";
+  window.positionTooltip(e, tt);
+};
+
+window.buyBestiaryExchangeItem = function (itemKey) {
+  let pStats = window.playerStats;
+  let ownedDust = pStats.astralDust || 0;
+
+  const dustCosts = {
+    "Catalyst Core": 15,
+    "Ancient Core": 25,
+    "Eridium Shard": 20,
+    "Luminous Soul": 30,
+    "Wildcard": 50
+  };
+
+  let cost = dustCosts[itemKey];
+  if (cost === undefined) return;
+
+  if (ownedDust < cost) {
+    window.pushHeaderToast("❌ Insufficient Astral Dust!", "#ff007f");
+    return;
+  }
+
+  if (itemKey === "Wildcard") {
+    // Wildcard gives a random card the player hasn't maxed out yet (< 600 total copies)
+    let cardsRegistry = window.MONSTER_CARDS_DATA;
+    let cardStats = pStats.monsterCards || {};
+    let nonMaxedKeys = Object.keys(cardsRegistry).filter(cKey => (cardStats[cKey] || 0) < 600);
+
+    if (nonMaxedKeys.length === 0) {
+      window.pushHeaderToast("👑 Your collection is fully maxed! Astral Dust cannot be spent on Wildcards.", "#ff007f");
+      return;
+    }
+
+    let rolledKey = nonMaxedKeys[Math.floor(Math.random() * nonMaxedKeys.length)];
+    let cData = cardsRegistry[rolledKey];
+
+    // Deduct and grant card copy
+    pStats.astralDust -= cost;
+    pStats.monsterCards[rolledKey] = (cardStats[rolledKey] || 0) + 1;
+
+    // Visual burst particles
+    let cvs = document.getElementById("gameCanvas");
+    let w = cvs ? cvs.width : 750;
+    let h = cvs ? cvs.height : 250;
+    for (let i = 0; i < 30; i++) {
+      window.particles.push({
+        x: w / 2, y: h / 2,
+        vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
+        radius: Math.random() * 2 + 1,
+        color: "#ff007f", alpha: 1, life: 30
+      });
+    }
+
+    window.pushHeaderToast(`🔮 Fated Memory: Received 1x ${cData.name}!`, "#ff007f");
+    window.pushLog(`<strong style="color:#ff007f;">[BESTIARY]</strong> Traded 50 Astral Dust for a Fated Memory wildcard. Unboxed: <span style="color:#ff007f;">1x ${cData.name}</span>!`);
+
+  } else {
+    // Standard material purchase
+    pStats.astralDust -= cost;
+    window.addEtcDrop(itemKey, 1);
+    window.pushHeaderToast(`🛒 Purchased: 1x ${itemKey}!`, "#2ecc71");
+    if (window.SoundManager) window.SoundManager.play("fairy");
+  }
+
+  window.updateUI();
+  window.renderBestiaryAlbum();
+  window.renderInventory();
+  window.saveGame();
+};
+
+// Check if any card has enough duplicates/souls to trigger upgrade and hook alert indicator
+window.checkBestiaryAlerts = function () {
+  let cardsOwned = window.playerStats.monsterCards || {};
+  let thresholds = window.CARD_UPGRADE_THRESHOLDS || [5, 15, 45, 100, 250, 600];
+  let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
+  let luminousOwned = window.inventory.ETC["Luminous Soul"] || 0;
+
+  for (let cKey in window.MONSTER_CARDS_DATA) {
+    let count = cardsOwned[cKey] || 0;
+
+    // Determine active card tier
+    let tier = -1;
+    for (let idx = 0; idx < thresholds.length; idx++) {
+      if (count >= thresholds[idx]) tier = idx;
+      else break;
+    }
+
+    if (tier < 5) {
+      let isLocked = tier < 0;
+      let nextThreshold = thresholds[tier + 1] || 600;
+      let canAffordDuplicates = isLocked ? count >= 5 : count >= nextThreshold;
+
+      if (canAffordDuplicates) {
+        let costs = window.getCardUpgradeCost(tier);
+        if (soulsOwned >= costs.mSouls && luminousOwned >= costs.lSouls) {
+          return true; // Found an upgradable card!
+        }
+      }
+    }
+  }
+  return false;
 };

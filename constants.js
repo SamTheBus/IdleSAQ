@@ -33,13 +33,20 @@ window.MYSTICAL_STOCK = [
     desc: "Trade 10 rare Luminous Souls for 1 Astral Essence.",
   },
   {
-    name: "Catalyst Core",
-    cost: 15,
-    currency: "Astral Shards",
-    color: "#2ecc71",
-    desc: "Trade 15 Astral Crucible Shards for 1 Catalyst Core.",
-  },
-];
+      name: "Catalyst Core",
+      cost: 15,
+      currency: "Astral Shards",
+      color: "#2ecc71",
+      desc: "Trade 15 Astral Crucible Shards for 1 Catalyst Core.",
+    },
+    {
+      name: "Monster Card Sack",
+      cost: 25,
+      currency: "Luminous Soul",
+      color: "#a855f7",
+      desc: "Trade 25 Luminous Souls for 1 rare Monster Card Sack (5 cards inside).",
+    }
+  ];
 
 window.POTION_TRANSMUTATIONS = [
   {
@@ -3275,4 +3282,82 @@ window.TITLES_DATA = {
       qly: 0.05,
     },
   },
+};
+
+window.CARD_UPGRADE_THRESHOLDS = [25, 50, 150, 300, 750, 1800];
+
+window.MONSTER_CARDS_DATA = {
+  // Whispering Woods (T0)
+  "slime": { name: "Slime Card", baseStat: "maxHp", baseVal: 0.02, isPct: true, desc: "Bubbly slime membrane increases Maximum HP.", set: "Whispering Woods" },
+  "sprout": { name: "Sprout Card", baseStat: "def", baseVal: 0.02, isPct: true, desc: "Rooted earth defenses improve overall Defense.", set: "Whispering Woods" },
+  "thorn_wyrm": { name: "Thorn Wyrm Card", baseStat: "critChance", baseVal: 0.005, isPct: true, desc: "Thorn-sharp instincts sharpen Critical Strike Chance.", set: "Whispering Woods" },
+
+  // Mountain Peaks (T1)
+  "golem": { name: "Golem Card", baseStat: "def", baseVal: 0.025, isPct: true, desc: "Solid granite skin bolsters Defense.", set: "Mountain Peaks" },
+  "wyrmling": { name: "Wyrmling Card", baseStat: "atk", baseVal: 0.02, isPct: true, desc: "Draconic fire embers augment Attack Power.", set: "Mountain Peaks" },
+  "gargoyle": { name: "Gargoyle Card", baseStat: "parry", baseVal: 0.005, isPct: true, desc: "Lithic wings snap open to improve Parry Rate.", set: "Mountain Peaks" },
+
+  // Inferno Depths (T2)
+  "magma_elemental": { name: "Magma Elemental Card", baseStat: "atk", baseVal: 0.025, isPct: true, desc: "Searing lava flow amplifies Attack Power.", set: "Inferno Depths" },
+  "lava_serpent": { name: "Lava Serpent Card", baseStat: "critDamage", baseVal: 0.015, isPct: true, desc: "Coiled molten pressure increases Critical Damage multipliers.", fill: true, set: "Inferno Depths" },
+  "hell_bat": { name: "Hell Bat", baseKey: "hell_bat", name: "Hell Bat Card", desc: "Flits erratically, creating chaotic critical openings.", stats: { critChance: 0.005 }, isPct: true, baseStat: "critChance", baseVal: 0.005, set: "Inferno Depths" },
+
+  // Fungal Swamp (T3)
+  "swamp_basilisk": { name: "Swamp Basilisk Card", baseStat: "maxHp", baseVal: 0.025, isPct: true, desc: "Primordial swamp vigor inflates Maximum HP.", set: "Fungal Swamp" },
+  "toxic_fly": { name: "Toxic Fly Card", baseStat: "moveSpeed", baseVal: 1.5, isPct: false, desc: "Wing flutter speeds up your Movement Speed.", set: "Fungal Swamp" },
+  "marsh_ghost": { name: "Marsh Ghost Card", baseStat: "int", baseVal: 2.0, isPct: false, desc: "Ethereal wisdom channels into your base Intelligence.", set: "Fungal Swamp" },
+
+  // Void Singularity (T4)
+  "void_orb": { name: "Void Orb Card", baseStat: "dropRate", baseVal: 0.02, isPct: true, desc: "Gravitational collapse pulls more loot into your sack.", set: "Void Singularity" },
+  "void_crawler": { name: "Void Crawler Card", baseStat: "rareSpawn", baseVal: 0.002, isPct: true, desc: "Spacial tears draw out more Rare Spawns.", set: "Void Singularity" },
+  "void_spectre": { name: "Void Spectre Card", baseStat: "gold", baseVal: 0.02, isPct: true, desc: "Cosmic echoes multiply all acquired Gold.", set: "Void Singularity" },
+
+  // Cosmic Wardens (Bosses)
+  "aegis_goliath": { name: "Aegis Goliath Card", baseStat: "def", baseVal: 0.03, isPct: true, desc: "Event Horizon shielding significantly increases Defense.", set: "Cosmic Wardens" },
+  "chronos_arbitrator": { name: "Chronos Arbitrator Card", baseStat: "moveSpeed", baseVal: 2.5, isPct: false, desc: "Temporal dilation accelerates Movement Speed.", set: "Cosmic Wardens" },
+  "nexus_overseer": { name: "Nexus Overseer Card", baseStat: "atk", baseVal: 0.03, isPct: true, desc: "Glitch code injections significantly increase Attack Power.", set: "Cosmic Wardens" }
+};
+
+window.CARD_SETS_DATA = {
+  "Whispering Woods": {
+    name: "Whispering Woods Set",
+    theme: "XP Rate Multiplier",
+    statKey: "xpRate",
+    cards: ["slime", "sprout", "thorn_wyrm"]
+  },
+  "Mountain Peaks": {
+    name: "Mountain Peaks Set",
+    theme: "Global Defense",
+    statKey: "defPctBonus",
+    cards: ["golem", "wyrmling", "gargoyle"]
+  },
+  "Inferno Depths": {
+    name: "Inferno Depths Set",
+    theme: "Global Attack",
+    statKey: "atkPctBonus",
+    cards: ["magma_elemental", "lava_serpent", "hell_bat"]
+  },
+  "Fungal Swamp": {
+    name: "Fungal Swamp Set",
+    theme: "Global Max HP",
+    statKey: "maxHpPctBonus",
+    cards: ["swamp_basilisk", "toxic_fly", "marsh_ghost"]
+  },
+  "Void Singularity": {
+    name: "Void Singularity Set",
+    theme: "Global Drop Quality",
+    statKey: "qly",
+    cards: ["void_orb", "void_crawler", "void_spectre"]
+  },
+  "Cosmic Wardens": {
+    name: "Cosmic Wardens Set",
+    theme: "All Core Attributes (STR/DEX/INT)",
+    statKey: "attributesMult", // Special handler in data.js to scale str, dex, int
+    cards: ["aegis_goliath", "chronos_arbitrator", "nexus_overseer"]
+  }
+};
+
+window.useDex["Monster Card Sack"] = {
+  desc: "A heavy, dust-covered burlap booster pack sealed with a runic wax stamp. Tearing it open dispenses a booster pack of 5 random cards for your Bestiary Album. Duplicates are spent on card rank elevations.",
+  color: "#a855f7"
 };

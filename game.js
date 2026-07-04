@@ -497,9 +497,12 @@ window.SaveManager = {
         }
       }
 
-      if (window.playerStats.autoSalvageThreshold === undefined) {
-        window.playerStats.autoSalvageThreshold = -1;
-      }
+      if (window.playerStats.monsterCards === undefined) {
+              window.playerStats.monsterCards = {};
+            }
+            if (window.playerStats.astralDust === undefined) {
+              window.playerStats.astralDust = 0;
+            }
 
       let savedInventory = parsed.inventory || {};
       window.inventory = {
@@ -4192,39 +4195,65 @@ window.CombatEngine = {
       window.rollPotionDrop(isBoss, window.mob && window.mob.isRare);
 
     // Cavern Sigil Sack drop rolls
-    let sackChance = 0;
-    if (
-      window.playerStats.isDungeonMode &&
-      window.mob.type === "dungeon_boss"
-    ) {
-      sackChance = 0.05;
-    } else if (
-      window.playerStats.isUberBoss &&
-      (window.mob.type === "rift_guardian" ||
-        window.mob.type === "aegis_goliath" ||
-        window.mob.type === "chronos_arbitrator" ||
-        window.mob.type === "nexus_overseer")
-    ) {
-      sackChance = 0.15;
-    } else if (window.mob.type === "boss") {
-      sackChance = 0.015;
-    }
+        let sackChance = 0;
+        if (
+          window.playerStats.isDungeonMode &&
+          window.mob.type === "dungeon_boss"
+        ) {
+          sackChance = 0.05;
+        } else if (
+          window.playerStats.isUberBoss &&
+          (window.mob.type === "rift_guardian" ||
+            window.mob.type === "aegis_goliath" ||
+            window.mob.type === "chronos_arbitrator" ||
+            window.mob.type === "nexus_overseer")
+        ) {
+          sackChance = 0.15;
+        } else if (window.mob.type === "boss") {
+          sackChance = 0.015;
+        }
 
-    if (sackChance > 0 && Math.random() < sackChance) {
-      window.addUseDrop("Cavern Sigil Sack", 1);
-      window.effects.push({
-        x: window.mob.x + window.mob.w / 2,
-        y: window.mob.y - 10,
-        text: "🎒 SIGIL SACK!",
-        color: "#9b59b6",
-        life: 55,
-      });
-      if (typeof window.pushLog === "function") {
-        window.pushLog(
-          `<strong style="color:#9b59b6;">[DROP]</strong> Recovered a rare <span style="color:#9b59b6;">Cavern Sigil Sack</span>!`,
-        );
-      }
-    }
+        if (sackChance > 0 && Math.random() < sackChance) {
+          window.addUseDrop("Cavern Sigil Sack", 1);
+          window.effects.push({
+            x: window.mob.x + window.mob.w / 2,
+            y: window.mob.y - 10,
+            text: "🎒 SIGIL SACK!",
+            color: "#9b59b6",
+            life: 55,
+          });
+          if (typeof window.pushLog === "function") {
+            window.pushLog(
+              `<strong style="color:#9b59b6;">[DROP]</strong> Recovered a rare <span style="color:#9b59b6;">Cavern Sigil Sack</span>!`,
+            );
+          }
+        }
+
+        // Highly restricted Monster Card Sack drop rolls
+        let cardSackChance = 0;
+        if (window.playerStats.isDungeonMode && window.mob.type === "dungeon_boss") {
+          cardSackChance = 0.15; // 15% on dungeon floor boss clears
+        } else if (window.playerStats.isUberBoss) {
+          cardSackChance = 0.25; // 25% on Rift Guardians
+        } else if (window.mob.type === "boss") {
+          cardSackChance = 0.02; // 2% on Stage Wardens
+        }
+
+        if (cardSackChance > 0 && Math.random() < cardSackChance) {
+          window.addUseDrop("Monster Card Sack", 1);
+          window.effects.push({
+            x: window.mob.x + window.mob.w / 2,
+            y: window.mob.y + 10,
+            text: "🃏 CARD BOOSTER PACK!",
+            color: "#a855f7",
+            life: 60,
+          });
+          if (typeof window.pushLog === "function") {
+            window.pushLog(
+              `<strong style="color:#a855f7;">[DROP]</strong> Discovered an elite <span style="color:#a855f7;">Monster Card Sack</span> booster pack!`,
+            );
+          }
+        }
 
     // Single-tier feats check conditions
     if (isBoss) {
@@ -4439,12 +4468,23 @@ window.CombatEngine = {
         window.playerStats.crucibleAccumulatedCores =
           (window.playerStats.crucibleAccumulatedCores || 0) + finalCores;
 
-        window.playerStats.crucibleWave++;
-        window.playerStats.cruciblePeak = Math.max(
-          window.playerStats.cruciblePeak || 1,
-          window.playerStats.crucibleWave,
-        );
-        window.playerStats.killCount = 0;
+        let oldWave = window.playerStats.crucibleWave || 1;
+                window.playerStats.crucibleWave++;
+                window.playerStats.cruciblePeak = Math.max(
+                  window.playerStats.cruciblePeak || 1,
+                  window.playerStats.crucibleWave,
+                );
+                window.playerStats.killCount = 0;
+
+                // Reward 1x Card Sack every 50 waves in the Crucible
+                if (oldWave > 0 && oldWave % 50 === 0) {
+                  window.addUseDrop("Monster Card Sack", 1);
+                  if (typeof window.pushLog === "function") {
+                    window.pushLog(
+                      `<strong style="color:#a855f7;">[CRUCIBLE MILESTONE]</strong> Wave ${oldWave} reached! Awarded 1x <span style="color:#a855f7;">Monster Card Sack</span>!`,
+                    );
+                  }
+                }
         if (typeof window.pushLog === "function")
           window.pushLog(
             `<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE] Advanced to Wave ${window.playerStats.crucibleWave}! (+${finalShards} Shards, +${finalCores} Cores accumulated)</span>`,
@@ -5505,12 +5545,20 @@ window.useItem = function (itemName) {
     let baseKeys = 1;
 
     window.playerStats.coins += baseGold;
-    window.playerStats.totalGoldEarned =
-      (window.playerStats.totalGoldEarned || 0) + baseGold;
-    window.addEtcDrop("Monster Soul", baseSouls);
-    window.addEtcDrop("Gacha Key", baseKeys);
+        window.playerStats.totalGoldEarned =
+          (window.playerStats.totalGoldEarned || 0) + baseGold;
+        window.addEtcDrop("Monster Soul", baseSouls);
+        window.addEtcDrop("Gacha Key", baseKeys);
 
-    let premiumDrops = [];
+        // Dynamic Sacks scaling with Clan Supply Depot research level
+        let cardSacksToAward = 1;
+        if (depotLevel >= 10) cardSacksToAward++;
+        if (depotLevel >= 20) cardSacksToAward++;
+        if (depotLevel >= 30) cardSacksToAward++;
+        window.addUseDrop("Monster Card Sack", cardSacksToAward);
+
+        let premiumDrops = [];
+        premiumDrops.push(`<span style="color:#a855f7;">+${cardSacksToAward}x Monster Card Sack(s)</span>`);
     if (depotLevel >= 5) {
       window.addEtcDrop("Catalyst Core", 1);
       premiumDrops.push(`<span style="color:#2ecc71;">+1 Catalyst Core</span>`);
@@ -5916,7 +5964,91 @@ window.useItem = function (itemName) {
     if (hr >= 7 && hr < 9) {
       window.playerStats.hasTriggeredCoffeeRun = true;
     }
-  } else if (itemName === "Cavern Sigil Sack") {
+  } else if (itemName === "Monster Card Sack") {
+      window.inventory.USE[itemName]--;
+      if (window.inventory.USE[itemName] === 0) {
+        delete window.inventory.USE[itemName];
+      }
+
+      // Play unboxing sound
+      if (window.SoundManager) window.SoundManager.play("fairy");
+
+      let cardKeys = Object.keys(window.MONSTER_CARDS_DATA);
+      let pulledCards = [];
+      let recycledDust = 0;
+
+      // Draw exactly 5 cards
+      for (let i = 0; i < 5; i++) {
+        let rolledKey = cardKeys[Math.floor(Math.random() * cardKeys.length)];
+        let cData = window.MONSTER_CARDS_DATA[rolledKey];
+
+        window.playerStats.monsterCards = window.playerStats.monsterCards || {};
+        let currentOwned = window.playerStats.monsterCards[rolledKey] || 0;
+
+        if (currentOwned >= 600) {
+          // Recycle duplicate cards above the Mythic cap into Astral Dust
+          recycledDust++;
+          pulledCards.push({ key: rolledKey, name: cData.name, isRecycled: true });
+        } else {
+          window.playerStats.monsterCards[rolledKey] = currentOwned + 1;
+          pulledCards.push({ key: rolledKey, name: cData.name, isRecycled: false });
+        }
+      }
+
+      if (recycledDust > 0) {
+        window.playerStats.astralDust = (window.playerStats.astralDust || 0) + recycledDust;
+      }
+
+      // Build the Card Booster Pack opening animation overlay
+      let overlay = document.createElement("div");
+      overlay.id = "booster-opening-overlay";
+      overlay.style.position = "fixed";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100%";
+      overlay.style.height = "100%";
+      overlay.style.backgroundColor = "rgba(0,0,0,0.95)";
+      overlay.style.display = "flex";
+      overlay.style.justifyContent = "center";
+      overlay.style.alignItems = "center";
+      overlay.style.zIndex = "45000";
+      overlay.style.backdropFilter = "blur(8px)";
+      document.body.appendChild(overlay);
+
+      let cardsHtml = pulledCards.map((p, idx) => {
+        let cData = window.MONSTER_CARDS_DATA[p.key];
+        let setDef = window.CARD_SETS_DATA[cData.set];
+        let color = window.getTierColor(3); // Nice epic color for card backs
+        let rowHtml = p.isRecycled
+          ? `<div style="font-size:11.5px; color:#ff007f; font-family:monospace; margin-top:2px;">🔄 Recycled (+1 Astral Dust)</div>`
+          : `<span style="font-size:11px; color:#aaa;">Added to collection (${window.playerStats.monsterCards[p.key]}/600)</span>`;
+
+        return `
+          <div style="background:#13151c; border:1.5px solid #a855f7; border-radius:8px; padding:10px; width:150px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.5); animation: toastFadeIn 0.3s ease-out; animation-delay:${idx * 0.15}s; animation-fill-mode: both; display:flex; flex-direction:column; justify-content:space-between; height:120px;">
+            <strong style="color:${color}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cData.name}</strong>
+            <span style="font-size:9px; color:#888; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-top:2px;">Set: ${setDef.name.replace(" Set", "")}</span>
+            <div style="border-top:1px dashed #333; margin-top:8px; padding-top:6px;">
+              ${rowHtml}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      overlay.innerHTML = `
+        <div style="background:#151515; border:3px solid #a855f7; border-radius:12px; width:95%; max-width:550px; box-shadow:0 15px 45px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s;">
+          <h2 style="margin:0 0 10px 0; color:#df9ffb; letter-spacing:2px; text-transform:uppercase; font-size:18px;">🃏 Booster Pack Unboxed!</h2>
+          <div style="height:2px; background:linear-gradient(90deg, transparent, #a855f7, transparent); margin-bottom:15px;"></div>
+          <p style="font-size:11px; color:#aaa; margin-bottom:15px; white-space:normal; text-align:center;">
+            You tore open a rare **Monster Card Sack** and obtained 5 cards for your Bestiary Album:
+          </p>
+          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
+            ${cardsHtml}
+          </div>
+          <button onclick="document.getElementById('booster-opening-overlay').remove(); window.setPauseState(false); window.updateUI(); window.renderInventory();" style="background:#a855f7; color:#fff; border:none; padding:10px 24px; font-weight:bold; font-size:12px; border-radius:4px; cursor:pointer; width:100%; box-shadow:0 0 10px #a855f755;">Claim Cards</button>
+        </div>
+      `;
+
+    } else if (itemName === "Cavern Sigil Sack") {
     // Uncapped specialised pouch; not bound by bag space limits
     window.inventory.USE[itemName]--;
     if (window.inventory.USE[itemName] === 0) {

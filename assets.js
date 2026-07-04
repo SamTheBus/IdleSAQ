@@ -452,6 +452,20 @@ window.AssetCatalog = {
             <path d="M16 13 v12 M11 18 h10" stroke="#00d2ff" stroke-width="1.8" stroke-linecap="round" style="filter: drop-shadow(0 0 3px #00d2ff);" />
           `;
     },
+    monster_card_sack(uid) {
+          return `
+            <defs>
+              <linearGradient id="g_mcs_${uid}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ff007f"/>
+                <stop offset="100%" stop-color="#a855f7"/>
+              </linearGradient>
+            </defs>
+            <rect x="6" y="4" width="20" height="24" rx="4" fill="url(#g_mcs_${uid})" stroke="#000" stroke-width="2" />
+            <path d="M6 10 H26 L20 4 H12 Z M6 22 H26 L20 28 H12 Z" fill="#2d1130" stroke="#000" stroke-width="1.5" />
+            <circle cx="16" cy="16" r="5" fill="#f1c40f" stroke="#000" stroke-width="1" />
+            <path d="M16 13 L16 19 M13 16 L19 16" stroke="#111" stroke-width="1.8" stroke-linecap="round" />
+          `;
+        },
   },
 
   // Centralized configurations of unique artifacts

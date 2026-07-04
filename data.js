@@ -25,6 +25,30 @@ window.getUiIconSvg = function (key, size = 12) {
 
 // --- SYSTEM UTILS ---
 
+function getCardTier(count) {
+  let thresholds = window.CARD_UPGRADE_THRESHOLDS || [25, 50, 150, 300, 750, 1800];
+  let t = -1;
+  for (let idx = 0; idx < thresholds.length; idx++) {
+    if (count >= thresholds[idx]) t = idx;
+    else break;
+  }
+  return t;
+}
+window.getCardTier = getCardTier;
+
+function getCardValue(base, tier) {
+  if (tier < 0) return 0;
+  return base * (1 + 0.6 * tier);
+}
+window.getCardValue = getCardValue;
+
+function getUtilityCardValue(tier) {
+  if (tier < 0) return 0;
+  const rates = [0.02, 0.04, 0.06, 0.08, 0.11, 0.15];
+  return rates[tier] || 0;
+}
+window.getUtilityCardValue = getUtilityCardValue;
+
 window.formatNumber = function (num) {
   if (num === null || num === undefined) return "0";
   num = Number(num);
@@ -1055,10 +1079,75 @@ window.resolvePlayerStats = function (useDraft = false) {
   let scale = limit - 0.01;
   p.rareSpawn = 0.01 + (excessRare * scale) / (excessRare + scale);
 
-  p.atk = Math.floor(p.atk);
-  p.maxHp = Math.floor(p.maxHp);
-  p.def = Math.floor(p.def);
-  p.moveSpeed = parseFloat(p.moveSpeed.toFixed(1));
+  // --- BESTIARY Album SYSTEM RESOLUTION ---
+      let cardsOwned = window.playerStats.monsterCards || {};
+
+      // 1. Process Individual Card Stat Additions
+      let activeCardsCounts = {};
+      for (let cKey in window.MONSTER_CARDS_DATA) {
+        let cData = window.MONSTER_CARDS_DATA[cKey];
+        let count = cardsOwned[cKey] || 0;
+        let tier = window.getCardTier(count);
+        activeCardsCounts[cKey] = tier; // Cache for set checks
+
+        if (tier >= 0) {
+          let isUtility = ["critChance", "critDamage", "block", "parry", "dropRate", "quality", "goldMulti", "rareSpawn", "fairySpawn"].includes(cData.baseStat);
+          let val = isUtility ? window.getUtilityCardValue(tier) : window.getCardValue(cData.baseVal, tier);
+
+        if (cData.baseStat === "atk") p.atk += Math.floor(val * p.atk); // Scaled attack add
+        else if (cData.baseStat === "maxHp") p.maxHp += Math.floor(val * p.maxHp);
+        else if (cData.baseStat === "def") p.def += Math.floor(val * p.def);
+        else if (cData.baseStat === "moveSpeed") p.moveSpeed += val;
+        else if (cData.baseStat === "critChance") p.critChance += val;
+        else if (cData.baseStat === "critDamage") p.critDamage += val;
+        else if (cData.baseStat === "block") p.block += val;
+        else if (cData.baseStat === "parry") p.parry += val;
+        else if (cData.baseStat === "dropRate") p.drop += val;
+        else if (cData.baseStat === "quality") p.qly += val;
+        else if (cData.baseStat === "goldMulti") p.gold += val;
+        else if (cData.baseStat === "rareSpawn") p.rareSpawn += val;
+        else if (cData.baseStat === "int") p.int += Math.floor(val);
+      }
+    }
+
+    // 2. Process Progressive Set Multipliers
+    let attributesMult = 1.0;
+    for (let sKey in window.CARD_SETS_DATA) {
+      let sData = window.CARD_SETS_DATA[sKey];
+      let minTierInSet = 5;
+      let anyLocked = false;
+
+      sData.cards.forEach((cKey) => {
+        let tier = activeCardsCounts[cKey] !== undefined ? activeCardsCounts[cKey] : -1;
+        if (tier < 0) anyLocked = true;
+        if (tier < minTierInSet) minTierInSet = tier;
+      });
+
+      if (!anyLocked && minTierInSet >= 0) {
+        // Set Level Progression: Unlocked = 20%, Rare = 35%, Magic = 50%, Epic = 65%, Legendary = 80%, Mythic = 100%
+        const setMultipliers = [0.2, 0.35, 0.5, 0.65, 0.8, 1.0];
+        let bonusPct = setMultipliers[minTierInSet] || 0.2;
+
+        if (sData.statKey === "xpRate") p.xpRate += bonusPct;
+        else if (sData.statKey === "atkPctBonus") achAtkPct += bonusPct;
+        else if (sData.statKey === "defPctBonus") achDefPct += bonusPct;
+        else if (sData.statKey === "maxHpPctBonus") achMaxHpPct += bonusPct;
+        else if (sData.statKey === "qly") p.qly += bonusPct;
+        else if (sData.statKey === "attributesMult") attributesMult += bonusPct;
+      }
+    }
+
+    // Apply Core Attributes Set Multiplier
+    if (attributesMult > 1.0) {
+      p.str = Math.floor(p.str * attributesMult);
+      p.dex = Math.floor(p.dex * attributesMult);
+      p.int = Math.floor(p.int * attributesMult);
+    }
+
+    p.atk = Math.floor(p.atk);
+    p.maxHp = Math.floor(p.maxHp);
+    p.def = Math.floor(p.def);
+    p.moveSpeed = parseFloat(p.moveSpeed.toFixed(1));
 
   // Set default targets required
   window.playerStats.targetsRequired = 5;
@@ -1529,7 +1618,9 @@ window.playerStats = {
   damageTakenThisBattle: 0,
   ankhTriggeredThisBattle: false,
   dailyMissions: [],
-  weeklyMissions: [],
+    weeklyMissions: [],
+    monsterCards: {},
+    astralDust: 0,
   dailyRerollsDone: 0, // Reset daily at 12:00 AM PST/PDT
   lastDailyResetTime: 0,
   lastWeeklyResetTime: 0,
@@ -1545,7 +1636,9 @@ window.playerStats = {
   equippedCostume: "knight",
   unlockedCostumes: ["knight"],
   playerName: "Guest",
-  clanId: null,
+    clanId: null,
+    monsterCards: {},
+    astralDust: 0,
   clanName: null,
   clanEmblem: null,
   clanSkills: {

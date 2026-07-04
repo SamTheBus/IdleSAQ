@@ -2938,3 +2938,72 @@ canvas {
     z-index: 10 !important;
   }
 }
+
+.bestiary-book {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bestiary-page-left {
+  flex: 1;
+  border-right: 1.5px dashed #4a154b;
+  padding-right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bestiary-page-right {
+  flex: 1.25;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Responsive Book Page Collapsing on Mobile devices */
+@media (max-width: 580px) {
+  .bestiary-book {
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+  .bestiary-page-left {
+    border-right: none !important;
+    border-bottom: 2px dashed #4a154b !important;
+    padding-right: 0 !important;
+    padding-bottom: 14px !important;
+  }
+  .bestiary-page-right {
+    padding-left: 0 !important;
+  }
+}
+
+/* Shiny upgrade bar fill glowing pulse keyframes */
+@keyframes shinyPulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 6px rgba(255, 0, 127, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.1);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(255, 0, 127, 0.85), inset 0 0 14px rgba(255, 255, 255, 0.3);
+    filter: brightness(1.2);
+  }
+}
+
+.bestiary-page-right .sink-prog-track {
+  height: 6px !important;
+  border: 1px solid #111 !important;
+}
+
+.bestiary-page-right .sink-prog-fill {
+  height: 100% !important;
+}
+
+.bestiary-page-right .btn-pulse-teal {
+  background: linear-gradient(135deg, #2ecc71, #27ae60) !important;
+  border: 1.5px solid #fff !important;
+  box-shadow: 0 0 10px rgba(46, 204, 113, 0.5) !important;
+  animation: shinyPulseGlow 1.5s infinite !important;
+}
