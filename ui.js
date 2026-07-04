@@ -12594,10 +12594,21 @@ window.toggleBestiaryAlbum = function () {
     window.renderBestiaryAlbum();
     modal.style.display = "block";
     window.setPauseState(true);
+
+    // Launch the live card breathing/animation loop
+    if (typeof window.animateBestiaryCards === "function") {
+      window.animateBestiaryCards();
+    }
   } else {
     modal.style.display = "none";
     window.hideTooltip();
     window.setPauseState(false);
+
+    // Stop the loop to conserve battery/CPU
+    if (window.bestiaryAnimFrameId) {
+      cancelAnimationFrame(window.bestiaryAnimFrameId);
+      window.bestiaryAnimFrameId = null;
+    }
   }
 };
 
@@ -12709,118 +12720,132 @@ window.renderBestiaryAlbum = function () {
   `;
 
   sData.cards.forEach((cKey) => {
-      let cData = window.MONSTER_CARDS_DATA[cKey];
-      let count = cardsOwned[cKey] || 0;
-      let tier = window.getCardTier(count);
+        let cData = window.MONSTER_CARDS_DATA[cKey];
+        let count = cardsOwned[cKey] || 0;
+        let tier = window.getCardTier(count);
 
-      let isLocked = tier < 0;
-      let cardColor = isLocked ? "#444" : window.getTierColor(tier);
+        let isLocked = tier < 0;
+        let cardColor = isLocked ? "#444" : window.getTierColor(tier);
 
-      let nextThresholdIndex = tier + 1;
-      let nextThreshold = thresholds[nextThresholdIndex] || 600;
-      let baseThreshold = thresholds[tier] || 0;
+        let nextThresholdIndex = tier + 1;
+        let nextThreshold = thresholds[nextThresholdIndex] || 600;
+        let baseThreshold = thresholds[tier] || 0;
 
-      let isMaxed = tier >= 5;
+        let isMaxed = tier >= 5;
 
-      // Build the duplicate progress tracker values
-            let flatProgressText = "";
-            let fillPct = 0;
-            let firstThreshold = thresholds[0] || 25;
-            if (isLocked) {
-              flatProgressText = `Copies: ${count} / ${firstThreshold}`;
-              fillPct = (count / firstThreshold) * 100;
-            } else if (isMaxed) {
-              flatProgressText = `MAX TIER OWNED`;
-              fillPct = 100;
-            } else {
-              flatProgressText = `Copies: ${count} / ${nextThreshold}`;
-              fillPct = ((count - baseThreshold) / (nextThreshold - baseThreshold)) * 100;
-            }
+        let flatProgressText = "";
+        let fillPct = 0;
+        let firstThreshold = thresholds[0] || 25;
+        if (isLocked) {
+          flatProgressText = `${count} / ${firstThreshold}`;
+          fillPct = (count / firstThreshold) * 100;
+        } else if (isMaxed) {
+          flatProgressText = `MAX TIER`;
+          fillPct = 100;
+        } else {
+          flatProgressText = `${count} / ${nextThreshold}`;
+          fillPct = ((count - baseThreshold) / (nextThreshold - baseThreshold)) * 100;
+        }
 
-      // Determine soul requirements to upgrade
-      let costs = window.getCardUpgradeCost(tier);
-      let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
-      let luminousOwned = window.inventory.ETC["Luminous Soul"] || 0;
+        let costs = window.getCardUpgradeCost(tier);
+        let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
+        let luminousOwned = window.inventory.ETC["Luminous Soul"] || 0;
 
-      let canAffordSouls = soulsOwned >= costs.mSouls && luminousOwned >= costs.lSouls;
-      let canAffordDuplicates = isLocked ? count >= 5 : count >= nextThreshold;
+        let canAffordSouls = soulsOwned >= costs.mSouls && luminousOwned >= costs.lSouls;
+        let canAffordDuplicates = isLocked ? count >= 5 : count >= nextThreshold;
 
-      let canUpgrade = !isMaxed && canAffordDuplicates && canAffordSouls;
+        let canUpgrade = !isMaxed && canAffordDuplicates && canAffordSouls;
 
-      // Shiny progress bar gradients matching card element tier
-      let progressGlow = canUpgrade ? "animation: pulseGlow 1.2s infinite;" : "";
-      let fillGrad = isLocked
-        ? `background:#555;`
-        : isMaxed
-          ? `background:linear-gradient(90deg, #f1c40f, #e74c3c);`
-          : `background:linear-gradient(90deg, #ffd700, #ff007f);`;
+        let progressGlow = canUpgrade ? "animation: pulseGlow 1.2s infinite;" : "";
+        let fillGrad = isLocked
+          ? `background:#555;`
+          : isMaxed
+            ? `background:linear-gradient(90deg, #f1c40f, #e74c3c);`
+            : `background:linear-gradient(90deg, #ffd700, #ff007f);`;
 
-      let upgradeBtnHtml = "";
-      if (isMaxed) {
-        upgradeBtnHtml = `<span style="color:#2ecc71; font-weight:bold; font-size:10px; font-family:monospace;">MAX TIER</span>`;
-      } else if (canUpgrade) {
-        upgradeBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:4px 10px; font-size:10px; font-weight:bold;" onclick="window.upgradeBestiaryCard('${cKey}')">Upgrade</button>`;
-      } else if (canAffordDuplicates) {
-        // Shards complete but lacking souls
-        let mColor = soulsOwned >= costs.mSouls ? "#2ecc71" : "#e74c3c";
-        let lColor = luminousOwned >= costs.lSouls ? "#2ecc71" : "#e74c3c";
-        let reqText = costs.lSouls > 0
-          ? `<span style="color:${mColor}">${costs.mSouls} M</span> & <span style="color:${lColor}">${costs.lSouls} L</span>`
-          : `<span style="color:${mColor}">${costs.mSouls} M</span>`;
-        upgradeBtnHtml = `<span style="font-size:8.5px; color:#888; font-family:monospace; line-height:1; display:block; text-align:right;">Req: ${reqText} Souls</span>`;
-      } else {
-        // Lacking shards
-        upgradeBtnHtml = `<span style="font-size:9px; color:#666; font-family:monospace;">Locked</span>`;
-      }
+        let upgradeBtnHtml = "";
+        if (isMaxed) {
+          upgradeBtnHtml = `<span style="color:#2ecc71; font-weight:bold; font-size:8px; font-family:monospace;">MAX</span>`;
+        } else if (canUpgrade) {
+          upgradeBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:2px 6px; font-size:8px; font-weight:bold; height:18px; line-height:1;" onclick="window.upgradeBestiaryCard('${cKey}')">UP</button>`;
+        } else if (canAffordDuplicates) {
+          let mColor = soulsOwned >= costs.mSouls ? "#2ecc71" : "#e74c3c";
+          upgradeBtnHtml = `<span style="font-size:8px; color:#888; font-family:monospace; line-height:1; display:block;">Req: <span style="color:${mColor}">${costs.mSouls}</span></span>`;
+        } else {
+          upgradeBtnHtml = `<span style="font-size:8px; color:#666; font-family:monospace;">Locked</span>`;
+        }
 
-      let statsDisplayLabel = "";
-            if (isLocked) {
-              statsDisplayLabel = `<span style="color:#7f8c8d; font-style:italic;">Padlock Seal: Open Monster Card Sacks to collect!</span>`;
-            } else {
-              let isUtility = ["critChance", "critDamage", "block", "parry", "dropRate", "quality", "goldMulti", "rareSpawn", "fairySpawn"].includes(cData.baseStat);
-              let val = isUtility ? window.getUtilityCardValue(tier) : window.getCardValue(cData.baseVal, tier);
-              let formattedVal = cData.isPct
-                ? `+${(val * 100).toFixed(1)}%`
-                : `+${val.toFixed(1)}`;
-              statsDisplayLabel = `Active Stat Bonus: <strong style="color:#2ecc71;">${formattedVal} ${window.getStatLabel(cData.baseStat)}</strong>`;
-            }
+        let statsDisplayLabelShort = "";
+        if (isLocked) {
+          statsDisplayLabelShort = `<span style="color:#7f8c8d; font-style:italic; font-size:9.5px;">Sacks to unlock!</span>`;
+        } else {
+          let isUtility = ["critChance", "critDamage", "block", "parry", "dropRate", "quality", "goldMulti", "rareSpawn", "fairySpawn"].includes(cData.baseStat);
+          let val = isUtility ? window.getUtilityCardValue(tier) : window.getCardValue(cData.baseVal, tier);
+          let formattedVal = cData.isPct
+            ? `+${(val * 100).toFixed(1)}%`
+            : `+${val.toFixed(1)}`;
+          statsDisplayLabelShort = `<strong style="color:#2ecc71; font-size:10px;">${formattedVal} ${window.getStatLabel(cData.baseStat)}</strong>`;
+        }
 
-    let cardIconHtml = window.getEquipIconHtml ? window.getEquipIconHtml({ type: cData.baseStat === "atk" ? "weapon" : cData.baseStat === "def" ? "shield" : "overall", statsRolled: isLocked ? 0 : tier }, 28) : "🃏";
+        let canvasId = `bestiary-card-canvas-${cKey}`;
 
-    rightPageHtml += `
-      <div class="bag-item" style="position:relative; background:linear-gradient(135deg, #100b1a 0%, #06040c 100%); border:1.5px solid ${cardColor}80; border-left:4.5px solid ${cardColor} !important; border-radius:6px; padding:10px; margin-bottom:0; display:flex; flex-direction:column; justify-content:space-between; min-height:85px;"
-           onmouseenter="window.showCardTooltip(event, '${cKey}')"
-           ontouchstart="window.showCardTooltip(event, '${cKey}')"
-           onmouseleave="window.hideTooltip()">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-              <div style="display:flex; align-items:center; gap:6px; min-width:0; text-align:left;">
-                  <div style="flex-shrink:0;">${cardIconHtml}</div>
-                  <div style="min-width:0;">
-                      <strong style="color:${cardColor}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">${cData.name}</strong>
-                      <span style="font-size:9.5px; color:#aaa; display:block;">${statsDisplayLabel}</span>
-                  </div>
+        let cardClass = "bestiary-card-item";
+              if (!isLocked && tier === 5) {
+                cardClass += " bestiary-card-holo";
+              }
+
+              rightPageHtml += `
+                <div class="${cardClass}" style="
+                  background: linear-gradient(135deg, #110d1c 0%, #06040a 100%);
+                  border: 2px solid ${cardColor};
+                  border-radius: 10px;
+                  padding: 8px 10px;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: space-between;
+                  align-items: center;
+                  position: relative;
+                  height: 235px;
+                  box-shadow: 0 4px 15px rgba(0,0,0,0.65), inset 0 0 10px ${cardColor}15;
+                  transition: transform 0.18s, box-shadow 0.18s;
+                "
+                onmouseenter="window.showCardTooltip(event, '${cKey}')"
+                onmouseleave="window.hideTooltip()"
+                ontouchstart="window.showCardTooltip(event, '${cKey}')">
+
+            <!-- Header: Name & Tier -->
+            <div style="width:100%; text-align:center;">
+              <strong style="color:${cardColor}; font-size:11.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:sans-serif;">${cData.name.replace(" Card", "")}</strong>
+              <span style="font-size:8px; color:#888; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-top:1px;">${isLocked ? "Locked" : window.getTierName(tier)}</span>
+            </div>
+
+            <!-- Card Art Canvas Frame -->
+            <div style="background: rgba(0,0,0,0.6); border: 1.5px solid ${isLocked ? "#222" : cardColor}44; border-radius: 6px; width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 6px 0; box-shadow: inset 0 0 8px #000;">
+              <canvas id="${canvasId}" width="64" height="64" style="width:64px; height:64px; pointer-events:none; image-rendering:pixelated;"></canvas>
+            </div>
+
+            <!-- Body: Stats -->
+            <div style="width:100%; text-align:center; min-height: 28px; display:flex; align-items:center; justify-content:center;">
+              <span style="font-size:9.5px; color:#ccc; line-height:1.2; display:block; white-space:normal; overflow:hidden;">${statsDisplayLabelShort}</span>
+            </div>
+
+            <!-- Progress Bar & Upgrade Button -->
+            <div style="width:100%; margin-top:4px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; height:18px;">
+                <span style="font-size:8px; color:#df9ffb; font-family:monospace; font-weight:bold;">${flatProgressText}</span>
+                ${upgradeBtnHtml}
               </div>
-              <div style="flex-shrink:0;">
-                  ${upgradeBtnHtml}
+              <div class="sink-prog-track" style="${progressGlow} margin:0; height:5px !important;">
+                <div class="sink-prog-fill" style="width:${fillPct}%; height:100%; ${fillGrad}"></div>
               </div>
+            </div>
           </div>
-          <!-- Progressive star tracker and shiny custom fill -->
-          <div style="margin-top:6px;">
-              <div style="display:flex; justify-content:space-between; font-size:8.5px; color:#888; font-family:monospace; margin-bottom:2px; line-height:1;">
-                  <span>PROGRESS TRACKER:</span>
-                  <span style="color:#df9ffb; font-weight:bold;">${flatProgressText}</span>
-              </div>
-              <div class="sink-prog-track" style="${progressGlow} margin-top:0;">
-                  <div class="sink-prog-fill" style="width:${fillPct}%; height:100%; ${fillGrad}"></div>
-              </div>
-          </div>
-      </div>
-    `;
-  });
+        `;
+    });
 
-  rightPageHtml += `</div></div></div>`;
+    rightPageHtml += `</div></div></div>`;
 
-  // Join pages together
+    // Join pages together
     contentEl.innerHTML = `
       <div class="bestiary-book" style="display:flex; gap:12px; width:100%;">
           ${leftPageHtml}
@@ -12830,6 +12855,18 @@ window.renderBestiaryAlbum = function () {
       <!-- Beautiful Separate Lower Section for the Astral Dust Recycling Shop -->
       ${window.renderAstralRecyclingShop(dustOwned)}
     `;
+
+    // Render enemy canvas drawings
+    setTimeout(() => {
+      sData.cards.forEach((cKey) => {
+        let canvas = document.getElementById(`bestiary-card-canvas-${cKey}`);
+        if (canvas) {
+          let count = cardsOwned[cKey] || 0;
+          let isLocked = window.getCardTier(count) < 0;
+          window.drawMonsterOnCanvas(canvas, cKey, isLocked);
+        }
+      });
+    }, 40);
   };
 
   window.renderAstralRecyclingShop = function (dustOwned) {
@@ -13239,4 +13276,96 @@ window.checkBestiaryAlerts = function () {
     }
   }
   return false;
+};
+
+window.drawMonsterOnCanvas = function (canvas, cKey, isLocked) {
+  if (!canvas) return;
+  let ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.imageSmoothingEnabled = false;
+
+  let isBoss = ["aegis_goliath", "chronos_arbitrator", "nexus_overseer"].includes(cKey);
+
+  // Set up mock mob properties
+  let mockMob = {
+    x: 12,
+    y: 12,
+    w: 40,
+    h: 40,
+    type: isBoss ? cKey : "mob",
+    visualType: cKey,
+    isRare: false,
+    flashTimer: 0,
+    isStopped: true,
+    visualTier: 0,
+    hp: 1, maxHp: 1
+  };
+
+  ctx.save();
+
+  // Custom offsets/scaffold scales inside the card frame
+  if (cKey === "slime") {
+    mockMob.y = 8;
+  } else if (cKey === "sprout") {
+    mockMob.y = 8;
+  } else if (cKey === "thorn_wyrm") {
+    mockMob.x = 4;
+    mockMob.y = 4;
+  } else if (cKey === "golem") {
+    mockMob.y = 8;
+  } else if (cKey === "magma_elemental") {
+    mockMob.y = 10;
+  } else if (cKey === "toxic_fly") {
+    mockMob.y = 8;
+  } else if (isBoss) {
+    mockMob.x = -8;
+    mockMob.y = -8;
+    mockMob.w = 80;
+    mockMob.h = 80;
+  }
+
+  // Draw monster directly onto the card's canvas
+  if (window.drawSingleMob) {
+    window.drawSingleMob(ctx, mockMob);
+  }
+  ctx.restore();
+
+  // Apply high-quality locked grayscale silhouette filter if locked
+  if (isLocked) {
+    canvas.style.filter = "grayscale(100%) brightness(50%) opacity(0.5)";
+  } else {
+    canvas.style.filter = "";
+  }
+};
+
+window.bestiaryAnimFrameId = null;
+
+window.animateBestiaryCards = function () {
+  let modal = document.getElementById("bestiary-modal");
+  if (!modal || modal.style.display !== "block") {
+    if (window.bestiaryAnimFrameId) {
+      cancelAnimationFrame(window.bestiaryAnimFrameId);
+      window.bestiaryAnimFrameId = null;
+    }
+    return;
+  }
+
+  let activeSetKey = window.selectedBestiarySetKey;
+  let sData = window.CARD_SETS_DATA[activeSetKey];
+  let cardsOwned = window.playerStats.monsterCards || {};
+
+  if (sData) {
+    sData.cards.forEach((cKey) => {
+      let canvas = document.getElementById(`bestiary-card-canvas-${cKey}`);
+      if (canvas) {
+        let count = cardsOwned[cKey] || 0;
+        let isLocked = window.getCardTier(count) < 0;
+        if (!isLocked) { // Only animate unlocked cards to conserve CPU
+          window.drawMonsterOnCanvas(canvas, cKey, false);
+        }
+      }
+    });
+  }
+
+  window.bestiaryAnimFrameId = requestAnimationFrame(window.animateBestiaryCards);
 };

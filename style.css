@@ -2963,6 +2963,31 @@ canvas {
   gap: 10px;
 }
 
+/* Card binder deck grid layout */
+.bestiary-page-right > div:last-child {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.bestiary-card-item:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.8) !important;
+}
+
+@keyframes holoShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.bestiary-card-holo {
+  background: linear-gradient(135deg, #100b1a 0%, #3e125c 25%, #ff007f 50%, #3e125c 75%, #100b1a 100%) !important;
+  background-size: 400% 400% !important;
+  animation: holoShimmer 8s ease infinite !important;
+  box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4), inset 0 0 15px rgba(255, 0, 127, 0.15) !important;
+}
+
 /* Responsive Book Page Collapsing on Mobile devices */
 @media (max-width: 580px) {
   .bestiary-book {
