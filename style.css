@@ -160,9 +160,6 @@ body {
 
 body.scroll-lock {
   overflow: hidden !important;
-  height: 100% !important;
-  position: fixed !important;
-  width: 100% !important;
 }
 
 /* --- GAME PLATFORM FRAME --- */
@@ -1543,9 +1540,9 @@ canvas {
   /* Snaps absolute draggable windows into fixed centered overlays on mobile */
   .draggable-window {
     position: fixed !important;
-    left: 2.5vw !important;
-    right: 2.5vw !important;
-    top: 10% !important;
+    left: 2.5vw;
+    right: auto !important;
+    top: 10%;
     width: 95vw !important;
     max-width: 95vw !important;
     transform: none !important;

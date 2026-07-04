@@ -801,11 +801,6 @@ Object.assign(window.UIManager, {
     ];
     const selectorsToCheck = [
       "#gacha-modal-overlay",
-      "#equip-swap-window",
-      "#medal-swap-window",
-      "#rates-draggable-window",
-      "#missions-draggable-window",
-      "#clan-draggable-window",
       "#supply-crate-overlay",
       "#sack-opening-overlay",
       "#sp-confirm-modal",
@@ -6709,14 +6704,17 @@ window.openEquipSwapWindow = function (e, slotKey) {
     win.style.left = savedLeft;
     win.style.top = savedTop;
   } else {
-    // Position window nicely to the left of the live stats panel
     let container = document
       .getElementById("game-container")
       .getBoundingClientRect();
-    let leftOffset = e && e.clientX ? e.clientX - container.left - 145 : 35;
-    let topOffset = e && e.clientY ? e.clientY - container.top - 80 : 100;
 
-    // Clamp coordinates safely within the game-container
+    // Adaptive Centering: Calculates the current scroll depth and positions the modal in front of you
+    let winWidth = 290;
+    let leftOffset = (window.innerWidth - winWidth) / 2 - container.left;
+    let topOffset =
+      window.scrollY + window.innerHeight / 2 - 150 - container.top;
+
+    // Clamp coordinates safely within the game-container boundary
     if (leftOffset < 5) leftOffset = 5;
     if (topOffset < 5) topOffset = 5;
     win.style.left = leftOffset + "px";
@@ -10678,30 +10676,35 @@ window.updateHubAlerts = function () {
   let hasClanAlert = clanBadge && clanBadge.style.display === "inline-block";
 
   // 5. Evaluate Settings / Name Setup Alert
-    let hasSettingsAlert = window.playerStats && window.playerStats.playerName === "Guest";
-    let sBadge = document.getElementById("hub-card-settings-badge");
-    if (sBadge) sBadge.style.display = hasSettingsAlert ? "inline-block" : "none";
+  let hasSettingsAlert =
+    window.playerStats && window.playerStats.playerName === "Guest";
+  let sBadge = document.getElementById("hub-card-settings-badge");
+  if (sBadge) sBadge.style.display = hasSettingsAlert ? "inline-block" : "none";
 
-    let renameContainer = document.getElementById("settings-rename-container");
-    if (renameContainer) {
-      if (hasSettingsAlert) {
-        renameContainer.style.borderColor = "#e74c3c";
-        renameContainer.style.boxShadow = "0 0 12px rgba(231, 76, 60, 0.4)";
-      } else {
-        renameContainer.style.borderColor = "#333";
-        renameContainer.style.boxShadow = "none";
-      }
+  let renameContainer = document.getElementById("settings-rename-container");
+  if (renameContainer) {
+    if (hasSettingsAlert) {
+      renameContainer.style.borderColor = "#e74c3c";
+      renameContainer.style.boxShadow = "0 0 12px rgba(231, 76, 60, 0.4)";
+    } else {
+      renameContainer.style.borderColor = "#333";
+      renameContainer.style.boxShadow = "none";
     }
+  }
 
-    // 6. Update Main Top Bar Hub Button Dot
-    let mainDot = document.getElementById("hub-menu-alert-dot");
-    if (mainDot) {
-      mainDot.style.display =
-        hasMissionsAlert || hasTrophiesAlert || hasMailAlert || hasClanAlert || hasSettingsAlert
-          ? "inline-block"
-          : "none";
-    }
-  };
+  // 6. Update Main Top Bar Hub Button Dot
+  let mainDot = document.getElementById("hub-menu-alert-dot");
+  if (mainDot) {
+    mainDot.style.display =
+      hasMissionsAlert ||
+      hasTrophiesAlert ||
+      hasMailAlert ||
+      hasClanAlert ||
+      hasSettingsAlert
+        ? "inline-block"
+        : "none";
+  }
+};
 
 window.checkUnreadMail = function () {
   if (!window.GAME_SERVER_URL) return;
@@ -11154,6 +11157,54 @@ window.inspectPlayer = function (targetUserId) {
       console.error("Inspect failed:", err);
       window.pushHeaderToast("❌ Network error inspecting legend.", "#e74c3c");
     });
+};
+
+// --- PAPER-DOLL PRESS & HOLD (LONG-PRESS) SYSTEMS ---
+window.slotLongPressTimeout = null;
+window.isSlotLongPressActive = false;
+
+window.startSlotLongPress = function (e, slotKey) {
+  if (e.pointerType === "mouse" && e.button !== 0) return; // Only process left click
+
+  window.isSlotLongPressActive = false;
+  if (window.slotLongPressTimeout) clearTimeout(window.slotLongPressTimeout);
+
+  // Soft tactile shrink feedback on touch start
+  let target = e.currentTarget;
+  target.style.transform = "scale(0.95)";
+  target.style.transition = "transform 0.1s";
+
+  // Capture position coordinates safely
+  let clientX = e.clientX;
+  let clientY = e.clientY;
+
+  window.slotLongPressTimeout = setTimeout(() => {
+    window.isSlotLongPressActive = true;
+    target.style.transform = "none";
+
+    // Build mock event to drive the aligned centering calculations
+    let mockEvent = {
+      clientX: clientX,
+      clientY: clientY,
+      stopPropagation: () => {},
+      preventDefault: () => {},
+    };
+
+    window.openEquipSwapWindow(mockEvent, slotKey);
+
+    // Haptic buzz vibration feedback on mobile
+    if (navigator.vibrate) {
+      navigator.vibrate(40);
+    }
+  }, 800); // 800ms holds represent the golden usability threshold for mobile long-presses
+};
+
+window.endSlotLongPress = function (e) {
+  if (window.slotLongPressTimeout) {
+    clearTimeout(window.slotLongPressTimeout);
+    window.slotLongPressTimeout = null;
+  }
+  e.currentTarget.style.transform = "none";
 };
 
 window.renderInspectModal = function (profile) {

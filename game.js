@@ -330,17 +330,17 @@ window.SaveManager = {
           }
 
           window.isCloudSynced = true;
-                                if (typeof window.updateSyncStatus === "function") {
-                                  window.updateSyncStatus("connected");
-                                }
-                              } else {
-                                window.isCloudSynced = true;
-                                if (typeof window.updateSyncStatus === "function") {
-                                  window.updateSyncStatus("connected");
-                                }
-                              }
+          if (typeof window.updateSyncStatus === "function") {
+            window.updateSyncStatus("connected");
+          }
+        } else {
+          window.isCloudSynced = true;
+          if (typeof window.updateSyncStatus === "function") {
+            window.updateSyncStatus("connected");
+          }
+        }
 
-                              if (resolvedOfflineMs > 0) {
+        if (resolvedOfflineMs > 0) {
           window.SaveManager.applyOfflineGains(resolvedOfflineMs);
         }
         if (typeof window.updateUI === "function") window.updateUI();
@@ -417,6 +417,14 @@ window.SaveManager = {
 
       const sanitizeItem = (item) => {
         if (!item || typeof item !== "object") return null;
+        if (
+          item.type === "shield" ||
+          item.type === "dagger" ||
+          item.type === "tome"
+        ) {
+          item.subType = item.type;
+          item.type = "subweapon";
+        }
         const numericKeys = [
           "id",
           "atk",
@@ -984,6 +992,28 @@ window.SaveManager = {
           window.hero.x = 40;
         };
         penalizeRewards();
+      }
+
+      if (window.playerStats.isDungeonMode) {
+        window.playerStats.isDungeonMode = false;
+        window.playerStats.currentDungeon = null;
+        window.playerStats.activeDungeonSigil = null;
+        window.playerStats.usedSecondWind = false;
+        window.mob = null;
+        window.hero.x = 40;
+
+        setTimeout(() => {
+          if (typeof window.showCustomConfirm === "function") {
+            window.showCustomConfirm(
+              "🚨 Dungeon Run Interrupted",
+              "Your previous Dungeon run was interrupted (offline or tab closed). You have been safely returned to the Campaign to prevent timeline paradoxes. No equipment was lost!",
+              "Return to Campaign",
+              "",
+              "#8e44ad",
+              () => {},
+            );
+          }
+        }, 2000);
       }
 
       if (window.playerStats.vendingQLevel === undefined)
@@ -1785,17 +1815,17 @@ window.loadGameAndSyncCloud = function () {
         }
 
         window.isCloudSynced = true;
-                if (typeof window.updateSyncStatus === "function") {
-                  window.updateSyncStatus("connected");
-                }
-              } else {
-                window.isCloudSynced = true;
-                if (typeof window.updateSyncStatus === "function") {
-                  window.updateSyncStatus("connected");
-                }
-              }
+        if (typeof window.updateSyncStatus === "function") {
+          window.updateSyncStatus("connected");
+        }
+      } else {
+        window.isCloudSynced = true;
+        if (typeof window.updateSyncStatus === "function") {
+          window.updateSyncStatus("connected");
+        }
+      }
 
-              // Apply offline progress EXACTLY once after final source resolution
+      // Apply offline progress EXACTLY once after final source resolution
       if (resolvedOfflineMs > 0) {
         window.applyOfflineGains(resolvedOfflineMs);
       }
@@ -1877,29 +1907,29 @@ window.onload = function () {
   });
 
   window.loadGame();
-    window.updateStickyCanvasStyle();
-    if (typeof window.requestWakeLock === "function") {
-      window.requestWakeLock();
-    }
+  window.updateStickyCanvasStyle();
+  if (typeof window.requestWakeLock === "function") {
+    window.requestWakeLock();
+  }
 
-    // Prompt fresh players to register their unique name
-    setTimeout(() => {
-      if (window.playerStats && window.playerStats.playerName === "Guest") {
-        if (typeof window.pushHeaderToast === "function") {
-          window.pushHeaderToast(
-            "👤 Set your character name to secure your spot on the Leaderboard! Click here.",
-            "#f1c40f",
-            function () {
-              if (typeof window.toggleSettings === "function") {
-                window.toggleSettings();
-              }
+  // Prompt fresh players to register their unique name
+  setTimeout(() => {
+    if (window.playerStats && window.playerStats.playerName === "Guest") {
+      if (typeof window.pushHeaderToast === "function") {
+        window.pushHeaderToast(
+          "👤 Set your character name to secure your spot on the Leaderboard! Click here.",
+          "#f1c40f",
+          function () {
+            if (typeof window.toggleSettings === "function") {
+              window.toggleSettings();
             }
-          );
-        }
+          },
+        );
       }
-    }, 4000);
+    }
+  }, 4000);
 
-    // Block pointer event leaks and click-through propagation on tooltips
+  // Block pointer event leaks and click-through propagation on tooltips
   const preventTooltipLeaks = (id) => {
     let el = document.getElementById(id);
     if (el) {
@@ -2217,18 +2247,34 @@ window.onload = function () {
   window.updateUI();
 };
 
+let lastUpdateTime = Date.now();
 let lastRenderTime = 0;
+let accumTime = 0;
+const logicTimeStep = 1000 / 60; // Target exactly 60 ticks per second (~16.67ms)
+
 function engineCycle() {
   try {
-    update(); // State ticks still execute at a liquid 60 ticks per second
-
     let now = Date.now();
-    // 45 FPS target (approx 22.2ms per frame) provides smoother motion while maintaining thermal efficiency
-    let limit =
-      window.playerStats && window.playerStats.ecoMode ? 1000 / 45 : 0;
+    let elapsed = now - lastUpdateTime;
 
-    if (now - lastRenderTime >= limit) {
-      window.draw(); // Draws at 30 FPS if Eco Mode is enabled, saving massive thermal output
+    // Prevent "spiral of death" during lag spikes or tab suspensions
+    if (elapsed > 250) elapsed = 250;
+    lastUpdateTime = now;
+
+    accumTime += elapsed;
+
+    // Execute as many fixed updates as needed to match real-time
+    while (accumTime >= logicTimeStep) {
+      update();
+      accumTime -= logicTimeStep;
+    }
+
+    // Limit render cycles to save CPU/GPU resources on mobile or Eco Mode
+    let renderLimit =
+      window.playerStats && window.playerStats.ecoMode ? 1000 / 45 : 0; // Perfectly preserves your 45 FPS Eco Mode target
+
+    if (now - lastRenderTime >= renderLimit) {
+      window.draw();
       lastRenderTime = now;
     }
 
@@ -2612,6 +2658,36 @@ function update() {
       window.playerStats.hasTriggeredAethericRecharge = true;
   } else {
     window.playerStats.activityTimer = 0;
+  }
+
+  // Time-Independent Dungeon Passive: 1% HP Regeneration per Second
+  if (window.playerStats.isDungeonMode && window.playerStats.currentHp > 0) {
+    if (!window.playerStats.lastRegenTime) {
+      window.playerStats.lastRegenTime = now;
+    }
+    if (now - window.playerStats.lastRegenTime >= 1000) {
+      window.playerStats.lastRegenTime = now;
+      let pCurrent = window.resolvePlayerStats();
+      if (window.playerStats.currentHp < pCurrent.maxHp) {
+        let regenAmt = Math.floor(pCurrent.maxHp * 0.01);
+        if (regenAmt > 0) {
+          window.playerStats.currentHp = Math.min(
+            pCurrent.maxHp,
+            window.playerStats.currentHp + regenAmt,
+          );
+          window.effects.push({
+            type: "regen",
+            x: window.hero.x - 5,
+            y: window.hero.y - 12,
+            amount: regenAmt,
+            color: "#2ecc71",
+            life: 35,
+          });
+        }
+      }
+    }
+  } else {
+    window.playerStats.lastRegenTime = 0; // Reset anchor outside dungeons
   }
 
   window.logicClock++;
@@ -3064,9 +3140,9 @@ function update() {
 
         if (isParried) {
           window.effects.push({
-            x: window.hero.x,
-            y: window.hero.y - 15,
-            text: "⚡ PARRY COUNTER!",
+            type: "parry",
+            x: window.hero.x - 5,
+            y: window.hero.y - 20,
             color: "#9b59b6",
             life: 50,
           });
@@ -3134,52 +3210,70 @@ function update() {
           }
         } else if (isBlocked) {
           window.effects.push({
-            x: window.hero.x,
-            y: window.hero.y,
-            text: "🛡️ BLOCKED",
+            type: "block",
+            x: window.hero.x - 5,
+            y: window.hero.y - 12,
             color: "#3498db",
             life: 40,
           });
           window.SoundManager.play("block");
 
-          if (
-            window.equippedSlots.subweapon &&
-            window.equippedSlots.subweapon.isUniqueAegis &&
-            window.mob &&
-            window.mob.hp > 0
-          ) {
-            let shieldLvl = window.equippedSlots.subweapon.stageLevel || 1;
-            let blastDmg = Math.ceil(p.def * (1.5 + shieldLvl * 0.05));
+          // High-Powered Shield Bash Counter-Attack for all Shields!
+          if (window.mob && window.mob.hp > 0) {
+            let bashDmg = Math.ceil(p.def * 1.5 * (1.0 + p.str * 0.002));
+            let isAegis =
+              window.equippedSlots.subweapon &&
+              window.equippedSlots.subweapon.isUniqueAegis;
+
+            if (isAegis) {
+              let shieldLvl = window.equippedSlots.subweapon.stageLevel || 1;
+              bashDmg = Math.ceil(
+                p.def * (2.2 + shieldLvl * 0.05) * (1.0 + p.str * 0.003),
+              );
+            }
+
             if (window.playerStats.singularityState === "storing") {
-              window.playerStats.singularityStoredDmg += blastDmg;
+              window.playerStats.singularityStoredDmg += bashDmg;
               window.effects.push({
                 x: window.mob.x + window.mob.w / 2,
                 y: window.mob.y - 10,
-                text: `+${window.formatNumber(blastDmg)} [STORED]`,
+                text: `+${window.formatNumber(bashDmg)} [STORED]`,
                 color: "#8e44ad",
                 life: 45,
               });
             } else {
-              window.mob.hp -= blastDmg;
+              window.mob.hp -= bashDmg;
               window.mob.flashTimer = 5;
-              window.spawnDamageEffect(blastDmg, "counter", false);
-              window.damageHistory.push({ time: Date.now(), amount: blastDmg });
+              window.spawnDamageEffect(bashDmg, "counter", false);
+              window.damageHistory.push({ time: Date.now(), amount: bashDmg });
+
+              // Shield slam visual impact particles
+              for (let i = 0; i < 8; i++) {
+                window.particles.push({
+                  x: window.mob.x + window.mob.w / 2,
+                  y: window.mob.y + window.mob.h / 2,
+                  vx: window.randFloat(-3, 3),
+                  vy: window.randFloat(-3, 3),
+                  radius: window.randFloat(1.5, 3.5),
+                  color: isAegis ? "#8e44ad" : "#3498db",
+                  alpha: 1,
+                  life: window.randInt(15, 25),
+                });
+              }
+
+              // Floating combat banner
+              window.effects.push({
+                x: window.hero.x + 35,
+                y: window.hero.y - 15,
+                text: isAegis ? "🛡️ AEGIS BLAST!" : "🛡️ SHIELD BASH!",
+                color: isAegis ? "#8e44ad" : "#3498db",
+                life: 45,
+              });
+
               if (window.mob.hp <= 0) {
                 window.handleMobDeath();
                 return;
               }
-            }
-            for (let i = 0; i < 8; i++) {
-              window.particles.push({
-                x: window.mob.x + window.mob.w / 2,
-                y: window.mob.y + window.mob.h / 2,
-                vx: window.randFloat(-3, 3),
-                vy: window.randFloat(-3, 3),
-                radius: window.randFloat(1.5, 3.5),
-                color: "#8e44ad",
-                alpha: 1,
-                life: window.randInt(15, 25),
-              });
             }
           }
 
@@ -3231,9 +3325,10 @@ function update() {
             let absorbed = Math.ceil(netDamage * p.arcaneBarrier);
             netDamage = Math.max(1, netDamage - absorbed);
             window.effects.push({
-              x: window.hero.x,
+              type: "barrier",
+              x: window.hero.x - 5,
               y: window.hero.y - 18,
-              text: `🛡️ BARRIER (-${Math.round(p.arcaneBarrier * 100)}%)`,
+              amount: Math.round(p.arcaneBarrier * 100),
               color: "#9b59b6",
               life: 55,
             });
@@ -3555,17 +3650,25 @@ window.CombatEngine = {
           window.playerStats.isCrucibleMode &&
           window.playerStats.crucibleActiveBuff?.id === "sanguine_feast"
         ) {
-          let buffStrength =
-            window.playerStats.crucibleInfusedType === "buff" ? 1.5 : 1.0;
+          let b = window.playerStats.crucibleActiveBuff;
+          let d = window.playerStats.crucibleActiveDebuff;
+          let isBuffInfused = window.playerStats.crucibleInfusedType === "buff";
+          let isDebuffInfused =
+            window.playerStats.crucibleInfusedType === "debuff";
+
+          let buffStrength = isBuffInfused ? 1.5 : 1.0;
+          let debuffStrength = isDebuffInfused ? 1.5 : 1.0;
+
           let healAmt = Math.ceil(p.maxHp * (0.02 * buffStrength));
           window.playerStats.currentHp = Math.min(
             p.maxHp,
             window.playerStats.currentHp + healAmt,
           );
           window.effects.push({
+            type: "regen",
             x: window.hero.x - 20,
             y: window.hero.y - 15,
-            text: "+" + healAmt + " [FEAST]",
+            amount: healAmt,
             color: "#2ecc71",
             life: 30,
           });
@@ -3716,8 +3819,16 @@ window.CombatEngine = {
           window.effects.push({
             x: window.mob.x,
             y: window.mob.y - 20,
-            text: "💥 RUPTURE! +" + window.formatNumber(healAmount) + " HP",
+            text: "💥 RUPTURE!",
             color: "#e74c3c",
+            life: 65,
+          });
+          window.effects.push({
+            type: "regen",
+            x: window.hero.x - 10,
+            y: window.hero.y - 15,
+            amount: healAmount,
+            color: "#2ecc71",
             life: 65,
           });
           window.spawnDamageEffect(ruptureDmg, "bleed", isRuptureCrit);
@@ -3762,17 +3873,15 @@ window.CombatEngine = {
         }
       }
 
-      // Offhand Dagger Multi-Strike (Deals 50% of your total Attack as an extra hit)
+      // Offhand Dagger Multi-Strike (Deals 35% of total Attack scaled multiplicatively by DEX)
       const hasDagger =
         window.equippedSlots.subweapon &&
         window.equippedSlots.subweapon.subType === "dagger";
       if (hasDagger) {
-        let daggerDmg = Math.max(
-          1,
-          Math.ceil(
-            p.atk * (window.playerStats.adrenalineTimer > 0 ? 2 : 1) * 0.5,
-          ),
-        );
+        let baseDagger = p.atk * 0.35 * (1.0 + p.dex * 0.002);
+        if (window.playerStats.adrenalineTimer > 0) baseDagger *= 2;
+        let daggerDmg = Math.max(1, Math.ceil(baseDagger));
+
         let isDaggerCrit = Math.random() < p.critChance;
         if (isDaggerCrit) daggerDmg = Math.ceil(daggerDmg * p.critDamage);
 
@@ -3795,24 +3904,22 @@ window.CombatEngine = {
         }
       }
 
-      // Elemental Tome Spells (20% independent chance each for Lightning, Fire, and Frost)
+      // Elemental Tome Spells (Balanced 15% independent chance with INT scaling)
       const hasTome =
         window.equippedSlots.subweapon &&
         window.equippedSlots.subweapon.subType === "tome";
       if (hasTome) {
-        let spellDmgBase = Math.max(
-          1,
-          Math.ceil(
-            p.atk * (window.playerStats.adrenalineTimer > 0 ? 2 : 1) * 0.5,
-          ),
-        );
+        let baseSpell = p.atk * 0.25 * (1.0 + p.int * 0.0025);
+        if (window.playerStats.adrenalineTimer > 0) baseSpell *= 2;
+        let spellDmgBase = Math.max(1, Math.ceil(baseSpell));
+
         let triggeredSpell = false;
         let lightProc = false,
           fireProc = false,
           frostProc = false;
 
         // 1. Lightning Spell Roll
-        if (Math.random() < 0.2) {
+        if (Math.random() < 0.15) {
           lightProc = true;
           triggeredSpell = true;
           let lightningDmg = spellDmgBase;
@@ -3860,7 +3967,7 @@ window.CombatEngine = {
         }
 
         // 2. Fire Spell Roll
-        if (Math.random() < 0.2) {
+        if (Math.random() < 0.15) {
           fireProc = true;
           triggeredSpell = true;
           let fireDmg = spellDmgBase;
@@ -3901,7 +4008,7 @@ window.CombatEngine = {
         }
 
         // 3. Frost Spell Roll
-        if (Math.random() < 0.2) {
+        if (Math.random() < 0.15) {
           frostProc = true;
           triggeredSpell = true;
           let frostDmg = spellDmgBase;
@@ -3980,9 +4087,10 @@ window.CombatEngine = {
           );
           window.playerStats.recentHeals.push({ time: now, amount: heal });
           window.effects.push({
+            type: "regen",
             x: window.hero.x - 25,
             y: window.hero.y - 10,
-            text: "❤️ +" + window.formatNumber(heal),
+            amount: heal,
             color: "#2ecc71",
             life: 60,
           });
@@ -4260,11 +4368,11 @@ window.CombatEngine = {
 
         if (isBlocked || isParried) {
           window.effects.push({
-            x: window.hero.x,
-            y: window.hero.y - 15,
-            text: isBlocked ? "🛡️ BLOCKED EXPLOSION!" : "⚡ PARRIED EXPLOSION!",
+            type: isBlocked ? "block" : "parry",
+            x: window.hero.x - 5,
+            y: window.hero.y - 20,
             color: isBlocked ? "#3498db" : "#9b59b6",
-            life: 40,
+            life: 45,
           });
           window.SoundManager.play(isBlocked ? "block" : "parry");
         } else {
@@ -4718,9 +4826,10 @@ window.CombatEngine = {
           window.playerStats.currentHp + healAmount,
         );
         window.effects.push({
+          type: "regen",
           x: window.hero.x,
           y: window.hero.y - 20,
-          text: "❤️ +" + window.formatNumber(healAmount),
+          amount: healAmount,
           color: "#2ecc71",
           life: 60,
         });
@@ -4738,11 +4847,11 @@ window.CombatEngine = {
 
         if (isBlocked || isParried) {
           window.effects.push({
-            x: window.hero.x,
-            y: window.hero.y - 15,
-            text: isBlocked ? "🛡️ BLOCKED EXPLOSION!" : "⚡ PARRIED EXPLOSION!",
+            type: isBlocked ? "block" : "parry",
+            x: window.hero.x - 5,
+            y: window.hero.y - 20,
             color: isBlocked ? "#3498db" : "#9b59b6",
-            life: 40,
+            life: 45,
           });
           window.SoundManager.play(isBlocked ? "block" : "parry");
         } else {
@@ -6366,7 +6475,7 @@ window.rollEquipmentDrop = function (
       1,
       null,
       null,
-      isMilestone,
+      isMilestone && !window.playerStats.isDungeonMode, // Suppress Milestone UI popup inside Dungeons
     );
   if (newItem.type === "artifact") window.inventory.ARTIFACT.push(newItem);
   else window.inventory.EQUIP.push(newItem);

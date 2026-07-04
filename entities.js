@@ -344,15 +344,29 @@
       let offsetX = window.randFloat(-40, 40);
       let offsetY = window.randFloat(-50, 15);
 
-      window.effects.push({
-        x: window.mob.x + window.mob.w / 2 + offsetX,
-        y: window.mob.y + offsetY,
-        vx: window.randFloat(-1.2, 1.2),
-        vy: window.randFloat(-1.5, -0.6),
-        text: hitText,
-        color: hitColor,
-        life: 40,
-      });
+      if (isCrit) {
+        window.effects.push({
+          type: "crit",
+          x: window.mob.x + window.mob.w / 2 + offsetX,
+          y: window.mob.y + offsetY,
+          vx: window.randFloat(-1.2, 1.2),
+          vy: window.randFloat(-2.0, -1.0), // Float up slightly faster/bouncier on crits
+          amount: amount,
+          life: 45,
+        });
+      } else {
+        // Enforce cel-shaded vector rendering for every single combat damage source!
+        window.effects.push({
+          type: type, // "slash", "dagger", "echo", "counter", "bleed", "lightning", "fire", "frost"
+          x: window.mob.x + window.mob.w / 2 + offsetX,
+          y: window.mob.y + offsetY,
+          vx: window.randFloat(-1.2, 1.2),
+          vy: window.randFloat(-1.5, -0.6),
+          amount: amount,
+          color: hitColor,
+          life: 40,
+        });
+      }
 
       let existingTotal = window.effects.find(
         (e) => e.isCumulative && e.life > 0,
@@ -8495,14 +8509,557 @@
     });
 
     window.effects.forEach((eff) => {
-      ctx.font = "bold 18px sans-serif";
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 4;
-      ctx.lineJoin = "miter";
-      ctx.miterLimit = 2;
-      ctx.strokeText(eff.text, eff.x, eff.y);
-      ctx.fillStyle = eff.color;
-      ctx.fillText(eff.text, eff.x, eff.y);
+      ctx.save();
+      let hx = eff.x;
+      let hy = eff.y - 5; // Align centered vertically with text
+
+      if (eff.type === "regen") {
+        // 1. Draw Cel-Shaded RPG Crimson Heart
+        ctx.beginPath();
+        ctx.moveTo(hx, hy - 4);
+        ctx.bezierCurveTo(hx - 4, hy - 9, hx - 9, hy - 4, hx - 9, hy + 1);
+        ctx.quadraticCurveTo(hx - 9, hy + 6, hx, hy + 12);
+        ctx.quadraticCurveTo(hx + 9, hy + 6, hx + 9, hy + 1);
+        ctx.bezierCurveTo(hx + 9, hy - 4, hx + 4, hy - 9, hx, hy - 4);
+        ctx.closePath();
+
+        ctx.fillStyle = "#e74c3c"; // Crimson red
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.stroke();
+        ctx.fill();
+
+        // 16-bit Specs highlight shine
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(hx - 2.5, hy - 3.5, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Draw +n Green Healing Numbers
+        let hitText = `+${window.formatNumber(eff.amount)}`;
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#2ecc71";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "crit") {
+        let fixedAngle = 0.35; // Completely static, NO SPINNING as the text floats!
+
+        // 1. Draw 3-Layer Vector Spiky Cartoon Explosion (💥 Silhouette)
+        let spikes = 6; // 6 prominent points for an asymmetric comic explosion feel
+
+        // Layer 1: Outer Crimson-Red Blast (Asymmetric & spiky)
+        ctx.beginPath();
+        for (let i = 0; i < spikes * 2; i++) {
+          let angle = (i * Math.PI) / spikes + fixedAngle;
+          let r = i % 2 === 0 ? 14 : 3.5; // High contrast between points and valleys
+          ctx.lineTo(hx + Math.cos(angle) * r, hy + Math.sin(angle) * r);
+        }
+        ctx.closePath();
+        ctx.fillStyle = "#e74c3c"; // Vibrant red-orange
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.stroke();
+        ctx.fill();
+
+        // Layer 2: Inner Golden-Yellow Blast
+        ctx.beginPath();
+        for (let i = 0; i < spikes * 2; i++) {
+          let angle = (i * Math.PI) / spikes + fixedAngle;
+          let r = i % 2 === 0 ? 9 : 2.5;
+          ctx.lineTo(hx + Math.cos(angle) * r, hy + Math.sin(angle) * r);
+        }
+        ctx.closePath();
+        ctx.fillStyle = "#f1c40f"; // Bright gold-yellow
+        ctx.fill();
+
+        // Layer 3: Central White-Hot Core Flash
+        ctx.beginPath();
+        for (let i = 0; i < spikes * 2; i++) {
+          let angle = (i * Math.PI) / spikes + fixedAngle;
+          let r = i % 2 === 0 ? 5.5 : 1.5;
+          ctx.lineTo(hx + Math.cos(angle) * r, hy + Math.sin(angle) * r);
+        }
+        ctx.closePath();
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+
+        // 2. Draw Heavy Gold-to-Crimson Gradient Typography (No leading "+")
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "900 18px 'Arial Black', Impact, sans-serif";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 16, hy + 5);
+
+        let textGrad = ctx.createLinearGradient(
+          hx + 16,
+          hy - 10,
+          hx + 16,
+          hy + 10,
+        );
+        textGrad.addColorStop(0, "#fff200"); // Yellow Gold
+        textGrad.addColorStop(0.5, "#f39c12"); // Vibrant Orange
+        textGrad.addColorStop(1, "#ee5253"); // Searing Red-Orange
+        ctx.fillStyle = textGrad;
+        ctx.fillText(hitText, hx + 16, hy + 5);
+      } else if (eff.type === "block") {
+        // 1. Draw Symmetric Steel Heater Shield
+        ctx.beginPath();
+        ctx.moveTo(hx - 6, hy - 6);
+        ctx.lineTo(hx + 6, hy - 6);
+        ctx.quadraticCurveTo(hx + 6, hy, hx + 5, hy + 3);
+        ctx.quadraticCurveTo(hx, hy + 10, hx, hy + 10);
+        ctx.quadraticCurveTo(hx - 5, hy + 3, hx - 6, hy);
+        ctx.quadraticCurveTo(hx - 6, hy, hx - 6, hy - 6);
+        ctx.closePath();
+
+        ctx.fillStyle = "#3498db"; // Sturdy Steel Blue
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.stroke();
+        ctx.fill();
+
+        // Silver/White Cross Emblem
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(hx, hy - 5);
+        ctx.lineTo(hx, hy + 8);
+        ctx.moveTo(hx - 4, hy + 1);
+        ctx.lineTo(hx + 4, hy + 1);
+        ctx.stroke();
+
+        // 2. Draw Text "BLOCK" (Sleek Blue)
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText("BLOCK", hx + 13, hy + 4);
+        ctx.fillStyle = "#3498db";
+        ctx.fillText("BLOCK", hx + 13, hy + 4);
+      } else if (eff.type === "parry") {
+        // 1. Draw Crossed Steel Sabers (💥 Parry Clash)
+        ctx.save();
+        ctx.translate(hx, hy);
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        // Saber 1 (bottom-left to top-right)
+        ctx.save();
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = "#bdc3c7"; // Steel silver
+        ctx.beginPath();
+        ctx.rect(-1, -11, 2, 14);
+        ctx.fill();
+        ctx.stroke();
+        // Crossguard
+        ctx.fillStyle = "#f1c40f"; // Gold
+        ctx.fillRect(-3.5, 3, 7, 1.5);
+        ctx.strokeRect(-3.5, 3, 7, 1.5);
+        // Red Pommel
+        ctx.fillStyle = "#e74c3c";
+        ctx.beginPath();
+        ctx.arc(0, 5, 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        // Saber 2 (bottom-right to top-left)
+        ctx.save();
+        ctx.rotate(-Math.PI / 4);
+        ctx.fillStyle = "#bdc3c7"; // Steel silver
+        ctx.beginPath();
+        ctx.rect(-1, -11, 2, 14);
+        ctx.fill();
+        ctx.stroke();
+        // Crossguard
+        ctx.fillStyle = "#f1c40f"; // Gold
+        ctx.fillRect(-3.5, 3, 7, 1.5);
+        ctx.strokeRect(-3.5, 3, 7, 1.5);
+        // Red Pommel
+        ctx.fillStyle = "#e74c3c";
+        ctx.beginPath();
+        ctx.arc(0, 5, 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.restore();
+
+        // 2. Draw Text "PARRY" (Vibrant Purple)
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText("PARRY", hx + 13, hy + 4);
+        ctx.fillStyle = "#9b59b6";
+        ctx.fillText("PARRY", hx + 13, hy + 4);
+      } else if (eff.type === "barrier") {
+        // 1. Draw concentric circles with black shadows/under-stroke first
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4.0;
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.arc(hx, hy, 8, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(hx, hy, 4, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Core cross outlines
+        ctx.beginPath();
+        ctx.moveTo(hx - 4, hy);
+        ctx.lineTo(hx + 4, hy);
+        ctx.moveTo(hx, hy - 4);
+        ctx.lineTo(hx, hy + 4);
+        ctx.stroke();
+
+        // 2. Colored overlay
+        ctx.strokeStyle = "#9b59b6"; // Arcane Purple
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(hx, hy, 8, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(hx, hy, 4, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(hx - 3, hy);
+        ctx.lineTo(hx + 3, hy);
+        ctx.moveTo(hx, hy - 3);
+        ctx.lineTo(hx, hy + 3);
+        ctx.stroke();
+
+        // 2. Draw Text "BARRIER -X%"
+        let hitText = `BARRIER -${eff.amount}%`;
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = "#9b59b6";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "lightning") {
+        // 1. Draw Sharp Golden Lightning Bolt
+        ctx.beginPath();
+        ctx.moveTo(hx + 2.5, hy - 9);
+        ctx.lineTo(hx - 5, hy + 1.5);
+        ctx.lineTo(hx - 0.5, hy + 1.5);
+        ctx.lineTo(hx - 4.5, hy + 10);
+        ctx.lineTo(hx + 4.5, hy - 0.5);
+        ctx.lineTo(hx, hy - 0.5);
+        ctx.closePath();
+
+        ctx.fillStyle = "#f1c40f"; // Yellow lightning
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.stroke();
+        ctx.fill();
+
+        // Flash inner shine
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(hx + 1, hy - 6);
+        ctx.lineTo(hx - 3, hy + 1);
+        ctx.stroke();
+
+        // 2. Draw Damage Text (Bright Yellow)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = "#f1c40f";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "fire") {
+        // 1. Draw 2-Layer Flickering Fire Flame
+        // Outer Flame (Vibrant Orange)
+        ctx.beginPath();
+        ctx.moveTo(hx, hy - 9);
+        ctx.quadraticCurveTo(hx - 7, hy - 2, hx - 7, hy + 4);
+        ctx.quadraticCurveTo(hx - 7, hy + 9.5, hx, hy + 9.5);
+        ctx.quadraticCurveTo(hx + 7, hy + 9.5, hx + 7, hy + 4);
+        ctx.quadraticCurveTo(hx + 7, hy - 2, hx, hy - 9);
+        ctx.closePath();
+        ctx.fillStyle = "#e67e22"; // Orange
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.stroke();
+        ctx.fill();
+
+        // Inner Flame Core (Hot Yellow)
+        ctx.beginPath();
+        ctx.moveTo(hx, hy - 4);
+        ctx.quadraticCurveTo(hx - 4, hy + 1, hx - 4, hy + 5.5);
+        ctx.quadraticCurveTo(hx - 4, hy + 8, hx, hy + 8);
+        ctx.quadraticCurveTo(hx + 4, hy + 8, hx + 4, hy + 5.5);
+        ctx.quadraticCurveTo(hx + 4, hy + 1, hx, hy - 4);
+        ctx.closePath();
+        ctx.fillStyle = "#f1c40f"; // Hot Yellow
+        ctx.fill();
+
+        // 2. Draw Damage Text (Orange)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = "#e67e22";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "frost") {
+        // 1. Draw Sharp Geometric Ice Shard
+        ctx.beginPath();
+        ctx.moveTo(hx, hy - 9);
+        ctx.lineTo(hx + 6, hy);
+        ctx.lineTo(hx, hy + 9);
+        ctx.lineTo(hx - 6, hy);
+        ctx.closePath();
+
+        ctx.fillStyle = "#dff9fb"; // Icy white
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.stroke();
+        ctx.fill();
+
+        // Inner frost veins (Light Blue)
+        ctx.strokeStyle = "#3498db";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(hx - 4, hy);
+        ctx.lineTo(hx + 4, hy);
+        ctx.moveTo(hx, hy - 6);
+        ctx.lineTo(hx, hy + 6);
+        ctx.stroke();
+
+        // 2. Draw Damage Text (Cool Ice Blue)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = "#3498db";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "slash") {
+        // 1. Draw Crossed Swords (Cel-Shaded)
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        // Blade 1 outline
+        ctx.beginPath();
+        ctx.moveTo(hx - 8, hy + 8);
+        ctx.lineTo(hx + 8, hy - 8);
+        ctx.stroke();
+
+        // Blade 2 outline
+        ctx.beginPath();
+        ctx.moveTo(hx + 8, hy + 8);
+        ctx.lineTo(hx - 8, hy - 8);
+        ctx.stroke();
+
+        // Fill Blade 1 (Silver)
+        ctx.strokeStyle = "#ecf0f1";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(hx - 8, hy + 8);
+        ctx.lineTo(hx + 8, hy - 8);
+        ctx.stroke();
+
+        // Fill Blade 2 (Silver)
+        ctx.beginPath();
+        ctx.moveTo(hx + 8, hy + 8);
+        ctx.lineTo(hx - 8, hy - 8);
+        ctx.stroke();
+
+        // Crossguards (Gold dots)
+        ctx.fillStyle = "#f1c40f";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(hx - 3, hy + 3, 2, 0, Math.PI * 2);
+        ctx.arc(hx + 3, hy + 3, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 2. Draw Damage Text (White)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#fff";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "dagger") {
+        // 1. Draw sharp pointed stiletto (Cel-Shaded)
+        ctx.save();
+        ctx.translate(hx, hy);
+        ctx.rotate(-Math.PI / 4); // Angled up-right
+
+        // Blade outline
+        ctx.fillStyle = "#bdc3c7";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(-2, 4);
+        ctx.lineTo(0, -9);
+        ctx.lineTo(2, 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Gold Guard
+        ctx.fillStyle = "#f1c40f";
+        ctx.beginPath();
+        ctx.roundRect(-4.5, 4, 9, 2.5, [1]);
+        ctx.fill();
+        ctx.stroke();
+
+        // Wood Hilt
+        ctx.fillStyle = "#5c3a21";
+        ctx.beginPath();
+        ctx.rect(-1.5, 6.5, 3, 5);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        // 2. Draw Damage Text (Muted Steel Blue)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#fff";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "echo") {
+        // 1. Draw Ghostly Purple Skull/Wisp (Cel-Shaded)
+        ctx.fillStyle = "#9b59b6";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.arc(hx, hy - 2, 6, Math.PI, 0, false);
+        ctx.quadraticCurveTo(hx + 6, hy + 6, hx + 3, hy + 8);
+        ctx.lineTo(hx - 3, hy + 8);
+        ctx.quadraticCurveTo(hx - 6, hy + 6, hx - 6, hy - 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Black eyes
+        ctx.fillStyle = "#000000";
+        ctx.beginPath();
+        ctx.arc(hx - 2, hy - 2, 1.5, 0, Math.PI * 2);
+        ctx.arc(hx + 2, hy - 2, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Draw Damage Text (Soft Purple)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#9b59b6";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "counter") {
+        // 1. Draw Golden Mini Heater Shield (Cel-Shaded)
+        ctx.fillStyle = "#f1c40f"; // Golden counter shield
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(hx - 6, hy - 6);
+        ctx.lineTo(hx + 6, hy - 6);
+        ctx.quadraticCurveTo(hx + 6, hy, hx + 5, hy + 3);
+        ctx.quadraticCurveTo(hx, hy + 9, hx, hy + 9);
+        ctx.quadraticCurveTo(hx - 5, hy + 3, hx - 6, hy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Red interior crest
+        ctx.fillStyle = "#e74c3c";
+        ctx.beginPath();
+        ctx.moveTo(hx - 3, hy - 4);
+        ctx.lineTo(hx + 3, hy - 4);
+        ctx.quadraticCurveTo(hx + 3, hy, hx, hy + 5);
+        ctx.quadraticCurveTo(hx - 3, hy, hx - 3, hy - 4);
+        ctx.closePath();
+        ctx.fill();
+
+        // 2. Draw Damage Text (Golden Orange)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#f1c40f";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "bleed") {
+        // 1. Draw Shiny Crimson Blood Droplet (Cel-Shaded)
+        ctx.fillStyle = "#c0392b"; // Deep crimson blood
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(hx, hy - 8);
+        ctx.quadraticCurveTo(hx - 6, hy, hx - 6, hy + 4);
+        ctx.quadraticCurveTo(hx - 6, hy + 9, hx, hy + 9);
+        ctx.quadraticCurveTo(hx + 6, hy + 9, hx + 6, hy + 4);
+        ctx.quadraticCurveTo(hx + 6, hy - 2, hx, hy - 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Specular shine
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.ellipse(hx - 2, hy + 2, 1.2, 2.5, Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Draw Damage Text (Dark Crimson)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#960018";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else {
+        ctx.font = "bold 18px sans-serif";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4;
+        ctx.lineJoin = "miter";
+        ctx.miterLimit = 2;
+        ctx.strokeText(eff.text, eff.x, eff.y);
+        ctx.fillStyle = eff.color;
+        ctx.fillText(eff.text, eff.x, eff.y);
+      }
+      ctx.restore();
     });
 
     if (
@@ -8565,26 +9122,26 @@
   };
 
   window.updateSyncStatus = function (status) {
-      let dot = document.getElementById("sync-dot");
-      let text = document.getElementById("sync-status-text");
-      if (!dot || !text) return;
+    let dot = document.getElementById("sync-dot");
+    let text = document.getElementById("sync-status-text");
+    if (!dot || !text) return;
 
-      if (status === "syncing") {
-        dot.style.background = "#f1c40f";
-        text.innerText = "SYNCING";
-        text.style.color = "#f1c40f";
-      } else if (status === "connected") {
-        dot.style.background = "#2ecc71";
-        text.innerText = "CONNECTED";
-        text.style.color = "#2ecc71";
-        window.isCloudSynced = true;
-      } else {
-        dot.style.background = "#7f8c8d";
-        text.innerText = "OFFLINE";
-        text.style.color = "#7f8c8d";
-        window.isCloudSynced = false;
-      }
-    };
+    if (status === "syncing") {
+      dot.style.background = "#f1c40f";
+      text.innerText = "SYNCING";
+      text.style.color = "#f1c40f";
+    } else if (status === "connected") {
+      dot.style.background = "#2ecc71";
+      text.innerText = "CONNECTED";
+      text.style.color = "#2ecc71";
+      window.isCloudSynced = true;
+    } else {
+      dot.style.background = "#7f8c8d";
+      text.innerText = "OFFLINE";
+      text.style.color = "#7f8c8d";
+      window.isCloudSynced = false;
+    }
+  };
 
   window.toggleEcoMode = function () {
     window.playerStats.ecoMode = !window.playerStats.ecoMode;

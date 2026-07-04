@@ -750,6 +750,15 @@ Object.assign(window.ItemFactory, {
     minStars = 0,
     allowedTraits = null,
   ) {
+    let originalType = chosenType;
+    if (
+      chosenType === "shield" ||
+      chosenType === "dagger" ||
+      chosenType === "tome"
+    ) {
+      chosenType = "subweapon";
+    }
+
     let item = {
       id: window.idCounter++,
       name: "",
@@ -804,7 +813,10 @@ Object.assign(window.ItemFactory, {
 
     if (chosenType === "subweapon") {
       const subTypes = ["shield", "dagger", "tome"];
-      item.subType = subTypes[Math.floor(Math.random() * subTypes.length)];
+      item.subType =
+        originalType === "subweapon"
+          ? subTypes[Math.floor(Math.random() * subTypes.length)]
+          : originalType;
     }
 
     if (chosenType !== "artifact") {
