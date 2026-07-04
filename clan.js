@@ -1182,23 +1182,24 @@ window.getWeeklyClanMail = function () {
   if (window.playerStats.weeklyClanCrateClaimed) return null;
 
   // 3. Ensure we have a valid weekly reset identifier or initialize it
-    const ptNow = new Date();
-    const dayOfWeek = ptNow.getDay();
-    const daysToMonday = (dayOfWeek + 6) % 7;
-    const lastMondayDate = new Date(ptNow);
-    lastMondayDate.setDate(ptNow.getDate() - daysToMonday);
-    const mondayStr = lastMondayDate.toLocaleDateString("en-US");
+  const ptNow = new Date();
+  const dayOfWeek = ptNow.getDay();
+  const daysToMonday = (dayOfWeek + 6) % 7;
+  const lastMondayDate = new Date(ptNow);
+  lastMondayDate.setDate(ptNow.getDate() - daysToMonday);
+  const mondayStr = lastMondayDate.toLocaleDateString("en-US");
 
-    if (!window.playerStats.lastWeeklyResetMondayStr) {
-      window.playerStats.lastWeeklyResetMondayStr = mondayStr;
-      window.saveGame();
-    }
+  if (!window.playerStats.lastWeeklyResetMondayStr) {
+    window.playerStats.lastWeeklyResetMondayStr = mondayStr;
+    window.saveGame();
+  }
 
-    return {
-      id: "clan_weekly_mail_" + mondayStr,
+  return {
+    id: "clan_weekly_mail_" + mondayStr,
     title: "Weekly Clan Supply Crate",
-    message: "Your weekly contribution has been processed. Here is your supply crate based on current Clan level.",
+    message:
+      "Your weekly contribution has been processed. Here is your supply crate based on current Clan level.",
     claimed: false,
-    rewards: { use: { "Weekly Clan Supply Crate": 1 } }
+    rewards: { use: { "Weekly Clan Supply Crate": 1 } },
   };
 };

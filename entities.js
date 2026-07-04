@@ -4174,605 +4174,1652 @@
 
     let costume = stats.equippedCostume || "knight";
 
-        // Decoupled Multi-Axis Visual Render Matrix
-        switch (costume) {
-          case "shinobi":
-                      // Localized custom colors for classic stealth ninja palette (dark charcoal/navy with dye accents)
-                      let shinobiGiColor = "#1a1a24";    // Stealth dark navy/grey
-                      let shinobiMaskColor = "#111115";  // Deep black mask wrap
-                      let shinobiSashColor = armorColor || "#3498db";  // Sash ties respect equipped armor dye
-                      let shinobiScarfColor = capeColor || "#c0392b";  // Flowing scarf respects cape dye
-                      let shinobiEyeColor = eyeColor || "#e74c3c";     // Peeking eyes respect frenzy state/skin
+    // Decoupled Multi-Axis Visual Render Matrix
+    switch (costume) {
+      case "shinobi":
+        {
+          let shinobiGiColor = skin === "default" ? "#15151c" : bodyColor;
+          let shinobiMaskColor = skin === "default" ? "#0d0d10" : armorColor;
+          let shinobiSashColor = skin === "default" ? "#3498db" : armorColor;
+          let shinobiScarfColor = capeColor;
+          let shinobiEyeColor = eyeColor;
 
-                      // 1. Crossed Katana Sheaths on the Back (Drawn behind the body)
-                      ctx.save();
-                      ctx.strokeStyle = "#000000";
-                      ctx.lineWidth = penHero;
-                      ctx.lineJoin = "round";
-
-                      // Left sheath & hilt
-                      ctx.save();
-                      ctx.translate(-4, bounce - 2);
-                      ctx.rotate(-Math.PI / 4);
-                      ctx.fillStyle = "#1e1e24";
-                      ctx.fillRect(-2, -18, 4, 20);
-                      ctx.strokeRect(-2, -18, 4, 20);
-                      ctx.fillStyle = "#ffd700"; // Gold hilt
-                      ctx.fillRect(-3, -24, 6, 6);
-                      ctx.strokeRect(-3, -24, 6, 6);
-                      ctx.restore();
-
-                      // Right sheath & hilt
-                      ctx.save();
-                      ctx.translate(2, -2 + bounce);
-                      ctx.rotate(Math.PI / 4);
-                      ctx.fillStyle = "#1e1e24";
-                      ctx.fillRect(-2, -18, 4, 20);
-                      ctx.strokeRect(-2, -18, 4, 20);
-                      ctx.fillStyle = "#ffd700"; // Gold hilt
-                      ctx.fillRect(-3, -24, 6, 6);
-                      ctx.strokeRect(-3, -24, 6, 6);
-                      ctx.restore();
-                      ctx.restore();
-
-                      // 2. Flowing Animated Scarf (Drawn behind/around neck, waving in the wind!)
-                      ctx.save();
-                      ctx.strokeStyle = "#000000";
-                      ctx.lineWidth = penHero;
-                      ctx.fillStyle = shinobiScarfColor;
-                      ctx.lineJoin = "round";
-                      let windWave1 = Math.sin(Date.now() / 120) * 4;
-                      let windWave2 = Math.cos(Date.now() / 150) * 3;
-
-                      // First waving scarf tail
-                      ctx.beginPath();
-                      ctx.moveTo(-6, -2 + bounce);
-                      ctx.quadraticCurveTo(-18 + windWave1, -6 + bounce, -28 + windWave1, -2 + windWave2 + bounce);
-                      ctx.lineTo(-24 + windWave1, 4 + windWave2 + bounce);
-                      ctx.quadraticCurveTo(-14 + windWave1, 0 + bounce, -6, 2 + bounce);
-                      ctx.closePath();
-                      ctx.fill();
-                      ctx.stroke();
-
-                      // Second waving scarf tail
-                      ctx.beginPath();
-                      ctx.moveTo(-6, -4 + bounce);
-                      ctx.quadraticCurveTo(-20 + windWave2, 2 + bounce, -26 + windWave2, 8 + windWave1 + bounce);
-                      ctx.lineTo(-21 + windWave2, 13 + windWave1 + bounce);
-                      ctx.quadraticCurveTo(-12 + windWave2, 6 + bounce, -6, 1 + bounce);
-                      ctx.closePath();
-                      ctx.fill();
-                      ctx.stroke();
-                      ctx.restore();
-
-                      // 3. Sleek Ninja Gi (Torso body block)
-                      ctx.fillStyle = shinobiGiColor;
-                      ctx.beginPath();
-                      ctx.rect(-7, bounce, 12, 16);
-                      ctx.fill();
-                      ctx.stroke();
-
-                      // Kimono/Gi overlapping crossover lines (the "V" overlap)
-                      ctx.strokeStyle = "#000000";
-                      ctx.lineWidth = 1.5;
-                      ctx.beginPath();
-                      ctx.moveTo(-7, bounce);
-                      ctx.lineTo(-1, 8 + bounce);
-                      ctx.moveTo(5, bounce);
-                      ctx.lineTo(-3, 10 + bounce);
-                      ctx.stroke();
-
-                      // 4. Belt Sash with hanging ribbon ends
-                      ctx.fillStyle = shinobiSashColor;
-                      ctx.strokeStyle = "#000000";
-                      ctx.lineWidth = penHero;
-                      ctx.beginPath();
-                      ctx.rect(-8, 7 + bounce, 14, 3.5);
-                      ctx.fill();
-                      ctx.stroke();
-
-                      // Hanging belt ribbons waving gently in the wind
-                      ctx.save();
-                      ctx.fillStyle = shinobiSashColor;
-                      ctx.translate(-4, 10 + bounce);
-                      ctx.rotate(Math.PI / 10 + Math.sin(Date.now() / 100) * 0.1);
-                      ctx.beginPath();
-                      ctx.rect(-1.5, 0, 3, 10);
-                      ctx.fill();
-                      ctx.stroke();
-                      ctx.restore();
-
-                      // 5. Hood & Mask Wrap (Head)
-                      ctx.fillStyle = shinobiGiColor;
-                      ctx.beginPath();
-                      ctx.roundRect(-10, -14 + bounce, 18, 16, [6, 6, 2, 2]);
-                      ctx.fill();
-                      ctx.stroke();
-
-                      // Dark mask plate eye slit interior
-                      ctx.fillStyle = "#2c3e50";
-                      ctx.beginPath();
-                      ctx.rect(-6, -11 + bounce, 10, 6);
-                      ctx.fill();
-
-                      // Mask Wrap (Lower half of face)
-                      ctx.fillStyle = shinobiMaskColor;
-                      ctx.beginPath();
-                      ctx.rect(-10, -6 + bounce, 18, 8);
-                      ctx.fill();
-                      ctx.stroke();
-
-                      // Forehead Protector Plate (Headband / Hitai-ate)
-                      ctx.fillStyle = "#7f8c8d";
-                      ctx.beginPath();
-                      ctx.rect(-6, -14 + bounce, 11, 3);
-                      ctx.fill();
-                      ctx.stroke();
-                      // Tiny metal headband rivets
-                      ctx.fillStyle = "#ffffff";
-                      ctx.fillRect(-5, -13 + bounce, 0.8, 0.8);
-                      ctx.fillRect(3, -13 + bounce, 0.8, 0.8);
-
-                      // 6. Peeking Glowing Shinobi Eyes
-                      ctx.fillStyle = shinobiEyeColor;
-                      ctx.shadowBlur = 6;
-                      ctx.shadowColor = shinobiEyeColor;
-                      ctx.beginPath();
-                      ctx.rect(-5, -10 + bounce, 2.5, 1.5);
-                      ctx.rect(0, -10 + bounce, 2.5, 1.5);
-                      ctx.fill();
-                      ctx.shadowBlur = 0;
-                      break;
-
-          case "archmage":
-            // Flowing Wizard Robes (Flared base)
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = penHero;
-            ctx.fillStyle = bodyColor;
-            ctx.beginPath();
-            ctx.moveTo(-6, bounce);
-            ctx.lineTo(-12, 16 + bounce);
-            ctx.lineTo(6, 16 + bounce);
-            ctx.lineTo(4, bounce);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Inner center vertical trim
-            ctx.fillStyle = capeColor;
-            ctx.beginPath();
-            ctx.rect(-2, bounce, 4, 16);
-            ctx.fill();
-            ctx.stroke();
-
-            // Mage Shoulders
-            ctx.fillStyle = armorColor;
-            ctx.beginPath();
-            ctx.rect(-9, bounce, 3, 4);
-            ctx.rect(5, bounce, 3, 4);
-            ctx.fill();
-            ctx.stroke();
-
-            // Long White Beard
-            ctx.fillStyle = "#ecf0f1";
-            ctx.beginPath();
-            ctx.moveTo(-5, -3 + bounce);
-            ctx.lineTo(0, 10 + bounce);
-            ctx.lineTo(4, -3 + bounce);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Head Base
-            ctx.fillStyle = bodyColor;
-            ctx.beginPath();
-            ctx.rect(-8, -14 + bounce, 15, 14);
-            ctx.fill();
-            ctx.stroke();
-
-            // Wizard Pointy Hat
-            ctx.fillStyle = bodyColor;
-            ctx.beginPath();
-            ctx.moveTo(-11, -14 + bounce);
-            ctx.lineTo(0, -29 + bounce);
-            ctx.lineTo(10, -14 + bounce);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Hat Brim
-            ctx.fillStyle = armorColor;
-            ctx.beginPath();
-            ctx.rect(-12, -16 + bounce, 23, 3);
-            ctx.fill();
-            ctx.stroke();
-
-            // Glowing Archmage eyes
-            ctx.fillStyle = eyeColor;
-            ctx.beginPath();
-            ctx.rect(-5, -11 + bounce, 2, 2);
-            ctx.rect(1, -11 + bounce, 2, 2);
-            ctx.fill();
-            break;
-
-          case "cyber":
-            // Jetpack Thruster Wings
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = penHero;
-            ctx.fillStyle = capeColor;
-            ctx.beginPath();
-            ctx.moveTo(-6, bounce);
-            ctx.lineTo(-20, -4 + bounce);
-            ctx.lineTo(-18, 12 + bounce);
-            ctx.lineTo(-6, 8 + bounce);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Cyber Body (Composite armor plating)
-            ctx.fillStyle = bodyColor;
-            ctx.beginPath();
-            ctx.rect(-8, bounce, 14, 16);
-            ctx.fill();
-            ctx.stroke();
-
-            // Neon glowing chest core
-            ctx.fillStyle = eyeColor;
-            ctx.beginPath();
-            ctx.arc(-1, 6 + bounce, 3.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // Visor Helmet Head
-            ctx.fillStyle = bodyColor;
-            ctx.beginPath();
-            ctx.rect(-10, -14 + bounce, 18, 16);
-            ctx.fill();
-            ctx.stroke();
-
-            // High-tech Plate lining
-            ctx.strokeStyle = armorColor;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(-10, -1 + bounce);
-            ctx.lineTo(8, -1 + bounce);
-            ctx.stroke();
-
-            // Full horizontal glowing visor
-            ctx.fillStyle = eyeColor;
-            ctx.beginPath();
-            ctx.rect(-9, -10 + bounce, 16, 4);
-            ctx.fill();
-            ctx.stroke();
-            break;
-
-          case "jackolantern":
-            // Leafy Cape (Autumn colors)
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = penHero;
-            ctx.fillStyle = bodyColor;
-            ctx.beginPath();
-            ctx.moveTo(-6, bounce);
-            ctx.lineTo(-18, 16 + bounce);
-            ctx.lineTo(-2, 18 + bounce);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Vine Chestplate
-            ctx.fillStyle = armorColor;
-            ctx.beginPath();
-            ctx.rect(-8, bounce, 14, 16);
-            ctx.fill();
-            ctx.stroke();
-
-            // Gourd straps crossing
-            ctx.strokeStyle = capeColor;
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(-8, bounce);
-            ctx.lineTo(6, 16 + bounce);
-            ctx.moveTo(6, bounce);
-            ctx.lineTo(-8, 16 + bounce);
-            ctx.stroke();
-
-            // Pumpkin Head
-            ctx.fillStyle = armorColor;
-            ctx.beginPath();
-            ctx.arc(-1, -7 + bounce, 9, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // Gourd stem
-            ctx.strokeStyle = capeColor;
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(-1, -15 + bounce);
-            ctx.quadraticCurveTo(2, -19 + bounce, 3, -18 + bounce);
-            ctx.stroke();
-
-            // Carved Eyes & Mouth
-            ctx.fillStyle = eyeColor;
-            // Left Eye
-            ctx.beginPath();
-            ctx.moveTo(-5, -10 + bounce);
-            ctx.lineTo(-2, -10 + bounce);
-            ctx.lineTo(-3.5, -7 + bounce);
-            ctx.closePath();
-            ctx.fill();
-            // Right Eye
-            ctx.beginPath();
-            ctx.moveTo(1, -10 + bounce);
-            ctx.lineTo(4, -10 + bounce);
-            ctx.lineTo(2.5, -7 + bounce);
-            ctx.closePath();
-            ctx.fill();
-            // Jagged carved mouth
-            ctx.beginPath();
-            ctx.moveTo(-6, -4 + bounce);
-            ctx.lineTo(-4, -2 + bounce);
-            ctx.lineTo(-2, -4 + bounce);
-            ctx.lineTo(0, -2 + bounce);
-            ctx.lineTo(2, -4 + bounce);
-            ctx.lineTo(4, -2 + bounce);
-            ctx.lineTo(2, 0 + bounce);
-            ctx.lineTo(-2, 0 + bounce);
-            ctx.closePath();
-            ctx.fill();
-            break;
-
-          case "santashelper":
-            // Cozy Back Cloak
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = penHero;
-            ctx.fillStyle = capeColor;
-            ctx.beginPath();
-            ctx.moveTo(-6, bounce);
-            ctx.lineTo(-18, 15);
-            ctx.lineTo(-2, 18);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Cozy Red Coat
-            ctx.fillStyle = capeColor;
-            ctx.beginPath();
-            ctx.rect(-8, bounce, 14, 16);
-            ctx.fill();
-            ctx.stroke();
-
-            // White fur collar/trim
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.rect(-8.5, bounce, 15, 3.5);
-            ctx.fill();
-            ctx.stroke();
-
-            // White vertical seam
-            ctx.beginPath();
-            ctx.rect(-1.5, 3.5 + bounce, 3, 12.5);
-            ctx.fill();
-            ctx.stroke();
-
-            // Black belt sash
-            ctx.fillStyle = "#111115";
-            ctx.beginPath();
-            ctx.rect(-8.5, 8 + bounce, 15, 3.5);
-            ctx.fill();
-            ctx.stroke();
-
-            // Gold belt buckle
-            ctx.fillStyle = "#f1c40f";
-            ctx.beginPath();
-            ctx.rect(-2.5, 7.5 + bounce, 5, 4.5);
-            ctx.fill();
-            ctx.stroke();
-
-            // Hood under floppy hat
-            ctx.fillStyle = bodyColor;
-            ctx.beginPath();
-            ctx.rect(-10, -14 + bounce, 18, 16);
-            ctx.fill();
-            ctx.stroke();
-
-            // White plush hat brim
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.rect(-11, -16 + bounce, 20, 4.5);
-            ctx.fill();
-            ctx.stroke();
-
-            // Floppy red hat cone falling to the left
-            ctx.fillStyle = capeColor;
-            ctx.beginPath();
-            ctx.moveTo(-9, -16 + bounce);
-            ctx.lineTo(-18, -25 + bounce); // Flopped point
-            ctx.lineTo(5, -16 + bounce);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Fluffy white pom-pom ball on flopped point
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.arc(-18, -25 + bounce, 3.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // Cozy eyes
-            ctx.fillStyle = eyeColor;
-            ctx.beginPath();
-            ctx.rect(-5, -10 + bounce, 2, 2);
-            ctx.rect(1, -10 + bounce, 2, 2);
-            ctx.fill();
-            break;
-
-          case "midsummer":
-            // Ivy Leaf Cape (Flowing green)
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = penHero;
-            ctx.fillStyle = capeColor;
-            ctx.beginPath();
-            ctx.moveTo(-6, bounce);
-            ctx.lineTo(-18, 15);
-            ctx.lineTo(-2, 18);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Under-Shirt
-            ctx.fillStyle = bodyColor;
-            ctx.beginPath();
-            ctx.rect(-8, bounce, 14, 16);
-            ctx.fill();
-            ctx.stroke();
-
-            // Leafy Druid Tunic Vest
-            ctx.fillStyle = "#2ecc71";
-            ctx.beginPath();
-            ctx.moveTo(-8, bounce);
-            ctx.lineTo(0, 16 + bounce);
-            ctx.lineTo(-8, 16 + bounce);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(6, bounce);
-            ctx.lineTo(-2, 16 + bounce);
-            ctx.lineTo(6, 16 + bounce);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Head Base
-            ctx.fillStyle = bodyColor;
-            ctx.beginPath();
-            ctx.rect(-10, -14 + bounce, 18, 16);
-            ctx.fill();
-            ctx.stroke();
-
-            // Vine crown base ring
-            ctx.strokeStyle = "#27ae60";
-            ctx.lineWidth = 1.8;
-            ctx.beginPath();
-            ctx.moveTo(-11, -12 + bounce);
-            ctx.quadraticCurveTo(0, -15 + bounce, 10, -12 + bounce);
-            ctx.stroke();
-
-            // Colorful wildflowers blooming in the crown
-            ctx.fillStyle = "#ff7675"; // Rose flower
-            ctx.beginPath();
-            ctx.arc(-7, -13 + bounce, 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = "#ffd23f"; // Dandelion
-            ctx.beginPath();
-            ctx.arc(0, -14 + bounce, 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = "#00d2ff"; // Bluebell
-            ctx.beginPath();
-            ctx.arc(6, -13 + bounce, 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // Bright druid eyes
-            ctx.fillStyle = eyeColor;
-            ctx.beginPath();
-            ctx.rect(-5, -8 + bounce, 2, 2);
-            ctx.rect(1, -8 + bounce, 2, 2);
-            ctx.fill();
-            break;
-
-          default: // "knight" Classic Plate Armor
-            // Draw Cape
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = penHero;
-            ctx.fillStyle = capeColor;
-            ctx.beginPath();
-            ctx.moveTo(-6, bounce);
-            ctx.lineTo(-18, 15);
-            ctx.lineTo(-2, 18);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Draw Body
-            ctx.fillStyle = bodyColor;
-            ctx.beginPath();
-            ctx.rect(-8, bounce, 14, 16);
-            ctx.fill();
-            ctx.stroke();
-
-            // Draw Helmet
-            ctx.fillStyle = armorColor;
-            ctx.beginPath();
-            ctx.rect(-10, -14 + bounce, 18, 16);
-            ctx.fill();
-            ctx.stroke();
-
-            // Helmet Visor / Eyes
-            ctx.fillStyle = "#2c3e50";
-            ctx.beginPath();
-            ctx.rect(0, -8 + bounce, 6, 4);
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle = eyeColor;
-            ctx.beginPath();
-            ctx.rect(-5, -20 + bounce, 4, 6);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.rect(-9, -16 + bounce, 8, 4);
-            ctx.fill();
-            ctx.stroke();
-            break;
-        }
-
-        // Crown of Tempests Aura
-        if (
-          equipped.helmet &&
-          equipped.helmet.isUniqueTempest &&
-          (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
-        ) {
+          // 1. Single angled Katana Sheath on the Back (Classic 3/4 profile)
           ctx.save();
-          ctx.translate(0, -14 + bounce);
-          ctx.strokeStyle = "#00d2ff";
-          ctx.lineWidth = 2.0;
-          ctx.shadowBlur = 10;
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.lineJoin = "round";
+
+          ctx.save();
+          ctx.translate(-5, 2 + bounce);
+          ctx.rotate(-Math.PI / 3.5); // Angled back-left
+          ctx.fillStyle = "#111115"; // Black sheath
+          ctx.fillRect(-2, -14, 4, 18);
+          ctx.strokeRect(-2, -14, 4, 18);
+
+          // Guard & Hilt
+          ctx.fillStyle = "#d4af37"; // Golden guard
+          ctx.fillRect(-4, -16, 8, 2.5);
+          ctx.strokeRect(-4, -16, 8, 2.5);
+
+          ctx.fillStyle = shinobiSashColor; // Wrapped hilt matching color accents
+          ctx.fillRect(-2, -23, 4, 7);
+          ctx.strokeRect(-2, -23, 4, 7);
+          ctx.fillStyle = "#111";
+          // Diamond wraps on hilt
+          ctx.fillRect(-1, -21, 2, 2);
+          ctx.fillRect(-1, -18, 2, 2);
+          ctx.restore();
+          ctx.restore();
+
+          // 2. Flowing Scarf / Shinobi Ribbons (Procedural Inertia & Wind-Drag Lerping)
+          ctx.save();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.fillStyle = shinobiScarfColor;
+          ctx.lineJoin = "round";
+
+          let isMoving =
+            options.isMainHero && (!window.mob || !window.mob.isStopped);
+
+          // Initialize or update persistent procedural weight on the character state object
+          if (playerStats.scarfWeight === undefined) {
+            try {
+              playerStats.scarfWeight = 0.0;
+            } catch (e) {
+              playerStats = { ...playerStats, scarfWeight: 0.0 };
+            }
+          }
+
+          let targetWeight = isMoving ? 1.0 : 0.0;
+          try {
+            playerStats.scarfWeight +=
+              (targetWeight - playerStats.scarfWeight) * 0.12;
+          } catch (e) {}
+          let w = playerStats.scarfWeight || 0.0;
+
+          // Query fully resolved movement speed dynamically (checking fast cache first)
+          let resolvedSpeed = 10;
+          if (window.cachedPlayerStats && window.cachedPlayerStats.moveSpeed) {
+            resolvedSpeed = window.cachedPlayerStats.moveSpeed;
+          } else if (typeof window.resolvePlayerStats === "function") {
+            let rp = window.resolvePlayerStats();
+            if (rp && rp.moveSpeed) resolvedSpeed = rp.moveSpeed;
+          }
+
+          // Dynamic wind-drag velocity ratio capped comfortably above target max
+          let speedRatio = Math.min(1.2, resolvedSpeed / 500.0);
+
+          // Variable wave frequency and tighter, rapid flutters at high speeds
+          let waveFreq = 0.1 + speedRatio * 0.16;
+          let ampY = Math.max(1.5, 4.0 - 2.5 * speedRatio);
+          let ampX = 1.0 + 2.0 * speedRatio;
+
+          let waveCycle = Date.now() * waveFreq;
+          let flutterY1 = Math.sin(waveCycle / 12) * ampY;
+          let flutterY2 = Math.cos(waveCycle / 15) * (ampY * 0.85);
+          let flutterX = Math.cos(waveCycle / 12) * ampX;
+
+          // Idle breathing waves (low-frequency, slow sag)
+          let idleSway1 = Math.sin(Date.now() / 800) * 1.5;
+          let idleSway2 = Math.cos(Date.now() / 1000) * 1.0;
+
+          // --- TOP RIBBON TAIL INTERPOLATION ---
+          let cpX1_idle = -12 + idleSway1;
+          let cpY1_idle = 4 + bounce;
+          let cpX1_run = -12 - 18 * speedRatio + flutterX;
+          let cpY1_run = 4 - 6 * speedRatio + flutterY1 + bounce;
+
+          let epX1_idle = -14 + idleSway1;
+          let epY1_idle = 12 + idleSway2 + bounce;
+          let epX1_run = -16 - 36 * speedRatio + flutterX * 1.5;
+          let epY1_run = 8 - 10 * speedRatio + flutterY2 + bounce;
+
+          // Blended control/end points
+          let cpX1 = cpX1_idle + (cpX1_run - cpX1_idle) * w;
+          let cpY1 = cpY1_idle + (cpY1_run - cpY1_idle) * w;
+          let epX1 = epX1_idle + (epX1_run - epX1_idle) * w;
+          let epY1 = epY1_idle + (epY1_run - epY1_idle) * w;
+
+          // Draw Top Ribbon
+          ctx.beginPath();
+          ctx.moveTo(-6, -2 + bounce);
+          ctx.quadraticCurveTo(cpX1, cpY1, epX1, epY1);
+          ctx.lineTo(epX1 + 4 * (1 - w), epY1 + 2 * w);
+          ctx.quadraticCurveTo(cpX1 + 4, cpY1 + 4, -6, 2 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // --- BOTTOM RIBBON TAIL INTERPOLATION ---
+          let cpX2_idle = -10 + idleSway2;
+          let cpY2_idle = 10 + bounce;
+          let cpX2_run = -10 - 16 * speedRatio - flutterX;
+          let cpY2_run = 10 - 8 * speedRatio - flutterY1 + bounce;
+
+          let epX2_idle = -11 + idleSway2;
+          let epY2_idle = 24 + idleSway1 + bounce;
+          let epX2_run = -14 - 34 * speedRatio - flutterX * 1.5;
+          let epY2_run = 18 - 16 * speedRatio - flutterY2 + bounce;
+
+          // Blended control/end points
+          let cpX2 = cpX2_idle + (cpX2_run - cpX2_idle) * w;
+          let cpY2 = cpY2_idle + (cpY2_run - cpY2_idle) * w;
+          let epX2 = epX2_idle + (epX2_run - epX2_idle) * w;
+          let epY2 = epY2_idle + (epY2_run - epY2_idle) * w;
+
+          // Draw Bottom Ribbon
+          ctx.beginPath();
+          ctx.moveTo(-6, 2 + bounce);
+          ctx.quadraticCurveTo(cpX2, cpY2, epX2, epY2);
+          ctx.lineTo(epX2 + 4 * (1 - w), epY2 + 2 * w);
+          ctx.quadraticCurveTo(cpX2 + 4, cpY2 + 4, -6, 5 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.restore();
+
+          // 3. Side-Profile Stealth Gi (Body)
+          ctx.fillStyle = shinobiGiColor;
+          ctx.beginPath();
+          ctx.rect(-8, bounce, 14, 16); // Centered body box
+          ctx.fill();
+          ctx.stroke();
+
+          // Crossed Gi collar lapels (facing right, so front overlap slopes from left down to right)
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(-8, bounce);
+          ctx.lineTo(2, 9 + bounce);
+          ctx.moveTo(3, bounce);
+          ctx.lineTo(-3, 11 + bounce);
+          ctx.stroke();
+
+          // 4. Sash Belt with Back-Flowing Ties
+          ctx.fillStyle = shinobiSashColor;
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.beginPath();
+          ctx.rect(-9, 7 + bounce, 15, 3.5);
+          ctx.fill();
+          ctx.stroke();
+
+          // Belt ribbons flowing back-left
+          ctx.save();
+          ctx.fillStyle = shinobiSashColor;
+          ctx.translate(-8, 9 + bounce);
+          ctx.rotate(-Math.PI / 6 + Math.sin(Date.now() / 100) * 0.12);
+          ctx.beginPath();
+          ctx.rect(-1.5, 0, 3, 11);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+
+          // 5. Right-Facing Masked Hood (Head)
+          ctx.fillStyle = shinobiGiColor;
+          ctx.beginPath();
+          // Left-weighted round hood representing head looking right
+          ctx.roundRect(-10, -14 + bounce, 18, 16, [6, 4, 4, 6]);
+          ctx.fill();
+          ctx.stroke();
+
+          // Face Opening (Slit offset to the right, showing right-facing orientation)
+          ctx.fillStyle = shinobiMaskColor;
+          ctx.beginPath();
+          ctx.roundRect(-2, -11 + bounce, 9, 6, [2]);
+          ctx.fill();
+          ctx.stroke();
+
+          // Forehead Protector Plate (Headband / Hitai-ate tilted right)
+          ctx.fillStyle = "#7f8c8d";
+          ctx.beginPath();
+          ctx.rect(-7, -14 + bounce, 12, 3);
+          ctx.fill();
+          ctx.stroke();
+
+          // Headband ties blowing back-left
+          ctx.save();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.5;
+          ctx.fillStyle = shinobiGiColor;
+          ctx.translate(-10, -12 + bounce);
+          ctx.rotate(-Math.PI / 4 + Math.sin(Date.now() / 90) * 0.15);
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(-8, -2);
+          ctx.lineTo(-6, 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+
+          // 6. Single Focused, Intense Glowing Eye looking right
+          ctx.fillStyle = shinobiEyeColor;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = shinobiEyeColor;
+          ctx.beginPath();
+          // Tilted focused single ninja eye slot
+          ctx.moveTo(1, -9 + bounce);
+          ctx.lineTo(5, -9 + bounce);
+          ctx.lineTo(4, -7.5 + bounce);
+          ctx.lineTo(1.5, -8 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+        break;
+
+      case "archmage":
+        {
+          // Recolor default skin robes to a gorgeous high-fantasy purple/gold/crimson theme
+          let robeColor = skin === "default" ? "#34225c" : bodyColor;
+          let trimColor = skin === "default" ? "#f1c40f" : armorColor;
+          let sashColor = skin === "default" ? "#e74c3c" : capeColor;
+
+          // 1. High Sorcerer Collar (frames the back of the neck)
+          ctx.fillStyle = sashColor;
+          ctx.beginPath();
+          ctx.moveTo(-10, bounce - 4);
+          ctx.quadraticCurveTo(-14, bounce - 18, -11, bounce - 14); // collar peak back-left
+          ctx.lineTo(-4, bounce - 10);
+          ctx.lineTo(2, bounce - 4);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Flowing Back Cape (sweeps back-left with motion drag)
+          ctx.fillStyle = robeColor;
+          ctx.beginPath();
+          ctx.moveTo(-6, bounce);
+          ctx.quadraticCurveTo(-16, 10 + bounce, -18, 16 + bounce);
+          ctx.lineTo(-6, 16 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // 2. Main Robe Torso (canted for a right-facing posture)
+          ctx.fillStyle = robeColor;
+          ctx.beginPath();
+          ctx.moveTo(-8, bounce);
+          ctx.lineTo(-12, 16 + bounce);
+          ctx.lineTo(6, 16 + bounce);
+          ctx.lineTo(5, bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Flared casting sleeves
+          ctx.fillStyle = robeColor;
+          ctx.beginPath();
+          ctx.moveTo(-7, bounce);
+          ctx.lineTo(-13, 8 + bounce);
+          ctx.lineTo(-7, 10 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(5, bounce);
+          ctx.lineTo(11, 8 + bounce);
+          ctx.lineTo(5, 10 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Crossed Robe Lapels & Gold Trim down front overlap
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(-8, bounce);
+          ctx.lineTo(4, 9 + bounce);
+          ctx.stroke();
+
+          ctx.fillStyle = trimColor;
+          ctx.beginPath();
+          ctx.moveTo(-2, bounce);
+          ctx.lineTo(4, 9 + bounce);
+          ctx.lineTo(1, 11 + bounce);
+          ctx.lineTo(-5, bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.lineWidth = penHero;
+
+          // 3. Ornate Sash Belt & Back-flowing ribbon (wind-drag)
+          ctx.fillStyle = sashColor;
+          ctx.beginPath();
+          ctx.rect(-9, 8 + bounce, 15, 3.5);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.save();
+          ctx.fillStyle = sashColor;
+          ctx.translate(-9, 10 + bounce);
+          ctx.rotate(Math.PI / 12 + Math.sin(Date.now() / 120) * 0.1); // sweeps back-left
+          ctx.beginPath();
+          ctx.rect(-2, 0, 4, 11);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+
+          // Glowing chest crystal amulet
+          ctx.fillStyle = "#00d2ff";
+          ctx.shadowBlur = 8;
           ctx.shadowColor = "#00d2ff";
           ctx.beginPath();
-          ctx.moveTo(-6, -2);
-          ctx.quadraticCurveTo(-14, -12, -18, -8);
-          ctx.quadraticCurveTo(-10, -5, -4, 0);
+          ctx.moveTo(-1, 2 + bounce);
+          ctx.lineTo(1.5, 4 + bounce);
+          ctx.lineTo(-1, 6 + bounce);
+          ctx.lineTo(-3.5, 4 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1;
           ctx.stroke();
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // 4. Majestic Flowing White Beard (Blowing backwards/left from right-facing chin)
+          ctx.fillStyle = "#f8fafc";
           ctx.beginPath();
-          ctx.moveTo(6, -2);
-          ctx.quadraticCurveTo(14, -12, 18, -8);
-          ctx.quadraticCurveTo(10, -5, 4, 0);
+          ctx.moveTo(3, -4 + bounce); // originates at chin
+          ctx.bezierCurveTo(-1, 2 + bounce, -12, 1 + bounce, -14, 8 + bounce); // flows left
+          ctx.quadraticCurveTo(-15, 12 + bounce, -12, 13 + bounce); // tail curl
+          ctx.bezierCurveTo(-9, 10 + bounce, -2, 6 + bounce, 2, 2 + bounce); // returns
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Beard combed texture highlights
+          ctx.strokeStyle = "#cbd5e1";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(1, -2 + bounce);
+          ctx.quadraticCurveTo(-3, 3 + bounce, -10, 8 + bounce);
+          ctx.moveTo(2, 0 + bounce);
+          ctx.quadraticCurveTo(-1, 5 + bounce, -6, 9 + bounce);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // 5. Hood Cowl Base (Open to the right, rounded to the back-left)
+          ctx.fillStyle = robeColor;
+          ctx.beginPath();
+          ctx.roundRect(-9, -15 + bounce, 16, 16, [8, 2, 2, 8]);
+          ctx.fill();
+          ctx.stroke();
+
+          // Cowl Interior Deep Arcane Shadow
+          ctx.fillStyle = "#111116";
+          ctx.beginPath();
+          ctx.roundRect(-2, -13 + bounce, 8, 12, [2, 6, 6, 2]);
+          ctx.fill();
+          ctx.stroke();
+
+          // 6. Angled Ornate Wizard Hat Brim
+          ctx.save();
+          ctx.translate(-1, -15 + bounce);
+          ctx.rotate(Math.PI / 18); // Tilted forward slightly
+          ctx.fillStyle = robeColor;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 13, 2.5, 0, 0, Math.PI * 2);
+          ctx.fill();
           ctx.stroke();
           ctx.restore();
+
+          // Curved Pointy Hat Cone (Curving backwards/left)
+          ctx.fillStyle = robeColor;
+          ctx.beginPath();
+          ctx.moveTo(-10, -15 + bounce);
+          ctx.bezierCurveTo(
+            -15,
+            -24 + bounce,
+            -16,
+            -30 + bounce,
+            -14,
+            -36 + bounce,
+          ); // curved slouch tip
+          ctx.quadraticCurveTo(-10, -32 + bounce, 7, -15 + bounce); // right side slant down
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Gilded Hat Band
+          ctx.fillStyle = sashColor;
+          ctx.beginPath();
+          ctx.moveTo(-10, -15 + bounce);
+          ctx.lineTo(-12, -18 + bounce);
+          ctx.lineTo(6, -17 + bounce);
+          ctx.lineTo(7, -15 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Golden Hat Buckle
+          ctx.fillStyle = trimColor;
+          ctx.beginPath();
+          ctx.rect(-3, -19 + bounce, 5, 4);
+          ctx.fill();
+          ctx.stroke();
+
+          // 7. Arcane Glowing Eye (Peering right from deep shadow)
+          ctx.fillStyle = "#00e5ff";
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = "#00e5ff";
+          ctx.beginPath();
+          ctx.moveTo(1, -9 + bounce);
+          ctx.lineTo(4.5, -9 + bounce);
+          ctx.lineTo(3.5, -7.5 + bounce);
+          ctx.lineTo(1.5, -8 + bounce);
+          ctx.closePath();
+          ctx.fill();
+
+          // 8. Floating Orb/Runic Sparks (Orbiting behind shoulders)
+          let cycle = Date.now() / 250;
+          let runeX = -16 + Math.sin(cycle) * 2;
+          let runeY = -4 + Math.cos(cycle) * 3 + bounce;
+          ctx.fillStyle = "#00e5ff";
+          ctx.shadowColor = "#00e5ff";
+          ctx.beginPath();
+          ctx.moveTo(runeX, runeY - 3);
+          ctx.lineTo(runeX + 2, runeY);
+          ctx.lineTo(runeX, runeY + 3);
+          ctx.lineTo(runeX - 2, runeY);
+          ctx.closePath();
+          ctx.fill();
+
+          let runeX2 = -12 + Math.cos(cycle + 2) * 1.5;
+          let runeY2 = -12 + Math.sin(cycle + 2) * 2 + bounce;
+          ctx.fillStyle = "#9b59b6";
+          ctx.shadowColor = "#9b59b6";
+          ctx.beginPath();
+          ctx.moveTo(runeX2, runeY2 - 2);
+          ctx.lineTo(runeX2 + 1.5, runeY2);
+          ctx.lineTo(runeX2, runeY2 + 2);
+          ctx.lineTo(runeX2 - 1.5, runeY2);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.shadowBlur = 0; // reset
+        }
+        break;
+
+      case "cyber":
+        {
+          // Localized color mapping for sleek cybernetic default elements
+          let suitColor = skin === "default" ? "#0f172a" : bodyColor; // Sleek carbon slate-black
+          let plateColor = skin === "default" ? "#1e293b" : armorColor; // Steel panel grey
+          let neonColor = skin === "default" ? "#00f0ff" : eyeColor; // Luminescent neon cyan
+
+          // 1. Active Jetpack Thruster & Exhaust Plume (Streams back-left)
+          ctx.fillStyle = plateColor;
+          ctx.beginPath();
+          ctx.roundRect(-12, 1 + bounce, 5, 10, [2]);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "#111827";
+          ctx.save();
+          ctx.translate(-11, 6 + bounce);
+          ctx.rotate(Math.PI / 6); // Angled down-left
+          ctx.beginPath();
+          ctx.moveTo(0, -3.5);
+          ctx.lineTo(-4, -5);
+          ctx.lineTo(-4, 5);
+          ctx.lineTo(0, 3.5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Pulsating glowing plasma plume
+          let plumeCycle = Date.now() / 60;
+          let plumeLength = 12 + Math.sin(plumeCycle) * 3;
+          ctx.fillStyle = neonColor;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = neonColor;
+          ctx.beginPath();
+          ctx.moveTo(-4, -3);
+          ctx.quadraticCurveTo(
+            -4 - plumeLength * 0.6,
+            -1 + Math.cos(plumeCycle) * 1.5,
+            -4 - plumeLength,
+            0,
+          );
+          ctx.quadraticCurveTo(
+            -4 - plumeLength * 0.6,
+            1 + Math.cos(plumeCycle) * 1.5,
+            -4,
+            3,
+          );
+          ctx.closePath();
+          ctx.fill();
+          ctx.shadowBlur = 0; // reset
+          ctx.restore();
+
+          // 2. Sleek Carbon Torso & Limb Plating
+          ctx.fillStyle = suitColor;
+          ctx.beginPath();
+          ctx.rect(-8, bounce, 14, 16);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = plateColor;
+          ctx.beginPath();
+          ctx.moveTo(-7, bounce);
+          ctx.lineTo(-9, 14 + bounce);
+          ctx.lineTo(5, 14 + bounce);
+          ctx.lineTo(5, bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // High-tech shoulder guard pauldrons
+          ctx.fillStyle = suitColor;
+          ctx.beginPath();
+          ctx.roundRect(-9, bounce - 2, 4, 6, [1.5]);
+          ctx.roundRect(4, bounce - 2, 4, 6, [1.5]);
+          ctx.fill();
+          ctx.stroke();
+
+          // 3. Neon Grid Circuit Pipes
+          ctx.strokeStyle = neonColor;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-4, 2 + bounce);
+          ctx.lineTo(-4, 11 + bounce);
+          ctx.lineTo(2, 11 + bounce);
+          ctx.moveTo(0, 5 + bounce);
+          ctx.lineTo(4, 5 + bounce);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // 4. Pulsating Chest Arc Reactor Core
+          let corePulse = 2.4 + Math.sin(Date.now() / 150) * 0.8;
+          ctx.fillStyle = "#ffffff"; // pure white core
+          ctx.strokeStyle = neonColor;
+          ctx.lineWidth = 1.5;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = neonColor;
+          ctx.beginPath();
+          ctx.arc(2, 6 + bounce, corePulse, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.shadowBlur = 0; // reset
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // 5. Sleek Right-Facing Aerodynamic Helmet
+          ctx.fillStyle = suitColor;
+          ctx.beginPath();
+          ctx.moveTo(-10, -14 + bounce);
+          ctx.quadraticCurveTo(-11, -16 + bounce, -8, -16 + bounce); // round back
+          ctx.lineTo(4, -14 + bounce); // sleek top
+          ctx.quadraticCurveTo(8, -12 + bounce, 7, -5 + bounce); // front jaw curve
+          ctx.lineTo(3, 1 + bounce); // chin
+          ctx.lineTo(-7, 1 + bounce); // neck seal
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Ear-Com Node & Antenna on the back-left
+          ctx.fillStyle = plateColor;
+          ctx.beginPath();
+          ctx.arc(-8, -7 + bounce, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.strokeStyle = neonColor;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(-8, -7 + bounce);
+          ctx.lineTo(-12, -15 + bounce); // angled antenna
+          ctx.stroke();
+
+          ctx.fillStyle = neonColor;
+          ctx.beginPath();
+          ctx.arc(-12, -15 + bounce, 1, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // 6. Streamlined Glowing Visor (Facing Right)
+          ctx.fillStyle = neonColor;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = neonColor;
+          ctx.beginPath();
+          ctx.moveTo(-2, -11 + bounce);
+          ctx.lineTo(4, -11 + bounce);
+          ctx.quadraticCurveTo(7.5, -9 + bounce, 6.5, -5 + bounce); // sleek curved visor front
+          ctx.lineTo(2, -5 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.shadowBlur = 0; // reset
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // 7. Floating Holographic HUD target reticle in front of visor
+          let hudTime = Date.now() / 500;
+          let hudX = 13;
+          let hudY = -7 + bounce;
+          ctx.strokeStyle = "rgba(0, 240, 255, 0.45)"; // Translucent holographic cyan
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(hudX, hudY, 5, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Crosshair ticks
+          ctx.beginPath();
+          ctx.moveTo(hudX - 7, hudY);
+          ctx.lineTo(hudX - 5, hudY);
+          ctx.moveTo(hudX + 5, hudY);
+          ctx.lineTo(hudX + 7, hudY);
+          ctx.moveTo(hudX, hudY - 7);
+          ctx.lineTo(hudX, hudY - 5);
+          ctx.moveTo(hudX, hudY + 5);
+          ctx.lineTo(hudX, hudY + 7);
+          ctx.stroke();
+        }
+        break;
+
+      case "jackolantern":
+        {
+          // Localized color mapping for organic seasonal elements
+          let pumpkinColor = skin === "default" ? "#e67e22" : bodyColor; // Pumpkin Orange
+          let leafColor1 = skin === "default" ? "#c0392b" : capeColor; // Maple Red
+          let leafColor2 = skin === "default" ? "#d35400" : armorColor; // Oak Orange
+          let stemColor = skin === "default" ? "#27ae60" : capeColor; // Mossy green stem
+          let glowColor = skin === "default" ? "#ff9f43" : eyeColor; // Inside candle flame glow (flame tint)
+
+          // Dynamic wind/motion billow values
+          let capeSway = Math.sin(Date.now() / 150) * 3;
+
+          // 1. Layered Back-flowing Autumn Leaf Cape (sweeps and billows left)
+          ctx.fillStyle = leafColor1;
+          ctx.beginPath();
+          ctx.moveTo(-6, bounce);
+          ctx.quadraticCurveTo(
+            -15 + capeSway * 0.5,
+            6 + bounce,
+            -17 + capeSway,
+            16 + bounce,
+          );
+          ctx.lineTo(-4, 16 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Overlapping secondary leaf layer
+          ctx.fillStyle = leafColor2;
+          ctx.beginPath();
+          ctx.moveTo(-4, bounce + 2);
+          ctx.quadraticCurveTo(
+            -11 + capeSway * 0.4,
+            10 + bounce,
+            -13 + capeSway * 0.8,
+            16 + bounce,
+          );
+          ctx.lineTo(-2, 16 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Leaf vein serrations waving in the wind
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(-17 + capeSway, 16 + bounce);
+          ctx.lineTo(-14 + capeSway * 0.7, 13 + bounce);
+          ctx.lineTo(-13 + capeSway * 0.8, 16 + bounce);
+          ctx.lineTo(-9 + capeSway * 0.5, 12 + bounce);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // 2. Vine-Woven Spooky Chestplate & Pauldrons
+          ctx.fillStyle = "#1e130c"; // Dark earthy under-girth
+          ctx.beginPath();
+          ctx.rect(-8, bounce, 14, 16);
+          ctx.fill();
+          ctx.stroke();
+
+          // Intersecting thorny branches
+          ctx.strokeStyle = "#5c3a21";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(-6, 2 + bounce);
+          ctx.lineTo(4, 14 + bounce);
+          ctx.moveTo(4, 2 + bounce);
+          ctx.lineTo(-6, 14 + bounce);
+          ctx.moveTo(-7, 8 + bounce);
+          ctx.lineTo(5, 8 + bounce);
+          ctx.stroke();
+
+          // Internal Magma cracks
+          ctx.strokeStyle = glowColor;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(-4, 4 + bounce);
+          ctx.lineTo(2, 10 + bounce);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // Leaf tattered shoulder guards
+          ctx.fillStyle = leafColor2;
+          ctx.beginPath();
+          ctx.roundRect(-10, bounce - 2, 4, 5, [1]);
+          ctx.roundRect(4, bounce - 2, 4, 5, [1]);
+          ctx.fill();
+          ctx.stroke();
+
+          // 3. Swirling Autumn Leaf Orbit (Swirls around feet in 3D perspective!)
+          for (let i = 0; i < 3; i++) {
+            let leafT =
+              (Date.now() / 1000 + i * ((Math.PI * 2) / 3)) % (Math.PI * 2);
+            let lx = Math.cos(leafT) * 12;
+            let ly = 16 + Math.sin(leafT) * 3 + bounce;
+            ctx.fillStyle = i % 2 === 0 ? leafColor1 : leafColor2;
+            ctx.save();
+            ctx.translate(lx, ly);
+            ctx.rotate(leafT * 2.5);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 3, 1.3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+          }
+
+          // 4. Ribbed Pumpkin Head with Rotational Breathing Wobble
+          let pX = -1;
+          let pY = -7 + bounce;
+          let pRad = 11.0; // Slightly scaled up for a more epic "pumpkin head" presence!
+
+          let headWobble = Math.sin(Date.now() / 180) * 0.05;
+
+          ctx.save();
+          ctx.translate(pX, pY);
+          ctx.rotate(headWobble);
+
+          // Base Pumpkin sphere
+          ctx.fillStyle = pumpkinColor;
+          ctx.beginPath();
+          ctx.arc(0, 0, pRad, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Spherical ribs wrap (creates 3D volume facing right)
+          ctx.strokeStyle = "rgba(0, 0, 0, 0.22)";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, pRad * 0.7, pRad, 0, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.ellipse(0, 0, pRad * 0.35, pRad, 0, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // Curly Green Stem (Sways back-left based on head rotation)
+          let stemSway = Math.sin(Date.now() / 140) * 0.15;
+          ctx.save();
+          ctx.translate(0, -pRad);
+          ctx.rotate(stemSway - Math.PI / 8);
+          ctx.strokeStyle = stemColor;
+          ctx.lineWidth = 2.8;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(-3, -6, -5, -4);
+          ctx.stroke();
+          ctx.restore();
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // 5. Carved Face with Real-Time Candle Flicker
+          let candleFlicker = 0.85 + Math.sin(Date.now() / 60) * 0.15;
+          ctx.fillStyle = glowColor;
+          ctx.shadowBlur = 10 * candleFlicker;
+          ctx.shadowColor = glowColor;
+
+          // Slanted sinister single eye
+          ctx.beginPath();
+          ctx.moveTo(2, -3);
+          ctx.lineTo(7, -3);
+          ctx.lineTo(5, 0.5);
+          ctx.closePath();
+          ctx.fill();
+
+          // Toothy grin curving upwards to the right
+          ctx.beginPath();
+          ctx.moveTo(-2, 2.5);
+          ctx.lineTo(1, 5.5);
+          ctx.lineTo(3, 3.5);
+          ctx.lineTo(6, 6.5);
+          ctx.lineTo(8, 1.5); // smile tip curves up
+          ctx.lineTo(5, 3.5);
+          ctx.lineTo(3, 1.5);
+          ctx.lineTo(1, 3.5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.shadowBlur = 0; // reset
+
+          // Deep black bevel outlines inside carved sections for high contrast
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(2, -3);
+          ctx.lineTo(7, -3);
+          ctx.lineTo(5, 0.5);
+          ctx.closePath();
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(-2, 2.5);
+          ctx.lineTo(1, 5.5);
+          ctx.lineTo(3, 3.5);
+          ctx.lineTo(6, 6.5);
+          ctx.lineTo(8, 1.5);
+          ctx.lineTo(5, 3.5);
+          ctx.lineTo(3, 1.5);
+          ctx.lineTo(1, 3.5);
+          ctx.closePath();
+          ctx.stroke();
+
+          ctx.restore(); // Restore head transform matrix
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // 6. Zero-Allocation Deterministic Drifting Embers (drifts back-left and rises!)
+          for (let i = 0; i < 4; i++) {
+            let seed = Math.sin(i * 123.45);
+            let t = (Date.now() / 1100 + seed * 5) % 1.0; // normalised 0 to 1 loop over 1.1s
+            let sparkX = pX - 2 - t * 18 + Math.sin(t * Math.PI * 2) * 2;
+            let sparkY = pY - pRad + 2 - t * 22 + bounce;
+            let alpha = 1.0 - t;
+            ctx.fillStyle = `rgba(230, 126, 34, ${alpha * 0.85})`;
+            ctx.fillRect(sparkX, sparkY, 1.5, 1.5);
+          }
+        }
+        break;
+
+      case "santashelper":
+        {
+          let coatColor = skin === "default" ? "#d63031" : capeColor;
+          let coatShadow = skin === "default" ? "#962d22" : bodyColor;
+          let trimColor = "#ffffff"; // Fluffy white fur trim stays snow-white
+          let goldColor = skin === "default" ? "#f1c40f" : armorColor;
+          let leatherColor = "#2d3436"; // Charcoal leather belt
+          let skinColor = "#ffddca"; // Healthy holiday skin
+          let beardColor = "#ffffff"; // Pure white beard
+          let beardShadow = "#cbd5e1"; // Beard shading depth
+
+          // --- MOVEMENT & DIRECTION LERPING ---
+          let isMoving =
+            options.isMainHero && (!window.mob || !window.mob.isStopped);
+          let stats = playerStats || window.playerStats || {};
+
+          if (stats.santaSackSway === undefined) {
+            stats.santaSackSway = 0;
+          }
+          let targetSway = isMoving ? 1.0 : 0.0;
+          stats.santaSackSway += (targetSway - stats.santaSackSway) * 0.1;
+          let swayWeight = stats.santaSackSway || 0;
+
+          let time = Date.now();
+          let capeSway = Math.sin(time / 130) * (1.8 + swayWeight * 2.5);
+          let windFlutter = Math.sin(time / 90) * (0.5 + swayWeight * 1.5);
+
+          // 1. ROYAL VELVET CLOAK (OVERLAPPING LAYERS & PROCEDURAL FLUTTER)
+          ctx.save();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.lineJoin = "round";
+
+          // Back shadow cape layer
+          ctx.fillStyle = coatShadow;
+          ctx.beginPath();
+          ctx.moveTo(-7, bounce);
+          ctx.quadraticCurveTo(
+            -15 + capeSway * 0.5,
+            6 + bounce,
+            -20 + capeSway + windFlutter,
+            16 + bounce,
+          );
+          ctx.lineTo(-4, 16 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Main bright velvet cape layer
+          ctx.fillStyle = coatColor;
+          ctx.beginPath();
+          ctx.moveTo(-6, bounce);
+          ctx.quadraticCurveTo(
+            -12 + capeSway * 0.4,
+            7 + bounce,
+            -17 + capeSway,
+            15.5 + bounce,
+          );
+          ctx.lineTo(-2, 15.5 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Shimmering golden border
+          ctx.strokeStyle = goldColor;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-5, 1 + bounce);
+          ctx.quadraticCurveTo(
+            -11 + capeSway * 0.4,
+            7.5 + bounce,
+            -15.5 + capeSway,
+            14.5 + bounce,
+          );
+          ctx.stroke();
+
+          // Reset line width
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // Soft fluffy white trim on Cape Bottom
+          ctx.fillStyle = trimColor;
+          ctx.beginPath();
+          let hemX = -17 + capeSway;
+          let hemY = 15.5 + bounce;
+          ctx.ellipse(hemX, hemY, 4, 2, 0, 0, Math.PI * 2);
+          ctx.ellipse(hemX + 3, hemY + 0.5, 3.5, 1.8, 0, 0, Math.PI * 2);
+          ctx.ellipse(hemX + 6.5, hemY + 0.8, 3.2, 1.5, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+
+          // 2. GIANT BURLAP TOY/SOUL SACK (SLUNG BACK-LEFT)
+          ctx.save();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.lineJoin = "round";
+
+          let sackX = -12 - swayWeight * 2;
+          let sackY = 5 + bounce;
+          ctx.translate(sackX, sackY);
+          ctx.rotate(-Math.PI / 10 + Math.sin(time / 200) * 0.05);
+
+          // Draw Sack Shadow Backing
+          ctx.fillStyle = "#6f4e37"; // Deep burlap brown shadow
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 9, 8, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Main Sack Body
+          let sackGrad = ctx.createRadialGradient(-3, -3, 1, 0, 0, 8.5);
+          sackGrad.addColorStop(0, "#a05a2c");
+          sackGrad.addColorStop(1, "#7d471b");
+          ctx.fillStyle = sackGrad;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 8.5, 7.5, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Green holiday patch with tiny stitches
+          ctx.fillStyle = "#27ae60";
+          ctx.beginPath();
+          ctx.rect(-3, -5, 4.5, 4.5);
+          ctx.fill();
+          ctx.stroke();
+          ctx.strokeStyle = "#000";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(-3, -5);
+          ctx.lineTo(-3, -0.5);
+          ctx.moveTo(1.5, -5);
+          ctx.lineTo(1.5, -0.5);
+          ctx.moveTo(-3, -5);
+          ctx.lineTo(1.5, -5);
+          ctx.moveTo(-3, -0.5);
+          ctx.lineTo(1.5, -0.5);
+          ctx.stroke();
+
+          // Golden ropes binding the sack mouth
+          ctx.strokeStyle = goldColor;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(4, -3, 4, Math.PI * 0.6, Math.PI * 1.5);
+          ctx.stroke();
+
+          // Golden tie knot
+          ctx.fillStyle = goldColor;
+          ctx.strokeStyle = "#000";
+          ctx.lineWidth = penHero;
+          ctx.beginPath();
+          ctx.ellipse(4.5, -3, 2, 1.2, Math.PI / 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+
+          // 3. COZY CRIMSON SANTA COAT & BELT (BODY)
+          ctx.save();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.lineJoin = "round";
+
+          // Main coat block
+          ctx.fillStyle = coatColor;
+          ctx.beginPath();
+          ctx.rect(-8, bounce, 14, 16);
+          ctx.fill();
+          ctx.stroke();
+
+          // Shaded coat contours
+          ctx.fillStyle = coatShadow;
+          ctx.beginPath();
+          ctx.rect(-8, bounce, 4, 16);
+          ctx.fill();
+
+          // Center fluffy white fur lining down the front
+          ctx.fillStyle = trimColor;
+          ctx.beginPath();
+          ctx.roundRect(-2.5, bounce, 5, 16, [1.5]);
+          ctx.fill();
+          ctx.stroke();
+
+          // Gold buttons flanking center line
+          ctx.fillStyle = goldColor;
+          ctx.beginPath();
+          ctx.arc(-4.5, 4 + bounce, 1.2, 0, Math.PI * 2);
+          ctx.arc(-4.5, 12 + bounce, 1.2, 0, Math.PI * 2);
+          ctx.arc(3.5, 4 + bounce, 1.2, 0, Math.PI * 2);
+          ctx.arc(3.5, 12 + bounce, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Leather Charcoal Belt
+          ctx.fillStyle = leatherColor;
+          ctx.beginPath();
+          ctx.rect(-8.5, 7.5 + bounce, 15, 4);
+          ctx.fill();
+          ctx.stroke();
+
+          // Giant Gold Buckle with cutout frame
+          ctx.fillStyle = goldColor;
+          ctx.beginPath();
+          ctx.rect(-3.5, 6 + bounce, 7, 7);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = leatherColor;
+          ctx.beginPath();
+          ctx.rect(-1.5, 8 + bounce, 3, 3);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.restore();
+
+          // 4. SANTA'S CHEERFUL HEAD BASE (PEEKING SKIN, EYES, & FLUFFY BEARD)
+          ctx.save();
+
+          // Fill head skin
+          ctx.fillStyle = skinColor;
+          ctx.beginPath();
+          ctx.roundRect(-8, -14 + bounce, 16, 14, [4]);
+          ctx.fill();
+
+          // Fluffy White Back Hair (behind ears/brim)
+          ctx.fillStyle = beardColor;
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.beginPath();
+          ctx.arc(-8, -9 + bounce, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(-7, -4 + bounce, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // 4b. THE MAJESTIC FLOATING BEARD (Drawn with individual path calls to prevent intersecting line bugs)
+          ctx.fillStyle = beardColor;
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.lineJoin = "round";
+
+          let beardCircles = [
+            { x: 6, y: -3, r: 3.5 }, // Right cheek
+            { x: 8.5, y: 1.5, r: 4.5 }, // Right mid
+            { x: 7.5, y: 6.5, r: 5 }, // Right lower
+            { x: 3, y: 9.5, r: 5.5 }, // Bottom center
+            { x: -3, y: 8.5, r: 5 }, // Left lower
+            { x: -6.5, y: 4, r: 4.5 }, // Left mid
+            { x: -6, y: -1, r: 3.5 }, // Left cheek
+          ];
+
+          beardCircles.forEach((bc) => {
+            ctx.beginPath();
+            ctx.arc(bc.x, bc.y + bounce, bc.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          });
+
+          // Draw central mustache (overlaps the beard base)
+          ctx.beginPath();
+          ctx.ellipse(
+            0.5,
+            -4.5 + bounce,
+            4,
+            2.2,
+            -Math.PI / 10,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.ellipse(5.5, -4.5 + bounce, 4, 2.2, Math.PI / 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // 4c. EYES & EYEBROWS (Rendered over the top of the beard to guarantee 100% absolute visibility)
+          ctx.fillStyle = "#1c1c1e"; // Solid black friendly eyes
+          ctx.beginPath();
+          ctx.arc(-2, -9 + bounce, 1.6, 0, Math.PI * 2);
+          ctx.arc(3.5, -9 + bounce, 1.6, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Sparkly white eye glints
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.arc(-2.4, -9.4 + bounce, 0.5, 0, Math.PI * 2);
+          ctx.arc(3.1, -9.4 + bounce, 0.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // White eyebrows
+          ctx.fillStyle = beardColor;
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.roundRect(-4.5, -13 + bounce, 4, 2, [1]);
+          ctx.fill();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.roundRect(1.5, -13 + bounce, 4, 2, [1]);
+          ctx.fill();
+          ctx.stroke();
+
+          // Soft red cheek blush
+          ctx.fillStyle = "rgba(231, 76, 60, 0.35)";
+          ctx.beginPath();
+          ctx.ellipse(-3.5, -6.5 + bounce, 2, 1, 0, 0, Math.PI * 2);
+          ctx.ellipse(5, -6.5 + bounce, 2, 1, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Rosy Button Nose
+          ctx.fillStyle = "#ff8a80";
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.beginPath();
+          ctx.arc(3, -5.5 + bounce, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.restore();
+
+          // 5. RED VELVET FLOPPY SANTA CAP WITH INTEGRATED SWAY
+          ctx.save();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.lineJoin = "round";
+
+          // Fluffy white cap brim sitting right at the crown
+          ctx.fillStyle = trimColor;
+          ctx.beginPath();
+          ctx.roundRect(-10.5, -16.5 + bounce, 18.5, 4.5, [2]);
+          ctx.fill();
+          ctx.stroke();
+
+          // Draw the main red cap dome (solid bean-hat backing structure)
+          ctx.fillStyle = coatColor;
+          ctx.beginPath();
+          ctx.moveTo(-10, -16 + bounce);
+          ctx.quadraticCurveTo(-8, -25 + bounce, -1, -25 + bounce);
+          ctx.quadraticCurveTo(5, -25 + bounce, 7, -16 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Draw the floppy crimson fold draping over the back-left
+          let capSway = Math.sin(time / 160) * (1.8 + swayWeight * 2.2);
+          let foldTipX = -13 + capSway;
+          let foldTipY = -12 + bounce;
+
+          ctx.fillStyle = coatColor;
+          ctx.beginPath();
+          ctx.moveTo(-3, -25 + bounce);
+          ctx.quadraticCurveTo(-11, -22 + bounce, foldTipX, foldTipY);
+          ctx.lineTo(foldTipX + 3, foldTipY - 1);
+          ctx.quadraticCurveTo(-6, -24 + bounce, 2, -25 + bounce);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // White pom-pom dangling directly from the fold tip
+          ctx.fillStyle = trimColor;
+          ctx.beginPath();
+          ctx.arc(foldTipX, foldTipY, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.restore();
+
+          // 7. ACTIVE WINTER AURORA (SPARKLING SNOW EMBER SPARKS)
+          if (options.isMainHero && !window.isGamePaused) {
+            ctx.save();
+            ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+            for (let i = 0; i < 4; i++) {
+              let seed = Math.sin(i * 45.67);
+              let t = (time / 1000 + seed * 6) % 1.0;
+              let sparkX = -4 - t * 24 + Math.sin(t * Math.PI * 2) * 4;
+              let sparkY = -15 - t * 16 + bounce;
+              let size = 1.2 * (1.0 - t);
+              ctx.fillRect(sparkX, sparkY, size, size);
+            }
+            ctx.restore();
+          }
+        }
+        break;
+
+      case "midsummer": {
+        let leafGreen = skin === "default" ? "#2ecc71" : armorColor;
+        let darkLeafGreen = skin === "default" ? "#1e824c" : bodyColor;
+        let strapColor = "#5c3a21"; // Earthy leather straps
+        let sunGold =
+          skin === "default"
+            ? "#f1c40f"
+            : skin === "void"
+              ? "#e84393"
+              : "#f1c40f";
+        let time = Date.now();
+        let windSway = Math.sin(time / 140) * 1.8;
+
+        // UNIQUE ORGANIC LEAF DRAWING ENGINE (Self-contained helper)
+        let drawLeaf = (cx, cy, r, angle, color) => {
+          ctx.save();
+          ctx.translate(cx, cy + bounce);
+          ctx.rotate(angle);
+          ctx.fillStyle = color;
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.lineJoin = "round";
+
+          ctx.beginPath();
+          ctx.moveTo(0, -r);
+          ctx.quadraticCurveTo(r * 0.65, -r * 0.1, 0, r); // Pointy right-curve
+          ctx.quadraticCurveTo(-r * 0.65, -r * 0.1, 0, -r); // Pointy left-curve
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Leaf middle vein
+          ctx.strokeStyle = "rgba(0, 0, 0, 0.18)";
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(0, -r * 0.7);
+          ctx.lineTo(0, r * 0.7);
+          ctx.stroke();
+
+          ctx.restore();
+        };
+
+        // 1. CASCADING IVY LEAF CANOPY (CAPE - Flowing Back-Left)
+        ctx.save();
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = penHero;
+        ctx.lineJoin = "round";
+
+        // Back deep leaf cape layer
+        ctx.fillStyle = darkLeafGreen;
+        ctx.beginPath();
+        ctx.moveTo(-5, bounce);
+        ctx.quadraticCurveTo(
+          -14 + windSway,
+          5 + bounce,
+          -16 + windSway,
+          15 + bounce,
+        );
+        ctx.quadraticCurveTo(-9 + windSway, 17 + bounce, -2, 16 + bounce);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Front bright ivy layer
+        ctx.fillStyle = leafGreen;
+        ctx.beginPath();
+        ctx.moveTo(-2, 1 + bounce);
+        ctx.quadraticCurveTo(
+          -10 + windSway * 0.8,
+          8 + bounce,
+          -12 + windSway * 0.8,
+          15 + bounce,
+        );
+        ctx.quadraticCurveTo(-5 + windSway * 0.8, 16 + bounce, 1, 14 + bounce);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Organic leaf veins
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(-3, 1 + bounce);
+        ctx.lineTo(-10 + windSway, 10 + bounce);
+        ctx.stroke();
+        ctx.restore();
+
+        // 2. LINEN SHIRT & LAYERED TUNIC (BODY)
+        // Neutral linen under-shirt
+        ctx.fillStyle = "#faf0e6";
+        ctx.beginPath();
+        ctx.rect(-8, bounce, 14, 16);
+        ctx.fill();
+        ctx.stroke();
+
+        // Leaf Shoulder Pauldrons (Using drawLeaf!)
+        drawLeaf(-9, 1, 4.5, Math.PI / 4, leafGreen);
+        drawLeaf(5, 1, 4.5, -Math.PI / 4, leafGreen);
+
+        // Leafy Vest Overlap (Left side)
+        ctx.fillStyle = leafGreen;
+        ctx.beginPath();
+        ctx.moveTo(-8, bounce);
+        ctx.lineTo(-2, bounce);
+        ctx.lineTo(-8, 11 + bounce);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Leafy Vest Overlap (Right side)
+        ctx.beginPath();
+        ctx.moveTo(6, bounce);
+        ctx.lineTo(0, bounce);
+        ctx.lineTo(6, 11 + bounce);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Layered Foliage Skirt
+        ctx.fillStyle = darkLeafGreen;
+        ctx.beginPath();
+        ctx.moveTo(-8.5, 9 + bounce);
+        ctx.lineTo(6.5, 9 + bounce);
+        ctx.lineTo(8, 16 + bounce);
+        ctx.lineTo(-10, 16 + bounce);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Foliage kilt curved detail scales
+        ctx.fillStyle = leafGreen;
+        for (let i = -8; i <= 4; i += 4) {
+          ctx.beginPath();
+          ctx.arc(i + 2, 16 + bounce, 2.2, Math.PI, 0);
+          ctx.fill();
+          ctx.stroke();
         }
 
-        // UNIQUE: Maelstrom Gale-Glaive "Gale Resonance" Canvas Aura
-        if (
-          stats.galeResonanceTimer > 0 &&
-          (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
-        ) {
-          ctx.save();
-          ctx.translate(0, bounce);
-          ctx.strokeStyle = "rgba(0, 255, 204, 0.45)";
-          ctx.lineWidth = 1.8;
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = "#00ffcc";
+        // Crossed leather chest laces
+        ctx.strokeStyle = strapColor;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-4, 2 + bounce);
+        ctx.lineTo(2, 6 + bounce);
+        ctx.moveTo(2, 2 + bounce);
+        ctx.lineTo(-4, 6 + bounce);
+        ctx.stroke();
+
+        // Woven Leather Belt
+        ctx.fillStyle = strapColor;
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = penHero;
+        ctx.beginPath();
+        ctx.rect(-8.5, 8 + bounce, 15, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        // Solstice Golden Sun Buckle
+        ctx.fillStyle = sunGold;
+        ctx.beginPath();
+        ctx.arc(0, 9.5 + bounce, 2.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = sunGold;
+        ctx.lineWidth = 0.8;
+        for (let r = 0; r < 8; r++) {
+          let angle = (r * Math.PI) / 4;
           ctx.beginPath();
-          ctx.arc(0, 0, 24 + Math.sin(Date.now() / 100) * 3, 0, Math.PI * 2);
+          ctx.moveTo(0, 9.5 + bounce);
+          ctx.lineTo(
+            0 + Math.cos(angle) * 4.5,
+            9.5 + bounce + Math.sin(angle) * 4.5,
+          );
+          ctx.stroke();
+        }
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = penHero;
+
+        // 3. SHADOWY FOREST HOOD (OBLITERATES FACE)
+        ctx.save();
+
+        // Cavity shadow background
+        ctx.fillStyle = "#0c1a10"; // Deep forest shadow cavity
+        ctx.beginPath();
+        ctx.roundRect(-8, -14 + bounce, 16, 14, [4]);
+        ctx.fill();
+        ctx.stroke();
+
+        // 4. NATURE GLOW EYES (Facing Right, Peeking from shadow)
+        ctx.fillStyle = "#55efc4"; // Glowing mint nature sparks
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = "#2ecc71";
+        ctx.beginPath();
+        ctx.arc(1.5, -9 + bounce, 1.3, 0, Math.PI * 2);
+        ctx.arc(5.0, -9 + bounce, 1.0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // 5. ORGANIC DRUID FOLIAGE CANOPY (Layered leaf shroud wrapping head)
+        // Draw deepest background leaves
+        drawLeaf(-7, -10, 5.0, -Math.PI / 3, darkLeafGreen); // Back-left upper
+        drawLeaf(-6, -4, 4.5, -Math.PI / 1.6, darkLeafGreen); // Back-left lower
+
+        // Branch/Vine Hair Locks peeking from the back of the head
+        ctx.fillStyle = "#a26938"; // Rich Auburn branch hair
+        ctx.beginPath();
+        ctx.arc(-9, -7 + bounce, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(-8, -2 + bounce, 4.0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw front-facing leaves
+        drawLeaf(-4, -15, 5.5, -Math.PI / 6, leafGreen); // Top left
+        drawLeaf(0, -17, 6.0, 0, darkLeafGreen); // Top center
+        drawLeaf(4, -15, 5.5, Math.PI / 6, leafGreen); // Top right
+        drawLeaf(5, -5, 5.5, Math.PI / 2.4, leafGreen); // Front-right (face mask drape)
+        drawLeaf(1, -3, 6.0, Math.PI / 1.8, darkLeafGreen); // Chin / low mask drape
+        drawLeaf(-3, -1, 4.8, -Math.PI / 2.2, leafGreen); // Lower-left neck base
+
+        // 6. WOVEN VINE CROWN & 3D BLOOMING WILDFLOWERS
+        ctx.strokeStyle = "#27ae60";
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(-11, -12 + bounce);
+        ctx.quadraticCurveTo(0, -15 + bounce, 11, -12 + bounce);
+        ctx.stroke();
+
+        let flowersList = [
+          { x: -5, y: -14, pCol: "#ff7675", cCol: "#ffd23f" }, // Rose
+          { x: 1, y: -16, pCol: "#ffd23f", cCol: "#ff7675" }, // Daisy
+          { x: 6, y: -13, pCol: "#54a0ff", cCol: "#ffffff" }, // Bluebell
+        ];
+
+        flowersList.forEach((fl) => {
+          ctx.save();
+          ctx.translate(fl.x, fl.y + bounce);
+          ctx.fillStyle = fl.pCol;
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 0.8;
+          for (let i = 0; i < 5; i++) {
+            let angle = (i * Math.PI * 2) / 5;
+            ctx.beginPath();
+            ctx.arc(
+              Math.cos(angle) * 1.5,
+              Math.sin(angle) * 1.5,
+              1.5,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fill();
+            ctx.stroke();
+          }
+          // Inner core bulb
+          ctx.fillStyle = fl.cCol;
+          ctx.beginPath();
+          ctx.arc(0, 0, 1.0, 0, Math.PI * 2);
+          ctx.fill();
           ctx.stroke();
           ctx.restore();
+        });
+
+        ctx.restore();
+
+        // 7. DRIFTING SUMMER FLOWER SPORES (ACTIVE WIND TRAIL)
+        if (options.isMainHero && !window.isGamePaused) {
+          ctx.save();
+          for (let i = 0; i < 3; i++) {
+            let seed = Math.sin(i * 78.91);
+            let t = (time / 900 + seed * 6) % 1.0;
+            let sparkX = -6 - t * 22 + Math.sin(t * Math.PI * 2) * 4;
+            let sparkY = -6 - t * 15 + bounce;
+            let alpha = 1.0 - t;
+            ctx.fillStyle =
+              i % 2 === 0
+                ? `rgba(255, 210, 63, ${alpha * 0.75})`
+                : `rgba(255, 118, 117, ${alpha * 0.75})`;
+            ctx.beginPath();
+            ctx.arc(sparkX, sparkY, 1.2 * (1.0 - t), 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
         }
+        break;
+      }
+
+      default: // "knight" Classic Plate Armor
+        // Draw Cape
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = penHero;
+        ctx.fillStyle = capeColor;
+        ctx.beginPath();
+        ctx.moveTo(-6, bounce);
+        ctx.lineTo(-18, 15);
+        ctx.lineTo(-2, 18);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw Body
+        ctx.fillStyle = bodyColor;
+        ctx.beginPath();
+        ctx.rect(-8, bounce, 14, 16);
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw Helmet
+        ctx.fillStyle = armorColor;
+        ctx.beginPath();
+        ctx.rect(-10, -14 + bounce, 18, 16);
+        ctx.fill();
+        ctx.stroke();
+
+        // Helmet Visor / Eyes
+        ctx.fillStyle = "#2c3e50";
+        ctx.beginPath();
+        ctx.rect(0, -8 + bounce, 6, 4);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = eyeColor;
+        ctx.beginPath();
+        ctx.rect(-5, -20 + bounce, 4, 6);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.rect(-9, -16 + bounce, 8, 4);
+        ctx.fill();
+        ctx.stroke();
+        break;
+    }
+
+    // Crown of Tempests Aura
+    if (
+      equipped.helmet &&
+      equipped.helmet.isUniqueTempest &&
+      (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
+    ) {
+      ctx.save();
+      ctx.translate(0, -14 + bounce);
+      ctx.strokeStyle = "#00d2ff";
+      ctx.lineWidth = 2.0;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = "#00d2ff";
+      ctx.beginPath();
+      ctx.moveTo(-6, -2);
+      ctx.quadraticCurveTo(-14, -12, -18, -8);
+      ctx.quadraticCurveTo(-10, -5, -4, 0);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(6, -2);
+      ctx.quadraticCurveTo(14, -12, 18, -8);
+      ctx.quadraticCurveTo(10, -5, 4, 0);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // UNIQUE: Maelstrom Gale-Glaive "Gale Resonance" Canvas Aura
+    if (
+      stats.galeResonanceTimer > 0 &&
+      (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
+    ) {
+      ctx.save();
+      ctx.translate(0, bounce);
+      ctx.strokeStyle = "rgba(0, 255, 204, 0.45)";
+      ctx.lineWidth = 1.8;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = "#00ffcc";
+      ctx.beginPath();
+      ctx.arc(0, 0, 24 + Math.sin(Date.now() / 100) * 3, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
 
     // Weapon
     ctx.save();

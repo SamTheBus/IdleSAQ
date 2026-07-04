@@ -2996,7 +2996,7 @@ window.COSMETIC_SKINS = {
     name: "Abyssal Void Color",
     desc: "A swirling cosmic color that turns fabrics into deep black holes.",
     color: "#8e44ad",
-    cost: 500,
+    cost: 1000,
     currency: "Luminous Soul",
   },
   crimson: {
@@ -3004,7 +3004,7 @@ window.COSMETIC_SKINS = {
     name: "Dragon Blood Color",
     desc: "Stained with ancient drake blood for a dark crimson finish.",
     color: "#e74c3c",
-    cost: 500,
+    cost: 1000,
     currency: "Luminous Soul",
   },
   gilded: {
@@ -3012,7 +3012,7 @@ window.COSMETIC_SKINS = {
     name: "Royal Gold Color",
     desc: "A rich gold leaf lacquer that shines with absolute brilliance.",
     color: "#f1c40f",
-    cost: 750,
+    cost: 1000,
     currency: "Luminous Soul",
   },
   celestial: {
@@ -3028,51 +3028,51 @@ window.COSMETIC_SKINS = {
 window.COSMETIC_COSTUMES = {
   knight: {
     id: "knight",
-    name: "Classic Plate Mail",
-    desc: "The timeless armor of the kingdom's elite frontliners.",
+    name: "Knight's Armor",
+    desc: "The default knight armor.",
     cost: 0,
     currency: "Gold",
-    color: "#bdc3c7"
+    color: "#bdc3c7",
   },
   shinobi: {
     id: "shinobi",
     name: "Sleek Shinobi Garb",
     desc: "Woven from silent shadow threads. Enhances stealth profile and swift parries.",
-    cost: 150000,
-    currency: "Gold",
-    color: "#3498db"
+    cost: 2500,
+    currency: "Luminous Soul",
+    color: "#3498db",
   },
   archmage: {
     id: "archmage",
     name: "Archmage Robes",
     desc: "Infused with residual mana to project an active arcane barrier.",
-    cost: 250,
+    cost: 2500,
     currency: "Luminous Soul",
-    color: "#9b59b6"
+    color: "#9b59b6",
   },
   cyber: {
     id: "cyber",
-    name: "Neon Cyber-Grid",
+    name: "Cyber Exosuit",
     desc: "Futuristic composite grid-suit driven by a pulsating neon core.",
-    cost: 500,
+    cost: 2500,
     currency: "Luminous Soul",
-    color: "#00d2ff"
+    color: "#00d2ff",
   },
   jackolantern: {
     id: "jackolantern",
-    name: "Jack-O'-Lantern Gourd",
+    name: "Jack-O'-Lantern",
     desc: "Spooky harvest armor capped with a glowing carved pumpkin helmet. (Autumn/Halloween Seasonal)",
     cost: 1000,
     currency: "Luminous Soul",
-    color: "#e67e22"
+    color: "#e67e22",
   },
   santashelper: {
     id: "santashelper",
-    name: "Holiday Helper Suit",
-    desc: "Cozy red and white trim coat with a floppy pom-pom cone cap. (Winter/Holiday Seasonal)",
+    name: "Yule Sovereign",
+    desc: "Sleek gold-trimmed charcoal plate armor paired with a majestic silver-white helmet, a glowing frost visor, a holiday velvet cloak, and a rune-bound satchel. (Winter/Holiday Seasonal)",
     cost: 1000,
     currency: "Luminous Soul",
-    color: "#ff7675"
+    color: "#ff4757",
   },
   midsummer: {
     id: "midsummer",
@@ -3080,8 +3080,8 @@ window.COSMETIC_COSTUMES = {
     desc: "Leafy forest tunic with comfortable straps and a crown of seasonal wildflowers. (Summer/Solstice Seasonal)",
     cost: 1000,
     currency: "Luminous Soul",
-    color: "#2ecc71"
-  }
+    color: "#2ecc71",
+  },
 };
 
 window.CAVERN_BUFFS = [

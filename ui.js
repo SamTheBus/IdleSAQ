@@ -166,35 +166,42 @@ window.getUseIconHtml = function (key, size = 32) {
   let innerHtml = "";
 
   // 1. Handle special unique assets
-    if (key === "SP Reset Scroll") {
-      bg = "rgba(155, 89, 182, 0.25)";
-      border = "#9b59b6";
-    } else if (key === "PP Reset Scroll") {
-      bg = "rgba(230, 126, 34, 0.25)";
-      border = "#e67e22";
-    } else if (key === "Cavern Sigil Sack") {
-      bg = "rgba(155, 89, 182, 0.25)";
-      border = "#9b59b6";
-      innerHtml = window.AssetCatalog.consumables.cavern_sigil_sack(uid);
-    } else if (key.includes("Sack")) {
-      bg = key.includes("Weekly") ? "rgba(155, 89, 182, 0.25)" : "rgba(241, 196, 15, 0.25)";
-      border = key.includes("Weekly") ? "#9b59b6" : "#f1c40f";
-      let stopCol = key.includes("Weekly") ? "#4a154b" : "#d35400";
-      innerHtml = window.AssetCatalog.consumables.sack(uid, stopCol);
-    } else if (key === "Weekly Clan Supply Crate") {
-      bg = "rgba(255, 170, 0, 0.25)";
-      border = "#ffaa00";
-      innerHtml = window.AssetCatalog.consumables.crate(uid);
-    } else if (key.includes("Elixir")) {
-      // 2. Map standard elixirs to the potion template
-      let pColor = key.includes("Attack") ? "#2ecc71" :
-                   key.includes("Vitality") ? "#e74c3c" :
-                   key.includes("Armored") ? "#3498db" :
-                   "#f1c40f";
-      bg = window.hexToRgba ? window.hexToRgba(pColor, 0.25) : "rgba(170, 170, 170, 0.25)";
-      border = pColor;
-      innerHtml = window.AssetCatalog.consumables.potion(uid, pColor);
-    } else if (key.includes("Vitality")) {
+  if (key === "SP Reset Scroll") {
+    bg = "rgba(155, 89, 182, 0.25)";
+    border = "#9b59b6";
+  } else if (key === "PP Reset Scroll") {
+    bg = "rgba(230, 126, 34, 0.25)";
+    border = "#e67e22";
+  } else if (key === "Cavern Sigil Sack") {
+    bg = "rgba(155, 89, 182, 0.25)";
+    border = "#9b59b6";
+    innerHtml = window.AssetCatalog.consumables.cavern_sigil_sack(uid);
+  } else if (key.includes("Sack")) {
+    bg = key.includes("Weekly")
+      ? "rgba(155, 89, 182, 0.25)"
+      : "rgba(241, 196, 15, 0.25)";
+    border = key.includes("Weekly") ? "#9b59b6" : "#f1c40f";
+    let stopCol = key.includes("Weekly") ? "#4a154b" : "#d35400";
+    innerHtml = window.AssetCatalog.consumables.sack(uid, stopCol);
+  } else if (key === "Weekly Clan Supply Crate") {
+    bg = "rgba(255, 170, 0, 0.25)";
+    border = "#ffaa00";
+    innerHtml = window.AssetCatalog.consumables.crate(uid);
+  } else if (key.includes("Elixir")) {
+    // 2. Map standard elixirs to the potion template
+    let pColor = key.includes("Attack")
+      ? "#2ecc71"
+      : key.includes("Vitality")
+        ? "#e74c3c"
+        : key.includes("Armored")
+          ? "#3498db"
+          : "#f1c40f";
+    bg = window.hexToRgba
+      ? window.hexToRgba(pColor, 0.25)
+      : "rgba(170, 170, 170, 0.25)";
+    border = pColor;
+    innerHtml = window.AssetCatalog.consumables.potion(uid, pColor);
+  } else if (key.includes("Vitality")) {
     bg = "rgba(231, 76, 60, 0.25)";
     border = "#e74c3c";
     innerHtml = window.AssetCatalog.consumables.potion(uid, "#e74c3c");
@@ -1029,7 +1036,7 @@ window.updateUI = function () {
     nameEl.innerHTML = `<span>${window.playerStats.playerName || "Guest"}</span>${titleHtml}`;
   }
 
-// Status Tags Row (Guild Emblem + Name)
+  // Status Tags Row (Guild Emblem + Name)
   let clanBadgeEl = document.getElementById("header-clan-badge");
   if (clanBadgeEl) {
     if (window.playerStats.clanId && window.playerStats.clanName) {
@@ -1432,12 +1439,13 @@ window.updateUI = function () {
 
 window.startSPDraftHold = function (e, statKey, direction) {
   e.preventDefault();
-  if (window.playerStats.sp <= 0 && direction > 0) return;
+  window.ensureDraftInitialized();
+  if (window.draftSP <= 0 && direction > 0) return;
   window.adjustSPDraft(statKey, direction);
 
   if (window.draftHoldTimeout) clearInterval(window.draftHoldTimeout);
   window.draftHoldTimeout = setInterval(() => {
-    if (window.playerStats.sp <= 0 && direction > 0) {
+    if (window.draftSP <= 0 && direction > 0) {
       clearInterval(window.draftHoldTimeout);
       return;
     }
@@ -1992,26 +2000,26 @@ window.toggleAuto = function () {
 };
 
 window.updateStickyCanvasStyle = function () {
-    let active = window.playerStats.stickyCanvas !== false;
-    let btn = document.getElementById("settings-toggle-sticky");
-    let canvasEl = document.getElementById("gameCanvas");
-    let containerEl = document.getElementById("game-container");
+  let active = window.playerStats.stickyCanvas !== false;
+  let btn = document.getElementById("settings-toggle-sticky");
+  let canvasEl = document.getElementById("gameCanvas");
+  let containerEl = document.getElementById("game-container");
 
-    if (btn) {
-      btn.innerText = active ? "Sticky Cam: ON" : "Sticky Cam: OFF";
-      btn.className = active ? "btn-action" : "btn-action un";
-    }
+  if (btn) {
+    btn.innerText = active ? "Sticky Cam: ON" : "Sticky Cam: OFF";
+    btn.className = active ? "btn-action" : "btn-action un";
+  }
 
-    if (canvasEl) {
-      canvasEl.style.position = active ? "sticky" : "static";
-      canvasEl.style.top = active ? "0" : "";
-      canvasEl.style.zIndex = active ? "999" : "";
-    }
+  if (canvasEl) {
+    canvasEl.style.position = active ? "sticky" : "static";
+    canvasEl.style.top = active ? "0" : "";
+    canvasEl.style.zIndex = active ? "999" : "";
+  }
 
-    if (containerEl) {
-      containerEl.style.overflow = active ? "visible" : "";
-    }
-  };
+  if (containerEl) {
+    containerEl.style.overflow = active ? "visible" : "";
+  }
+};
 
 window.toggleStickyCanvas = function () {
   window.playerStats.stickyCanvas = !window.playerStats.stickyCanvas;
@@ -5645,17 +5653,21 @@ window.submitConsoleCommand = function () {
   } else if (mainCmd === "/level") {
     let lvl = parseInt(args[1], 10);
     if (lvl > 0) {
+      let oldLvl = window.playerStats.level || 1;
+      let diff = lvl - oldLvl;
       window.playerStats.level = lvl;
-      window.playerStats.sp = (window.playerStats.sp || 0) + 1;
+      if (diff > 0) {
+        window.playerStats.sp = (window.playerStats.sp || 0) + diff * 6;
+      }
       window.playerStats.xp = 0;
       window.playerStats.xpReq = Math.floor(
-        250 * Math.pow(1.2, window.playerStats.level - 1),
+        100 * Math.pow(1.2, window.playerStats.level - 1),
       );
       let p = window.resolvePlayerStats();
       window.playerStats.currentHp = p.maxHp;
       if (typeof window.pushLog === "function")
         window.pushLog(
-          `<span style="color:#2ecc71;">[DEV] Set Level to ${lvl}!</span>`,
+          `<span style="color:#2ecc71;">[DEV] Set Level to ${lvl}! (+${diff > 0 ? diff * 6 : 0} SP)</span>`,
         );
       if (typeof window.updateUI === "function") window.updateUI();
       if (typeof window.saveGame === "function") window.saveGame();
@@ -9875,8 +9887,11 @@ window.fetchMailboxData = function () {
   const claimedMailIds = window.playerStats.claimedMailIds || [];
 
   if (!window.GAME_SERVER_URL) {
-      // Local / Offline fallback allows players to still receive their Weekly Clan Supply Crate!
-      let localMail = (typeof window.getWeeklyClanMail === 'function') ? window.getWeeklyClanMail() : null;
+    // Local / Offline fallback allows players to still receive their Weekly Clan Supply Crate!
+    let localMail =
+      typeof window.getWeeklyClanMail === "function"
+        ? window.getWeeklyClanMail()
+        : null;
     if (localMail) {
       window.renderMailboxItems([localMail]);
       window.updateMailboxBadge(!localMail.claimed);
@@ -10054,18 +10069,19 @@ window.claimMailReward = function (mailId) {
   window.justClaimedMailIds.add(mailId);
 
   // Catch client-side weekly clan mail claim
-    if (mailId.startsWith("clan_weekly_mail_")) {
-      let localMail = window.getWeeklyClanMail();
-      if (localMail && !localMail.claimed) {
-        window.addUseDrop("Weekly Clan Supply Crate", 1);
+  if (mailId.startsWith("clan_weekly_mail_")) {
+    let localMail = window.getWeeklyClanMail();
+    if (localMail && !localMail.claimed) {
+      window.addUseDrop("Weekly Clan Supply Crate", 1);
 
-        // Mark as claimed in playerStats
-        window.playerStats.weeklyClanCrateClaimed = true;
+      // Mark as claimed in playerStats
+      window.playerStats.weeklyClanCrateClaimed = true;
 
-        window.playerStats.claimedMailIds = window.playerStats.claimedMailIds || [];
-        if (!window.playerStats.claimedMailIds.includes(mailId)) {
-          window.playerStats.claimedMailIds.push(mailId);
-        }
+      window.playerStats.claimedMailIds =
+        window.playerStats.claimedMailIds || [];
+      if (!window.playerStats.claimedMailIds.includes(mailId)) {
+        window.playerStats.claimedMailIds.push(mailId);
+      }
       if (typeof window.spawnPurchaseCelebration === "function") {
         window.spawnPurchaseCelebration("gacha", "#ffaa00", 5);
       }
@@ -10226,15 +10242,17 @@ window.switchBoutiqueCategory = function (cat) {
   window.state.boutiqueCategory = cat;
 
   // Force update button visual states
-  document.querySelectorAll(".sub-tab-btn").forEach(btn => btn.classList.remove("active"));
+  document
+    .querySelectorAll(".sub-tab-btn")
+    .forEach((btn) => btn.classList.remove("active"));
 
   let btnCostumes = document.getElementById("btn-boutique-costumes");
   let btnDyes = document.getElementById("btn-boutique-dyes");
 
-  if (cat === 'costumes') {
-    if(btnCostumes) btnCostumes.classList.add("active");
+  if (cat === "costumes") {
+    if (btnCostumes) btnCostumes.classList.add("active");
   } else {
-    if(btnDyes) btnDyes.classList.add("active");
+    if (btnDyes) btnDyes.classList.add("active");
   }
 
   window.renderBoutiqueSkins();
@@ -10359,9 +10377,9 @@ window.renderBoutiqueSkins = function () {
     let canAfford = owned >= selItem.cost;
 
     showcasePrice.innerText = `${selItem.cost} ${currencyLabel}`;
-        showcasePrice.style.color = canAfford ? "#f1c40f" : "#e74c3c";
-        showcaseBtn.innerText = `UNLOCK`;
-        showcaseBtn.disabled = false; // Always keep the button clickable so the error toast fires
+    showcasePrice.style.color = canAfford ? "#f1c40f" : "#e74c3c";
+    showcaseBtn.innerText = `UNLOCK`;
+    showcaseBtn.disabled = false; // Always keep the button clickable so the error toast fires
     if (canAfford) {
       showcaseBtn.style.background = selItem.color;
       showcaseBtn.style.color = selItem.color === "#f1c40f" ? "#111" : "#fff";
@@ -10377,7 +10395,9 @@ window.renderBoutiqueSkins = function () {
 
   // 2. Render the grid below
   let html = "";
-  let datasource = isCostumesTab ? window.COSMETIC_COSTUMES : window.COSMETIC_SKINS;
+  let datasource = isCostumesTab
+    ? window.COSMETIC_COSTUMES
+    : window.COSMETIC_SKINS;
 
   Object.keys(datasource).forEach((key) => {
     let item = datasource[key];
@@ -10679,8 +10699,8 @@ window.checkUnreadMail = function () {
   })
     .then((response) => response.json())
     .then((data) => {
-          console.log("📨 Mailbox Server Response:", data); // Add this line
-          if (data.success && data.mailbox) {
+      console.log("📨 Mailbox Server Response:", data); // Add this line
+      if (data.success && data.mailbox) {
         const hasUnclaimed = data.mailbox.some((m) => !m.claimed);
         window.updateMailboxBadge(hasUnclaimed);
       }
@@ -11913,6 +11933,24 @@ window.unslotCavernSigil = function () {
   window.updateUI();
 };
 
+window.slotCavernSigilInline = function (sigilId) {
+  if (!sigilId) return;
+  let id = parseInt(sigilId, 10);
+  let sigil = window.inventory.SIGIL.find((item) => item.id === id);
+  if (sigil) {
+    window.state.slottedCavernSigil = sigil;
+    if (window.SoundManager) window.SoundManager.play("spell");
+  }
+  window.renderCavernsPrepUI();
+};
+
+window.unslotCavernSigilInline = function (event) {
+  if (event) event.stopPropagation();
+  window.state.slottedCavernSigil = null;
+  if (window.SoundManager) window.SoundManager.play("swing");
+  window.renderCavernsPrepUI();
+};
+
 window.updateSalvagePadUI = function () {
   let threshold =
     window.playerStats.autoSalvageThreshold !== undefined
@@ -12109,53 +12147,77 @@ window.renderCavernsPrepUI = function () {
     let buffDescs = slottedSig.buffs
       .map(
         (b) =>
-          `<span style="color:#2ecc71; display:block; font-size:9.5px;">• ☀️ ${b.name}: ${b.desc}</span>`,
+          `<span style="color:#2ecc71; display:block; font-size:9.5px; line-height:1.4;">• ☀️ ${b.name}: ${b.desc}</span>`,
       )
       .join("");
     let debuffDescs = slottedSig.debuffs
       .map(
         (d) =>
-          `<span style="color:#e74c3c; display:block; font-size:9.5px;">• 🌑 ${d.name}: ${d.desc}</span>`,
+          `<span style="color:#e74c3c; display:block; font-size:9.5px; line-height:1.4;">• 🌑 ${d.name}: ${d.desc}</span>`,
       )
       .join("");
     sigilSlotHtml = `
-            <div style="background:#111; border: 1.5px solid ${col}; border-radius: 6px; padding: 10px; margin-bottom: 12px; text-align:left; position:relative;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <strong style="color:${col}; font-size:11.5px;">${slottedSig.name}</strong>
-                <button class="btn-action un" style="padding:2px 8px; font-size:9px;" onclick="window.unslotCavernSigilInline(event)">Unslot</button>
-              </div>
-              <div style="font-size:9.5px; color:#aaa; line-height:1.4;">
-                ${buffDescs}${debuffDescs}
-                <span style="color:#3498db; font-weight:bold; display:block; margin-top:3px; font-size:9.5px;">💎 Focus Rewards: +${(slottedSig.rewardMultiplier * 100).toFixed(0)}% Loot Multiplier</span>
-                ${slottedSig.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold; font-size:9.5px;">✨ Quality Boost: +${(slottedSig.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
-              </div>
+        <div style="background:rgba(${window.hexToRgbValues(col)}, 0.08); border: 2px solid ${col}; border-radius: 8px; padding: 12px; margin-bottom: 12px; text-align:left; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(${window.hexToRgbValues(col)}, 0.1); animation: toastFadeIn 0.25s;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:9.5px; color:${col}; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">⚡ ACTIVE CHAMBER MODIFIER</span>
+            <button class="btn-action un" style="padding:2px 8px; font-size:9.5px; font-weight:bold;" onclick="window.unslotCavernSigilInline(event)">Unslot</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <div style="flex-shrink:0;">${window.getEquipIconHtml(slottedSig, 32)}</div>
+            <div style="min-width:0; flex:1;">
+              <strong style="color:${col}; font-size:13px; text-shadow:0 0 6px ${col}44; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px;">${slottedSig.name}</strong>
+              <span style="font-size:9px; color:#aaa; font-family:monospace; display:block; margin-top:2px;">Rarity: ${slottedSig.statsRolled}★ ${window.getTierName(slottedSig.statsRolled)}</span>
             </div>
-          `;
+          </div>
+          <div style="background:#090b0e; border:1px solid #222; border-radius:4px; padding:8px; font-size:10px; line-height:1.4;">
+            ${buffDescs}${debuffDescs}
+            <div style="border-top:1px dashed #222; margin-top:6px; padding-top:4px; display:flex; flex-direction:column; gap:1px; font-family:monospace; font-size:9.5px;">
+              <span style="color:#3498db; font-weight:bold;">💎 Focus Rewards: +${(slottedSig.rewardMultiplier * 100).toFixed(0)}% Loot Multiplier</span>
+              ${slottedSig.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold;">✨ Quality Boost: +${(slottedSig.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
+            </div>
+          </div>
+        </div>
+      `;
   } else {
-    // Find owned sigils
-    let ownedSigils = window.inventory.EQUIP.filter(
-      (item) => item && item.type === "sigil",
-    );
+    // Correctly search the specialized SIGIL pouch instead of the old EQUIP array
+    let ownedSigils = window.inventory.SIGIL || [];
+
     if (ownedSigils.length === 0) {
       sigilSlotHtml = `
-              <div style="background:#111; border: 1px dashed #444; border-radius: 6px; padding: 10px; margin-bottom: 12px; text-align:center; font-size:10px; color:#666;">
-                No Cavern Sigils owned. Slay Dungeon/Stage Bosses or Guardians to drop Modifiers Sacks!
-              </div>
-            `;
+          <div style="background:#111; border: 1.5px dashed #333; border-radius: 8px; padding: 16px; margin-bottom: 12px; text-align:center; font-size:10.5px; color:#7f8c8d; line-height:1.45; white-space:normal;">
+            No Cavern Sigils found in your pouch.<br>Slay standard Campaign Bosses, Rare Spawns, or Dungeon Bosses to drop **Cavern Sigil Sacks**!
+          </div>
+        `;
     } else {
-      sigilSlotHtml = `
-              <div style="background:#111; border: 1px dashed #444; border-radius: 6px; padding: 10px; margin-bottom: 12px; text-align:center;">
-                <span style="font-size:10px; color:#aaa; display:block; margin-bottom:6px;">Enhance your descent with an optional Cavern Sigil:</span>
-                <select id="caverns-sigil-selector" onchange="window.slotCavernSigilInline(this.value)" style="width:100%; max-width:260px; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:6px; font-size:10.5px; cursor:pointer;">
-                  <option value="">-- Apply Cavern Sigil --</option>
-                  ${ownedSigils
-                    .map((sig) => {
-                      return `<option value="${sig.id}">${sig.name}</option>`;
-                    })
-                    .join("")}
-                </select>
+      // Build an elegant grid for direct, one-click slotting
+      let gridHtml = ownedSigils
+        .map((sig) => {
+          let col = window.getTierColor(sig.statsRolled);
+          let shortName = sig.name.split(" (")[0];
+          return `
+              <div style="background:#111; border: 1.5px solid ${col}44; border-radius:6px; padding:6px; cursor:pointer; display:flex; align-items:center; gap:8px; transition: all 0.15s ease;"
+                   onclick="window.slotCavernSigilInline('${sig.id}')"
+                   onmouseenter="window.showInventoryTooltip(event, ${sig.id})"
+                   ontouchstart="window.showInventoryTooltip(event, ${sig.id})"
+                   onmouseleave="window.hideTooltip()">
+                <div style="flex-shrink:0;">${window.getEquipIconHtml(sig, 24)}</div>
+                <div style="min-width:0; flex:1; text-align:left;">
+                  <strong style="color:${col}; font-size:10px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:115px;">${shortName}</strong>
+                  <span style="font-size:8.5px; color:#888; display:block; font-family:monospace; margin-top:1px;">Loot: +${(sig.rewardMultiplier * 100).toFixed(0)}%</span>
+                </div>
               </div>
             `;
+        })
+        .join("");
+
+      sigilSlotHtml = `
+          <div style="margin-bottom: 12px; text-align:left;">
+            <span style="font-size:10px; color:#9b59b6; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">🎒 SELECT CAVERN MODIFIER (Click to Slot):</span>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; max-height:130px; overflow-y:auto; padding-right:4px;">
+              ${gridHtml}
+            </div>
+          </div>
+        `;
     }
   }
 
@@ -12266,10 +12328,10 @@ window.executeCavernsDescent = function () {
     window.playerStats.activeDungeonSigil = activeSig;
     window.state.slottedCavernSigil = null;
 
-    // Remove sigil from EQUIP bag
-    let sIdx = window.inventory.EQUIP.findIndex((i) => i.id === activeSig.id);
+    // Properly remove sigil from the SIGIL pouch
+    let sIdx = window.inventory.SIGIL.findIndex((i) => i.id === activeSig.id);
     if (sIdx !== -1) {
-      window.inventory.EQUIP.splice(sIdx, 1);
+      window.inventory.SIGIL.splice(sIdx, 1);
     }
   } else {
     window.playerStats.activeDungeonSigil = null;

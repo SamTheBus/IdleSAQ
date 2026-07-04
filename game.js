@@ -927,16 +927,19 @@ window.SaveManager = {
         }
       }
       if (window.playerStats.unlockedSkins.length === 0)
-              window.playerStats.unlockedSkins = ["default"];
+        window.playerStats.unlockedSkins = ["default"];
 
-            if (window.playerStats.equippedCostume === undefined) {
-              window.playerStats.equippedCostume = "knight";
-            }
-            if (window.playerStats.unlockedCostumes === undefined || window.playerStats.unlockedCostumes.length === 0) {
-              window.playerStats.unlockedCostumes = ["knight"];
-            }
+      if (window.playerStats.equippedCostume === undefined) {
+        window.playerStats.equippedCostume = "knight";
+      }
+      if (
+        window.playerStats.unlockedCostumes === undefined ||
+        window.playerStats.unlockedCostumes.length === 0
+      ) {
+        window.playerStats.unlockedCostumes = ["knight"];
+      }
 
-            if (window.playerStats.equippedTitle === undefined)
+      if (window.playerStats.equippedTitle === undefined)
         window.playerStats.equippedTitle = null;
       if (window.playerStats.claimedMailIds === undefined)
         window.playerStats.claimedMailIds = [];
@@ -1716,15 +1719,15 @@ window.loadGameAndSyncCloud = function () {
 
   if (localDataRaw) {
     try {
-          localParsed = JSON.parse(localDataRaw);
-          window.applySaveStatePayload(localParsed, true);
-          window.recalculateXpRequirement(); // FORCE the new formula on every load
-          if (localParsed.lastSaveTime) {
-            offlineMsToApply = now - localParsed.lastSaveTime;
-          }
-        } catch (e) {
-          console.error("Local save load failed", e);
-        }
+      localParsed = JSON.parse(localDataRaw);
+      window.applySaveStatePayload(localParsed, true);
+      window.recalculateXpRequirement(); // FORCE the new formula on every load
+      if (localParsed.lastSaveTime) {
+        offlineMsToApply = now - localParsed.lastSaveTime;
+      }
+    } catch (e) {
+      console.error("Local save load failed", e);
+    }
   }
 
   if (!window.GAME_SERVER_URL) {
@@ -2201,11 +2204,11 @@ function engineCycle() {
     update(); // State ticks still execute at a liquid 60 ticks per second
 
     let now = Date.now();
-        // 45 FPS target (approx 22.2ms per frame) provides smoother motion while maintaining thermal efficiency
-        let limit =
-          window.playerStats && window.playerStats.ecoMode ? 1000 / 45 : 0;
+    // 45 FPS target (approx 22.2ms per frame) provides smoother motion while maintaining thermal efficiency
+    let limit =
+      window.playerStats && window.playerStats.ecoMode ? 1000 / 45 : 0;
 
-        if (now - lastRenderTime >= limit) {
+    if (now - lastRenderTime >= limit) {
       window.draw(); // Draws at 30 FPS if Eco Mode is enabled, saving massive thermal output
       lastRenderTime = now;
     }
@@ -4315,12 +4318,10 @@ window.CombatEngine = {
     if (window.playerStats.isDungeonMode) {
       if (window.playerStats.currentDungeon === "equip") {
         if (window.mob.type === "dungeon_boss") {
-          if (Math.random() < 0.05) {
-            if (typeof window.rollEquipmentDrop === "function")
-              window.rollEquipmentDrop(true, false, 1, false);
-          } else if (Math.random() < 0.2) {
-            if (typeof window.rollEquipmentDrop === "function")
-              window.rollEquipmentDrop(true, false, 0, false);
+          // Guaranteed Equipment Drop for defeating the Floor Boss
+          if (typeof window.rollEquipmentDrop === "function") {
+            let minStarsRoll = Math.random() < 0.2 ? 1 : 0; // 20% chance to guarantee 1★+ minimum
+            window.rollEquipmentDrop(true, false, minStarsRoll, false, true); // isMilestone = true bypasses rng check
           }
           // Balanced unique artifact tempering speed by adjusting Overlord's Sigil rate to 20%
           if (Math.random() < 0.05) {
@@ -4330,9 +4331,9 @@ window.CombatEngine = {
               window.pushToast("Overlord's Sigil", null, "#1abc9c", true, 1);
           }
         } else {
-          if (Math.random() < 0.01) {
-            if (typeof window.rollEquipmentDrop === "function")
-              window.rollEquipmentDrop(false, false, 0, false);
+          // Let the single-roll loot and Pity system handle minion kills cleanly
+          if (typeof window.rollEquipmentDrop === "function") {
+            window.rollEquipmentDrop(false, false, 0, false);
           }
         }
       } else if (window.playerStats.currentDungeon === "mat") {
@@ -4471,16 +4472,9 @@ window.CombatEngine = {
         }
       }
     } else {
-      let baseDropRate = window.playerStats.isUberBoss
-        ? 1.0
-        : isBoss
-          ? 0.01
-          : window.mob.isRare
-            ? 0.005
-            : 0.001;
-      if (Math.random() < baseDropRate * p.drop * window.state.efficiency) {
-        if (typeof window.rollEquipmentDrop === "function")
-          window.rollEquipmentDrop(isBoss, false, 0, window.mob.isRare);
+      // Let the single-roll loot function evaluate rates and progress pity natively
+      if (typeof window.rollEquipmentDrop === "function") {
+        window.rollEquipmentDrop(isBoss, false, 0, window.mob.isRare);
       }
     }
 
@@ -4696,52 +4690,65 @@ window.CombatEngine = {
     }
 
     if (window.playerStats.isDungeonMode) {
-          // VAMPIRIC CHECKPOINT: Heal 20% Max HP on Boss kill
-          if (window.mob.type === "dungeon_boss") {
-            let p = window.resolvePlayerStats();
-            let healAmount = Math.floor(p.maxHp * 0.20);
-            window.playerStats.currentHp = Math.min(p.maxHp, window.playerStats.currentHp + healAmount);
-            window.effects.push({ x: window.hero.x, y: window.hero.y - 20, text: "❤️ +" + window.formatNumber(healAmount), color: "#2ecc71", life: 60 });
-            if(window.SoundManager) window.SoundManager.play("revive");
+      // VAMPIRIC CHECKPOINT: Heal 20% Max HP on Boss kill
+      if (window.mob.type === "dungeon_boss") {
+        let p = window.resolvePlayerStats();
+        let healAmount = Math.floor(p.maxHp * 0.2);
+        window.playerStats.currentHp = Math.min(
+          p.maxHp,
+          window.playerStats.currentHp + healAmount,
+        );
+        window.effects.push({
+          x: window.hero.x,
+          y: window.hero.y - 20,
+          text: "❤️ +" + window.formatNumber(healAmount),
+          color: "#2ecc71",
+          life: 60,
+        });
+        if (window.SoundManager) window.SoundManager.play("revive");
+      }
+
+      // Active Debuff: Volatile Sparks (On-death mitigatable explosions)
+      if (
+        window.playerStats.activeDungeonSigil?.debuffs.some(
+          (d) => d.id === "volatile_sparks",
+        )
+      ) {
+        let isBlocked = Math.random() < p.block;
+        let isParried = !isBlocked && Math.random() < p.parry;
+
+        if (isBlocked || isParried) {
+          window.effects.push({
+            x: window.hero.x,
+            y: window.hero.y - 15,
+            text: isBlocked ? "🛡️ BLOCKED EXPLOSION!" : "⚡ PARRIED EXPLOSION!",
+            color: isBlocked ? "#3498db" : "#9b59b6",
+            life: 40,
+          });
+          window.SoundManager.play(isBlocked ? "block" : "parry");
+        } else {
+          let dmg = Math.ceil(p.maxHp * 0.18);
+          window.playerStats.currentHp = Math.max(
+            1,
+            window.playerStats.currentHp - dmg,
+          );
+          window.effects.push({
+            x: window.hero.x,
+            y: window.hero.y,
+            text: "-" + dmg + " [EXPLOSION]",
+            color: "#e74c3c",
+            life: 40,
+          });
+          window.SoundManager.play("death");
+          if (window.playerStats.currentHp <= 1) {
+            window.playerStats.currentHp = 0;
+            window.deathAnimationTimer = window.deathMaxFrames;
+            window.mob = null;
+            window.updateUI();
+            return;
           }
-
-          // Active Debuff: Volatile Sparks (On-death mitigatable explosions)
-                if (window.playerStats.activeDungeonSigil?.debuffs.some((d) => d.id === "volatile_sparks")) {
-                  let isBlocked = Math.random() < p.block;
-                  let isParried = !isBlocked && Math.random() < p.parry;
-
-                  if (isBlocked || isParried) {
-                    window.effects.push({
-                      x: window.hero.x,
-                      y: window.hero.y - 15,
-                      text: isBlocked ? "🛡️ BLOCKED EXPLOSION!" : "⚡ PARRIED EXPLOSION!",
-                      color: isBlocked ? "#3498db" : "#9b59b6",
-                      life: 40,
-                    });
-                    window.SoundManager.play(isBlocked ? "block" : "parry");
-                  } else {
-                    let dmg = Math.ceil(p.maxHp * 0.18);
-                    window.playerStats.currentHp = Math.max(
-                      1,
-                      window.playerStats.currentHp - dmg,
-                    );
-                    window.effects.push({
-                      x: window.hero.x,
-                      y: window.hero.y,
-                      text: "-" + dmg + " [EXPLOSION]",
-                      color: "#e74c3c",
-                      life: 40,
-                    });
-                    window.SoundManager.play("death");
-                    if (window.playerStats.currentHp <= 1) {
-                      window.playerStats.currentHp = 0;
-                      window.deathAnimationTimer = window.deathMaxFrames;
-                      window.mob = null;
-                      window.updateUI();
-                      return;
-                    }
-                  }
-                }
+        }
+      }
 
       if (window.mob.type === "dungeon_boss") {
         let dType = window.playerStats.currentDungeon;
@@ -5754,12 +5761,7 @@ window.useItem = function (itemName) {
       `<span style='color:#f1c40f; font-weight:bold;'>[USE] Consumed ${itemName}! Speed boosted by +${Math.floor(finalDuration / 60)}s.</span>`,
     );
   } else if (itemName === "Cavern Sigil Sack") {
-    let maxBag = window.getMaxBagSlots();
-    if (window.inventory.SIGIL.length >= maxBag) {
-      window.pushHeaderToast("❌ Sigil pouch is full!", "#e74c3c");
-      return;
-    }
-
+    // Uncapped specialised pouch; not bound by bag space limits
     window.inventory.USE[itemName]--;
     if (window.inventory.USE[itemName] === 0) {
       delete window.inventory.USE[itemName];
@@ -6128,48 +6130,97 @@ window.enterCrucible = function () {
   window.openCrucibleDraftModal();
 };
 
-window.rollEquipmentDrop = function (isBossKill, silent = false, minStars = 0, isRareMob = false, isMilestone = false, dungeonStageScale = null) {
-    let p = window.resolvePlayerStats();
-    let maxBag = window.getMaxBagSlots();
+window.rollEquipmentDrop = function (
+  isBossKill,
+  silent = false,
+  minStars = 0,
+  isRareMob = false,
+  isMilestone = false,
+  dungeonStageScale = null,
+) {
+  let p = window.resolvePlayerStats();
+  let maxBag = window.getMaxBagSlots();
 
-    // Milestone drops are 100% guaranteed and bypass the standard probability/pity checks
-    if (!isMilestone) {
-        let baseDropRate = window.playerStats.isUberBoss ? 1.0 : isBossKill ? 0.01 : isRareMob ? 0.005 : 0.001;
-        let effectiveRate = window.PitySystem.getEffectiveRate(baseDropRate * p.drop * window.state.efficiency);
+  // Milestone drops are 100% guaranteed and bypass the standard probability/pity checks
+  if (!isMilestone) {
+    let baseDropRate = window.playerStats.isUberBoss
+      ? 1.0
+      : isBossKill
+        ? 0.01
+        : isRareMob
+          ? 0.005
+          : 0.001;
+    let effectiveRate = window.PitySystem.getEffectiveRate(
+      baseDropRate * p.drop * window.state.efficiency,
+    );
 
-        // Roll Logic
-        if (Math.random() >= effectiveRate) {
-            if (window.playerStats.isDungeonMode) {
-                window.PitySystem.increment();
-            }
-            return;
-        }
-
-        // SUCCESS: Reset Pity
-        window.PitySystem.reset();
+    // Roll Logic
+    if (Math.random() >= effectiveRate) {
+      if (window.playerStats.isDungeonMode) {
+        window.PitySystem.increment();
+      }
+      return;
     }
 
-    // Setup logic moved outside the if block or placed correctly
-    let allowArtifact = window.playerStats.isUberBoss && Math.random() < 0.05;
-    let types = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
-    let allowedTraits = null;
+    // SUCCESS: Reset Pity
+    window.PitySystem.reset();
+  }
 
-    if (window.playerStats.isUberBoss) {
-        let bossType = window.playerStats.currentUberBoss || "guardian";
-        if (bossType === "guardian") {
-            types = ["chest", "leggings", "overall"];
-            allowedTraits = ["vampirism", "defense", "parry_strike", "second_wind", "golem_stance", "titan_grip", "dodge_buff"];
-        } else if (bossType === "chronos") {
-            types = ["boots", "helmet"];
-            allowedTraits = ["gold_hoard", "move_speed", "idle_spd", "extend_buffs", "fairy_wealth", "alchemist_alembic", "philosopher_catalyst"];
-        } else if (bossType === "nexus") {
-            types = ["weapon", "subweapon"];
-            allowedTraits = ["frenzy", "magic_find", "echo_strike", "active_spd", "bag_space", "void_pull", "cauldron_eternity"];
-        }
+  // Setup logic moved outside the if block or placed correctly
+  let allowArtifact = window.playerStats.isUberBoss && Math.random() < 0.05;
+  let types = [
+    "weapon",
+    "subweapon",
+    "helmet",
+    "chest",
+    "leggings",
+    "overall",
+    "boots",
+  ];
+  let allowedTraits = null;
+
+  if (window.playerStats.isUberBoss) {
+    let bossType = window.playerStats.currentUberBoss || "guardian";
+    if (bossType === "guardian") {
+      types = ["chest", "leggings", "overall"];
+      allowedTraits = [
+        "vampirism",
+        "defense",
+        "parry_strike",
+        "second_wind",
+        "golem_stance",
+        "titan_grip",
+        "dodge_buff",
+      ];
+    } else if (bossType === "chronos") {
+      types = ["boots", "helmet"];
+      allowedTraits = [
+        "gold_hoard",
+        "move_speed",
+        "idle_spd",
+        "extend_buffs",
+        "fairy_wealth",
+        "alchemist_alembic",
+        "philosopher_catalyst",
+      ];
+    } else if (bossType === "nexus") {
+      types = ["weapon", "subweapon"];
+      allowedTraits = [
+        "frenzy",
+        "magic_find",
+        "echo_strike",
+        "active_spd",
+        "bag_space",
+        "void_pull",
+        "cauldron_eternity",
+      ];
     }
+  }
 
-    let chosenType = allowArtifact ? "artifact" : types[Math.floor(Math.random() * types.length)];
-    let statLinesCount = 0;
+  let chosenType = allowArtifact
+    ? "artifact"
+    : types[Math.floor(Math.random() * types.length)];
+  let statLinesCount = 0;
 
   let probs = window.calculateRarityProbabilities(p.qly, false);
 
@@ -6199,11 +6250,12 @@ window.rollEquipmentDrop = function (isBossKill, silent = false, minStars = 0, i
   else statLinesCount = 0;
 
   let activeStage = window.playerStats.stage;
-    if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
-      // Scales gear towards the highest floor reached (Peak) to prevent low-level gear spam
-      let peakFloor = window.playerStats.dungeonPeaks[window.playerStats.currentDungeon] || 1;
-      activeStage = peakFloor;
-    } else if (window.playerStats.isUberBoss) {
+  if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
+    // Scales gear towards the highest floor reached (Peak) to prevent low-level gear spam
+    let peakFloor =
+      window.playerStats.dungeonPeaks[window.playerStats.currentDungeon] || 1;
+    activeStage = peakFloor;
+  } else if (window.playerStats.isUberBoss) {
     let runPeak = Math.max(
       window.playerStats.stage,
       window.playerStats.maxStage || 1,

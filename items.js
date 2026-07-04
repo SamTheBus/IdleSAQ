@@ -4,18 +4,19 @@
    ========================================================================= */
 
 window.PitySystem = {
-    increment() {
-        window.playerStats.lootPityCounter = (window.playerStats.lootPityCounter || 0) + 1;
-    },
-    reset() {
-        window.playerStats.lootPityCounter = 0;
-    },
-    getEffectiveRate(baseRate) {
-        // Only apply in Dungeons to preserve Campaign balance
-        if (!window.playerStats.isDungeonMode) return baseRate;
-        let counter = window.playerStats.lootPityCounter || 0;
-        return baseRate * (1 + (counter * 0.05)); // Each failed kill adds +5% base rate
-    }
+  increment() {
+    window.playerStats.lootPityCounter =
+      (window.playerStats.lootPityCounter || 0) + 1;
+  },
+  reset() {
+    window.playerStats.lootPityCounter = 0;
+  },
+  getEffectiveRate(baseRate) {
+    // Only apply in Dungeons to preserve Campaign balance
+    if (!window.playerStats.isDungeonMode) return baseRate;
+    let counter = window.playerStats.lootPityCounter || 0;
+    return baseRate * (1 + counter * 0.05); // Each failed kill adds +5% base rate
+  },
 };
 
 window.forgeSelectedItem = null;
@@ -2853,11 +2854,11 @@ Object.assign(window.ForgeManager, {
     } else if (window.forgeMode === "tier") {
       if (window.forgeSelectedItem.statsRolled >= 5) return;
       let currentStars = window.forgeSelectedItem.statsRolled;
-                let targetStars = currentStars + 1;
-                let costGold = targetStars * 2500;
-                let shardReq = targetStars;
-                let scrapReqAmount = targetStars * 5;
-                let targetScrapName = window.getScrapYieldName(targetStars);
+      let targetStars = currentStars + 1;
+      let costGold = targetStars * 2500;
+      let shardReq = targetStars;
+      let scrapReqAmount = targetStars * 5;
+      let targetScrapName = window.getScrapYieldName(targetStars);
 
       let playerShards = window.inventory.ETC["Eridium Shard"] || 0;
       let playerScraps = window.inventory.ETC[targetScrapName] || 0;

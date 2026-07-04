@@ -119,8 +119,7 @@
   font-weight: bold;
 }
 
-html,
-body {
+html {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -133,16 +132,26 @@ body {
     BlinkMacSystemFont,
     Roboto,
     sans-serif;
-  overflow-x: clip; /* Replaced hidden with clip to allow position: sticky to function */
-  overflow-y: scroll !important; /* Locks scrollbar track on-screen to stabilize horizontal width */
-  font-size: 13.5px; /* Upscaled global root size */
+  overflow-x: visible;
+  overflow-y: scroll !important; /* Primary scrolling container */
+  font-size: 13.5px;
 }
 
 body {
+  margin: 0;
   padding: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 100%;
+  max-width: 100vw;
+  background-color: var(--bg-main);
+  color: var(--text-light);
+  font-family:
+    "Segoe UI",
+    -apple-system,
+    BlinkMacSystemFont,
+    Roboto,
+    sans-serif;
+  overflow-x: visible;
+  overflow-y: visible !important; /* Must be visible for position: sticky to resolve viewport bounds */
   -webkit-user-select: none;
   user-select: none;
   touch-action: manipulation;
@@ -158,6 +167,7 @@ body.scroll-lock {
 
 /* --- GAME PLATFORM FRAME --- */
 #game-container {
+  margin: 0 auto;
   width: 100%;
   max-width: 750px;
   background: var(--bg-card);
@@ -178,10 +188,10 @@ body.scroll-lock {
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
   touch-action: none;
-  /* Make sure these are enforced for sticky */
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 999 !important;
+  /* Base settings, adjusted dynamically by toggle options */
+  position: sticky;
+  top: 0;
+  z-index: 999;
 }
 
 /* --- TOP NAVIGATION BAR --- */
@@ -2921,7 +2931,8 @@ canvas {
 
 /* Fix Boutique buttons on mobile */
 @media (max-width: 580px) {
-  #btn-boutique-costumes, #btn-boutique-dyes {
+  #btn-boutique-costumes,
+  #btn-boutique-dyes {
     min-height: 44px !important; /* Ensure they are touch-friendly */
     display: flex !important;
     align-items: center !important;

@@ -127,57 +127,57 @@ window.GameState = {
     while (window.playerStats.xp >= window.playerStats.xpReq) {
       window.playerStats.xp -= window.playerStats.xpReq;
       window.playerStats.level++;
-            window.playerStats.sp += 6; // Award 6 Skill Points per level up
+      window.playerStats.sp += 6; // Award 6 Skill Points per level up
 
       // Exponential scaling thresholds prevent runaway level inflation
       window.playerStats.xpReq = Math.floor(
-        250 * Math.pow(1.2, window.playerStats.level - 1),
+        100 * Math.pow(1.2, window.playerStats.level - 1),
       );
       leveledUp = true;
 
       // Keep active UI Attribute Matrix draft allocations in sync
       if (window.draftAllocations !== null) {
-        window.draftSP++;
+        window.draftSP += 6; // Keep draft in sync with the 6 SP per level up
       }
     }
 
-window.triggerLevelUpEffect = function() {
-    let heroX = window.hero.x + 12;
-    let heroY = window.hero.y + 15;
-    // Explode 60 golden particles in a ring
-    for(let i = 0; i < 60; i++) {
+    window.triggerLevelUpEffect = function () {
+      let heroX = window.hero.x + 12;
+      let heroY = window.hero.y + 15;
+      // Explode 60 golden particles in a ring
+      for (let i = 0; i < 60; i++) {
         let angle = (i / 60) * Math.PI * 2;
         window.particles.push({
-            x: heroX,
-            y: heroY,
-            vx: Math.cos(angle) * 8,
-            vy: Math.sin(angle) * 8,
-            radius: window.randFloat(2, 5),
-            color: "#f1c40f",
-            alpha: 1,
-            life: 60,
-            gravity: 0.1
+          x: heroX,
+          y: heroY,
+          vx: Math.cos(angle) * 8,
+          vy: Math.sin(angle) * 8,
+          radius: window.randFloat(2, 5),
+          color: "#f1c40f",
+          alpha: 1,
+          life: 60,
+          gravity: 0.1,
         });
-    }
-};
+      }
+    };
 
     if (leveledUp) {
-          window.triggerLevelUpEffect();
+      window.triggerLevelUpEffect();
 
-                window.invalidatePlayerStats();
-          let p = window.resolvePlayerStats();
+      window.invalidatePlayerStats();
+      let p = window.resolvePlayerStats();
       window.playerStats.currentHp = p.maxHp; // Fully heal to new Max HP
 
       if (!isOffline) {
         if (window.SoundManager) window.SoundManager.play("revive");
         if (typeof window.pushLog === "function") {
           window.pushLog(
-            `<strong style="color:#d946ef;">🎉 LEVEL UP! Reached Level ${window.playerStats.level}! (+1 SP)</strong>`,
+            `<strong style="color:#d946ef;">🎉 LEVEL UP! Reached Level ${window.playerStats.level}! (+6 SP)</strong>`,
           );
         }
         if (typeof window.pushHeaderToast === "function") {
           window.pushHeaderToast(
-            `🎉 Level Up! Reached Level ${window.playerStats.level}!`,
+            `🎉 Level Up! Reached Level ${window.playerStats.level}! (+6 SP)`,
             "#d946ef",
           );
         }
@@ -1310,6 +1310,17 @@ window.resolvePlayerStats = function (useDraft = false) {
   )
     p.activeAttackSpeed = 15;
 
+  // Hyperbolic soft cap on the Drop Rate bonus to prevent infinite late-game inventory overflow
+  let rawDropBonus = p.drop - 1.0;
+  if (rawDropBonus > 1.0) {
+    let softCapLimit = 4.0; // Absolute maximum bonus is +400% (5.0x drop multiplier)
+    p.drop =
+      1.0 +
+      1.0 +
+      ((rawDropBonus - 1.0) * softCapLimit) /
+        (rawDropBonus - 1.0 + softCapLimit);
+  }
+
   if (!useDraft) {
     window.cachedPlayerStats = p;
     window.playerStatsDirty = false;
@@ -1509,8 +1520,8 @@ window.playerStats = {
   achievementTimestamps: {},
   claimedMailIds: [],
   unlockedSkins: ["default"],
-    equippedCostume: "knight",
-    unlockedCostumes: ["knight"],
+  equippedCostume: "knight",
+  unlockedCostumes: ["knight"],
   playerName: "Guest",
   clanId: null,
   clanName: null,
@@ -1724,22 +1735,22 @@ Object.assign(window.QuestSystem, {
 
     if (window.playerStats.prestigeCount > 0) {
       if (
-              !window.playerStats.lastWeeklyResetMondayStr ||
-              window.playerStats.lastWeeklyResetMondayStr !== lastMondayStr
-            ) {
-              this.generateWeeklyMissions();
-              window.playerStats.lastWeeklyResetMondayStr = lastMondayStr;
-              window.playerStats.lastWeeklyResetTime = now;
-              window.playerStats.weeklyRewardClaimed = false;
+        !window.playerStats.lastWeeklyResetMondayStr ||
+        window.playerStats.lastWeeklyResetMondayStr !== lastMondayStr
+      ) {
+        this.generateWeeklyMissions();
+        window.playerStats.lastWeeklyResetMondayStr = lastMondayStr;
+        window.playerStats.lastWeeklyResetTime = now;
+        window.playerStats.weeklyRewardClaimed = false;
 
-              // Add this line below:
-              window.playerStats.weeklyClanCrateClaimed = false;
+        // Add this line below:
+        window.playerStats.weeklyClanCrateClaimed = false;
 
-              if (typeof window.pushLog === "function")
-                window.pushLog(
-                  "<span style='color:#9b59b6; font-weight:bold;'>📅 [SYSTEM] Clan Weekly Board refreshed!</span>",
-                );
-            }
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            "<span style='color:#9b59b6; font-weight:bold;'>📅 [SYSTEM] Clan Weekly Board refreshed!</span>",
+          );
+      }
     } else {
       window.playerStats.weeklyMissions = [];
     }
@@ -1849,8 +1860,8 @@ window.deathMaxFrames = 90;
 window.lastUpdateTime = Date.now();
 window.sessionStartTime = Date.now();
 window.respawnIntervalId = null;
-window.recalculateXpRequirement = function() {
-    window.playerStats.xpReq = Math.floor(
-        100 * Math.pow(1.2, window.playerStats.level - 1)
-    );
+window.recalculateXpRequirement = function () {
+  window.playerStats.xpReq = Math.floor(
+    100 * Math.pow(1.2, window.playerStats.level - 1),
+  );
 };
