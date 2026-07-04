@@ -13028,7 +13028,7 @@ window.upgradeBestiaryCard = function (cardKey) {
   let cData = window.MONSTER_CARDS_DATA[cardKey];
   let tier = window.getCardTier(count);
 
-  let thresholds = window.CARD_UPGRADE_THRESHOLDS || [5, 15, 45, 100, 250, 600];
+  let thresholds = window.CARD_UPGRADE_THRESHOLDS || [1, 50, 150, 300, 750, 1800];
   let isLocked = tier < 0;
   let nextThreshold = thresholds[tier + 1] || 600;
 

@@ -6193,44 +6193,54 @@ window.useItem = function (itemName) {
                 ? `<div style="font-size:10px; color:#ff007f; font-family:monospace; margin-top:4px; font-weight:bold;">🔄 Recycled (+1 Astral Dust)</div>`
                 : `<span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">New Card Added!</span>`;
 
-              let cardIconHtml = window.getEquipIconHtml ? window.getEquipIconHtml({ type: cData.baseStat === "atk" ? "weapon" : cData.baseStat === "def" ? "shield" : "overall", statsRolled: p.isRecycled ? 5 : 3 }, 24) : "🃏";
+              let cardCanvasId = `booster-card-canvas-${idx}`;
 
-              return `
-                <div class="gacha-card" style="width:130px; height:180px; position:relative; perspective:1000px;"
-                     onmouseenter="window.showCardTooltip(event, '${p.key}')"
-                     onmouseleave="window.hideTooltip()"
-                     ontouchstart="window.showCardTooltip(event, '${p.key}')">
-                  <div class="gacha-card-inner" id="gacha-card-inner-${p.key}" style="
-                    width:100%; height:100%; transition:transform 0.6s; transform-style:preserve-3d; position:relative; cursor:pointer;
-                  " onclick="window.flipGachaCard('${p.key}')">
-                    <!-- Front Face (Mystical Card Back) -->
-                    <div class="gacha-card-back" style="
-                      width:100%; height:100%; position:absolute; backface-visibility:hidden; border-radius:8px; border:2.5px solid #a855f7; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(135deg, #120e25 0%, #29124a 100%);
-                    ">
-                      <div style="font-size:30px; margin-bottom:6px;">🃏</div>
-                      <div style="font-size:8px; letter-spacing:1px; font-weight:bold; color:#a855f7; text-transform:uppercase;">FLIP CARD</div>
-                    </div>
-                    <!-- Back Face (Card illustration Front) -->
-                    <div class="gacha-card-front" style="
-                      width:100%; height:100%; position:absolute; backface-visibility:hidden; border-radius:8px; border:2.5px solid ${cardColor}; display:flex; flex-direction:column; justify-content:space-between; padding:8px; background:#0c0812; transform:rotateY(180deg);
-                    ">
-                      <div style="display:flex; flex-direction:column; justify-content:space-between; height:100%; text-align:center;">
-                        <strong style="color:${cardColor}; font-size:11px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cData.name}</strong>
-                        <span style="font-size:8px; color:#888; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-top:1px;">Set: ${setDef.name.replace(" Set", "")}</span>
-                        <div style="text-align:center; margin:6px 0; display:flex; justify-content:center; align-items:center;">
-                          ${cardIconHtml}
-                        </div>
-                        <div style="border-top:1px dashed #333; margin-top:4px; padding-top:4px;">
-                          ${rowHtml}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              `;
-            }).join("");
+                          return `
+                            <div class="gacha-card" style="width:130px; height:180px; position:relative; perspective:1000px;"
+                                 onmouseenter="window.showCardTooltip(event, '${p.key}')"
+                                 onmouseleave="window.hideTooltip()"
+                                 ontouchstart="window.showCardTooltip(event, '${p.key}')">
+                              <div class="gacha-card-inner" id="gacha-card-inner-${p.key}" style="
+                                width:100%; height:100%; transition:transform 0.6s; transform-style:preserve-3d; position:relative; cursor:pointer;
+                              " onclick="window.flipGachaCard('${p.key}')">
+                                <!-- Front Face (Mystical Card Back) -->
+                                <div class="gacha-card-back" style="
+                                  width:100%; height:100%; position:absolute; backface-visibility:hidden; border-radius:8px; border:2.5px solid #a855f7; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(135deg, #120e25 0%, #29124a 100%);
+                                ">
+                                  <div style="font-size:30px; margin-bottom:6px;">🃏</div>
+                                  <div style="font-size:8px; letter-spacing:1px; font-weight:bold; color:#a855f7; text-transform:uppercase;">FLIP CARD</div>
+                                </div>
+                                <!-- Back Face (Card illustration Front) -->
+                                <div class="gacha-card-front" style="
+                                  width:100%; height:100%; position:absolute; backface-visibility:hidden; border-radius:8px; border:2.5px solid ${cardColor}; display:flex; flex-direction:column; justify-content:space-between; padding:8px; background:#0c0812; transform:rotateY(180deg);
+                                ">
+                                  <div style="display:flex; flex-direction:column; justify-content:space-between; height:100%; text-align:center;">
+                                    <strong style="color:${cardColor}; font-size:11px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cData.name}</strong>
+                                    <span style="font-size:8px; color:#888; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-top:1px;">Set: ${setDef.name.replace(" Set", "")}</span>
+                                    <div style="text-align:center; margin:6px 0; display:flex; justify-content:center; align-items:center;">
+                                      <div style="background: rgba(0,0,0,0.6); border: 1.5px solid ${cardColor}44; border-radius: 4px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: inset 0 0 6px #000;">
+                                        <canvas id="${cardCanvasId}" width="48" height="48" style="width:48px; height:48px; pointer-events:none; image-rendering:pixelated;"></canvas>
+                                      </div>
+                                    </div>
+                                    <div style="border-top:1px dashed #333; margin-top:4px; padding-top:4px;">
+                                      ${rowHtml}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          `;
+                        }).join("");
 
-            grid.innerHTML = gridHtml;
+                        grid.innerHTML = gridHtml;
+
+                        // Paint all the unboxed monster canvases instantly
+                        pulledCards.forEach((p, idx) => {
+                          let canvas = document.getElementById(`booster-card-canvas-${idx}`);
+                          if (canvas && window.drawMonsterOnCanvas) {
+                            window.drawMonsterOnCanvas(canvas, p.key, false); // Always drawn full-color inside reveal
+                          }
+                        });
 
             window.flipGachaCard = function (cKey) {
               let cardInner = document.getElementById(`gacha-card-inner-${cKey}`);

@@ -26,7 +26,7 @@ window.getUiIconSvg = function (key, size = 12) {
 // --- SYSTEM UTILS ---
 
 function getCardTier(count) {
-  let thresholds = window.CARD_UPGRADE_THRESHOLDS || [25, 50, 150, 300, 750, 1800];
+  let thresholds = window.CARD_UPGRADE_THRESHOLDS || [1, 25, 50, 150, 300, 750];
   let t = -1;
   for (let idx = 0; idx < thresholds.length; idx++) {
     if (count >= thresholds[idx]) t = idx;

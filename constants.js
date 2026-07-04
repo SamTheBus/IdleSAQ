@@ -3284,7 +3284,7 @@ window.TITLES_DATA = {
   },
 };
 
-window.CARD_UPGRADE_THRESHOLDS = [25, 50, 150, 300, 750, 1800];
+window.CARD_UPGRADE_THRESHOLDS = [1, 50, 150, 300, 750, 1800];
 
 window.MONSTER_CARDS_DATA = {
   // Whispering Woods (T0)
