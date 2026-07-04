@@ -617,53 +617,21 @@ window.SaveManager = {
         delete window.playerStats.nextMatKeyTime;
       }
 
-      let campaignPeak =
-        window.playerStats.lifetimePeakStage ||
-        window.playerStats.maxStage ||
-        1;
-      let targetCheck = Math.floor(campaignPeak * 0.5);
-
       if (window.playerStats.dungeonPeaks === undefined) {
-        window.playerStats.dungeonPeaks = {
-          equip: targetCheck,
-          gold: targetCheck,
-          mat: targetCheck,
-        };
-      } else {
-        window.playerStats.dungeonPeaks.equip = Math.max(
-          window.playerStats.dungeonPeaks.equip || 1,
-          targetCheck,
-        );
-        window.playerStats.dungeonPeaks.gold = Math.max(
-          window.playerStats.dungeonPeaks.gold || 1,
-          targetCheck,
-        );
-        window.playerStats.dungeonPeaks.mat = Math.max(
-          window.playerStats.dungeonPeaks.mat || 1,
-          targetCheck,
-        );
-      }
+              window.playerStats.dungeonPeaks = {
+                equip: 1,
+                gold: 1,
+                mat: 1,
+              };
+            }
 
-      if (window.playerStats.currentDungeonStage === undefined) {
-        window.playerStats.currentDungeonStage = {
-          equip: targetCheck,
-          gold: targetCheck,
-          mat: targetCheck,
-        };
-      } else {
-        window.playerStats.currentDungeonStage.equip = Math.max(
-          window.playerStats.currentDungeonStage.equip || 1,
-          targetCheck,
-        );
-        window.playerStats.currentDungeonStage.gold = Math.max(
-          window.playerStats.currentDungeonStage.gold || 1,
-          targetCheck,
-        );
-        window.playerStats.currentDungeonStage.mat = Math.max(
-          window.playerStats.currentDungeonStage.mat || 1,
-          targetCheck,
-        );
-      }
+            if (window.playerStats.currentDungeonStage === undefined) {
+              window.playerStats.currentDungeonStage = {
+                equip: 1,
+                gold: 1,
+                mat: 1,
+              };
+            }
 
       if (window.playerStats.astralShards === undefined)
         window.playerStats.astralShards = 0;
@@ -2361,11 +2329,11 @@ function update() {
         window.updateUI();
       }
     } else {
-                          if (window.playerStats.watchTick >= 1200) {
-                            window.playerStats.watchTick = 0;
-                            let extraFrames = Math.floor(p.int * 0.05);
-                            window.playerStats.watchActiveTimer = Math.min(480, 240 + extraFrames);
-                            window.pushLog(
+      if (window.playerStats.watchTick >= 1200) {
+        window.playerStats.watchTick = 0;
+        let extraFrames = Math.floor(p.int * 0.05);
+        window.playerStats.watchActiveTimer = Math.min(480, 240 + extraFrames);
+        window.pushLog(
           "<span style='color:#f1c40f; font-weight:bold;'>[CHRONOS WATCH] A Temporal Fracture opened! speeds dilated (+15% speed, -25% enemy speed).</span>",
         );
         window.updateUI();
@@ -2601,26 +2569,32 @@ function update() {
           });
         }
         window.spawnDamageEffect(bleedDmg, "bleed", false);
-                  window.damageHistory.push({ time: Date.now(), amount: bleedDmg });
+        window.damageHistory.push({ time: Date.now(), amount: bleedDmg });
 
-                  // Sanguine Reaver: Ticks lifesteal with the active bleed damage instead of granting instant flat burst heals!
-                  if (window.equippedSlots.weapon && window.equippedSlots.weapon.isUniqueSword) {
-                    let bleedHeal = Math.max(1, Math.ceil(bleedDmg * 0.15));
-                    window.playerStats.currentHp = Math.min(p.maxHp, window.playerStats.currentHp + bleedHeal);
-                    window.effects.push({
-                      type: "regen",
-                      x: window.hero.x - 20,
-                      y: window.hero.y - 12,
-                      amount: bleedHeal,
-                      color: "#e74c3c",
-                      life: 30,
-                    });
-                  }
+        // Sanguine Reaver: Ticks lifesteal with the active bleed damage instead of granting instant flat burst heals!
+        if (
+          window.equippedSlots.weapon &&
+          window.equippedSlots.weapon.isUniqueSword
+        ) {
+          let bleedHeal = Math.max(1, Math.ceil(bleedDmg * 0.15));
+          window.playerStats.currentHp = Math.min(
+            p.maxHp,
+            window.playerStats.currentHp + bleedHeal,
+          );
+          window.effects.push({
+            type: "regen",
+            x: window.hero.x - 20,
+            y: window.hero.y - 12,
+            amount: bleedHeal,
+            color: "#e74c3c",
+            life: 30,
+          });
+        }
 
-                  if (window.mob.hp <= 0) window.handleMobDeath();
-                }
-              }
-            }
+        if (window.mob.hp <= 0) window.handleMobDeath();
+      }
+    }
+  }
 
   if (window.playerStats.frenzyTimer > 0) window.playerStats.frenzyTimer--;
   if (window.playerStats.adrenalineTimer > 0)
@@ -2787,12 +2761,12 @@ function update() {
         window.playerStats.singularityState = "dormant";
         window.playerStats.singularityTimer = 1800;
         if (window.mob) {
-                  let finalStored = window.playerStats.singularityStoredDmg || 0;
-                  let shieldLvl = window.equippedSlots.weapon.stageLevel || 1;
-                  let mult = 1.4 + (shieldLvl * 0.015) + (p.str * 0.0001);
-                  if (mult > 2.5) mult = 2.5;
+          let finalStored = window.playerStats.singularityStoredDmg || 0;
+          let shieldLvl = window.equippedSlots.weapon.stageLevel || 1;
+          let mult = 1.4 + shieldLvl * 0.015 + p.str * 0.0001;
+          if (mult > 2.5) mult = 2.5;
 
-                  let finalDetonationDmg = Math.ceil(finalStored * mult);
+          let finalDetonationDmg = Math.ceil(finalStored * mult);
           let maxCap = Math.ceil(window.mob.maxHp * 1.5);
           if (finalDetonationDmg > maxCap) {
             finalDetonationDmg = maxCap;
@@ -2913,8 +2887,11 @@ function update() {
         proj.hitMobs.push(window.mob.id);
         let mobDef = window.mob.def || 0;
         if (proj.isMaelstromCrescent) {
-                                  let windDmg = Math.max(1, Math.ceil(p.atk * 0.5 * (1.0 + p.dex * 0.0015)));
-                                  windDmg = Math.max(1, Math.ceil(windDmg * (100 / (100 + mobDef))));
+          let windDmg = Math.max(
+            1,
+            Math.ceil(p.atk * 0.5 * (1.0 + p.dex * 0.0015)),
+          );
+          windDmg = Math.max(1, Math.ceil(windDmg * (100 / (100 + mobDef))));
 
           if (window.playerStats.singularityState === "storing") {
             window.playerStats.singularityStoredDmg += windDmg;
@@ -2955,10 +2932,13 @@ function update() {
             }
           }
         } else {
-                  let flameDmg = Math.max(1, Math.ceil(p.atk * 0.25 * (1.0 + p.int * 0.002)));
-                  flameDmg = Math.max(1, Math.ceil(flameDmg * (100 / (100 + mobDef))));
+          let flameDmg = Math.max(
+            1,
+            Math.ceil(p.atk * 0.25 * (1.0 + p.int * 0.002)),
+          );
+          flameDmg = Math.max(1, Math.ceil(flameDmg * (100 / (100 + mobDef))));
 
-                  if (window.playerStats.singularityState === "storing") {
+          if (window.playerStats.singularityState === "storing") {
             window.playerStats.singularityStoredDmg += flameDmg;
             window.effects.push({
               x: window.mob.x + window.mob.w / 2,
@@ -3207,25 +3187,27 @@ function update() {
           )
             window.playerStats.daggerParryStagger = true;
           if (window.checkArtifactTrait("dodge_buff")) {
-                      let ext = window.checkArtifactTrait("extend_buffs") ? (180 + window.getArtifactTemperLevel("extend_buffs") * 30) : 0;
-                      window.playerStats.adrenalineTimer = 360 + ext; // 6s base + extension
-                    }
+            let ext = window.checkArtifactTrait("extend_buffs")
+              ? 180 + window.getArtifactTemperLevel("extend_buffs") * 30
+              : 0;
+            window.playerStats.adrenalineTimer = 360 + ext; // 6s base + extension
+          }
 
           if (window.checkArtifactTrait("parry_strike")) {
-                      let T = window.getArtifactTemperLevel("parry_strike");
-                      let mult = 0.5 + (T * 0.15); // 50% base + 15% per level (max 140%)
-                      let counterDmg = p.atk * mult;
-                      if (window.playerStats.adrenalineTimer > 0) counterDmg *= 2;
-                      counterDmg = Math.ceil(counterDmg);
+            let T = window.getArtifactTemperLevel("parry_strike");
+            let mult = 0.5 + T * 0.15; // 50% base + 15% per level (max 140%)
+            let counterDmg = p.atk * mult;
+            if (window.playerStats.adrenalineTimer > 0) counterDmg *= 2;
+            counterDmg = Math.ceil(counterDmg);
 
-                      window.mob.hp -= counterDmg;
-                      window.spawnDamageEffect(counterDmg, "counter", false);
-                      window.damageHistory.push({ time: Date.now(), amount: counterDmg });
-                      if (window.mob.hp <= 0) {
-                        window.handleMobDeath();
-                        return;
-                      }
-                    }
+            window.mob.hp -= counterDmg;
+            window.spawnDamageEffect(counterDmg, "counter", false);
+            window.damageHistory.push({ time: Date.now(), amount: counterDmg });
+            if (window.mob.hp <= 0) {
+              window.handleMobDeath();
+              return;
+            }
+          }
         } else if (isBlocked) {
           window.effects.push({
             type: "block",
@@ -3372,12 +3354,12 @@ function update() {
             window.mob.hp > 0
           ) {
             if (window.playerStats.tempestCooldown === undefined)
-                                  window.playerStats.tempestCooldown = 0;
-                                if (window.playerStats.tempestCooldown <= 0) {
-                                  window.playerStats.tempestCooldown = 60;
-                                  if (Math.random() < 0.15) {
-                                    let boltDmg = Math.ceil(p.atk * 1.5 * (1.0 + p.int * 0.002));
-                                    if (window.playerStats.singularityState === "storing") {
+              window.playerStats.tempestCooldown = 0;
+            if (window.playerStats.tempestCooldown <= 0) {
+              window.playerStats.tempestCooldown = 60;
+              if (Math.random() < 0.15) {
+                let boltDmg = Math.ceil(p.atk * 1.5 * (1.0 + p.int * 0.002));
+                if (window.playerStats.singularityState === "storing") {
                   window.playerStats.singularityStoredDmg += boltDmg;
                   window.effects.push({
                     x: window.mob.x + window.mob.w / 2,
@@ -3437,21 +3419,21 @@ function update() {
           }
           if (window.playerStats.currentHp <= 0) {
             if (
-                        window.checkArtifactTrait("second_wind") &&
-                        !window.playerStats.usedSecondWind
-                      ) {
-                        window.playerStats.usedSecondWind = true;
-                        let T = window.getArtifactTemperLevel("second_wind");
-                        let healPct = 0.40 + (T * 0.05); // 40% base + 5% per level (max 70%)
-                        window.playerStats.currentHp = Math.floor(p.maxHp * healPct);
-                        window.playerStats.ankhTriggeredThisBattle = true;
-                        window.effects.push({
-                          x: window.hero.x,
-                          y: window.hero.y - 20,
-                          text: "🔥 SECOND WIND!",
-                          color: "#e67e22",
-                          life: 80,
-                        });
+              window.checkArtifactTrait("second_wind") &&
+              !window.playerStats.usedSecondWind
+            ) {
+              window.playerStats.usedSecondWind = true;
+              let T = window.getArtifactTemperLevel("second_wind");
+              let healPct = 0.4 + T * 0.05; // 40% base + 5% per level (max 70%)
+              window.playerStats.currentHp = Math.floor(p.maxHp * healPct);
+              window.playerStats.ankhTriggeredThisBattle = true;
+              window.effects.push({
+                x: window.hero.x,
+                y: window.hero.y - 20,
+                text: "🔥 SECOND WIND!",
+                color: "#e67e22",
+                life: 80,
+              });
             } else {
               if (window.playerStats.isPrestigeBossMode)
                 window.playerStats.killedBy = "Hooktail (Prestige Boss)";
@@ -3828,16 +3810,16 @@ window.CombatEngine = {
           );
 
           window.mob.hp -= ruptureDmg;
-                            window.mob.flashTimer = 8;
+          window.mob.flashTimer = 8;
 
-                            window.effects.push({
-                              x: window.mob.x,
-                              y: window.mob.y - 20,
-                              text: "💥 RUPTURE!",
-                              color: "#e74c3c",
-                              life: 65,
-                            });
-                            window.spawnDamageEffect(ruptureDmg, "bleed", isRuptureCrit);
+          window.effects.push({
+            x: window.mob.x,
+            y: window.mob.y - 20,
+            text: "💥 RUPTURE!",
+            color: "#e74c3c",
+            life: 65,
+          });
+          window.spawnDamageEffect(ruptureDmg, "bleed", isRuptureCrit);
           window.damageHistory.push({ time: Date.now(), amount: ruptureDmg });
 
           // Trigger custom blood explosion physics particles
@@ -4063,34 +4045,34 @@ window.CombatEngine = {
       }
 
       if (window.checkArtifactTrait("echo_strike") && Math.random() < 0.3) {
-              let T = window.getArtifactTemperLevel("echo_strike");
-              let mult = 0.25 + (T * 0.05); // 25% base + 5% per level (max 55%)
-              let echoDmg = Math.max(1, Math.ceil(finalDamage * mult));
-              window.mob.hp -= echoDmg;
-              window.spawnDamageEffect(echoDmg, "echo", false);
-              window.damageHistory.push({ time: Date.now(), amount: echoDmg });
-            }
+        let T = window.getArtifactTemperLevel("echo_strike");
+        let mult = 0.25 + T * 0.05; // 25% base + 5% per level (max 55%)
+        let echoDmg = Math.max(1, Math.ceil(finalDamage * mult));
+        window.mob.hp -= echoDmg;
+        window.spawnDamageEffect(echoDmg, "echo", false);
+        window.damageHistory.push({ time: Date.now(), amount: echoDmg });
+      }
       if (window.checkArtifactTrait("vampirism")) {
-              let now = Date.now();
-              // Purge healing siphons older than 1,000ms
-              window.playerStats.recentHeals = (
-                window.playerStats.recentHeals || []
-              ).filter((h) => now - h.time < 1000);
-              let totalRecentHealed = window.playerStats.recentHeals.reduce(
-                (sum, h) => sum + h.amount,
-                0,
-              );
+        let now = Date.now();
+        // Purge healing siphons older than 1,000ms
+        window.playerStats.recentHeals = (
+          window.playerStats.recentHeals || []
+        ).filter((h) => now - h.time < 1000);
+        let totalRecentHealed = window.playerStats.recentHeals.reduce(
+          (sum, h) => sum + h.amount,
+          0,
+        );
 
-              let T = window.getArtifactTemperLevel("vampirism");
-              let healPct = 0.005 + (T * 0.001); // 0.5% base + 0.1% per level (max 1.1%)
-              let capPct = 0.03 + (T * 0.005); // 3% base + 0.5% Max HP/sec per level (max 6%)
+        let T = window.getArtifactTemperLevel("vampirism");
+        let healPct = 0.005 + T * 0.001; // 0.5% base + 0.1% per level (max 1.1%)
+        let capPct = 0.03 + T * 0.005; // 3% base + 0.5% Max HP/sec per level (max 6%)
 
-              // Restrict healing from Vampirism to a global ceiling of Max HP per second
-              let maxHealSec = p.maxHp * capPct;
-              let allowedHeal = Math.max(0, maxHealSec - totalRecentHealed);
+        // Restrict healing from Vampirism to a global ceiling of Max HP per second
+        let maxHealSec = p.maxHp * capPct;
+        let allowedHeal = Math.max(0, maxHealSec - totalRecentHealed);
 
-              let rawHeal = Math.max(1, Math.floor(finalDamage * healPct));
-              let heal = Math.min(allowedHeal, rawHeal);
+        let rawHeal = Math.max(1, Math.floor(finalDamage * healPct));
+        let heal = Math.min(allowedHeal, rawHeal);
 
         if (heal > 0) {
           window.playerStats.currentHp = Math.min(
@@ -4134,49 +4116,54 @@ window.CombatEngine = {
           window.playerStats.hasTriggeredWeekendWarrior = true;
         }
 
-      // Universal Overkill Splash / Stage-Skip Mechanic
-    if (
-      window.mob &&
-      window.mob.hp < 0 &&
-      !window.playerStats.isDungeonMode &&
-      !window.playerStats.isCrucibleMode &&
-      !window.playerStats.isBossMode &&
-      !window.playerStats.isFarmingLoop
-    ) {
-      let overkillRatio = Math.abs(window.mob.hp) / window.mob.maxHp;
-      if (overkillRatio >= 2.0) {
-        // Overkilled by at least 200% of mob Max HP
-        let extraKills = Math.min(3, Math.floor(overkillRatio)); // Cap at 3 extra progress kills
-        window.playerStats.killCount = Math.min(
-          window.playerStats.targetsRequired,
-          window.playerStats.killCount + extraKills,
-        );
-        window.effects.push({
-          x: window.hero.x + 12,
-          y: window.hero.y - 25,
-          text: `💥 OVERKILL SPLASH (+${extraKills})`,
-          color: "#2ecc71",
-          life: 55,
-        });
-        if (
-          window.playerStats.killCount >= window.playerStats.targetsRequired
-        ) {
-          window.playerStats.isBossMode = true;
+      // Universal Overkill Splash / Stage-Skip Mechanic (Now available in Dungeons!)
+      if (
+        window.mob &&
+        window.mob.hp < 0 &&
+        !window.playerStats.isCrucibleMode &&
+        !window.playerStats.isBossMode &&
+        !window.playerStats.isFarmingLoop
+      ) {
+        let overkillRatio = Math.abs(window.mob.hp) / window.mob.maxHp;
+        if (overkillRatio >= 2.0) {
+          // Overkilled by at least 200% of mob Max HP
+          let extraKills = Math.min(3, Math.floor(overkillRatio)); // Cap at 3 extra progress kills
+          window.playerStats.killCount = Math.min(
+            window.playerStats.targetsRequired,
+            window.playerStats.killCount + extraKills,
+          );
+          window.effects.push({
+            x: window.hero.x + 12,
+            y: window.hero.y - 25,
+            text: `💥 OVERKILL SPLASH (+${extraKills})`,
+            color: "#2ecc71",
+            life: 55,
+          });
+          if (
+            window.playerStats.killCount >=
+            window.playerStats.targetsRequired
+          ) {
+            window.playerStats.isBossMode = true;
+          }
         }
       }
-    }
 
-    let isBoss =
-      window.mob.type === "boss" ||
-      window.mob.type === "dungeon_boss" ||
-      window.mob.type === "dungeon_miniboss" ||
-      window.mob.type === "rift_guardian" ||
-      window.mob.type === "prestige_boss" ||
-      window.mob.type === "aegis_goliath" ||
-      window.mob.type === "chronos_arbitrator" ||
-      window.mob.type === "nexus_overseer";
+      let isBoss =
+              window.mob.type === "boss" ||
+              window.mob.type === "dungeon_boss" ||
+              window.mob.type === "dungeon_miniboss" ||
+              window.mob.type === "rift_guardian" ||
+              window.mob.type === "prestige_boss" ||
+              window.mob.type === "aegis_goliath" ||
+              window.mob.type === "chronos_arbitrator" ||
+              window.mob.type === "nexus_overseer";
 
-    // UNIQUE: Warp-Core Greaves "Time Dilation" Boss Kill Haste trigger
+            // Phoenix Rising: Slay any boss while sitting at or below 1% of Max HP!
+            if (isBoss && window.playerStats.currentHp > 0 && (window.playerStats.currentHp / p.maxHp) <= 0.01) {
+              window.playerStats.hasTriggeredPhoenixRising = true;
+            }
+
+            // UNIQUE: Warp-Core Greaves "Time Dilation" Boss Kill Haste trigger
     if (
       isBoss &&
       window.equippedSlots.boots &&
@@ -4270,18 +4257,18 @@ window.CombatEngine = {
     }
 
     // Void Core Siphon-Heal Check on Rare Defeat
-        if (
-          window.mob &&
-          window.mob.isRare &&
-          window.checkArtifactTrait("void_pull")
-        ) {
-          let T = window.getArtifactTemperLevel("void_pull");
-          let healPct = 0.20 + (T * 0.02); // 20% base + 2% per level (max 32%)
-          let healAmount = Math.ceil(p.maxHp * healPct);
-          window.playerStats.currentHp = Math.min(
-            p.maxHp,
-            window.playerStats.currentHp + healAmount,
-          );
+    if (
+      window.mob &&
+      window.mob.isRare &&
+      window.checkArtifactTrait("void_pull")
+    ) {
+      let T = window.getArtifactTemperLevel("void_pull");
+      let healPct = 0.2 + T * 0.02; // 20% base + 2% per level (max 32%)
+      let healAmount = Math.ceil(p.maxHp * healPct);
+      window.playerStats.currentHp = Math.min(
+        p.maxHp,
+        window.playerStats.currentHp + healAmount,
+      );
       window.effects.push({
         x: window.mob.x,
         y: window.mob.y - 15,
@@ -4827,22 +4814,24 @@ window.CombatEngine = {
     }
 
     if (window.checkArtifactTrait("frenzy")) {
-          if (window.playerStats.frenzyTimer <= 0) {
-            window.playerStats.frenzyKillCount++;
-            if (window.playerStats.frenzyKillCount >= 8) {
-              let T_fz = window.getArtifactTemperLevel("frenzy");
-              let baseDuration = 300; // 5 seconds in frames
-              let ext = window.checkArtifactTrait("extend_buffs") ? (180 + window.getArtifactTemperLevel("extend_buffs") * 30) : 0;
+      if (window.playerStats.frenzyTimer <= 0) {
+        window.playerStats.frenzyKillCount++;
+        if (window.playerStats.frenzyKillCount >= 8) {
+          let T_fz = window.getArtifactTemperLevel("frenzy");
+          let baseDuration = 300; // 5 seconds in frames
+          let ext = window.checkArtifactTrait("extend_buffs")
+            ? 180 + window.getArtifactTemperLevel("extend_buffs") * 30
+            : 0;
 
-              window.playerStats.frenzyTimer = baseDuration + (T_fz * 30) + ext; // +0.5s per level
-              window.playerStats.frenzyKillCount = 0;
-              if (typeof window.pushLog === "function")
-                window.pushLog(
-                  `<strong style='color:#e67e22;'>[BERSERKER RAGE]</strong> 100% Critical Frenzy Unleashed!`,
-                );
-            }
-          }
+          window.playerStats.frenzyTimer = baseDuration + T_fz * 30 + ext; // +0.5s per level
+          window.playerStats.frenzyKillCount = 0;
+          if (typeof window.pushLog === "function")
+            window.pushLog(
+              `<strong style='color:#e67e22;'>[BERSERKER RAGE]</strong> 100% Critical Frenzy Unleashed!`,
+            );
         }
+      }
+    }
 
     if (window.playerStats.isDungeonMode) {
       // VAMPIRIC CHECKPOINT: Heal 20% Max HP on Boss kill
@@ -5768,16 +5757,16 @@ window.useItem = function (itemName) {
   );
 
   function consumeUseItem(name) {
-      let spareChance = 0.12;
-      if (window.checkArtifactTrait("philosopher_catalyst")) {
-        let T = window.getArtifactTemperLevel("philosopher_catalyst");
-        spareChance = 0.12 + (T * 0.03); // 12% base + 3% per level (max 30%)
-      }
-      if (
-        window.checkArtifactTrait("philosopher_catalyst") &&
-        Math.random() < spareChance
-      ) {
-        window.pushHeaderToast("✨ Elixir Sparing Effect Triggered!", "#2ecc71");
+    let spareChance = 0.12;
+    if (window.checkArtifactTrait("philosopher_catalyst")) {
+      let T = window.getArtifactTemperLevel("philosopher_catalyst");
+      spareChance = 0.12 + T * 0.03; // 12% base + 3% per level (max 30%)
+    }
+    if (
+      window.checkArtifactTrait("philosopher_catalyst") &&
+      Math.random() < spareChance
+    ) {
+      window.pushHeaderToast("✨ Elixir Sparing Effect Triggered!", "#2ecc71");
       window.pushLog(
         `<strong style='color:#9b59b6;'>[PHILOSOPHER'S CATALYST]</strong> Sparing check passed! Your ${name} was not consumed.`,
       );
@@ -5910,24 +5899,24 @@ window.useItem = function (itemName) {
       `<span style='color:#3498db; font-weight:bold;'>[USE] Consumed ${itemName}! Defense boosted by +${Math.floor(finalDuration / 60)}s.</span>`,
     );
   } else if (itemName.includes("Haste Elixir")) {
-        window.playerStats.hastePotionTimer =
-          (window.playerStats.hastePotionTimer || 0) + finalDuration;
-        window.playerStats.hastePotionStrength = itemName.includes("Supernal")
-          ? 3
-          : itemName.includes("Greater")
-            ? 2
-            : 1;
-        consumeUseItem(itemName);
-        window.pushLog(
-          `<span style='color:#f1c40f; font-weight:bold;'>[USE] Consumed ${itemName}! Speed boosted by +${Math.floor(finalDuration / 60)}s.</span>`,
-        );
+    window.playerStats.hastePotionTimer =
+      (window.playerStats.hastePotionTimer || 0) + finalDuration;
+    window.playerStats.hastePotionStrength = itemName.includes("Supernal")
+      ? 3
+      : itemName.includes("Greater")
+        ? 2
+        : 1;
+    consumeUseItem(itemName);
+    window.pushLog(
+      `<span style='color:#f1c40f; font-weight:bold;'>[USE] Consumed ${itemName}! Speed boosted by +${Math.floor(finalDuration / 60)}s.</span>`,
+    );
 
-        // Trigger Coffee Run achievement if consumed between 7:00 AM and 9:00 AM local time
-        let hr = new Date().getHours();
-        if (hr >= 7 && hr < 9) {
-          window.playerStats.hasTriggeredCoffeeRun = true;
-        }
-      } else if (itemName === "Cavern Sigil Sack") {
+    // Trigger Coffee Run achievement if consumed between 7:00 AM and 9:00 AM local time
+    let hr = new Date().getHours();
+    if (hr >= 7 && hr < 9) {
+      window.playerStats.hasTriggeredCoffeeRun = true;
+    }
+  } else if (itemName === "Cavern Sigil Sack") {
     // Uncapped specialised pouch; not bound by bag space limits
     window.inventory.USE[itemName]--;
     if (window.inventory.USE[itemName] === 0) {
@@ -6079,23 +6068,23 @@ window.triggerFairyLoot = function (targetFairy) {
   }
 
   if (window.checkArtifactTrait("fairy_wealth")) {
-      let T = window.getArtifactTemperLevel("fairy_wealth");
-      let lSoulChance = 0.08 + (T * 0.01); // 8% base + 1% per level (max 14%)
-      if (Math.random() < lSoulChance) {
-        window.addEtcDrop("Luminous Soul", 1);
-        window.effects.push({
-          x: spawnX,
-          y: spawnY - 10,
-          text: `💖 +1 Luminous Soul!`,
-          color: "#ffb6c1",
-          life: 80,
-        });
-        window.pushLog(
-          `<strong style='color:#ffb6c1;'>[FAIRY QUEEN'S CROWN]</strong> Extracted 1 Luminous Soul from the fairy magic!`,
-        );
-        return;
-      }
+    let T = window.getArtifactTemperLevel("fairy_wealth");
+    let lSoulChance = 0.08 + T * 0.01; // 8% base + 1% per level (max 14%)
+    if (Math.random() < lSoulChance) {
+      window.addEtcDrop("Luminous Soul", 1);
+      window.effects.push({
+        x: spawnX,
+        y: spawnY - 10,
+        text: `💖 +1 Luminous Soul!`,
+        color: "#ffb6c1",
+        life: 80,
+      });
+      window.pushLog(
+        `<strong style='color:#ffb6c1;'>[FAIRY QUEEN'S CROWN]</strong> Extracted 1 Luminous Soul from the fairy magic!`,
+      );
+      return;
     }
+  }
 
   if (Math.random() < 0.2) {
     let goldYield = Math.floor((100 + window.playerStats.stage * 35) * p.gold);
@@ -6233,16 +6222,20 @@ window.enterDungeon = function (type) {
     mat: "Material Cavern",
   };
   window.playerStats.dungeonPeaks = window.playerStats.dungeonPeaks || {
-    equip: 1,
-    gold: 1,
-    mat: 1,
-  };
-  window.playerStats.currentDungeonStage = window.playerStats
-    .currentDungeonStage || { equip: 1, gold: 1, mat: 1 };
-  let checkpoint = Math.max(
-    1,
-    Math.floor((window.playerStats.dungeonPeaks[type] || 1) * 0.9),
-  );
+      equip: 1,
+      gold: 1,
+      mat: 1,
+    };
+    window.playerStats.currentDungeonStage = window.playerStats
+      .currentDungeonStage || { equip: 1, gold: 1, mat: 1 };
+
+    let peak = window.playerStats.dungeonPeaks[type] || 1;
+    let campaignStage = window.playerStats.stage || 1;
+    let checkpoint = Math.max(
+      1,
+      Math.floor(peak * 0.8),
+      Math.floor(campaignStage * 0.7),
+    );
 
   window.showCustomConfirm(
     "Enter Infinite Dungeon",

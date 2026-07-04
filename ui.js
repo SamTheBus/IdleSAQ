@@ -976,17 +976,18 @@ window.updateUI = function () {
     window.setText("tab-dp-gold", goPeak);
     window.setText("tab-dp-mat", maPeak);
 
-    let eqCheck = Math.max(1, Math.floor(eqPeak * 0.9));
-    let goCheck = Math.max(1, Math.floor(goPeak * 0.9));
-    let maCheck = Math.max(1, Math.floor(maPeak * 0.9));
+    let campaignStage = window.playerStats.stage || 1;
+                let eqCheck = Math.max(1, Math.floor(eqPeak * 0.8), Math.floor(campaignStage * 0.7));
+                let goCheck = Math.max(1, Math.floor(goPeak * 0.8), Math.floor(campaignStage * 0.7));
+                let maCheck = Math.max(1, Math.floor(maPeak * 0.8), Math.floor(campaignStage * 0.7));
 
-    window.setText("dc-equip", eqCheck);
-    window.setText("dc-gold", goCheck);
-    window.setText("dc-mat", maCheck);
+                window.setText("dc-equip", eqCheck);
+                window.setText("dc-gold", goCheck);
+                window.setText("dc-mat", maCheck);
 
-    window.setText("tab-dc-equip", eqCheck);
-    window.setText("tab-dc-gold", goCheck);
-    window.setText("tab-dc-mat", maCheck);
+                window.setText("tab-dc-equip", eqCheck);
+                window.setText("tab-dc-gold", goCheck);
+                window.setText("tab-dc-mat", maCheck);
   }
 
   // Update Crucible Peak & Checkpoint in Activities Menu
@@ -3420,13 +3421,16 @@ window.buyPrestigeUpgrade = function (type) {
         p.maxHp,
       );
 
-      window.updateUI();
-      window.renderPrestigeTab();
-      window.renderInventory();
-      window.saveGame();
-    },
-  );
-};
+      if (typeof window.checkAchievements === "function") {
+              window.checkAchievements();
+            }
+            window.updateUI();
+            window.renderPrestigeTab();
+            window.renderInventory();
+            window.saveGame();
+          },
+        );
+      };
 
 window.challengeHooktail = function () {
   if (window.playerStats.level < 25) {
@@ -6773,11 +6777,17 @@ window.executeSwapItem = function (slotKey, itemId) {
 
       // Prevent equipping duplicate artifacts via manual slot selection
       let isAlreadyEquipped = ["art1", "art2", "art3"].some(
-        (slot) => slot !== slotKey && window.equippedSlots[slot] && window.equippedSlots[slot].trait === item.trait
+        (slot) =>
+          slot !== slotKey &&
+          window.equippedSlots[slot] &&
+          window.equippedSlots[slot].trait === item.trait,
       );
       if (isAlreadyEquipped) {
         if (typeof window.pushHeaderToast === "function") {
-          window.pushHeaderToast("❌ You cannot equip duplicate artifacts!", "#e74c3c");
+          window.pushHeaderToast(
+            "❌ You cannot equip duplicate artifacts!",
+            "#e74c3c",
+          );
         }
         return;
       }
@@ -7972,10 +7982,13 @@ window.buyMissionUpgrade = function (type) {
   );
 
   window.SoundManager.play("spell");
-  window.updateUI();
-  window.renderMissionsWindow();
-  window.saveGame();
-};
+    if (typeof window.checkAchievements === "function") {
+      window.checkAchievements();
+    }
+    window.updateUI();
+    window.renderMissionsWindow();
+    window.saveGame();
+  };
 
 window.buyMissionItem = function (itemName, cost) {
   let p = window.playerStats;
@@ -12198,7 +12211,12 @@ window.renderCavernsPrepUI = function () {
   let dColors = { equip: "#3498db", gold: "#f1c40f", mat: "#2ecc71" };
 
   let peak = p.dungeonPeaks[mode] || 1;
-  let checkpoint = Math.max(1, Math.floor(peak * 0.9));
+    let campaignStage = p.stage || 1;
+    let checkpoint = Math.max(
+      1,
+      Math.floor(peak * 0.8),
+      Math.floor(campaignStage * 0.7),
+    );
 
   let modeDescs = {
     equip:
@@ -12416,12 +12434,15 @@ window.executeCavernsDescent = function () {
     window.playerStats.activeDungeonSigil = null;
   }
 
-  let checkpoint = Math.max(
-    1,
-    Math.floor((window.playerStats.dungeonPeaks[mode] || 1) * 0.9),
-  );
+  let peak = window.playerStats.dungeonPeaks[mode] || 1;
+    let campaignStage = window.playerStats.stage || 1;
+    let checkpoint = Math.max(
+      1,
+      Math.floor(peak * 0.8),
+      Math.floor(campaignStage * 0.7),
+    );
 
-  window.playerStats.isDungeonMode = true;
+    window.playerStats.isDungeonMode = true;
   window.playerStats.isCrucibleMode = false;
   window.playerStats.currentDungeon = mode;
   window.playerStats.currentDungeonStage[mode] = checkpoint;

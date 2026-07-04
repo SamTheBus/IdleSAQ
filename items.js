@@ -1092,35 +1092,35 @@ Object.assign(window.ItemFactory, {
     }
 
     item.atk = (item.baseAtk || 0) + item.bonusAtk;
-        item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
-        item.def = (item.baseDef || 0) + item.bonusDef;
-        item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
-        item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
-        item.critDamage = item.bonusCritDamage;
-        item.block = (item.baseBlock || 0) + item.bonusBlock;
-        item.parry = (item.baseParry || 0) + item.bonusParry;
-        item.str = (item.baseStr || 0) + item.bonusStr;
-        item.dex = (item.baseDex || 0) + item.bonusDex;
-        item.int = (item.baseInt || 0) + item.bonusInt;
-        item.activeAttackSpeed = item.bonusActiveSpeed;
-        item.idleAttackSpeed = item.bonusIdleSpeed;
+    item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
+    item.def = (item.baseDef || 0) + item.bonusDef;
+    item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
+    item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
+    item.critDamage = item.bonusCritDamage;
+    item.block = (item.baseBlock || 0) + item.bonusBlock;
+    item.parry = (item.baseParry || 0) + item.bonusParry;
+    item.str = (item.baseStr || 0) + item.bonusStr;
+    item.dex = (item.baseDex || 0) + item.bonusDex;
+    item.int = (item.baseInt || 0) + item.bonusInt;
+    item.activeAttackSpeed = item.bonusActiveSpeed;
+    item.idleAttackSpeed = item.bonusIdleSpeed;
 
-        // Initialize pristine unmutated baseline values for exact scaling
-        item.rawBaseAtk = item.baseAtk || 0;
-        item.rawBaseDef = item.baseDef || 0;
-        item.rawBaseMaxHp = item.baseMaxHp || 0;
-        item.rawBaseInt = item.baseInt || 0;
-        item.rawBaseMoveSpeed = item.baseMoveSpeed || 0;
-        item.rawBaseBlock = item.baseBlock || 0;
-        item.rawBaseParry = item.baseParry || 0;
+    // Initialize pristine unmutated baseline values for exact scaling
+    item.rawBaseAtk = item.baseAtk || 0;
+    item.rawBaseDef = item.baseDef || 0;
+    item.rawBaseMaxHp = item.baseMaxHp || 0;
+    item.rawBaseInt = item.baseInt || 0;
+    item.rawBaseMoveSpeed = item.baseMoveSpeed || 0;
+    item.rawBaseBlock = item.baseBlock || 0;
+    item.rawBaseParry = item.baseParry || 0;
 
-        item.baseGoldMulti = item.goldMulti || 0;
-        item.baseDropRate = item.dropRate || 0;
-        item.baseQuality = item.quality || 0;
-        item.baseRareSpawn = item.rareSpawn || 0;
-        item.baseFairySpawn = item.fairySpawn || 0;
+    item.baseGoldMulti = item.goldMulti || 0;
+    item.baseDropRate = item.dropRate || 0;
+    item.baseQuality = item.quality || 0;
+    item.baseRareSpawn = item.rareSpawn || 0;
+    item.baseFairySpawn = item.fairySpawn || 0;
 
-        if (chosenType !== "artifact") {
+    if (chosenType !== "artifact") {
       let isDungeon = window.playerStats.isDungeonMode;
       let isBoss =
         window.playerStats.isBossMode || window.playerStats.isUberBoss;
@@ -1884,11 +1884,16 @@ window.recalculateItemStats = function (item) {
   }
 
   if (item.type === "artifact") {
-    if (item.baseGoldMulti === undefined) item.baseGoldMulti = Math.max(0, item.goldMulti - tempers * 0.05);
-    if (item.baseDropRate === undefined) item.baseDropRate = Math.max(0, item.dropRate - tempers * 0.03);
-    if (item.baseQuality === undefined) item.baseQuality = Math.max(0, item.quality - tempers * 0.02);
-    if (item.baseFairySpawn === undefined) item.baseFairySpawn = Math.max(0, item.fairySpawn - tempers * 0.02);
-    if (item.baseRareSpawn === undefined) item.baseRareSpawn = Math.max(0, item.rareSpawn - tempers * 0.01);
+    if (item.baseGoldMulti === undefined)
+      item.baseGoldMulti = Math.max(0, item.goldMulti - tempers * 0.05);
+    if (item.baseDropRate === undefined)
+      item.baseDropRate = Math.max(0, item.dropRate - tempers * 0.03);
+    if (item.baseQuality === undefined)
+      item.baseQuality = Math.max(0, item.quality - tempers * 0.02);
+    if (item.baseFairySpawn === undefined)
+      item.baseFairySpawn = Math.max(0, item.fairySpawn - tempers * 0.02);
+    if (item.baseRareSpawn === undefined)
+      item.baseRareSpawn = Math.max(0, item.rareSpawn - tempers * 0.01);
   }
 
   // Restore pristine unmutated baseline stats to ensure clean idempotency
@@ -1934,28 +1939,42 @@ window.recalculateItemStats = function (item) {
       item.int = Math.round(item.int * artMultiplier) + tempers * 3;
 
       if (item.goldMulti > 0)
-        item.goldMulti = parseFloat((item.goldMulti + tempers * 0.05).toFixed(4));
+        item.goldMulti = parseFloat(
+          (item.goldMulti + tempers * 0.05).toFixed(4),
+        );
       if (item.dropRate > 0)
         item.dropRate = parseFloat((item.dropRate + tempers * 0.03).toFixed(4));
       if (item.quality > 0)
         item.quality = parseFloat((item.quality + tempers * 0.02).toFixed(4));
       if (item.fairySpawn > 0)
-        item.fairySpawn = parseFloat((item.fairySpawn + tempers * 0.02).toFixed(4));
+        item.fairySpawn = parseFloat(
+          (item.fairySpawn + tempers * 0.02).toFixed(4),
+        );
       if (item.rareSpawn > 0)
-        item.rareSpawn = parseFloat((item.rareSpawn + tempers * 0.01).toFixed(4));
+        item.rareSpawn = parseFloat(
+          (item.rareSpawn + tempers * 0.01).toFixed(4),
+        );
       if (item.critChance > 0)
-        item.critChance = parseFloat((item.critChance + tempers * 0.01).toFixed(4));
+        item.critChance = parseFloat(
+          (item.critChance + tempers * 0.01).toFixed(4),
+        );
       if (item.parry > 0)
         item.parry = parseFloat((item.parry + tempers * 0.005).toFixed(4));
       if (item.block > 0)
         item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
       if (item.idleAttackSpeed > 0)
-        item.idleAttackSpeed = parseFloat((item.idleAttackSpeed + tempers * 0.03).toFixed(4));
+        item.idleAttackSpeed = parseFloat(
+          (item.idleAttackSpeed + tempers * 0.03).toFixed(4),
+        );
       if (item.activeAttackSpeed > 0)
-        item.activeAttackSpeed = parseFloat((item.activeAttackSpeed + tempers * 0.03).toFixed(4));
+        item.activeAttackSpeed = parseFloat(
+          (item.activeAttackSpeed + tempers * 0.03).toFixed(4),
+        );
       if (item.moveSpeed > 0) item.moveSpeed += tempers;
       if (item.critDamage > 0)
-        item.critDamage = parseFloat((item.critDamage + tempers * 0.025).toFixed(4));
+        item.critDamage = parseFloat(
+          (item.critDamage + tempers * 0.025).toFixed(4),
+        );
     } else {
       let multiplier = 1 + tempers * 0.08;
       item.baseAtk = Math.round(item.baseAtk * multiplier);
@@ -1972,9 +1991,13 @@ window.recalculateItemStats = function (item) {
 
       if (item.moveSpeed > 0) item.moveSpeed += tempers;
       if (item.critChance > 0)
-        item.critChance = parseFloat((item.critChance + tempers * 0.005).toFixed(4));
+        item.critChance = parseFloat(
+          (item.critChance + tempers * 0.005).toFixed(4),
+        );
       if (item.critDamage > 0)
-        item.critDamage = parseFloat((item.critDamage + tempers * 0.015).toFixed(4));
+        item.critDamage = parseFloat(
+          (item.critDamage + tempers * 0.015).toFixed(4),
+        );
       if (item.block > 0)
         item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
       if (item.parry > 0)
@@ -1984,15 +2007,25 @@ window.recalculateItemStats = function (item) {
       if (item.quality > 0)
         item.quality = parseFloat((item.quality + tempers * 0.005).toFixed(4));
       if (item.goldMulti > 0)
-        item.goldMulti = parseFloat((item.goldMulti + tempers * 0.01).toFixed(4));
+        item.goldMulti = parseFloat(
+          (item.goldMulti + tempers * 0.01).toFixed(4),
+        );
       if (item.rareSpawn > 0)
-        item.rareSpawn = parseFloat((item.rareSpawn + tempers * 0.001).toFixed(4));
+        item.rareSpawn = parseFloat(
+          (item.rareSpawn + tempers * 0.001).toFixed(4),
+        );
       if (item.fairySpawn > 0)
-        item.fairySpawn = parseFloat((item.fairySpawn + tempers * 0.01).toFixed(4));
+        item.fairySpawn = parseFloat(
+          (item.fairySpawn + tempers * 0.01).toFixed(4),
+        );
       if (item.activeAttackSpeed > 0)
-        item.activeAttackSpeed = parseFloat((item.bonusActiveSpeed * (1 + tempers * 0.08)).toFixed(4));
+        item.activeAttackSpeed = parseFloat(
+          (item.bonusActiveSpeed * (1 + tempers * 0.08)).toFixed(4),
+        );
       if (item.idleAttackSpeed > 0)
-        item.idleAttackSpeed = parseFloat((item.bonusIdleSpeed * (1 + tempers * 0.08)).toFixed(4));
+        item.idleAttackSpeed = parseFloat(
+          (item.bonusIdleSpeed * (1 + tempers * 0.08)).toFixed(4),
+        );
     }
   }
 
@@ -2243,29 +2276,34 @@ Object.assign(window.GameState, {
       }
       window.equippedSlots.overall = item;
     } else if (item.type === "chest" || item.type === "leggings") {
-          if (window.equippedSlots.overall) {
-            delete window.equippedSlots.overall.isEquippedSlot;
-            window.inventory.EQUIP.push(window.equippedSlots.overall);
-            window.equippedSlots.overall = null;
-          }
-          if (window.equippedSlots[item.type]) {
-            delete window.equippedSlots[item.type].isEquippedSlot;
-            window.inventory.EQUIP.push(window.equippedSlots[item.type]);
-          }
-          window.equippedSlots[item.type] = item;
-        } else if (item.type === "artifact") {
-          // Prevent equipping duplicate artifacts in core bag slot clicking
-          let isAlreadyEquipped = ["art1", "art2", "art3"].some(
-            (slot) => window.equippedSlots[slot] && window.equippedSlots[slot].trait === item.trait
+      if (window.equippedSlots.overall) {
+        delete window.equippedSlots.overall.isEquippedSlot;
+        window.inventory.EQUIP.push(window.equippedSlots.overall);
+        window.equippedSlots.overall = null;
+      }
+      if (window.equippedSlots[item.type]) {
+        delete window.equippedSlots[item.type].isEquippedSlot;
+        window.inventory.EQUIP.push(window.equippedSlots[item.type]);
+      }
+      window.equippedSlots[item.type] = item;
+    } else if (item.type === "artifact") {
+      // Prevent equipping duplicate artifacts in core bag slot clicking
+      let isAlreadyEquipped = ["art1", "art2", "art3"].some(
+        (slot) =>
+          window.equippedSlots[slot] &&
+          window.equippedSlots[slot].trait === item.trait,
+      );
+      if (isAlreadyEquipped) {
+        if (typeof window.pushHeaderToast === "function") {
+          window.pushHeaderToast(
+            "❌ You cannot equip duplicate artifacts!",
+            "#e74c3c",
           );
-          if (isAlreadyEquipped) {
-            if (typeof window.pushHeaderToast === "function") {
-              window.pushHeaderToast("❌ You cannot equip duplicate artifacts!", "#e74c3c");
-            }
-            return;
-          }
+        }
+        return;
+      }
 
-          if (!window.equippedSlots.art1) window.equippedSlots.art1 = item;
+      if (!window.equippedSlots.art1) window.equippedSlots.art1 = item;
       else if (!window.equippedSlots.art2) window.equippedSlots.art2 = item;
       else {
         if (window.equippedSlots.art3) {
@@ -3898,20 +3936,23 @@ window.buyGoldUpgrade = function (type) {
   }
 
   window.updateUI();
-  window.renderGoldUpgrades();
+    window.renderGoldUpgrades();
 
-  // Find newly rendered card and trigger physical purchase slam flash!
-  let cardEl = document.getElementById(`sink-card-${type}`);
-  if (cardEl) {
-    cardEl.classList.add("sink-upgraded-flash");
-    setTimeout(() => {
-      let checkEl = document.getElementById(`sink-card-${type}`);
-      if (checkEl) checkEl.classList.remove("sink-upgraded-flash");
-    }, 600);
-  }
+    // Find newly rendered card and trigger physical purchase slam flash!
+    let cardEl = document.getElementById(`sink-card-${type}`);
+    if (cardEl) {
+      cardEl.classList.add("sink-upgraded-flash");
+      setTimeout(() => {
+        let checkEl = document.getElementById(`sink-card-${type}`);
+        if (checkEl) checkEl.classList.remove("sink-upgraded-flash");
+      }, 600);
+    }
 
-  window.saveGame();
-};
+    if (typeof window.checkAchievements === "function") {
+      window.checkAchievements();
+    }
+    window.saveGame();
+  };
 
 window.transmutePotion = function (index) {
   let recipe = window.POTION_TRANSMUTATIONS[index];
