@@ -2202,17 +2202,31 @@ window.onload = function () {
     }
 
     // Auto-close Settings menu if clicking outside of it
-    let settingsModal = document.getElementById("settings-modal");
-    if (settingsModal && settingsModal.style.display === "block") {
-      if (
-        !e.target.closest("#settings-modal") &&
-        !e.target.closest('button[onclick*="toggleSettings"]')
-      ) {
-        settingsModal.style.display = "none";
-        window.hideTooltip();
-      }
-    }
-  });
+                let settingsModal = document.getElementById("settings-modal");
+                if (settingsModal && settingsModal.style.display === "block") {
+                  if (
+                    !e.target.closest("#settings-modal") &&
+                    !e.target.closest('button[onclick*="toggleSettings"]')
+                  ) {
+                    settingsModal.style.display = "none";
+                    window.hideTooltip();
+                  }
+                }
+
+                // Auto-close Bestiary Modal if clicking outside of it
+                let bestiaryModal = document.getElementById("bestiary-modal");
+                if (bestiaryModal && bestiaryModal.style.display === "block") {
+                  if (
+                    !e.target.closest("#bestiary-modal") &&
+                    !e.target.closest('div[onclick*="toggleBestiaryAlbum"]')
+                  ) {
+                    bestiaryModal.style.display = "none";
+                    window.hideTooltip();
+                    window.setPauseState(false);
+                    window.updateUI();
+                  }
+                }
+              });
 
   requestAnimationFrame(engineCycle);
   window.updateUI();
@@ -5965,88 +5979,299 @@ window.useItem = function (itemName) {
       window.playerStats.hasTriggeredCoffeeRun = true;
     }
   } else if (itemName === "Monster Card Sack") {
-      window.inventory.USE[itemName]--;
-      if (window.inventory.USE[itemName] === 0) {
-        delete window.inventory.USE[itemName];
-      }
-
-      // Play unboxing sound
-      if (window.SoundManager) window.SoundManager.play("fairy");
-
-      let cardKeys = Object.keys(window.MONSTER_CARDS_DATA);
-      let pulledCards = [];
-      let recycledDust = 0;
-
-      // Draw exactly 5 cards
-      for (let i = 0; i < 5; i++) {
-        let rolledKey = cardKeys[Math.floor(Math.random() * cardKeys.length)];
-        let cData = window.MONSTER_CARDS_DATA[rolledKey];
-
-        window.playerStats.monsterCards = window.playerStats.monsterCards || {};
-        let currentOwned = window.playerStats.monsterCards[rolledKey] || 0;
-
-        if (currentOwned >= 600) {
-          // Recycle duplicate cards above the Mythic cap into Astral Dust
-          recycledDust++;
-          pulledCards.push({ key: rolledKey, name: cData.name, isRecycled: true });
-        } else {
-          window.playerStats.monsterCards[rolledKey] = currentOwned + 1;
-          pulledCards.push({ key: rolledKey, name: cData.name, isRecycled: false });
+        window.inventory.USE[itemName]--;
+        if (window.inventory.USE[itemName] === 0) {
+          delete window.inventory.USE[itemName];
         }
-      }
 
-      if (recycledDust > 0) {
-        window.playerStats.astralDust = (window.playerStats.astralDust || 0) + recycledDust;
-      }
+        let cardKeys = Object.keys(window.MONSTER_CARDS_DATA);
+        let pulledCards = [];
+        let recycledDust = 0;
 
-      // Build the Card Booster Pack opening animation overlay
-      let overlay = document.createElement("div");
-      overlay.id = "booster-opening-overlay";
-      overlay.style.position = "fixed";
-      overlay.style.top = "0";
-      overlay.style.left = "0";
-      overlay.style.width = "100%";
-      overlay.style.height = "100%";
-      overlay.style.backgroundColor = "rgba(0,0,0,0.95)";
-      overlay.style.display = "flex";
-      overlay.style.justifyContent = "center";
-      overlay.style.alignItems = "center";
-      overlay.style.zIndex = "45000";
-      overlay.style.backdropFilter = "blur(8px)";
-      document.body.appendChild(overlay);
+        // Draw exactly 5 cards
+        for (let i = 0; i < 5; i++) {
+          let rolledKey = cardKeys[Math.floor(Math.random() * cardKeys.length)];
+          let cData = window.MONSTER_CARDS_DATA[rolledKey];
 
-      let cardsHtml = pulledCards.map((p, idx) => {
-        let cData = window.MONSTER_CARDS_DATA[p.key];
-        let setDef = window.CARD_SETS_DATA[cData.set];
-        let color = window.getTierColor(3); // Nice epic color for card backs
-        let rowHtml = p.isRecycled
-          ? `<div style="font-size:11.5px; color:#ff007f; font-family:monospace; margin-top:2px;">🔄 Recycled (+1 Astral Dust)</div>`
-          : `<span style="font-size:11px; color:#aaa;">Added to collection (${window.playerStats.monsterCards[p.key]}/600)</span>`;
+          window.playerStats.monsterCards = window.playerStats.monsterCards || {};
+          let currentOwned = window.playerStats.monsterCards[rolledKey] || 0;
 
-        return `
-          <div style="background:#13151c; border:1.5px solid #a855f7; border-radius:8px; padding:10px; width:150px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.5); animation: toastFadeIn 0.3s ease-out; animation-delay:${idx * 0.15}s; animation-fill-mode: both; display:flex; flex-direction:column; justify-content:space-between; height:120px;">
-            <strong style="color:${color}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cData.name}</strong>
-            <span style="font-size:9px; color:#888; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-top:2px;">Set: ${setDef.name.replace(" Set", "")}</span>
-            <div style="border-top:1px dashed #333; margin-top:8px; padding-top:6px;">
-              ${rowHtml}
+          if (currentOwned >= 600) {
+            recycledDust++;
+            pulledCards.push({ key: rolledKey, name: cData.name, isRecycled: true });
+          } else {
+            window.playerStats.monsterCards[rolledKey] = currentOwned + 1;
+            pulledCards.push({ key: rolledKey, name: cData.name, isRecycled: false });
+          }
+        }
+
+        if (recycledDust > 0) {
+          window.playerStats.astralDust = (window.playerStats.astralDust || 0) + recycledDust;
+        }
+
+        let overlay = document.createElement("div");
+        overlay.id = "booster-opening-overlay";
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.backgroundColor = "rgba(0,0,0,0.95)";
+        overlay.style.display = "flex";
+        overlay.style.justifyContent = "center";
+        overlay.style.alignItems = "center";
+        overlay.style.zIndex = "45000";
+        overlay.style.backdropFilter = "blur(10px)";
+        document.body.appendChild(overlay);
+
+        window.setPauseState(true);
+
+        overlay.innerHTML = `
+          <style>
+            .pack-wrapper {
+              position: relative;
+              width: 220px;
+              height: 310px;
+              cursor: pointer;
+              perspective: 1000px;
+              animation: floatingPack 3s ease-in-out infinite;
+            }
+            .pack-foil {
+              width: 100%;
+              height: 100%;
+              background: linear-gradient(135deg, #1d0f3a 0%, #3e125c 50%, #1d0f3a 100%);
+              border: 2.5px solid #a855f7;
+              border-radius: 12px;
+              box-shadow: 0 10px 30px rgba(0,0,0,0.85), inset 0 0 15px rgba(168,85,247,0.3);
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              align-items: center;
+              padding: 15px;
+              box-sizing: border-box;
+              position: relative;
+              overflow: hidden;
+            }
+            .pack-foil::before {
+              content: "";
+              position: absolute;
+              top: -150%; left: -50%; width: 200%; height: 200%;
+              background: linear-gradient(135deg, rgba(255,255,255,0) 45%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0) 55%);
+              transform: rotate(-15deg);
+              animation: foilShine 4s linear infinite;
+            }
+            .pack-seal {
+              width: 55px;
+              height: 55px;
+              background: #ff007f;
+              border: 2px solid #fff;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 26px;
+              box-shadow: 0 0 15px #ff007f, inset -3px -3px 6px rgba(0,0,0,0.5);
+              animation: sealGlow 1.5s infinite;
+            }
+
+            /* Flip Card Elements */
+            .booster-grid {
+              display: flex;
+              gap: 12px;
+              justify-content: center;
+              flex-wrap: wrap;
+              perspective: 1000px;
+            }
+            .gacha-card {
+              width: 130px;
+              height: 180px;
+              position: relative;
+              cursor: pointer;
+            }
+            .gacha-card-inner {
+              width: 100%;
+              height: 100%;
+              transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+              transform-style: preserve-3d;
+              position: relative;
+            }
+            .gacha-card.flipped .gacha-card-inner {
+              transform: rotateY(180deg);
+            }
+            .gacha-card-front, .gacha-card-back {
+              width: 100%;
+              height: 100%;
+              position: absolute;
+              backface-visibility: hidden;
+              border-radius: 8px;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              padding: 8px;
+              box-sizing: border-box;
+            }
+            .gacha-card-back {
+              background: linear-gradient(135deg, #120e25 0%, #29124a 100%);
+              border: 2px solid #a855f7;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              color: #df9ffb;
+            }
+            .gacha-card-front {
+              background: #0f1115;
+              transform: rotateY(180deg);
+            }
+
+            @keyframes floatingPack {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+            @keyframes foilShine {
+              0% { transform: translate(-30%, -30%) rotate(-15deg); }
+              100% { transform: translate(130%, 130%) rotate(-15deg); }
+            }
+            @keyframes sealGlow {
+              0%, 100% { box-shadow: 0 0 10px #ff007f; }
+              50% { box-shadow: 0 0 25px #ff007f; }
+            }
+            @keyframes ripFoil {
+              0% { transform: translateY(0) scaleY(1); opacity: 1; }
+              100% { transform: translateY(-100px) scaleY(0); opacity: 0; }
+            }
+            @keyframes cardRevealArc {
+              0% { transform: translateY(120px) scale(0); opacity: 0; }
+              100% { transform: translateY(0) scale(1); opacity: 1; }
+            }
+          </style>
+
+          <div id="booster-pack-stage" style="text-align:center;">
+            <div class="pack-wrapper" onclick="window.ripBoosterPack()">
+              <div class="pack-foil" id="pack-foil-element">
+                <div style="font-size:10px; color:#df9ffb; font-weight:bold; letter-spacing:2px;">BESTIARY ALBUM</div>
+                <div class="pack-seal">🃏</div>
+                <div style="font-size:10px; color:#ff007f; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">Tear Open Booster</div>
+              </div>
             </div>
+            <div style="font-size:12px; color:#df9ffb; font-weight:bold; margin-top:15px; letter-spacing:1px;">CLICK PACK TO TEAR OPEN</div>
+          </div>
+
+          <div id="booster-cards-stage" style="display:none; text-align:center; width: 100%; max-width:800px; padding:0 20px;">
+            <div style="font-size:13px; font-weight:bold; color:#df9ffb; margin-bottom:12px; letter-spacing:1px;" id="booster-status-text">CARDS OBTAINED: CLICK TO FLIP</div>
+            <div class="booster-grid" id="booster-grid-element"></div>
+            <button id="btn-booster-claim" class="btn-action" style="display:none; background:linear-gradient(135deg, #a855f7, #6c5ce7); border:1px solid #fff; font-weight:bold; font-size:12px; text-transform:uppercase; letter-spacing:1px; padding:12px 35px; border-radius:6px; cursor:pointer; margin-top:20px; box-shadow:0 4px 15px rgba(168,85,247,0.4); animation: pulseGlow 1.5s infinite;">Claim Cards</button>
           </div>
         `;
-      }).join("");
 
-      overlay.innerHTML = `
-        <div style="background:#151515; border:3px solid #a855f7; border-radius:12px; width:95%; max-width:550px; box-shadow:0 15px 45px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s;">
-          <h2 style="margin:0 0 10px 0; color:#df9ffb; letter-spacing:2px; text-transform:uppercase; font-size:18px;">🃏 Booster Pack Unboxed!</h2>
-          <div style="height:2px; background:linear-gradient(90deg, transparent, #a855f7, transparent); margin-bottom:15px;"></div>
-          <p style="font-size:11px; color:#aaa; margin-bottom:15px; white-space:normal; text-align:center;">
-            You tore open a rare **Monster Card Sack** and obtained 5 cards for your Bestiary Album:
-          </p>
-          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
-            ${cardsHtml}
-          </div>
-          <button onclick="document.getElementById('booster-opening-overlay').remove(); window.setPauseState(false); window.updateUI(); window.renderInventory();" style="background:#a855f7; color:#fff; border:none; padding:10px 24px; font-weight:bold; font-size:12px; border-radius:4px; cursor:pointer; width:100%; box-shadow:0 0 10px #a855f755;">Claim Cards</button>
-        </div>
-      `;
+        window.ripBoosterPack = function () {
+          let pack = document.getElementById("booster-pack-stage");
+          let cardsStage = document.getElementById("booster-cards-stage");
+          let grid = document.getElementById("booster-grid-element");
+          if (!pack || !cardsStage || !grid) return;
+
+          if (window.SoundManager) window.SoundManager.play("death"); // Heavy rip sound
+
+          let foil = document.getElementById("pack-foil-element");
+          if (foil) {
+            foil.style.animation = "ripFoil 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards";
+          }
+
+          setTimeout(() => {
+            pack.style.display = "none";
+            cardsStage.style.display = "block";
+            if (window.SoundManager) window.SoundManager.play("revive"); // Mystical cards sound
+
+            let flippedCount = 0;
+            let gridHtml = pulledCards.map((p, idx) => {
+              let cData = window.MONSTER_CARDS_DATA[p.key];
+              let setDef = window.CARD_SETS_DATA[cData.set];
+              let cardColor = window.getTierColor(p.isRecycled ? 5 : 3);
+
+              let rowHtml = p.isRecycled
+                ? `<div style="font-size:10px; color:#ff007f; font-family:monospace; margin-top:4px; font-weight:bold;">🔄 Recycled (+1 Astral Dust)</div>`
+                : `<span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">New Card Added!</span>`;
+
+              let cardIconHtml = window.getEquipIconHtml ? window.getEquipIconHtml({ type: cData.baseStat === "atk" ? "weapon" : cData.baseStat === "def" ? "shield" : "overall", statsRolled: p.isRecycled ? 5 : 3 }, 24) : "🃏";
+
+              return `
+                <div class="gacha-card" style="width:130px; height:180px; position:relative; perspective:1000px;"
+                     onmouseenter="window.showCardTooltip(event, '${p.key}')"
+                     onmouseleave="window.hideTooltip()"
+                     ontouchstart="window.showCardTooltip(event, '${p.key}')">
+                  <div class="gacha-card-inner" id="gacha-card-inner-${p.key}" style="
+                    width:100%; height:100%; transition:transform 0.6s; transform-style:preserve-3d; position:relative; cursor:pointer;
+                  " onclick="window.flipGachaCard('${p.key}')">
+                    <!-- Front Face (Mystical Card Back) -->
+                    <div class="gacha-card-back" style="
+                      width:100%; height:100%; position:absolute; backface-visibility:hidden; border-radius:8px; border:2.5px solid #a855f7; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(135deg, #120e25 0%, #29124a 100%);
+                    ">
+                      <div style="font-size:30px; margin-bottom:6px;">🃏</div>
+                      <div style="font-size:8px; letter-spacing:1px; font-weight:bold; color:#a855f7; text-transform:uppercase;">FLIP CARD</div>
+                    </div>
+                    <!-- Back Face (Card illustration Front) -->
+                    <div class="gacha-card-front" style="
+                      width:100%; height:100%; position:absolute; backface-visibility:hidden; border-radius:8px; border:2.5px solid ${cardColor}; display:flex; flex-direction:column; justify-content:space-between; padding:8px; background:#0c0812; transform:rotateY(180deg);
+                    ">
+                      <div style="display:flex; flex-direction:column; justify-content:space-between; height:100%; text-align:center;">
+                        <strong style="color:${cardColor}; font-size:11px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cData.name}</strong>
+                        <span style="font-size:8px; color:#888; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-top:1px;">Set: ${setDef.name.replace(" Set", "")}</span>
+                        <div style="text-align:center; margin:6px 0; display:flex; justify-content:center; align-items:center;">
+                          ${cardIconHtml}
+                        </div>
+                        <div style="border-top:1px dashed #333; margin-top:4px; padding-top:4px;">
+                          ${rowHtml}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join("");
+
+            grid.innerHTML = gridHtml;
+
+            window.flipGachaCard = function (cKey) {
+              let cardInner = document.getElementById(`gacha-card-inner-${cKey}`);
+              if (!cardInner || cardInner.style.transform === "rotateY(180deg)") return;
+
+              cardInner.style.transform = "rotateY(180deg)";
+              if (window.SoundManager) window.SoundManager.play("spell");
+
+              flippedCount++;
+              let status = document.getElementById("booster-status-text");
+              if (status) {
+                status.innerText = `CARDS REVEALED: ${flippedCount} / 5`;
+              }
+
+              if (flippedCount === 5) {
+                let claimBtn = document.getElementById("btn-booster-claim");
+                if (claimBtn) {
+                  claimBtn.style.display = "inline-block";
+                  claimBtn.style.opacity = "0";
+                  setTimeout(() => {
+                    claimBtn.style.transition = "opacity 0.4s ease";
+                    claimBtn.style.opacity = "1";
+                  }, 50);
+                }
+                if (status) {
+                  status.innerHTML = `<span style="color:#2ecc71; font-weight:bold;">ALL CARDS UNBOXED!</span>`;
+                }
+              }
+            };
+
+            let claimBtn = document.getElementById("btn-booster-claim");
+            if (claimBtn) {
+              claimBtn.onclick = function () {
+                overlay.remove();
+                window.isGamePaused = false;
+                window.updateUI();
+                window.renderInventory();
+              };
+            }
+          }, 550);
+        };
 
     } else if (itemName === "Cavern Sigil Sack") {
     // Uncapped specialised pouch; not bound by bag space limits

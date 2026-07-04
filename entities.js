@@ -9218,113 +9218,178 @@
   };
 
   window.openCavernSigilSackAnimation = function (newItem) {
-    let overlay = document.createElement("div");
-    overlay.id = "sack-opening-overlay";
-    overlay.style.position = "fixed";
-    overlay.style.top = "0";
-    overlay.style.left = "0";
-    overlay.style.width = "100%";
-    overlay.style.height = "100%";
-    overlay.style.backgroundColor = "rgba(0,0,0,0.92)";
-    overlay.style.display = "flex";
-    overlay.style.justifyContent = "center";
-    overlay.style.alignItems = "center";
-    overlay.style.zIndex = "45000";
-    overlay.style.backdropFilter = "blur(8px)";
-    document.body.appendChild(overlay);
+      let overlay = document.createElement("div");
+      overlay.id = "sack-opening-overlay";
+      overlay.style.position = "fixed";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100%";
+      overlay.style.height = "100%";
+      overlay.style.backgroundColor = "rgba(0,0,0,0.92)";
+      overlay.style.display = "flex";
+      overlay.style.justifyContent = "center";
+      overlay.style.alignItems = "center";
+      overlay.style.zIndex = "45000";
+      overlay.style.backdropFilter = "blur(8px)";
+      document.body.appendChild(overlay);
 
-    let color = window.getTierColor(newItem.statsRolled);
-    let stars = newItem.statsRolled;
-
-    overlay.innerHTML = `
-                  <style>
-                    .sack-anim-container {
-                      display: flex;
-                      justify-content: center;
-                      align-items: center;
-                      height: 180px;
-                      margin-bottom: 10px;
-                    }
-                    .sack-svg {
-                      animation: sackShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-                      overflow: visible !important;
-                    }
-                    .sack-string {
-                      animation: stringUntie 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-                      animation-delay: 0.42s;
-                    }
-                    .sack-neck {
-                      animation: neckOpen 0.5s cubic-bezier(0.25, 0.8, 0.25, 1.25) forwards;
-                      animation-delay: 0.44s;
-                    }
-                    .sparkle {
-                      opacity: 0;
-                      animation: sparkleUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-                      animation-delay: 0.5s;
-                      transform-origin: 16px 14px;
-                    }
-                    .s1 { --dx: 0px; --dy: -38px; --ds: 1.4; }
-                    .s2 { --dx: -28px; --dy: -28px; --ds: 1.2; }
-                    .s3 { --dx: 28px; --dy: -28px; --ds: 1.2; }
-                    .s4 { --dx: -14px; --dy: -42px; --ds: 1.1; }
-                    .s5 { --dx: 14px; --dy: -42px; --ds: 1.1; }
-                  </style>
-                  <div style="text-align:center; color:white; animation: toastFadeIn 0.3s ease-out;">
-                    <div class="sack-anim-container">
-                      <svg class="sack-svg" width="150" height="150" viewBox="0 0 32 32">
-                        <ellipse cx="16" cy="28" rx="10" ry="2" fill="rgba(0,0,0,0.5)" />
-                        <g class="sack-neck" style="transform-origin: 16px 14px;">
-                          <path d="M12,14 L10,8 C12,6 20,6 22,8 L20,14 Z" fill="#9b59b6" stroke="#000" stroke-width="1.5" />
-                        </g>
-                        <path d="M16 8 C10 8, 6 11, 6 19 C6 26, 10 30, 16 30 C22 30, 26 26, 26 19 C26 11, 22 8, 16 8 Z" fill="#4a154b" stroke="#000" stroke-width="2" />
-                        <g class="sack-string" style="transform-origin: 16px 14px;">
-                          <path d="M11 14 Q16 16, 21 14" fill="none" stroke="#f1c40f" stroke-width="1.8" />
-                          <circle cx="16" cy="14" r="2" fill="#f1c40f" stroke="#000" stroke-width="1" />
-                        </g>
-                        <g class="sparkle s1"><circle cx="16" cy="8" r="2" fill="#00d2ff" /></g>
-                        <g class="sparkle s2"><circle cx="10" cy="10" r="1.5" fill="#00d2ff" /></g>
-                        <g class="sparkle s3"><circle cx="22" cy="10" r="1.5" fill="#00d2ff" /></g>
-                      </svg>
-                    </div>
-                    <div style="font-size: 15px; font-weight: 900; color:#9b59b6; letter-spacing: 2px; text-shadow: 0 0 6px rgba(155,89,182,0.3);">TRANSMUTING CAVERN SIGIL...</div>
-                  </div>
-                `;
-
-    setTimeout(() => {
-      let buffDescs = newItem.buffs
-        .map(
-          (b) =>
-            `<span style="color:#2ecc71; display:block; font-size:10px; margin-bottom:2px;">• ☀️ ${b.name}: ${b.desc}</span>`,
-        )
-        .join("");
-      let debuffDescs = newItem.debuffs
-        .map(
-          (d) =>
-            `<span style="color:#e74c3c; display:block; font-size:10px; margin-bottom:2px;">• 🌑 ${d.name}: ${d.desc}</span>`,
-        )
-        .join("");
+      let color = window.getTierColor(newItem.statsRolled);
+      let stars = newItem.statsRolled;
 
       overlay.innerHTML = `
-                    <div style="background:#15121b; border:3px solid ${color}; border-radius:12px; width:95%; max-width:400px; box-shadow:0 15px 45px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s;">
-                      <h2 style="margin:0 0 10px 0; color:${color}; letter-spacing:2px; text-transform:uppercase; font-size:18px;">🔮 SIGIL UNBOXED!</h2>
-                      <div style="height:2px; background:linear-gradient(90deg, transparent, ${color}, transparent); margin-bottom:15px;"></div>
-                      <div style="text-align:center; margin-bottom:12px;">${window.getEquipIconHtml(newItem, 48)}</div>
-                      <h3 style="color:${color}; font-size:14px; margin:0 0 4px 0;">${newItem.name}</h3>
-                      <span style="font-size:10px; color:#aaa; font-family:monospace; display:block; margin-bottom:12px;">Quality: ${stars}★ ${window.getTierName(stars)}</span>
+        <style>
+          .cavern-anim-wrapper {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .cavern-runic-circle {
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            border: 2px dashed rgba(168, 85, 247, 0.4);
+            border-radius: 50%;
+            animation: runicSpin 15s linear infinite;
+          }
+          .cavern-runic-circle::before {
+            content: "";
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 1px dashed rgba(0, 210, 255, 0.25);
+            border-radius: 50%;
+            animation: runicSpinReverse 8s linear infinite;
+          }
+          .sack-anim-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 180px;
+          }
+          .sack-svg {
+            animation: sackViolentShake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+            overflow: visible !important;
+          }
+          .sack-string {
+            animation: stringUntie 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+            animation-delay: 0.5s;
+          }
+          .sack-neck {
+            animation: neckOpen 0.5s cubic-bezier(0.25, 0.8, 0.25, 1.25) forwards;
+            animation-delay: 0.52s;
+          }
+          .portal-blast {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #fff 0%, ${color} 60%, transparent 100%);
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+            animation: portalErupt 0.6s cubic-bezier(0.1, 0.8, 0.25, 1) forwards;
+            animation-delay: 0.55s;
+            pointer-events: none;
+          }
 
-                      <div style="background:#090610; border:1px solid #333; border-radius:6px; padding:12px; text-align:left; margin-bottom:15px; line-height:1.45;">
-                        <strong style="color:#f1c40f; font-family:monospace; display:block; margin-bottom:6px; text-transform:uppercase; font-size:10px; letter-spacing:0.5px;">⚡ SIGIL MODIFIERS:</strong>
-                        ${buffDescs}
-                        ${debuffDescs}
-                        <div style="border-top:1px dashed #333; margin-top:8px; padding-top:6px; display:flex; flex-direction:column; gap:2px; font-family:monospace; font-size:9.5px;">
-                          <span style="color:#3498db; font-weight:bold;">💎 Focus Rewards: +${(newItem.rewardMultiplier * 100).toFixed(0)}% Loot Multiplier</span>
-                          ${newItem.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold;">✨ Quality Boost: +${(newItem.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
-                        </div>
-                      </div>
+          @keyframes runicSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          @keyframes runicSpinReverse {
+            0% { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
+          }
+          @keyframes sackViolentShake {
+            0% { transform: scale(1) rotate(0deg); }
+            10% { transform: scale(1.1) rotate(-12deg); }
+            20% { transform: scale(1.1) rotate(14deg); }
+            30% { transform: scale(1.1) rotate(-14deg); }
+            40% { transform: scale(1.1) rotate(12deg); }
+            50% { transform: scale(1.1) rotate(-8deg); }
+            60% { transform: scale(1.05) rotate(6deg); }
+            70% { transform: scale(1.02) rotate(-3deg); }
+            80% { transform: scale(1.01) rotate(1deg); }
+            100% { transform: scale(1) rotate(0deg); }
+          }
+          @keyframes stringUntie {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(18px) scale(0.3); opacity: 0; }
+          }
+          @keyframes neckOpen {
+            0% { transform: scaleX(1) scaleY(1); }
+            100% { transform: scaleX(1.4) scaleY(0.6) translateY(3px); }
+          }
+          @keyframes portalErupt {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: scale(25); }
+          }
+        </style>
+        <div style="text-align:center; color:white; animation: toastFadeIn 0.3s ease-out;">
+          <div class="cavern-anim-wrapper">
+            <div class="cavern-runic-circle"></div>
+            <div class="portal-blast"></div>
+            <div class="sack-anim-container">
+              <svg class="sack-svg" width="130" height="130" viewBox="0 0 32 32">
+                <!-- Shadow -->
+                <ellipse cx="16" cy="29" rx="10" ry="2" fill="rgba(0,0,0,0.5)" />
+                <!-- Sack Neck -->
+                <g class="sack-neck" style="transform-origin: 16px 14px;">
+                  <path d="M12,14 L10,8 C12,6 20,6 22,8 L20,14 Z" fill="#9b59b6" stroke="#000" stroke-width="1.5" />
+                </g>
+                <!-- Main Pouch -->
+                <path d="M16 8 C10 8, 6 11, 6 19 C6 26, 10 30, 16 30 C22 30, 26 26, 26 19 C26 11, 22 8, 16 8 Z" fill="#4a154b" stroke="#000" stroke-width="2" />
+                <!-- Binding String -->
+                <g class="sack-string" style="transform-origin: 16px 14px;">
+                  <path d="M11 14 Q16 16, 21 14" fill="none" stroke="#f1c40f" stroke-width="1.8" />
+                  <circle cx="16" cy="14" r="2" fill="#f1c40f" stroke="#000" stroke-width="1" />
+                </g>
+              </svg>
+            </div>
+          </div>
+          <div style="font-size: 14px; font-weight: 900; color:#9b59b6; letter-spacing: 3px; text-shadow: 0 0 8px rgba(155,89,182,0.5); text-transform: uppercase;">TRANSMUTING CAVERN SIGIL...</div>
+        </div>
+      `;
 
-                      <button onclick="document.getElementById('sack-opening-overlay').remove(); window.setPauseState(false); window.updateUI(); window.renderInventory();" style="background:${color}; color:${stars === 4 || stars === 1 ? "#fff" : "#111"}; border:none; padding:10px; font-weight:bold; font-size:12px; border-radius:4px; cursor:pointer; width:100%; box-shadow:0 0 10px ${color}55;">Store in Sigil Sack</button>
-                    </div>
-                  `;
-    }, 1000);
-  };
+      setTimeout(() => {
+        let buffDescs = newItem.buffs
+          .map(
+            (b) =>
+              `<span style="color:#2ecc71; display:block; font-size:10px; margin-bottom:2px;">• ☀️ ${b.name}: ${b.desc}</span>`,
+          )
+          .join("");
+        let debuffDescs = newItem.debuffs
+          .map(
+            (d) =>
+              `<span style="color:#e74c3c; display:block; font-size:10px; margin-bottom:2px;">• 🌑 ${d.name}: ${d.desc}</span>`,
+          )
+          .join("");
+
+        overlay.innerHTML = `
+          <div style="background:#15121b; border:3px solid ${color}; border-radius:12px; width:95%; max-width:400px; box-shadow:0 15px 45px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s;">
+            <h2 style="margin:0 0 10px 0; color:${color}; letter-spacing:2px; text-transform:uppercase; font-size:18px;">🔮 SIGIL UNBOXED!</h2>
+            <div style="height:2px; background:linear-gradient(90deg, transparent, ${color}, transparent); margin-bottom:15px;"></div>
+            <div style="text-align:center; margin-bottom:12px;">${window.getEquipIconHtml(newItem, 48)}</div>
+            <h3 style="color:${color}; font-size:14px; margin:0 0 4px 0;">${newItem.name}</h3>
+            <span style="font-size:10px; color:#aaa; font-family:monospace; display:block; margin-bottom:12px;">Quality: ${stars}★ ${window.getTierName(stars)}</span>
+
+            <div style="background:#090610; border:1px solid #333; border-radius:6px; padding:12px; text-align:left; margin-bottom:15px; line-height:1.45;">
+              <strong style="color:#f1c40f; font-family:monospace; display:block; margin-bottom:6px; text-transform:uppercase; font-size:10px; letter-spacing:0.5px;">⚡ SIGIL MODIFIERS:</strong>
+              ${buffDescs}
+              ${debuffDescs}
+              <div style="border-top:1px dashed #333; margin-top:8px; padding-top:6px; display:flex; flex-direction:column; gap:2px; font-family:monospace; font-size:9.5px;">
+                <span style="color:#3498db; font-weight:bold;">💎 Focus Rewards: +${(newItem.rewardMultiplier * 100).toFixed(0)}% Loot Multiplier</span>
+                ${newItem.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold;">✨ Quality Boost: +${(newItem.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
+              </div>
+            </div>
+
+            <button onclick="document.getElementById('sack-opening-overlay').remove(); window.setPauseState(false); window.updateUI(); window.renderInventory();" style="background:${color}; color:${stars === 4 || stars === 1 ? "#fff" : "#111"}; border:none; padding:10px; font-weight:bold; font-size:12px; border-radius:4px; cursor:pointer; width:100%; box-shadow:0 0 10px ${color}55;">Store in Sigil Sack</button>
+          </div>
+        `;
+      }, 1100);
+    };
 })();

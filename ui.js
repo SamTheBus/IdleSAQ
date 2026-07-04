@@ -12818,7 +12818,7 @@ window.renderBestiaryAlbum = function () {
     `;
   });
 
-  rightPageHtml += `</div></div>`;
+  rightPageHtml += `</div></div></div>`;
 
   // Join pages together
     contentEl.innerHTML = `
@@ -12882,7 +12882,10 @@ window.renderBestiaryAlbum = function () {
       let cleanIcon = item.icon.replace("margin-right: 12px;", "margin-right: 4px;").replace("margin-right: 8px;", "margin-right: 4px;");
 
       return `
-        <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(180deg, #13111c 0%, #08060c 100%); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; transition: transform 0.15s, border-color 0.15s; margin-bottom: 0;">
+        <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(180deg, #13111c 0%, #08060c 100%); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; transition: transform 0.15s, border-color 0.15s; margin-bottom: 0;"
+             onmouseenter="window.showAstralDustShopTooltip(event, '${item.key}')"
+             onmouseleave="window.hideTooltip()"
+             ontouchstart="window.showAstralDustShopTooltip(event, '${item.key}')">
           <div style="display:flex; align-items:center; gap:8px;">
             <div style="flex-shrink:0;">${cleanIcon}</div>
             <div style="min-width:0; flex:1; text-align:left;">
@@ -12915,6 +12918,70 @@ window.renderBestiaryAlbum = function () {
         </div>
       </div>
     `;
+  };
+
+  window.showAstralDustShopTooltip = function (e, key) {
+    if (window.isSimulatedMouseEvent && window.isSimulatedMouseEvent(e)) return;
+    e.stopPropagation();
+    let tt = document.getElementById("game-tooltip");
+    if (!tt) return;
+
+    let title = "";
+    let desc = "";
+    let color = "#ff007f";
+    let cost = 0;
+    let icon = "🔮";
+
+    if (key === "Catalyst Core") {
+      title = "Catalyst Core";
+      desc = "Spent at the Forge to lock and re-roll equipment modifiers.";
+      color = "#2ecc71";
+      cost = 15;
+      icon = window.getEtcIconHtml ? window.getEtcIconHtml("Catalyst Core", 24) : "🟢";
+    } else if (key === "Eridium Shard") {
+      title = "Eridium Shard";
+      desc = "Spent at the Forge to Tier Up an item's Star Rarity.";
+      color = "#8e44ad";
+      cost = 20;
+      icon = window.getEtcIconHtml ? window.getEtcIconHtml("Eridium Shard", 24) : "🔮";
+    } else if (key === "Ancient Core") {
+      title = "Ancient Core";
+      desc = "Sacrifice at the Altar to summon a Rift Guardian.";
+      color = "#e74c3c";
+      cost = 25;
+      icon = window.getEtcIconHtml ? window.getEtcIconHtml("Ancient Core", 24) : "🔴";
+    } else if (key === "Luminous Soul") {
+      title = "Luminous Soul";
+      desc = "A radiant, pure soul dropped by rare monsters, used for advanced alchemy and trades.";
+      color = "#ffb6c1";
+      cost = 30;
+      icon = window.getEtcIconHtml ? window.getEtcIconHtml("Luminous Soul", 24) : "💖";
+    } else if (key === "Wildcard") {
+      title = "Fated Memory Wildcard";
+      desc = "Dispenses 1 copy of a random monster card you haven't maxed out yet (< 600 copies). Essential for targeted collection progression.";
+      color = "#ff007f";
+      cost = 50;
+      icon = `<span style="font-size:20px;">🔮</span>`;
+    }
+
+    let cleanIcon = icon.replace("margin-right: 12px;", "margin-right: 8px;").replace("margin-right: 8px;", "margin-right: 8px;");
+    let dustOwned = window.playerStats.astralDust || 0;
+    let canAfford = dustOwned >= cost;
+    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+
+    tt.innerHTML = `
+      <div style="padding: 10px; width: 220px; box-sizing: border-box; font-family:sans-serif;">
+        <div class="tt-title" style="color:${color}; display:flex; align-items:center; gap:8px;">${cleanIcon} <span>${title}</span></div>
+        <div style="color:#aaa; font-size:11px; white-space:normal; line-height:1.4; margin-top:8px;">
+          ${desc}<br><br>
+          • Cost: <strong style="color:${costColor};">${cost} Astral Dust</strong><br>
+          • Your Dust: <strong style="color:#fff;">${dustOwned} Dust</strong>
+        </div>
+      </div>
+    `;
+    tt.style.borderColor = color;
+    tt.style.display = "block";
+    window.positionTooltip(e, tt);
   };
 
 window.upgradeBestiaryCard = function (cardKey) {

@@ -399,74 +399,109 @@ window.AssetCatalog = {
 
   // Centralized configurations of consumables, scrolls, crates, and sacks
   consumables: {
-    potion(uid, color) {
-      return `
-        ${window.AssetCatalog.gradients.liquid(uid, color)}
-        <path d="M13 5 L19 5 L19 12 L26 23 C28 26, 26 29, 21 29 L11 29 C6 29, 4 26, 6 23 L13 12 Z" fill="#334155" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-        <path d="M8.5 21 L23.5 21 L25 24 C26.2 26.2, 25 28, 21 28 L11 28 C7 28, 5.8 26.2, 7 24 Z" fill="url(#grad_liq_${uid})" stroke="#000" stroke-width="1.5"/>
-        <rect x="13.5" y="2" width="5" height="4" fill="#a0522d" stroke="#000" stroke-width="1.5"/>
-        <path d="M14.5 6 L14.5 11" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1" stroke-linecap="round" fill="none" />
-        <path d="M22 14 C23.5 17, 23.5 21, 22 24" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1" stroke-linecap="round" fill="none" />
-        <path d="M9 22 C8 24, 9 26, 11 27" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.65"/>
-      `;
+      potion(uid, color) {
+        return `
+          ${window.AssetCatalog.gradients.liquid(uid, color)}
+          <path d="M13 5 L19 5 L19 12 L26 23 C28 26, 26 29, 21 29 L11 29 C6 29, 4 26, 6 23 L13 12 Z" fill="#334155" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M8.5 21 L23.5 21 L25 24 C26.2 26.2, 25 28, 21 28 L11 28 C7 28, 5.8 26.2, 7 24 Z" fill="url(#grad_liq_${uid})" stroke="#000" stroke-width="1.5"/>
+          <rect x="13.5" y="2" width="5" height="4" fill="#a0522d" stroke="#000" stroke-width="1.5"/>
+          <path d="M14.5 6 L14.5 11" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1" stroke-linecap="round" fill="none" />
+          <path d="M22 14 C23.5 17, 23.5 21, 22 24" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1" stroke-linecap="round" fill="none" />
+          <path d="M9 22 C8 24, 9 26, 11 27" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.65"/>
+        `;
+      },
+      scroll(uid, color) {
+        return `
+          <path d="M6 10 L26 6 L26 22 L6 26 Z" fill="#fdf6e2" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="13" y="11" width="6" height="11" transform="rotate(-11 16 16)" fill="${color}" stroke="#000" stroke-width="1.5" />
+          <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
+          <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
+        `;
+      },
+      sack(uid, stopCol) {
+        return `
+          <defs>
+            <linearGradient id="g_sk_b_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffd54f" />
+              <stop offset="50%" stop-color="#f1c40f" />
+              <stop offset="100%" stop-color="${stopCol}" />
+            </linearGradient>
+            <linearGradient id="g_sk_n_${uid}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#ffe082" />
+              <stop offset="100%" stop-color="${stopCol}" />
+            </linearGradient>
+          </defs>
+          <ellipse cx="16" cy="28.5" rx="10" ry="2.2" fill="rgba(0,0,0,0.4)" />
+          <path d="M12 11 L10 6 C12 4.5, 20 4.5, 22 6 L20 11 Z" fill="url(#g_sk_n_${uid})" stroke="#000" stroke-width="1.8" />
+          <path d="M16 11 C10 11, 5 14, 5 21 C5 27, 9 30, 16 30 C23 30, 27 27, 27 21 C27 14, 22 11, 16 11 Z" fill="url(#g_sk_b_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round" />
+          <path d="M11 13 C8 17, 8 23, 11 27" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="1.8" />
+          <path d="M21 13 C24 17, 24 23, 21 27" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="1.8" />
+          <path d="M16 12 V29" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" />
+          <path d="M10.5 11 Q16 13, 21.5 11" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" />
+          <path d="M11 12.5 Q16 14.5, 21 12.5" fill="none" stroke="#ffb300" stroke-width="1.2" stroke-linecap="round" />
+          <path d="M15 12 Q12 18, 10 20 M17 12 Q20 18, 22 20" stroke="#f1c40f" stroke-width="1.5" stroke-linecap="round" />
+          <circle cx="16" cy="12.5" r="3" fill="#e74c3c" stroke="#000" stroke-width="1.2" />
+          <circle cx="16" cy="12.5" r="1" fill="#fff" opacity="0.6" />
+        `;
+      },
+      crate(uid) {
+        return `
+          <defs><linearGradient id="g_cr_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d35400" /><stop offset="100%" stop-color="#5c3a21" /></linearGradient></defs>
+          <rect x="5" y="8" width="22" height="20" rx="3" fill="url(#g_cr_${uid})" stroke="#000" stroke-width="2"/>
+          <line x1="5" y1="8" x2="27" y2="28" stroke="#3e2723" stroke-width="2.5"/>
+          <line x1="27" y1="8" x2="5" y2="28" stroke="#3e2723" stroke-width="2.5"/>
+          <rect x="5" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
+          <rect x="22" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
+          <rect x="5" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
+          <rect x="22" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
+          <rect x="13" y="15" width="6" height="6" fill="#ffd700" stroke="#000" stroke-width="1.5" rx="1"/>
+        `;
+      },
+      cavern_sigil_sack(uid) {
+        return `
+          <defs>
+            <linearGradient id="g_css_b_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#df9ffb" />
+              <stop offset="50%" stop-color="#9b59b6" />
+              <stop offset="100%" stop-color="#4a154b" />
+            </linearGradient>
+            <linearGradient id="g_css_n_${uid}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#e8a7fc" />
+              <stop offset="100%" stop-color="#4a154b" />
+            </linearGradient>
+          </defs>
+          <ellipse cx="16" cy="28.5" rx="10" ry="2.2" fill="rgba(0,0,0,0.5)" />
+          <path d="M12 11 L10 6 C12 4.5, 20 4.5, 22 6 L20 11 Z" fill="url(#g_css_n_${uid})" stroke="#000" stroke-width="1.8" />
+          <path d="M16 11 C10 11, 5 14, 5 21 C5 27, 9 30, 16 30 C23 30, 27 27, 27 21 C27 14, 22 11, 16 11 Z" fill="url(#g_css_b_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round" />
+          <path d="M10 14 Q16 17, 22 14 M9 18 Q16 21, 23 18 M10 22 Q16 25, 22 22" fill="none" stroke="#00d2ff" stroke-width="1.2" stroke-dasharray="2 2" stroke-linecap="round" opacity="0.8" style="filter: drop-shadow(0 0 2px #00d2ff);" />
+          <path d="M10.5 11 Q16 13, 21.5 11" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" />
+          <circle cx="16" cy="12" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="1" />
+          <path d="M16 13 v12 M11 18 h10" stroke="#00d2ff" stroke-width="2" stroke-linecap="round" style="filter: drop-shadow(0 0 3px #00d2ff);" />
+        `;
+      },
+      monster_card_sack(uid) {
+        return `
+          <defs>
+            <linearGradient id="g_mcs_b_${uid}" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ff007f"/>
+              <stop offset="50%" stop-color="#df9ffb" />
+              <stop offset="100%" stop-color="#a855f7"/>
+            </linearGradient>
+            <linearGradient id="g_mcs_g_${uid}" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#ffeaa7" />
+              <stop offset="100%" stop-color="#f1c40f" />
+            </linearGradient>
+          </defs>
+          <ellipse cx="16" cy="28.5" rx="10" ry="2" fill="rgba(0,0,0,0.4)" />
+          <rect x="6" y="4" width="20" height="24" rx="3.5" fill="url(#g_mcs_b_${uid})" stroke="#000" stroke-width="2" />
+          <path d="M6 4 L9 7 L12 4 L15 7 L18 4 L21 7 L24 4 L26 4 L26 7 L6 7 Z" fill="url(#g_mcs_g_${uid})" stroke="#000" stroke-width="1.2" />
+          <path d="M6 28 L9 25 L12 28 L15 25 L18 28 L21 25 L24 28 L26 28 L26 25 L6 25 Z" fill="url(#g_mcs_g_${uid})" stroke="#000" stroke-width="1.2" />
+          <rect x="8.5" y="9" width="15" height="14" fill="none" stroke="#fff" stroke-width="1" opacity="0.35" />
+          <circle cx="16" cy="16" r="4.5" fill="url(#g_mcs_g_${uid})" stroke="#000" stroke-width="1.2" style="filter: drop-shadow(0 0 3px #f1c40f);" />
+          <path d="M16 13.5 L16 18.5 M13.5 16 L18.5 16" stroke="#111" stroke-width="1.2" stroke-linecap="round" />
+        `;
+      },
     },
-    scroll(uid, color) {
-      return `
-        <path d="M6 10 L26 6 L26 22 L6 26 Z" fill="#fdf6e2" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-        <rect x="13" y="11" width="6" height="11" transform="rotate(-11 16 16)" fill="${color}" stroke="#000" stroke-width="1.5" />
-        <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
-        <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
-      `;
-    },
-    sack(uid, stopColor) {
-      return `
-        <defs><linearGradient id="g_sk_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f1c40f" /><stop offset="100%" stop-color="${stopColor}" /></linearGradient></defs>
-        <path d="M16 8 C10 8, 6 11, 6 18 C6 25, 10 29, 16 29 C22 29, 26 25, 26 18 C26 11, 22 8, 16 8 Z" fill="url(#g_sk_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-        <ellipse cx="16" cy="10" rx="5" ry="1.8" fill="${stopColor}" stroke="#000" stroke-width="1.5" />
-        <path d="M14 10 L10 14 M18 10 L22 14" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round"/>
-      `;
-    },
-    crate(uid) {
-      return `
-            <defs><linearGradient id="g_cr_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d35400" /><stop offset="100%" stop-color="#5c3a21" /></linearGradient></defs>
-            <rect x="5" y="8" width="22" height="20" rx="3" fill="url(#g_cr_${uid})" stroke="#000" stroke-width="2"/>
-            <line x1="5" y1="8" x2="27" y2="28" stroke="#3e2723" stroke-width="2.5"/>
-            <line x1="27" y1="8" x2="5" y2="28" stroke="#3e2723" stroke-width="2.5"/>
-            <rect x="5" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
-            <rect x="22" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
-            <rect x="5" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
-            <rect x="22" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
-            <rect x="13" y="15" width="6" height="6" fill="#ffd700" stroke="#000" stroke-width="1.5" rx="1"/>
-          `;
-    },
-    cavern_sigil_sack(uid) {
-      return `
-            <defs>
-              <linearGradient id="g_css_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#9b59b6" />
-                <stop offset="100%" stop-color="#4a154b" />
-              </linearGradient>
-            </defs>
-            <path d="M16 8 C10 8, 6 11, 6 19 C6 26, 10 30, 16 30 C22 30, 26 26, 26 19 C26 11, 22 8, 16 8 Z" fill="url(#g_css_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M11 11 Q16 13, 21 11" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round"/>
-            <path d="M16 13 v12 M11 18 h10" stroke="#00d2ff" stroke-width="1.8" stroke-linecap="round" style="filter: drop-shadow(0 0 3px #00d2ff);" />
-          `;
-    },
-    monster_card_sack(uid) {
-          return `
-            <defs>
-              <linearGradient id="g_mcs_${uid}" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#ff007f"/>
-                <stop offset="100%" stop-color="#a855f7"/>
-              </linearGradient>
-            </defs>
-            <rect x="6" y="4" width="20" height="24" rx="4" fill="url(#g_mcs_${uid})" stroke="#000" stroke-width="2" />
-            <path d="M6 10 H26 L20 4 H12 Z M6 22 H26 L20 28 H12 Z" fill="#2d1130" stroke="#000" stroke-width="1.5" />
-            <circle cx="16" cy="16" r="5" fill="#f1c40f" stroke="#000" stroke-width="1" />
-            <path d="M16 13 L16 19 M13 16 L19 16" stroke="#111" stroke-width="1.8" stroke-linecap="round" />
-          `;
-        },
-  },
 
   // Centralized configurations of unique artifacts
   artifacts: {
