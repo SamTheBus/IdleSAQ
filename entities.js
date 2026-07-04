@@ -8565,24 +8565,26 @@
   };
 
   window.updateSyncStatus = function (status) {
-    let dot = document.getElementById("sync-dot");
-    let text = document.getElementById("sync-status-text");
-    if (!dot || !text) return;
+      let dot = document.getElementById("sync-dot");
+      let text = document.getElementById("sync-status-text");
+      if (!dot || !text) return;
 
-    if (status === "syncing") {
-      dot.style.background = "#f1c40f";
-      text.innerText = "SYNCING";
-      text.style.color = "#f1c40f";
-    } else if (status === "connected") {
-      dot.style.background = "#2ecc71";
-      text.innerText = "CONNECTED";
-      text.style.color = "#2ecc71";
-    } else {
-      dot.style.background = "#7f8c8d";
-      text.innerText = "OFFLINE";
-      text.style.color = "#7f8c8d";
-    }
-  };
+      if (status === "syncing") {
+        dot.style.background = "#f1c40f";
+        text.innerText = "SYNCING";
+        text.style.color = "#f1c40f";
+      } else if (status === "connected") {
+        dot.style.background = "#2ecc71";
+        text.innerText = "CONNECTED";
+        text.style.color = "#2ecc71";
+        window.isCloudSynced = true;
+      } else {
+        dot.style.background = "#7f8c8d";
+        text.innerText = "OFFLINE";
+        text.style.color = "#7f8c8d";
+        window.isCloudSynced = false;
+      }
+    };
 
   window.toggleEcoMode = function () {
     window.playerStats.ecoMode = !window.playerStats.ecoMode;

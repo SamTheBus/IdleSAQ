@@ -10677,15 +10677,31 @@ window.updateHubAlerts = function () {
   let clanBadge = document.getElementById("hub-card-clan-badge");
   let hasClanAlert = clanBadge && clanBadge.style.display === "inline-block";
 
-  // 5. Update Main Top Bar Hub Button Dot
-  let mainDot = document.getElementById("hub-menu-alert-dot");
-  if (mainDot) {
-    mainDot.style.display =
-      hasMissionsAlert || hasTrophiesAlert || hasMailAlert || hasClanAlert
-        ? "inline-block"
-        : "none";
-  }
-};
+  // 5. Evaluate Settings / Name Setup Alert
+    let hasSettingsAlert = window.playerStats && window.playerStats.playerName === "Guest";
+    let sBadge = document.getElementById("hub-card-settings-badge");
+    if (sBadge) sBadge.style.display = hasSettingsAlert ? "inline-block" : "none";
+
+    let renameContainer = document.getElementById("settings-rename-container");
+    if (renameContainer) {
+      if (hasSettingsAlert) {
+        renameContainer.style.borderColor = "#e74c3c";
+        renameContainer.style.boxShadow = "0 0 12px rgba(231, 76, 60, 0.4)";
+      } else {
+        renameContainer.style.borderColor = "#333";
+        renameContainer.style.boxShadow = "none";
+      }
+    }
+
+    // 6. Update Main Top Bar Hub Button Dot
+    let mainDot = document.getElementById("hub-menu-alert-dot");
+    if (mainDot) {
+      mainDot.style.display =
+        hasMissionsAlert || hasTrophiesAlert || hasMailAlert || hasClanAlert || hasSettingsAlert
+          ? "inline-block"
+          : "none";
+    }
+  };
 
 window.checkUnreadMail = function () {
   if (!window.GAME_SERVER_URL) return;

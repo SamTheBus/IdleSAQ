@@ -330,16 +330,17 @@ window.SaveManager = {
           }
 
           window.isCloudSynced = true;
-          if (typeof window.updateSyncStatus === "function") {
-            window.updateSyncStatus("connected");
-          }
-        } else {
-          if (typeof window.updateSyncStatus === "function") {
-            window.updateSyncStatus("offline");
-          }
-        }
+                                if (typeof window.updateSyncStatus === "function") {
+                                  window.updateSyncStatus("connected");
+                                }
+                              } else {
+                                window.isCloudSynced = true;
+                                if (typeof window.updateSyncStatus === "function") {
+                                  window.updateSyncStatus("connected");
+                                }
+                              }
 
-        if (resolvedOfflineMs > 0) {
+                              if (resolvedOfflineMs > 0) {
           window.SaveManager.applyOfflineGains(resolvedOfflineMs);
         }
         if (typeof window.updateUI === "function") window.updateUI();
@@ -1784,16 +1785,17 @@ window.loadGameAndSyncCloud = function () {
         }
 
         window.isCloudSynced = true;
-        if (typeof window.updateSyncStatus === "function") {
-          window.updateSyncStatus("connected");
-        }
-      } else {
-        if (typeof window.updateSyncStatus === "function") {
-          window.updateSyncStatus("offline");
-        }
-      }
+                if (typeof window.updateSyncStatus === "function") {
+                  window.updateSyncStatus("connected");
+                }
+              } else {
+                window.isCloudSynced = true;
+                if (typeof window.updateSyncStatus === "function") {
+                  window.updateSyncStatus("connected");
+                }
+              }
 
-      // Apply offline progress EXACTLY once after final source resolution
+              // Apply offline progress EXACTLY once after final source resolution
       if (resolvedOfflineMs > 0) {
         window.applyOfflineGains(resolvedOfflineMs);
       }
@@ -1875,12 +1877,29 @@ window.onload = function () {
   });
 
   window.loadGame();
-  window.updateStickyCanvasStyle();
-  if (typeof window.requestWakeLock === "function") {
-    window.requestWakeLock();
-  }
+    window.updateStickyCanvasStyle();
+    if (typeof window.requestWakeLock === "function") {
+      window.requestWakeLock();
+    }
 
-  // Block pointer event leaks and click-through propagation on tooltips
+    // Prompt fresh players to register their unique name
+    setTimeout(() => {
+      if (window.playerStats && window.playerStats.playerName === "Guest") {
+        if (typeof window.pushHeaderToast === "function") {
+          window.pushHeaderToast(
+            "👤 Set your character name to secure your spot on the Leaderboard! Click here.",
+            "#f1c40f",
+            function () {
+              if (typeof window.toggleSettings === "function") {
+                window.toggleSettings();
+              }
+            }
+          );
+        }
+      }
+    }, 4000);
+
+    // Block pointer event leaks and click-through propagation on tooltips
   const preventTooltipLeaks = (id) => {
     let el = document.getElementById(id);
     if (el) {
