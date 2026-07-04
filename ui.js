@@ -6770,6 +6770,18 @@ window.executeSwapItem = function (slotKey, itemId) {
     let idx = window.inventory.ARTIFACT.findIndex((i) => i.id === itemId);
     if (idx !== -1) {
       let item = window.inventory.ARTIFACT[idx];
+
+      // Prevent equipping duplicate artifacts via manual slot selection
+      let isAlreadyEquipped = ["art1", "art2", "art3"].some(
+        (slot) => slot !== slotKey && window.equippedSlots[slot] && window.equippedSlots[slot].trait === item.trait
+      );
+      if (isAlreadyEquipped) {
+        if (typeof window.pushHeaderToast === "function") {
+          window.pushHeaderToast("❌ You cannot equip duplicate artifacts!", "#e74c3c");
+        }
+        return;
+      }
+
       let oldMaxHp = 100;
       if (typeof window.resolvePlayerStats === "function")
         oldMaxHp = window.resolvePlayerStats().maxHp;

@@ -363,27 +363,24 @@ window.getAchievementProgress = function (ach) {
         ? 1
         : 0;
     if (ach.id === "sing_perfect_deflection")
-      return window.playerStats.hasTriggeredPerfectDeflection ? 1 : 0;
-    let hr = new Date().getHours();
-    if (ach.id === "sing_night_owl") return hr >= 0 && hr < 4 ? 1 : 0;
-    if (ach.id === "sing_early_bird") return hr >= 5 && hr < 8 ? 1 : 0;
-    if (ach.id === "sing_coffee_run")
-      return hr >= 7 && hr < 9 && window.playerStats.hastePotionTimer > 0
-        ? 1
-        : 0;
-    if (ach.id === "sing_high_noon")
-      return hr >= 12 && hr < 13 && window.playerStats.hasTriggeredHighNoon
-        ? 1
-        : 0;
-    if (ach.id === "sing_witching_hour")
-      return hr >= 3 && hr < 4 && window.playerStats.hasTriggeredWitchingHour
-        ? 1
-        : 0;
-    if (ach.id === "sing_weekend_warrior") {
-      let day = new Date().getDay();
-      return day === 0 || day === 6 ? 1 : 0;
-    }
-    if (ach.id === "sing_time_capsule")
+                return window.playerStats.hasTriggeredPerfectDeflection ? 1 : 0;
+              if (ach.id === "sing_night_owl")
+                return window.playerStats.hasTriggeredNightOwl ? 1 : 0;
+              if (ach.id === "sing_early_bird")
+                return window.playerStats.hasTriggeredEarlyBird ? 1 : 0;
+              if (ach.id === "sing_coffee_run")
+                return window.playerStats.hasTriggeredCoffeeRun ? 1 : 0;
+              if (ach.id === "sing_high_noon") {
+                let hr = new Date().getHours();
+                return hr >= 12 && hr < 13 && window.playerStats.hasTriggeredHighNoon ? 1 : 0;
+              }
+              if (ach.id === "sing_witching_hour") {
+                let hr = new Date().getHours();
+                return hr >= 3 && hr < 4 && window.playerStats.hasTriggeredWitchingHour ? 1 : 0;
+              }
+              if (ach.id === "sing_weekend_warrior")
+                return window.playerStats.hasTriggeredWeekendWarrior ? 1 : 0;
+              if (ach.id === "sing_time_capsule")
       return window.playerStats.hasTriggeredTimeCapsule ? 1 : 0;
     if (ach.id === "sing_long_run")
       return window.playerStats.sessionPlaytime >= 3600000 ? 1 : 0;
@@ -516,6 +513,14 @@ window.checkArtifactTrait = function (trait) {
     (window.equippedSlots.art2 && window.equippedSlots.art2.trait === trait) ||
     (window.equippedSlots.art3 && window.equippedSlots.art3.trait === trait)
   );
+};
+
+window.getArtifactTemperLevel = function (trait) {
+  if (!window.equippedSlots) return 0;
+  if (window.equippedSlots.art1 && window.equippedSlots.art1.trait === trait) return window.equippedSlots.art1.temperLevel || 0;
+  if (window.equippedSlots.art2 && window.equippedSlots.art2.trait === trait) return window.equippedSlots.art2.temperLevel || 0;
+  if (window.equippedSlots.art3 && window.equippedSlots.art3.trait === trait) return window.equippedSlots.art3.temperLevel || 0;
+  return 0;
 };
 
 window.getItemSetName = function (item) {
@@ -1485,19 +1490,23 @@ window.playerStats = {
   },
 
   // Achievement Checkpoint Flags
-  hasTriggeredMurphysLaw: false,
-  hasTriggeredAgainstOdds: false,
-  hasTriggeredLuckySeven: false,
-  hasTriggeredBackFromBrink: false,
-  hasTriggeredElementalConvergence: false,
-  hasTriggeredLookMaNoHands: false,
-  hasTriggeredOverkill: false,
-  hasTriggeredSpeedrun: false,
-  hasTriggeredExactChange: false,
-  hasTriggeredUnfortunateSoul: false,
-  hasTriggeredAlchemicalSynthesis: false,
-  hasTriggeredPatientShepherd: false,
-  hasTriggeredBareFists: false,
+    hasTriggeredMurphysLaw: false,
+    hasTriggeredAgainstOdds: false,
+    hasTriggeredLuckySeven: false,
+    hasTriggeredBackFromBrink: false,
+    hasTriggeredElementalConvergence: false,
+    hasTriggeredLookMaNoHands: false,
+    hasTriggeredOverkill: false,
+    hasTriggeredSpeedrun: false,
+    hasTriggeredExactChange: false,
+    hasTriggeredUnfortunateSoul: false,
+    hasTriggeredAlchemicalSynthesis: false,
+    hasTriggeredPatientShepherd: false,
+    hasTriggeredBareFists: false,
+    hasTriggeredNightOwl: false,
+    hasTriggeredEarlyBird: false,
+    hasTriggeredCoffeeRun: false,
+    hasTriggeredWeekendWarrior: false,
   hasTriggeredPerfectDeflection: false,
   hasTriggeredWitchingHour: false,
   hasTriggeredHighNoon: false,

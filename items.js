@@ -1092,20 +1092,35 @@ Object.assign(window.ItemFactory, {
     }
 
     item.atk = (item.baseAtk || 0) + item.bonusAtk;
-    item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
-    item.def = (item.baseDef || 0) + item.bonusDef;
-    item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
-    item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
-    item.critDamage = item.bonusCritDamage;
-    item.block = (item.baseBlock || 0) + item.bonusBlock;
-    item.parry = (item.baseParry || 0) + item.bonusParry;
-    item.str = (item.baseStr || 0) + item.bonusStr;
-    item.dex = (item.baseDex || 0) + item.bonusDex;
-    item.int = (item.baseInt || 0) + item.bonusInt;
-    item.activeAttackSpeed = item.bonusActiveSpeed;
-    item.idleAttackSpeed = item.bonusIdleSpeed;
+        item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
+        item.def = (item.baseDef || 0) + item.bonusDef;
+        item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
+        item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
+        item.critDamage = item.bonusCritDamage;
+        item.block = (item.baseBlock || 0) + item.bonusBlock;
+        item.parry = (item.baseParry || 0) + item.bonusParry;
+        item.str = (item.baseStr || 0) + item.bonusStr;
+        item.dex = (item.baseDex || 0) + item.bonusDex;
+        item.int = (item.baseInt || 0) + item.bonusInt;
+        item.activeAttackSpeed = item.bonusActiveSpeed;
+        item.idleAttackSpeed = item.bonusIdleSpeed;
 
-    if (chosenType !== "artifact") {
+        // Initialize pristine unmutated baseline values for exact scaling
+        item.rawBaseAtk = item.baseAtk || 0;
+        item.rawBaseDef = item.baseDef || 0;
+        item.rawBaseMaxHp = item.baseMaxHp || 0;
+        item.rawBaseInt = item.baseInt || 0;
+        item.rawBaseMoveSpeed = item.baseMoveSpeed || 0;
+        item.rawBaseBlock = item.baseBlock || 0;
+        item.rawBaseParry = item.baseParry || 0;
+
+        item.baseGoldMulti = item.goldMulti || 0;
+        item.baseDropRate = item.dropRate || 0;
+        item.baseQuality = item.quality || 0;
+        item.baseRareSpawn = item.rareSpawn || 0;
+        item.baseFairySpawn = item.fairySpawn || 0;
+
+        if (chosenType !== "artifact") {
       let isDungeon = window.playerStats.isDungeonMode;
       let isBoss =
         window.playerStats.isBossMode || window.playerStats.isUberBoss;
@@ -1832,8 +1847,168 @@ Object.assign(window.ItemFactory, {
 });
 
 // Legacy Compatibility Aliases to protect references
-window.recalculateItemStats = (item) =>
-  window.ItemFactory.recalculateItemStats(item);
+window.recalculateItemStats = function (item) {
+  item.bonusAtk = item.bonusAtk || 0;
+  item.bonusMaxHp = item.bonusMaxHp || 0;
+  item.bonusDef = item.bonusDef || 0;
+  item.bonusMoveSpeed = item.bonusMoveSpeed || 0;
+  item.bonusCritChance = item.bonusCritChance || 0;
+  item.bonusCritDamage = item.bonusCritDamage || 0;
+  item.bonusBlock = item.bonusBlock || 0;
+  item.bonusParry = item.bonusParry || 0;
+  item.bonusActiveSpeed = item.bonusActiveSpeed || 0;
+  item.bonusIdleSpeed = item.bonusIdleSpeed || 0;
+  item.bonusStr = item.bonusStr || 0;
+  item.bonusDex = item.bonusDex || 0;
+  item.bonusInt = item.bonusInt || 0;
+
+  let tempers = item.temperLevel || 0;
+
+  // Self-Healing Save Migration: Reconstruct unmutated raw properties for legacy items
+  if (item.rawBaseAtk === undefined) {
+    if (tempers > 0 && item.type !== "artifact") {
+      let multiplier = 1 + tempers * 0.08;
+      item.rawBaseAtk = Math.round((item.baseAtk || 0) / multiplier);
+      item.rawBaseDef = Math.round((item.baseDef || 0) / multiplier);
+      item.rawBaseMaxHp = Math.round((item.baseMaxHp || 0) / multiplier);
+      item.rawBaseInt = Math.round((item.baseInt || 0) / multiplier);
+    } else {
+      item.rawBaseAtk = item.baseAtk || 0;
+      item.rawBaseDef = item.baseDef || 0;
+      item.rawBaseMaxHp = item.baseMaxHp || 0;
+      item.rawBaseInt = item.baseInt || 0;
+    }
+    item.rawBaseMoveSpeed = item.baseMoveSpeed || 0;
+    item.rawBaseBlock = item.baseBlock || 0;
+    item.rawBaseParry = item.baseParry || 0;
+  }
+
+  if (item.type === "artifact") {
+    if (item.baseGoldMulti === undefined) item.baseGoldMulti = Math.max(0, item.goldMulti - tempers * 0.05);
+    if (item.baseDropRate === undefined) item.baseDropRate = Math.max(0, item.dropRate - tempers * 0.03);
+    if (item.baseQuality === undefined) item.baseQuality = Math.max(0, item.quality - tempers * 0.02);
+    if (item.baseFairySpawn === undefined) item.baseFairySpawn = Math.max(0, item.fairySpawn - tempers * 0.02);
+    if (item.baseRareSpawn === undefined) item.baseRareSpawn = Math.max(0, item.rareSpawn - tempers * 0.01);
+  }
+
+  // Restore pristine unmutated baseline stats to ensure clean idempotency
+  item.baseAtk = item.rawBaseAtk;
+  item.baseDef = item.rawBaseDef;
+  item.baseMaxHp = item.rawBaseMaxHp;
+  item.baseInt = item.rawBaseInt;
+  item.baseMoveSpeed = item.rawBaseMoveSpeed;
+  item.baseBlock = item.rawBaseBlock;
+  item.baseParry = item.rawBaseParry;
+
+  if (item.type === "artifact") {
+    item.goldMulti = item.baseGoldMulti;
+    item.dropRate = item.baseDropRate;
+    item.quality = item.baseQuality;
+    item.fairySpawn = item.baseFairySpawn;
+    item.rareSpawn = item.baseRareSpawn;
+  }
+
+  item.atk = (item.baseAtk || 0) + item.bonusAtk;
+  item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
+  item.def = (item.baseDef || 0) + item.bonusDef;
+  item.moveSpeed = (item.baseMoveSpeed || 0) + item.bonusMoveSpeed;
+  item.critChance = (item.baseCritChance || 0) + item.bonusCritChance;
+  item.critDamage = (item.baseCritDamage || 0) + item.bonusCritDamage;
+  item.block = (item.baseBlock || 0) + item.bonusBlock;
+  item.parry = (item.baseParry || 0) + item.bonusParry;
+  item.activeAttackSpeed = (item.baseActiveSpeed || 0) + item.bonusActiveSpeed;
+  item.idleAttackSpeed = (item.baseIdleSpeed || 0) + item.bonusIdleSpeed;
+  item.str = (item.baseStr || 0) + item.bonusStr;
+  item.dex = (item.baseDex || 0) + item.bonusDex;
+  item.int = (item.baseInt || 0) + item.bonusInt;
+
+  if (tempers > 0) {
+    let isArt = item.type === "artifact";
+    if (isArt) {
+      let artMultiplier = Math.pow(1.15, tempers);
+      item.atk = Math.round(item.atk * artMultiplier) + tempers * 15;
+      item.maxHp = Math.round(item.maxHp * artMultiplier) + tempers * 100;
+      item.def = Math.round(item.def * artMultiplier) + tempers * 10;
+      item.str = Math.round(item.str * artMultiplier) + tempers * 3;
+      item.dex = Math.round(item.dex * artMultiplier) + tempers * 3;
+      item.int = Math.round(item.int * artMultiplier) + tempers * 3;
+
+      if (item.goldMulti > 0)
+        item.goldMulti = parseFloat((item.goldMulti + tempers * 0.05).toFixed(4));
+      if (item.dropRate > 0)
+        item.dropRate = parseFloat((item.dropRate + tempers * 0.03).toFixed(4));
+      if (item.quality > 0)
+        item.quality = parseFloat((item.quality + tempers * 0.02).toFixed(4));
+      if (item.fairySpawn > 0)
+        item.fairySpawn = parseFloat((item.fairySpawn + tempers * 0.02).toFixed(4));
+      if (item.rareSpawn > 0)
+        item.rareSpawn = parseFloat((item.rareSpawn + tempers * 0.01).toFixed(4));
+      if (item.critChance > 0)
+        item.critChance = parseFloat((item.critChance + tempers * 0.01).toFixed(4));
+      if (item.parry > 0)
+        item.parry = parseFloat((item.parry + tempers * 0.005).toFixed(4));
+      if (item.block > 0)
+        item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
+      if (item.idleAttackSpeed > 0)
+        item.idleAttackSpeed = parseFloat((item.idleAttackSpeed + tempers * 0.03).toFixed(4));
+      if (item.activeAttackSpeed > 0)
+        item.activeAttackSpeed = parseFloat((item.activeAttackSpeed + tempers * 0.03).toFixed(4));
+      if (item.moveSpeed > 0) item.moveSpeed += tempers;
+      if (item.critDamage > 0)
+        item.critDamage = parseFloat((item.critDamage + tempers * 0.025).toFixed(4));
+    } else {
+      let multiplier = 1 + tempers * 0.08;
+      item.baseAtk = Math.round(item.baseAtk * multiplier);
+      item.baseDef = Math.round(item.baseDef * multiplier);
+      item.baseMaxHp = Math.round(item.baseMaxHp * multiplier);
+      item.baseInt = Math.round(item.baseInt * multiplier);
+
+      item.atk = Math.round(item.atk * multiplier);
+      item.maxHp = Math.round(item.maxHp * multiplier);
+      item.def = Math.round(item.def * multiplier);
+      item.str = Math.round(item.str * multiplier);
+      item.dex = Math.round(item.dex * multiplier);
+      item.int = Math.round(item.int * multiplier);
+
+      if (item.moveSpeed > 0) item.moveSpeed += tempers;
+      if (item.critChance > 0)
+        item.critChance = parseFloat((item.critChance + tempers * 0.005).toFixed(4));
+      if (item.critDamage > 0)
+        item.critDamage = parseFloat((item.critDamage + tempers * 0.015).toFixed(4));
+      if (item.block > 0)
+        item.block = parseFloat((item.block + tempers * 0.005).toFixed(4));
+      if (item.parry > 0)
+        item.parry = parseFloat((item.parry + tempers * 0.005).toFixed(4));
+      if (item.dropRate > 0)
+        item.dropRate = parseFloat((item.dropRate + tempers * 0.01).toFixed(4));
+      if (item.quality > 0)
+        item.quality = parseFloat((item.quality + tempers * 0.005).toFixed(4));
+      if (item.goldMulti > 0)
+        item.goldMulti = parseFloat((item.goldMulti + tempers * 0.01).toFixed(4));
+      if (item.rareSpawn > 0)
+        item.rareSpawn = parseFloat((item.rareSpawn + tempers * 0.001).toFixed(4));
+      if (item.fairySpawn > 0)
+        item.fairySpawn = parseFloat((item.fairySpawn + tempers * 0.01).toFixed(4));
+      if (item.activeAttackSpeed > 0)
+        item.activeAttackSpeed = parseFloat((item.bonusActiveSpeed * (1 + tempers * 0.08)).toFixed(4));
+      if (item.idleAttackSpeed > 0)
+        item.idleAttackSpeed = parseFloat((item.bonusIdleSpeed * (1 + tempers * 0.08)).toFixed(4));
+    }
+  }
+
+  if (item.enchantments) {
+    for (let statKey in item.enchantments) {
+      let count = item.enchantments[statKey];
+      let multiplier = Math.pow(1.25, count);
+      const integerStats = ["atk", "maxHp", "def", "str", "dex", "int"];
+      if (integerStats.includes(statKey)) {
+        item[statKey] = Math.ceil(item[statKey] * multiplier);
+      } else {
+        item[statKey] = parseFloat((item[statKey] * multiplier).toFixed(4));
+      }
+    }
+  }
+};
 
 // Append Item Upgrade Logic directly inside ItemFactory
 Object.assign(window.ItemFactory, {
@@ -2068,18 +2243,29 @@ Object.assign(window.GameState, {
       }
       window.equippedSlots.overall = item;
     } else if (item.type === "chest" || item.type === "leggings") {
-      if (window.equippedSlots.overall) {
-        delete window.equippedSlots.overall.isEquippedSlot;
-        window.inventory.EQUIP.push(window.equippedSlots.overall);
-        window.equippedSlots.overall = null;
-      }
-      if (window.equippedSlots[item.type]) {
-        delete window.equippedSlots[item.type].isEquippedSlot;
-        window.inventory.EQUIP.push(window.equippedSlots[item.type]);
-      }
-      window.equippedSlots[item.type] = item;
-    } else if (item.type === "artifact") {
-      if (!window.equippedSlots.art1) window.equippedSlots.art1 = item;
+          if (window.equippedSlots.overall) {
+            delete window.equippedSlots.overall.isEquippedSlot;
+            window.inventory.EQUIP.push(window.equippedSlots.overall);
+            window.equippedSlots.overall = null;
+          }
+          if (window.equippedSlots[item.type]) {
+            delete window.equippedSlots[item.type].isEquippedSlot;
+            window.inventory.EQUIP.push(window.equippedSlots[item.type]);
+          }
+          window.equippedSlots[item.type] = item;
+        } else if (item.type === "artifact") {
+          // Prevent equipping duplicate artifacts in core bag slot clicking
+          let isAlreadyEquipped = ["art1", "art2", "art3"].some(
+            (slot) => window.equippedSlots[slot] && window.equippedSlots[slot].trait === item.trait
+          );
+          if (isAlreadyEquipped) {
+            if (typeof window.pushHeaderToast === "function") {
+              window.pushHeaderToast("❌ You cannot equip duplicate artifacts!", "#e74c3c");
+            }
+            return;
+          }
+
+          if (!window.equippedSlots.art1) window.equippedSlots.art1 = item;
       else if (!window.equippedSlots.art2) window.equippedSlots.art2 = item;
       else {
         if (window.equippedSlots.art3) {
