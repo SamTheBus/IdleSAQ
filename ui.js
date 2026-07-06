@@ -57,7 +57,12 @@ window.getEquipIconHtml = function (item, size = 32) {
     type = item.subType || "shield";
   }
 
-  if (window.AssetCatalog.genericEquipment[type]) {
+  // Normalize item noun for precise lookup (e.g., "Full Plate Armor" -> "full_plate_armor")
+  let nounKey = item.noun ? item.noun.toLowerCase().replace(/\s+/g, "_") : "";
+
+  if (window.AssetCatalog.genericEquipment[nounKey]) {
+    innerHtml = window.AssetCatalog.genericEquipment[nounKey](id, color);
+  } else if (window.AssetCatalog.genericEquipment[type]) {
     innerHtml = window.AssetCatalog.genericEquipment[type](id, color);
   } else {
     innerHtml = `<circle cx="16" cy="16" r="10" fill="${color}" stroke="#000000" stroke-width="1.5"/>`;
@@ -1789,35 +1794,58 @@ window.pushToast = function (
   }
 
   function guessItem(n, s) {
-    if (s === "UNIQUE") {
-      let lower = n.toLowerCase();
-      let art = window.ARTIFACT_POOL ? window.ARTIFACT_POOL.find(a => lower.includes(a.name.toLowerCase())) : null;
-      return {
-        type: "artifact",
-        statsRolled: "UNIQUE",
-        trait: art ? art.trait : "frenzy"
-      };
-    }
-    let tType = guessItemType(n);
-    let sType = null;
-    if (tType === "subweapon") {
-      let lower = n.toLowerCase();
-      if (lower.includes("shield") || lower.includes("buckler") || lower.includes("aegis") || lower.includes("bulwark")) {
-        sType = "shield";
-      } else if (lower.includes("dagger") || lower.includes("kris") || lower.includes("stiletto") || lower.includes("dirk") || lower.includes("gauche")) {
-        sType = "dagger";
-      } else {
-        sType = "tome";
-      }
-    }
-    let mock = {
-      id: Math.floor(Math.random() * 1000000),
-      name: n,
-      type: tType,
-      subType: sType,
-      statsRolled: s,
-    };
-    let lower = n.toLowerCase();
+          if (s === "UNIQUE") {
+            let lower = n.toLowerCase();
+            let art = window.ARTIFACT_POOL ? window.ARTIFACT_POOL.find(a => lower.includes(a.name.toLowerCase())) : null;
+            return {
+              type: "artifact",
+              statsRolled: "UNIQUE",
+              trait: art ? art.trait : "frenzy"
+            };
+          }
+          let tType = guessItemType(n);
+          let sType = null;
+          if (tType === "subweapon") {
+            let lower = n.toLowerCase();
+            if (lower.includes("shield") || lower.includes("buckler") || lower.includes("aegis") || lower.includes("bulwark")) {
+              sType = "shield";
+            } else if (lower.includes("dagger") || lower.includes("kris") || lower.includes("stiletto") || lower.includes("dirk") || lower.includes("gauche")) {
+              sType = "dagger";
+            } else {
+              sType = "tome";
+            }
+          }
+
+          // Dynamically extract the underlying noun from the name to populate custom icons on toasts
+          let foundNoun = "";
+          if (window.slotNouns) {
+            let flatNouns = [];
+            for (let k in window.slotNouns) {
+              if (k === "subweapon") {
+                for (let sk in window.slotNouns.subweapon) {
+                  flatNouns = flatNouns.concat(window.slotNouns.subweapon[sk]);
+                }
+              } else {
+                flatNouns = flatNouns.concat(window.slotNouns[k]);
+              }
+            }
+            for (let noun of flatNouns) {
+              if (n.includes(noun)) {
+                foundNoun = noun;
+                break;
+              }
+            }
+          }
+
+          let mock = {
+            id: Math.floor(Math.random() * 1000000),
+            name: n,
+            type: tType,
+            subType: sType,
+            statsRolled: s,
+            noun: foundNoun,
+          };
+          let lower = n.toLowerCase();
     if (lower.includes("phoenix")) mock.isUniqueStaff = true;
     if (lower.includes("sanguine") || lower.includes("reaver")) mock.isUniqueSword = true;
     if (lower.includes("sovereign") || lower.includes("singularity")) mock.isUniqueSingularity = true;

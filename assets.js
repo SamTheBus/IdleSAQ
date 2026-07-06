@@ -190,16 +190,379 @@ window.AssetCatalog = {
   },
 
   // Blueprints for procedurally rendering generic equipment based on slots
-  genericEquipment: {
-    weapon(id, color) {
-      return `
-        ${window.AssetCatalog.gradients.weapon(id, color)}
-        <path d="M16 3 L19 8 L18 21 L14 21 L13 8 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.8" />
-        <rect x="11" y="21" width="10" height="2.5" rx="0.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />
-        <rect x="14.5" y="23.5" width="3" height="5" fill="#5c3a21" stroke="#000" stroke-width="1" />
-        <circle cx="16" cy="29.5" r="1.5" fill="#f1c40f" stroke="#000" stroke-width="1" />
-      `;
-    },
+    genericEquipment: {
+      // --- SPECIALIZED NOUN Blueprints ---
+      greatsword(id, color) {
+        return `
+          ${window.AssetCatalog.gradients.weapon(id, color)}
+          <path d="M14 2 L18 2 L18 20 L14 20 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.8" />
+          <path d="M9 20 L23 20 L16 23 Z" fill="${color}" stroke="#000" stroke-width="1.5" />
+          <rect x="14.5" y="23" width="3" height="6" fill="#4d2f12" stroke="#000" stroke-width="1" />
+          <circle cx="16" cy="29.5" r="1.5" fill="${color}" stroke="#000" stroke-width="1" />
+        `;
+      },
+      warhammer(id, color) {
+        return `
+          <line x1="16" y1="12" x2="16" y2="30" stroke="#5c3a21" stroke-width="2.5" stroke-linecap="round" />
+          <rect x="9" y="4" width="14" height="8" rx="2" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
+          <path d="M7 6 L9 6 L9 10 L7 10 Z" fill="${color}" stroke="#000" stroke-width="1" />
+          <path d="M23 6 L25 6 L25 10 L23 10 Z" fill="${color}" stroke="#000" stroke-width="1" />
+          <polygon points="16,1 18,4 14,4" fill="${color}" stroke="#000" stroke-width="1" />
+          <line x1="16" y1="12" x2="16" y2="20" stroke="${color}" stroke-width="1" />
+        `;
+      },
+      battleaxe(id, color) {
+        return `
+          <line x1="16" y1="6" x2="16" y2="30" stroke="#4d2f12" stroke-width="2.5" stroke-linecap="round" />
+          <path d="M16 8 Q7 4, 10 14 Q14 18, 16 16" fill="${color}" stroke="#000" stroke-width="1.8" />
+          <path d="M16 8 Q25 4, 22 14 Q18 18, 16 16" fill="${color}" stroke="#000" stroke-width="1.8" />
+          <circle cx="16" cy="12" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />
+          <polygon points="16,3 18,6 14,3" fill="#bdc3c7" stroke="#000" stroke-width="1" />
+        `;
+      },
+      broadsword(id, color) {
+        return `
+          ${window.AssetCatalog.gradients.weapon(id, color)}
+          <path d="M13 3 L19 3 L18 20 L14 20 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.8" />
+          <rect x="9" y="20" width="14" height="2.5" rx="0.5" fill="${color}" stroke="#000" stroke-width="1.2" />
+          <rect x="14" y="22.5" width="4" height="6" fill="#3b3b3b" stroke="#000" stroke-width="1" />
+          <circle cx="16" cy="29.5" r="1.5" fill="${color}" stroke="#000" stroke-width="1" />
+        `;
+      },
+      kite_shield(id, color) {
+            return `
+              ${window.AssetCatalog.gradients.shield(id, color)}
+              <path d="M7 5 Q16 3, 25 5 Q23 18, 16 29 Q9 18, 7 5 Z" fill="url(#grad_sh_${id})" stroke="#000" stroke-width="2" />
+              <path d="M12 9 Q16 7, 20 9 L18 18 Q16 23, 16 23 L14 18 Z" fill="none" stroke="#fff" stroke-width="1" opacity="0.6" />
+            `;
+          },
+          tower_shield(id, color) {
+            return `
+              ${window.AssetCatalog.gradients.shield(id, color)}
+              <rect x="8" y="4" width="16" height="24" rx="2" fill="url(#grad_sh_${id})" stroke="#000" stroke-width="2" />
+              <line x1="16" y1="4" x2="16" y2="28" stroke="#000" stroke-width="1.5" />
+              <circle cx="11" cy="8" r="1" fill="#fff" /><circle cx="21" cy="8" r="1" fill="#fff" />
+              <circle cx="11" cy="16" r="1" fill="#fff" /><circle cx="21" cy="16" r="1" fill="#fff" />
+              <circle cx="11" cy="24" r="1" fill="#fff" /><circle cx="21" cy="24" r="1" fill="#fff" />
+            `;
+          },
+          buckler(id, color) {
+            return `
+              <circle cx="16" cy="16" r="11" fill="${color}" stroke="#000" stroke-width="2" />
+              <circle cx="16" cy="16" r="7" fill="#2c3e50" stroke="#000" stroke-width="1.5" />
+              <circle cx="16" cy="16" r="3" fill="#ffffff" stroke="#000" stroke-width="1" />
+              <line x1="16" y1="5" x2="16" y2="27" stroke="#111" stroke-dasharray="2 2" stroke-width="1" />
+              <line x1="5" y1="16" x2="27" y2="16" stroke="#111" stroke-dasharray="2 2" stroke-width="1" />
+            `;
+          },
+          heater_shield(id, color) {
+            return `
+              ${window.AssetCatalog.gradients.shield(id, color)}
+              <path d="M6 5 H26 V14 C26 22, 16 29, 16 29 C16 29, 6 22, 6 14 Z" fill="url(#grad_sh_${id})" stroke="#000" stroke-width="2" stroke-linejoin="round" />
+              <path d="M12 9 H20 M16 9 V23" stroke="${color}" stroke-width="2" stroke-linecap="round" fill="none" />
+            `;
+          },
+          aegis(id, color) {
+            return `
+              ${window.AssetCatalog.gradients.shield(id, color)}
+              <path d="M16 3 L27 8 L24 22 L16 29 L8 22 L5 8 Z" fill="url(#grad_sh_${id})" stroke="#000" stroke-width="2" stroke-linejoin="round" />
+              <circle cx="16" cy="16" r="5" fill="none" stroke="#fff" stroke-dasharray="3 1.5" stroke-width="1.2" />
+              <circle cx="16" cy="16" r="3.2" fill="${color}" stroke="#000" stroke-width="1" />
+            `;
+          },
+          kris(id, color) {
+            return `
+              <!-- Wavy kris blade -->
+              <path d="M16 4 Q19 7, 16 10 Q13 13, 16 16 L17 19 L15 19 L14 16 Q17 13, 14 10 Q11 7, 14 4 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
+              <rect x="11" y="19" width="10" height="2.2" rx="0.5" fill="${color}" stroke="#000" stroke-width="1" />
+              <path d="M14.5 21 L13 26 Q16 29, 19 26 L17.5 21 Z" fill="#4a2711" stroke="#000" stroke-width="1" />
+            `;
+          },
+          stiletto(id, color) {
+            return `
+              <!-- Ultra thin piercing needle stiletto blade -->
+              <path d="M15.5 3 H16.5 L17 19 H15 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.5" />
+              <rect x="11" y="19" width="10" height="2" rx="0.5" fill="${color}" stroke="#000" stroke-width="1" />
+              <rect x="14.5" y="21" width="3" height="7" rx="0.5" fill="#111" stroke="#000" stroke-width="1" />
+              <circle cx="16" cy="28.5" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
+            `;
+          },
+          baselard(id, color) {
+            return `
+              <!-- Straight broad diamond blade -->
+              <path d="M16 4 L18 8 L17 19 H15 L14 8 Z" fill="#95a5a6" stroke="#000" stroke-width="1.8" />
+              <!-- H-shaped hilt guard -->
+              <rect x="10" y="19" width="12" height="2.5" fill="${color}" stroke="#000" stroke-width="1" />
+              <rect x="14.5" y="21.5" width="3" height="5" fill="#4a2306" stroke="#000" stroke-width="1" />
+              <!-- H-shaped pommel -->
+              <rect x="11" y="26.5" width="10" height="2.5" fill="${color}" stroke="#000" stroke-width="1" />
+            `;
+          },
+          dirk(id, color) {
+            return `
+              <!-- Single edged heavy dirk blade -->
+              <path d="M15 4 L17.5 7 L17.5 19 H14.5 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.8" />
+              <rect x="12" y="19" width="8" height="2" fill="${color}" stroke="#000" stroke-width="1" />
+              <rect x="14" y="21" width="4" height="6.5" fill="#5c3a21" stroke="#000" stroke-width="1" />
+              <circle cx="16" cy="28" r="1.8" fill="${color}" stroke="#000" stroke-width="0.8" />
+            `;
+          },
+          main_gauche(id, color) {
+            return `
+              <!-- Main Gauche curved guard dagger -->
+              <path d="M16 4 L17.8 8 L17 19 H15 L14.2 8 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.8" />
+              <!-- Ornate curved crossguard -->
+              <path d="M9 19 Q16 16, 23 19" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" />
+              <!-- Finger protection basket ring -->
+              <path d="M13 19 C13 23, 19 23, 19 19" fill="none" stroke="${color}" stroke-width="1.5" />
+              <rect x="14.5" y="21" width="3" height="6" fill="#111" stroke="#000" stroke-width="1" />
+            `;
+          },
+      grimoire(id, color) {
+            return `
+              <!-- Deep Purple/Black Ritual Binding -->
+              <rect x="5" y="4" width="22" height="24" rx="2" fill="#1b002a" stroke="#000" stroke-width="1.8" />
+              <rect x="5" y="4" width="4.5" height="24" fill="#0d001a" stroke="#000" stroke-width="1" />
+              <!-- Occult Golden Crescent Moon and Star -->
+              <path d="M19 12 C19 16, 14 20, 14 20 C14 20, 18 18, 18 12 C18 6, 14 4, 14 4 C14 4, 19 8, 19 12 Z" fill="#f1c40f" stroke="#000" stroke-width="0.8" transform="translate(1, 0)" />
+              <polygon points="15,10 16,12 14,12" fill="${color}" />
+              <!-- Forbidden Seal Lock -->
+              <rect x="25" y="13" width="3" height="6" rx="0.5" fill="#f1c40f" stroke="#000" stroke-width="1" />
+            `;
+          },
+               codex(id, color) {
+                 return `
+                   <!-- Brass and Bronze Clad Cover -->
+                   <rect x="6" y="4" width="20" height="24" rx="2" fill="#784212" stroke="#000" stroke-width="2" />
+                   <rect x="6" y="4" width="4" height="24" fill="#4a2306" stroke="#000" stroke-width="1" />
+                   <!-- Rotating Mechanical Gears -->
+                   <circle cx="17" cy="16" r="6" fill="none" stroke="#bdc3c7" stroke-dasharray="2 1.5" stroke-width="1.8" />
+                   <circle cx="17" cy="16" r="4" fill="${color}" stroke="#111" stroke-width="1" />
+                   <circle cx="17" cy="16" r="1.5" fill="#fff" />
+                 `;
+               },
+               lexicon(id, color) {
+                 return `
+                   <!-- Heavy Academic Blue Bound Cover -->
+                   <rect x="6" y="4" width="20" height="24" rx="2" fill="#1b4f72" stroke="#000" stroke-width="2" />
+                   <rect x="6" y="4" width="4.5" height="24" fill="#113047" stroke="#000" stroke-width="1" />
+                   <!-- Gold spine Ribs -->
+                   <line x1="6" y1="9" x2="10" y2="9" stroke="#f1c40f" stroke-width="1" />
+                   <line x1="6" y1="16" x2="10" y2="16" stroke="#f1c40f" stroke-width="1" />
+                   <line x1="6" y1="23" x2="10" y2="23" stroke="#f1c40f" stroke-width="1" />
+                   <!-- Scholar's Glowing Eye of Knowledge -->
+                   <path d="M11 16 Q17 10, 23 16 Q17 22, 11 16 Z" fill="none" stroke="#fff" stroke-width="1.5" />
+                   <circle cx="17" cy="16" r="3" fill="${color}" stroke="#000" stroke-width="1" />
+                 `;
+               },
+               chronicle(id, color) {
+                 return `
+                   <!-- Relic leather book of past lives -->
+                   <rect x="6" y="4" width="20" height="24" rx="2" fill="#4d1a00" stroke="#000" stroke-width="2" />
+                   <rect x="6" y="4" width="4" height="24" fill="#2d1000" stroke="#000" stroke-width="1" />
+                   <!-- Golden Hourglass symbol -->
+                   <path d="M13 10 L21 10 L17 16 L21 22 L13 22 Z" fill="none" stroke="#f1c40f" stroke-width="1.5" />
+                   <!-- Sand hourglass vials inside -->
+                   <polygon points="14,11 20,11 17,15" fill="${color}" />
+                   <polygon points="17,17 19,21 15,21" fill="${color}" />
+                 `;
+               },
+      greathelm(id, color) {
+            return `
+              <!-- Bucket Knight Helm -->
+              <path d="M9 8 H23 V23 L16 29 L9 23 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
+              <!-- Crest plume on top matching quality tiers -->
+              <path d="M16 8 Q12 1, 16 2 Q20 1, 16 8" fill="${color}" stroke="#000" stroke-width="1" />
+              <!-- Golden T-shaped visor bar -->
+              <path d="M12 12 H20 M16 12 V22" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round" fill="none" />
+              <path d="M12 12 H20 M16 12 V22" stroke="#000" stroke-width="1" stroke-linecap="round" fill="none" />
+              <!-- Breathing vents -->
+              <circle cx="12" cy="17" r="0.8" fill="#111" /><circle cx="14" cy="17" r="0.8" fill="#111" />
+              <circle cx="18" cy="17" r="0.8" fill="#111" /><circle cx="20" cy="17" r="0.8" fill="#111" />
+              <circle cx="12" cy="20" r="0.8" fill="#111" /><circle cx="14" cy="20" r="0.8" fill="#111" />
+              <circle cx="18" cy="20" r="0.8" fill="#111" /><circle cx="20" cy="20" r="0.8" fill="#111" />
+            `;
+          },
+          armet(id, color) {
+            return `
+              <!-- Renaissance Armet Helm -->
+              <path d="M9 10 C9 4, 23 4, 23 10 L24 23 L16 29 L8 23 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
+              <!-- Articulated Visor Plate with tier highlighted line -->
+              <path d="M9 12 Q16 7, 23 12 L21 19 L11 19 Z" fill="#95a5a6" stroke="#000" stroke-width="1.2" />
+              <!-- Eye slits -->
+              <line x1="11" y1="13.5" x2="21" y2="13.5" stroke="#111" stroke-width="1.5" />
+              <circle cx="16" cy="16" r="1.2" fill="${color}" stroke="#000" stroke-width="0.8" />
+            `;
+          },
+          bascinet(id, color) {
+            return `
+              <!-- Pointed houndskull helmet -->
+              <path d="M9 12 C9 5, 23 5, 23 12 L24 23 L16 29 L8 23 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+              <!-- Snout-like pointed visor -->
+              <polygon points="10,11 16,15 22,11 20,20 16,24 12,20" fill="#95a5a6" stroke="#000" stroke-width="1.2" />
+              <!-- Angled squint slits -->
+              <line x1="11" y1="13" x2="15" y2="14" stroke="#111" stroke-width="1.8" stroke-linecap="round" />
+              <line x1="21" y1="13" x2="17" y2="14" stroke="#111" stroke-width="1.8" stroke-linecap="round" />
+              <!-- Breath ventilation dots on snout matching quality color -->
+              <circle cx="15" cy="18" r="0.8" fill="${color}" />
+              <circle cx="17" cy="18" r="0.8" fill="${color}" />
+              <circle cx="14" cy="20" r="0.8" fill="${color}" />
+              <circle cx="18" cy="20" r="0.8" fill="${color}" />
+            `;
+          },
+          barbuta(id, color) {
+            return `
+              <!-- Classical Italian T-vent helmet -->
+              <path d="M9 10 C9 4, 23 4, 23 10 L24 24 L16 29 L8 24 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+              <!-- Distinct T-shaped face opening -->
+              <path d="M12 10 H20 V16 L17 16 V24 H15 V16 L12 16 Z" fill="#111" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" />
+              <!-- Center ridge line -->
+              <path d="M16 4 V10" stroke="#000" stroke-width="2" />
+            `;
+          },
+          circlet(id, color) {
+            return `
+              <path d="M6 18 Q16 11, 26 18 Q16 23, 6 18 Z" fill="none" stroke="${color}" stroke-width="2.5" />
+              <polygon points="16,11 19,15 13,15" fill="${color}" stroke="#000" stroke-width="1" />
+              <circle cx="16" cy="9.5" r="1.5" fill="#fff" stroke="#000" stroke-width="0.8" />
+              <circle cx="10" cy="15.5" r="1.2" fill="#fff" stroke="#000" stroke-width="0.8" />
+              <circle cx="22" cy="15.5" r="1.2" fill="#fff" stroke="#000" stroke-width="0.8" />
+            `;
+          },
+          coif(id, color) {
+            return `
+              <path d="M9 10 C9 5, 23 5, 23 10 L24 22 L16 28 L8 22 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+              <path d="M12 15 Q16 13, 20 15 L18 22 Q16 24, 16 24 L14 22 Z" fill="#2c3e50" stroke="#000" stroke-width="1.2" />
+              <circle cx="16" cy="16" r="6" fill="none" stroke="#ffffff" stroke-dasharray="2 2" stroke-width="1" opacity="0.6" />
+            `;
+          },
+          visor(id, color) {
+            return `
+              <!-- Heavy helm with pivoting visor -->
+              <path d="M9 10 C9 4, 23 4, 23 10 L24 24 L16 29 L8 24 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+              <!-- Visor plate with V-vent -->
+              <path d="M9 10 L23 10 L21 21 L16 24 L11 21 Z" fill="#95a5a6" stroke="#000" stroke-width="1.2" />
+              <rect x="11.5" y="12" width="9" height="1.8" fill="#111" />
+              <!-- Pivot rivets on sides -->
+              <circle cx="8" cy="12" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
+              <circle cx="24" cy="12" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
+              <!-- Slit breathers -->
+              <line x1="14" y1="17" x2="18" y2="17" stroke="#111" stroke-width="1" />
+              <line x1="13" y1="19" x2="19" y2="19" stroke="#111" stroke-width="1" />
+            `;
+          },
+      cuirass(id, color) {
+            return `
+              <!-- heavy sculpted steel breastplate with tier pauldrons -->
+              <path d="M8 8 L24 8 L22 22 L16 26 L10 22 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
+              <path d="M4 9 Q8 6, 9 12 L7 14 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
+              <path d="M28 9 Q20 6, 23 12 L25 14 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
+              <path d="M12 13 Q16 15, 20 13" fill="none" stroke="#333" stroke-width="1.5" />
+              <path d="M11 18 Q16 20, 21 18" fill="none" stroke="#333" stroke-width="1.5" />
+              <line x1="16" y1="8" x2="16" y2="24" stroke="#333" stroke-width="1.5" />
+            `;
+          },
+          hauberk(id, color) {
+            return `
+              <!-- Chainmail vest -->
+              <path d="M8 7 L24 7 L24 23 L16 28 L8 23 Z" fill="#95a5a6" stroke="#000" stroke-width="1.8" />
+              <path d="M8 12 H24 M8 17 H24 M8 22 H24" stroke="rgba(0,0,0,0.25)" stroke-width="1.5" stroke-dasharray="2 2" />
+              <rect x="11" y="5" width="10" height="4" fill="${color}" stroke="#000" stroke-width="1" />
+            `;
+          },
+          brigandine(id, color) {
+            return `
+              <!-- Studded leather/velvet armor doublet -->
+              <path d="M8 8 L24 8 L22 22 L16 26 L10 22 Z" fill="#2c3e50" stroke="#000" stroke-width="1.8" />
+              <!-- Rivet studs (dots) matching Tier Color -->
+              <circle cx="12" cy="11" r="1" fill="${color}" /><circle cx="16" cy="11" r="1" fill="${color}" /><circle cx="20" cy="11" r="1" fill="${color}" />
+              <circle cx="10" cy="15" r="1" fill="${color}" /><circle cx="14" cy="15" r="1" fill="${color}" /><circle cx="18" cy="15" r="1" fill="${color}" /><circle cx="22" cy="15" r="1" fill="${color}" />
+              <circle cx="12" cy="19" r="1" fill="${color}" /><circle cx="16" cy="19" r="1" fill="${color}" /><circle cx="20" cy="19" r="1" fill="${color}" />
+              <!-- Neck guard -->
+              <path d="M10 8 Q16 11, 22 8" fill="none" stroke="#5c3a21" stroke-width="1.5" />
+            `;
+          },
+          plate_mail(id, color) {
+            return `
+              <!-- Heavy segmented horizontal plates -->
+              <path d="M8 8 L24 8 L22 22 L16 26 L10 22 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
+              <!-- Segmented plate seams -->
+              <path d="M9 12 C9 12, 16 14, 23 12" fill="none" stroke="#333" stroke-width="1.5" />
+              <path d="M9.5 16 C9.5 16, 16 18, 22.5 16" fill="none" stroke="#333" stroke-width="1.5" />
+              <path d="M10 20 C10 20, 16 22, 22 20" fill="none" stroke="#333" stroke-width="1.5" />
+              <!-- Colored vertical bracing harness straps -->
+              <line x1="12" y1="8" x2="12" y2="23" stroke="${color}" stroke-width="1.5" />
+              <line x1="20" y1="8" x2="20" y2="23" stroke="${color}" stroke-width="1.5" />
+            `;
+          },
+          doublet(id, color) {
+            return `
+              <!-- Fabric vest with white undershirt and gold buttons -->
+              <path d="M8 8 L24 8 L22 22 L16 26 L10 22 Z" fill="${color}" stroke="#000" stroke-width="1.8" />
+              <polygon points="12,8 16,13 20,8" fill="#fff" stroke="#000" stroke-width="1" />
+              <line x1="16" y1="8" x2="16" y2="13" stroke="#000" stroke-width="1" />
+              <path d="M8 8 L12 14 L10 16" fill="none" stroke="#111" stroke-width="1.5" />
+              <path d="M24 8 L20 14 L22 16" fill="none" stroke="#111" stroke-width="1.5" />
+              <circle cx="16" cy="15" r="1.2" fill="#f1c40f" stroke="#000" stroke-width="0.8" />
+              <circle cx="16" cy="19" r="1.2" fill="#f1c40f" stroke="#000" stroke-width="0.8" />
+            `;
+          },
+          inquisitor_robes(id, color) {
+            return `
+              <!-- Fabric draped robes with hood -->
+              <path d="M6 14 L26 14 L23 29 L16 30 L9 29 Z" fill="#34495e" stroke="#000" stroke-width="1.8" />
+              <path d="M8 12 Q16 16, 24 12 L22 18 Q16 22, 10 18 Z" fill="${color}" stroke="#000" stroke-width="1.5" />
+              <path d="M11 12 C11 5, 21 5, 21 12 Z" fill="#2c3e50" stroke="#000" stroke-width="1.5" />
+              <path d="M13 12 C13 8, 19 8, 19 12 Z" fill="#111" />
+              <line x1="16" y1="18" x2="16" y2="29" stroke="#f1c40f" stroke-width="1.2" />
+            `;
+          },
+          full_plate_armor(id, color) {
+            return `
+              <!-- Articulated full steel suit -->
+              <path d="M8 6 L24 6 L22 20 L16 24 L10 20 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
+              <path d="M10 20 H22 L24 28 H8 Z" fill="#95a5a6" stroke="#000" stroke-width="1.5" />
+              <!-- Rounded heavy pauldrons with tier color trims -->
+              <path d="M4 10 C4 6, 10 7, 10 13 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
+              <path d="M28 10 C28 6, 22 7, 22 13 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
+              <!-- Fluted chest detailing -->
+              <path d="M12 11 L16 16 L20 11 M12 15 L16 19 L20 15" fill="none" stroke="#333" stroke-width="1.2" />
+              <!-- Heavy iron belt buckle -->
+              <rect x="14" y="19" width="4" height="3" fill="#f1c40f" stroke="#000" stroke-width="1" />
+            `;
+          },
+      exosuit(id, color) {
+        return `
+          <!-- Sci-fi mechanical armature with chest core -->
+          <rect x="7" y="6" width="18" height="21" rx="3" fill="#2c3e50" stroke="#000" stroke-width="2" />
+          <path d="M4 10 Q8 6, 9 12 Z M28 10 Q24 6, 23 12 Z" fill="#34495e" stroke="#000" stroke-width="1.2" />
+          <path d="M12 12 L16 16 L20 12" fill="none" stroke="${color}" stroke-width="1.5" />
+          <path d="M12 18 L16 16 L20 18" fill="none" stroke="${color}" stroke-width="1.5" />
+          <circle cx="16" cy="16" r="3.5" fill="#fff" stroke="${color}" stroke-width="1.5" />
+        `;
+      },
+      trenchcoat(id, color) {
+        return `
+          <!-- Sleek draped coat with popped collar -->
+          <path d="M7 6 L25 6 L22 29 L16 30 L10 29 Z" fill="#2c3e50" stroke="#000" stroke-width="1.8" />
+          <polygon points="7,6 12,14 10,6" fill="${color}" stroke="#000" stroke-width="1" />
+          <polygon points="25,6 20,14 22,6" fill="${color}" stroke="#000" stroke-width="1" />
+          <rect x="9.5" y="16" width="13" height="3" fill="#111" stroke="#000" stroke-width="1" />
+          <rect x="15" y="15.5" width="2" height="4" fill="#f1c40f" stroke="#000" stroke-width="0.8" />
+          <line x1="16" y1="19" x2="16" y2="29" stroke="#111" stroke-width="1.5" />
+        `;
+      },
+
+      // --- GENERIC SLOT Blueprints ---
+      weapon(id, color) {
+        return `
+          ${window.AssetCatalog.gradients.weapon(id, color)}
+          <path d="M16 3 L19 8 L18 21 L14 21 L13 8 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.8" />
+          <rect x="11" y="21" width="10" height="2.5" rx="0.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />
+          <rect x="14.5" y="23.5" width="3" height="5" fill="#5c3a21" stroke="#000" stroke-width="1" />
+          <circle cx="16" cy="29.5" r="1.5" fill="#f1c40f" stroke="#000" stroke-width="1" />
+        `;
+      },
     shield(id, color) {
       return `
         ${window.AssetCatalog.gradients.shield(id, color)}
@@ -215,13 +578,23 @@ window.AssetCatalog = {
       `;
     },
     tome(id, color) {
-      return `
-        <rect x="8" y="6" width="16" height="20" rx="1.5" fill="${color}" stroke="#000" stroke-width="2" />
-        <rect x="10" y="8" width="12" height="16" fill="#ffffff" opacity="0.9" rx="1" />
-        <line x1="12" y1="12" x2="20" y2="12" stroke="#444444" stroke-width="1.2" />
-        <line x1="12" y1="16" x2="18" y2="16" stroke="#444444" stroke-width="1.2" />
-      `;
-    },
+          return `
+            <!-- Heavy Leather Bound Cover -->
+            <rect x="6" y="4" width="20" height="24" rx="2" fill="#2d1a0d" stroke="#000" stroke-width="1.8" />
+            <!-- Book Spine Binding -->
+            <rect x="6" y="4" width="4" height="24" fill="#1c0f07" stroke="#000" stroke-width="1" />
+            <!-- Gold Corner Brackets -->
+            <polygon points="10,4 12,4 10,6" fill="#f1c40f" />
+            <polygon points="26,4 24,4 26,6" fill="#f1c40f" />
+            <polygon points="10,28 12,28 10,26" fill="#f1c40f" />
+            <polygon points="26,28 24,28 26,26" fill="#f1c40f" />
+            <!-- Inner Page Edge line details -->
+            <line x1="25" y1="5" x2="25" y2="27" stroke="#eaeaea" stroke-width="1.2" />
+            <!-- Central Mystical Sphere scaling with Tier Color -->
+            <circle cx="17" cy="16" r="4.5" fill="${color}" stroke="#000" stroke-width="1.2" />
+            <circle cx="15.5" cy="14.5" r="1" fill="#fff" opacity="0.6" />
+          `;
+        },
     helmet(id, color) {
       return `
         ${window.AssetCatalog.gradients.equip(id, color)}
@@ -236,50 +609,183 @@ window.AssetCatalog = {
       `;
     },
     chest(id, color) {
-      return `
-        ${window.AssetCatalog.gradients.equip(id, color)}
-        <path d="M4 11 C4 6, 11 8, 11 13 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" />
-        <path d="M28 11 C28 6, 21 8, 21 13 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" />
-        <path d="M8 8 Q16 11, 24 8 L25 21 C25 26, 16 29, 16 29 C16 29, 7 26, 7 21 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
-        <path d="M15.5 10 L16.5 10 L16.5 28 L15.5 28 Z" fill="${color}" stroke="#000" stroke-width="0.8" />
-        <path d="M11 8 Q16 12, 21 8" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" />
-      `;
-    },
-    leggings(id, color) {
-      return `
-        ${window.AssetCatalog.gradients.equip(id, color)}
-        <rect x="7" y="6" width="18" height="5" rx="1.5" fill="${color}" stroke="#000" stroke-width="1.5" />
-        <path d="M7 11 L13 11 L12 18 L7 17 Z M19 11 L25 11 L25 17 L20 18 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
-        <path d="M9 18 L14 18 L13 28 L9 28 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
-        <circle cx="11.5" cy="20" r="2.2" fill="${color}" stroke="#000" stroke-width="1" />
-        <path d="M18 18 L23 18 L23 28 L19 28 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
-        <circle cx="20.5" cy="20" r="2.2" fill="${color}" stroke="#000" stroke-width="1" />
-      `;
-    },
-    overall(id, color) {
-      return `
-        ${window.AssetCatalog.gradients.equip(id, color)}
-        <path d="M3 11 Q10 8, 10 14 Z M29 11 Q22 8, 22 14 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.5" />
-        <path d="M4 14 Q10 12, 10 17 Z M28 14 Q22 12, 22 17 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.2" />
-        <path d="M8 8 L24 8 L22 20 L16 24 L10 20 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" />
-        <path d="M12 12 H20 M11 16 H21" stroke="${color}" stroke-width="1.8" stroke-linecap="round" />
-        <path d="M10 20 H22 L24 28 H8 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
-        <line x1="13" y1="20" x2="11" y2="28" stroke="#000" stroke-width="1.5" /><line x1="19" y1="20" x2="21" y2="28" stroke="#000" stroke-width="1.5" />
-        <path d="M12 8 C12 11, 20 11, 20 8" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" />
-      `;
-    },
-    boots(id, color) {
+          return `
+            <!-- Left & Right Shoulder Pauldrons -->
+            <path d="M4 11 C4 6, 11 8, 11 13 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
+            <path d="M28 11 C28 6, 21 8, 21 13 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
+            <!-- Main Chestplate Body with high-contrast steel shading -->
+            <path d="M8 8 L24 8 L22 22 L16 26 L10 22 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
+            <!-- Dynamic Trim Accents matching quality tiers -->
+            <path d="M11 14 H21" stroke="${color}" stroke-width="2.2" stroke-linecap="round" />
+            <path d="M11 18 H21" stroke="${color}" stroke-width="2.2" stroke-linecap="round" />
+          `;
+        },
+        leggings(id, color) {
               return `
-                ${window.AssetCatalog.gradients.equip(id, color)}
-                <path d="M4 11 L10 7 L12 18 L16 23 L15 27 L4 26 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
-                <path d="M16 11 L22 7 L24 18 L28 23 L27 27 L16 26 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
-                <path d="M4 16 H10 M16 16 H22 M4 21 H12 M16 21 H24" stroke="#000" stroke-width="1.2" />
-                <rect x="4" y="12" width="6" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
-                <rect x="16" y="12" width="6" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
-                <circle cx="6" cy="24" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
-                <circle cx="18" cy="24" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
+                <rect x="7" y="6" width="18" height="5" rx="1.5" fill="${color}" stroke="#000" stroke-width="1.5" />
+                <path d="M7 11 L13 11 L12 18 L7 17 Z M19 11 L25 11 L25 17 L20 18 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
+                <path d="M9 18 L14 18 L13 28 L9 28 Z" fill="#95a5a6" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
+                <circle cx="11.5" cy="20" r="2.2" fill="${color}" stroke="#000" stroke-width="1" />
+                <path d="M18 18 L23 18 L23 28 L19 28 Z" fill="#95a5a6" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
+                <circle cx="20.5" cy="20" r="2.2" fill="${color}" stroke="#000" stroke-width="1" />
               `;
             },
+            greaves(id, color) {
+                  return `
+                    <!-- Leather back straps wrapping behind -->
+                    <path d="M4 14 H14 M4 22 H14 M18 14 H28 M18 22 H28" stroke="#5c3a21" stroke-width="2.2" stroke-linecap="round" fill="none" />
+                    <!-- Left Shin Guard: Curved/Tapered Plate -->
+                    <path d="M5 10 L13 10 L12 28 H6 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+                    <!-- Left Highlight (Specular Reflection) -->
+                    <path d="M9 10 L12 10 L11 27 H9 Z" fill="#ffffff" opacity="0.25" />
+                    <!-- Left Knee Guard (Poleyn) -->
+                    <path d="M4 8 Q9 5, 14 8 L13 12 H5 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
+                    <circle cx="9" cy="10" r="1.2" fill="#fff" />
+
+                    <!-- Right Shin Guard: Curved/Tapered Plate -->
+                    <path d="M19 8 L27 8 L26 28 H20 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+                    <circle cx="23" cy="12" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
+                    <!-- Right Highlight (Specular Reflection) -->
+                    <path d="M23 10 L26 10 L25 27 H23 Z" fill="#ffffff" opacity="0.25" />
+                    <!-- Right Knee Guard (Poleyn) -->
+                    <path d="M18 8 Q23 5, 28 8 L27 12 H19 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
+                    <circle cx="23" cy="10" r="1.2" fill="#fff" />
+                  `;
+                },
+                legplates(id, color) {
+                  return `
+                    <!-- Heavy overlapping segmented plate guard -->
+                    <rect x="7" y="6" width="18" height="5" rx="1.5" fill="${color}" stroke="#000" stroke-width="1.5" />
+                    <!-- Left leg plate stack -->
+                    <path d="M7 11 H13 V28 H7 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
+                    <path d="M7 16 H13 M7 21 H13 M7 25 H13" stroke="#333" stroke-width="1.5" />
+                    <!-- Left Highlight -->
+                    <path d="M10 11 L13 11 L13 27 H10 Z" fill="#fff" opacity="0.15" />
+                    <!-- Right leg plate stack -->
+                    <path d="M19 11 H25 V28 H19 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
+                    <path d="M19 16 H25 M19 21 H25 M19 25 H25" stroke="#333" stroke-width="1.5" />
+                    <!-- Right Highlight -->
+                    <path d="M22 11 L25 11 L25 27 H22 Z" fill="#fff" opacity="0.15" />
+                  `;
+                },
+            chausses(id, color) {
+              return `
+                <!-- Chainmail leg wraps with colored leather belts -->
+                <rect x="7" y="5" width="18" height="4" fill="${color}" stroke="#000" stroke-width="1.5" />
+                <path d="M7 9 L13 9 L11 28 H7 Z" fill="#95a5a6" stroke="#000" stroke-width="1.8" />
+                <path d="M19 9 L25 9 L25 28 H21 Z" fill="#95a5a6" stroke="#000" stroke-width="1.8" />
+                <!-- Chain weave indicators -->
+                <path d="M7 12 H13 M7 16 H13 M7 20 H13 M7 24 H13 M19 12 H25 M19 16 H25 M19 20 H25 M19 24 H25" stroke="rgba(0,0,0,0.3)" stroke-width="1" stroke-dasharray="2 1" />
+              `;
+            },
+            cuisses(id, color) {
+              return `
+                <!-- Leather padded cuisses with color knee caps -->
+                <path d="M7 8 L13 8 L11 24 H7 Z" fill="#5c3a21" stroke="#000" stroke-width="1.8" />
+                <path d="M19 8 L25 8 L25 24 H21 Z" fill="#5c3a21" stroke="#000" stroke-width="1.8" />
+                <!-- Padded stich details -->
+                <path d="M7 12 L13 16 M7 16 L11 20 M19 12 L25 16 M19 16 L23 20" stroke="rgba(255,255,255,0.15)" stroke-width="1.2" />
+                <!-- Knee caps -->
+                <circle cx="9" cy="24" r="3.2" fill="${color}" stroke="#000" stroke-width="1.2" />
+                <circle cx="23" cy="24" r="3.2" fill="${color}" stroke="#000" stroke-width="1.2" />
+              `;
+            },
+            overall(id, color) {
+          return `
+            <!-- Full Suit Base Shading -->
+            <path d="M8 6 L24 6 L22 20 L16 24 L10 20 Z" fill="#506272" stroke="#000" stroke-width="1.8" />
+            <path d="M10 20 H22 L24 28 H8 Z" fill="#34495e" stroke="#000" stroke-width="1.5" />
+            <!-- Shoulder Padding Trims -->
+            <path d="M4 11 Q10 8, 10 14 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
+            <path d="M28 11 Q22 8, 22 14 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
+            <!-- Central Seam & Emblem Glimmer -->
+            <line x1="16" y1="8" x2="16" y2="26" stroke="${color}" stroke-width="2.5" stroke-linecap="round" />
+          `;
+        },
+    boots(id, color) {
+          return `
+            <!-- Left Leather Boot -->
+            <!-- Flared cuff matching quality tier -->
+            <path d="M3 11 L11 11 L10 15 H4 Z" fill="${color}" stroke="#000" stroke-width="1.5" />
+            <path d="M4 14 L10 14 L12 22 L15 25 L13 28 L4 27 Z" fill="#5c3a21" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+            <!-- Specular Highlight -->
+            <path d="M5 15 L10 15 L11 21 H5 Z" fill="#ffffff" opacity="0.15" />
+            <path d="M4 27 L13 28" stroke="#111" stroke-width="2.2" />
+
+            <!-- Right Leather Boot -->
+            <!-- Flared cuff matching quality tier -->
+            <path d="M17 11 L25 11 L24 15 H18 Z" fill="${color}" stroke="#000" stroke-width="1.5" />
+            <path d="M18 14 L24 14 L26 22 L29 25 L27 28 L18 27 Z" fill="#5c3a21" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+            <!-- Specular Highlight -->
+            <path d="M19 15 L24 15 L25 21 H19 Z" fill="#ffffff" opacity="0.15" />
+            <path d="M18 27 L27 28" stroke="#111" stroke-width="2.2" />
+          `;
+        },
+        sabatons(id, color) {
+          return `
+            <!-- Gothic Sabatons with spec highlights -->
+            <path d="M3 15 L9 11 L12 21 L16 26 L13 29 L3 27 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+            <path d="M15 15 L21 11 L24 21 L28 26 L25 29 L15 27 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+            <polygon points="3,27 6,25 3,25" fill="${color}" stroke="#000" stroke-width="0.8" />
+            <polygon points="15,27 18,25 15,25" fill="${color}" stroke="#000" stroke-width="0.8" />
+            <!-- Specular reflections -->
+            <path d="M4 16 L9 13 L10 21 H4 Z" fill="#ffffff" opacity="0.25" />
+            <path d="M16 16 L21 13 L22 21 H16 Z" fill="#ffffff" opacity="0.25" />
+          `;
+        },
+        sollerets(id, color) {
+          return `
+            <!-- Left Solleret scale plates -->
+            <path d="M4 11 L10 8 L12 26 L4 25 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+            <!-- Overlapping lamination lines -->
+            <path d="M4 15 H11 M4 19 H12 M4 23 H11" stroke="#333" stroke-width="1.5" />
+            <!-- Left strap buckle -->
+            <rect x="4" y="11" width="7" height="2.5" fill="${color}" stroke="#000" stroke-width="1" />
+
+            <!-- Right Solleret scale plates -->
+            <path d="M16 11 L22 8 L24 26 L16 25 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+            <!-- Overlapping lamination lines -->
+            <path d="M16 15 H23 M16 19 H24 M16 23 H23" stroke="#333" stroke-width="1.5" />
+            <!-- Right strap buckle -->
+            <rect x="16" y="11" width="7" height="2.5" fill="${color}" stroke="#000" stroke-width="1" />
+          `;
+        },
+        steel_boots(id, color) {
+          return `
+            <!-- Left Steel Boot -->
+            <!-- Flared Ankle Collar -->
+            <path d="M4 10 H14 L12 15 H6 Z" fill="${color}" stroke="#000" stroke-width="1.5" />
+            <path d="M5 15 L13 15 L14 24 L12 27 L4 26 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+            <!-- Heavy Steel Toe Cap -->
+            <path d="M4 23 L12 24 L11 27 H5 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.2" />
+            <!-- Reflection Highlight -->
+            <path d="M5 16 L12 16 L13 22 H5 Z" fill="#ffffff" opacity="0.25" />
+
+            <!-- Right Steel Boot -->
+            <!-- Flared Ankle Collar -->
+            <path d="M18 10 H28 L26 15 H20 Z" fill="${color}" stroke="#000" stroke-width="1.5" />
+            <path d="M19 15 L27 15 L28 24 L26 27 L18 26 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+            <!-- Heavy Steel Toe Cap -->
+            <path d="M18 23 L26 24 L25 27 H19 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.2" />
+            <!-- Reflection Highlight -->
+            <path d="M19 16 L26 16 L27 22 H19 Z" fill="#ffffff" opacity="0.25" />
+          `;
+        },
+        treads(id, color) {
+          return `
+            <!-- Leather boots with thick black rubber outsoles and laces -->
+            <path d="M4 11 L10 8 L12 21 L16 24 L14 28 L4 27 Z" fill="#5c3a21" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+            <path d="M16 11 L22 7 L24 18 L28 23 L27 28 L16 27 Z" fill="#5c3a21" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+            <!-- Outsoles -->
+            <path d="M4 26 L14 27 L14 28 L4 27 Z" fill="#111" stroke="#000" stroke-width="1" />
+            <path d="M16 26 L26 27 L26 28 L16 27 Z" fill="#111" stroke="#000" stroke-width="1" />
+            <!-- Color laces buckle highlights -->
+            <rect x="6" y="13" width="4" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
+            <rect x="18" y="13" width="4" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
+            <rect x="5.5" y="18" width="4.5" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
+            <rect x="17.5" y="18" width="4.5" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
+          `;
+        },
             sigil(id, color) {
               return `
                 <defs>
