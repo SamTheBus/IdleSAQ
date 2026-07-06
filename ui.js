@@ -171,7 +171,8 @@ window.getUseIconHtml = function (key, size = 32) {
   let innerHtml = "";
 
   // Set 64x64 grid coordinates dynamically for upscaled vector items
-  let isHighFidelity = key.includes("Sack") || key.includes("Crate") || key.includes("Sigil");
+  let isHighFidelity =
+    key.includes("Sack") || key.includes("Crate") || key.includes("Sigil");
   let viewBox = isHighFidelity ? "0 0 64 64" : "0 0 32 32";
 
   // 1. Handle special unique assets
@@ -241,13 +242,13 @@ window.getUseIconHtml = function (key, size = 32) {
   }
 
   if (key === "Monster Card Sack") {
-      bg = "rgba(168, 85, 247, 0.25)";
-      border = "#a855f7";
-      innerHtml = window.AssetCatalog.consumables.monster_card_sack(uid);
-    }
+    bg = "rgba(168, 85, 247, 0.25)";
+    border = "#a855f7";
+    innerHtml = window.AssetCatalog.consumables.monster_card_sack(uid);
+  }
 
-    return window.AssetCatalog.compile(viewBox, innerHtml, size, bg, border);
-  };
+  return window.AssetCatalog.compile(viewBox, innerHtml, size, bg, border);
+};
 
 window.getArtifactIconHtml = function (trait, size = 24) {
   let uid = Math.floor(Math.random() * 10000000);
@@ -1779,82 +1780,161 @@ window.pushToast = function (
 
   function guessItemType(n) {
     let lowerName = n.toLowerCase();
-    if (lowerName.includes("staff") || lowerName.includes("sword") || lowerName.includes("glaive") || lowerName.includes("reaver") || lowerName.includes("greatsword") || lowerName.includes("halberd") || lowerName.includes("axe") || lowerName.includes("mace") || lowerName.includes("hammer") || lowerName.includes("blade")) {
+    if (
+      lowerName.includes("staff") ||
+      lowerName.includes("sword") ||
+      lowerName.includes("glaive") ||
+      lowerName.includes("reaver") ||
+      lowerName.includes("greatsword") ||
+      lowerName.includes("halberd") ||
+      lowerName.includes("axe") ||
+      lowerName.includes("mace") ||
+      lowerName.includes("hammer") ||
+      lowerName.includes("blade")
+    ) {
       return "weapon";
     }
-    if (lowerName.includes("shield") || lowerName.includes("buckler") || lowerName.includes("aegis") || lowerName.includes("bulwark") || lowerName.includes("dagger") || lowerName.includes("kris") || lowerName.includes("stiletto") || lowerName.includes("dirk") || lowerName.includes("gauche") || lowerName.includes("tome") || lowerName.includes("book") || lowerName.includes("codex") || lowerName.includes("lexicon") || lowerName.includes("chronicle") || lowerName.includes("watch")) {
+    if (
+      lowerName.includes("shield") ||
+      lowerName.includes("buckler") ||
+      lowerName.includes("aegis") ||
+      lowerName.includes("bulwark") ||
+      lowerName.includes("dagger") ||
+      lowerName.includes("kris") ||
+      lowerName.includes("stiletto") ||
+      lowerName.includes("dirk") ||
+      lowerName.includes("gauche") ||
+      lowerName.includes("tome") ||
+      lowerName.includes("book") ||
+      lowerName.includes("codex") ||
+      lowerName.includes("lexicon") ||
+      lowerName.includes("chronicle") ||
+      lowerName.includes("watch")
+    ) {
       return "subweapon";
     }
-    if (lowerName.includes("helm") || lowerName.includes("visor") || lowerName.includes("circlet") || lowerName.includes("crown")) return "helmet";
-    if (lowerName.includes("hauberk") || lowerName.includes("cuirass") || lowerName.includes("brigandine") || lowerName.includes("plate") || lowerName.includes("chest")) return "chest";
-    if (lowerName.includes("greaves") || lowerName.includes("leg") || lowerName.includes("chausses") || lowerName.includes("cui")) return "leggings";
-    if (lowerName.includes("boot") || lowerName.includes("sabatons") || lowerName.includes("sollerets") || lowerName.includes("treads")) return "boots";
-    if (lowerName.includes("exosuit") || lowerName.includes("robe") || lowerName.includes("suit") || lowerName.includes("trench") || lowerName.includes("overall")) return "overall";
+    if (
+      lowerName.includes("helm") ||
+      lowerName.includes("visor") ||
+      lowerName.includes("circlet") ||
+      lowerName.includes("crown")
+    )
+      return "helmet";
+    if (
+      lowerName.includes("hauberk") ||
+      lowerName.includes("cuirass") ||
+      lowerName.includes("brigandine") ||
+      lowerName.includes("plate") ||
+      lowerName.includes("chest")
+    )
+      return "chest";
+    if (
+      lowerName.includes("greaves") ||
+      lowerName.includes("leg") ||
+      lowerName.includes("chausses") ||
+      lowerName.includes("cui")
+    )
+      return "leggings";
+    if (
+      lowerName.includes("boot") ||
+      lowerName.includes("sabatons") ||
+      lowerName.includes("sollerets") ||
+      lowerName.includes("treads")
+    )
+      return "boots";
+    if (
+      lowerName.includes("exosuit") ||
+      lowerName.includes("robe") ||
+      lowerName.includes("suit") ||
+      lowerName.includes("trench") ||
+      lowerName.includes("overall")
+    )
+      return "overall";
     return "weapon";
   }
 
   function guessItem(n, s) {
-          if (s === "UNIQUE") {
-            let lower = n.toLowerCase();
-            let art = window.ARTIFACT_POOL ? window.ARTIFACT_POOL.find(a => lower.includes(a.name.toLowerCase())) : null;
-            return {
-              type: "artifact",
-              statsRolled: "UNIQUE",
-              trait: art ? art.trait : "frenzy"
-            };
-          }
-          let tType = guessItemType(n);
-          let sType = null;
-          if (tType === "subweapon") {
-            let lower = n.toLowerCase();
-            if (lower.includes("shield") || lower.includes("buckler") || lower.includes("aegis") || lower.includes("bulwark")) {
-              sType = "shield";
-            } else if (lower.includes("dagger") || lower.includes("kris") || lower.includes("stiletto") || lower.includes("dirk") || lower.includes("gauche")) {
-              sType = "dagger";
-            } else {
-              sType = "tome";
-            }
-          }
+    if (s === "UNIQUE") {
+      let lower = n.toLowerCase();
+      let art = window.ARTIFACT_POOL
+        ? window.ARTIFACT_POOL.find((a) => lower.includes(a.name.toLowerCase()))
+        : null;
+      return {
+        type: "artifact",
+        statsRolled: "UNIQUE",
+        trait: art ? art.trait : "frenzy",
+      };
+    }
+    let tType = guessItemType(n);
+    let sType = null;
+    if (tType === "subweapon") {
+      let lower = n.toLowerCase();
+      if (
+        lower.includes("shield") ||
+        lower.includes("buckler") ||
+        lower.includes("aegis") ||
+        lower.includes("bulwark")
+      ) {
+        sType = "shield";
+      } else if (
+        lower.includes("dagger") ||
+        lower.includes("kris") ||
+        lower.includes("stiletto") ||
+        lower.includes("dirk") ||
+        lower.includes("gauche")
+      ) {
+        sType = "dagger";
+      } else {
+        sType = "tome";
+      }
+    }
 
-          // Dynamically extract the underlying noun from the name to populate custom icons on toasts
-          let foundNoun = "";
-          if (window.slotNouns) {
-            let flatNouns = [];
-            for (let k in window.slotNouns) {
-              if (k === "subweapon") {
-                for (let sk in window.slotNouns.subweapon) {
-                  flatNouns = flatNouns.concat(window.slotNouns.subweapon[sk]);
-                }
-              } else {
-                flatNouns = flatNouns.concat(window.slotNouns[k]);
-              }
-            }
-            for (let noun of flatNouns) {
-              if (n.includes(noun)) {
-                foundNoun = noun;
-                break;
-              }
-            }
+    // Dynamically extract the underlying noun from the name to populate custom icons on toasts
+    let foundNoun = "";
+    if (window.slotNouns) {
+      let flatNouns = [];
+      for (let k in window.slotNouns) {
+        if (k === "subweapon") {
+          for (let sk in window.slotNouns.subweapon) {
+            flatNouns = flatNouns.concat(window.slotNouns.subweapon[sk]);
           }
+        } else {
+          flatNouns = flatNouns.concat(window.slotNouns[k]);
+        }
+      }
+      for (let noun of flatNouns) {
+        if (n.includes(noun)) {
+          foundNoun = noun;
+          break;
+        }
+      }
+    }
 
-          let mock = {
-            id: Math.floor(Math.random() * 1000000),
-            name: n,
-            type: tType,
-            subType: sType,
-            statsRolled: s,
-            noun: foundNoun,
-          };
-          let lower = n.toLowerCase();
+    let mock = {
+      id: Math.floor(Math.random() * 1000000),
+      name: n,
+      type: tType,
+      subType: sType,
+      statsRolled: s,
+      noun: foundNoun,
+    };
+    let lower = n.toLowerCase();
     if (lower.includes("phoenix")) mock.isUniqueStaff = true;
-    if (lower.includes("sanguine") || lower.includes("reaver")) mock.isUniqueSword = true;
-    if (lower.includes("sovereign") || lower.includes("singularity")) mock.isUniqueSingularity = true;
-    if (lower.includes("gale-glaive") || lower.includes("maelstrom")) mock.isUniqueMaelstrom = true;
-    if (lower.includes("bulwark") || lower.includes("aegis")) mock.isUniqueAegis = true;
-    if (lower.includes("pocket-watch") || lower.includes("watch")) mock.isUniqueWatch = true;
+    if (lower.includes("sanguine") || lower.includes("reaver"))
+      mock.isUniqueSword = true;
+    if (lower.includes("sovereign") || lower.includes("singularity"))
+      mock.isUniqueSingularity = true;
+    if (lower.includes("gale-glaive") || lower.includes("maelstrom"))
+      mock.isUniqueMaelstrom = true;
+    if (lower.includes("bulwark") || lower.includes("aegis"))
+      mock.isUniqueAegis = true;
+    if (lower.includes("pocket-watch") || lower.includes("watch"))
+      mock.isUniqueWatch = true;
     if (lower.includes("chronicle")) mock.isUniqueChronicle = true;
-    if (lower.includes("warp-core") || lower.includes("greaves")) mock.isUniqueWarpCore = true;
-    if (lower.includes("tempests") || lower.includes("crown")) mock.isUniqueTempest = true;
+    if (lower.includes("warp-core") || lower.includes("greaves"))
+      mock.isUniqueWarpCore = true;
+    if (lower.includes("tempests") || lower.includes("crown"))
+      mock.isUniqueTempest = true;
     return mock;
   }
 
@@ -1867,7 +1947,9 @@ window.pushToast = function (
     iconHtml = window.getUseIconHtml ? window.getUseIconHtml(name, 32) : "";
   } else if (name) {
     let itemObj = item || guessItem(name, stars);
-    iconHtml = window.getEquipIconHtml ? window.getEquipIconHtml(itemObj, 32) : "";
+    iconHtml = window.getEquipIconHtml
+      ? window.getEquipIconHtml(itemObj, 32)
+      : "";
   }
 
   let contentHtml = "";
@@ -4724,8 +4806,18 @@ window.generateItemCardHtml = function (
   // Custom Cavern Sigil card renderer
   if (item.type === "sigil") {
     let color = window.getTierColor(item.statsRolled);
-    let buffDescs = item.buffs.map(b => `<div style="color:#2ecc71; font-size:10px; margin-bottom:2px; line-height:1.35;">• ☀️ <strong>${b.name}</strong>: ${b.desc}</div>`).join("");
-    let debuffDescs = item.debuffs.map(d => `<div style="color:#e74c3c; font-size:10px; margin-bottom:2px; line-height:1.35;">• 🌑 <strong>${d.name}</strong>: ${d.desc}</div>`).join("");
+    let buffDescs = item.buffs
+      .map(
+        (b) =>
+          `<div style="color:#2ecc71; font-size:10px; margin-bottom:2px; line-height:1.35;">• ☀️ <strong>${b.name}</strong>: ${b.desc}</div>`,
+      )
+      .join("");
+    let debuffDescs = item.debuffs
+      .map(
+        (d) =>
+          `<div style="color:#e74c3c; font-size:10px; margin-bottom:2px; line-height:1.35;">• 🌑 <strong>${d.name}</strong>: ${d.desc}</div>`,
+      )
+      .join("");
     let lockTag = item.locked ? " 🔒" : "";
 
     let sigHtml = `
@@ -8074,11 +8166,21 @@ window.revealGachaReward = function (item) {
   }
 
   // Direct items.js notifications
-            window.pushLog(
-              `<strong style='color:#f1c40f;'>[GACHA]</strong> Dispensed: <span style='color:${color};'>${item.name}</span>`,
-              item.id,
-            );
-            window.pushToast(item.name, item.statsRolled, color, false, 1, null, null, false, item);
+  window.pushLog(
+    `<strong style='color:#f1c40f;'>[GACHA]</strong> Dispensed: <span style='color:${color};'>${item.name}</span>`,
+    item.id,
+  );
+  window.pushToast(
+    item.name,
+    item.statsRolled,
+    color,
+    false,
+    1,
+    null,
+    null,
+    false,
+    item,
+  );
 
   let itemCardHtml = window.generateItemCardHtml(item, null, false);
 
@@ -13659,33 +13761,33 @@ window.animateBestiaryCards = function () {
   }
 
   window.bestiaryAnimFrameId = requestAnimationFrame(
-      window.animateBestiaryCards,
-    );
-  };
+    window.animateBestiaryCards,
+  );
+};
 
-  window.boosterAnimFrameId = null;
-  window.animateBoosterCards = function () {
-    let overlay = document.getElementById("booster-opening-overlay");
-    if (!overlay) {
-      if (window.boosterAnimFrameId) {
-        cancelAnimationFrame(window.boosterAnimFrameId);
-        window.boosterAnimFrameId = null;
-      }
-      return;
+window.boosterAnimFrameId = null;
+window.animateBoosterCards = function () {
+  let overlay = document.getElementById("booster-opening-overlay");
+  if (!overlay) {
+    if (window.boosterAnimFrameId) {
+      cancelAnimationFrame(window.boosterAnimFrameId);
+      window.boosterAnimFrameId = null;
     }
+    return;
+  }
 
-    // Iterates and continuously paints active sprite drawings for flipped card nodes
-    for (let i = 0; i < 5; i++) {
-      let canvas = document.getElementById(`booster-card-canvas-${i}`);
-      if (canvas) {
-        let cKey = canvas.getAttribute("data-card-key");
-        let cardInner = document.getElementById(`gacha-card-inner-${cKey}`);
-        let isFlipped = cardInner && cardInner.classList.contains("flipped");
-        if (isFlipped) {
-          window.drawMonsterOnCanvas(canvas, cKey, false);
-        }
+  // Iterates and continuously paints active sprite drawings for flipped card nodes
+  for (let i = 0; i < 5; i++) {
+    let canvas = document.getElementById(`booster-card-canvas-${i}`);
+    if (canvas) {
+      let cKey = canvas.getAttribute("data-card-key");
+      let cardInner = document.getElementById(`gacha-card-inner-${cKey}`);
+      let isFlipped = cardInner && cardInner.classList.contains("flipped");
+      if (isFlipped) {
+        window.drawMonsterOnCanvas(canvas, cKey, false);
       }
     }
+  }
 
-    window.boosterAnimFrameId = requestAnimationFrame(window.animateBoosterCards);
-  };
+  window.boosterAnimFrameId = requestAnimationFrame(window.animateBoosterCards);
+};

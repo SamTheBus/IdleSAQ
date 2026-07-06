@@ -2590,17 +2590,17 @@ Object.assign(window.GameState, {
             `<span style='color:#e74c3c;'>[AUTO-SALVAGE]</span> Automatically deconstructed ${item.name} into: ${activeHarvest.join(", ")}`,
           );
         if (typeof window.pushToast === "function")
-                    window.pushToast(
-                      item.name,
-                      item.statsRolled,
-                      window.getTierColor(item.statsRolled),
-                      true,
-                      1,
-                      `⚡ Auto-Salvaged: <span style="color:#e74c3c;">${item.name}</span>`,
-                      null,
-                      false,
-                      item
-                    );
+          window.pushToast(
+            item.name,
+            item.statsRolled,
+            window.getTierColor(item.statsRolled),
+            true,
+            1,
+            `⚡ Auto-Salvaged: <span style="color:#e74c3c;">${item.name}</span>`,
+            null,
+            false,
+            item,
+          );
       }
       return true;
     }

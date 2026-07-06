@@ -190,19 +190,19 @@ window.AssetCatalog = {
   },
 
   // Blueprints for procedurally rendering generic equipment based on slots
-    genericEquipment: {
-      // --- SPECIALIZED NOUN Blueprints ---
-      greatsword(id, color) {
-        return `
+  genericEquipment: {
+    // --- SPECIALIZED NOUN Blueprints ---
+    greatsword(id, color) {
+      return `
           ${window.AssetCatalog.gradients.weapon(id, color)}
           <path d="M14 2 L18 2 L18 20 L14 20 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.8" />
           <path d="M9 20 L23 20 L16 23 Z" fill="${color}" stroke="#000" stroke-width="1.5" />
           <rect x="14.5" y="23" width="3" height="6" fill="#4d2f12" stroke="#000" stroke-width="1" />
           <circle cx="16" cy="29.5" r="1.5" fill="${color}" stroke="#000" stroke-width="1" />
         `;
-      },
-      warhammer(id, color) {
-        return `
+    },
+    warhammer(id, color) {
+      return `
           <line x1="16" y1="12" x2="16" y2="30" stroke="#5c3a21" stroke-width="2.5" stroke-linecap="round" />
           <rect x="9" y="4" width="14" height="8" rx="2" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
           <path d="M7 6 L9 6 L9 10 L7 10 Z" fill="${color}" stroke="#000" stroke-width="1" />
@@ -210,34 +210,34 @@ window.AssetCatalog = {
           <polygon points="16,1 18,4 14,4" fill="${color}" stroke="#000" stroke-width="1" />
           <line x1="16" y1="12" x2="16" y2="20" stroke="${color}" stroke-width="1" />
         `;
-      },
-      battleaxe(id, color) {
-        return `
+    },
+    battleaxe(id, color) {
+      return `
           <line x1="16" y1="6" x2="16" y2="30" stroke="#4d2f12" stroke-width="2.5" stroke-linecap="round" />
           <path d="M16 8 Q7 4, 10 14 Q14 18, 16 16" fill="${color}" stroke="#000" stroke-width="1.8" />
           <path d="M16 8 Q25 4, 22 14 Q18 18, 16 16" fill="${color}" stroke="#000" stroke-width="1.8" />
           <circle cx="16" cy="12" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />
           <polygon points="16,3 18,6 14,3" fill="#bdc3c7" stroke="#000" stroke-width="1" />
         `;
-      },
-      broadsword(id, color) {
-        return `
+    },
+    broadsword(id, color) {
+      return `
           ${window.AssetCatalog.gradients.weapon(id, color)}
           <path d="M13 3 L19 3 L18 20 L14 20 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.8" />
           <rect x="9" y="20" width="14" height="2.5" rx="0.5" fill="${color}" stroke="#000" stroke-width="1.2" />
           <rect x="14" y="22.5" width="4" height="6" fill="#3b3b3b" stroke="#000" stroke-width="1" />
           <circle cx="16" cy="29.5" r="1.5" fill="${color}" stroke="#000" stroke-width="1" />
         `;
-      },
-      kite_shield(id, color) {
-            return `
+    },
+    kite_shield(id, color) {
+      return `
               ${window.AssetCatalog.gradients.shield(id, color)}
               <path d="M7 5 Q16 3, 25 5 Q23 18, 16 29 Q9 18, 7 5 Z" fill="url(#grad_sh_${id})" stroke="#000" stroke-width="2" />
               <path d="M12 9 Q16 7, 20 9 L18 18 Q16 23, 16 23 L14 18 Z" fill="none" stroke="#fff" stroke-width="1" opacity="0.6" />
             `;
-          },
-          tower_shield(id, color) {
-            return `
+    },
+    tower_shield(id, color) {
+      return `
               ${window.AssetCatalog.gradients.shield(id, color)}
               <rect x="8" y="4" width="16" height="24" rx="2" fill="url(#grad_sh_${id})" stroke="#000" stroke-width="2" />
               <line x1="16" y1="4" x2="16" y2="28" stroke="#000" stroke-width="1.5" />
@@ -245,50 +245,50 @@ window.AssetCatalog = {
               <circle cx="11" cy="16" r="1" fill="#fff" /><circle cx="21" cy="16" r="1" fill="#fff" />
               <circle cx="11" cy="24" r="1" fill="#fff" /><circle cx="21" cy="24" r="1" fill="#fff" />
             `;
-          },
-          buckler(id, color) {
-            return `
+    },
+    buckler(id, color) {
+      return `
               <circle cx="16" cy="16" r="11" fill="${color}" stroke="#000" stroke-width="2" />
               <circle cx="16" cy="16" r="7" fill="#2c3e50" stroke="#000" stroke-width="1.5" />
               <circle cx="16" cy="16" r="3" fill="#ffffff" stroke="#000" stroke-width="1" />
               <line x1="16" y1="5" x2="16" y2="27" stroke="#111" stroke-dasharray="2 2" stroke-width="1" />
               <line x1="5" y1="16" x2="27" y2="16" stroke="#111" stroke-dasharray="2 2" stroke-width="1" />
             `;
-          },
-          heater_shield(id, color) {
-            return `
+    },
+    heater_shield(id, color) {
+      return `
               ${window.AssetCatalog.gradients.shield(id, color)}
               <path d="M6 5 H26 V14 C26 22, 16 29, 16 29 C16 29, 6 22, 6 14 Z" fill="url(#grad_sh_${id})" stroke="#000" stroke-width="2" stroke-linejoin="round" />
               <path d="M12 9 H20 M16 9 V23" stroke="${color}" stroke-width="2" stroke-linecap="round" fill="none" />
             `;
-          },
-          aegis(id, color) {
-            return `
+    },
+    aegis(id, color) {
+      return `
               ${window.AssetCatalog.gradients.shield(id, color)}
               <path d="M16 3 L27 8 L24 22 L16 29 L8 22 L5 8 Z" fill="url(#grad_sh_${id})" stroke="#000" stroke-width="2" stroke-linejoin="round" />
               <circle cx="16" cy="16" r="5" fill="none" stroke="#fff" stroke-dasharray="3 1.5" stroke-width="1.2" />
               <circle cx="16" cy="16" r="3.2" fill="${color}" stroke="#000" stroke-width="1" />
             `;
-          },
-          kris(id, color) {
-            return `
+    },
+    kris(id, color) {
+      return `
               <!-- Wavy kris blade -->
               <path d="M16 4 Q19 7, 16 10 Q13 13, 16 16 L17 19 L15 19 L14 16 Q17 13, 14 10 Q11 7, 14 4 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
               <rect x="11" y="19" width="10" height="2.2" rx="0.5" fill="${color}" stroke="#000" stroke-width="1" />
               <path d="M14.5 21 L13 26 Q16 29, 19 26 L17.5 21 Z" fill="#4a2711" stroke="#000" stroke-width="1" />
             `;
-          },
-          stiletto(id, color) {
-            return `
+    },
+    stiletto(id, color) {
+      return `
               <!-- Ultra thin piercing needle stiletto blade -->
               <path d="M15.5 3 H16.5 L17 19 H15 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.5" />
               <rect x="11" y="19" width="10" height="2" rx="0.5" fill="${color}" stroke="#000" stroke-width="1" />
               <rect x="14.5" y="21" width="3" height="7" rx="0.5" fill="#111" stroke="#000" stroke-width="1" />
               <circle cx="16" cy="28.5" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
             `;
-          },
-          baselard(id, color) {
-            return `
+    },
+    baselard(id, color) {
+      return `
               <!-- Straight broad diamond blade -->
               <path d="M16 4 L18 8 L17 19 H15 L14 8 Z" fill="#95a5a6" stroke="#000" stroke-width="1.8" />
               <!-- H-shaped hilt guard -->
@@ -297,18 +297,18 @@ window.AssetCatalog = {
               <!-- H-shaped pommel -->
               <rect x="11" y="26.5" width="10" height="2.5" fill="${color}" stroke="#000" stroke-width="1" />
             `;
-          },
-          dirk(id, color) {
-            return `
+    },
+    dirk(id, color) {
+      return `
               <!-- Single edged heavy dirk blade -->
               <path d="M15 4 L17.5 7 L17.5 19 H14.5 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.8" />
               <rect x="12" y="19" width="8" height="2" fill="${color}" stroke="#000" stroke-width="1" />
               <rect x="14" y="21" width="4" height="6.5" fill="#5c3a21" stroke="#000" stroke-width="1" />
               <circle cx="16" cy="28" r="1.8" fill="${color}" stroke="#000" stroke-width="0.8" />
             `;
-          },
-          main_gauche(id, color) {
-            return `
+    },
+    main_gauche(id, color) {
+      return `
               <!-- Main Gauche curved guard dagger -->
               <path d="M16 4 L17.8 8 L17 19 H15 L14.2 8 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.8" />
               <!-- Ornate curved crossguard -->
@@ -317,9 +317,9 @@ window.AssetCatalog = {
               <path d="M13 19 C13 23, 19 23, 19 19" fill="none" stroke="${color}" stroke-width="1.5" />
               <rect x="14.5" y="21" width="3" height="6" fill="#111" stroke="#000" stroke-width="1" />
             `;
-          },
-      grimoire(id, color) {
-            return `
+    },
+    grimoire(id, color) {
+      return `
               <!-- Deep Purple/Black Ritual Binding -->
               <rect x="5" y="4" width="22" height="24" rx="2" fill="#1b002a" stroke="#000" stroke-width="1.8" />
               <rect x="5" y="4" width="4.5" height="24" fill="#0d001a" stroke="#000" stroke-width="1" />
@@ -329,9 +329,9 @@ window.AssetCatalog = {
               <!-- Forbidden Seal Lock -->
               <rect x="25" y="13" width="3" height="6" rx="0.5" fill="#f1c40f" stroke="#000" stroke-width="1" />
             `;
-          },
-               codex(id, color) {
-                 return `
+    },
+    codex(id, color) {
+      return `
                    <!-- Brass and Bronze Clad Cover -->
                    <rect x="6" y="4" width="20" height="24" rx="2" fill="#784212" stroke="#000" stroke-width="2" />
                    <rect x="6" y="4" width="4" height="24" fill="#4a2306" stroke="#000" stroke-width="1" />
@@ -340,9 +340,9 @@ window.AssetCatalog = {
                    <circle cx="17" cy="16" r="4" fill="${color}" stroke="#111" stroke-width="1" />
                    <circle cx="17" cy="16" r="1.5" fill="#fff" />
                  `;
-               },
-               lexicon(id, color) {
-                 return `
+    },
+    lexicon(id, color) {
+      return `
                    <!-- Heavy Academic Blue Bound Cover -->
                    <rect x="6" y="4" width="20" height="24" rx="2" fill="#1b4f72" stroke="#000" stroke-width="2" />
                    <rect x="6" y="4" width="4.5" height="24" fill="#113047" stroke="#000" stroke-width="1" />
@@ -354,9 +354,9 @@ window.AssetCatalog = {
                    <path d="M11 16 Q17 10, 23 16 Q17 22, 11 16 Z" fill="none" stroke="#fff" stroke-width="1.5" />
                    <circle cx="17" cy="16" r="3" fill="${color}" stroke="#000" stroke-width="1" />
                  `;
-               },
-               chronicle(id, color) {
-                 return `
+    },
+    chronicle(id, color) {
+      return `
                    <!-- Relic leather book of past lives -->
                    <rect x="6" y="4" width="20" height="24" rx="2" fill="#4d1a00" stroke="#000" stroke-width="2" />
                    <rect x="6" y="4" width="4" height="24" fill="#2d1000" stroke="#000" stroke-width="1" />
@@ -366,9 +366,9 @@ window.AssetCatalog = {
                    <polygon points="14,11 20,11 17,15" fill="${color}" />
                    <polygon points="17,17 19,21 15,21" fill="${color}" />
                  `;
-               },
-      greathelm(id, color) {
-            return `
+    },
+    greathelm(id, color) {
+      return `
               <!-- Bucket Knight Helm -->
               <path d="M9 8 H23 V23 L16 29 L9 23 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
               <!-- Crest plume on top matching quality tiers -->
@@ -382,9 +382,9 @@ window.AssetCatalog = {
               <circle cx="12" cy="20" r="0.8" fill="#111" /><circle cx="14" cy="20" r="0.8" fill="#111" />
               <circle cx="18" cy="20" r="0.8" fill="#111" /><circle cx="20" cy="20" r="0.8" fill="#111" />
             `;
-          },
-          armet(id, color) {
-            return `
+    },
+    armet(id, color) {
+      return `
               <!-- Renaissance Armet Helm -->
               <path d="M9 10 C9 4, 23 4, 23 10 L24 23 L16 29 L8 23 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
               <!-- Articulated Visor Plate with tier highlighted line -->
@@ -393,9 +393,9 @@ window.AssetCatalog = {
               <line x1="11" y1="13.5" x2="21" y2="13.5" stroke="#111" stroke-width="1.5" />
               <circle cx="16" cy="16" r="1.2" fill="${color}" stroke="#000" stroke-width="0.8" />
             `;
-          },
-          bascinet(id, color) {
-            return `
+    },
+    bascinet(id, color) {
+      return `
               <!-- Pointed houndskull helmet -->
               <path d="M9 12 C9 5, 23 5, 23 12 L24 23 L16 29 L8 23 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
               <!-- Snout-like pointed visor -->
@@ -409,9 +409,9 @@ window.AssetCatalog = {
               <circle cx="14" cy="20" r="0.8" fill="${color}" />
               <circle cx="18" cy="20" r="0.8" fill="${color}" />
             `;
-          },
-          barbuta(id, color) {
-            return `
+    },
+    barbuta(id, color) {
+      return `
               <!-- Classical Italian T-vent helmet -->
               <path d="M9 10 C9 4, 23 4, 23 10 L24 24 L16 29 L8 24 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
               <!-- Distinct T-shaped face opening -->
@@ -419,25 +419,25 @@ window.AssetCatalog = {
               <!-- Center ridge line -->
               <path d="M16 4 V10" stroke="#000" stroke-width="2" />
             `;
-          },
-          circlet(id, color) {
-            return `
+    },
+    circlet(id, color) {
+      return `
               <path d="M6 18 Q16 11, 26 18 Q16 23, 6 18 Z" fill="none" stroke="${color}" stroke-width="2.5" />
               <polygon points="16,11 19,15 13,15" fill="${color}" stroke="#000" stroke-width="1" />
               <circle cx="16" cy="9.5" r="1.5" fill="#fff" stroke="#000" stroke-width="0.8" />
               <circle cx="10" cy="15.5" r="1.2" fill="#fff" stroke="#000" stroke-width="0.8" />
               <circle cx="22" cy="15.5" r="1.2" fill="#fff" stroke="#000" stroke-width="0.8" />
             `;
-          },
-          coif(id, color) {
-            return `
+    },
+    coif(id, color) {
+      return `
               <path d="M9 10 C9 5, 23 5, 23 10 L24 22 L16 28 L8 22 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
               <path d="M12 15 Q16 13, 20 15 L18 22 Q16 24, 16 24 L14 22 Z" fill="#2c3e50" stroke="#000" stroke-width="1.2" />
               <circle cx="16" cy="16" r="6" fill="none" stroke="#ffffff" stroke-dasharray="2 2" stroke-width="1" opacity="0.6" />
             `;
-          },
-          visor(id, color) {
-            return `
+    },
+    visor(id, color) {
+      return `
               <!-- Heavy helm with pivoting visor -->
               <path d="M9 10 C9 4, 23 4, 23 10 L24 24 L16 29 L8 24 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
               <!-- Visor plate with V-vent -->
@@ -450,9 +450,9 @@ window.AssetCatalog = {
               <line x1="14" y1="17" x2="18" y2="17" stroke="#111" stroke-width="1" />
               <line x1="13" y1="19" x2="19" y2="19" stroke="#111" stroke-width="1" />
             `;
-          },
-      cuirass(id, color) {
-            return `
+    },
+    cuirass(id, color) {
+      return `
               <!-- heavy sculpted steel breastplate with tier pauldrons -->
               <path d="M8 8 L24 8 L22 22 L16 26 L10 22 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
               <path d="M4 9 Q8 6, 9 12 L7 14 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
@@ -461,17 +461,17 @@ window.AssetCatalog = {
               <path d="M11 18 Q16 20, 21 18" fill="none" stroke="#333" stroke-width="1.5" />
               <line x1="16" y1="8" x2="16" y2="24" stroke="#333" stroke-width="1.5" />
             `;
-          },
-          hauberk(id, color) {
-            return `
+    },
+    hauberk(id, color) {
+      return `
               <!-- Chainmail vest -->
               <path d="M8 7 L24 7 L24 23 L16 28 L8 23 Z" fill="#95a5a6" stroke="#000" stroke-width="1.8" />
               <path d="M8 12 H24 M8 17 H24 M8 22 H24" stroke="rgba(0,0,0,0.25)" stroke-width="1.5" stroke-dasharray="2 2" />
               <rect x="11" y="5" width="10" height="4" fill="${color}" stroke="#000" stroke-width="1" />
             `;
-          },
-          brigandine(id, color) {
-            return `
+    },
+    brigandine(id, color) {
+      return `
               <!-- Studded leather/velvet armor doublet -->
               <path d="M8 8 L24 8 L22 22 L16 26 L10 22 Z" fill="#2c3e50" stroke="#000" stroke-width="1.8" />
               <!-- Rivet studs (dots) matching Tier Color -->
@@ -481,9 +481,9 @@ window.AssetCatalog = {
               <!-- Neck guard -->
               <path d="M10 8 Q16 11, 22 8" fill="none" stroke="#5c3a21" stroke-width="1.5" />
             `;
-          },
-          plate_mail(id, color) {
-            return `
+    },
+    plate_mail(id, color) {
+      return `
               <!-- Heavy segmented horizontal plates -->
               <path d="M8 8 L24 8 L22 22 L16 26 L10 22 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
               <!-- Segmented plate seams -->
@@ -494,9 +494,9 @@ window.AssetCatalog = {
               <line x1="12" y1="8" x2="12" y2="23" stroke="${color}" stroke-width="1.5" />
               <line x1="20" y1="8" x2="20" y2="23" stroke="${color}" stroke-width="1.5" />
             `;
-          },
-          doublet(id, color) {
-            return `
+    },
+    doublet(id, color) {
+      return `
               <!-- Fabric vest with white undershirt and gold buttons -->
               <path d="M8 8 L24 8 L22 22 L16 26 L10 22 Z" fill="${color}" stroke="#000" stroke-width="1.8" />
               <polygon points="12,8 16,13 20,8" fill="#fff" stroke="#000" stroke-width="1" />
@@ -506,9 +506,9 @@ window.AssetCatalog = {
               <circle cx="16" cy="15" r="1.2" fill="#f1c40f" stroke="#000" stroke-width="0.8" />
               <circle cx="16" cy="19" r="1.2" fill="#f1c40f" stroke="#000" stroke-width="0.8" />
             `;
-          },
-          inquisitor_robes(id, color) {
-            return `
+    },
+    inquisitor_robes(id, color) {
+      return `
               <!-- Fabric draped robes with hood -->
               <path d="M6 14 L26 14 L23 29 L16 30 L9 29 Z" fill="#34495e" stroke="#000" stroke-width="1.8" />
               <path d="M8 12 Q16 16, 24 12 L22 18 Q16 22, 10 18 Z" fill="${color}" stroke="#000" stroke-width="1.5" />
@@ -516,9 +516,9 @@ window.AssetCatalog = {
               <path d="M13 12 C13 8, 19 8, 19 12 Z" fill="#111" />
               <line x1="16" y1="18" x2="16" y2="29" stroke="#f1c40f" stroke-width="1.2" />
             `;
-          },
-          full_plate_armor(id, color) {
-            return `
+    },
+    full_plate_armor(id, color) {
+      return `
               <!-- Articulated full steel suit -->
               <path d="M8 6 L24 6 L22 20 L16 24 L10 20 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" />
               <path d="M10 20 H22 L24 28 H8 Z" fill="#95a5a6" stroke="#000" stroke-width="1.5" />
@@ -530,9 +530,9 @@ window.AssetCatalog = {
               <!-- Heavy iron belt buckle -->
               <rect x="14" y="19" width="4" height="3" fill="#f1c40f" stroke="#000" stroke-width="1" />
             `;
-          },
-      exosuit(id, color) {
-        return `
+    },
+    exosuit(id, color) {
+      return `
           <!-- Sci-fi mechanical armature with chest core -->
           <rect x="7" y="6" width="18" height="21" rx="3" fill="#2c3e50" stroke="#000" stroke-width="2" />
           <path d="M4 10 Q8 6, 9 12 Z M28 10 Q24 6, 23 12 Z" fill="#34495e" stroke="#000" stroke-width="1.2" />
@@ -540,9 +540,9 @@ window.AssetCatalog = {
           <path d="M12 18 L16 16 L20 18" fill="none" stroke="${color}" stroke-width="1.5" />
           <circle cx="16" cy="16" r="3.5" fill="#fff" stroke="${color}" stroke-width="1.5" />
         `;
-      },
-      trenchcoat(id, color) {
-        return `
+    },
+    trenchcoat(id, color) {
+      return `
           <!-- Sleek draped coat with popped collar -->
           <path d="M7 6 L25 6 L22 29 L16 30 L10 29 Z" fill="#2c3e50" stroke="#000" stroke-width="1.8" />
           <polygon points="7,6 12,14 10,6" fill="${color}" stroke="#000" stroke-width="1" />
@@ -551,18 +551,18 @@ window.AssetCatalog = {
           <rect x="15" y="15.5" width="2" height="4" fill="#f1c40f" stroke="#000" stroke-width="0.8" />
           <line x1="16" y1="19" x2="16" y2="29" stroke="#111" stroke-width="1.5" />
         `;
-      },
+    },
 
-      // --- GENERIC SLOT Blueprints ---
-      weapon(id, color) {
-        return `
+    // --- GENERIC SLOT Blueprints ---
+    weapon(id, color) {
+      return `
           ${window.AssetCatalog.gradients.weapon(id, color)}
           <path d="M16 3 L19 8 L18 21 L14 21 L13 8 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.8" />
           <rect x="11" y="21" width="10" height="2.5" rx="0.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />
           <rect x="14.5" y="23.5" width="3" height="5" fill="#5c3a21" stroke="#000" stroke-width="1" />
           <circle cx="16" cy="29.5" r="1.5" fill="#f1c40f" stroke="#000" stroke-width="1" />
         `;
-      },
+    },
     shield(id, color) {
       return `
         ${window.AssetCatalog.gradients.shield(id, color)}
@@ -578,7 +578,7 @@ window.AssetCatalog = {
       `;
     },
     tome(id, color) {
-          return `
+      return `
             <!-- Heavy Leather Bound Cover -->
             <rect x="6" y="4" width="20" height="24" rx="2" fill="#2d1a0d" stroke="#000" stroke-width="1.8" />
             <!-- Book Spine Binding -->
@@ -594,7 +594,7 @@ window.AssetCatalog = {
             <circle cx="17" cy="16" r="4.5" fill="${color}" stroke="#000" stroke-width="1.2" />
             <circle cx="15.5" cy="14.5" r="1" fill="#fff" opacity="0.6" />
           `;
-        },
+    },
     helmet(id, color) {
       return `
         ${window.AssetCatalog.gradients.equip(id, color)}
@@ -609,7 +609,7 @@ window.AssetCatalog = {
       `;
     },
     chest(id, color) {
-          return `
+      return `
             <!-- Left & Right Shoulder Pauldrons -->
             <path d="M4 11 C4 6, 11 8, 11 13 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
             <path d="M28 11 C28 6, 21 8, 21 13 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
@@ -619,9 +619,9 @@ window.AssetCatalog = {
             <path d="M11 14 H21" stroke="${color}" stroke-width="2.2" stroke-linecap="round" />
             <path d="M11 18 H21" stroke="${color}" stroke-width="2.2" stroke-linecap="round" />
           `;
-        },
-        leggings(id, color) {
-              return `
+    },
+    leggings(id, color) {
+      return `
                 <rect x="7" y="6" width="18" height="5" rx="1.5" fill="${color}" stroke="#000" stroke-width="1.5" />
                 <path d="M7 11 L13 11 L12 18 L7 17 Z M19 11 L25 11 L25 17 L20 18 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
                 <path d="M9 18 L14 18 L13 28 L9 28 Z" fill="#95a5a6" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
@@ -629,9 +629,9 @@ window.AssetCatalog = {
                 <path d="M18 18 L23 18 L23 28 L19 28 Z" fill="#95a5a6" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />
                 <circle cx="20.5" cy="20" r="2.2" fill="${color}" stroke="#000" stroke-width="1" />
               `;
-            },
-            greaves(id, color) {
-                  return `
+    },
+    greaves(id, color) {
+      return `
                     <!-- Leather back straps wrapping behind -->
                     <path d="M4 14 H14 M4 22 H14 M18 14 H28 M18 22 H28" stroke="#5c3a21" stroke-width="2.2" stroke-linecap="round" fill="none" />
                     <!-- Left Shin Guard: Curved/Tapered Plate -->
@@ -651,9 +651,9 @@ window.AssetCatalog = {
                     <path d="M18 8 Q23 5, 28 8 L27 12 H19 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
                     <circle cx="23" cy="10" r="1.2" fill="#fff" />
                   `;
-                },
-                legplates(id, color) {
-                  return `
+    },
+    legplates(id, color) {
+      return `
                     <!-- Heavy overlapping segmented plate guard -->
                     <rect x="7" y="6" width="18" height="5" rx="1.5" fill="${color}" stroke="#000" stroke-width="1.5" />
                     <!-- Left leg plate stack -->
@@ -667,9 +667,9 @@ window.AssetCatalog = {
                     <!-- Right Highlight -->
                     <path d="M22 11 L25 11 L25 27 H22 Z" fill="#fff" opacity="0.15" />
                   `;
-                },
-            chausses(id, color) {
-              return `
+    },
+    chausses(id, color) {
+      return `
                 <!-- Chainmail leg wraps with colored leather belts -->
                 <rect x="7" y="5" width="18" height="4" fill="${color}" stroke="#000" stroke-width="1.5" />
                 <path d="M7 9 L13 9 L11 28 H7 Z" fill="#95a5a6" stroke="#000" stroke-width="1.8" />
@@ -677,9 +677,9 @@ window.AssetCatalog = {
                 <!-- Chain weave indicators -->
                 <path d="M7 12 H13 M7 16 H13 M7 20 H13 M7 24 H13 M19 12 H25 M19 16 H25 M19 20 H25 M19 24 H25" stroke="rgba(0,0,0,0.3)" stroke-width="1" stroke-dasharray="2 1" />
               `;
-            },
-            cuisses(id, color) {
-              return `
+    },
+    cuisses(id, color) {
+      return `
                 <!-- Leather padded cuisses with color knee caps -->
                 <path d="M7 8 L13 8 L11 24 H7 Z" fill="#5c3a21" stroke="#000" stroke-width="1.8" />
                 <path d="M19 8 L25 8 L25 24 H21 Z" fill="#5c3a21" stroke="#000" stroke-width="1.8" />
@@ -689,9 +689,9 @@ window.AssetCatalog = {
                 <circle cx="9" cy="24" r="3.2" fill="${color}" stroke="#000" stroke-width="1.2" />
                 <circle cx="23" cy="24" r="3.2" fill="${color}" stroke="#000" stroke-width="1.2" />
               `;
-            },
-            overall(id, color) {
-          return `
+    },
+    overall(id, color) {
+      return `
             <!-- Full Suit Base Shading -->
             <path d="M8 6 L24 6 L22 20 L16 24 L10 20 Z" fill="#506272" stroke="#000" stroke-width="1.8" />
             <path d="M10 20 H22 L24 28 H8 Z" fill="#34495e" stroke="#000" stroke-width="1.5" />
@@ -701,9 +701,9 @@ window.AssetCatalog = {
             <!-- Central Seam & Emblem Glimmer -->
             <line x1="16" y1="8" x2="16" y2="26" stroke="${color}" stroke-width="2.5" stroke-linecap="round" />
           `;
-        },
+    },
     boots(id, color) {
-          return `
+      return `
             <!-- Left Leather Boot -->
             <!-- Flared cuff matching quality tier -->
             <path d="M3 11 L11 11 L10 15 H4 Z" fill="${color}" stroke="#000" stroke-width="1.5" />
@@ -720,9 +720,9 @@ window.AssetCatalog = {
             <path d="M19 15 L24 15 L25 21 H19 Z" fill="#ffffff" opacity="0.15" />
             <path d="M18 27 L27 28" stroke="#111" stroke-width="2.2" />
           `;
-        },
-        sabatons(id, color) {
-          return `
+    },
+    sabatons(id, color) {
+      return `
             <!-- Gothic Sabatons with spec highlights -->
             <path d="M3 15 L9 11 L12 21 L16 26 L13 29 L3 27 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
             <path d="M15 15 L21 11 L24 21 L28 26 L25 29 L15 27 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
@@ -732,9 +732,9 @@ window.AssetCatalog = {
             <path d="M4 16 L9 13 L10 21 H4 Z" fill="#ffffff" opacity="0.25" />
             <path d="M16 16 L21 13 L22 21 H16 Z" fill="#ffffff" opacity="0.25" />
           `;
-        },
-        sollerets(id, color) {
-          return `
+    },
+    sollerets(id, color) {
+      return `
             <!-- Left Solleret scale plates -->
             <path d="M4 11 L10 8 L12 26 L4 25 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
             <!-- Overlapping lamination lines -->
@@ -749,9 +749,9 @@ window.AssetCatalog = {
             <!-- Right strap buckle -->
             <rect x="16" y="11" width="7" height="2.5" fill="${color}" stroke="#000" stroke-width="1" />
           `;
-        },
-        steel_boots(id, color) {
-          return `
+    },
+    steel_boots(id, color) {
+      return `
             <!-- Left Steel Boot -->
             <!-- Flared Ankle Collar -->
             <path d="M4 10 H14 L12 15 H6 Z" fill="${color}" stroke="#000" stroke-width="1.5" />
@@ -770,9 +770,9 @@ window.AssetCatalog = {
             <!-- Reflection Highlight -->
             <path d="M19 16 L26 16 L27 22 H19 Z" fill="#ffffff" opacity="0.25" />
           `;
-        },
-        treads(id, color) {
-          return `
+    },
+    treads(id, color) {
+      return `
             <!-- Leather boots with thick black rubber outsoles and laces -->
             <path d="M4 11 L10 8 L12 21 L16 24 L14 28 L4 27 Z" fill="#5c3a21" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
             <path d="M16 11 L22 7 L24 18 L28 23 L27 28 L16 27 Z" fill="#5c3a21" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
@@ -785,9 +785,9 @@ window.AssetCatalog = {
             <rect x="5.5" y="18" width="4.5" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
             <rect x="17.5" y="18" width="4.5" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
           `;
-        },
-            sigil(id, color) {
-              return `
+    },
+    sigil(id, color) {
+      return `
                 <defs>
                   <linearGradient id="g_sig_${id}" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0%" stop-color="#ffffff"/>
@@ -799,8 +799,8 @@ window.AssetCatalog = {
                 <circle cx="16" cy="16" r="6.2" fill="none" stroke="#ffffff" stroke-dasharray="2 2" stroke-width="1" opacity="0.75" />
                 <path d="M16 9 L16 23 M11 16 L21 16" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
               `;
-            },
-          },
+    },
+  },
 
   // Blueprints for procedurally rendering bosses on indicators or consoles
   bosses: {
@@ -939,7 +939,7 @@ window.AssetCatalog = {
         `;
     },
     sack(uid, stopCol) {
-          return `
+      return `
             <defs>
               <linearGradient id="g_sk_b_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffd54f" />
@@ -979,9 +979,9 @@ window.AssetCatalog = {
             <path d="M34 24 Q40 38, 44 42" fill="none" stroke="url(#g_sk_g_${uid})" stroke-width="2.2" stroke-linecap="round" />
             <circle cx="44" cy="42" r="1.2" fill="url(#g_sk_g_${uid})" stroke="#000" stroke-width="0.8" />
           `;
-        },
-        crate(uid) {
-          return `
+    },
+    crate(uid) {
+      return `
             <defs>
               <linearGradient id="g_cr_w_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#a0522d" />
@@ -1014,9 +1014,9 @@ window.AssetCatalog = {
             <line x1="16" y1="16" x2="16" y2="24" stroke="#3d1d0b" stroke-width="1.5" />
             <line x1="48" y1="16" x2="48" y2="24" stroke="#3d1d0b" stroke-width="1.5" />
           `;
-        },
-        cavern_sigil_sack(uid) {
-          return `
+    },
+    cavern_sigil_sack(uid) {
+      return `
             <defs>
               <linearGradient id="g_css_b_${uid}" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#7d3c98" />
@@ -1066,9 +1066,9 @@ window.AssetCatalog = {
             <path d="M34 30 Q40 40, 46 43" fill="none" stroke="url(#g_css_g_${uid})" stroke-width="2.2" stroke-linecap="round" />
             <circle cx="46" cy="43" r="1.5" fill="url(#g_css_g_${uid})" stroke="#000" stroke-width="0.8" />
           `;
-        },
-        monster_card_sack(uid) {
-          return `
+    },
+    monster_card_sack(uid) {
+      return `
             <defs>
               <linearGradient id="g_mcs_b_${uid}" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#ff007f"/>
@@ -1095,7 +1095,7 @@ window.AssetCatalog = {
             <path d="M17 18 L24 18 M17 18 L17 25" stroke="#00d2ff" stroke-width="2" opacity="0.8" />
             <path d="M47 46 L40 46 M47 46 L47 39" stroke="#00d2ff" stroke-width="2" opacity="0.8" />
           `;
-        },
+    },
   },
 
   // Centralized configurations of unique artifacts

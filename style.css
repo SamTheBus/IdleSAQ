@@ -1337,11 +1337,11 @@ canvas {
   }
 
   .tooltip-base {
-      max-width: 90vw;
-      max-height: 75vh;
-      overflow-y: auto;
-      pointer-events: auto;
-    }
+    max-width: 90vw;
+    max-height: 75vh;
+    overflow-y: auto;
+    pointer-events: auto;
+  }
 
   .tooltip-flex-container {
     flex-direction: column;
@@ -2256,10 +2256,10 @@ canvas {
 
   /* --- COMPACT HIGH-YIELD TOOLTIPS --- */
   .tooltip-base {
-          max-width: 90vw;
-          max-height: 75vh;
-          overflow-y: auto;
-        }
+    max-width: 90vw;
+    max-height: 75vh;
+    overflow-y: auto;
+  }
 
   .tooltip-card {
     padding: 8px !important;
@@ -3058,7 +3058,9 @@ canvas {
 .tab-btn .rucksack-flap {
   transform: translateY(0);
   opacity: 1;
-  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15), opacity 0.3s;
+  transition:
+    transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15),
+    opacity 0.3s;
 }
 
 .tab-btn.active .rucksack-flap {
@@ -3070,7 +3072,9 @@ canvas {
 .tab-btn .rucksack-straps-open {
   opacity: 0;
   transform: translateY(-4px);
-  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1.2), opacity 0.25s;
+  transition:
+    transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1.2),
+    opacity 0.25s;
 }
 
 .tab-btn.active .rucksack-straps-open {
@@ -3082,7 +3086,9 @@ canvas {
 .tab-btn .rucksack-flap {
   transform: translateY(0);
   opacity: 1;
-  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15), opacity 0.3s;
+  transition:
+    transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15),
+    opacity 0.3s;
 }
 
 .tab-btn.active .rucksack-flap {
@@ -3108,7 +3114,9 @@ canvas {
 .tab-btn .rucksack-flap {
   transform: translateY(0);
   opacity: 1;
-  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15), opacity 0.3s;
+  transition:
+    transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15),
+    opacity 0.3s;
 }
 
 .tab-btn.active .rucksack-flap {
@@ -3182,7 +3190,8 @@ canvas {
 }
 
 @keyframes tabCrownFloating {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -3206,11 +3215,13 @@ canvas {
 }
 
 @keyframes tabRubyHeartBeat {
-  0%, 100% {
+  0%,
+  100% {
     fill: #ff2200;
     filter: drop-shadow(0 0 1.5px #ff3300);
   }
-  22%, 60% {
+  22%,
+  60% {
     fill: #ffffff;
     filter: drop-shadow(0 0 6px #ffd700);
   }
@@ -3228,7 +3239,8 @@ canvas {
 }
 
 @keyframes tabMarketCoinFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -3247,7 +3259,8 @@ canvas {
 }
 
 @keyframes tabMarketPotionPulse {
-  0%, 100% {
+  0%,
+  100% {
     filter: drop-shadow(0 0 1px #ff007f);
   }
   50% {
@@ -3266,7 +3279,8 @@ canvas {
 }
 
 @keyframes tabMarketAwningSway {
-  0%, 100% {
+  0%,
+  100% {
     transform: rotate(0deg);
   }
   50% {
@@ -3287,7 +3301,8 @@ canvas {
 }
 
 @keyframes tabHeroShieldClang {
-  0%, 48% {
+  0%,
+  48% {
     transform: translateY(0);
   }
   55% {
@@ -3299,7 +3314,8 @@ canvas {
   80% {
     transform: translateY(0.1px);
   }
-  92%, 100% {
+  92%,
+  100% {
     transform: translateY(0);
   }
 }
@@ -3313,7 +3329,9 @@ canvas {
 
 /* Sword executes a smooth vertical charge drop, then surges upward to lock straight */
 .tab-btn.active .hero-sword {
-  animation: tabHeroSwordSlash 0.85s cubic-bezier(0.25, 0.8, 0.25, 1.05) forwards, tabHeroSwordBlueGlow 1.5s ease-in-out infinite 0.85s;
+  animation:
+    tabHeroSwordSlash 0.85s cubic-bezier(0.25, 0.8, 0.25, 1.05) forwards,
+    tabHeroSwordBlueGlow 1.5s ease-in-out infinite 0.85s;
 }
 
 @keyframes tabHeroSwordSlash {
@@ -3335,7 +3353,8 @@ canvas {
 }
 
 @keyframes tabHeroSwordBlueGlow {
-  0%, 100% {
+  0%,
+  100% {
     filter: drop-shadow(0 0 1.5px rgba(0, 240, 255, 0.4));
   }
   50% {
@@ -3348,14 +3367,18 @@ canvas {
   transform: scale(0.85);
   opacity: 0;
   transform-origin: 16px 16.5px;
-  transition: transform 0.4s ease-out, opacity 0.3s;
+  transition:
+    transform 0.4s ease-out,
+    opacity 0.3s;
 }
 
 /* Ring fades in, scales to 1.05x, and does a very slow, elegant rotation and gentle pulse */
 .tab-btn.active .hero-aura-ring {
   opacity: 0.65;
   transform: scale(1.05);
-  animation: tabHeroRingSpin 7s linear infinite, tabHeroRingPulse 1.8s ease-in-out infinite alternate;
+  animation:
+    tabHeroRingSpin 7s linear infinite,
+    tabHeroRingPulse 1.8s ease-in-out infinite alternate;
 }
 
 @keyframes tabHeroRingSpin {
@@ -3382,16 +3405,21 @@ canvas {
 .tab-btn .hero-shield-gem {
   fill: #00d2ff;
   opacity: 0.5;
-  transition: opacity 0.35s ease, fill 0.35s ease;
+  transition:
+    opacity 0.35s ease,
+    fill 0.35s ease;
 }
 
 /* Gem flashes bright white-hot as the sword surges upward, maintaining a strong active pulse */
 .tab-btn.active .hero-shield-gem {
-  animation: tabHeroShieldPulse 0.85s ease-in-out forwards, tabHeroShieldGlow 1.5s ease-in-out infinite 0.85s;
+  animation:
+    tabHeroShieldPulse 0.85s ease-in-out forwards,
+    tabHeroShieldGlow 1.5s ease-in-out infinite 0.85s;
 }
 
 @keyframes tabHeroShieldPulse {
-  0%, 25% {
+  0%,
+  25% {
     fill: #00d2ff;
     opacity: 0.5;
     filter: drop-shadow(0 0 1px #00d2ff);
@@ -3406,7 +3434,8 @@ canvas {
     opacity: 0.75;
     filter: drop-shadow(0 0 2px #00d2ff);
   }
-  90%, 100% {
+  90%,
+  100% {
     fill: #ffffff;
     opacity: 0.85;
     filter: drop-shadow(0 0 3px #00ffff);
@@ -3414,7 +3443,8 @@ canvas {
 }
 
 @keyframes tabHeroShieldGlow {
-  0%, 100% {
+  0%,
+  100% {
     fill: #ffffff;
     opacity: 0.85;
     filter: drop-shadow(0 0 3px #00ffff);
@@ -3434,11 +3464,14 @@ canvas {
 
 /* Hilt sapphire pulses in sync with the shield barrier glow */
 .tab-btn.active .hero-sword-gem {
-  animation: tabHeroSwordGemPulse 0.85s ease-in-out forwards, tabHeroSwordGemGlow 1.5s ease-in-out infinite 0.85s;
+  animation:
+    tabHeroSwordGemPulse 0.85s ease-in-out forwards,
+    tabHeroSwordGemGlow 1.5s ease-in-out infinite 0.85s;
 }
 
 @keyframes tabHeroSwordGemPulse {
-  0%, 25% {
+  0%,
+  25% {
     fill: #00d2ff;
     filter: drop-shadow(0 0 1px #00d2ff);
   }
@@ -3450,14 +3483,16 @@ canvas {
     fill: #00d2ff;
     filter: drop-shadow(0 0 1.5px #00d2ff);
   }
-  90%, 100% {
+  90%,
+  100% {
     fill: #ffffff;
     filter: drop-shadow(0 0 3px #00ffff);
   }
 }
 
 @keyframes tabHeroSwordGemGlow {
-  0%, 100% {
+  0%,
+  100% {
     fill: #ffffff;
     filter: drop-shadow(0 0 3px #00ffff);
   }
@@ -3475,7 +3510,8 @@ canvas {
 
 /* Double strike triggers on active transition */
 .tab-btn.active .tab-anvil-hammer {
-  animation: tabHammerDoubleStrike 1.2s cubic-bezier(0.25, 0.8, 0.25, 1.15) forwards;
+  animation: tabHammerDoubleStrike 1.2s cubic-bezier(0.25, 0.8, 0.25, 1.15)
+    forwards;
 }
 
 @keyframes tabHammerDoubleStrike {
@@ -3510,11 +3546,15 @@ canvas {
 }
 
 @keyframes tabEmberFlash {
-  0%, 38%, 75%, 100% {
+  0%,
+  38%,
+  75%,
+  100% {
     fill: #ff5500;
     filter: drop-shadow(0 0 2px #ff3300);
   }
-  22%, 60% {
+  22%,
+  60% {
     fill: #ffffff;
     filter: drop-shadow(0 0 6px #ffd700);
   }
@@ -3527,7 +3567,11 @@ canvas {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(135deg, rgba(16, 20, 28, 0.95) 0%, rgba(8, 10, 15, 0.95) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 20, 28, 0.95) 0%,
+    rgba(8, 10, 15, 0.95) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-left: 4px solid var(--toast-rarity-color, #7f8c8d);
   border-radius: 8px;
@@ -3544,7 +3588,8 @@ canvas {
   overflow: hidden;
   box-sizing: border-box;
   transform-origin: top center;
-  animation: premiumToastIn 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+  animation: premiumToastIn 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.15)
+    forwards;
 }
 
 .premium-toast-shine {
@@ -3577,7 +3622,13 @@ canvas {
 }
 
 @keyframes premiumToastShine {
-  0% { left: -150%; }
-  50% { left: 150%; }
-  100% { left: 150%; }
+  0% {
+    left: -150%;
+  }
+  50% {
+    left: 150%;
+  }
+  100% {
+    left: 150%;
+  }
 }

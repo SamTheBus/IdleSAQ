@@ -3422,30 +3422,30 @@ window.MONSTER_CARDS_DATA = {
   },
 
   // Cosmic Wardens (Bosses)
-    aegis_goliath: {
-      name: "Aegis Goliath Card",
-      baseStat: "def",
-      baseVal: 0.05, // Increased from 0.03 to 0.05 (+5% base Defense)
-      isPct: true,
-      desc: "Event Horizon shielding significantly increases Defense.",
-      set: "Cosmic Wardens",
-    },
-    chronos_arbitrator: {
-      name: "Chronos Arbitrator Card",
-      baseStat: "moveSpeed",
-      baseVal: 5.0, // Increased from 2.5 to 5.0 (+5.0 base Movement Speed)
-      isPct: false,
-      desc: "Temporal dilation accelerates Movement Speed.",
-      set: "Cosmic Wardens",
-    },
-    nexus_overseer: {
-      name: "Nexus Overseer Card",
-      baseStat: "atk",
-      baseVal: 0.05, // Increased from 0.03 to 0.05 (+5% base Attack Power)
-      isPct: true,
-      desc: "Glitch code injections significantly increase Attack Power.",
-      set: "Cosmic Wardens",
-    },
+  aegis_goliath: {
+    name: "Aegis Goliath Card",
+    baseStat: "def",
+    baseVal: 0.05, // Increased from 0.03 to 0.05 (+5% base Defense)
+    isPct: true,
+    desc: "Event Horizon shielding significantly increases Defense.",
+    set: "Cosmic Wardens",
+  },
+  chronos_arbitrator: {
+    name: "Chronos Arbitrator Card",
+    baseStat: "moveSpeed",
+    baseVal: 5.0, // Increased from 2.5 to 5.0 (+5.0 base Movement Speed)
+    isPct: false,
+    desc: "Temporal dilation accelerates Movement Speed.",
+    set: "Cosmic Wardens",
+  },
+  nexus_overseer: {
+    name: "Nexus Overseer Card",
+    baseStat: "atk",
+    baseVal: 0.05, // Increased from 0.03 to 0.05 (+5% base Attack Power)
+    isPct: true,
+    desc: "Glitch code injections significantly increase Attack Power.",
+    set: "Cosmic Wardens",
+  },
 };
 
 window.CARD_SETS_DATA = {

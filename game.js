@@ -3419,97 +3419,97 @@ window.detonateGaleFlurry = function () {
 };
 
 window.CombatEngine = {
-    triggerPlayerSlash() {
-      if (window.isGamePaused) return;
-      let p = window.resolvePlayerStats();
-      let cooldownCap =
-        window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
-      if (window.hero.attackTimer > 0) return;
+  triggerPlayerSlash() {
+    if (window.isGamePaused) return;
+    let p = window.resolvePlayerStats();
+    let cooldownCap =
+      window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
+    if (window.hero.attackTimer > 0) return;
 
-      // Anti-Cheese Check: Apply Static Feedback debuff on any active attack (including held inputs)
-      let isActivelyAttacking = window.spacePressed || window.isCanvasPressed;
-      if (isActivelyAttacking) {
-        // Dungeon Mode check
-        if (
-          window.playerStats.isDungeonMode &&
-          window.playerStats.activeDungeonSigil?.debuffs.some(
-            (d) => d.id === "static_feedback",
-          )
-        ) {
-          let selfDmg = Math.ceil(p.maxHp * 0.02);
-          window.playerStats.currentHp = Math.max(
-            1,
-            window.playerStats.currentHp - selfDmg,
-          );
-          window.effects.push({
-            x: window.hero.x,
-            y: window.hero.y,
-            text: "-" + selfDmg + " [STATIC]",
-            color: "#e74c3c",
-            life: 30,
-          });
-          if (window.playerStats.currentHp <= 1) {
-            window.playerStats.currentHp = 0;
-            window.deathAnimationTimer = window.deathMaxFrames;
-          }
-          window.updateUI();
-        }
-        // Crucible Mode check
-        if (
-          window.playerStats.isCrucibleMode &&
-          window.playerStats.crucibleActiveDebuff?.id === "static_feedback"
-        ) {
-          let debuffStrength =
-            window.playerStats.crucibleInfusedType === "debuff" ? 1.5 : 1.0;
-          let selfDmg = Math.ceil(p.maxHp * (0.02 * debuffStrength));
-          window.playerStats.currentHp = Math.max(
-            1,
-            window.playerStats.currentHp - selfDmg,
-          );
-          window.effects.push({
-            x: window.hero.x,
-            y: window.hero.y,
-            text: "-" + selfDmg + " [STATIC]",
-            color: "#e74c3c",
-            life: 30,
-          });
-          if (window.playerStats.currentHp <= 1) {
-            window.playerStats.currentHp = 0;
-            window.deathAnimationTimer = window.deathMaxFrames;
-          }
-          window.updateUI();
-        }
-      }
-
-      window.SoundManager.play("swing");
-      window.hero.attackTimer = cooldownCap;
-
+    // Anti-Cheese Check: Apply Static Feedback debuff on any active attack (including held inputs)
+    let isActivelyAttacking = window.spacePressed || window.isCanvasPressed;
+    if (isActivelyAttacking) {
+      // Dungeon Mode check
       if (
-        window.equippedSlots.weapon &&
-        window.equippedSlots.weapon.isUniqueStaff
+        window.playerStats.isDungeonMode &&
+        window.playerStats.activeDungeonSigil?.debuffs.some(
+          (d) => d.id === "static_feedback",
+        )
       ) {
-        window.projectiles.push({
+        let selfDmg = Math.ceil(p.maxHp * 0.02);
+        window.playerStats.currentHp = Math.max(
+          1,
+          window.playerStats.currentHp - selfDmg,
+        );
+        window.effects.push({
+          x: window.hero.x,
+          y: window.hero.y,
+          text: "-" + selfDmg + " [STATIC]",
+          color: "#e74c3c",
+          life: 30,
+        });
+        if (window.playerStats.currentHp <= 1) {
+          window.playerStats.currentHp = 0;
+          window.deathAnimationTimer = window.deathMaxFrames;
+        }
+        window.updateUI();
+      }
+      // Crucible Mode check
+      if (
+        window.playerStats.isCrucibleMode &&
+        window.playerStats.crucibleActiveDebuff?.id === "static_feedback"
+      ) {
+        let debuffStrength =
+          window.playerStats.crucibleInfusedType === "debuff" ? 1.5 : 1.0;
+        let selfDmg = Math.ceil(p.maxHp * (0.02 * debuffStrength));
+        window.playerStats.currentHp = Math.max(
+          1,
+          window.playerStats.currentHp - selfDmg,
+        );
+        window.effects.push({
+          x: window.hero.x,
+          y: window.hero.y,
+          text: "-" + selfDmg + " [STATIC]",
+          color: "#e74c3c",
+          life: 30,
+        });
+        if (window.playerStats.currentHp <= 1) {
+          window.playerStats.currentHp = 0;
+          window.deathAnimationTimer = window.deathMaxFrames;
+        }
+        window.updateUI();
+      }
+    }
+
+    window.SoundManager.play("swing");
+    window.hero.attackTimer = cooldownCap;
+
+    if (
+      window.equippedSlots.weapon &&
+      window.equippedSlots.weapon.isUniqueStaff
+    ) {
+      window.projectiles.push({
+        x: window.hero.x + 35,
+        y: window.hero.y + 10,
+        r: 10,
+        hitMobs: [],
+        pulseOffset: Math.random() * 10,
+      });
+      for (let i = 0; i < 4; i++) {
+        window.particles.push({
           x: window.hero.x + 35,
           y: window.hero.y + 10,
-          r: 10,
-          hitMobs: [],
-          pulseOffset: Math.random() * 10,
+          vx: window.randFloat(1, 3),
+          vy: window.randFloat(-2, 2),
+          radius: window.randFloat(1.5, 3),
+          color: "#e67e22",
+          alpha: 1,
+          life: window.randInt(15, 25),
         });
-        for (let i = 0; i < 4; i++) {
-          window.particles.push({
-            x: window.hero.x + 35,
-            y: window.hero.y + 10,
-            vx: window.randFloat(1, 3),
-            vy: window.randFloat(-2, 2),
-            radius: window.randFloat(1.5, 3),
-            color: "#e67e22",
-            alpha: 1,
-            life: window.randInt(15, 25),
-          });
-        }
       }
-      window.executeHitCalculations();
-    },
+    }
+    window.executeHitCalculations();
+  },
 
   executeHitCalculations() {
     if (window.mob && window.mob.x < window.hero.x + 65) {
@@ -5902,22 +5902,29 @@ window.useItem = function (itemName) {
     }
 
     let normalCardKeys = Object.keys(window.MONSTER_CARDS_DATA).filter(
-          (k) => !["aegis_goliath", "chronos_arbitrator", "nexus_overseer"].includes(k)
-        );
-        let bossCardKeys = ["aegis_goliath", "chronos_arbitrator", "nexus_overseer"];
-        let pulledCards = [];
-        let recycledDust = 0;
+      (k) =>
+        !["aegis_goliath", "chronos_arbitrator", "nexus_overseer"].includes(k),
+    );
+    let bossCardKeys = [
+      "aegis_goliath",
+      "chronos_arbitrator",
+      "nexus_overseer",
+    ];
+    let pulledCards = [];
+    let recycledDust = 0;
 
-        // Draw exactly 5 cards
-        for (let i = 0; i < 5; i++) {
-          let rolledKey;
-          if (Math.random() < 0.05) {
-            // Rare 5% chance to drop an elite boss card
-            rolledKey = bossCardKeys[Math.floor(Math.random() * bossCardKeys.length)];
-          } else {
-            // Standard 95% chance to drop a regular monster card
-            rolledKey = normalCardKeys[Math.floor(Math.random() * normalCardKeys.length)];
-          }
+    // Draw exactly 5 cards
+    for (let i = 0; i < 5; i++) {
+      let rolledKey;
+      if (Math.random() < 0.05) {
+        // Rare 5% chance to drop an elite boss card
+        rolledKey =
+          bossCardKeys[Math.floor(Math.random() * bossCardKeys.length)];
+      } else {
+        // Standard 95% chance to drop a regular monster card
+        rolledKey =
+          normalCardKeys[Math.floor(Math.random() * normalCardKeys.length)];
+      }
       let cData = window.MONSTER_CARDS_DATA[rolledKey];
 
       window.playerStats.monsterCards = window.playerStats.monsterCards || {};
@@ -6183,8 +6190,7 @@ window.useItem = function (itemName) {
 
         window.flipGachaCard = function (cKey) {
           let cardInner = document.getElementById(`gacha-card-inner-${cKey}`);
-          if (!cardInner || cardInner.classList.contains("flipped"))
-            return;
+          if (!cardInner || cardInner.classList.contains("flipped")) return;
 
           cardInner.classList.add("flipped");
           cardInner.style.transform = "rotateY(180deg)";
@@ -6213,20 +6219,20 @@ window.useItem = function (itemName) {
         };
 
         let claimBtn = document.getElementById("btn-booster-claim");
-                if (claimBtn) {
-                  claimBtn.onclick = function () {
-                    overlay.remove();
-                    window.isGamePaused = false;
-                    window.updateUI();
-                    window.renderInventory();
-                  };
-                }
+        if (claimBtn) {
+          claimBtn.onclick = function () {
+            overlay.remove();
+            window.isGamePaused = false;
+            window.updateUI();
+            window.renderInventory();
+          };
+        }
 
-                // Initiate the unboxed cards live-animation loop
-                if (typeof window.animateBoosterCards === "function") {
-                  window.animateBoosterCards();
-                }
-              }, 550);
+        // Initiate the unboxed cards live-animation loop
+        if (typeof window.animateBoosterCards === "function") {
+          window.animateBoosterCards();
+        }
+      }, 550);
     };
   } else if (itemName === "Cavern Sigil Sack") {
     // Uncapped specialised pouch; not bound by bag space limits
@@ -6792,41 +6798,41 @@ window.rollEquipmentDrop = function (
   }
 
   let color = window.getTierColor(newItem.statsRolled);
-            if (!silent) {
-              if (newItem.type === "artifact")
-                window.pushLog(
-                  `<strong style='color:#1abc9c;'>⭐ UNIQUE ARTIFACT DROPPED!</strong> Extracted: <span style='color:#1abc9c;'>${newItem.name}</span>!`,
-                  newItem.id,
-                );
-              else if (sourceName === "Gacha")
-                window.pushLog(
-                  `<strong style='color:#f1c40f;'>[GACHA]</strong> Dispensed: <span style='color:${color};'>${newItem.name}</span>`,
-                  newItem.id,
-                );
-              else if (sourceName === "Rare")
-                window.pushLog(
-                  `<strong style='color:#ffb6c1;'>RARE ENEMY KILLED!</strong> Found: <span style='color:${color};'>${newItem.name}</span>`,
-                  newItem.id,
-                );
-              else
-                window.pushLog(
-                  `<strong style='color:#ff9f43;'>BOSS KILLED!</strong> Found: <span style='color:${color};'>${newItem.name}</span>`,
-                  newItem.id,
-                );
-            }
+  if (!silent) {
+    if (newItem.type === "artifact")
+      window.pushLog(
+        `<strong style='color:#1abc9c;'>⭐ UNIQUE ARTIFACT DROPPED!</strong> Extracted: <span style='color:#1abc9c;'>${newItem.name}</span>!`,
+        newItem.id,
+      );
+    else if (sourceName === "Gacha")
+      window.pushLog(
+        `<strong style='color:#f1c40f;'>[GACHA]</strong> Dispensed: <span style='color:${color};'>${newItem.name}</span>`,
+        newItem.id,
+      );
+    else if (sourceName === "Rare")
+      window.pushLog(
+        `<strong style='color:#ffb6c1;'>RARE ENEMY KILLED!</strong> Found: <span style='color:${color};'>${newItem.name}</span>`,
+        newItem.id,
+      );
+    else
+      window.pushLog(
+        `<strong style='color:#ff9f43;'>BOSS KILLED!</strong> Found: <span style='color:${color};'>${newItem.name}</span>`,
+        newItem.id,
+      );
+  }
 
-            if (!silent)
-              window.pushToast(
-                newItem.name,
-                newItem.statsRolled,
-                color,
-                false,
-                1,
-                null,
-                null,
-                isMilestone && !window.playerStats.isDungeonMode,
-                newItem
-              );
+  if (!silent)
+    window.pushToast(
+      newItem.name,
+      newItem.statsRolled,
+      color,
+      false,
+      1,
+      null,
+      null,
+      isMilestone && !window.playerStats.isDungeonMode,
+      newItem,
+    );
   if (newItem.type === "artifact") window.inventory.ARTIFACT.push(newItem);
   else window.inventory.EQUIP.push(newItem);
 
