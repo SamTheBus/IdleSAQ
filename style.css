@@ -1337,11 +1337,11 @@ canvas {
   }
 
   .tooltip-base {
-    max-width: 90vw;
-    max-height: 75vh;
-    overflow-y: auto;
-    pointer-events: auto;
-  }
+      max-width: 90vw;
+      max-height: 75vh;
+      overflow-y: auto;
+      pointer-events: auto;
+    }
 
   .tooltip-flex-container {
     flex-direction: column;
@@ -1538,18 +1538,18 @@ canvas {
   }
 
   /* Snaps absolute draggable windows into fixed centered overlays on mobile */
-    .draggable-window {
-      position: fixed !important;
-      left: 2.5vw !important;
-      right: auto !important;
-      top: 10% !important;
-      width: 95vw !important;
-      max-width: 95vw !important;
-      transform: none !important;
-      height: auto !important;
-      max-height: 80vh !important;
-    }
+  .draggable-window {
+    position: fixed !important;
+    left: 2.5vw !important;
+    right: auto !important;
+    top: 10% !important;
+    width: 95vw !important;
+    max-width: 95vw !important;
+    transform: none !important;
+    height: auto !important;
+    max-height: 80vh !important;
   }
+}
 
 /* ==========================================================================
            14.5. MISSION BOARD DRAGGABLE DECK
@@ -2256,10 +2256,10 @@ canvas {
 
   /* --- COMPACT HIGH-YIELD TOOLTIPS --- */
   .tooltip-base {
-    max-height: 85vh !important;
-    overflow-y: auto !important;
-    pointer-events: auto !important; /* Allows scroll swiping inside tooltips */
-  }
+          max-width: 90vw;
+          max-height: 75vh;
+          overflow-y: auto;
+        }
 
   .tooltip-card {
     padding: 8px !important;
@@ -2972,20 +2972,35 @@ canvas {
 
 .bestiary-card-item:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.8) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8) !important;
 }
 
 @keyframes holoShimmer {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .bestiary-card-holo {
-  background: linear-gradient(135deg, #100b1a 0%, #3e125c 25%, #ff007f 50%, #3e125c 75%, #100b1a 100%) !important;
+  background: linear-gradient(
+    135deg,
+    #100b1a 0%,
+    #3e125c 25%,
+    #ff007f 50%,
+    #3e125c 75%,
+    #100b1a 100%
+  ) !important;
   background-size: 400% 400% !important;
   animation: holoShimmer 8s ease infinite !important;
-  box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4), inset 0 0 15px rgba(255, 0, 127, 0.15) !important;
+  box-shadow:
+    0 4px 15px rgba(255, 0, 127, 0.4),
+    inset 0 0 15px rgba(255, 0, 127, 0.15) !important;
 }
 
 /* Responsive Book Page Collapsing on Mobile devices */
@@ -3007,12 +3022,17 @@ canvas {
 
 /* Shiny upgrade bar fill glowing pulse keyframes */
 @keyframes shinyPulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 6px rgba(255, 0, 127, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.1);
+  0%,
+  100% {
+    box-shadow:
+      0 0 6px rgba(255, 0, 127, 0.4),
+      inset 0 0 8px rgba(255, 255, 255, 0.1);
     filter: brightness(1);
   }
   50% {
-    box-shadow: 0 0 16px rgba(255, 0, 127, 0.85), inset 0 0 14px rgba(255, 255, 255, 0.3);
+    box-shadow:
+      0 0 16px rgba(255, 0, 127, 0.85),
+      inset 0 0 14px rgba(255, 255, 255, 0.3);
     filter: brightness(1.2);
   }
 }
@@ -3031,4 +3051,533 @@ canvas {
   border: 1.5px solid #fff !important;
   box-shadow: 0 0 10px rgba(46, 204, 113, 0.5) !important;
   animation: shinyPulseGlow 1.5s infinite !important;
+}
+
+/* --- SACK TAB UNBUCKLE & LOOT REVEAL ANIMATION --- */
+/* The Top Flap slides upward and fades away when active */
+.tab-btn .rucksack-flap {
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15), opacity 0.3s;
+}
+
+.tab-btn.active .rucksack-flap {
+  transform: translateY(-8px) scaleY(0.3);
+  opacity: 0;
+}
+
+/* Loose Unbuckled Straps drop down and dangle when active */
+.tab-btn .rucksack-straps-open {
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1.2), opacity 0.25s;
+}
+
+.tab-btn.active .rucksack-straps-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- SACK TAB UNBUCKLE & LOOT REVEAL ANIMATION --- */
+.tab-btn .rucksack-flap {
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15), opacity 0.3s;
+}
+
+.tab-btn.active .rucksack-flap {
+  transform: translateY(-8px) scaleY(0.3);
+  opacity: 0;
+}
+
+/* Loose Unbuckled Straps drop down and dangle when active */
+.tab-btn .rucksack-straps-open {
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+}
+
+.tab-btn.active .rucksack-straps-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- FORGE TAB BUTTON DOUBLE STRIKE --- */
+==== EQUALS ====
+/* --- SACK TAB UNBUCKLE & LOOT REVEAL ANIMATION --- */
+.tab-btn .rucksack-flap {
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15), opacity 0.3s;
+}
+
+.tab-btn.active .rucksack-flap {
+  transform: translateY(-8px) scaleY(0.3);
+  opacity: 0;
+}
+
+/* Loose Unbuckled Straps drop down and dangle when active */
+.tab-btn .rucksack-straps-open {
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+}
+
+.tab-btn.active .rucksack-straps-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- RUNS TAB INTERDIMENSIONAL PORTAL ANIMATION --- */
+.tab-btn .pillar-runes {
+  stroke: #2c3e50;
+  transition: stroke 0.3s ease;
+}
+
+.tab-btn.active .pillar-runes {
+  stroke: #00d2ff;
+  filter: drop-shadow(0 0 1.5px #00d2ff);
+}
+
+.tab-btn .portal-core {
+  opacity: 0.35;
+  transition: opacity 0.35s ease;
+}
+
+.tab-btn.active .portal-core {
+  opacity: 1;
+  filter: drop-shadow(0 0 3px #8e44ad);
+}
+
+.tab-btn .portal-spiral {
+  transform: scale(0.6);
+  transition: transform 0.3s ease-out;
+}
+
+.tab-btn.active .portal-spiral {
+  transform: scale(1);
+  animation: portalSpiralRotate 4s linear infinite;
+}
+
+@keyframes portalSpiralRotate {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.15); /* Interdimensional breathing wobble */
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+/* --- PRESTIGE TAB DRAGON CROWN ANIMATION --- */
+.tab-btn .prestige-crown-group {
+  transform: translateY(0);
+  transition: transform 0.35s ease-out;
+}
+
+.tab-btn.active .prestige-crown-group {
+  animation: tabCrownFloating 2.2s ease-in-out infinite;
+}
+
+@keyframes tabCrownFloating {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2.5px); /* Floating hover effect */
+  }
+}
+
+/* Ruby gems dormant states */
+.tab-btn .prestige-ruby-heart,
+.tab-btn .prestige-ruby-spark {
+  fill: #e74c3c;
+  stroke: #000;
+  stroke-width: 1.2px;
+  transition: fill 0.35s ease;
+}
+
+/* Ruby pulses like a beating dragon heart on active select */
+.tab-btn.active .prestige-ruby-heart,
+.tab-btn.active .prestige-ruby-spark {
+  animation: tabRubyHeartBeat 1.2s ease-in-out infinite;
+}
+
+@keyframes tabRubyHeartBeat {
+  0%, 100% {
+    fill: #ff2200;
+    filter: drop-shadow(0 0 1.5px #ff3300);
+  }
+  22%, 60% {
+    fill: #ffffff;
+    filter: drop-shadow(0 0 6px #ffd700);
+  }
+}
+
+/* --- MARKET TAB INTERACTIVE ANIMATION --- */
+/* Gold coin floats vertically on counter when active */
+.tab-btn .market-coin {
+  transform: translateY(0);
+  transition: transform 0.35s ease-out;
+}
+
+.tab-btn.active .market-coin {
+  animation: tabMarketCoinFloat 1.6s ease-in-out infinite;
+}
+
+@keyframes tabMarketCoinFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2.5px); /* Floating elevation */
+  }
+}
+
+/* Displayed Alchemist Potion glows with pink fluid light when active */
+.tab-btn .market-potion {
+  filter: drop-shadow(0 0 1px rgba(232, 67, 147, 0.25));
+  transition: filter 0.35s ease;
+}
+
+.tab-btn.active .market-potion {
+  animation: tabMarketPotionPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes tabMarketPotionPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 1px #ff007f);
+  }
+  50% {
+    filter: drop-shadow(0 0 4.5px #ff007f);
+  }
+}
+
+/* Scalloped canopy tassels sway gently as if caught in a draft */
+.tab-btn .awning-tassels {
+  transform: rotate(0deg);
+  transition: transform 0.3s ease-in-out;
+}
+
+.tab-btn.active .awning-tassels {
+  animation: tabMarketAwningSway 2.4s ease-in-out infinite;
+}
+
+@keyframes tabMarketAwningSway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(1.8deg); /* Gentle breeze sway */
+  }
+}
+
+/* --- HERO TAB BUTTON VERTICAL CHARGE & SUBTLE GLOW --- */
+/* Shield Group is static by default */
+.tab-btn .hero-shield-group {
+  transform: translateY(0);
+  transition: transform 0.3s ease-out;
+}
+
+/* Shield does a deep vertical thud impact shake as the sword locks at its apex */
+.tab-btn.active .hero-shield-group {
+  animation: tabHeroShieldClang 0.85s ease-out forwards;
+}
+
+@keyframes tabHeroShieldClang {
+  0%, 48% {
+    transform: translateY(0);
+  }
+  55% {
+    transform: translateY(1.2px); /* Vertical impact thud! */
+  }
+  68% {
+    transform: translateY(-0.5px);
+  }
+  80% {
+    transform: translateY(0.1px);
+  }
+  92%, 100% {
+    transform: translateY(0);
+  }
+}
+
+/* Sword remains centered at 0deg at all times, keeping native gradients */
+.tab-btn .hero-sword {
+  transform: rotate(0deg) translateY(0);
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  filter: drop-shadow(0 0 0px transparent);
+}
+
+/* Sword executes a smooth vertical charge drop, then surges upward to lock straight */
+.tab-btn.active .hero-sword {
+  animation: tabHeroSwordSlash 0.85s cubic-bezier(0.25, 0.8, 0.25, 1.05) forwards, tabHeroSwordBlueGlow 1.5s ease-in-out infinite 0.85s;
+}
+
+@keyframes tabHeroSwordSlash {
+  0% {
+    transform: rotate(0deg) translateY(0);
+  }
+  25% {
+    transform: rotate(0deg) translateY(4.5px); /* Crouches/slides down to charge */
+  }
+  55% {
+    transform: rotate(0deg) translateY(-3.5px) scaleY(1.05); /* Surges up, stretching slightly */
+  }
+  75% {
+    transform: rotate(0deg) translateY(-1.2px) scaleY(1); /* Minor bounce */
+  }
+  100% {
+    transform: rotate(0deg) translateY(-1.5px); /* Settles proudly vertically centered */
+  }
+}
+
+@keyframes tabHeroSwordBlueGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 1.5px rgba(0, 240, 255, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 3.5px rgba(0, 240, 255, 0.75));
+  }
+}
+
+/* Thin runic ring behind shield dormant state */
+.tab-btn .hero-aura-ring {
+  transform: scale(0.85);
+  opacity: 0;
+  transform-origin: 16px 16.5px;
+  transition: transform 0.4s ease-out, opacity 0.3s;
+}
+
+/* Ring fades in, scales to 1.05x, and does a very slow, elegant rotation and gentle pulse */
+.tab-btn.active .hero-aura-ring {
+  opacity: 0.65;
+  transform: scale(1.05);
+  animation: tabHeroRingSpin 7s linear infinite, tabHeroRingPulse 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes tabHeroRingSpin {
+  0% {
+    transform: scale(1.05) rotate(0deg);
+  }
+  100% {
+    transform: scale(1.05) rotate(360deg);
+  }
+}
+
+@keyframes tabHeroRingPulse {
+  0% {
+    opacity: 0.45;
+    filter: drop-shadow(0 0 1px #00f0ff);
+  }
+  100% {
+    opacity: 0.8;
+    filter: drop-shadow(0 0 3px #00f0ff);
+  }
+}
+
+/* Protective aetheric shield gem dormant state */
+.tab-btn .hero-shield-gem {
+  fill: #00d2ff;
+  opacity: 0.5;
+  transition: opacity 0.35s ease, fill 0.35s ease;
+}
+
+/* Gem flashes bright white-hot as the sword surges upward, maintaining a strong active pulse */
+.tab-btn.active .hero-shield-gem {
+  animation: tabHeroShieldPulse 0.85s ease-in-out forwards, tabHeroShieldGlow 1.5s ease-in-out infinite 0.85s;
+}
+
+@keyframes tabHeroShieldPulse {
+  0%, 25% {
+    fill: #00d2ff;
+    opacity: 0.5;
+    filter: drop-shadow(0 0 1px #00d2ff);
+  }
+  55% {
+    fill: #ffffff; /* White-hot ascension flash! */
+    opacity: 1;
+    filter: drop-shadow(0 0 5px #00ffff);
+  }
+  75% {
+    fill: #00d2ff;
+    opacity: 0.75;
+    filter: drop-shadow(0 0 2px #00d2ff);
+  }
+  90%, 100% {
+    fill: #ffffff;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 3px #00ffff);
+  }
+}
+
+@keyframes tabHeroShieldGlow {
+  0%, 100% {
+    fill: #ffffff;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 3px #00ffff);
+  }
+  50% {
+    fill: #00d2ff;
+    opacity: 0.6;
+    filter: drop-shadow(0 0 1.5px #00d2ff);
+  }
+}
+
+/* Sapphire hilt gem dormant state */
+.tab-btn .hero-sword-gem {
+  fill: #00d2ff;
+  transition: fill 0.35s ease;
+}
+
+/* Hilt sapphire pulses in sync with the shield barrier glow */
+.tab-btn.active .hero-sword-gem {
+  animation: tabHeroSwordGemPulse 0.85s ease-in-out forwards, tabHeroSwordGemGlow 1.5s ease-in-out infinite 0.85s;
+}
+
+@keyframes tabHeroSwordGemPulse {
+  0%, 25% {
+    fill: #00d2ff;
+    filter: drop-shadow(0 0 1px #00d2ff);
+  }
+  55% {
+    fill: #ffffff;
+    filter: drop-shadow(0 0 4px #00ffff);
+  }
+  75% {
+    fill: #00d2ff;
+    filter: drop-shadow(0 0 1.5px #00d2ff);
+  }
+  90%, 100% {
+    fill: #ffffff;
+    filter: drop-shadow(0 0 3px #00ffff);
+  }
+}
+
+@keyframes tabHeroSwordGemGlow {
+  0%, 100% {
+    fill: #ffffff;
+    filter: drop-shadow(0 0 3px #00ffff);
+  }
+  50% {
+    fill: #00d2ff;
+    filter: drop-shadow(0 0 1px #00d2ff);
+  }
+}
+
+/* --- FORGE TAB BUTTON DOUBLE STRIKE --- */
+.tab-btn .tab-anvil-hammer {
+  transform: rotate(-35deg);
+  transition: transform 0.25s ease-out;
+}
+
+/* Double strike triggers on active transition */
+.tab-btn.active .tab-anvil-hammer {
+  animation: tabHammerDoubleStrike 1.2s cubic-bezier(0.25, 0.8, 0.25, 1.15) forwards;
+}
+
+@keyframes tabHammerDoubleStrike {
+  0% {
+    transform: rotate(-35deg);
+  }
+  22% {
+    transform: rotate(7deg); /* Strike 1! */
+  }
+  38% {
+    transform: rotate(-18deg); /* Rebound 1 */
+  }
+  60% {
+    transform: rotate(7deg); /* Strike 2! */
+  }
+  75% {
+    transform: rotate(-8deg); /* Rebound 2 */
+  }
+  100% {
+    transform: rotate(-35deg); /* Return to resting pose */
+  }
+}
+
+/* Hot ember flash sync */
+.tab-btn .tab-anvil-ember {
+  fill: #ff5500;
+  filter: drop-shadow(0 0 2px #ff3300);
+}
+
+.tab-btn.active .tab-anvil-ember {
+  animation: tabEmberFlash 1.2s ease-out forwards;
+}
+
+@keyframes tabEmberFlash {
+  0%, 38%, 75%, 100% {
+    fill: #ff5500;
+    filter: drop-shadow(0 0 2px #ff3300);
+  }
+  22%, 60% {
+    fill: #ffffff;
+    filter: drop-shadow(0 0 6px #ffd700);
+  }
+}
+
+/* ==========================================================================
+   PREMIUM GLASSMORPHIC TOAST OVERHAUL
+   ========================================================================= */
+.premium-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(16, 20, 28, 0.95) 0%, rgba(8, 10, 15, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 4px solid var(--toast-rarity-color, #7f8c8d);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #f1f5f9;
+  box-shadow:
+    0 10px 30px -5px rgba(0, 0, 0, 0.8),
+    0 0 15px var(--toast-glow-color, rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  max-width: 100%;
+  pointer-events: none;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  transform-origin: top center;
+  animation: premiumToastIn 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+}
+
+.premium-toast-shine {
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  animation: premiumToastShine 2.8s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes premiumToastIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes premiumToastShine {
+  0% { left: -150%; }
+  50% { left: 150%; }
+  100% { left: 150%; }
 }

@@ -269,18 +269,32 @@ window.AssetCatalog = {
       `;
     },
     boots(id, color) {
-      return `
-        ${window.AssetCatalog.gradients.equip(id, color)}
-        <path d="M4 11 L10 7 L12 18 L16 23 L15 27 L4 26 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
-        <path d="M16 11 L22 7 L24 18 L28 23 L27 27 L16 26 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
-        <path d="M4 16 H10 M16 16 H22 M4 21 H12 M16 21 H24" stroke="#000" stroke-width="1.2" />
-        <rect x="4" y="12" width="6" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
-        <rect x="16" y="12" width="6" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
-        <circle cx="6" cy="24" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
-        <circle cx="18" cy="24" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
-      `;
-    },
-  },
+              return `
+                ${window.AssetCatalog.gradients.equip(id, color)}
+                <path d="M4 11 L10 7 L12 18 L16 23 L15 27 L4 26 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+                <path d="M16 11 L22 7 L24 18 L28 23 L27 27 L16 26 Z" fill="url(#grad_eq_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+                <path d="M4 16 H10 M16 16 H22 M4 21 H12 M16 21 H24" stroke="#000" stroke-width="1.2" />
+                <rect x="4" y="12" width="6" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
+                <rect x="16" y="12" width="6" height="2" fill="${color}" stroke="#000" stroke-width="0.8" />
+                <circle cx="6" cy="24" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
+                <circle cx="18" cy="24" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
+              `;
+            },
+            sigil(id, color) {
+              return `
+                <defs>
+                  <linearGradient id="g_sig_${id}" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#ffffff"/>
+                    <stop offset="45%" stop-color="${color}"/>
+                    <stop offset="100%" stop-color="#110d1a"/>
+                  </linearGradient>
+                </defs>
+                <path d="M16 2 L28 10 L28 22 L16 30 L4 22 L4 10 Z" fill="url(#g_sig_${id})" stroke="#000" stroke-width="1.8" stroke-linejoin="round" />
+                <circle cx="16" cy="16" r="6.2" fill="none" stroke="#ffffff" stroke-dasharray="2 2" stroke-width="1" opacity="0.75" />
+                <path d="M16 9 L16 23 M11 16 L21 16" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
+              `;
+            },
+          },
 
   // Blueprints for procedurally rendering bosses on indicators or consoles
   bosses: {
@@ -399,8 +413,8 @@ window.AssetCatalog = {
 
   // Centralized configurations of consumables, scrolls, crates, and sacks
   consumables: {
-      potion(uid, color) {
-        return `
+    potion(uid, color) {
+      return `
           ${window.AssetCatalog.gradients.liquid(uid, color)}
           <path d="M13 5 L19 5 L19 12 L26 23 C28 26, 26 29, 21 29 L11 29 C6 29, 4 26, 6 23 L13 12 Z" fill="#334155" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
           <path d="M8.5 21 L23.5 21 L25 24 C26.2 26.2, 25 28, 21 28 L11 28 C7 28, 5.8 26.2, 7 24 Z" fill="url(#grad_liq_${uid})" stroke="#000" stroke-width="1.5"/>
@@ -409,99 +423,174 @@ window.AssetCatalog = {
           <path d="M22 14 C23.5 17, 23.5 21, 22 24" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1" stroke-linecap="round" fill="none" />
           <path d="M9 22 C8 24, 9 26, 11 27" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.65"/>
         `;
-      },
-      scroll(uid, color) {
-        return `
+    },
+    scroll(uid, color) {
+      return `
           <path d="M6 10 L26 6 L26 22 L6 26 Z" fill="#fdf6e2" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
           <rect x="13" y="11" width="6" height="11" transform="rotate(-11 16 16)" fill="${color}" stroke="#000" stroke-width="1.5" />
           <path d="M6 10 C6 10, 4 12, 6 14" stroke="#000" stroke-width="2" fill="none" />
           <path d="M26 6 C26 6, 28 8, 26 10" stroke="#000" stroke-width="2" fill="none" />
         `;
-      },
-      sack(uid, stopCol) {
-        return `
-          <defs>
-            <linearGradient id="g_sk_b_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#ffd54f" />
-              <stop offset="50%" stop-color="#f1c40f" />
-              <stop offset="100%" stop-color="${stopCol}" />
-            </linearGradient>
-            <linearGradient id="g_sk_n_${uid}" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#ffe082" />
-              <stop offset="100%" stop-color="${stopCol}" />
-            </linearGradient>
-          </defs>
-          <ellipse cx="16" cy="28.5" rx="10" ry="2.2" fill="rgba(0,0,0,0.4)" />
-          <path d="M12 11 L10 6 C12 4.5, 20 4.5, 22 6 L20 11 Z" fill="url(#g_sk_n_${uid})" stroke="#000" stroke-width="1.8" />
-          <path d="M16 11 C10 11, 5 14, 5 21 C5 27, 9 30, 16 30 C23 30, 27 27, 27 21 C27 14, 22 11, 16 11 Z" fill="url(#g_sk_b_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round" />
-          <path d="M11 13 C8 17, 8 23, 11 27" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="1.8" />
-          <path d="M21 13 C24 17, 24 23, 21 27" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="1.8" />
-          <path d="M16 12 V29" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" />
-          <path d="M10.5 11 Q16 13, 21.5 11" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" />
-          <path d="M11 12.5 Q16 14.5, 21 12.5" fill="none" stroke="#ffb300" stroke-width="1.2" stroke-linecap="round" />
-          <path d="M15 12 Q12 18, 10 20 M17 12 Q20 18, 22 20" stroke="#f1c40f" stroke-width="1.5" stroke-linecap="round" />
-          <circle cx="16" cy="12.5" r="3" fill="#e74c3c" stroke="#000" stroke-width="1.2" />
-          <circle cx="16" cy="12.5" r="1" fill="#fff" opacity="0.6" />
-        `;
-      },
-      crate(uid) {
-        return `
-          <defs><linearGradient id="g_cr_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d35400" /><stop offset="100%" stop-color="#5c3a21" /></linearGradient></defs>
-          <rect x="5" y="8" width="22" height="20" rx="3" fill="url(#g_cr_${uid})" stroke="#000" stroke-width="2"/>
-          <line x1="5" y1="8" x2="27" y2="28" stroke="#3e2723" stroke-width="2.5"/>
-          <line x1="27" y1="8" x2="5" y2="28" stroke="#3e2723" stroke-width="2.5"/>
-          <rect x="5" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
-          <rect x="22" y="8" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
-          <rect x="5" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
-          <rect x="22" y="23" width="5" height="5" fill="#7f8c8d" stroke="#000" stroke-width="1" />
-          <rect x="13" y="15" width="6" height="6" fill="#ffd700" stroke="#000" stroke-width="1.5" rx="1"/>
-        `;
-      },
-      cavern_sigil_sack(uid) {
-        return `
-          <defs>
-            <linearGradient id="g_css_b_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#df9ffb" />
-              <stop offset="50%" stop-color="#9b59b6" />
-              <stop offset="100%" stop-color="#4a154b" />
-            </linearGradient>
-            <linearGradient id="g_css_n_${uid}" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#e8a7fc" />
-              <stop offset="100%" stop-color="#4a154b" />
-            </linearGradient>
-          </defs>
-          <ellipse cx="16" cy="28.5" rx="10" ry="2.2" fill="rgba(0,0,0,0.5)" />
-          <path d="M12 11 L10 6 C12 4.5, 20 4.5, 22 6 L20 11 Z" fill="url(#g_css_n_${uid})" stroke="#000" stroke-width="1.8" />
-          <path d="M16 11 C10 11, 5 14, 5 21 C5 27, 9 30, 16 30 C23 30, 27 27, 27 21 C27 14, 22 11, 16 11 Z" fill="url(#g_css_b_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round" />
-          <path d="M10 14 Q16 17, 22 14 M9 18 Q16 21, 23 18 M10 22 Q16 25, 22 22" fill="none" stroke="#00d2ff" stroke-width="1.2" stroke-dasharray="2 2" stroke-linecap="round" opacity="0.8" style="filter: drop-shadow(0 0 2px #00d2ff);" />
-          <path d="M10.5 11 Q16 13, 21.5 11" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" />
-          <circle cx="16" cy="12" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="1" />
-          <path d="M16 13 v12 M11 18 h10" stroke="#00d2ff" stroke-width="2" stroke-linecap="round" style="filter: drop-shadow(0 0 3px #00d2ff);" />
-        `;
-      },
-      monster_card_sack(uid) {
-        return `
-          <defs>
-            <linearGradient id="g_mcs_b_${uid}" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#ff007f"/>
-              <stop offset="50%" stop-color="#df9ffb" />
-              <stop offset="100%" stop-color="#a855f7"/>
-            </linearGradient>
-            <linearGradient id="g_mcs_g_${uid}" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#ffeaa7" />
-              <stop offset="100%" stop-color="#f1c40f" />
-            </linearGradient>
-          </defs>
-          <ellipse cx="16" cy="28.5" rx="10" ry="2" fill="rgba(0,0,0,0.4)" />
-          <rect x="6" y="4" width="20" height="24" rx="3.5" fill="url(#g_mcs_b_${uid})" stroke="#000" stroke-width="2" />
-          <path d="M6 4 L9 7 L12 4 L15 7 L18 4 L21 7 L24 4 L26 4 L26 7 L6 7 Z" fill="url(#g_mcs_g_${uid})" stroke="#000" stroke-width="1.2" />
-          <path d="M6 28 L9 25 L12 28 L15 25 L18 28 L21 25 L24 28 L26 28 L26 25 L6 25 Z" fill="url(#g_mcs_g_${uid})" stroke="#000" stroke-width="1.2" />
-          <rect x="8.5" y="9" width="15" height="14" fill="none" stroke="#fff" stroke-width="1" opacity="0.35" />
-          <circle cx="16" cy="16" r="4.5" fill="url(#g_mcs_g_${uid})" stroke="#000" stroke-width="1.2" style="filter: drop-shadow(0 0 3px #f1c40f);" />
-          <path d="M16 13.5 L16 18.5 M13.5 16 L18.5 16" stroke="#111" stroke-width="1.2" stroke-linecap="round" />
-        `;
-      },
     },
+    sack(uid, stopCol) {
+          return `
+            <defs>
+              <linearGradient id="g_sk_b_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffd54f" />
+                <stop offset="50%" stop-color="#f1c40f" />
+                <stop offset="100%" stop-color="${stopCol}" />
+              </linearGradient>
+              <linearGradient id="g_sk_n_${uid}" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ffe082" />
+                <stop offset="100%" stop-color="${stopCol}" />
+              </linearGradient>
+              <linearGradient id="g_sk_g_${uid}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffeaa7" />
+                <stop offset="50%" stop-color="#f1c40f" />
+                <stop offset="100%" stop-color="#9a7d0a" />
+              </linearGradient>
+            </defs>
+            <ellipse cx="32" cy="58" rx="20" ry="3.5" fill="rgba(0,0,0,0.5)" />
+
+            <!-- Flared Open Neck -->
+            <path d="M24 22 L20 12 C24 9, 40 9, 44 12 L40 22 Z" fill="url(#g_sk_n_${uid})" stroke="#000" stroke-width="1.8" />
+
+            <!-- Main Sack Body -->
+            <path d="M32 22 C20 22, 10 25, 10 40 C10 52, 18 58, 32 58 C46 58, 54 52, 54 40 C54 25, 44 22, 32 22 Z" fill="url(#g_sk_b_${uid})" stroke="#000" stroke-width="2" stroke-linejoin="round" />
+
+            <!-- Creases & Highlights -->
+            <path d="M12 36 C18 40, 32 36, 42 36" fill="none" stroke="rgba(0,0,0,0.18)" stroke-width="1.8" />
+            <path d="M32 22 V58" stroke="rgba(0,0,0,0.15)" stroke-width="1.5" />
+
+            <!-- Cinch cord rope and Knot -->
+            <path d="M22 22 Q32 26, 42 22" fill="none" stroke="url(#g_sk_g_${uid})" stroke-width="3" stroke-linecap="round" />
+            <path d="M24 23 Q32 26.5, 40 23" fill="none" stroke="#000" stroke-width="1" stroke-linecap="round" />
+            <circle cx="32" cy="23.2" r="3.2" fill="#ffd700" stroke="#000" stroke-width="1.5" />
+
+            <!-- Dangling strings -->
+            <path d="M30 24 Q24 38, 20 42" fill="none" stroke="url(#g_sk_g_${uid})" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="20" cy="42" r="1.2" fill="url(#g_sk_g_${uid})" stroke="#000" stroke-width="0.8" />
+            <path d="M34 24 Q40 38, 44 42" fill="none" stroke="url(#g_sk_g_${uid})" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="44" cy="42" r="1.2" fill="url(#g_sk_g_${uid})" stroke="#000" stroke-width="0.8" />
+          `;
+        },
+        crate(uid) {
+          return `
+            <defs>
+              <linearGradient id="g_cr_w_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#a0522d" />
+                <stop offset="100%" stop-color="#5c2e16" />
+              </linearGradient>
+              <linearGradient id="g_cr_m_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffd700" />
+                <stop offset="100%" stop-color="#b7950b" />
+              </linearGradient>
+            </defs>
+            <ellipse cx="32" cy="58" rx="24" ry="4" fill="rgba(0,0,0,0.55)" />
+            <!-- Wooden Crate Chest Body -->
+            <rect x="10" y="24" width="44" height="32" rx="4" fill="url(#g_cr_w_${uid})" stroke="#000" stroke-width="2.5" />
+            <!-- Wood panels details -->
+            <line x1="21" y1="24" x2="21" y2="56" stroke="#3d1d0b" stroke-width="1.5" />
+            <line x1="32" y1="24" x2="32" y2="56" stroke="#3d1d0b" stroke-width="1.5" />
+            <line x1="43" y1="24" x2="43" y2="56" stroke="#3d1d0b" stroke-width="1.5" />
+            <!-- Diagonal crossbeam struts -->
+            <line x1="12" y1="26" x2="52" y2="54" stroke="#3d1d0b" stroke-width="3" />
+            <!-- Heavy corner brackets (Golden/Iron) -->
+            <rect x="10" y="24" width="8" height="8" fill="url(#g_cr_m_${uid})" stroke="#000" stroke-width="1.2" />
+            <rect x="46" y="24" width="8" height="8" fill="url(#g_cr_m_${uid})" stroke="#000" stroke-width="1.2" />
+            <rect x="10" y="48" width="8" height="8" fill="url(#g_cr_m_${uid})" stroke="#000" stroke-width="1.2" />
+            <rect x="46" y="48" width="8" height="8" fill="url(#g_cr_m_${uid})" stroke="#000" stroke-width="1.2" />
+            <!-- Big Runic Lock in center -->
+            <rect x="28" y="28" width="8" height="11" rx="1.5" fill="url(#g_cr_m_${uid})" stroke="#000" stroke-width="1.5" />
+            <circle cx="32" cy="33" r="1.5" fill="#111" />
+            <!-- Crate Lid -->
+            <rect x="8" y="16" width="48" height="8" rx="1.5" fill="#a0522d" stroke="#000" stroke-width="2.5" />
+            <line x1="16" y1="16" x2="16" y2="24" stroke="#3d1d0b" stroke-width="1.5" />
+            <line x1="48" y1="16" x2="48" y2="24" stroke="#3d1d0b" stroke-width="1.5" />
+          `;
+        },
+        cavern_sigil_sack(uid) {
+          return `
+            <defs>
+              <linearGradient id="g_css_b_${uid}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#7d3c98" />
+                <stop offset="60%" stop-color="#4a154b" />
+                <stop offset="100%" stop-color="#110521" />
+              </linearGradient>
+              <linearGradient id="g_css_n_${uid}" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#e8a7fc" />
+                <stop offset="100%" stop-color="#4a154b" />
+              </linearGradient>
+              <linearGradient id="g_css_g_${uid}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffeaa7" />
+                <stop offset="50%" stop-color="#f1c40f" />
+                <stop offset="100%" stop-color="#9a7d0a" />
+              </linearGradient>
+              <linearGradient id="g_css_m_${uid}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#00ffff" />
+                <stop offset="100%" stop-color="#008b8b" />
+              </linearGradient>
+            </defs>
+            <ellipse cx="32" cy="58" rx="20" ry="3.5" fill="rgba(0,0,0,0.55)" />
+
+            <!-- Flared Open Neck -->
+            <path d="M20 16 C25 9, 39 9, 44 16 C39 12, 25 12, 20 16 Z" fill="url(#g_css_m_${uid})" opacity="0.8" style="filter: drop-shadow(0 0 3px #00ffff);" />
+            <path d="M24 28 L18 14 C22 10, 32 10, 32 16 L32 28 Z" fill="url(#g_css_b_${uid})" stroke="#000" stroke-width="1.8" />
+            <path d="M40 28 L46 14 C42 10, 32 10, 32 16 L32 28 Z" fill="url(#g_css_b_${uid})" stroke="#000" stroke-width="1.8" />
+
+            <!-- Main Velvet Pouch Body -->
+            <path d="M32 18 C20 18, 11 21, 11 38 C11 51, 18 58, 32 58 C46 58, 53 51, 53 38 C53 21, 44 18, 32 18 Z" fill="url(#g_css_b_${uid})" stroke="#000" stroke-width="2.2" stroke-linejoin="round" />
+
+            <!-- Crease Shadows -->
+            <path d="M11 38 Q18 42, 32 38" fill="none" stroke="rgba(0,0,0,0.25)" stroke-width="2" />
+            <path d="M32 18 Q23 35, 18 51" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="3" />
+            <path d="M32 18 Q41 35, 46 51" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="3" transform="scale(-1, 1) translate(-64, 0)" />
+
+            <!-- Glowing Cyber-Teal Runic Medallion -->
+            <circle cx="32" cy="40" r="10" fill="none" stroke="#00ffff" stroke-dasharray="2.5 3" stroke-width="1.2" opacity="0.8" style="filter: drop-shadow(0 0 4px #00ffff);" />
+            <circle cx="32" cy="40" r="7.5" fill="url(#g_css_g_${uid})" stroke="#000" stroke-width="1.5" />
+            <polygon points="32,35.5 35.5,40 32,44.5 28.5,40" fill="#ffffff" stroke="#00ffff" stroke-width="1.2" style="filter: drop-shadow(0 0 3px #00ffff);" />
+
+            <!-- Gold Cinch Band & Strings -->
+            <path d="M22 28 Q32 31.5, 42 28" fill="none" stroke="url(#g_css_g_${uid})" stroke-width="3.5" stroke-linecap="round" />
+            <path d="M24 29 Q32 32, 40 29" fill="none" stroke="#000" stroke-width="1.2" stroke-linecap="round" />
+            <circle cx="32" cy="29.2" r="3.2" fill="#ffd700" stroke="#000" stroke-width="1.5" />
+            <path d="M30 30 Q24 40, 18 43" fill="none" stroke="url(#g_css_g_${uid})" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="18" cy="43" r="1.5" fill="url(#g_css_g_${uid})" stroke="#000" stroke-width="0.8" />
+            <path d="M34 30 Q40 40, 46 43" fill="none" stroke="url(#g_css_g_${uid})" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="46" cy="43" r="1.5" fill="url(#g_css_g_${uid})" stroke="#000" stroke-width="0.8" />
+          `;
+        },
+        monster_card_sack(uid) {
+          return `
+            <defs>
+              <linearGradient id="g_mcs_b_${uid}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ff007f"/>
+                <stop offset="50%" stop-color="#df9ffb" />
+                <stop offset="100%" stop-color="#a855f7"/>
+              </linearGradient>
+              <linearGradient id="g_mcs_g_${uid}" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#ffeaa7" />
+                <stop offset="100%" stop-color="#f1c40f" />
+              </linearGradient>
+            </defs>
+            <ellipse cx="32" cy="58" rx="20" ry="3.5" fill="rgba(0,0,0,0.55)" />
+            <!-- Foil Pack Base -->
+            <rect x="12" y="8" width="40" height="48" rx="7" fill="url(#g_mcs_b_${uid})" stroke="#000" stroke-width="2.2" />
+            <!-- Serrated Crimp Top -->
+            <path d="M12 8 L18 14 L24 8 L30 14 L36 8 L42 14 L48 8 L52 8 L52 14 L12 14 Z" fill="url(#g_mcs_g_${uid})" stroke="#000" stroke-width="1.2" />
+            <!-- Serrated Crimp Bottom -->
+            <path d="M12 56 L18 50 L24 56 L30 50 L36 56 L42 50 L48 56 L52 56 L52 50 L12 50 Z" fill="url(#g_mcs_g_${uid})" stroke="#000" stroke-width="1.2" />
+            <!-- Holographic Card Frame overlay -->
+            <rect x="17" y="18" width="30" height="28" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.35" />
+            <!-- Glowing central card symbol -->
+            <circle cx="32" cy="32" r="9" fill="url(#g_mcs_g_${uid})" stroke="#000" stroke-width="1.5" style="filter: drop-shadow(0 0 4px #f1c40f);" />
+            <path d="M32 27 L32 37 M27 32 L37 32" stroke="#111" stroke-width="2" stroke-linecap="round" />
+            <path d="M17 18 L24 18 M17 18 L17 25" stroke="#00d2ff" stroke-width="2" opacity="0.8" />
+            <path d="M47 46 L40 46 M47 46 L47 39" stroke="#00d2ff" stroke-width="2" opacity="0.8" />
+          `;
+        },
+  },
 
   // Centralized configurations of unique artifacts
   artifacts: {
@@ -750,43 +839,43 @@ window.AssetCatalog = {
       `;
     },
     tempest(uid) {
-          return `
+      return `
             <defs><linearGradient id="g_un_tp_${uid}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a0f0ff"/><stop offset="100%" stop-color="#0080b0"/></linearGradient></defs>
             <path d="M6 21 L10 7 L14 15 L16 4 L18 15 L22 7 L26 21 Z" fill="url(#g_un_tp_${uid})" stroke="#111" stroke-width="1.8" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px #00d2ff);"/>
             <rect x="6" y="21" width="20" height="4" fill="url(#g_un_tp_${uid})" stroke="#111" stroke-width="1.8"/>
           `;
-        },
-      },
-    };
+    },
+  },
+};
 
-    window.getAchievementBadgeHtml = function (ach, unlocked, size = 32) {
-      let id = ach.id;
-      let isSingle = !!ach.isSingleTier;
+window.getAchievementBadgeHtml = function (ach, unlocked, size = 32) {
+  let id = ach.id;
+  let isSingle = !!ach.isSingleTier;
 
-      let category = "";
-      let tierNum = 0;
+  let category = "";
+  let tierNum = 0;
 
-      if (isSingle) {
-        category = "sing";
-      } else {
-        let lastUnderscore = id.lastIndexOf("_");
-        if (lastUnderscore !== -1) {
-          category = id.substring(0, lastUnderscore);
-          tierNum = parseInt(id.substring(lastUnderscore + 1), 10);
-        } else {
-          category = id;
-        }
-      }
+  if (isSingle) {
+    category = "sing";
+  } else {
+    let lastUnderscore = id.lastIndexOf("_");
+    if (lastUnderscore !== -1) {
+      category = id.substring(0, lastUnderscore);
+      tierNum = parseInt(id.substring(lastUnderscore + 1), 10);
+    } else {
+      category = id;
+    }
+  }
 
-      let iconSvg = "";
-      let glowColor = unlocked ? "#f1c40f" : "#444";
-      let bgGradient = unlocked
-        ? "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"
-        : "linear-gradient(135deg, #151515 0%, #0d0d0d 100%)";
+  let iconSvg = "";
+  let glowColor = unlocked ? "#f1c40f" : "#444";
+  let bgGradient = unlocked
+    ? "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"
+    : "linear-gradient(135deg, #151515 0%, #0d0d0d 100%)";
 
-      switch (category) {
-        case "slayer":
-          iconSvg = `
+  switch (category) {
+    case "slayer":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linecap="round" fill="none">
               <path d="M6 26 L26 6" />
               <path d="M26 26 L6 6" />
@@ -794,10 +883,10 @@ window.AssetCatalog = {
               <path d="M20 9 L9 20" />
             </g>
           `;
-          break;
-        case "hoarder":
-        case "drop_g":
-          iconSvg = `
+      break;
+    case "hoarder":
+    case "drop_g":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
               <ellipse cx="16" cy="22" rx="8" ry="3" />
               <ellipse cx="16" cy="16" rx="8" ry="3" />
@@ -805,36 +894,36 @@ window.AssetCatalog = {
               <path d="M8 10 V22 M24 10 V22" />
             </g>
           `;
-          break;
-        case "stage":
-          iconSvg = `
+      break;
+    case "stage":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" fill="none">
               <circle cx="16" cy="16" r="10" />
               <path d="M16 6 V26 M6 16 H26" stroke-dasharray="2 2" />
-              <polygon points="16,10 19,16 16,14 13,16" fill="${unlocked ? glowColor : 'none'}" />
+              <polygon points="16,10 19,16 16,14 13,16" fill="${unlocked ? glowColor : "none"}" />
             </g>
           `;
-          break;
-        case "level":
-          iconSvg = `
+      break;
+    case "level":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
               <path d="M6 24 L10 10 L16 16 L22 10 L26 24 Z" />
-              <circle cx="16" cy="24" r="1.5" fill="${unlocked ? glowColor : 'none'}" />
+              <circle cx="16" cy="24" r="1.5" fill="${unlocked ? glowColor : "none"}" />
             </g>
           `;
-          break;
-        case "forge":
-        case "refo":
-          iconSvg = `
+      break;
+    case "forge":
+    case "refo":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
               <path d="M10 20 L22 10" />
-              <path d="M6 24 L10 20 L12 22 Z" fill="${unlocked ? glowColor : 'none'}" />
-              <rect x="18" y="4" width="8" height="8" rx="1.5" transform="rotate(45 22 8)" fill="${unlocked ? glowColor : 'none'}" />
+              <path d="M6 24 L10 20 L12 22 Z" fill="${unlocked ? glowColor : "none"}" />
+              <rect x="18" y="4" width="8" height="8" rx="1.5" transform="rotate(45 22 8)" fill="${unlocked ? glowColor : "none"}" />
             </g>
           `;
-          break;
-        case "enchant":
-          iconSvg = `
+      break;
+    case "enchant":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
               <rect x="8" y="6" width="16" height="20" rx="1" />
               <line x1="12" y1="12" x2="20" y2="12" />
@@ -842,74 +931,74 @@ window.AssetCatalog = {
               <circle cx="16" cy="16" r="2" stroke-dasharray="2 2" />
             </g>
           `;
-          break;
-        case "rift":
-          iconSvg = `
+      break;
+    case "rift":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" fill="none">
               <circle cx="16" cy="16" r="10" stroke-dasharray="4 2" />
-              <circle cx="16" cy="16" r="5" fill="${unlocked ? glowColor : 'none'}" />
+              <circle cx="16" cy="16" r="5" fill="${unlocked ? glowColor : "none"}" />
             </g>
           `;
-          break;
-        case "prestige":
-          iconSvg = `
+      break;
+    case "prestige":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
-              <path d="M16 28 C10 28, 6 22, 16 12 C26 22, 22 28, 16 28 Z" fill="${unlocked ? glowColor : 'none'}" fill-opacity="0.15" />
+              <path d="M16 28 C10 28, 6 22, 16 12 C26 22, 22 28, 16 28 Z" fill="${unlocked ? glowColor : "none"}" fill-opacity="0.15" />
               <path d="M10 18 Q16 12, 22 18" />
             </g>
           `;
-          break;
-        case "d_eq":
-          iconSvg = `
+      break;
+    case "d_eq":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="1.8" stroke-linejoin="round" fill="none">
-              <path d="M8 8 Q16 6, 24 8 Q23 18, 16 25 Q9 18, 8 8 Z" fill="${unlocked ? glowColor : 'none'}" fill-opacity="0.15" />
+              <path d="M8 8 Q16 6, 24 8 Q23 18, 16 25 Q9 18, 8 8 Z" fill="${unlocked ? glowColor : "none"}" fill-opacity="0.15" />
               <path d="M16 5 L16 25" />
             </g>
           `;
-          break;
-        case "d_go":
-          iconSvg = `
+      break;
+    case "d_go":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
               <rect x="6" y="10" width="20" height="16" rx="2" />
               <path d="M6 16 H26" />
               <circle cx="16" cy="13" r="1.5" />
             </g>
           `;
-          break;
-        case "d_ma":
-        case "buff":
-          iconSvg = `
+      break;
+    case "d_ma":
+    case "buff":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
-              <path d="M12 6 H18 M13 6 V12 L8 22 A2 2 0 0 0 10 25 H22 A2 2 0 0 0 24 22 L19 12 V6" fill="${unlocked ? glowColor : 'none'}" fill-opacity="0.15" />
+              <path d="M12 6 H18 M13 6 V12 L8 22 A2 2 0 0 0 10 25 H22 A2 2 0 0 0 24 22 L19 12 V6" fill="${unlocked ? glowColor : "none"}" fill-opacity="0.15" />
             </g>
           `;
-          break;
-        case "d_cr":
-          iconSvg = `
+      break;
+    case "d_cr":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
               <polygon points="6,24 9,14 16,19 23,14 26,24" />
               <line x1="6" y1="24" x2="26" y2="24" />
             </g>
           `;
-          break;
-        case "hit":
-          iconSvg = `
+      break;
+    case "hit":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="1.8" stroke-linejoin="round" fill="none">
-              <path d="M16 4 L19 12 L27 10 L21 16 L26 24 L16 19 L6 24 L11 16 L5 10 L13 12 Z" fill="${unlocked ? glowColor : 'none'}" fill-opacity="0.15" />
+              <path d="M16 4 L19 12 L27 10 L21 16 L26 24 L16 19 L6 24 L11 16 L5 10 L13 12 Z" fill="${unlocked ? glowColor : "none"}" fill-opacity="0.15" />
             </g>
           `;
-          break;
-        case "fairy":
-          iconSvg = `
+      break;
+    case "fairy":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="1.8" stroke-linejoin="round" fill="none">
               <path d="M16 16 C10 16, 6 12, 11 8 C16 4, 16 16, 16 16 Z" />
               <path d="M16 16 C22 16, 26 12, 21 8 C16 4, 16 16, 16 16 Z" />
-              <circle cx="16" cy="16" r="2.5" fill="${unlocked ? glowColor : 'none'}" />
+              <circle cx="16" cy="16" r="2.5" fill="${unlocked ? glowColor : "none"}" />
             </g>
           `;
-          break;
-        case "death":
-          iconSvg = `
+      break;
+    case "death":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
               <rect x="10" y="8" width="12" height="12" rx="4" />
               <rect x="12" y="18" width="8" height="6" rx="1" />
@@ -917,86 +1006,98 @@ window.AssetCatalog = {
               <circle cx="19" cy="12" r="1.5" />
             </g>
           `;
-          break;
-        case "salvage":
-          iconSvg = `
+      break;
+    case "salvage":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
               <circle cx="16" cy="16" r="8" />
               <path d="M12 12 H20 M12 20 H20 M16 12 V20" />
             </g>
           `;
-          break;
-        case "f_spd":
-          iconSvg = `
+      break;
+    case "f_spd":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
               <path d="M19 4 L9 14 H16 L13 22 L23 12 H16 Z" />
             </g>
           `;
-          break;
-        case "defl":
-          iconSvg = `
+      break;
+    case "defl":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="2" stroke-linejoin="round" fill="none">
               <path d="M8 6 H24 L21 21 L16 26 L11 21 Z" />
             </g>
           `;
-          break;
-        case "g_up":
-          iconSvg = `
+      break;
+    case "g_up":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="1.8" stroke-linejoin="round" fill="none">
               <path d="M6 10 H26 V24 H6 Z M11 16 H15 V24 H11 Z" />
               <path d="M9 10 V6 M23 10 V6" />
             </g>
           `;
-          break;
-        case "rare_s":
-          iconSvg = `
+      break;
+    case "rare_s":
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="1.8" fill="none">
               <circle cx="16" cy="16" r="9" />
               <circle cx="16" cy="16" r="5" />
-              <circle cx="16" cy="16" r="1.5" fill="${unlocked ? glowColor : 'none'}" />
+              <circle cx="16" cy="16" r="1.5" fill="${unlocked ? glowColor : "none"}" />
             </g>
           `;
-          break;
-        case "sing":
-        default:
-          iconSvg = `
+      break;
+    case "sing":
+    default:
+      iconSvg = `
             <g stroke="${glowColor}" stroke-width="1.8" stroke-linejoin="round" fill="none">
-              <polygon points="16,3 27,10.5 27,23.5 16,29 5,23.5 5,10.5" fill="${unlocked ? glowColor : 'none'}" fill-opacity="0.1" />
+              <polygon points="16,3 27,10.5 27,23.5 16,29 5,23.5 5,10.5" fill="${unlocked ? glowColor : "none"}" fill-opacity="0.1" />
               <circle cx="16" cy="16" r="5.5" />
             </g>
           `;
-          break;
-      }
+      break;
+  }
 
-      let romanNum = "";
-      if (tierNum > 0) {
-        const rom = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
-        romanNum = rom[tierNum] || tierNum.toString();
-      }
+  let romanNum = "";
+  if (tierNum > 0) {
+    const rom = [
+      "",
+      "I",
+      "II",
+      "III",
+      "IV",
+      "V",
+      "VI",
+      "VII",
+      "VIII",
+      "IX",
+      "X",
+    ];
+    romanNum = rom[tierNum] || tierNum.toString();
+  }
 
-      let romanOverlay = romanNum
-        ? `<span style="
+  let romanOverlay = romanNum
+    ? `<span style="
             position: absolute;
             bottom: -2px;
             right: -2px;
-            background: ${unlocked ? '#f1c40f' : '#222'};
-            color: ${unlocked ? '#000' : '#888'};
+            background: ${unlocked ? "#f1c40f" : "#222"};
+            color: ${unlocked ? "#000" : "#888"};
             font-family: monospace;
             font-size: 8px;
             font-weight: 900;
             padding: 1px 3.5px;
             border-radius: 3px;
-            border: 1px solid ${unlocked ? '#fff' : '#444'};
-            box-shadow: ${unlocked ? '0 0 6px rgba(241,196,15,0.4)' : 'none'};
+            border: 1px solid ${unlocked ? "#fff" : "#444"};
+            box-shadow: ${unlocked ? "0 0 6px rgba(241,196,15,0.4)" : "none"};
             line-height: 1;
             z-index: 2;
           ">${romanNum}</span>`
-        : "";
+    : "";
 
-      return `
+  return `
         <span style="
           background: ${bgGradient};
-          border: 1.5px solid ${unlocked ? '#f1c40f' : '#333'};
+          border: 1.5px solid ${unlocked ? "#f1c40f" : "#333"};
           border-radius: 8px;
           padding: 3px;
           display: inline-flex;
@@ -1005,7 +1106,7 @@ window.AssetCatalog = {
           width: ${size}px;
           height: ${size}px;
           position: relative;
-          box-shadow: ${unlocked ? 'inset 0 0 8px rgba(241,196,15,0.15)' : 'none'};
+          box-shadow: ${unlocked ? "inset 0 0 8px rgba(241,196,15,0.15)" : "none"};
           box-sizing: border-box;
           flex-shrink: 0;
         ">
@@ -1015,4 +1116,4 @@ window.AssetCatalog = {
           ${romanOverlay}
         </span>
       `;
-    };
+};

@@ -877,7 +877,10 @@ Object.assign(window.ItemFactory, {
           );
         } else if (item.subType === "tome") {
           item.baseInt = Math.ceil(
-            1.5 * stageScale * prestigeMult * baseRarityMult,
+            1.5 * expScale * prestigeMult * baseRarityMult,
+          );
+          item.baseAtk = Math.ceil(
+            0.4 * expScale * prestigeMult * baseRarityMult,
           );
         }
       }
@@ -1674,7 +1677,10 @@ Object.assign(window.ItemFactory, {
           );
         } else if (item.subType === "tome") {
           item.baseInt = Math.ceil(
-            1.5 * (item.stageLevel || 1) * prestigeMult * baseRarityMult,
+            1.5 * expScale * prestigeMult * baseRarityMult,
+          );
+          item.baseAtk = Math.ceil(
+            0.4 * expScale * prestigeMult * baseRarityMult,
           );
         }
       }
@@ -1894,6 +1900,24 @@ window.recalculateItemStats = function (item) {
       item.baseFairySpawn = Math.max(0, item.fairySpawn - tempers * 0.02);
     if (item.baseRareSpawn === undefined)
       item.baseRareSpawn = Math.max(0, item.rareSpawn - tempers * 0.01);
+  }
+
+  if (
+    item.type === "subweapon" &&
+    item.subType === "tome" &&
+    !item.isUniqueWatch &&
+    !item.isUniqueChronicle
+  ) {
+    let stars = item.statsRolled || 0;
+    let baseRarityMult = 1.0 + stars * 0.3;
+    let repStage = (item.stageLevel || 1) * 10;
+    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+    let repScale = Math.pow(repGrowth, repStage);
+    let expScale = repScale;
+    let prestigeMult = 1.0;
+
+    item.rawBaseInt = Math.ceil(1.5 * expScale * prestigeMult * baseRarityMult);
+    item.rawBaseAtk = Math.ceil(0.4 * expScale * prestigeMult * baseRarityMult);
   }
 
   // Restore pristine unmutated baseline stats to ensure clean idempotency
@@ -2566,14 +2590,17 @@ Object.assign(window.GameState, {
             `<span style='color:#e74c3c;'>[AUTO-SALVAGE]</span> Automatically deconstructed ${item.name} into: ${activeHarvest.join(", ")}`,
           );
         if (typeof window.pushToast === "function")
-          window.pushToast(
-            item.name,
-            item.statsRolled,
-            window.getTierColor(item.statsRolled),
-            true,
-            1,
-            `⚡ Auto-Salvaged: <span style="color:#e74c3c;">${item.name}</span>`,
-          );
+                    window.pushToast(
+                      item.name,
+                      item.statsRolled,
+                      window.getTierColor(item.statsRolled),
+                      true,
+                      1,
+                      `⚡ Auto-Salvaged: <span style="color:#e74c3c;">${item.name}</span>`,
+                      null,
+                      false,
+                      item
+                    );
       }
       return true;
     }
@@ -3936,23 +3963,23 @@ window.buyGoldUpgrade = function (type) {
   }
 
   window.updateUI();
-    window.renderGoldUpgrades();
+  window.renderGoldUpgrades();
 
-    // Find newly rendered card and trigger physical purchase slam flash!
-    let cardEl = document.getElementById(`sink-card-${type}`);
-    if (cardEl) {
-      cardEl.classList.add("sink-upgraded-flash");
-      setTimeout(() => {
-        let checkEl = document.getElementById(`sink-card-${type}`);
-        if (checkEl) checkEl.classList.remove("sink-upgraded-flash");
-      }, 600);
-    }
+  // Find newly rendered card and trigger physical purchase slam flash!
+  let cardEl = document.getElementById(`sink-card-${type}`);
+  if (cardEl) {
+    cardEl.classList.add("sink-upgraded-flash");
+    setTimeout(() => {
+      let checkEl = document.getElementById(`sink-card-${type}`);
+      if (checkEl) checkEl.classList.remove("sink-upgraded-flash");
+    }, 600);
+  }
 
-    if (typeof window.checkAchievements === "function") {
-      window.checkAchievements();
-    }
-    window.saveGame();
-  };
+  if (typeof window.checkAchievements === "function") {
+    window.checkAchievements();
+  }
+  window.saveGame();
+};
 
 window.transmutePotion = function (index) {
   let recipe = window.POTION_TRANSMUTATIONS[index];
@@ -4161,20 +4188,18 @@ window.executeParagonUpgrade = function () {
       p.paragonLevel = parLevel + 1;
 
       window.pushHeaderToast(
-              `🧬 Paragon Infused to Level ${p.paragonLevel}!`,
-              "#ff007f",
-            );
-            if (window.SoundManager) window.SoundManager.play("revive");
-            if (window.spawnPurchaseCelebration) {
-              window.spawnPurchaseCelebration("alchemy", "#ff007f", 5);
-            }
-            window.invalidatePlayerStats();
-            window.updateUI();
-            window.renderPrestigeTab();
-            window.renderInventory();
-            window.saveGame();
-          }
-        );
-      };
-
-
+        `🧬 Paragon Infused to Level ${p.paragonLevel}!`,
+        "#ff007f",
+      );
+      if (window.SoundManager) window.SoundManager.play("revive");
+      if (window.spawnPurchaseCelebration) {
+        window.spawnPurchaseCelebration("alchemy", "#ff007f", 5);
+      }
+      window.invalidatePlayerStats();
+      window.updateUI();
+      window.renderPrestigeTab();
+      window.renderInventory();
+      window.saveGame();
+    },
+  );
+};

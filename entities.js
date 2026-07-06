@@ -337,6 +337,7 @@
         else if (type === "echo") hitColor = "#9b59b6";
         else if (type === "counter") hitColor = "#f1c40f";
         else if (type === "bleed") hitColor = "#960018";
+        else if (type === "dagger") hitColor = "#a5b1c2"; // Elegant steel-grey
       }
 
       if (type !== "slash") hitText = `${icons[type]} ${hitText}`;
@@ -8644,30 +8645,39 @@
         ctx.fillStyle = "#3498db";
         ctx.fillText("BLOCK", hx + 13, hy + 4);
       } else if (eff.type === "parry") {
-        // 1. Draw Crossed Steel Sabers (💥 Parry Clash)
+        // 1. Draw Crossed Steel Sabers (💥 Parry Clash) - Perfectly sized & crisp outlines
         ctx.save();
         ctx.translate(hx, hy);
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 3.5;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
 
         // Saber 1 (bottom-left to top-right)
         ctx.save();
         ctx.rotate(Math.PI / 4);
-        ctx.fillStyle = "#bdc3c7"; // Steel silver
+        ctx.fillStyle = "#ecf0f1"; // Clean silver-white
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.5; // Proper thin outline
+        ctx.lineJoin = "round";
         ctx.beginPath();
-        ctx.rect(-1, -11, 2, 14);
+        ctx.rect(-2.5, -18, 5, 22); // Wider, longer blade
         ctx.fill();
         ctx.stroke();
+
+        // Blade edge highlight
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.rect(0, -18, 2.5, 22);
+        ctx.fill();
+
         // Crossguard
         ctx.fillStyle = "#f1c40f"; // Gold
-        ctx.fillRect(-3.5, 3, 7, 1.5);
-        ctx.strokeRect(-3.5, 3, 7, 1.5);
+        ctx.beginPath();
+        ctx.rect(-6, 4, 12, 3);
+        ctx.fill();
+        ctx.stroke();
+
         // Red Pommel
         ctx.fillStyle = "#e74c3c";
         ctx.beginPath();
-        ctx.arc(0, 5, 1, 0, Math.PI * 2);
+        ctx.arc(0, 10, 2.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
         ctx.restore();
@@ -8675,19 +8685,32 @@
         // Saber 2 (bottom-right to top-left)
         ctx.save();
         ctx.rotate(-Math.PI / 4);
-        ctx.fillStyle = "#bdc3c7"; // Steel silver
+        ctx.fillStyle = "#ecf0f1"; // Clean silver-white
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.5;
+        ctx.lineJoin = "round";
         ctx.beginPath();
-        ctx.rect(-1, -11, 2, 14);
+        ctx.rect(-2.5, -18, 5, 22);
         ctx.fill();
         ctx.stroke();
+
+        // Blade edge highlight
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.rect(0, -18, 2.5, 22);
+        ctx.fill();
+
         // Crossguard
         ctx.fillStyle = "#f1c40f"; // Gold
-        ctx.fillRect(-3.5, 3, 7, 1.5);
-        ctx.strokeRect(-3.5, 3, 7, 1.5);
+        ctx.beginPath();
+        ctx.rect(-6, 4, 12, 3);
+        ctx.fill();
+        ctx.stroke();
+
         // Red Pommel
         ctx.fillStyle = "#e74c3c";
         ctx.beginPath();
-        ctx.arc(0, 5, 1, 0, Math.PI * 2);
+        ctx.arc(0, 10, 2.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
         ctx.restore();
@@ -8910,35 +8933,51 @@
         ctx.fillStyle = eff.color || "#fff";
         ctx.fillText(hitText, hx + 14, hy + 4);
       } else if (eff.type === "dagger") {
-        // 1. Draw sharp pointed stiletto (Cel-Shaded)
+        // 1. Draw sharp pointed stiletto (Cel-Shaded) - Highly visible & beautifully outlined
         ctx.save();
         ctx.translate(hx, hy);
         ctx.rotate(-Math.PI / 4); // Angled up-right
 
-        // Blade outline
-        ctx.fillStyle = "#bdc3c7";
+        // Blade outline - scaled up nicely to prevent black lines overlapping the face
+        ctx.fillStyle = "#ecf0f1"; // Clean silver-white
         ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 3.5;
+        ctx.lineWidth = 1.5; // Appropriate thin stroke
         ctx.lineJoin = "round";
         ctx.beginPath();
-        ctx.moveTo(-2, 4);
-        ctx.lineTo(0, -9);
-        ctx.lineTo(2, 4);
+        ctx.moveTo(-4, 4);
+        ctx.lineTo(0, -18);
+        ctx.lineTo(4, 4);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Gold Guard
+        // Shimmer highlight on blade half
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.moveTo(0, -18);
+        ctx.lineTo(4, 4);
+        ctx.lineTo(0, 4);
+        ctx.closePath();
+        ctx.fill();
+
+        // Gold Guard (Larger, more visible)
         ctx.fillStyle = "#f1c40f";
         ctx.beginPath();
-        ctx.roundRect(-4.5, 4, 9, 2.5, [1]);
+        ctx.roundRect(-8, 4, 16, 4, [2]);
         ctx.fill();
         ctx.stroke();
 
-        // Wood Hilt
+        // Wood Hilt (Larger, more visible)
         ctx.fillStyle = "#5c3a21";
         ctx.beginPath();
-        ctx.rect(-1.5, 6.5, 3, 5);
+        ctx.rect(-2.5, 8, 5, 10);
+        ctx.fill();
+        ctx.stroke();
+
+        // Pommel jewel
+        ctx.fillStyle = "#e74c3c";
+        ctx.beginPath();
+        ctx.arc(0, 18, 2.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
         ctx.restore();
@@ -9218,25 +9257,25 @@
   };
 
   window.openCavernSigilSackAnimation = function (newItem) {
-      let overlay = document.createElement("div");
-      overlay.id = "sack-opening-overlay";
-      overlay.style.position = "fixed";
-      overlay.style.top = "0";
-      overlay.style.left = "0";
-      overlay.style.width = "100%";
-      overlay.style.height = "100%";
-      overlay.style.backgroundColor = "rgba(0,0,0,0.92)";
-      overlay.style.display = "flex";
-      overlay.style.justifyContent = "center";
-      overlay.style.alignItems = "center";
-      overlay.style.zIndex = "45000";
-      overlay.style.backdropFilter = "blur(8px)";
-      document.body.appendChild(overlay);
+    let overlay = document.createElement("div");
+    overlay.id = "sack-opening-overlay";
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.backgroundColor = "rgba(0,0,0,0.92)";
+    overlay.style.display = "flex";
+    overlay.style.justifyContent = "center";
+    overlay.style.alignItems = "center";
+    overlay.style.zIndex = "45000";
+    overlay.style.backdropFilter = "blur(8px)";
+    document.body.appendChild(overlay);
 
-      let color = window.getTierColor(newItem.statsRolled);
-      let stars = newItem.statsRolled;
+    let color = window.getTierColor(newItem.statsRolled);
+    let stars = newItem.statsRolled;
 
-      overlay.innerHTML = `
+    overlay.innerHTML = `
         <style>
           .cavern-anim-wrapper {
             position: relative;
@@ -9334,42 +9373,109 @@
             <div class="cavern-runic-circle"></div>
             <div class="portal-blast"></div>
             <div class="sack-anim-container">
-              <svg class="sack-svg" width="130" height="130" viewBox="0 0 32 32">
-                <!-- Shadow -->
-                <ellipse cx="16" cy="29" rx="10" ry="2" fill="rgba(0,0,0,0.5)" />
-                <!-- Sack Neck -->
-                <g class="sack-neck" style="transform-origin: 16px 14px;">
-                  <path d="M12,14 L10,8 C12,6 20,6 22,8 L20,14 Z" fill="#9b59b6" stroke="#000" stroke-width="1.5" />
-                </g>
-                <!-- Main Pouch -->
-                <path d="M16 8 C10 8, 6 11, 6 19 C6 26, 10 30, 16 30 C22 30, 26 26, 26 19 C26 11, 22 8, 16 8 Z" fill="#4a154b" stroke="#000" stroke-width="2" />
-                <!-- Binding String -->
-                <g class="sack-string" style="transform-origin: 16px 14px;">
-                  <path d="M11 14 Q16 16, 21 14" fill="none" stroke="#f1c40f" stroke-width="1.8" />
-                  <circle cx="16" cy="14" r="2" fill="#f1c40f" stroke="#000" stroke-width="1" />
-                </g>
-              </svg>
-            </div>
+                        <svg class="sack-svg" width="130" height="130" viewBox="0 0 64 64">
+                          <defs>
+                            <!-- Luxurious Void Velvet Body Gradient -->
+                            <linearGradient id="g_premium_velvet" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stop-color="#7d3c98" />
+                              <stop offset="60%" stop-color="#4a154b" />
+                              <stop offset="100%" stop-color="#110521" />
+                            </linearGradient>
+                            <!-- Glowing Magic Celestial Teal Lining -->
+                            <linearGradient id="g_magic_celestial" x1="0" y1="0" x2="1" y2="1">
+                              <stop offset="0%" stop-color="#00ffff" />
+                              <stop offset="100%" stop-color="#008b8b" />
+                            </linearGradient>
+                            <!-- Polished Gold Metallic Gradient -->
+                            <linearGradient id="g_polished_gold" x1="0" y1="0" x2="1" y2="1">
+                              <stop offset="0%" stop-color="#ffeaa7" />
+                              <stop offset="50%" stop-color="#f1c40f" />
+                              <stop offset="100%" stop-color="#9a7d0a" />
+                            </linearGradient>
+                            <!-- Dark shadow mask for folds -->
+                            <linearGradient id="g_fold_shadow" x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stop-color="rgba(0,0,0,0.4)" />
+                              <stop offset="100%" stop-color="rgba(0,0,0,0)" />
+                            </linearGradient>
+                          </defs>
+
+                          <!-- Soft Blurred Base Drop-Shadow -->
+                          <ellipse cx="32" cy="58" rx="20" ry="3.5" fill="rgba(0,0,0,0.55)" />
+
+                          <!-- Flared Open Neck Sleeve with Glow -->
+                          <g class="sack-neck" style="transform-origin: 32px 28px;">
+                            <!-- Glowing Teal Lining Inside -->
+                            <path d="M20 16 C25 9, 39 9, 44 16 C39 12, 25 12, 20 16 Z" fill="url(#g_magic_celestial)" opacity="0.8" style="filter: drop-shadow(0 0 3px #00ffff);" />
+                            <!-- Left Flared Neck Sleeve -->
+                            <path d="M24 28 L18 14 C22 10, 32 10, 32 16 L32 28 Z" fill="url(#g_premium_velvet)" stroke="#000" stroke-width="1.8" />
+                            <!-- Right Flared Neck Sleeve -->
+                            <path d="M40 28 L46 14 C42 10, 32 10, 32 16 L32 28 Z" fill="url(#g_premium_velvet)" stroke="#000" stroke-width="1.8" />
+                            <!-- Fold lines on the collar -->
+                            <path d="M24 28 Q32 22, 32 16" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="1.5" />
+                            <path d="M40 28 Q32 22, 32 16" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="1.5" />
+                          </g>
+
+                          <!-- Main Velvet Pouch Body -->
+                          <path d="M32 18 C20 18, 11 21, 11 38 C11 51, 18 58, 32 58 C46 58, 53 51, 53 38 C53 21, 44 18, 32 18 Z" fill="url(#g_premium_velvet)" stroke="#000" stroke-width="2.2" stroke-linejoin="round" />
+
+                          <!-- Organic Fabric Creases & Depth Shadows -->
+                          <path d="M11 38 Q18 42, 32 38" fill="none" stroke="rgba(0,0,0,0.25)" stroke-width="2" />
+                          <path d="M32 18 Q23 35, 18 51" fill="none" stroke="url(#g_fold_shadow)" stroke-width="3" />
+                          <path d="M32 18 Q41 35, 46 51" fill="none" stroke="url(#g_fold_shadow)" stroke-width="3" transform="scale(-1, 1) translate(-64, 0)" />
+
+                          <!-- Glowing Cyber-Teal Runic Medallion (Sigil) on Front -->
+                          <!-- Outer magic orbit ring -->
+                          <circle cx="32" cy="40" r="10" fill="none" stroke="#00ffff" stroke-dasharray="2.5 3" stroke-width="1.2" opacity="0.8" style="filter: drop-shadow(0 0 4px #00ffff);" />
+                          <!-- Metallic gold backing plate -->
+                          <circle cx="32" cy="40" r="7.5" fill="url(#g_polished_gold)" stroke="#000" stroke-width="1.5" />
+                          <!-- White-hot glowing core glyph -->
+                          <polygon points="32,35.5 35.5,40 32,44.5 28.5,40" fill="#ffffff" stroke="#00ffff" stroke-width="1.2" style="filter: drop-shadow(0 0 3px #00ffff);" />
+
+                          <!-- Cinched Braided Gold String & Loops -->
+                          <g class="sack-string" style="transform-origin: 32px 28px;">
+                            <!-- Main Cinch Band -->
+                            <path d="M22 28 Q32 31.5, 42 28" fill="none" stroke="url(#g_polished_gold)" stroke-width="3.5" stroke-linecap="round" />
+                            <path d="M24 29 Q32 32, 40 29" fill="none" stroke="#000" stroke-width="1.2" stroke-linecap="round" />
+
+                            <!-- Left Ribbon Loop -->
+                            <path d="M28 29 Q21 26, 25 33 Z" fill="url(#g_polished_gold)" stroke="#000" stroke-width="1.2" />
+                            <!-- Right Ribbon Loop -->
+                            <path d="M36 29 Q43 26, 39 33 Z" fill="url(#g_polished_gold)" stroke="#000" stroke-width="1.2" />
+
+                            <!-- Central Tie Knot Node -->
+                            <circle cx="32" cy="29.2" r="3.2" fill="#ffd700" stroke="#000" stroke-width="1.5" />
+                            <circle cx="32" cy="29.2" r="1" fill="#fff" opacity="0.6" />
+
+                            <!-- Left Hanging String Strand -->
+                            <path d="M30 30 Q24 40, 18 43" fill="none" stroke="url(#g_polished_gold)" stroke-width="2.2" stroke-linecap="round" />
+                            <circle cx="18" cy="43" r="1.5" fill="url(#g_polished_gold)" stroke="#000" stroke-width="0.8" />
+
+                            <!-- Right Hanging String Strand -->
+                            <path d="M34 30 Q40 40, 46 43" fill="none" stroke="url(#g_polished_gold)" stroke-width="2.2" stroke-linecap="round" />
+                            <circle cx="46" cy="43" r="1.5" fill="url(#g_polished_gold)" stroke="#000" stroke-width="0.8" />
+                          </g>
+                        </svg>
+                      </div>
           </div>
           <div style="font-size: 14px; font-weight: 900; color:#9b59b6; letter-spacing: 3px; text-shadow: 0 0 8px rgba(155,89,182,0.5); text-transform: uppercase;">TRANSMUTING CAVERN SIGIL...</div>
         </div>
       `;
 
-      setTimeout(() => {
-        let buffDescs = newItem.buffs
-          .map(
-            (b) =>
-              `<span style="color:#2ecc71; display:block; font-size:10px; margin-bottom:2px;">• ☀️ ${b.name}: ${b.desc}</span>`,
-          )
-          .join("");
-        let debuffDescs = newItem.debuffs
-          .map(
-            (d) =>
-              `<span style="color:#e74c3c; display:block; font-size:10px; margin-bottom:2px;">• 🌑 ${d.name}: ${d.desc}</span>`,
-          )
-          .join("");
+    setTimeout(() => {
+      let buffDescs = newItem.buffs
+        .map(
+          (b) =>
+            `<span style="color:#2ecc71; display:block; font-size:10px; margin-bottom:2px;">• ☀️ ${b.name}: ${b.desc}</span>`,
+        )
+        .join("");
+      let debuffDescs = newItem.debuffs
+        .map(
+          (d) =>
+            `<span style="color:#e74c3c; display:block; font-size:10px; margin-bottom:2px;">• 🌑 ${d.name}: ${d.desc}</span>`,
+        )
+        .join("");
 
-        overlay.innerHTML = `
+      overlay.innerHTML = `
           <div style="background:#15121b; border:3px solid ${color}; border-radius:12px; width:95%; max-width:400px; box-shadow:0 15px 45px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s;">
             <h2 style="margin:0 0 10px 0; color:${color}; letter-spacing:2px; text-transform:uppercase; font-size:18px;">🔮 SIGIL UNBOXED!</h2>
             <div style="height:2px; background:linear-gradient(90deg, transparent, ${color}, transparent); margin-bottom:15px;"></div>
@@ -9390,6 +9496,6 @@
             <button onclick="document.getElementById('sack-opening-overlay').remove(); window.setPauseState(false); window.updateUI(); window.renderInventory();" style="background:${color}; color:${stars === 4 || stars === 1 ? "#fff" : "#111"}; border:none; padding:10px; font-weight:bold; font-size:12px; border-radius:4px; cursor:pointer; width:100%; box-shadow:0 0 10px ${color}55;">Store in Sigil Sack</button>
           </div>
         `;
-      }, 1100);
-    };
+    }, 1100);
+  };
 })();
