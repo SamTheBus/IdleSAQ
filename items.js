@@ -831,12 +831,12 @@ Object.assign(window.ItemFactory, {
 
     let prestigeMult = 1.0;
 
-    // Direct-Alignment Scaling Model: Maps item creation baselines exactly to enemy exponential scale curves
-    let repStage = stageScale * 10;
-    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-    let repScale = Math.pow(repGrowth, repStage);
+        // Direct-Alignment Scaling Model: Maps item creation baselines exactly to enemy exponential scale curves
+        let repStage = window.getEffectiveStage(stageScale * 10);
+        let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+        let repScale = Math.pow(repGrowth, repStage);
 
-    let expScale = repScale;
+        let expScale = repScale;
     let hpDefExpScale = repScale;
 
     // Apply baseline attribute values matching slot configurations (Slot-Specific Base Stats)
@@ -1607,9 +1607,9 @@ Object.assign(window.ItemFactory, {
     item.bonusInt = item.bonusInt || 0;
 
     // Direct-Alignment Scaling Model: Maps recalculations exactly to enemy exponential scale curves
-    let repStage = (item.stageLevel || 1) * 10;
-    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-    let repScale = Math.pow(repGrowth, repStage);
+        let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
+        let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+        let repScale = Math.pow(repGrowth, repStage);
 
     let expScale = repScale;
     let hpDefExpScale = repScale;
@@ -1909,11 +1909,11 @@ window.recalculateItemStats = function (item) {
     !item.isUniqueChronicle
   ) {
     let stars = item.statsRolled || 0;
-    let baseRarityMult = 1.0 + stars * 0.3;
-    let repStage = (item.stageLevel || 1) * 10;
-    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-    let repScale = Math.pow(repGrowth, repStage);
-    let expScale = repScale;
+        let baseRarityMult = 1.0 + stars * 0.3;
+        let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
+        let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+        let repScale = Math.pow(repGrowth, repStage);
+        let expScale = repScale;
     let prestigeMult = 1.0;
 
     item.rawBaseInt = Math.ceil(1.5 * expScale * prestigeMult * baseRarityMult);
@@ -2130,11 +2130,12 @@ Object.assign(window.ItemFactory, {
     }
 
     let selectedStat = pool[Math.floor(Math.random() * pool.length)];
-    let stageScale = item.stageLevel || 1;
-    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-    let expScale = Math.pow(1.18, stageScale) * Math.pow(stageScale, 2.2);
-    let hpDefExpScale = Math.pow(1.16, stageScale) * Math.pow(stageScale, 2.2);
-    let rarityMult = 1 + item.statsRolled * 0.15;
+        let stageScale = item.stageLevel || 1;
+        let effStageScale = window.getEffectiveStage(stageScale * 10) / 10;
+        // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
+        let expScale = Math.pow(1.18, effStageScale) * Math.pow(effStageScale, 2.2);
+        let hpDefExpScale = Math.pow(1.16, effStageScale) * Math.pow(effStageScale, 2.2);
+        let rarityMult = 1 + item.statsRolled * 0.15;
     let prestigeMult = Math.pow(1.08, window.playerStats.prestigeCount || 0);
 
     if (selectedStat === "atk")
@@ -3593,11 +3594,12 @@ Object.assign(window.ForgeManager, {
     if (eligiblePool.length === 0) eligiblePool = possiblePool;
 
     let newProp = eligiblePool[Math.floor(Math.random() * eligiblePool.length)];
-    let stageScale = item.stageLevel || 1;
-    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-    let expScale = Math.pow(1.58, stageScale);
-    let hpDefExpScale = Math.pow(1.56, stageScale);
-    let rarityMult = 1 + item.statsRolled * 0.15;
+        let stageScale = item.stageLevel || 1;
+        let effStageScale = window.getEffectiveStage(stageScale * 10) / 10;
+        // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
+        let expScale = Math.pow(1.58, effStageScale);
+        let hpDefExpScale = Math.pow(1.56, effStageScale);
+        let rarityMult = 1 + item.statsRolled * 0.15;
     let rolledValue = 0;
 
     if (newProp === "bonusAtk")

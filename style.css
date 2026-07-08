@@ -175,20 +175,24 @@ body.scroll-lock {
   overflow: visible !important; /* Force visible so sticky isn't clipped */
 }
 
-/* Ensure the canvas is correctly positioned */
+/* Relative Viewport Anchor Container */
+#canvas-container {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  width: 100%;
+  background: #0c0f12;
+  border-bottom: 2px solid #1f242d;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+
 #gameCanvas {
   display: block;
   background: #0c0f12;
   width: 100%;
   height: auto;
-  border-bottom: 2px solid #1f242d;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
   touch-action: none;
-  /* Base settings, adjusted dynamically by toggle options */
-  position: sticky;
-  top: 0;
-  z-index: 999;
 }
 
 /* --- TOP NAVIGATION BAR --- */
@@ -988,21 +992,21 @@ canvas {
   box-shadow: 0 0 8px rgba(139, 92, 246, 0.45);
 }
 
-/* --- DEATH AND COLLAPSE GRAPHICS --- */
+/* --- DEATH AND COLLAPSE GRAPHICS BOUND TO CANVAS --- */
 #death-overlay {
-  position: fixed;
+  position: absolute; /* Bound strictly to canvas container */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(8, 2, 2, 0.94);
+  background: rgba(8, 2, 2, 0.88);
   color: white;
   display: none;
   justify-content: center;
   align-items: center;
-  z-index: 15000;
-  backdrop-filter: blur(8px);
-  animation: deathFadeIn 0.35s ease-out forwards;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  animation: deathFadeIn 0.3s ease-out forwards;
 }
 
 @keyframes deathFadeIn {
@@ -1017,17 +1021,14 @@ canvas {
 #death-card {
   background: linear-gradient(135deg, #1e0505 0%, #060000 100%);
   border: 2px solid #e74c3c;
-  border-radius: 12px;
-  padding: 20px;
-  width: 92%;
-  max-width: 440px;
+  border-radius: 8px;
   box-shadow:
-    0 15px 45px rgba(0, 0, 0, 0.95),
-    inset 0 0 25px rgba(192, 57, 43, 0.25),
-    0 0 30px rgba(192, 57, 43, 0.15);
+    0 10px 30px rgba(0, 0, 0, 0.95),
+    inset 0 0 15px rgba(192, 57, 43, 0.2),
+    0 0 20px rgba(192, 57, 43, 0.1);
   text-align: center;
   transform: scale(0.9);
-  animation: deathCardPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+  animation: deathCardPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
 }
 
 @keyframes deathCardPop {

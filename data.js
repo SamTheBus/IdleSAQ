@@ -25,6 +25,14 @@ window.getUiIconSvg = function (key, size = 12) {
 
 // --- SYSTEM UTILS ---
 
+window.getEffectiveStage = function(stage) {
+  let s = Number(stage);
+  if (isNaN(s) || s < 1) s = 1;
+  // Stages <= 100 behave exactly as normal.
+  // Stages > 100 scale using a continuous, sub-exponential curve to prevent floats from hitting Infinity.
+  return s <= 100 ? s : 100 + Math.pow(s - 100, 0.65) * 3.5;
+};
+
 function getCardTier(count) {
   let thresholds = window.CARD_UPGRADE_THRESHOLDS || [1, 25, 50, 150, 300, 750];
   let t = -1;

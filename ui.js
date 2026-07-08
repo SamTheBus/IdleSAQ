@@ -2171,17 +2171,9 @@ window.setPauseState = function (paused) {
 };
 
 window.togglePause = function () {
-  let deathOverlay = document.getElementById("death-overlay");
-  let offlineModal = document.getElementById("offline-summary-modal");
-  if ((deathOverlay && deathOverlay.style.display === "flex") || offlineModal) {
-    return;
-  }
-  window.setPauseState(!window.isGamePaused);
+  // Manual pausing has been deprecated to prevent exploit cooldown stalling and mid-fight gear swapping.
   if (typeof window.pushHeaderToast === "function") {
-    window.pushHeaderToast(
-      window.isGamePaused ? "⏸️ Game Paused!" : "▶️ Game Resumed!",
-      window.isGamePaused ? "#e74c3c" : "#2ecc71",
-    );
+    window.pushHeaderToast("⚖️ Manual pausing is disabled! Real-time battle is enforced.", "#e67e22");
   }
 };
 
@@ -3365,10 +3357,11 @@ window.renderPrestigeTab = function () {
   );
 
   let activeStage = p.selectedPrestigeStage;
-  let growthRate = 1.045 + (activeStage * 0.04) / (activeStage + 200);
-  let scale = Math.pow(growthRate, activeStage);
+    let effStage = window.getEffectiveStage(activeStage);
+    let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+    let scale = Math.pow(growthRate, effStage);
 
-  let hpVal = Math.floor(600 * scale);
+    let hpVal = Math.floor(600 * scale);
   let dmgVal = Math.floor(6 * scale);
   let defVal = Math.floor(80 + (activeStage - 80) * 1.5);
 
@@ -7601,11 +7594,12 @@ window.renderAltarTab = function () {
   let slidesHtml = window.riftBossesMetadata
     .map((boss, idx) => {
       let lvl = isRiftActive ? activeLvl : selectedLvl;
-      let equivalentStage = 50 + lvl * 10;
-      let gRate = 1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
-      let rScale = Math.pow(gRate, equivalentStage);
+            let equivalentStage = 50 + lvl * 10;
+            let effStage = window.getEffectiveStage(equivalentStage);
+            let gRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+            let rScale = Math.pow(gRate, effStage);
 
-      let defVal = Math.floor(boss.defMult * rScale);
+            let defVal = Math.floor(boss.defMult * rScale);
       let hpVal = Math.floor(boss.hpMult * (60 * rScale) * (1 + defVal / 100)); // True Effective Health
       let dmgVal = Math.floor(20 * rScale * boss.dmgMult);
 
@@ -8524,9 +8518,9 @@ window.claimMasterMissionReward = function (isWeekly = false) {
     window.addUseDrop("Monster Card Sack", 1);
 
     if (typeof window.pushLog === "function")
-      window.pushLog(
-        `<strong style="color:#f1c40f;">🏆 [MISSION BOARD] Beaten Weekly Board! Earned +${scalingPPText} PP, 1x Card Sack, Gacha Keys, 10x Mission Tokens, and ${grandItem.name}!</strong>`,
-      );
+          window.pushLog(
+            `<strong style="color:#f1c40f;">🏆 [MISSION BOARD] Beaten Weekly Board! Earned +${scalingPP} PP, 1x Card Sack, Gacha Keys, 10x Mission Tokens, and ${grandItem.name}!</strong>`,
+          );
   } else {
     window.playerStats.dailyRewardClaimed = true;
 

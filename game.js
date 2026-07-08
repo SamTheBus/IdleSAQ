@@ -1371,10 +1371,11 @@ window.SaveManager = {
     );
 
     // Stage Progression Loop
-    while (remainingSeconds > 0 && currentStage < maxProgressStage) {
-      let growthRate = 1.045 + (currentStage * 0.04) / (currentStage + 200);
-      let expScale = Math.pow(growthRate, currentStage);
-      let mobHp = Math.floor(25 * expScale * (1 + currentStage * 0.06));
+        while (remainingSeconds > 0 && currentStage < maxProgressStage) {
+          let effStage = window.getEffectiveStage(currentStage);
+          let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+          let expScale = Math.pow(growthRate, effStage);
+          let mobHp = Math.floor(25 * expScale * (1 + effStage * 0.06));
 
       // DPS Check: If player's effective damage cannot clear the HP barrier, progress halts
       if (playerDps < mobHp / 10) {
@@ -1412,10 +1413,11 @@ window.SaveManager = {
     }
 
     // Remaining seconds are spent FARMING on the final reached stage
-    if (remainingSeconds > 0) {
-      let growthRate = 1.045 + (currentStage * 0.04) / (currentStage + 200);
-      let expScale = Math.pow(growthRate, currentStage);
-      let mobHp = Math.floor(25 * expScale * (1 + currentStage * 0.06));
+        if (remainingSeconds > 0) {
+          let effStage = window.getEffectiveStage(currentStage);
+          let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+          let expScale = Math.pow(growthRate, effStage);
+          let mobHp = Math.floor(25 * expScale * (1 + effStage * 0.06));
 
       let swingTime = p.idleAttackSpeed / 60;
       let ttkMob = Math.max(swingTime, mobHp / playerDps);
@@ -4984,22 +4986,22 @@ window.CombatEngine = {
     }
 
     let scale;
-    if (window.playerStats.isDungeonMode) {
-      window.playerStats.currentDungeonStage = window.playerStats
-        .currentDungeonStage || { equip: 1, gold: 1, mat: 1 };
-      let dStage =
-        window.playerStats.currentDungeonStage[
-          window.playerStats.currentDungeon
-        ] || 1;
+        if (window.playerStats.isDungeonMode) {
+          window.playerStats.currentDungeonStage = window.playerStats
+            .currentDungeonStage || { equip: 1, gold: 1, mat: 1 };
+          let dStage =
+            window.playerStats.currentDungeonStage[
+              window.playerStats.currentDungeon
+            ] || 1;
 
-      // Smooth, campaign-aligned exponential scaling formula avoiding arithmetic overflow at high levels
-      let baseRate = 1.045 + (dStage * 0.015) / (dStage + 300);
-      scale = Math.pow(baseRate, dStage) * (1 + dStage * 0.05);
-    } else {
-      // Smooth out post-wall base acceleration to prevent runaway super-exponential cliffs
-      let growthRate = 1.045 + (activeStage * 0.04) / (activeStage + 200);
-      scale = Math.pow(growthRate, activeStage);
-    }
+          let effStage = window.getEffectiveStage(dStage);
+          let baseRate = 1.045 + (effStage * 0.015) / (effStage + 300);
+          scale = Math.pow(baseRate, effStage) * (1 + effStage * 0.05);
+        } else {
+          let effStage = window.getEffectiveStage(activeStage);
+          let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+          scale = Math.pow(growthRate, effStage);
+        }
 
     if (window.playerStats.isDungeonMode) {
       let hpScale = window.playerStats.currentDungeon === "gold" ? 1.5 : 1;
