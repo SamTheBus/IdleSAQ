@@ -399,38 +399,41 @@
     window.RenderEngine.spawnDamageEffect(amount, type, isCrit);
 
   // Append renderNemesisPreview inside window.RenderEngine
-  Object.assign(window.RenderEngine, {
-    renderNemesisPreview(mobData) {
-      const dCanvas = document.getElementById("death-enemy-canvas");
-      if (!dCanvas) return;
-      const dCtx = dCanvas.getContext("2d");
-      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+    Object.assign(window.RenderEngine, {
+      renderNemesisPreview(mobData) {
+        const dCanvas = document.getElementById("death-enemy-canvas");
+        if (!dCanvas) return;
+        const dCtx = dCanvas.getContext("2d");
+        dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
 
-      if (!mobData) {
-        dCtx.fillStyle = "#c0392b";
-        dCtx.font = "bold 20px sans-serif";
-        dCtx.textAlign = "center";
-        dCtx.textBaseline = "middle";
-        dCtx.fillText("💀", 30, 30);
-        return;
-      }
+        if (!mobData) {
+          dCtx.fillStyle = "#c0392b";
+          dCtx.font = "bold 20px sans-serif";
+          dCtx.textAlign = "center";
+          dCtx.textBaseline = "middle";
+          dCtx.fillText("💀", dCanvas.width / 2, dCanvas.height / 2);
+          return;
+        }
 
-      let renderMob = JSON.parse(JSON.stringify(mobData));
-      renderMob.flashTimer = 0;
-      let maxDim = Math.max(renderMob.w, renderMob.h);
-      let scale = maxDim > 0 ? 40 / maxDim : 1.0;
+        let renderMob = JSON.parse(JSON.stringify(mobData));
+        renderMob.flashTimer = 0;
 
-      dCtx.save();
-      dCtx.translate(30, 30);
-      dCtx.scale(scale, scale);
-      dCtx.translate(
-        -(renderMob.x + renderMob.w / 2),
-        -(renderMob.y + renderMob.h / 2),
-      );
-      window.RenderEngine.drawSingleMob(dCtx, renderMob);
-      dCtx.restore();
-    },
-  });
+        // Calculate containing scale to keep the sprite within 80% of canvas bounds
+        let maxDim = Math.max(renderMob.w, renderMob.h);
+        let scale = maxDim > 0 ? (dCanvas.width * 0.8) / maxDim : 1.0;
+
+        dCtx.save();
+        // Dynamically target the exact center point of the active canvas dimensions
+        dCtx.translate(dCanvas.width / 2, dCanvas.height / 2);
+        dCtx.scale(scale, scale);
+        dCtx.translate(
+          -(renderMob.x + renderMob.w / 2),
+          -(renderMob.y + renderMob.h / 2),
+        );
+        window.RenderEngine.drawSingleMob(dCtx, renderMob);
+        dCtx.restore();
+      },
+    });
 
   // Legacy Compatibility Aliases to protect references
   window.renderNemesisPreview = (mobData) =>

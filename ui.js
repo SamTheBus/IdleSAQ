@@ -2193,6 +2193,7 @@ window.toggleAuto = function () {
 window.updateStickyCanvasStyle = function () {
   let active = window.playerStats.stickyCanvas !== false;
   let btn = document.getElementById("settings-toggle-sticky");
+  let canvasContainer = document.getElementById("canvas-container");
   let canvasEl = document.getElementById("gameCanvas");
   let containerEl = document.getElementById("game-container");
 
@@ -2202,9 +2203,13 @@ window.updateStickyCanvasStyle = function () {
   }
 
   if (canvasEl) {
-    canvasEl.style.position = active ? "sticky" : "static";
-    canvasEl.style.top = active ? "0" : "";
-    canvasEl.style.zIndex = active ? "999" : "";
+    canvasEl.style.position = "static";
+  }
+
+  if (canvasContainer) {
+    canvasContainer.style.position = active ? "sticky" : "relative";
+    canvasContainer.style.top = active ? "0" : "";
+    canvasContainer.style.zIndex = active ? "999" : "";
   }
 
   if (containerEl) {

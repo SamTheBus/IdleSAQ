@@ -2815,64 +2815,92 @@
         <!-- Simplified Defeated Card Overlay bound strictly to canvas container -->
         <div id="death-overlay">
             <div id="death-card"
-                 style="width: 90%; max-width: 380px; padding: 10px 15px; margin: auto;">
+                 style="width: 95%; max-width: 440px; padding: 12px 16px; margin: auto; border: 2px solid #e74c3c; border-radius: 10px; background: linear-gradient(135deg, #180505 0%, #050000 100%); box-shadow: 0 8px 30px rgba(0,0,0,0.95), inset 0 0 15px rgba(231,76,60,0.2);">
                 <div id="death-header"
-                     style="font-size: 18px; letter-spacing: 2px; margin-bottom: 2px;">DEFEATED
+                     style="font-size: 20px; font-weight: 950; color: #e74c3c; letter-spacing: 3px; text-shadow: 0 0 10px rgba(231, 76, 60, 0.5); margin-bottom: 2px; text-transform: uppercase;">
+                    DEFEATED
                 </div>
-                <div style="font-size: 10px; color: #cbd5e1; margin-bottom: 6px;">
+                <div style="font-size: 10.5px; color: #cbd5e1; margin-bottom: 6px;">
                     <span id="death-stat-peak">Stage X</span> • <span id="death-stat-retreat"
-                                                                      style="color: #2ecc71;">Retreat Stage Y</span>
+                                                                      style="color: #2ecc71; font-weight: bold;">Retreat Stage Y</span>
                 </div>
 
-                <div style="display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; background: rgba(0,0,0,0.5); border: 1px solid #781c1c; border-radius: 6px; padding: 6px; margin-bottom: 8px;">
+                <!-- Row 1: Nemesis & Stats -->
+                <div style="display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; background: rgba(0,0,0,0.65); border: 1.2px solid #781c1c; border-radius: 6px; padding: 6px 10px; margin-bottom: 8px; box-shadow: inset 0 0 8px #000;">
                     <div class="death-nemesis-container"
-                         style="width: 38px; height: 38px; margin: 0;">
+                         style="width: 40px; height: 40px; border-color: #e74c3c; box-shadow: 0 0 8px rgba(231, 76, 60, 0.35); margin: 0; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
                         <canvas id="death-enemy-canvas" width="40" height="40"
                                 style="width:40px; height:40px; display:block;"></canvas>
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; text-align: left; font-size: 9px; font-family: monospace;">
-                        <div><span style="color:#aaa; display:block;">SLAIN</span><strong
-                                style="color:#fff;" id="death-stat-kills">0</strong></div>
-                        <div><span style="color:#aaa; display:block;">GOLD</span><strong
-                                style="color:#f1c40f;" id="death-stat-run-gold">+0</strong></div>
-                        <div><span style="color:#aaa; display:block;">XP</span><strong
-                                style="color:#9b59b6;" id="death-stat-run-xp">+0</strong></div>
+                    <div style="text-align: left; line-height: 1.3;">
+                        <span style="color:#aaa; font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; display: block;">KILLED BY</span>
+                        <strong style="color: #ff7675; font-size: 11.5px;" id="death-stat-nemesis">Unknown
+                            Foe</strong>
+                        <span style="color:#7f8c8d; font-size: 9px; display: block; font-family: monospace;">Damage Taken: <strong
+                                style="color:#fff;" id="death-stat-dmg-taken">0</strong></span>
                     </div>
                 </div>
 
-                <!-- Strategic Survival Advice Banner -->
-                <div id="death-tip-container">
+                <!-- Row 2: Campaign/Descent Run Earnings -->
+                <div style="background: rgba(0,0,0,0.55); border: 1px solid #444; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px;">
+                    <div style="font-size: 8px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 2px; margin-bottom: 4px; text-align: left;">
+                        ⚔️ Run Harvest Summary
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; text-align: center; font-family: monospace; font-size: 10px;">
+                        <div><span
+                                style="color:#888; font-size: 7.5px; display:block; margin-bottom: 1px;">SLAIN</span><strong
+                                style="color:#fff; font-size:11px;" id="death-stat-kills">0</strong>
+                        </div>
+                        <div><span
+                                style="color:#888; font-size: 7.5px; display:block; margin-bottom: 1px;">GOLD</span><strong
+                                style="color:#f1c40f; font-size:11px;"
+                                id="death-stat-run-gold">+0</strong></div>
+                        <div><span
+                                style="color:#888; font-size: 7.5px; display:block; margin-bottom: 1px;">XP</span><strong
+                                style="color:#9b59b6; font-size:11px;"
+                                id="death-stat-run-xp">+0</strong></div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Tactical Alerts -->
+                <div id="death-alerts-container"
+                     style="display: none; background: rgba(241, 196, 15, 0.05); border: 1.5px dashed #f1c40f; border-radius: 6px; padding: 6px 10px; margin-bottom: 8px; font-size: 10px; text-align: left; line-height: 1.35; color: #fff;">
+                    <!-- Filled dynamically via javascript -->
+                </div>
+
+                <!-- Row 4: Strategic Advice Banner -->
+                <div id="death-tip-container"
+                     style="background: rgba(231, 76, 60, 0.04); border: 1px dashed rgba(231, 76, 60, 0.45); border-radius: 6px; padding: 6px 10px; font-size: 10px; line-height: 1.35; color: #e2e8f0; text-align: left; margin-bottom: 10px; white-space: normal;">
                     <span id="death-tip-text"></span>
                 </div>
 
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                <div id="death-tip-container">
-                    <span id="death-tip-text"></span>
-                </div>
-
+                <!-- Row 5: Action Controls -->
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                     <div id="death-respawn-timer-container"
-                         style="display: flex; align-items: center; gap: 6px; margin: 0;">
-                        <div style="position: relative; width: 28px; height: 28px;">
-                            <svg width="28" height="28" viewBox="0 0 44 44"
-                                 style="transform: rotate(-90deg); width:28px; height:28px; display:block;">
+                         style="display: flex; align-items: center; gap: 6px; margin: 0; flex-shrink: 0;">
+                        <div style="position: relative; width: 26px; height: 26px;">
+                            <svg width="26" height="26" viewBox="0 0 44 44"
+                                 style="transform: rotate(-90deg); width:26px; height:26px; display:block;">
                                 <circle cx="22" cy="22" r="18" fill="none" stroke="#2a1212"
-                                        stroke-width="3"></circle>
+                                        stroke-width="4.5"></circle>
                                 <circle id="death-respawn-spinner" cx="22" cy="22" r="18"
-                                        fill="none" stroke="#e74c3c" stroke-width="3"
+                                        fill="none" stroke="#e74c3c" stroke-width="4.5"
                                         stroke-dasharray="113.1" stroke-dashoffset="0"
                                         style="transition: stroke-dashoffset 0.1s linear"></circle>
                             </svg>
                             <div id="death-respawn-timer-text"
-                                 style="position: absolute; top: 0; left: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-family: monospace; font-weight: bold; color: #fff;">
+                                 style="position: absolute; top: 0; left: 0; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-family: monospace; font-weight: bold; color: #fff;">
                                 10
                             </div>
                         </div>
-                        <span style="font-size: 9px; color: #dca7a7; font-family: monospace;">Reclaim (<span
-                                id="death-timer-seconds">10</span>s)</span>
+                        <div style="text-align: left; line-height: 1.0;">
+                            <span style="font-size: 7.5px; color: #aaa; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Auto Reclaim</span>
+                            <span style="font-size: 9px; color: #dca7a7; font-family: monospace; font-weight: bold;"><span
+                                    id="death-timer-seconds">10</span>s left</span>
+                        </div>
                     </div>
                     <button id="death-respawn-btn" onclick="window.respawnHero()"
-                            style="flex: 1; padding: 6px 12px; font-size: 11px; margin: 0; height: 32px; line-height: 1;">
+                            style="flex: 1; padding: 8px 14px; font-size: 11.5px; margin: 0; height: 32px; line-height: 1;">
                         Arise & Reclaim
                     </button>
                 </div>

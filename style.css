@@ -1000,11 +1000,16 @@ canvas {
   background: rgba(8, 2, 2, 0.88);
   color: white;
   display: none;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start; /* Ensures scrollable area doesn't clip top/bottom cards */
   align-items: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   z-index: 1000;
   backdrop-filter: blur(4px);
   animation: deathFadeIn 0.3s ease-out forwards;
+  padding: 10px 0;
+  box-sizing: border-box;
 }
 
 @keyframes deathFadeIn {
