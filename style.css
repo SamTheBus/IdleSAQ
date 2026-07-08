@@ -177,9 +177,7 @@ body.scroll-lock {
 
 /* Relative Viewport Anchor Container */
 #canvas-container {
-  position: sticky;
-  top: 0;
-  z-index: 999;
+  position: relative;
   width: 100%;
   background: #0c0f12;
   border-bottom: 2px solid #1f242d;
