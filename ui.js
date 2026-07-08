@@ -8795,8 +8795,8 @@ window.renderMissionsWindow = function () {
     }
 
     let weeklyMasterBtnHtml = "";
-    let scalingPPText = 2 + Math.floor(window.playerStats.prestigeCount / 5);
-    if (window.playerStats.prestigeCount === 0) {
+        let scalingPP = 2 + Math.floor(window.playerStats.prestigeCount / 5);
+        if (window.playerStats.prestigeCount === 0) {
       weeklyMasterBtnHtml = `
         <div style="background:rgba(231,76,60,0.08); border:1px dashed #e74c3c; border-radius:6px; padding:10px; text-align:center; color:#e74c3c; font-size:10.5px; font-weight:bold; width:100%;">
             🔒 Weekly Board unlocks after your first Ascension at the Altar of Ascension.
