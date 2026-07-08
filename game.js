@@ -5287,58 +5287,55 @@ window.CombatEngine = {
     }
 
     let prestigeCount = window.playerStats.prestigeCount || 0;
-    let rollbackPercent = 0.8;
-    if (prestigeCount >= 1)
-      rollbackPercent = Math.min(0.95, 0.9 + (prestigeCount - 1) * 0.01);
+              let rollbackPercent = 0.8;
+              if (prestigeCount >= 1)
+                rollbackPercent = Math.min(0.95, 0.9 + (prestigeCount - 1) * 0.01);
 
-    let restartStage;
-    if (wasDungeon) {
-      restartStage = window.playerStats.stage;
-      let dNames = {
-        equip: "Equipment Dungeon",
-        gold: "Gold Mine",
-        mat: "Material Cavern",
-      };
-      let dName = dNames[activeDungeon] || "Dungeon";
-      document.getElementById("death-stat-peak").innerText =
-        `${dName} Floor ${dungeonFloor}`;
-      document.getElementById("death-stat-retreat").innerText =
-        `Campaign Stage ${restartStage}`;
-    } else {
-      // Campaign only rollback condition (Dungeons, Crucible, Altar Uber Bosses, and Prestige Bosses bypass rollback)
-      let isOutsideCampaign = wasUber || wasPrestige || wasCrucible;
-      if (isOutsideCampaign) {
-        restartStage = window.playerStats.stage;
-        document.getElementById("death-stat-peak").innerText = wasUber
-          ? "Rift Guardian"
-          : "Prestige Boss";
-        document.getElementById("death-stat-retreat").innerText =
-          `Campaign Stage ${restartStage}`;
-      } else {
-        // Standard campaign death (mobs or stage bosses) -> Rollback applied
-        restartStage = Math.max(
-          1,
-          Math.floor((window.playerStats.maxStage || 1) * rollbackPercent),
-        );
-        window.playerStats.stage = restartStage;
-        document.getElementById("death-stat-peak").innerText =
-          `Stage ${window.playerStats.maxStage || 1}`;
-        document.getElementById("death-stat-retreat").innerText =
-          `Stage ${restartStage}`;
-      }
-    }
+              let restartStage;
+              const peakEl = document.getElementById("death-stat-peak");
+              const retreatEl = document.getElementById("death-stat-retreat");
+              const killsEl = document.getElementById("death-stat-kills");
+              const goldEl = document.getElementById("death-stat-run-gold");
+              const xpEl = document.getElementById("death-stat-run-xp");
+              const tipEl = document.getElementById("death-tip-text");
 
-    document.getElementById("death-stat-kills").innerText = window.formatNumber(
-      window.playerStats.runKills || 0,
-    );
-    document.getElementById("death-stat-run-gold").innerText =
-      `+` + window.formatNumber(window.playerStats.runGold || 0);
-    document.getElementById("death-stat-run-xp").innerText =
-      `+` + window.formatNumber(window.playerStats.runXp || 0);
-    document.getElementById("death-tip-text").innerText =
-      "Reforging modifiers with Catalyst Cores and tempering weapon components significantly increases battle survivability.";
+              if (wasDungeon) {
+                restartStage = window.playerStats.stage;
+                let dNames = {
+                  equip: "Equipment Dungeon",
+                  gold: "Gold Mine",
+                  mat: "Material Cavern",
+                };
+                let dName = dNames[activeDungeon] || "Dungeon";
+                if (peakEl) peakEl.innerText = `${dName} Floor ${dungeonFloor}`;
+                if (retreatEl) retreatEl.innerText = `Campaign Stage ${restartStage}`;
+              } else {
+                // Campaign only rollback condition (Dungeons, Crucible, Altar Uber Bosses, and Prestige Bosses bypass rollback)
+                let isOutsideCampaign = wasUber || wasPrestige || wasCrucible;
+                if (isOutsideCampaign) {
+                  restartStage = window.playerStats.stage;
+                  if (peakEl) peakEl.innerText = wasUber ? "Rift Guardian" : "Prestige Boss";
+                  if (retreatEl) retreatEl.innerText = `Campaign Stage ${restartStage}`;
+                } else {
+                  // Standard campaign death (mobs or stage bosses) -> Rollback applied
+                  restartStage = Math.max(
+                    1,
+                    Math.floor((window.playerStats.maxStage || 1) * rollbackPercent),
+                  );
+                  window.playerStats.stage = restartStage;
+                  if (peakEl) peakEl.innerText = `Stage ${window.playerStats.maxStage || 1}`;
+                  if (retreatEl) retreatEl.innerText = `Stage ${restartStage}`;
+                }
+              }
 
-    window.updateUI();
+              if (killsEl) killsEl.innerText = window.formatNumber(window.playerStats.runKills || 0);
+              if (goldEl) goldEl.innerText = `+` + window.formatNumber(window.playerStats.runGold || 0);
+              if (xpEl) xpEl.innerText = `+` + window.formatNumber(window.playerStats.runXp || 0);
+              if (tipEl) {
+                tipEl.innerText = "Reforging modifiers with Catalyst Cores and tempering weapon components significantly increases battle survivability.";
+              }
+
+              window.updateUI();
 
     if (wasDungeon)
       window.pushLog(
