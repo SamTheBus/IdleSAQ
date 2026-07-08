@@ -221,14 +221,49 @@ window.AssetCatalog = {
         `;
     },
     broadsword(id, color) {
-      return `
-          ${window.AssetCatalog.gradients.weapon(id, color)}
-          <path d="M13 3 L19 3 L18 20 L14 20 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.8" />
-          <rect x="9" y="20" width="14" height="2.5" rx="0.5" fill="${color}" stroke="#000" stroke-width="1.2" />
-          <rect x="14" y="22.5" width="4" height="6" fill="#3b3b3b" stroke="#000" stroke-width="1" />
-          <circle cx="16" cy="29.5" r="1.5" fill="${color}" stroke="#000" stroke-width="1" />
-        `;
-    },
+          return `
+              ${window.AssetCatalog.gradients.weapon(id, color)}
+              <path d="M13 3 L19 3 L18 20 L14 20 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.8" />
+              <rect x="9" y="20" width="14" height="2.5" rx="0.5" fill="${color}" stroke="#000" stroke-width="1.2" />
+              <rect x="14" y="22.5" width="4" height="6" fill="#3b3b3b" stroke="#000" stroke-width="1" />
+              <circle cx="16" cy="29.5" r="1.5" fill="${color}" stroke="#000" stroke-width="1" />
+            `;
+        },
+        longsword(id, color) {
+          return `
+              ${window.AssetCatalog.gradients.weapon(id, color)}
+              <path d="M15 2 H17 L17.5 21 H14.5 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.5" />
+              <rect x="10" y="21" width="12" height="2" rx="0.5" fill="${color}" stroke="#000" stroke-width="1" />
+              <rect x="14.5" y="23" width="3" height="6.5" fill="#333" stroke="#000" stroke-width="1" />
+              <circle cx="16" cy="29.5" r="1.5" fill="${color}" stroke="#000" stroke-width="0.8" />
+            `;
+        },
+        halberd(id, color) {
+          return `
+              <line x1="16" y1="12" x2="16" y2="30" stroke="#5c3a21" stroke-width="2" />
+              <path d="M16 2 L18 8 H14 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.2" />
+              <path d="M16 8 Q23 6, 22 13 Q18 15, 16 14 Z" fill="${color}" stroke="#000" stroke-width="1.2" />
+              <path d="M16 9 L11 11 L16 13 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.2" />
+            `;
+        },
+        flanged_mace(id, color) {
+          return `
+              <line x1="16" y1="12" x2="16" y2="30" stroke="#2c3e50" stroke-width="2.5" />
+              <rect x="13" y="4" width="6" height="10" rx="1" fill="#7f8c8d" stroke="#000" stroke-width="1.5" />
+              <path d="M10 5 L13 7 V11 L10 13 Z" fill="${color}" stroke="#000" stroke-width="1" />
+              <path d="M22 5 L19 7 V11 L22 13 Z" fill="${color}" stroke="#000" stroke-width="1" />
+              <polygon points="16,1 18,4 14,4" fill="#95a5a6" stroke="#000" stroke-width="1" />
+            `;
+        },
+        claymore(id, color) {
+          return `
+              ${window.AssetCatalog.gradients.weapon(id, color)}
+              <path d="M14 2 L18 2 L18 19 L14 19 Z" fill="url(#grad_weap_${id})" stroke="#000" stroke-width="1.8" />
+              <path d="M9 19 L16 21 L23 19 L21 23 L16 22 L11 23 Z" fill="${color}" stroke="#000" stroke-width="1.5" />
+              <rect x="14.5" y="23" width="3" height="6.5" fill="#4a2711" stroke="#000" stroke-width="1" />
+              <circle cx="16" cy="29.5" r="1.5" fill="${color}" stroke="#000" stroke-width="1" />
+            `;
+        },
     kite_shield(id, color) {
       return `
               ${window.AssetCatalog.gradients.shield(id, color)}

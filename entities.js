@@ -6475,52 +6475,65 @@
         ctx.stroke();
       }
     } else {
-      if (options.slashFrame) {
-        ctx.translate(15, -10);
-        ctx.rotate(-Math.PI / 2.3);
-        ctx.fillStyle = "#7f8c8d";
-        ctx.beginPath();
-        ctx.rect(-2, -2, 4, 10);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = "#8e44ad";
-        ctx.beginPath();
-        ctx.rect(-5, 8, 10, 4);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = "#ecf0f1";
-        ctx.beginPath();
-        ctx.rect(-2, 12, 4, 25);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = "rgba(236, 240, 241, 0.4)";
-        ctx.beginPath();
-        ctx.arc(0, 20, 35, 0, Math.PI / 2);
-        ctx.lineTo(0, 0);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = "rgba(0, 0, 0, 0.55)";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      } else {
-        ctx.rotate(-Math.PI / 8);
-        ctx.fillStyle = "#7f8c8d";
-        ctx.beginPath();
-        ctx.rect(-2, -2, 4, 10);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = "#8e44ad";
-        ctx.beginPath();
-        ctx.rect(-5, 8, 10, 4);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = "#ecf0f1";
-        ctx.beginPath();
-        ctx.rect(-2, 12, 4, 25);
-        ctx.fill();
-        ctx.stroke();
-      }
-    }
+          let weapItem = equipped.weapon;
+          let tierColor = window.getTierColor(weapItem ? weapItem.statsRolled : 0);
+          let rgbVals = window.hexToRgbValues ? window.hexToRgbValues(tierColor) : "236, 240, 241";
+
+          if (options.slashFrame) {
+            ctx.translate(15, -10);
+            ctx.rotate(-Math.PI / 2.3);
+
+            // --- Sleek, classic sword rendering ---
+            ctx.fillStyle = "#7f8c8d";
+            ctx.beginPath();
+            ctx.rect(-2, -2, 4, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#8e44ad";
+            ctx.beginPath();
+            ctx.rect(-5, 8, 10, 4);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#ecf0f1";
+            ctx.beginPath();
+            ctx.rect(-2, 12, 4, 25);
+            ctx.fill();
+            ctx.stroke();
+
+            // Premium dynamic slash color trail inheriting quality
+            ctx.fillStyle = `rgba(${rgbVals}, 0.35)`;
+            ctx.beginPath();
+            ctx.arc(0, 20, 35, 0, Math.PI / 2);
+            ctx.lineTo(0, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = `rgba(${rgbVals}, 0.55)`;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          } else {
+            ctx.rotate(-Math.PI / 8);
+
+            ctx.fillStyle = "#7f8c8d";
+            ctx.beginPath();
+            ctx.rect(-2, -2, 4, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#8e44ad";
+            ctx.beginPath();
+            ctx.rect(-5, 8, 10, 4);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#ecf0f1";
+            ctx.beginPath();
+            ctx.rect(-2, 12, 4, 25);
+            ctx.fill();
+            ctx.stroke();
+          }
+        }
     ctx.restore();
 
     if (
