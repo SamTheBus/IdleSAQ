@@ -3,7 +3,7 @@
    initial global state, and system utility functions.
    ========================================================================= */
 
-window.GAME_VERSION = 0.98; // Pre-release Alpha 0.9.8 // Increment this whenever you push a new release
+window.GAME_VERSION = 0.99; // Pre-release Alpha 0.9.9 // Increment this whenever you push a new release
 
 // Core Security: HTML Sanitizer to prevent XSS injection in user lists
 window.escapeHTML = function (str) {
@@ -28,9 +28,8 @@ window.getUiIconSvg = function (key, size = 12) {
 window.getEffectiveStage = function (stage) {
   let s = Number(stage);
   if (isNaN(s) || s < 1) s = 1;
-  // Stages <= 100 behave exactly as normal.
-  // Stages > 100 scale using a continuous, sub-exponential curve to prevent floats from hitting Infinity.
-  return s <= 100 ? s : 100 + Math.pow(s - 100, 0.65) * 3.5;
+  // Smoothed, continuously dampening sub-exponential transition post-100 to avoid sudden cliffs
+  return s <= 100 ? s : 100 + Math.pow(s - 100, 0.7) * 1.5;
 };
 
 function getCardTier(count) {

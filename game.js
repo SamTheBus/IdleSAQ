@@ -3060,11 +3060,25 @@ function update() {
               : 600;
         } else {
           // If not blocked, calculate net damage, which can still be parried or mitigated!
-          let netDamage = Math.max(
-            1,
-            Math.ceil(window.mob.damage * (100 / (100 + p.def))),
-          );
-          const subType = window.equippedSlots.subweapon
+                    // Calculate dynamic armor constant based on active stage scale to prevent flatlocked high-tier defenses
+                    let actStg = window.playerStats.stage;
+                    if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
+                      actStg = window.playerStats.currentDungeonStage[window.playerStats.currentDungeon] || 1;
+                    } else if (window.playerStats.isUberBoss) {
+                      let rLvl = window.playerStats.activeRiftLevel || 1;
+                      actStg = 50 + rLvl * 10;
+                    }
+                    let dEffStage = window.getEffectiveStage(actStg);
+                    let dGrowthRate = 1.045 + (dEffStage * 0.04) / (dEffStage + 200);
+                    let dScale = Math.pow(dGrowthRate, dEffStage);
+
+                    let armorConstant = Math.max(100, 5.0 * dScale);
+                    let netDamage = Math.max(
+                      1,
+                      Math.ceil(window.mob.damage * (armorConstant / (armorConstant + p.def)))
+                    );
+
+                    const subType = window.equippedSlots.subweapon
             ? window.equippedSlots.subweapon.subType
             : null;
 
