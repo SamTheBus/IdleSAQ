@@ -865,11 +865,14 @@ window.updateUI = function () {
   let p = window.resolvePlayerStats(hasDraftChanges);
 
   // Dynamic Clan Hall Locked Overlay Rendering (Void-style Lock & Chains)
-    let clanCard = document.getElementById("hub-card-clan");
-    if (clanCard) {
-      // Only lock out clan hall if the player is under level 25 AND has never prestige-ascended
-      if (window.playerStats.level < 25 && (window.playerStats.prestigeCount || 0) === 0) {
-        clanCard.classList.add("locked-void");
+  let clanCard = document.getElementById("hub-card-clan");
+  if (clanCard) {
+    // Only lock out clan hall if the player is under level 25 AND has never prestige-ascended
+    if (
+      window.playerStats.level < 25 &&
+      (window.playerStats.prestigeCount || 0) === 0
+    ) {
+      clanCard.classList.add("locked-void");
       clanCard.innerHTML = `
         <div class="hub-card-icon" style="border-color: #9b59b6 !important; background: rgba(155, 89, 182, 0.15) !important; position: relative; z-index: 2;">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff007f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px #ff007f);">
@@ -1478,9 +1481,10 @@ window.startSPDraftHold = function (e, statKey, direction) {
     let delay = Math.max(30, 150 - tickCount * 8);
 
     let committed = window.playerStats.spAllocations[statKey] || 0;
-    let limit = direction > 0
-      ? window.draftSP
-      : (window.draftAllocations[statKey] - committed);
+    let limit =
+      direction > 0
+        ? window.draftSP
+        : window.draftAllocations[statKey] - committed;
 
     let actualAmt = Math.min(amount, limit);
     if (actualAmt > 0) {
@@ -2647,25 +2651,25 @@ window.showStatBreakdown = function (e, statKey, isPct = false) {
     html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): ${formatVal(intScaleTotal)}</div>`;
 
   let totalVal =
-      data.base +
-      data.lvl +
-      gearTotal +
-      artTotal +
-      achTotal +
-      intScaleTotal +
-      prestigeTotal +
-      setFlatBonus;
-    if (statKey === "atk" && effectiveStr > 0) {
-      let actualDmgAdded = Math.floor(totalVal * (effectiveStr * 0.001));
-      html += `<div class="tt-stat-line" style="color:#e67e22;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(actualDmgAdded)} Damage</div>`;
-      html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveStr * 0.1).toFixed(1)}% Multiplier)</div>`;
-    }
-    if (statKey === "maxHp" && effectiveStr > 0) {
-      let hpBonus = Math.floor(totalVal * (effectiveStr * 0.001));
-      html += `<div class="tt-stat-line" style="color:#e74c3c;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(hpBonus)} HP</div>`;
-      html += `<div class="tt-stat-line" style="color:#e74c3c; font-style:italic;">  (+${(effectiveStr * 0.1).toFixed(1)}% Multiplier)</div>`;
-    }
-    // INT scaling defense has been removed from breakdown
+    data.base +
+    data.lvl +
+    gearTotal +
+    artTotal +
+    achTotal +
+    intScaleTotal +
+    prestigeTotal +
+    setFlatBonus;
+  if (statKey === "atk" && effectiveStr > 0) {
+    let actualDmgAdded = Math.floor(totalVal * (effectiveStr * 0.001));
+    html += `<div class="tt-stat-line" style="color:#e67e22;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(actualDmgAdded)} Damage</div>`;
+    html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveStr * 0.1).toFixed(1)}% Multiplier)</div>`;
+  }
+  if (statKey === "maxHp" && effectiveStr > 0) {
+    let hpBonus = Math.floor(totalVal * (effectiveStr * 0.001));
+    html += `<div class="tt-stat-line" style="color:#e74c3c;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(hpBonus)} HP</div>`;
+    html += `<div class="tt-stat-line" style="color:#e74c3c; font-style:italic;">  (+${(effectiveStr * 0.1).toFixed(1)}% Multiplier)</div>`;
+  }
+  // INT scaling defense has been removed from breakdown
   if (statKey === "moveSpeed" && effectiveDex > 0) {
     let scaleVal = (effectiveDex * 20) / (effectiveDex + 150);
     html += `<div class="tt-stat-line" style="color:#3498db;">• ${window.getUiIconSvg("dex", 11)} Dexterity Scaling (DEX): +${scaleVal.toFixed(1)} Speed</div>`;
@@ -2697,28 +2701,28 @@ window.showStatBreakdown = function (e, statKey, isPct = false) {
     html += `<div class="tt-stat-line" style="color:#2ecc71;">• Effective Avoidance: <strong style="color:#2ecc71;">${Math.floor(p[statKey] * 100)}%</strong></div>`;
   }
   if (statKey === "str") {
-      let effStr = Math.max(0, totalVal - 5);
-      html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
-      html += `<div class="tt-stat-line" style="color:#2ecc71;">• Attack Multiplier: +${(effStr * 0.1).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#e74c3c;">• Max HP Multiplier: +${(effStr * 0.1).toFixed(1)}%</div>`;
-    } else if (statKey === "dex") {
-      let effDex = Math.max(0, totalVal - 5);
-      let critChScale = (effDex * 0.1) / (effDex + 250);
-      let moveSpdScale = (effDex * 5.0) / (effDex + 150);
-      html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
-      html += `<div class="tt-stat-line" style="color:#e67e22;">• Crit Chance: +${(critChScale * 100).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#f1c40f;">• Crit Multiplier: +${(effDex * 0.1).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#3498db;">• Move Speed Boost: +${moveSpdScale.toFixed(1)}</div>`;
-    } else if (statKey === "int") {
-      let effInt = Math.max(0, totalVal - 5);
-      let blockChScale = (effInt * 0.05) / (effInt + 150);
-      let potDurScale = effInt * 0.0001;
-      html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
-      html += `<div class="tt-stat-line" style="color:#3498db;">• Block Rate Boost: +${(blockChScale * 100).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#e74c3c;">• Parry Rate Boost: +${(blockChScale * 100).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#9b59b6;">• Fairy Multiplier: +${(effInt * 0.01).toFixed(1)}%</div>`;
-      html += `<div class="tt-stat-line" style="color:#9b59b6;">• Potion Duration: +${potDurScale.toFixed(4)}%</div>`;
-    }
+    let effStr = Math.max(0, totalVal - 5);
+    html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
+    html += `<div class="tt-stat-line" style="color:#2ecc71;">• Attack Multiplier: +${(effStr * 0.1).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#e74c3c;">• Max HP Multiplier: +${(effStr * 0.1).toFixed(1)}%</div>`;
+  } else if (statKey === "dex") {
+    let effDex = Math.max(0, totalVal - 5);
+    let critChScale = (effDex * 0.1) / (effDex + 250);
+    let moveSpdScale = (effDex * 5.0) / (effDex + 150);
+    html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
+    html += `<div class="tt-stat-line" style="color:#e67e22;">• Crit Chance: +${(critChScale * 100).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#f1c40f;">• Crit Multiplier: +${(effDex * 0.1).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#3498db;">• Move Speed Boost: +${moveSpdScale.toFixed(1)}</div>`;
+  } else if (statKey === "int") {
+    let effInt = Math.max(0, totalVal - 5);
+    let blockChScale = (effInt * 0.05) / (effInt + 150);
+    let potDurScale = effInt * 0.0001;
+    html += `<div style="margin: 6px 0; border-top: 1px dashed #444; padding-top: 4px; color: #ffb6c1; font-weight: bold;">Scaling Contributions:</div>`;
+    html += `<div class="tt-stat-line" style="color:#3498db;">• Block Rate Boost: +${(blockChScale * 100).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#e74c3c;">• Parry Rate Boost: +${(blockChScale * 100).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#9b59b6;">• Fairy Multiplier: +${(effInt * 0.01).toFixed(1)}%</div>`;
+    html += `<div class="tt-stat-line" style="color:#9b59b6;">• Potion Duration: +${potDurScale.toFixed(4)}%</div>`;
+  }
 
   html += `</div>`;
   tt.style.borderColor = data.color;
@@ -5384,28 +5388,28 @@ window.refreshMarketShopIfNeeded = function () {
 
       let chosenType = types[Math.floor(Math.random() * types.length)];
 
-            // Resolve base boss gold drops matching this item's specific Level/Stage Scale
-            let itemStage = stageScale * 10;
-            let effStage = window.getEffectiveStage(itemStage);
-            let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-            let scale = Math.pow(growthRate, effStage);
-            let baseBossGold = Math.floor(15 * scale);
+      // Resolve base boss gold drops matching this item's specific Level/Stage Scale
+      let itemStage = stageScale * 10;
+      let effStage = window.getEffectiveStage(itemStage);
+      let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+      let scale = Math.pow(growthRate, effStage);
+      let baseBossGold = Math.floor(15 * scale);
 
-            // Balanced Rarity Cost multipliers (expressed as equivalent boss kills of that item's level)
-            const rarityCostMultipliers = [
-              15,   // 0★ Common
-              35,   // 1★ Rare
-              90,   // 2★ Magic
-              250,  // 3★ Epic
-              800,  // 4★ Legendary
-              2500  // 5★ Mythic
-            ];
-            let itemRarityFactor = rarityCostMultipliers[statLinesCount] || 15;
+      // Balanced Rarity Cost multipliers (expressed as equivalent boss kills of that item's level)
+      const rarityCostMultipliers = [
+        15, // 0★ Common
+        35, // 1★ Rare
+        90, // 2★ Magic
+        250, // 3★ Epic
+        800, // 4★ Legendary
+        2500, // 5★ Mythic
+      ];
+      let itemRarityFactor = rarityCostMultipliers[statLinesCount] || 15;
 
-            // Final Level-Anchored shop cost calculation
-            let cost = Math.floor(baseBossGold * itemRarityFactor);
+      // Final Level-Anchored shop cost calculation
+      let cost = Math.floor(baseBossGold * itemRarityFactor);
 
-            let shopItemData = window.createItemObject(
+      let shopItemData = window.createItemObject(
         chosenType,
         statLinesCount,
         stageScale,
@@ -11887,19 +11891,19 @@ window.resolveInspectedPlayerStats = function (profile) {
   itemHpPct += effectiveStr * 0.003;
   itemDefPct += Math.log10(effectiveInt + 1) * 0.15;
   p.critChance += parseFloat(
-      ((effectiveDex * 0.1) / (effectiveDex + 250)).toFixed(4)
-    );
-    p.critDamage += effectiveDex * 0.001;
-    p.moveSpeed += parseFloat(
-      ((effectiveDex * 5.0) / (effectiveDex + 150)).toFixed(1)
-    );
-    p.block += parseFloat(
-      ((effectiveInt * 0.05) / (effectiveInt + 150)).toFixed(4)
-    );
-    p.parry += parseFloat(
-      ((effectiveInt * 0.05) / (effectiveInt + 150)).toFixed(4)
-    );
-    p.fairySpawn += parseFloat((effectiveInt * 0.0001).toFixed(4));
+    ((effectiveDex * 0.1) / (effectiveDex + 250)).toFixed(4),
+  );
+  p.critDamage += effectiveDex * 0.001;
+  p.moveSpeed += parseFloat(
+    ((effectiveDex * 5.0) / (effectiveDex + 150)).toFixed(1),
+  );
+  p.block += parseFloat(
+    ((effectiveInt * 0.05) / (effectiveInt + 150)).toFixed(4),
+  );
+  p.parry += parseFloat(
+    ((effectiveInt * 0.05) / (effectiveInt + 150)).toFixed(4),
+  );
+  p.fairySpawn += parseFloat((effectiveInt * 0.0001).toFixed(4));
 
   let flatDef = (stats.baseDef || 0) + (alloc.spDef || 0) * 4;
   let defMultiplier = 1.0;

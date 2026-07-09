@@ -1071,35 +1071,56 @@ Object.assign(window.ItemFactory, {
             prestigeMult,
         );
       else if (selectedStat === "dropRate") {
-              let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
-              item.dropRate += parseFloat(
-                (window.randFloat(0.02, 0.05) * rarityMult * prestigeMult * utilityScale).toFixed(4)
-              );
-            }
-            else if (selectedStat === "quality") {
-              let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
-              item.quality += parseFloat(
-                (window.randFloat(0.01, 0.03) * rarityMult * prestigeMult * utilityScale).toFixed(4)
-              );
-            }
-            else if (selectedStat === "goldMulti") {
-              let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
-              item.goldMulti += parseFloat(
-                (window.randFloat(0.02, 0.05) * rarityMult * prestigeMult * utilityScale).toFixed(4)
-              );
-            }
-            else if (selectedStat === "rareSpawn") {
-              let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
-              item.rareSpawn += parseFloat(
-                (window.randFloat(0.002, 0.006) * rarityMult * prestigeMult * utilityScale).toFixed(4)
-              );
-            }
-            else if (selectedStat === "fairySpawn") {
-              let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
-              item.fairySpawn += parseFloat(
-                (window.randFloat(0.02, 0.06) * rarityMult * prestigeMult * utilityScale).toFixed(4)
-              );
-            }
+        let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+        item.dropRate += parseFloat(
+          (
+            window.randFloat(0.02, 0.05) *
+            rarityMult *
+            prestigeMult *
+            utilityScale
+          ).toFixed(4),
+        );
+      } else if (selectedStat === "quality") {
+        let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+        item.quality += parseFloat(
+          (
+            window.randFloat(0.01, 0.03) *
+            rarityMult *
+            prestigeMult *
+            utilityScale
+          ).toFixed(4),
+        );
+      } else if (selectedStat === "goldMulti") {
+        let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+        item.goldMulti += parseFloat(
+          (
+            window.randFloat(0.02, 0.05) *
+            rarityMult *
+            prestigeMult *
+            utilityScale
+          ).toFixed(4),
+        );
+      } else if (selectedStat === "rareSpawn") {
+        let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+        item.rareSpawn += parseFloat(
+          (
+            window.randFloat(0.002, 0.006) *
+            rarityMult *
+            prestigeMult *
+            utilityScale
+          ).toFixed(4),
+        );
+      } else if (selectedStat === "fairySpawn") {
+        let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+        item.fairySpawn += parseFloat(
+          (
+            window.randFloat(0.02, 0.06) *
+            rarityMult *
+            prestigeMult *
+            utilityScale
+          ).toFixed(4),
+        );
+      }
     }
 
     item.atk = (item.baseAtk || 0) + item.bonusAtk;
@@ -1358,26 +1379,26 @@ Object.assign(window.ItemFactory, {
       min += 0.01 * sScale * rMult;
       max += 0.03 * sScale * rMult;
     } else if (statKey === "rareSpawn" && item.rareSpawn > 0) {
-          let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
-          min += 0.002 * rarityMult * utilityScale;
-          max += 0.006 * rarityMult * utilityScale;
-        } else if (statKey === "dropRate" && item.dropRate > 0) {
-          let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
-          min += 0.02 * rarityMult * utilityScale;
-          max += 0.05 * rarityMult * utilityScale;
-        } else if (statKey === "quality" && item.quality > 0) {
-          let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
-          min += 0.01 * rarityMult * utilityScale;
-          max += 0.03 * rarityMult * utilityScale;
-        } else if (statKey === "goldMulti" && item.goldMulti > 0) {
-          let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
-          min += 0.02 * rarityMult * utilityScale;
-          max += 0.05 * rarityMult * utilityScale;
-        } else if (statKey === "fairySpawn" && item.fairySpawn > 0) {
-          let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
-          min += 0.02 * rarityMult * utilityScale;
-          max += 0.06 * rarityMult * utilityScale;
-        }
+      let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
+      min += 0.002 * rarityMult * utilityScale;
+      max += 0.006 * rarityMult * utilityScale;
+    } else if (statKey === "dropRate" && item.dropRate > 0) {
+      let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
+      min += 0.02 * rarityMult * utilityScale;
+      max += 0.05 * rarityMult * utilityScale;
+    } else if (statKey === "quality" && item.quality > 0) {
+      let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
+      min += 0.01 * rarityMult * utilityScale;
+      max += 0.03 * rarityMult * utilityScale;
+    } else if (statKey === "goldMulti" && item.goldMulti > 0) {
+      let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
+      min += 0.02 * rarityMult * utilityScale;
+      max += 0.05 * rarityMult * utilityScale;
+    } else if (statKey === "fairySpawn" && item.fairySpawn > 0) {
+      let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
+      min += 0.02 * rarityMult * utilityScale;
+      max += 0.06 * rarityMult * utilityScale;
+    }
 
     const unscaledStats = ["activeAttackSpeed", "idleAttackSpeed"];
     if (!unscaledStats.includes(statKey)) {
