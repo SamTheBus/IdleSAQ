@@ -938,23 +938,28 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.int = Math.floor(p.int * achIntPct);
 
   let effectiveStr = Math.max(0, p.str - 5);
-  let effectiveDex = Math.max(0, p.dex - 5);
-  let effectiveInt = Math.max(0, p.int - 5);
+    let effectiveDex = Math.max(0, p.dex - 5);
+    let effectiveInt = Math.max(0, p.int - 5);
 
-  itemAtkPct += effectiveStr * 0.003;
-  itemHpPct += effectiveStr * 0.003;
-  itemDefPct += Math.log10(effectiveInt + 1) * 0.15;
-  p.critChance += parseFloat(
-    ((effectiveDex * 0.3) / (effectiveDex + 250)).toFixed(4),
-  );
-  p.critDamage += effectiveDex * 0.003;
-  p.moveSpeed += parseFloat(
-    ((effectiveDex * 20) / (effectiveDex + 150)).toFixed(1),
-  );
-  let logInt = Math.log10(effectiveInt + 1);
-  p.block += parseFloat((0.12 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
-  p.parry += parseFloat((0.12 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
-  p.fairySpawn += parseFloat((effectiveInt * 0.001).toFixed(4));
+    // Nerfed to 0.1% per point (Option A)
+    itemAtkPct += effectiveStr * 0.001;
+    itemHpPct += effectiveStr * 0.001;
+    // INT scaling defense has been removed
+
+    // DEX scaling curves brought in line (Crit Chance capped at +10% from stats, Crit damage at 0.1% per point, Speed capped at +5.0)
+    p.critChance += parseFloat(
+      ((effectiveDex * 0.1) / (effectiveDex + 250)).toFixed(4)
+    );
+    p.critDamage += effectiveDex * 0.001;
+    p.moveSpeed += parseFloat(
+      ((effectiveDex * 5.0) / (effectiveDex + 150)).toFixed(1)
+    );
+
+    // INT scaling curves brought in line (Avoidance capped at +5%, Fairy spawn at 0.01% per point)
+    let logInt = Math.log10(effectiveInt + 1);
+    p.block += parseFloat((0.05 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
+    p.parry += parseFloat((0.05 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
+    p.fairySpawn += parseFloat((effectiveInt * 0.0001).toFixed(4));
 
   let flatDef =
     window.playerStats.baseDef + alloc.spDef * 4 + aT.def + setCtx.flatDefBonus;
@@ -987,12 +992,13 @@ window.resolvePlayerStats = function (useDraft = false) {
       maxBlockCap = window.checkArtifactTrait("titan_grip") ? 0.25 : 0.2;
       p.parry = 0.0; // STRICT: Can't parry with a shield
     } else if (subType === "tome") {
-      let intScale = Math.max(0, p.int - 5);
-      let logIntScale = Math.log10(intScale + 1);
-      p.arcaneBarrier = parseFloat(
-        (0.2 + 0.15 * (1 - 1 / (1 + 0.15 * logIntScale))).toFixed(4),
-      );
-      p.block = 0.0; // STRICT: Can't block with a tome
+          let intScale = Math.max(0, p.int - 5);
+          let logIntScale = Math.log10(intScale + 1);
+          // Caps the Arcane Barrier at 25% max (20% base + 5% scaling limit)
+          p.arcaneBarrier = parseFloat(
+            (0.2 + 0.05 * (1 - 1 / (1 + 0.15 * logIntScale))).toFixed(4)
+          );
+          p.block = 0.0; // STRICT: Can't block with a tome
       p.parry = 0.0; // STRICT: Can't parry with a tome
     } else if (subType === "dagger") {
       maxParryCap = window.checkArtifactTrait("titan_grip") ? 0.3 : 0.25;
