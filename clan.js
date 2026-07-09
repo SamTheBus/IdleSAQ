@@ -81,7 +81,8 @@ window.getClanEmblemHtml = function (seed, size = 32) {
 };
 
 window.toggleClanHall = function () {
-  if (window.playerStats.level < 25) {
+  // Allow all ascended players to bypass the level 25 requirement check
+  if (window.playerStats.level < 25 && (window.playerStats.prestigeCount || 0) === 0) {
     window.pushHeaderToast("🔒 Clan Hall unlocks at Level 25!", "#e74c3c");
     return;
   }
@@ -356,6 +357,9 @@ window.renderClanDashboard = function (clan, members, invitations) {
   const contentEl = document.getElementById("clan-win-content");
   if (!contentEl) return;
 
+  // Cache latest database payload to support modular deficit actions
+  window.lastFetchedClanData = clan;
+
   const currentTab = window.clanActiveTab || "OVERVIEW";
   const userId = window.getGameUserId();
   const isLeader = clan.leader_id === userId;
@@ -577,17 +581,18 @@ window.renderClanDashboard = function (clan, members, invitations) {
     let listHtml = "";
 
     if (
-      !questsData ||
-      !questsData.activeList ||
-      questsData.activeList.length === 0
-    ) {
-      listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
-    } else {
-      let stgScale = Math.max(
-        1,
-        Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1,
-      );
-      let calculatedGoldMult = Math.pow(1.8, stgScale);
+          !questsData ||
+          !questsData.activeList ||
+          questsData.activeList.length === 0
+        ) {
+          listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
+        } else {
+          let stgScale = Math.max(
+            1,
+            Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1,
+          );
+          // Replaced hyper-exponential growth with balanced polynomial curve scaling
+          let calculatedGoldMult = 1.0 + Math.pow(stgScale, 1.5) * 1.2;
 
       listHtml = questsData.activeList
         .map((q) => {
@@ -731,114 +736,165 @@ window.renderClanDashboard = function (clan, members, invitations) {
       }
     `;
   } else if (currentTab === "RESEARCH") {
-    let getSkillUpgradeCardHtml = (
-      key,
-      label,
-      bonusText,
-      currentL,
-      maxL,
-      col,
-    ) => {
-      let costGold = 0;
-      let costSoul = 0;
-      let soulName = "";
+      let getSkillUpgradeCardHtml = (
+        key,
+        label,
+        bonusText,
+        currentL,
+        maxL,
+        col
+      ) => {
+        let costGold = 0;
+        let costSoul = 0;
+        let soulName = "";
+        let bankField = "";
 
-      if (key === "steel_phalanx" || key === "vitality_well") {
-        costGold = Math.floor(
-          (key === "steel_phalanx" ? 25000 : 20000) * Math.pow(1.35, currentL),
-        );
-        costSoul = Math.floor(200 * Math.pow(1.25, currentL));
-        soulName = "Monster Souls";
-      } else {
-        let baseG =
-          key === "prosperity_accord"
-            ? 40000
-            : key === "voyagers_guidance"
-              ? 50000
-              : key === "clan_supply_depot"
-                ? 55000
-                : 45000;
-        let baseS =
-          key === "aetheric_wisdom" ? 6 : key === "clan_supply_depot" ? 8 : 5;
-        let scaleG = key === "clan_supply_depot" ? 1.45 : 1.4;
-        let scaleS = key === "clan_supply_depot" ? 1.35 : 1.3;
-        costGold = Math.floor(baseG * Math.pow(scaleG, currentL));
-        costSoul = Math.floor(baseS * Math.pow(scaleS, currentL));
-        soulName = "Luminous Souls";
-      }
+        if (key === "steel_phalanx" || key === "vitality_well") {
+          costGold = Math.floor((key === "steel_phalanx" ? 25000 : 20000) * Math.pow(1.35, currentL));
+          costSoul = Math.floor(200 * Math.pow(1.25, currentL));
+          soulName = "Monster Souls";
+          bankField = "souls_bank";
+        } else {
+          let baseG = key === "prosperity_accord" ? 40000 : key === "voyagers_guidance" ? 50000 : key === "clan_supply_depot" ? 55000 : 45000;
+          let baseS = key === "aetheric_wisdom" ? 6 : key === "clan_supply_depot" ? 8 : 5;
+          let scaleG = key === "clan_supply_depot" ? 1.45 : 1.4;
+          let scaleS = key === "clan_supply_depot" ? 1.35 : 1.3;
+          costGold = Math.floor(baseG * Math.pow(scaleG, currentL));
+          costSoul = Math.floor(baseS * Math.pow(scaleS, currentL));
+          soulName = "Luminous Souls";
+          bankField = "luminous_bank";
+        }
 
-      let isMaxed = currentL >= maxL;
-      let clanLevel = clan.level || 1;
-      let isGated = currentL >= clanLevel * 2;
-      let canAffordGold = clan.gold_bank >= costGold;
-      let canAffordSoul =
-        key === "steel_phalanx" || key === "vitality_well"
-          ? clan.souls_bank >= costSoul
-          : clan.luminous_bank >= costSoul;
+        let isMaxed = currentL >= maxL;
+        let clanLevel = clan.level || 1;
+        let isGated = currentL >= clanLevel * 2;
+        let canAffordGold = clan.gold_bank >= costGold;
+        let canAffordSoul = clan[bankField] >= costSoul;
 
-      let canUpgrade =
-        isLeader && !isMaxed && !isGated && canAffordGold && canAffordSoul;
-      let bgStyle = window.hexToRgba
-        ? window.hexToRgba(col, 0.04)
-        : "rgba(255,255,255,0.02)";
-      let btnTextColor =
-        col === "#f1c40f" || col === "#ffb6c1" ? "#111" : "#fff";
+        let goldDeficit = Math.max(0, costGold - clan.gold_bank);
+        let soulsDeficit = Math.max(0, costSoul - clan[bankField]);
 
-      let icon = "";
-      if (key === "steel_phalanx")
-        icon =
-          window.getUiIconSvg("atk", 13) + " " + window.getUiIconSvg("def", 13);
-      else if (key === "vitality_well") icon = window.getUiIconSvg("maxHp", 13);
-      else if (key === "prosperity_accord")
-        icon = window.getUiIconSvg("gold", 13);
-      else if (key === "voyagers_guidance")
-        icon = window.getUiIconSvg("dropRate", 13);
-      else if (key === "aetheric_wisdom")
-        icon = window.getUiIconSvg("xpRate", 13);
+        let personalGold = window.playerStats.coins || 0;
+        let rawSoulName = bankField === "souls_bank" ? "Monster Soul" : "Luminous Soul";
+        let personalSouls = window.inventory.ETC[rawSoulName] || 0;
 
-      let gateText = "";
-      if (isGated && !isMaxed) {
-        gateText = `<br><span style="color:#e74c3c; font-weight:bold;">🔒 BLOCKED: Level up Clan to ${Math.ceil((currentL + 1) / 2)} to upgrade further!</span>`;
-      }
+        let canBridgeGold = personalGold >= goldDeficit;
+        let canBridgeSouls = personalSouls >= soulsDeficit;
+        let canAutoDepositAndUpgrade = isLeader && !isMaxed && !isGated && canBridgeGold && canBridgeSouls && (goldDeficit > 0 || soulsDeficit > 0);
 
-      return `
-        <div class="shop-row" style="border-color:${col}; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:4px; padding:10px; margin-bottom:6px; cursor:help;">
-                          <div style="display:flex; justify-content:space-between; align-items:center;">
-                              <strong style="color:${col}; font-size:11.5px; display:inline-flex; align-items:center; gap:4px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${currentL}/${maxL})</span></strong>
-                              <span style="color:#aaa; font-size:9px; font-family:monospace;">${isMaxed ? "MAXED" : "RESEARCH"}</span>
-                          </div>
-                          <div style="font-size:9.5px; color:#aaa; line-height:1.35; margin-bottom:6px;">
-                              Current active bonus: <strong style="color:#fff;">${bonusText}</strong>${gateText}<br>
-                              ${
-                                isMaxed
-                                  ? `<span style="color:#2ecc71; font-weight:bold;">Shared research cap reached!</span>`
-                                  : `
-                              Cost: <span style="${canAffordGold ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costGold)} Gold</span> &
-                              <span style="${canAffordSoul ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costSoul)} ${soulName}</span>`
-                              }
-                          </div>
-            ${
-              isLeader
-                ? `
-                <button class="btn-action" style="background:${col}; color:${btnTextColor}; font-weight:bold; font-size:10px; padding:4px;" ${canUpgrade ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeUpgradeClanSkill('${key}')">Upgrade Research</button>
-            `
-                : `<div style="font-size:8.5px; color:#888; font-style:italic; text-align:center;">* Only the Clan Founder can initiate research upgrades.</div>`
-            }
+        let canUpgradeDirectly = isLeader && !isMaxed && !isGated && canAffordGold && canAffordSoul;
+        let bgStyle = window.hexToRgba ? window.hexToRgba(col, 0.04) : "rgba(255,255,255,0.02)";
+        let btnTextColor = col === "#f1c40f" || col === "#ffb6c1" ? "#111" : "#fff";
+
+        let icon = "";
+        if (key === "steel_phalanx")
+          icon = window.getUiIconSvg("atk", 13) + " " + window.getUiIconSvg("def", 13);
+        else if (key === "vitality_well") icon = window.getUiIconSvg("maxHp", 13);
+        else if (key === "prosperity_accord") icon = window.getUiIconSvg("gold", 13);
+        else if (key === "voyagers_guidance") icon = window.getUiIconSvg("dropRate", 13);
+        else if (key === "aetheric_wisdom") icon = window.getUiIconSvg("xpRate", 13);
+        else if (key === "clan_supply_depot") icon = window.getUiIconSvg("gold", 13);
+
+        let statusBadge = `<span style="background:rgba(255,255,255,0.04); border:1px solid #333; color:#aaa; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace;">LOCKED</span>`;
+        if (isMaxed) {
+          statusBadge = `<span style="background:rgba(46,204,113,0.15); border:1px solid #2ecc71; color:#2ecc71; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace;">MAX RANK</span>`;
+        } else if (isGated) {
+          statusBadge = `<span style="background:rgba(231,76,60,0.15); border:1px solid #e74c3c; color:#e74c3c; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace;">GATED</span>`;
+        } else if (canUpgradeDirectly) {
+          statusBadge = `<span style="background:rgba(241,196,15,0.15); border:1px solid #f1c40f; color:#f1c40f; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace; animation:pulseGlow 1.2s infinite;">READY</span>`;
+        } else if (canAutoDepositAndUpgrade) {
+          statusBadge = `<span style="background:rgba(52,152,219,0.15); border:1px solid #3498db; color:#3498db; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace;">BRIDGEABLE</span>`;
+        }
+
+        let barWidth = (currentL / maxL) * 100;
+        let gateWarningText = "";
+        if (isGated && !isMaxed) {
+          gateWarningText = `<div style="margin-top:6px; background:rgba(231,76,60,0.06); border:1px dashed #e74c3c; padding:5px; border-radius:4px; font-size:8.5px; color:#ff7675; text-align:center; font-weight:bold; line-height:1.2;">🔒 RESEARCH BLOCKED: Level up your Clan to Level ${Math.ceil((currentL + 1) / 2)} to expand the caps!</div>`;
+        }
+
+        let buttonControls = "";
+        if (isLeader && !isMaxed && !isGated) {
+          if (canUpgradeDirectly) {
+            buttonControls = `
+              <button class="btn-action" style="background:${col}; color:${btnTextColor}; font-weight:bold; font-size:10px; padding:8px; width:100%; border-radius:4px; border:1px solid #fff; box-shadow:0 3px 10px ${col}44;" onclick="window.executeUpgradeClanSkill('${key}')">Upgrade Research</button>
+            `;
+          } else if (canAutoDepositAndUpgrade) {
+            buttonControls = `
+              <button class="btn-action" style="background:linear-gradient(135deg, #2ecc71, #27ae60); color:#fff; font-weight:bold; font-size:10px; padding:8px; width:100%; border-radius:4px; border:1px solid #fff; box-shadow:0 3px 10px rgba(46,204,113,0.3);" onclick="window.executeDeficitContributeAndUpgrade('${key}', ${costGold}, ${costSoul}, '${bankField}')">⚡ Fund Deficit & Research</button>
+            `;
+          } else {
+            buttonControls = `
+              <button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-weight:bold; font-size:10px; padding:8px; width:100%; border-radius:4px; cursor:not-allowed;" disabled>Lacking Treasury & Inventory Bags</button>
+            `;
+          }
+        } else if (!isLeader && !isMaxed && !isGated) {
+          buttonControls = `<div style="font-size:8.5px; color:#888; font-style:italic; text-align:center; margin-top:2px;">* Only the Clan Founder can initiate research upgrades.</div>`;
+        }
+
+        return `
+          <div class="shop-row" style="border:1.5px solid ${col}44; border-left: 4.5px solid ${col} !important; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:6px; padding:12px; margin-bottom:0; cursor:help;">
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+              <strong style="color:${col}; font-size:12px; display:inline-flex; align-items:center; gap:6px;">${icon} ${label}</strong>
+              ${statusBadge}
+            </div>
+
+            <div style="font-size:10px; color:#cbd5e1; line-height:1.4;">
+              Current Active Bonus: <strong style="color:#fff;">${bonusText}</strong>
+            </div>
+
+            <!-- Progress Bar through cap limit -->
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:8.5px; color:#aaa; font-family:monospace; margin-top:2px;">
+              <span>RESEARCH INTENSITY:</span>
+              <span style="color:#df9ffb; font-weight:bold;">Lv. ${currentL} / ${maxL}</span>
+            </div>
+            <div class="sink-prog-track" style="margin:0 0 6px 0; height:5px !important;">
+              <div class="sink-prog-fill" style="width:${barWidth}%; height:100%; background:${col};"></div>
+            </div>
+
+            ${!isMaxed ? `
+            <div style="background:rgba(0,0,0,0.4); border:1px solid #222; border-radius:4px; padding:6px; font-size:9.5px; font-family:monospace; display:flex; flex-direction:column; gap:2.5px;">
+              <div style="display:flex; justify-content:space-between;">
+                <span>• Required Gold:</span>
+                <strong style="${canAffordGold ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costGold)} <span style="color:#888;">(Vault: ${window.formatNumber(clan.gold_bank)})</span></strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span>• Required ${soulName.replace(" Souls", "")}s:</span>
+                <strong style="${canAffordSoul ? "color:#2ecc71;" : "color:#e74c3c;"}">${costSoul} <span style="color:#888;">(Vault: ${clan[bankField]})</span></strong>
+              </div>
+              ${goldDeficit > 0 || soulsDeficit > 0 ? `
+              <div style="border-top:1px dashed #333; margin-top:4px; padding-top:4px; display:flex; flex-direction:column; gap:1.5px; color:#aaa;">
+                <div style="display:flex; justify-content:space-between;">
+                  <span>• Missing Gold:</span>
+                  <strong style="${canBridgeGold ? "color:#3498db;" : "color:#e74c3c;"}">${window.formatNumber(goldDeficit)} <span style="color:#555;">(You: ${window.formatNumber(personalGold)})</span></strong>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span>• Missing ${soulName.replace(" Souls", "")}s:</span>
+                  <strong style="${canBridgeSouls ? "color:#3498db;" : "color:#e74c3c;"}">${soulsDeficit} <span style="color:#555;">(You: ${personalSouls})</span></strong>
+                </div>
+              </div>
+              ` : ""}
+            </div>
+            ` : ""}
+
+            ${gateWarningText}
+            <div style="margin-top:4px; width:100%;">
+              ${buttonControls}
+            </div>
+          </div>
+        `;
+      };
+
+      tabContentHtml = `
+        <div style="display:flex; flex-direction:column; gap:10px; max-height:280px; overflow-y:auto; padding-right:4px;">
+            ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", "+" + ((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1) + "% Attack & Defense", clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
+            ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", "+" + ((clan.skill_vitality_well || 0) * 0.8).toFixed(1) + "% Max HP", clan.skill_vitality_well || 0, 50, "#3498db")}
+            ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", "+" + ((clan.skill_prosperity_accord || 0) * 1.0).toFixed(1) + "% Gold Multiplier", clan.skill_prosperity_accord || 0, 30, "#f1c40f")}
+            ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager's Guidance", "+" + ((clan.skill_voyagers_guidance || 0) * 0.5).toFixed(1) + "% Drop Rate & Quality", clan.skill_voyagers_guidance || 0, 30, "#2ecc71")}
+            ${getSkillUpgradeCardHtml("aetheric_wisdom", "Aetheric Wisdom", "+" + ((clan.skill_aetheric_wisdom || 0) * 1.0).toFixed(1) + "% XP Rate", clan.skill_aetheric_wisdom || 0, 30, "#9b59b6")}
+            ${getSkillUpgradeCardHtml("clan_supply_depot", "Supply Depot", "Crate yields: +" + (clan.skill_clan_supply_depot || 0) * 20 + "% Gold & +" + (clan.skill_clan_supply_depot || 0) * 10 + "% Souls", clan.skill_clan_supply_depot || 0, 30, "#ffaa00")}
         </div>
       `;
-    };
-
-    tabContentHtml = `
-                                  <div style="display:flex; flex-direction:column; gap:4px;">
-                                      ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", "+" + ((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1) + "% Attack & Defense", clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
-                                      ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", "+" + ((clan.skill_vitality_well || 0) * 0.8).toFixed(1) + "% Max HP", clan.skill_vitality_well || 0, 50, "#3498db")}
-                                      ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", "+" + ((clan.skill_prosperity_accord || 0) * 1.0).toFixed(1) + "% Gold Multiplier", clan.skill_prosperity_accord || 0, 30, "#f1c40f")}
-                                      ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager's Guidance", "+" + ((clan.skill_voyagers_guidance || 0) * 0.5).toFixed(1) + "% Drop Rate & Quality", clan.skill_voyagers_guidance || 0, 30, "#2ecc71")}
-                                      ${getSkillUpgradeCardHtml("aetheric_wisdom", "Aetheric Wisdom", "+" + ((clan.skill_aetheric_wisdom || 0) * 1.0).toFixed(1) + "% XP Rate", clan.skill_aetheric_wisdom || 0, 30, "#9b59b6")}
-                                      ${getSkillUpgradeCardHtml("clan_supply_depot", "Supply Depot", "Crate yields: " + (clan.skill_clan_supply_depot || 0) * 20 + "% Gold & " + (clan.skill_clan_supply_depot || 0) * 10 + "% Souls", clan.skill_clan_supply_depot || 0, 30, "#ffaa00")}
-                                  </div>
-                                `;
-  }
+    }
 
   contentEl.innerHTML = `
     ${tabHeaderHtml}
@@ -894,13 +950,14 @@ window.executeClaimClanQuestReward = function (questId) {
           claimsReport.push(`+${r.sacks}x Clan Sacks`);
         }
         if (r.goldBase > 0) {
-          let stgScale = Math.max(
-            1,
-            Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) +
-              1,
-          );
-          let calculatedGold = Math.ceil(r.goldBase * Math.pow(1.8, stgScale));
-          window.playerStats.coins += calculatedGold;
+                  let stgScale = Math.max(
+                    1,
+                    Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) +
+                      1,
+                  );
+                  // Replaced hyper-exponential growth with balanced polynomial curve scaling
+                  let calculatedGold = Math.ceil(r.goldBase * (1.0 + Math.pow(stgScale, 1.5) * 1.2));
+                  window.playerStats.coins += calculatedGold;
           window.playerStats.totalGoldEarned =
             (window.playerStats.totalGoldEarned || 0) + calculatedGold;
           claimsReport.push(`+${window.formatNumber(calculatedGold)} Gold`);
@@ -1137,11 +1194,11 @@ window.executeClanDonate = function (type, amount) {
   }
 
   // Hit network endpoint
-  fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, type, amount }),
-  })
+    fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, resType: type, amount }),
+    })
     .then((r) => r.json())
     .then((data) => {
       if (data.success) {
@@ -1202,4 +1259,77 @@ window.getWeeklyClanMail = function () {
     claimed: false,
     rewards: { use: { "Weekly Clan Supply Crate": 1 } },
   };
+};
+
+// Granular Auto-Deposit Bridge Controller to reduce guild screen friction
+window.executeDeficitContributeAndUpgrade = function (skillKey, costGold, costSoul, bankField) {
+  let clan = window.lastFetchedClanData;
+  if (!clan) return;
+
+  let goldDeficit = Math.max(0, costGold - clan.gold_bank);
+  let soulsDeficit = Math.max(0, costSoul - clan[bankField]);
+
+  let personalGold = window.playerStats.coins || 0;
+  let rawSoulName = bankField === "souls_bank" ? "Monster Soul" : "Luminous Soul";
+  let personalSouls = window.inventory.ETC[rawSoulName] || 0;
+
+  if (personalGold < goldDeficit) {
+    window.pushHeaderToast("❌ Insufficient personal Gold to cover the research deficit!", "#e74c3c");
+    return;
+  }
+  if (personalSouls < soulsDeficit) {
+    window.pushHeaderToast(`❌ Insufficient personal ${rawSoulName}s to cover the research deficit!`, "#e74c3c");
+    return;
+  }
+
+  let popupMessage = `Are you sure you want to donate the deficit missing from your personal inventory to the Clan Vault and instantly trigger the Research Upgrade?<br><br>
+                      💸 <strong style="color:#f1c40f;">Auto-Deposited:</strong><br>
+                      • ${goldDeficit > 0 ? `+${goldDeficit.toLocaleString()} Gold` : "0 Gold"}<br>
+                      • ${soulsDeficit > 0 ? `+${soulsDeficit.toLocaleString()} ${rawSoulName}s` : `0 ${rawSoulName}s`}`;
+
+  window.showCustomConfirm(
+    "Cooperative Fusion",
+    popupMessage,
+    "Fund & Research",
+    "Cancel",
+    "#9b59b6",
+    async function () {
+      try {
+        const userId = window.getGameUserId();
+
+        // 1. Bridges Gold Deficit
+        if (goldDeficit > 0) {
+          window.playerStats.coins -= goldDeficit;
+          if (window.playerStats.coins === 0) window.playerStats.hasTriggeredExactChange = true;
+
+          await fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, resType: "gold", amount: goldDeficit }),
+          });
+        }
+
+        // 2. Bridges Souls Deficit
+        if (soulsDeficit > 0) {
+          window.inventory.ETC[rawSoulName] -= soulsDeficit;
+          if (window.inventory.ETC[rawSoulName] === 0) delete window.inventory.ETC[rawSoulName];
+
+          await fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId,
+              resType: bankField === "souls_bank" ? "souls" : "luminous",
+              amount: soulsDeficit,
+            }),
+          });
+        }
+
+        // 3. Directly triggers the upgrade
+        await window.executeUpgradeClanSkill(skillKey);
+      } catch (err) {
+        console.error("Auto contribution upgrade chain failed:", err);
+      }
+    }
+  );
 };

@@ -1371,11 +1371,11 @@ window.SaveManager = {
     );
 
     // Stage Progression Loop
-        while (remainingSeconds > 0 && currentStage < maxProgressStage) {
-          let effStage = window.getEffectiveStage(currentStage);
-          let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-          let expScale = Math.pow(growthRate, effStage);
-          let mobHp = Math.floor(25 * expScale * (1 + effStage * 0.06));
+    while (remainingSeconds > 0 && currentStage < maxProgressStage) {
+      let effStage = window.getEffectiveStage(currentStage);
+      let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+      let expScale = Math.pow(growthRate, effStage);
+      let mobHp = Math.floor(25 * expScale * (1 + effStage * 0.06));
 
       // DPS Check: If player's effective damage cannot clear the HP barrier, progress halts
       if (playerDps < mobHp / 10) {
@@ -1413,11 +1413,11 @@ window.SaveManager = {
     }
 
     // Remaining seconds are spent FARMING on the final reached stage
-        if (remainingSeconds > 0) {
-          let effStage = window.getEffectiveStage(currentStage);
-          let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-          let expScale = Math.pow(growthRate, effStage);
-          let mobHp = Math.floor(25 * expScale * (1 + effStage * 0.06));
+    if (remainingSeconds > 0) {
+      let effStage = window.getEffectiveStage(currentStage);
+      let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+      let expScale = Math.pow(growthRate, effStage);
+      let mobHp = Math.floor(25 * expScale * (1 + effStage * 0.06));
 
       let swingTime = p.idleAttackSpeed / 60;
       let ttkMob = Math.max(swingTime, mobHp / playerDps);
@@ -4258,12 +4258,15 @@ window.CombatEngine = {
     if (window.playerStats.isCrucibleMode) baseCoin = 0; // Crucible awards survival stats on death summary
 
     if (
-      window.playerStats.isDungeonMode &&
-      window.playerStats.currentDungeon === "gold"
-    ) {
-      baseCoin *= 5;
-      if (window.mob.type === "dungeon_boss") baseCoin *= 4;
-    }
+          window.playerStats.isDungeonMode &&
+          window.playerStats.currentDungeon === "gold"
+        ) {
+          let goldFloor = window.playerStats.currentDungeonStage["gold"] || 1;
+          // Floor-scaling multiplier: Starts at x10, climbs by +1.0 for every 5 floors depth
+          let dungeonMult = 10.0 + (goldFloor / 5.0);
+          baseCoin *= dungeonMult;
+          if (window.mob.type === "dungeon_boss") baseCoin *= 5.0;
+        }
     if (window.mob.isRare) baseCoin *= 4;
 
     let coinYield = Math.ceil(baseCoin * p.gold);
@@ -4986,22 +4989,22 @@ window.CombatEngine = {
     }
 
     let scale;
-        if (window.playerStats.isDungeonMode) {
-          window.playerStats.currentDungeonStage = window.playerStats
-            .currentDungeonStage || { equip: 1, gold: 1, mat: 1 };
-          let dStage =
-            window.playerStats.currentDungeonStage[
-              window.playerStats.currentDungeon
-            ] || 1;
+    if (window.playerStats.isDungeonMode) {
+      window.playerStats.currentDungeonStage = window.playerStats
+        .currentDungeonStage || { equip: 1, gold: 1, mat: 1 };
+      let dStage =
+        window.playerStats.currentDungeonStage[
+          window.playerStats.currentDungeon
+        ] || 1;
 
-          let effStage = window.getEffectiveStage(dStage);
-          let baseRate = 1.045 + (effStage * 0.015) / (effStage + 300);
-          scale = Math.pow(baseRate, effStage) * (1 + effStage * 0.05);
-        } else {
-          let effStage = window.getEffectiveStage(activeStage);
-          let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-          scale = Math.pow(growthRate, effStage);
-        }
+      let effStage = window.getEffectiveStage(dStage);
+      let baseRate = 1.045 + (effStage * 0.015) / (effStage + 300);
+      scale = Math.pow(baseRate, effStage) * (1 + effStage * 0.05);
+    } else {
+      let effStage = window.getEffectiveStage(activeStage);
+      let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+      scale = Math.pow(growthRate, effStage);
+    }
 
     if (window.playerStats.isDungeonMode) {
       let hpScale = window.playerStats.currentDungeon === "gold" ? 1.5 : 1;
@@ -5287,135 +5290,166 @@ window.CombatEngine = {
     }
 
     let prestigeCount = window.playerStats.prestigeCount || 0;
-              let rollbackPercent = 0.8;
-              if (prestigeCount >= 1)
-                rollbackPercent = Math.min(0.95, 0.9 + (prestigeCount - 1) * 0.01);
+    let rollbackPercent = 0.8;
+    if (prestigeCount >= 1)
+      rollbackPercent = Math.min(0.95, 0.9 + (prestigeCount - 1) * 0.01);
 
-              let restartStage;
-              const peakEl = document.getElementById("death-stat-peak");
-              const retreatEl = document.getElementById("death-stat-retreat");
-              const killsEl = document.getElementById("death-stat-kills");
-              const goldEl = document.getElementById("death-stat-run-gold");
-              const xpEl = document.getElementById("death-stat-run-xp");
-              const tipEl = document.getElementById("death-tip-text");
+    let restartStage;
+    const peakEl = document.getElementById("death-stat-peak");
+    const retreatEl = document.getElementById("death-stat-retreat");
+    const killsEl = document.getElementById("death-stat-kills");
+    const goldEl = document.getElementById("death-stat-run-gold");
+    const xpEl = document.getElementById("death-stat-run-xp");
+    const tipEl = document.getElementById("death-tip-text");
 
-              if (wasDungeon) {
-                restartStage = window.playerStats.stage;
-                let dNames = {
-                  equip: "Equipment Dungeon",
-                  gold: "Gold Mine",
-                  mat: "Material Cavern",
-                };
-                let dName = dNames[activeDungeon] || "Dungeon";
-                if (peakEl) peakEl.innerText = `${dName} Floor ${dungeonFloor}`;
-                if (retreatEl) retreatEl.innerText = `Campaign Stage ${restartStage}`;
-              } else {
-                // Campaign only rollback condition (Dungeons, Crucible, Altar Uber Bosses, and Prestige Bosses bypass rollback)
-                let isOutsideCampaign = wasUber || wasPrestige || wasCrucible;
-                if (isOutsideCampaign) {
-                  restartStage = window.playerStats.stage;
-                  if (peakEl) peakEl.innerText = wasUber ? "Rift Guardian" : "Prestige Boss";
-                  if (retreatEl) retreatEl.innerText = `Campaign Stage ${restartStage}`;
-                } else {
-                  // Standard campaign death (mobs or stage bosses) -> Rollback applied
-                  restartStage = Math.max(
-                    1,
-                    Math.floor((window.playerStats.maxStage || 1) * rollbackPercent),
-                  );
-                  window.playerStats.stage = restartStage;
-                  if (peakEl) peakEl.innerText = `Stage ${window.playerStats.maxStage || 1}`;
-                  if (retreatEl) retreatEl.innerText = `Stage ${restartStage}`;
-                }
-              }
+    if (wasDungeon) {
+      restartStage = window.playerStats.stage;
+      let dNames = {
+        equip: "Equipment Dungeon",
+        gold: "Gold Mine",
+        mat: "Material Cavern",
+      };
+      let dName = dNames[activeDungeon] || "Dungeon";
+      if (peakEl) peakEl.innerText = `${dName} Floor ${dungeonFloor}`;
+      if (retreatEl) retreatEl.innerText = `Campaign Stage ${restartStage}`;
+    } else {
+      // Campaign only rollback condition (Dungeons, Crucible, Altar Uber Bosses, and Prestige Bosses bypass rollback)
+      let isOutsideCampaign = wasUber || wasPrestige || wasCrucible;
+      if (isOutsideCampaign) {
+        restartStage = window.playerStats.stage;
+        if (peakEl)
+          peakEl.innerText = wasUber ? "Rift Guardian" : "Prestige Boss";
+        if (retreatEl) retreatEl.innerText = `Campaign Stage ${restartStage}`;
+      } else {
+        // Standard campaign death (mobs or stage bosses) -> Rollback applied
+        restartStage = Math.max(
+          1,
+          Math.floor((window.playerStats.maxStage || 1) * rollbackPercent),
+        );
+        window.playerStats.stage = restartStage;
+        if (peakEl)
+          peakEl.innerText = `Stage ${window.playerStats.maxStage || 1}`;
+        if (retreatEl) retreatEl.innerText = `Stage ${restartStage}`;
+      }
+    }
 
-              if (killsEl) killsEl.innerText = window.formatNumber(window.playerStats.runKills || 0);
-                            if (goldEl) goldEl.innerText = `+` + window.formatNumber(window.playerStats.runGold || 0);
-                            if (xpEl) xpEl.innerText = `+` + window.formatNumber(window.playerStats.runXp || 0);
-                            if (tipEl) {
-                              tipEl.innerText = "Reforging modifiers with Catalyst Cores and tempering weapon components significantly increases battle survivability.";
-                            }
+    if (killsEl)
+      killsEl.innerText = window.formatNumber(window.playerStats.runKills || 0);
+    if (goldEl)
+      goldEl.innerText =
+        `+` + window.formatNumber(window.playerStats.runGold || 0);
+    if (xpEl)
+      xpEl.innerText = `+` + window.formatNumber(window.playerStats.runXp || 0);
+    if (tipEl) {
+      tipEl.innerText =
+        "Reforging modifiers with Catalyst Cores and tempering weapon components significantly increases battle survivability.";
+    }
 
-                            // Update Nemesis name & specific battle loop damage metrics
-                                          const nemesisEl = document.getElementById("death-stat-nemesis");
-                                          const dmgTakenEl = document.getElementById("death-stat-dmg-taken");
-                                          if (nemesisEl) {
-                                            nemesisEl.innerText = window.playerStats.killedBy || "Unknown Foe";
-                                          }
-                                          if (dmgTakenEl) {
-                                            dmgTakenEl.innerText = window.formatNumber(window.playerStats.damageTakenThisBattle || 0);
-                                          }
+    // Update Nemesis name & specific battle loop damage metrics
+    const nemesisEl = document.getElementById("death-stat-nemesis");
+    const dmgTakenEl = document.getElementById("death-stat-dmg-taken");
+    if (nemesisEl) {
+      nemesisEl.innerText = window.playerStats.killedBy || "Unknown Foe";
+    }
+    if (dmgTakenEl) {
+      dmgTakenEl.innerText = window.formatNumber(
+        window.playerStats.damageTakenThisBattle || 0,
+      );
+    }
 
-                                          // Compile and render tactical alerts for unspent points, empty gear, or low defense values
-                                          const alertsEl = document.getElementById("death-alerts-container");
-                                          const tipContainerEl = document.getElementById("death-tip-container");
+    // Compile and render tactical alerts for unspent points, empty gear, or low defense values
+    const alertsEl = document.getElementById("death-alerts-container");
+    const tipContainerEl = document.getElementById("death-tip-container");
 
-                                          if (alertsEl) {
-                                            let alertsList = [];
+    if (alertsEl) {
+      let alertsList = [];
 
-                                            // Alert 1: Unspent Skill Points check
-                                            let unallocatedSp = window.playerStats.sp || 0;
-                                            if (unallocatedSp > 0) {
-                                              alertsList.push(`⚠️ <strong style="color:#f1c40f;">${unallocatedSp} SP Available:</strong> spend them under the <strong>Hero</strong> tab!`);
-                                            }
+      // Alert 1: Unspent Skill Points check
+      let unallocatedSp = window.playerStats.sp || 0;
+      if (unallocatedSp > 0) {
+        alertsList.push(
+          `⚠️ <strong style="color:#f1c40f;">${unallocatedSp} SP Available:</strong> spend them under the <strong>Hero</strong> tab!`,
+        );
+      }
 
-                                            // Alert 2: Empty Non-Relic Equipment Slots check
-                                            let missingEquipSlots = [];
-                                            const keySlots = ["weapon", "subweapon", "helmet", "chest", "leggings", "boots"];
-                                            keySlots.forEach(slotKey => {
-                                              if (!window.equippedSlots[slotKey]) {
-                                                // Bypass piece-slots if they are using a full overall composite suit
-                                                if (window.equippedSlots.overall && (slotKey === "chest" || slotKey === "leggings")) return;
-                                                missingEquipSlots.push(slotKey.toUpperCase());
-                                              }
-                                            });
-                                            if (missingEquipSlots.length > 0) {
-                                              alertsList.push(`⚠️ <strong style="color:#ff7675;">Missing Gear:</strong> Empty slot: <strong>${missingEquipSlots.join(", ")}</strong>.`);
-                                            }
+      // Alert 2: Empty Non-Relic Equipment Slots check
+      let missingEquipSlots = [];
+      const keySlots = [
+        "weapon",
+        "subweapon",
+        "helmet",
+        "chest",
+        "leggings",
+        "boots",
+      ];
+      keySlots.forEach((slotKey) => {
+        if (!window.equippedSlots[slotKey]) {
+          // Bypass piece-slots if they are using a full overall composite suit
+          if (
+            window.equippedSlots.overall &&
+            (slotKey === "chest" || slotKey === "leggings")
+          )
+            return;
+          missingEquipSlots.push(slotKey.toUpperCase());
+        }
+      });
+      if (missingEquipSlots.length > 0) {
+        alertsList.push(
+          `⚠️ <strong style="color:#ff7675;">Missing Gear:</strong> Empty slot: <strong>${missingEquipSlots.join(", ")}</strong>.`,
+        );
+      }
 
-                                            // Alert 3: Armor Recommendation check relative to their Stage progression
-                                            let currentLvlStage = window.playerStats.stage || 1;
-                                            let recommendedDefense = currentLvlStage * 8;
-                                            let activeD = window.resolvePlayerStats();
-                                            if (activeD.def < recommendedDefense) {
-                                              alertsList.push(`⚒️ <strong style="color:#3498db;">Low Defense:</strong> Your defense (${window.formatNumber(activeD.def)}) is below target (${window.formatNumber(recommendedDefense)}). Temper armor!`);
-                                            }
+      // Alert 3: Armor Recommendation check relative to their Stage progression
+      let currentLvlStage = window.playerStats.stage || 1;
+      let recommendedDefense = currentLvlStage * 8;
+      let activeD = window.resolvePlayerStats();
+      if (activeD.def < recommendedDefense) {
+        alertsList.push(
+          `⚒️ <strong style="color:#3498db;">Low Defense:</strong> Your defense (${window.formatNumber(activeD.def)}) is below target (${window.formatNumber(recommendedDefense)}). Temper armor!`,
+        );
+      }
 
-                                            if (alertsList.length > 0) {
-                                              alertsEl.innerHTML = alertsList.map(itemText => `<div style="margin-bottom:4px; line-height:1.3;">${itemText}</div>`).join("");
-                                              alertsEl.style.display = "block";
+      if (alertsList.length > 0) {
+        alertsEl.innerHTML = alertsList
+          .map(
+            (itemText) =>
+              `<div style="margin-bottom:4px; line-height:1.3;">${itemText}</div>`,
+          )
+          .join("");
+        alertsEl.style.display = "block";
 
-                                              // Collapse height by hiding the generic advisory banner whenever custom action warnings exist
-                                              if (tipContainerEl) tipContainerEl.style.display = "none";
-                                            } else {
-                                              alertsEl.style.display = "none";
+        // Collapse height by hiding the generic advisory banner whenever custom action warnings exist
+        if (tipContainerEl) tipContainerEl.style.display = "none";
+      } else {
+        alertsEl.style.display = "none";
 
-                                              // Restore generic static advisory if there are no action alerts
-                                              if (tipContainerEl) tipContainerEl.style.display = "block";
-                                            }
-                                          }
+        // Restore generic static advisory if there are no action alerts
+        if (tipContainerEl) tipContainerEl.style.display = "block";
+      }
+    }
 
-                                          window.updateUI();
+    window.updateUI();
 
-                  if (wasDungeon)
-                    window.pushLog(
-                      `<span style='color:#e74c3c; font-weight:bold;'>[DUNGEON STAGE FAILIURE] Died on Dungeon Floor. Safely returned to Campaign Stage ${restartStage}.</span>`,
-                    );
-                  else
-                    window.pushLog(
-                      `<span style='color:#e74c3c; font-weight:bold;'>[DEFEATED] Returned to Stage ${restartStage} (${Math.round(rollbackPercent * 100)}% of Max Stage). No equipment lost!</span>`,
-                    );
+    if (wasDungeon)
+      window.pushLog(
+        `<span style='color:#e74c3c; font-weight:bold;'>[DUNGEON STAGE FAILIURE] Died on Dungeon Floor. Safely returned to Campaign Stage ${restartStage}.</span>`,
+      );
+    else
+      window.pushLog(
+        `<span style='color:#e74c3c; font-weight:bold;'>[DEFEATED] Returned to Stage ${restartStage} (${Math.round(rollbackPercent * 100)}% of Max Stage). No equipment lost!</span>`,
+      );
 
-                  const overlayEl = document.getElementById("death-overlay");
-                      const canvasContainer = document.getElementById("canvas-container");
-                      if (overlayEl) overlayEl.style.display = "flex";
+    const overlayEl = document.getElementById("death-overlay");
+    const canvasContainer = document.getElementById("canvas-container");
+    if (overlayEl) overlayEl.style.display = "flex";
 
-                      // Preserve active sticky camera viewport alignment rather than forcing relative resets
-                      if (typeof window.updateStickyCanvasStyle === "function") {
-                        window.updateStickyCanvasStyle();
-                      }
-                      window.saveGame();
+    // Preserve active sticky camera viewport alignment rather than forcing relative resets
+    if (typeof window.updateStickyCanvasStyle === "function") {
+      window.updateStickyCanvasStyle();
+    }
+    window.saveGame();
 
-        let timeLeft = 10;
+    let timeLeft = 10;
     const spinner = document.getElementById("death-respawn-spinner");
     const timerText = document.getElementById("death-respawn-timer-text");
     const secondsLabel = document.getElementById("death-timer-seconds");
@@ -5451,19 +5485,19 @@ window.CombatEngine = {
   },
 
   respawnHero() {
-      if (window.respawnIntervalId) {
-        clearInterval(window.respawnIntervalId);
-        window.respawnIntervalId = null;
-      }
-      const overlayEl = document.getElementById("death-overlay");
-      if (overlayEl) overlayEl.style.display = "none";
+    if (window.respawnIntervalId) {
+      clearInterval(window.respawnIntervalId);
+      window.respawnIntervalId = null;
+    }
+    const overlayEl = document.getElementById("death-overlay");
+    if (overlayEl) overlayEl.style.display = "none";
 
-      // Restore sticky/relative settings based on user preference
-      if (typeof window.updateStickyCanvasStyle === "function") {
-        window.updateStickyCanvasStyle();
-      }
+    // Restore sticky/relative settings based on user preference
+    if (typeof window.updateStickyCanvasStyle === "function") {
+      window.updateStickyCanvasStyle();
+    }
 
-      let p = window.resolvePlayerStats();
+    let p = window.resolvePlayerStats();
     window.playerStats.currentHp = p.maxHp;
 
     window.mob = null;

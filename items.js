@@ -379,9 +379,9 @@ window.renderForgeTab = function () {
                   <div style='font-size:11px; line-height:1.8; background:#111; padding:10px; border-radius:4px; border:1px solid #333; text-align:left;'>
                       Select an eligible item from your list.<br><br>
                       <b>TEMPER:</b> Refines stats with tier-appropriate material scraps. Failure consumes raw items.<br><br>
-                      <b>REFORGE STAT:</b> Spend <strong style="color:#2ecc71;">Catalyst Cores</strong> to lock and roll a modifier line of your choice. All other slots lock permanently once selection is active!<br><br>
-                      <b>TIER UP:</b> Infuses Eridium Shards to permanently elevate stars and unlock 1 additional random stat modifier!<br><br>
-                      <b>ENCHANT:</b> Infuse powerful magic using salvaged <b>Astral Essence</b>. Boosts 1 random stat line by 25%. Slots scale with rarity.<br><br>
+                      <b>REFORGE STAT:</b> Spend <strong style="color:#1abc9c;">Overlord's Sigils</strong> to lock and roll a modifier line of your choice. All other slots lock permanently once selection is active!<br><br>
+                                            <b>TIER UP:</b> Infuses Eridium Shards to permanently elevate stars and unlock 1 additional random stat modifier!<br><br>
+                                            <b>ENCHANT:</b> Infuse powerful magic using salvaged <b>Astral Essences</b>. Boosts 1 random stat line by 25%. Slots scale with rarity.<br><br>
                       <b>RE-ROLL SET:</b> Infuse <strong style="color:#bdc3c7;">Monster Souls</strong> and gold to alter set resonances. Handy for completing Vanguard/Colossus layout chains!
                   </div>
               </div>`;
@@ -463,11 +463,11 @@ window.renderForgeTab = function () {
       let costGold = Math.floor(
         150 * item.stageLevel * Math.pow(2, item.statsRolled),
       );
-      let ownedCores = window.inventory.ETC["Catalyst Core"] || 0;
+      let ownedSigils = window.inventory.ETC["Overlord's Sigil"] || 0;
 
       let goldColor =
         window.playerStats.coins >= costGold ? "#f1c40f" : "#e74c3c";
-      let coresColor = ownedCores >= 1 ? "#9b59b6" : "#e74c3c";
+      let sigilColor = ownedSigils >= 1 ? "#2ecc71" : "#e74c3c";
 
       if (!item.reforgedProperty) {
         html += `<div style="font-size:11px; color:#aaa; margin-bottom:8px;">Select a modifier line below to prepare for reforging:</div>`;
@@ -485,28 +485,28 @@ window.renderForgeTab = function () {
           let rProp = item.tempReforgeProp;
           let valText = item[rProp] > 0 ? `+${item[rProp]}` : `${item[rProp]}`;
           html += `<div style="margin-top:10px; background:#111; padding:8px; border-radius:4px; border:1px dashed #2ecc71; font-size:11px; margin-bottom:12px; text-align:center;">
-                        <span style="color:#2ecc71; font-weight:bold;">SELECTED TO RE-ROLL:</span><br>
-                        <strong>${window.getStatLabel(rProp)} (${valText})</strong><br>
-                        <span style="font-size:9px; color:#aaa;">(Clicking Execute Reforge will lock this as the only reforgible line!)</span>
-                    </div>`;
+                              <span style="color:#2ecc71; font-weight:bold;">SELECTED TO RE-ROLL:</span><br>
+                              <strong>${window.getStatLabel(rProp)} (${valText})</strong><br>
+                              <span style="font-size:9px; color:#aaa;">(Clicking Execute Reforge will lock this as the only reforgible line!)</span>
+                          </div>`;
 
           html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
-          html += `<div style="font-size:11px; color:${coresColor}; margin-bottom:12px;">• 1x Catalyst Core (Owned: ${ownedCores.toLocaleString()})</div>`;
-          html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedCores >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Execute Reforge</button>`;
+          html += `<div style="font-size:11px; color:${sigilColor}; margin-bottom:12px;">• 1x Overlord's Sigil (Owned: ${ownedSigils.toLocaleString()})</div>`;
+          html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Execute Reforge</button>`;
         }
       } else {
         let rProp = item.reforgedProperty;
         let valText = item[rProp] > 0 ? `+${item[rProp]}` : `${item[rProp]}`;
 
         html += `<div style="background:#111; padding:8px; border-radius:4px; border:1px solid #9b59b6; font-size:11px; margin-bottom:12px; text-align:center;">
-                    <span style="color:#9b59b6; font-weight:bold;">REFORGIBLE SLOT (LOCKED):</span><br>
-                    <strong style="color:#2ecc71; font-size:12px;">${window.getStatLabel(rProp)} (${valText})</strong><br>
-                    <span style="font-size:9px; color:#aaa;">(All other stat lines on this item are permanently locked!)</span>
-                </div>`;
+                          <span style="color:#9b59b6; font-weight:bold;">REFORGIBLE SLOT (LOCKED):</span><br>
+                          <strong style="color:#2ecc71; font-size:12px;">${window.getStatLabel(rProp)} (${valText})</strong><br>
+                          <span style="font-size:9px; color:#aaa;">(All other stat lines on this item are permanently locked!)</span>
+                      </div>`;
 
         html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
-        html += `<div style="font-size:11px; color:${coresColor}; margin-bottom:12px;">• 1x Catalyst Core (Owned: ${ownedCores.toLocaleString()})</div>`;
-        html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #111);" ${window.playerStats.coins >= costGold && ownedCores >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Re-Roll Locked Modifier</button>`;
+        html += `<div style="font-size:11px; color:${sigilColor}; margin-bottom:12px;">• 1x Overlord's Sigil (Owned: ${ownedSigils.toLocaleString()})</div>`;
+        html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Re-Roll Locked Modifier</button>`;
       }
     }
   } else if (window.forgeMode === "tier") {
@@ -571,15 +571,15 @@ window.renderForgeTab = function () {
     } else if (currentEnchants >= maxEnchants) {
       html += `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 20px 0; font-size:11px;">MAXIMUM ENCHANTMENT LIMIT REACHED (${maxEnchants}/${maxEnchants})<br><br><span style="color:#aaa; font-weight:normal;">Reset this item's enchantments in "Reset Enchants" mode to enchant again.</span></div>`;
     } else {
-      let playerEssence = window.inventory.ETC["Astral Essence"] || 0;
-      let essenceColor = playerEssence >= 1 ? "#2ecc71" : "#e74c3c";
+      let playerSigil = window.inventory.ETC["Overlord's Sigil"] || 0;
+      let sigilColor = playerSigil >= 1 ? "#2ecc71" : "#e74c3c";
 
       html += `<div style="font-size:11px; margin-bottom:10px; color:#aaa;">Enchantment Slots: <span style="color:#fff; font-weight:bold;">${currentEnchants} / ${maxEnchants}</span></div>`;
       let pct = (currentEnchants / maxEnchants) * 100;
       html += `<div class="forge-progress-bg"><div class="forge-progress-fill" style="width:${pct}%; background: linear-gradient(90deg, #9b59b6, #e84393);"></div></div>`;
-      html += `<div style="font-size:11px; color:${essenceColor}; margin-bottom:15px;">• 1x Astral Essence Required (Owned: ${playerEssence})</div>`;
+      html += `<div style="font-size:11px; color:${sigilColor}; margin-bottom:15px;">• 1x Overlord's Sigil Required (Owned: ${playerSigil})</div>`;
       html += `<div style="font-size:11px; color:#9b59b6; font-weight:bold; margin-bottom:15px;">🔮 Randomly boosts one active parameter by +25%!</div>`;
-      html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #1a0221);" ${playerEssence >= 1 ? "" : "disabled"} onclick="window.enchantItem()">Infuse Enchantment</button>`;
+      html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #1a0221);" ${playerSigil >= 1 ? "" : "disabled"} onclick="window.enchantItem()">Infuse Enchantment</button>`;
     }
   } else if (window.forgeMode === "reset_enchant") {
     let currentEnchants = item.totalEnchants || 0;
@@ -831,12 +831,12 @@ Object.assign(window.ItemFactory, {
 
     let prestigeMult = 1.0;
 
-        // Direct-Alignment Scaling Model: Maps item creation baselines exactly to enemy exponential scale curves
-        let repStage = window.getEffectiveStage(stageScale * 10);
-        let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-        let repScale = Math.pow(repGrowth, repStage);
+    // Direct-Alignment Scaling Model: Maps item creation baselines exactly to enemy exponential scale curves
+    let repStage = window.getEffectiveStage(stageScale * 10);
+    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+    let repScale = Math.pow(repGrowth, repStage);
 
-        let expScale = repScale;
+    let expScale = repScale;
     let hpDefExpScale = repScale;
 
     // Apply baseline attribute values matching slot configurations (Slot-Specific Base Stats)
@@ -1070,28 +1070,36 @@ Object.assign(window.ItemFactory, {
             rarityMult *
             prestigeMult,
         );
-      else if (selectedStat === "dropRate")
-        item.dropRate += parseFloat(
-          (window.randFloat(0.02, 0.05) * rarityMult * prestigeMult).toFixed(4),
-        );
-      else if (selectedStat === "quality")
-        item.quality += parseFloat(
-          (window.randFloat(0.01, 0.03) * rarityMult * prestigeMult).toFixed(4),
-        );
-      else if (selectedStat === "goldMulti")
-        item.goldMulti += parseFloat(
-          (window.randFloat(0.02, 0.05) * rarityMult * prestigeMult).toFixed(4),
-        );
-      else if (selectedStat === "rareSpawn")
-        item.rareSpawn += parseFloat(
-          (window.randFloat(0.002, 0.006) * rarityMult * prestigeMult).toFixed(
-            4,
-          ),
-        );
-      else if (selectedStat === "fairySpawn")
-        item.fairySpawn += parseFloat(
-          (window.randFloat(0.02, 0.06) * rarityMult * prestigeMult).toFixed(4),
-        );
+      else if (selectedStat === "dropRate") {
+              let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+              item.dropRate += parseFloat(
+                (window.randFloat(0.02, 0.05) * rarityMult * prestigeMult * utilityScale).toFixed(4)
+              );
+            }
+            else if (selectedStat === "quality") {
+              let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+              item.quality += parseFloat(
+                (window.randFloat(0.01, 0.03) * rarityMult * prestigeMult * utilityScale).toFixed(4)
+              );
+            }
+            else if (selectedStat === "goldMulti") {
+              let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+              item.goldMulti += parseFloat(
+                (window.randFloat(0.02, 0.05) * rarityMult * prestigeMult * utilityScale).toFixed(4)
+              );
+            }
+            else if (selectedStat === "rareSpawn") {
+              let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+              item.rareSpawn += parseFloat(
+                (window.randFloat(0.002, 0.006) * rarityMult * prestigeMult * utilityScale).toFixed(4)
+              );
+            }
+            else if (selectedStat === "fairySpawn") {
+              let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+              item.fairySpawn += parseFloat(
+                (window.randFloat(0.02, 0.06) * rarityMult * prestigeMult * utilityScale).toFixed(4)
+              );
+            }
     }
 
     item.atk = (item.baseAtk || 0) + item.bonusAtk;
@@ -1350,21 +1358,26 @@ Object.assign(window.ItemFactory, {
       min += 0.01 * sScale * rMult;
       max += 0.03 * sScale * rMult;
     } else if (statKey === "rareSpawn" && item.rareSpawn > 0) {
-      min += 0.002 * rarityMult;
-      max += 0.006 * rarityMult;
-    } else if (statKey === "dropRate" && item.dropRate > 0) {
-      min += 0.02 * rarityMult;
-      max += 0.05 * rarityMult;
-    } else if (statKey === "quality" && item.quality > 0) {
-      min += 0.01 * rarityMult;
-      max += 0.03 * rarityMult;
-    } else if (statKey === "goldMulti" && item.goldMulti > 0) {
-      min += 0.02 * rarityMult;
-      max += 0.05 * rarityMult;
-    } else if (statKey === "fairySpawn" && item.fairySpawn > 0) {
-      min += 0.02 * rarityMult;
-      max += 0.06 * rarityMult;
-    }
+          let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
+          min += 0.002 * rarityMult * utilityScale;
+          max += 0.006 * rarityMult * utilityScale;
+        } else if (statKey === "dropRate" && item.dropRate > 0) {
+          let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
+          min += 0.02 * rarityMult * utilityScale;
+          max += 0.05 * rarityMult * utilityScale;
+        } else if (statKey === "quality" && item.quality > 0) {
+          let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
+          min += 0.01 * rarityMult * utilityScale;
+          max += 0.03 * rarityMult * utilityScale;
+        } else if (statKey === "goldMulti" && item.goldMulti > 0) {
+          let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
+          min += 0.02 * rarityMult * utilityScale;
+          max += 0.05 * rarityMult * utilityScale;
+        } else if (statKey === "fairySpawn" && item.fairySpawn > 0) {
+          let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageLevel) - 1) * 0.12;
+          min += 0.02 * rarityMult * utilityScale;
+          max += 0.06 * rarityMult * utilityScale;
+        }
 
     const unscaledStats = ["activeAttackSpeed", "idleAttackSpeed"];
     if (!unscaledStats.includes(statKey)) {
@@ -1607,9 +1620,9 @@ Object.assign(window.ItemFactory, {
     item.bonusInt = item.bonusInt || 0;
 
     // Direct-Alignment Scaling Model: Maps recalculations exactly to enemy exponential scale curves
-        let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
-        let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-        let repScale = Math.pow(repGrowth, repStage);
+    let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
+    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+    let repScale = Math.pow(repGrowth, repStage);
 
     let expScale = repScale;
     let hpDefExpScale = repScale;
@@ -1909,11 +1922,11 @@ window.recalculateItemStats = function (item) {
     !item.isUniqueChronicle
   ) {
     let stars = item.statsRolled || 0;
-        let baseRarityMult = 1.0 + stars * 0.3;
-        let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
-        let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-        let repScale = Math.pow(repGrowth, repStage);
-        let expScale = repScale;
+    let baseRarityMult = 1.0 + stars * 0.3;
+    let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
+    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+    let repScale = Math.pow(repGrowth, repStage);
+    let expScale = repScale;
     let prestigeMult = 1.0;
 
     item.rawBaseInt = Math.ceil(1.5 * expScale * prestigeMult * baseRarityMult);
@@ -2130,12 +2143,13 @@ Object.assign(window.ItemFactory, {
     }
 
     let selectedStat = pool[Math.floor(Math.random() * pool.length)];
-        let stageScale = item.stageLevel || 1;
-        let effStageScale = window.getEffectiveStage(stageScale * 10) / 10;
-        // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-        let expScale = Math.pow(1.18, effStageScale) * Math.pow(effStageScale, 2.2);
-        let hpDefExpScale = Math.pow(1.16, effStageScale) * Math.pow(effStageScale, 2.2);
-        let rarityMult = 1 + item.statsRolled * 0.15;
+    let stageScale = item.stageLevel || 1;
+    let effStageScale = window.getEffectiveStage(stageScale * 10) / 10;
+    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
+    let expScale = Math.pow(1.18, effStageScale) * Math.pow(effStageScale, 2.2);
+    let hpDefExpScale =
+      Math.pow(1.16, effStageScale) * Math.pow(effStageScale, 2.2);
+    let rarityMult = 1 + item.statsRolled * 0.15;
     let prestigeMult = Math.pow(1.08, window.playerStats.prestigeCount || 0);
 
     if (selectedStat === "atk")
@@ -2633,7 +2647,7 @@ Object.assign(window.ForgeManager, {
   getRequiredScrapForTemper(item) {
     if (!item) return "Monster Soul";
     if (item.type === "artifact" || item.statsRolled === "UNIQUE")
-      return "Overlord's Sigil";
+      return "Catalyst Core";
 
     const scraps = [
       "Monster Soul",
@@ -3521,23 +3535,23 @@ Object.assign(window.ForgeManager, {
       150 * itemLvlMultiplier * Math.pow(2, item.statsRolled),
     );
 
-    let ownedCores = window.inventory.ETC["Catalyst Core"] || 0;
+    let ownedSigil = window.inventory.ETC["Overlord's Sigil"] || 0;
 
     if (window.playerStats.coins < costGold) {
       if (typeof window.pushHeaderToast === "function")
         window.pushHeaderToast("Not enough Gold!", "#e74c3c");
       return;
     }
-    if (ownedCores < 1) {
+    if (ownedSigil < 1) {
       if (typeof window.pushHeaderToast === "function")
-        window.pushHeaderToast("Requires 1 Catalyst Core!", "#e74c3c");
+        window.pushHeaderToast("Requires 1 Overlord's Sigil!", "#e74c3c");
       return;
     }
 
     window.playerStats.coins -= costGold;
-    window.inventory.ETC["Catalyst Core"]--;
-    if (window.inventory.ETC["Catalyst Core"] === 0)
-      delete window.inventory.ETC["Catalyst Core"];
+    window.inventory.ETC["Overlord's Sigil"]--;
+    if (window.inventory.ETC["Overlord's Sigil"] === 0)
+      delete window.inventory.ETC["Overlord's Sigil"];
 
     item[rProp] = 0;
 
@@ -3594,12 +3608,12 @@ Object.assign(window.ForgeManager, {
     if (eligiblePool.length === 0) eligiblePool = possiblePool;
 
     let newProp = eligiblePool[Math.floor(Math.random() * eligiblePool.length)];
-        let stageScale = item.stageLevel || 1;
-        let effStageScale = window.getEffectiveStage(stageScale * 10) / 10;
-        // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-        let expScale = Math.pow(1.58, effStageScale);
-        let hpDefExpScale = Math.pow(1.56, effStageScale);
-        let rarityMult = 1 + item.statsRolled * 0.15;
+    let stageScale = item.stageLevel || 1;
+    let effStageScale = window.getEffectiveStage(stageScale * 10) / 10;
+    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
+    let expScale = Math.pow(1.58, effStageScale);
+    let hpDefExpScale = Math.pow(1.56, effStageScale);
+    let rarityMult = 1 + item.statsRolled * 0.15;
     let rolledValue = 0;
 
     if (newProp === "bonusAtk")

@@ -25,7 +25,7 @@ window.getUiIconSvg = function (key, size = 12) {
 
 // --- SYSTEM UTILS ---
 
-window.getEffectiveStage = function(stage) {
+window.getEffectiveStage = function (stage) {
   let s = Number(stage);
   if (isNaN(s) || s < 1) s = 1;
   // Stages <= 100 behave exactly as normal.

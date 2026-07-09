@@ -677,7 +677,8 @@ window.renderRiftConsole = function () {
 window.changeRiftLevel = function (direction) {
   let maxLvl = (window.playerStats.highestRiftLevel || 0) + 5;
   let newLvl = window.riftSelectedLevel + direction;
-  if (newLvl < 1) newLvl = 1;
+  let minLvl = Math.max(1, window.playerStats.highestRiftLevel || 1);
+  if (newLvl < minLvl) newLvl = minLvl;
   if (newLvl > maxLvl) newLvl = maxLvl;
   window.riftSelectedLevel = newLvl;
   window.renderRiftConsole();
@@ -864,10 +865,11 @@ window.updateUI = function () {
   let p = window.resolvePlayerStats(hasDraftChanges);
 
   // Dynamic Clan Hall Locked Overlay Rendering (Void-style Lock & Chains)
-  let clanCard = document.getElementById("hub-card-clan");
-  if (clanCard) {
-    if (window.playerStats.level < 25) {
-      clanCard.classList.add("locked-void");
+    let clanCard = document.getElementById("hub-card-clan");
+    if (clanCard) {
+      // Only lock out clan hall if the player is under level 25 AND has never prestige-ascended
+      if (window.playerStats.level < 25 && (window.playerStats.prestigeCount || 0) === 0) {
+        clanCard.classList.add("locked-void");
       clanCard.innerHTML = `
         <div class="hub-card-icon" style="border-color: #9b59b6 !important; background: rgba(155, 89, 182, 0.15) !important; position: relative; z-index: 2;">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff007f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px #ff007f);">
@@ -1459,46 +1461,62 @@ window.startSPDraftHold = function (e, statKey, direction) {
   e.preventDefault();
   window.ensureDraftInitialized();
   if (window.draftSP <= 0 && direction > 0) return;
-  window.adjustSPDraft(statKey, direction);
 
-  if (window.draftHoldTimeout) clearInterval(window.draftHoldTimeout);
-  window.draftHoldTimeout = setInterval(() => {
-    if (window.draftSP <= 0 && direction > 0) {
-      clearInterval(window.draftHoldTimeout);
-      return;
+  window.adjustSPDraft(statKey, direction, 1);
+
+  if (window.draftHoldTimeout) clearTimeout(window.draftHoldTimeout);
+
+  let tickCount = 0;
+  const tick = () => {
+    tickCount++;
+    // Gradually escalate chunk sizes for massive SP pools
+    let amount = 1;
+    if (tickCount > 35) amount = 25;
+    else if (tickCount > 15) amount = 5;
+
+    // Accelerate distribution frequency
+    let delay = Math.max(30, 150 - tickCount * 8);
+
+    let committed = window.playerStats.spAllocations[statKey] || 0;
+    let limit = direction > 0
+      ? window.draftSP
+      : (window.draftAllocations[statKey] - committed);
+
+    let actualAmt = Math.min(amount, limit);
+    if (actualAmt > 0) {
+      window.adjustSPDraft(statKey, direction, actualAmt);
+      window.draftHoldTimeout = setTimeout(tick, delay);
+    } else {
+      window.stopSPDraftHold();
     }
-    if (
-      direction < 0 &&
-      window.draftAllocations[statKey] <=
-        window.playerStats.spAllocations[statKey]
-    ) {
-      clearInterval(window.draftHoldTimeout);
-      return;
-    }
-    window.adjustSPDraft(statKey, direction);
-  }, 120);
+  };
+
+  window.draftHoldTimeout = setTimeout(tick, 150);
 };
 
 window.stopSPDraftHold = function (e) {
   if (e) e.stopPropagation();
   if (window.draftHoldTimeout) {
-    clearInterval(window.draftHoldTimeout);
+    clearTimeout(window.draftHoldTimeout);
     window.draftHoldTimeout = null;
   }
 };
 
-window.adjustSPDraft = function (statKey, direction) {
+window.adjustSPDraft = function (statKey, direction, amount = 1) {
   window.ensureDraftInitialized();
   if (direction > 0) {
-    if (window.draftSP > 0) {
-      window.draftSP--;
-      window.draftAllocations[statKey]++;
+    let actual = Math.min(amount, window.draftSP);
+    if (actual > 0) {
+      window.draftSP -= actual;
+      window.draftAllocations[statKey] += actual;
     }
   } else {
     let committed = window.playerStats.spAllocations[statKey] || 0;
-    if (window.draftAllocations[statKey] > committed) {
-      window.draftSP++;
-      window.draftAllocations[statKey]--;
+    let limit = window.draftAllocations[statKey] - committed;
+    let actual = Math.min(amount, limit);
+    if (actual > 0) {
+      window.draftSP += actual;
+      window.draftAllocations[statKey] -= actual;
     }
   }
   window.updateUI();
@@ -2173,7 +2191,10 @@ window.setPauseState = function (paused) {
 window.togglePause = function () {
   // Manual pausing has been deprecated to prevent exploit cooldown stalling and mid-fight gear swapping.
   if (typeof window.pushHeaderToast === "function") {
-    window.pushHeaderToast("⚖️ Manual pausing is disabled! Real-time battle is enforced.", "#e67e22");
+    window.pushHeaderToast(
+      "⚖️ Manual pausing is disabled! Real-time battle is enforced.",
+      "#e67e22",
+    );
   }
 };
 
@@ -3294,9 +3315,10 @@ window.changePrestigeBossStage = function (direction) {
   let p = window.playerStats;
   let maxS = p.maxStage || 80;
   if (maxS < 80) maxS = 80;
+  let minPrestigeS = p.highestPrestigeStageCleared || 80;
 
-  let newStage = (p.selectedPrestigeStage || 80) + direction;
-  if (newStage < 80) newStage = 80;
+  let newStage = (p.selectedPrestigeStage || minPrestigeS) + direction;
+  if (newStage < minPrestigeS) newStage = minPrestigeS;
   if (newStage > maxS) newStage = maxS;
 
   p.selectedPrestigeStage = newStage;
@@ -3355,18 +3377,23 @@ window.renderPrestigeTab = function () {
   // Render Left Column: Hooktail Battle Console with Level Selector
   let maxS = p.maxStage || 80;
   if (maxS < 80) maxS = 80;
-  if (p.selectedPrestigeStage === undefined) p.selectedPrestigeStage = maxS;
+  let minPrestigeS = p.highestPrestigeStageCleared || 80;
+  if (
+    p.selectedPrestigeStage === undefined ||
+    p.selectedPrestigeStage < minPrestigeS
+  ) {
+    p.selectedPrestigeStage = minPrestigeS;
+  }
   p.selectedPrestigeStage = Math.max(
-    80,
+    minPrestigeS,
     Math.min(maxS, p.selectedPrestigeStage),
   );
-
   let activeStage = p.selectedPrestigeStage;
-    let effStage = window.getEffectiveStage(activeStage);
-    let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-    let scale = Math.pow(growthRate, effStage);
+  let effStage = window.getEffectiveStage(activeStage);
+  let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+  let scale = Math.pow(growthRate, effStage);
 
-    let hpVal = Math.floor(600 * scale);
+  let hpVal = Math.floor(600 * scale);
   let dmgVal = Math.floor(6 * scale);
   let defVal = Math.floor(80 + (activeStage - 80) * 1.5);
 
@@ -3517,21 +3544,21 @@ window.renderPrestigeTab = function () {
                 </div>
 
                 <!-- Challenge Tier Selector Slider -->
-                <div style="background:rgba(15,7,7,0.85); border:1px solid #5a0e0e; border-radius:6px; padding:10px; margin-bottom:12px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <div>
-                            <strong style="color:#ff7675; font-size:11px; text-transform:uppercase;">Challenge Tier Level:</strong>
-                            <span style="font-size:9.5px; color:#aaa; display:block;">Limits: Stage 80 to Peak ${maxS}</span>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:4px;">
-                            <button class="btn-action" style="padding:2px 8px; background:#5a0e0e;" ${p.maxStage < 80 ? "disabled" : ""} onclick="window.changePrestigeBossStage(-1)">-</button>
-                            <strong style="font-size:13px; font-family:monospace; color:#fff; min-width:28px; text-align:center;">${activeStage}</strong>
-                            <button class="btn-action" style="padding:2px 8px; background:#5a0e0e;" ${p.maxStage < 80 ? "disabled" : ""} onclick="window.changePrestigeBossStage(1)">+</button>
-                        </div>
-                    </div>
-                    <!-- Slider Control -->
-                    <input type="range" min="80" max="${maxS}" value="${activeStage}" step="1" ${p.maxStage < 80 ? "disabled" : ""} oninput="window.changePrestigeBossStage(parseInt(this.value, 10) - window.playerStats.selectedPrestigeStage)" style="width:100%; height:4px; accent-color:#e74c3c; cursor:pointer;" />
-                </div>
+                                <div style="background:rgba(15,7,7,0.85); border:1px solid #5a0e0e; border-radius:6px; padding:10px; margin-bottom:12px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                        <div>
+                                            <strong style="color:#ff7675; font-size:11px; text-transform:uppercase;">Challenge Tier Level:</strong>
+                                            <span style="font-size:9.5px; color:#aaa; display:block;">Limits: Stage ${minPrestigeS} to Peak ${maxS}</span>
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:4px;">
+                                            <button class="btn-action" style="padding:2px 8px; background:#5a0e0e;" ${p.maxStage < minPrestigeS ? "disabled" : ""} onclick="window.changePrestigeBossStage(-1)">-</button>
+                                            <strong style="font-size:13px; font-family:monospace; color:#fff; min-width:28px; text-align:center;">${activeStage}</strong>
+                                            <button class="btn-action" style="padding:2px 8px; background:#5a0e0e;" ${p.maxStage < minPrestigeS ? "disabled" : ""} onclick="window.changePrestigeBossStage(1)">+</button>
+                                        </div>
+                                    </div>
+                                    <!-- Slider Control -->
+                                    <input type="range" min="${minPrestigeS}" max="${maxS}" value="${activeStage}" step="1" ${p.maxStage < minPrestigeS ? "disabled" : ""} oninput="window.changePrestigeBossStage(parseInt(this.value, 10) - window.playerStats.selectedPrestigeStage)" style="width:100%; height:4px; accent-color:#e74c3c; cursor:pointer;" />
+                                </div>
 
                 <!-- Forecasted Boss Stats -->
                 <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:4px; padding:8px; margin-bottom:10px; font-family:monospace; font-size:9.5px;">
@@ -3732,6 +3759,12 @@ window.triggerPrestigeAscension = function () {
   )
     window.playerStats.hasTriggeredSpeedrun = true;
   window.playerStats.lastAscensionTime = nowTime;
+  window.playerStats.highestPrestigeStageCleared = Math.max(
+    window.playerStats.highestPrestigeStageCleared || 80,
+    activeStage,
+  );
+  window.playerStats.selectedPrestigeStage =
+    window.playerStats.highestPrestigeStageCleared;
   window.playerStats.lifetimePeakStage = Math.max(
     window.playerStats.lifetimePeakStage || 1,
     window.playerStats.maxStage || 1,
@@ -5355,11 +5388,29 @@ window.refreshMarketShopIfNeeded = function () {
       }
 
       let chosenType = types[Math.floor(Math.random() * types.length)];
-      let cost = Math.floor(
-        500 * Math.pow(2.15, stageScale - 1) * Math.pow(2.5, statLinesCount),
-      );
 
-      let shopItemData = window.createItemObject(
+            // Resolve base boss gold drops matching this item's specific Level/Stage Scale
+            let itemStage = stageScale * 10;
+            let effStage = window.getEffectiveStage(itemStage);
+            let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+            let scale = Math.pow(growthRate, effStage);
+            let baseBossGold = Math.floor(15 * scale);
+
+            // Balanced Rarity Cost multipliers (expressed as equivalent boss kills of that item's level)
+            const rarityCostMultipliers = [
+              15,   // 0★ Common
+              35,   // 1★ Rare
+              90,   // 2★ Magic
+              250,  // 3★ Epic
+              800,  // 4★ Legendary
+              2500  // 5★ Mythic
+            ];
+            let itemRarityFactor = rarityCostMultipliers[statLinesCount] || 15;
+
+            // Final Level-Anchored shop cost calculation
+            let cost = Math.floor(baseBossGold * itemRarityFactor);
+
+            let shopItemData = window.createItemObject(
         chosenType,
         statLinesCount,
         stageScale,
@@ -5948,7 +5999,7 @@ window.submitConsoleCommand = function () {
       (window.playerStats.missionTokens || 0) + amt;
     if (typeof window.pushLog === "function")
       window.pushLog(
-        `<span style="color:#2ecc71;">[DEV] Granted +${amt} Mission Tokens!</span>`,
+        `<span style="color:#2ecc71;">[DEV] Granted +${amt} Quest Points!</span>`,
       );
     if (typeof window.updateUI === "function") window.updateUI();
     if (typeof window.renderMissionsWindow === "function")
@@ -7199,21 +7250,21 @@ window.showCurrentRatesModal = function () {
                             </div>
 
                             <!-- GOLD DUNGEON -->
-                            <div style="background:#111; border:1px solid #333; border-radius:4px; padding:8px; margin-bottom:8px;">
-                                <div style="color:#f1c40f; font-weight:bold; font-size:11px; margin-bottom:4px; border-bottom:1px solid #222; padding-bottom:3px; display:flex; justify-content:space-between;">
-                                    <span>💰 Gold Mine (Floor ${goldFloor})</span>
-                                </div>
-                                <div style="font-family:monospace; font-size:10px; display:flex; flex-direction:column; gap:2px;">
-                                    <div style="display:flex; justify-content:space-between;">
-                                        <span>🟡 Gold Multiplier (Floor):</span>
-                                        <strong style="color:#f1c40f;">x5.00</strong>
-                                    </div>
-                                    <div style="display:flex; justify-content:space-between;">
-                                        <span>👑 Boss Gold Bonus:</span>
-                                        <strong style="color:#f1c40f;">x20.00</strong>
-                                    </div>
-                                </div>
-                            </div>
+                                                        <div style="background:#111; border:1px solid #333; border-radius:4px; padding:8px; margin-bottom:8px;">
+                                                            <div style="color:#f1c40f; font-weight:bold; font-size:11px; margin-bottom:4px; border-bottom:1px solid #222; padding-bottom:3px; display:flex; justify-content:space-between;">
+                                                                <span>💰 Gold Mine (Floor ${goldFloor})</span>
+                                                            </div>
+                                                            <div style="font-family:monospace; font-size:10px; display:flex; flex-direction:column; gap:2px;">
+                                                                <div style="display:flex; justify-content:space-between;">
+                                                                    <span>🟡 Gold Multiplier (Floor):</span>
+                                                                    <strong style="color:#f1c40f;">x${(10.0 + goldFloor / 5.0).toFixed(2)}</strong>
+                                                                </div>
+                                                                <div style="display:flex; justify-content:space-between;">
+                                                                    <span>👑 Boss Gold Bonus:</span>
+                                                                    <strong style="color:#f1c40f;">x${((10.0 + goldFloor / 5.0) * 5.0).toFixed(2)}</strong>
+                                                                </div>
+                                                            </div>
+                                                        </div>
 
                             <!-- MATERIAL DUNGEON -->
                             <div style="background:#111; border:1px solid #333; border-radius:4px; padding:8px; margin-bottom:8px;">
@@ -7435,9 +7486,9 @@ window.showMissionTooltip = function (e, missionId, isWeekly) {
         <div class="tt-title" style="color:${color};">${typeLabel} Objective</div>
         <div style="color:#fff; font-size:11.5px; font-weight:bold; margin-bottom:6px; white-space:normal; line-height:1.45;">${m.desc}</div>
         <div style="margin-top:6px; border-top:1px dashed #444; padding-top:6px; font-family:monospace; font-size:10px; line-height:1.4;">
-            <div class="tt-stat-line" style="color:#aaa;">Progress: <strong style="color:#fff;">${m.current.toLocaleString()} / ${m.target.toLocaleString()} (${Math.min(100, pct).toFixed(1)}%)</strong></div>
-            <div class="tt-stat-line" style="color:#aaa;">Reward: <strong style="color:#f1c40f;">${rewardText}</strong> & <strong style="color:#2ecc71;">+1 MP</strong></div>
-        </div>
+                    <div class="tt-stat-line" style="color:#aaa;">Progress: <strong style="color:#fff;">${m.current.toLocaleString()} / ${m.target.toLocaleString()} (${Math.min(100, pct).toFixed(1)}%)</strong></div>
+                    <div class="tt-stat-line" style="color:#aaa;">Reward: <strong style="color:#f1c40f;">${rewardText}</strong> & <strong style="color:#2ecc71;">+1 QP</strong></div>
+                </div>
     </div>
   `;
 
@@ -7599,12 +7650,12 @@ window.renderAltarTab = function () {
   let slidesHtml = window.riftBossesMetadata
     .map((boss, idx) => {
       let lvl = isRiftActive ? activeLvl : selectedLvl;
-            let equivalentStage = 50 + lvl * 10;
-            let effStage = window.getEffectiveStage(equivalentStage);
-            let gRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-            let rScale = Math.pow(gRate, effStage);
+      let equivalentStage = 50 + lvl * 10;
+      let effStage = window.getEffectiveStage(equivalentStage);
+      let gRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+      let rScale = Math.pow(gRate, effStage);
 
-            let defVal = Math.floor(boss.defMult * rScale);
+      let defVal = Math.floor(boss.defMult * rScale);
       let hpVal = Math.floor(boss.hpMult * (60 * rScale) * (1 + defVal / 100)); // True Effective Health
       let dmgVal = Math.floor(20 * rScale * boss.dmgMult);
 
@@ -7754,7 +7805,8 @@ window.renderAltarTab = function () {
 window.changeAltarRiftLevel = function (direction) {
   let maxLvl = (window.playerStats.highestRiftLevel || 0) + 5;
   let newLvl = window.riftSelectedLevel + direction;
-  if (newLvl < 1) newLvl = 1;
+  let minLvl = Math.max(1, window.playerStats.highestRiftLevel || 1);
+  if (newLvl < minLvl) newLvl = minLvl;
   if (newLvl > maxLvl) newLvl = maxLvl;
   window.riftSelectedLevel = newLvl;
   window.renderAltarTab();
@@ -8295,19 +8347,19 @@ window.showMissionShopUpgradeTooltip = function (e, upId) {
   if (upId === "bag") {
     title = "🎒 Dimensional Satchel";
     let cost = 4 + currentLevel * 3;
-    desc = `Each upgrade level permanently expands your maximum equipment and artifact sack capacity by <strong style="color:#3498db;">+10 slots</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 10} Slots)</strong><br>• Cost: <strong style="color:#f1c40f;">${cost} MP</strong>`;
+    desc = `Each upgrade level permanently expands your maximum equipment and artifact sack capacity by <strong style="color:#3498db;">+10 slots</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 10} Slots)</strong><br>• Cost: <strong style="color:#f1c40f;">${cost} QP</strong>`;
     color = "#3498db";
   } else if (upId === "gold") {
     title = "💰 Midas Training";
-    desc = `Permanently increases your Global Gold Multiplier by <strong style="color:#f1c40f;">+5%</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 5}%)</strong><br>• Cost: <strong style="color:#f1c40f;">5 MP</strong>`;
+    desc = `Permanently increases your Global Gold Multiplier by <strong style="color:#f1c40f;">+5%</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 5}%)</strong><br>• Cost: <strong style="color:#f1c40f;">5 QP</strong>`;
     color = "#f1c40f";
   } else if (upId === "atk") {
     title = "⚔️ Gladiator Mastery";
-    desc = `Permanently increases your Global Attack Power by <strong style="color:#e74c3c;">+2%</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 2}%)</strong><br>• Cost: <strong style="color:#f1c40f;">5 MP</strong>`;
+    desc = `Permanently increases your Global Attack Power by <strong style="color:#e74c3c;">+2%</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 2}%)</strong><br>• Cost: <strong style="color:#f1c40f;">5 QP</strong>`;
     color = "#e74c3c";
   } else if (upId === "hp") {
     title = "❤️ Iron Constitution";
-    desc = `Permanently increases your Global Max HP by <strong style="color:#3498db;">+3%</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 3}%)</strong><br>• Cost: <strong style="color:#f1c40f;">5 MP</strong>`;
+    desc = `Permanently increases your Global Max HP by <strong style="color:#3498db;">+3%</strong>.<br><br>• Current Level: <strong style="color:#fff;">Lv. ${currentLevel} (+${currentLevel * 3}%)</strong><br>• Cost: <strong style="color:#f1c40f;">5 QP</strong>`;
     color = "#3498db";
   }
 
@@ -8344,7 +8396,7 @@ window.showMissionShopItemTooltip = function (e, itemName) {
     color = "#e74c3c";
     cost = 2;
   } else if (normalizedName === "Overlords Sigil") {
-    desc = "Material required to temper Unique Artifacts at the Forge.";
+    desc = "Spent at the Forge to lock and re-roll equipment modifiers.";
     color = "#1abc9c";
     cost = 6;
   } else if (normalizedName === "Gacha Key") {
@@ -8353,8 +8405,7 @@ window.showMissionShopItemTooltip = function (e, itemName) {
     color = "#f1c40f";
     cost = 4;
   } else if (normalizedName === "Catalyst Core") {
-    desc =
-      "Spent at the Forge to re-roll and lock select weapon and armor attributes.";
+    desc = "Spent at the Forge to temper Unique Artifacts.";
     color = "#2ecc71";
     cost = 3;
   } else if (normalizedName === "Astral Essence") {
@@ -8389,11 +8440,11 @@ window.showMissionShopItemTooltip = function (e, itemName) {
   iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 8px;");
 
   tt.innerHTML = `
-    <div style="padding: 10px; width: 220px; box-sizing: border-box;">
-        <div class="tt-title" style="color:${color}; display:flex; align-items:center; gap:8px;">${iconHtml}<span>${finalName}</span></div>
-        <div style="color:#aaa; font-size:11px; white-space:normal; line-height:1.4; margin-top:8px;">
-            ${desc}<br><br>
-            • Cost: <strong style="color:#f1c40f;">${cost} MP</strong><br>
+      <div style="padding: 10px; width: 220px; box-sizing: border-box;">
+          <div class="tt-title" style="color:${color}; display:flex; align-items:center; gap:8px;">${iconHtml}<span>${finalName}</span></div>
+          <div style="color:#aaa; font-size:11px; white-space:normal; line-height:1.4; margin-top:8px;">
+              ${desc}<br><br>
+              • Cost: <strong style="color:#f1c40f;">${cost} QP</strong><br>
             • Owned: <strong style="color:#fff;">${(window.inventory.ETC[finalName] || window.inventory.USE[finalName] || 0).toLocaleString()}</strong>
         </div>
     </div>
@@ -8459,7 +8510,7 @@ window.claimMissionReward = function (missionId, isWeekly = false) {
       ? `${m.treatQty}x ${m.treat} & 3x ${m.potionAward}`
       : `${m.treatQty}x ${m.treat}`;
     window.pushHeaderToast(
-      `🎁 Claimed: ${textLabel} & +1 Mission Token!`,
+      `🎁 Claimed: ${textLabel} & +1 Quest Point!`,
       "#2ecc71",
     );
   }
@@ -8523,9 +8574,9 @@ window.claimMasterMissionReward = function (isWeekly = false) {
     window.addUseDrop("Monster Card Sack", 1);
 
     if (typeof window.pushLog === "function")
-          window.pushLog(
-            `<strong style="color:#f1c40f;">🏆 [MISSION BOARD] Beaten Weekly Board! Earned +${scalingPP} PP, 1x Card Sack, Gacha Keys, 10x Mission Tokens, and ${grandItem.name}!</strong>`,
-          );
+      window.pushLog(
+        `<strong style="color:#f1c40f;">🏆 [QUEST BOARD] Beaten Weekly Board! Earned +${scalingPP} PP, 1x Card Sack, Gacha Keys, 10x Quest Points, and ${grandItem.name}!</strong>`,
+      );
   } else {
     window.playerStats.dailyRewardClaimed = true;
 
@@ -8656,10 +8707,10 @@ window.toggleMissions = function () {
     win.style.top = "60px";
 
     win.innerHTML = `
-      <div class="draggable-header" id="missions-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
-          <span>🎯 Mission Board & Shop</span>
-          <button onclick="document.getElementById('missions-draggable-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
-      </div>
+          <div class="draggable-header" id="missions-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
+              <span>🎯 Quest Board & Shop</span>
+              <button onclick="document.getElementById('missions-draggable-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
+          </div>
       <div class="draggable-content" id="missions-win-content" style="max-height: 400px; padding: 12px; background:#07030b;">
           <!-- Live sub-tab content injected dynamically below -->
       </div>
@@ -8686,11 +8737,11 @@ window.renderMissionsWindow = function () {
   let shopIconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`;
 
   let tabHeaderHtml = `
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:12px; padding:0 2px;">
-        <button onclick="window.switchMissionsTab('BOARD')" class="sub-tab-btn ${currentTab === "BOARD" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">${boardIconSvg}Mission Board</button>
-        <button onclick="window.switchMissionsTab('SHOP')" class="sub-tab-btn ${currentTab === "SHOP" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">${shopIconSvg}Mission Shop</button>
-    </div>
-  `;
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:12px; padding:0 2px;">
+          <button onclick="window.switchMissionsTab('BOARD')" class="sub-tab-btn ${currentTab === "BOARD" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">${boardIconSvg}Quest Board</button>
+          <button onclick="window.switchMissionsTab('SHOP')" class="sub-tab-btn ${currentTab === "SHOP" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px;">${shopIconSvg}Quest Shop</button>
+      </div>
+    `;
 
   let contentHtml = "";
 
@@ -8795,8 +8846,8 @@ window.renderMissionsWindow = function () {
     }
 
     let weeklyMasterBtnHtml = "";
-        let scalingPP = 2 + Math.floor(window.playerStats.prestigeCount / 5);
-        if (window.playerStats.prestigeCount === 0) {
+    let scalingPP = 2 + Math.floor(window.playerStats.prestigeCount / 5);
+    if (window.playerStats.prestigeCount === 0) {
       weeklyMasterBtnHtml = `
         <div style="background:rgba(231,76,60,0.08); border:1px dashed #e74c3c; border-radius:6px; padding:10px; text-align:center; color:#e74c3c; font-size:10.5px; font-weight:bold; width:100%;">
             🔒 Weekly Board unlocks after your first Ascension at the Altar of Ascension.
@@ -8821,11 +8872,11 @@ window.renderMissionsWindow = function () {
           `;
     } else {
       weekliesCardHtml = `
-            <div style="border:1.5px solid #9b59b680; border-radius:8px; padding:12px; background:rgba(155,89,182,0.03); box-shadow:0 4px 15px rgba(0,0,0,0.5);">
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #9b59b644; padding-bottom:6px; margin-bottom:10px;">
-                    <strong style="color:#df9ffb; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">📆 Weekly Clan Quests</strong>
-                    <span style="font-size:9.5px; color:#aaa; font-family:monospace;" id="weekly-timer-val">Refreshing...</span>
-                </div>
+                  <div style="border:1.5px solid #9b59b680; border-radius:8px; padding:12px; background:rgba(155, 89, 182, 0.03); box-shadow:0 4px 15px rgba(0,0,0,0.5);">
+                      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #9b59b644; padding-bottom:6px; margin-bottom:10px;">
+                          <strong style="color:#df9ffb; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">📆 Weekly Quests</strong>
+                          <span style="font-size:9.5px; color:#aaa; font-family:monospace;" id="weekly-timer-val">Refreshing...</span>
+                      </div>
                 <div>
                     ${weeklies.map((m) => getMissionRowHtml(m, true)).join("")}
                 </div>
@@ -8884,20 +8935,25 @@ window.renderMissionsWindow = function () {
     let constitutionSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
 
     let bagBtnHtml = canAffordBag
-      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('bag')">Upgrade (${costBag} MP)</button>`
-      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139;" disabled>Lacking MP</button>`;
+      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('bag')">Upgrade (${costBag} QP)</button>`
+      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (${costBag})</button>`;
 
     let goldBtnHtml = canAffordGold
-      ? `<button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('gold')">Upgrade (5 MP)</button>`
-      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139;" disabled>Lacking MP</button>`;
+      ? `<button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('gold')">Upgrade (5 QP)</button>`
+      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
 
     let atkBtnHtml = canAffordAtk
-      ? `<button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('atk')">Upgrade (5 MP)</button>`
-      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139;" disabled>Lacking MP</button>`;
+      ? `<button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('atk')">Upgrade (5 QP)</button>`
+      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
 
     let hpBtnHtml = canAffordHp
-      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('hp')">Upgrade (5 MP)</button>`
-      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139;" disabled>Lacking MP</button>`;
+      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('hp')">Upgrade (5 QP)</button>`
+      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
+
+    let costColorBag = canAffordBag ? "#2ecc71" : "#e74c3c";
+    let costColorGold = canAffordGold ? "#2ecc71" : "#e74c3c";
+    let costColorAtk = canAffordAtk ? "#2ecc71" : "#e74c3c";
+    let costColorHp = canAffordHp ? "#2ecc71" : "#e74c3c";
 
     let reagents = [
       {
@@ -8987,7 +9043,7 @@ window.renderMissionsWindow = function () {
                 </div>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:4; border-top:1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:2px;">
-                <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${r.cost} MP</span>
+                            <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${r.cost} QP</span>
                 <button class="btn-action" style="font-size:9.5px; padding:4px 8px; border-radius:4px; ${isAfford ? "background:" + r.color + "; color:" + (r.color === "#f1c40f" ? "#111" : "#fff") + "; border: 1px solid #fff;" : "background:#222; color:#555; border:1px solid #333; cursor:not-allowed;"}" ${isAfford ? "" : "disabled"} onclick="window.buyMissionItem('${finalKey}', ${r.cost})">
                     Buy
                 </button>
@@ -9000,83 +9056,91 @@ window.renderMissionsWindow = function () {
     contentHtml = `
       <div style="display:flex; flex-direction:column; gap:12px;">
           <!-- UPGRADE GRID -->
-          <div style="background:#111; border:1.5px solid #2ecc7180; border-radius:8px; padding:12px; box-shadow:0 4px 15px rgba(0,0,0,0.5);">
-              <strong style="color:#2ecc71; font-size:12px; display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">🎖️ PERMANENT GUILD UPGRADES</strong>
-              <span style="font-size:9.5px; color:#aaa; display:block; margin-bottom:10px; line-height:1.4;">These bonuses persist permanently and are NOT reset upon Prestige Ascension.</span>
+                    <div style="background:#111; border:1.5px solid #2ecc7180; border-radius:8px; padding:12px; box-shadow:0 4px 15px rgba(0,0,0,0.5);">
+                        <strong style="color:#2ecc71; font-size:12px; display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">🎖️ PERMANENT UPGRADES</strong>
+                        <span style="font-size:9.5px; color:#aaa; display:block; margin-bottom:10px; line-height:1.4;">These bonuses persist permanently and are NOT reset upon Prestige Ascension.</span>
 
               <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:8px;">
-                  <!-- Satchel -->
-                  <div class="sink-slate-panel" style="border: 1px solid #3498db44; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px;">
-                      <div>
-                          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                              <strong style="color:#3498db; font-size:11px;">Dimensional Satchel</strong>
-                              <div style="width:24px; height:24px; background:#000; border:1px solid #3498db; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                  ${satchelSvg}
-                              </div>
-                          </div>
-                          <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Expands unequipped bag limits by +10 slots per rank.</div>
-                          <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
-                              <span style="color:#888;">CAPACITY:</span><br>
-                              ${lvlBag * 10} ➔ <span style="color:#2ecc71; font-weight:bold;">${(lvlBag + 1) * 10}</span>
-                          </div>
-                      </div>
-                      ${bagBtnHtml}
-                  </div>
+                                <!-- Satchel -->
+                                <div class="sink-slate-panel" style="border: 1.5px solid #3498db50; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px; position:relative;">
+                                    <!-- Price Badge -->
+                                    <span style="position: absolute; top: 6px; right: 36px; background: rgba(52, 152, 219, 0.15); border: 1px solid #3498db80; color: ${costColorBag}; font-family: monospace; font-size: 9.5px; font-weight: bold; padding: 2px 6px; border-radius: 4px; box-shadow: 0 0 6px rgba(52, 152, 219, 0.2); z-index: 2;">${costBag} QP</span>
+                                    <div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding-right:45px;">
+                                            <strong style="color:#3498db; font-size:11px;">Dimensional Satchel</strong>
+                                            <div style="width:24px; height:24px; background:#000; border:1px solid #3498db; border-radius:4px; display:flex; align-items:center; justify-content:center; position:absolute; right:10px; top:10px; z-index:1;">
+                                                ${satchelSvg}
+                                            </div>
+                                        </div>
+                                        <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Expands unequipped bag limits by +10 slots per rank.</div>
+                                        <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
+                                            <span style="color:#888;">CAPACITY:</span><br>
+                                            ${lvlBag * 10} ➔ <span style="color:#2ecc71; font-weight:bold;">${(lvlBag + 1) * 10}</span>
+                                        </div>
+                                    </div>
+                                    ${bagBtnHtml}
+                                </div>
 
-                  <!-- Midas -->
-                  <div class="sink-slate-panel" style="border: 1px solid #f1c40f44; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px;">
-                      <div>
-                          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                              <strong style="color:#f1c40f; font-size:11px;">Midas Training</strong>
-                              <div style="width:24px; height:24px; background:#000; border:1px solid #f1c40f; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                  ${midasSvg}
-                              </div>
-                          </div>
-                          <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Permanently increases global Gold drop multiplier.</div>
-                          <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
-                              <span style="color:#888;">GOLD MULT:</span><br>
-                              +${lvlGold * 5}% ➔ <span style="color:#2ecc71; font-weight:bold;">+${(lvlGold + 1) * 5}%</span>
-                          </div>
-                      </div>
-                      ${goldBtnHtml}
-                  </div>
+                                <!-- Midas -->
+                                <div class="sink-slate-panel" style="border: 1.5px solid #f1c40f50; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px; position:relative;">
+                                    <!-- Price Badge -->
+                                    <span style="position: absolute; top: 6px; right: 36px; background: rgba(241, 196, 15, 0.15); border: 1px solid #f1c40f80; color: ${costColorGold}; font-family: monospace; font-size: 9.5px; font-weight: bold; padding: 2px 6px; border-radius: 4px; box-shadow: 0 0 6px rgba(241, 196, 15, 0.2); z-index: 2;">5 QP</span>
+                                    <div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding-right:45px;">
+                                            <strong style="color:#f1c40f; font-size:11px;">Midas Training</strong>
+                                            <div style="width:24px; height:24px; background:#000; border:1px solid #f1c40f; border-radius:4px; display:flex; align-items:center; justify-content:center; position:absolute; right:10px; top:10px; z-index:1;">
+                                                ${midasSvg}
+                                            </div>
+                                        </div>
+                                        <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Permanently increases global Gold drop multiplier.</div>
+                                        <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
+                                            <span style="color:#888;">GOLD MULT:</span><br>
+                                            +${lvlGold * 5}% ➔ <span style="color:#2ecc71; font-weight:bold;">+${(lvlGold + 1) * 5}%</span>
+                                        </div>
+                                    </div>
+                                    ${goldBtnHtml}
+                                </div>
 
-                  <!-- Gladiator -->
-                  <div class="sink-slate-panel" style="border: 1px solid #e74c3c44; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px;">
-                      <div>
-                          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                              <strong style="color:#e74c3c; font-size:11px;">Gladiator Mastery</strong>
-                              <div style="width:24px; height:24px; background:#000; border:1px solid #e74c3c; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                  ${gladiatorSvg}
-                              </div>
-                          </div>
-                          <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Permanently increases global raw Attack power.</div>
-                          <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
-                              <span style="color:#888;">ATTACK:</span><br>
-                              +${lvlAtk * 2}% ➔ <span style="color:#2ecc71; font-weight:bold;">+${(lvlAtk + 1) * 2}%</span>
-                          </div>
-                      </div>
-                      ${atkBtnHtml}
-                  </div>
+                                <!-- Gladiator -->
+                                <div class="sink-slate-panel" style="border: 1.5px solid #e74c3c50; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px; position:relative;">
+                                    <!-- Price Badge -->
+                                    <span style="position: absolute; top: 6px; right: 36px; background: rgba(231, 76, 60, 0.15); border: 1px solid #e74c3c80; color: ${costColorAtk}; font-family: monospace; font-size: 9.5px; font-weight: bold; padding: 2px 6px; border-radius: 4px; box-shadow: 0 0 6px rgba(231, 76, 60, 0.2); z-index: 2;">5 QP</span>
+                                    <div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding-right:45px;">
+                                            <strong style="color:#e74c3c; font-size:11px;">Gladiator Mastery</strong>
+                                            <div style="width:24px; height:24px; background:#000; border:1px solid #e74c3c; border-radius:4px; display:flex; align-items:center; justify-content:center; position:absolute; right:10px; top:10px; z-index:1;">
+                                                ${gladiatorSvg}
+                                            </div>
+                                        </div>
+                                        <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Permanently increases global raw Attack power.</div>
+                                        <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
+                                            <span style="color:#888;">ATTACK:</span><br>
+                                            +${lvlAtk * 2}% ➔ <span style="color:#2ecc71; font-weight:bold;">+${(lvlAtk + 1) * 2}%</span>
+                                        </div>
+                                    </div>
+                                    ${atkBtnHtml}
+                                </div>
 
-                  <!-- HP / Constitution -->
-                  <div class="sink-slate-panel" style="border: 1px solid #3498db44; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px;">
-                      <div>
-                          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                              <strong style="color:#3498db; font-size:11px;">Iron Constitution</strong>
-                              <div style="width:24px; height:24px; background:#000; border:1px solid #3498db; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                  ${constitutionSvg}
-                              </div>
-                          </div>
-                          <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Permanently increases global raw Maximum HP.</div>
-                          <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
-                              <span style="color:#888;">MAX HEALTH:</span><br>
-                              +${lvlHp * 3}% ➔ <span style="color:#2ecc71; font-weight:bold;">+${(lvlHp + 1) * 3}%</span>
-                          </div>
-                      </div>
-                      ${hpBtnHtml}
-                  </div>
-              </div>
+                                <!-- HP / Constitution -->
+                                <div class="sink-slate-panel" style="border: 1.5px solid #3498db50; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px; position:relative;">
+                                    <!-- Price Badge -->
+                                    <span style="position: absolute; top: 6px; right: 36px; background: rgba(52, 152, 219, 0.15); border: 1px solid #3498db80; color: ${costColorHp}; font-family: monospace; font-size: 9.5px; font-weight: bold; padding: 2px 6px; border-radius: 4px; box-shadow: 0 0 6px rgba(52, 152, 219, 0.2); z-index: 2;">5 QP</span>
+                                    <div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding-right:45px;">
+                                            <strong style="color:#3498db; font-size:11px;">Iron Constitution</strong>
+                                            <div style="width:24px; height:24px; background:#000; border:1px solid #3498db; border-radius:4px; display:flex; align-items:center; justify-content:center; position:absolute; right:10px; top:10px; z-index:1;">
+                                                ${constitutionSvg}
+                                            </div>
+                                        </div>
+                                        <div style="font-size:9px; color:#aaa; margin-bottom:6px; line-height:1.35; white-space:normal;">Permanently increases global raw Maximum HP.</div>
+                                        <div style="background:rgba(0,0,0,0.35); border:1px solid #222; border-radius:4px; padding:4px; font-size:9px; font-family:monospace; margin-bottom:8px; line-height:1.2; text-align:left;">
+                                            <span style="color:#888;">MAX HEALTH:</span><br>
+                                            +${lvlHp * 3}% ➔ <span style="color:#2ecc71; font-weight:bold;">+${(lvlHp + 1) * 3}%</span>
+                                        </div>
+                                    </div>
+                                    ${hpBtnHtml}
+                                </div>
+                            </div>
           </div>
 
           <!-- REAGENTS BOARD -->
@@ -9091,16 +9155,16 @@ window.renderMissionsWindow = function () {
   }
 
   contentEl.innerHTML = `
-    ${tabHeaderHtml}
+      ${tabHeaderHtml}
 
-    <!-- Mission Points Balance Bar -->
-    <div style="background:#111; border:1px solid #333; padding:8px; border-radius:6px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px;">
-        <span>Mission Points:</span>
-        <strong style="color:#f1c40f; font-size:13px;" id="mission-point-lbl">${tokenBalance} MP</strong>
-    </div>
+      <!-- Quest Points Balance Bar -->
+      <div style="background:#111; border:1px solid #333; padding:8px; border-radius:6px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px;">
+          <span>Quest Points:</span>
+          <strong style="color:#f1c40f; font-size:13px;" id="mission-point-lbl">${tokenBalance} QP</strong>
+      </div>
 
-    ${contentHtml}
-  `;
+      ${contentHtml}
+    `;
 
   if (currentTab === "BOARD") {
     // Dynamic countdown timer calculations locked to Pacific Time (PST/PDT)
@@ -9479,7 +9543,7 @@ window.openDailyRewardSack = function (specificName) {
   window.SoundManager.play("fairy");
   window.setPauseState(true);
 
-  // Determine rewards (Standardized Daily MP and randomized pool rolls)
+  // Determine rewards (Standardized Daily QP and randomized pool rolls)
   window.playerStats.missionTokens =
     (window.playerStats.missionTokens || 0) + 1;
 
@@ -9809,14 +9873,14 @@ window.openDailyRewardSack = function (specificName) {
               <h3 style="margin:0; color:#f1c40f; font-size:15px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">🎒 CLAN SACK OPENED!</h3>
             </div>
             <div style="background:#111; border:1px solid #222; border-radius:6px; padding:8px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-                            <div style="display:flex; align-items:center;">
-                              <span style="background:rgba(241,196,15,0.1); border:1px solid #f1c40f; border-radius:4px; padding:4px; display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:16px;">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                              </span>
-                              <strong style="color:#f1c40f; font-size:12.5px; margin-left:8px;">Mission Points</strong>
-                            </div>
-                            <strong style="color:#fff; font-size:13px; font-family:monospace;">+1 MP</strong>
-                          </div>
+                                        <div style="display:flex; align-items:center;">
+                                          <span style="background:rgba(241,196,15,0.1); border:1px solid #f1c40f; border-radius:4px; padding:4px; display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:16px;">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                                          </span>
+                                          <strong style="color:#f1c40f; font-size:12.5px; margin-left:8px;">Quest Points</strong>
+                                        </div>
+                                        <strong style="color:#fff; font-size:13px; font-family:monospace;">+1 QP</strong>
+                                      </div>
 
               <div style="font-size:10px; color:#aaa; font-weight:bold; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">📦 Loot & Equipment Yield (Hover for Info):</div>
               <div>
@@ -9934,12 +9998,9 @@ window.openWeeklyRewardSack = function (specificName) {
 
   // 5% chance for a random Artifact
   if (Math.random() < 0.05) {
-    let art = window.createItemObject(
-      "artifact",
-      3,
-      window.playerStats.lifetimePeakStage || 1,
-      0,
-    );
+    let peak = window.playerStats.lifetimePeakStage || 1;
+    let stageLvl = Math.max(1, Math.floor((peak - 1) / 10) + 1);
+    let art = window.createItemObject("artifact", 3, stageLvl, 0);
     window.inventory.ARTIFACT.push(art);
     window.frozenItemDb[art.id] = JSON.parse(JSON.stringify(art));
     receivedRewards.push({
@@ -10145,14 +10206,14 @@ window.openWeeklyRewardSack = function (specificName) {
                           <h3 style="margin:0; color:#9b59b6; font-size:15px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">💼 CLAN WEEKLY SACK OPENED! (Lv. ${clanLvl})</h3>
                         </div>
             <div style="background:#111; border:1px solid #222; border-radius:6px; padding:8px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-                            <div style="display:flex; align-items:center;">
-                              <span style="background:rgba(155,89,182,0.1); border:1px solid #9b59b6; border-radius:4px; padding:4px; display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:16px;">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                              </span>
-                              <strong style="color:#9b59b6; font-size:12.5px; margin-left:8px;">Mission Points</strong>
-                            </div>
-                            <strong style="color:#fff; font-size:13px; font-family:monospace;">+3 MP</strong>
-                          </div>
+                                        <div style="display:flex; align-items:center;">
+                                          <span style="background:rgba(155,89,182,0.1); border:1px solid #9b59b6; border-radius:4px; padding:4px; display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; font-size:16px;">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                                          </span>
+                                          <strong style="color:#9b59b6; font-size:12.5px; margin-left:8px;">Quest Points</strong>
+                                        </div>
+                                        <strong style="color:#fff; font-size:13px; font-family:monospace;">+3 QP</strong>
+                                      </div>
 
               <div style="font-size:10px; color:#aaa; font-weight:bold; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">📦 Guaranteed Relic Yields (Hover for Info):</div>
               <div>

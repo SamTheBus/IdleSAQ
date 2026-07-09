@@ -399,41 +399,41 @@
     window.RenderEngine.spawnDamageEffect(amount, type, isCrit);
 
   // Append renderNemesisPreview inside window.RenderEngine
-    Object.assign(window.RenderEngine, {
-      renderNemesisPreview(mobData) {
-        const dCanvas = document.getElementById("death-enemy-canvas");
-        if (!dCanvas) return;
-        const dCtx = dCanvas.getContext("2d");
-        dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+  Object.assign(window.RenderEngine, {
+    renderNemesisPreview(mobData) {
+      const dCanvas = document.getElementById("death-enemy-canvas");
+      if (!dCanvas) return;
+      const dCtx = dCanvas.getContext("2d");
+      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
 
-        if (!mobData) {
-          dCtx.fillStyle = "#c0392b";
-          dCtx.font = "bold 20px sans-serif";
-          dCtx.textAlign = "center";
-          dCtx.textBaseline = "middle";
-          dCtx.fillText("💀", dCanvas.width / 2, dCanvas.height / 2);
-          return;
-        }
+      if (!mobData) {
+        dCtx.fillStyle = "#c0392b";
+        dCtx.font = "bold 20px sans-serif";
+        dCtx.textAlign = "center";
+        dCtx.textBaseline = "middle";
+        dCtx.fillText("💀", dCanvas.width / 2, dCanvas.height / 2);
+        return;
+      }
 
-        let renderMob = JSON.parse(JSON.stringify(mobData));
-        renderMob.flashTimer = 0;
+      let renderMob = JSON.parse(JSON.stringify(mobData));
+      renderMob.flashTimer = 0;
 
-        // Calculate containing scale to keep the sprite within 80% of canvas bounds
-        let maxDim = Math.max(renderMob.w, renderMob.h);
-        let scale = maxDim > 0 ? (dCanvas.width * 0.8) / maxDim : 1.0;
+      // Calculate containing scale to keep the sprite within 80% of canvas bounds
+      let maxDim = Math.max(renderMob.w, renderMob.h);
+      let scale = maxDim > 0 ? (dCanvas.width * 0.8) / maxDim : 1.0;
 
-        dCtx.save();
-        // Dynamically target the exact center point of the active canvas dimensions
-        dCtx.translate(dCanvas.width / 2, dCanvas.height / 2);
-        dCtx.scale(scale, scale);
-        dCtx.translate(
-          -(renderMob.x + renderMob.w / 2),
-          -(renderMob.y + renderMob.h / 2),
-        );
-        window.RenderEngine.drawSingleMob(dCtx, renderMob);
-        dCtx.restore();
-      },
-    });
+      dCtx.save();
+      // Dynamically target the exact center point of the active canvas dimensions
+      dCtx.translate(dCanvas.width / 2, dCanvas.height / 2);
+      dCtx.scale(scale, scale);
+      dCtx.translate(
+        -(renderMob.x + renderMob.w / 2),
+        -(renderMob.y + renderMob.h / 2),
+      );
+      window.RenderEngine.drawSingleMob(dCtx, renderMob);
+      dCtx.restore();
+    },
+  });
 
   // Legacy Compatibility Aliases to protect references
   window.renderNemesisPreview = (mobData) =>
@@ -642,123 +642,123 @@
           c.fill();
         }
       } else if (vType === "coin_elemental") {
-              let cx = m.x + m.w / 2;
-              let cy = m.y + m.h / 2 + Math.sin(Date.now() / 150) * 3;
+        let cx = m.x + m.w / 2;
+        let cy = m.y + m.h / 2 + Math.sin(Date.now() / 150) * 3;
 
-              // Precompute coordinates and depth state for the 6 orbiting gold coins
-              let coinsList = [];
-              for (let i = 0; i < 6; i++) {
-                let angle = Date.now() / 600 + (i * Math.PI * 2) / 6;
-                let dist = 18 + Math.sin(Date.now() / 150 + i) * 3;
-                let ox = cx + Math.cos(angle) * dist * 1.3;
-                let oy = cy + Math.sin(angle) * dist * 0.5;
-                let isBehind = Math.sin(angle) < 0; // True if positioned behind core
+        // Precompute coordinates and depth state for the 6 orbiting gold coins
+        let coinsList = [];
+        for (let i = 0; i < 6; i++) {
+          let angle = Date.now() / 600 + (i * Math.PI * 2) / 6;
+          let dist = 18 + Math.sin(Date.now() / 150 + i) * 3;
+          let ox = cx + Math.cos(angle) * dist * 1.3;
+          let oy = cy + Math.sin(angle) * dist * 0.5;
+          let isBehind = Math.sin(angle) < 0; // True if positioned behind core
 
-                let rot = angle * 2;
-                let cw = 6 * Math.abs(Math.sin(rot));
-                let ch = 6;
+          let rot = angle * 2;
+          let cw = 6 * Math.abs(Math.sin(rot));
+          let ch = 6;
 
-                coinsList.push({ ox, oy, cw, ch, isBehind });
-              }
+          coinsList.push({ ox, oy, cw, ch, isBehind });
+        }
 
-              let drawCoinPiece = (cn) => {
-                c.save();
-                c.translate(cn.ox, cn.oy);
-                c.rotate(Math.PI / 12);
+        let drawCoinPiece = (cn) => {
+          c.save();
+          c.translate(cn.ox, cn.oy);
+          c.rotate(Math.PI / 12);
 
-                c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
-                c.beginPath();
-                c.ellipse(0, 0, cn.cw + 1.2, cn.ch + 1.2, 0, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
+          c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
+          c.beginPath();
+          c.ellipse(0, 0, cn.cw + 1.2, cn.ch + 1.2, 0, 0, Math.PI * 2);
+          c.fill();
+          c.stroke();
 
-                if (m.flashTimer === 0) {
-                  c.fillStyle = "#ffd700";
-                  c.beginPath();
-                  c.ellipse(0, 0, cn.cw, cn.ch, 0, 0, Math.PI * 2);
-                  c.fill();
-                  c.strokeStyle = "#b7950b";
-                  c.lineWidth = 0.8;
-                  c.beginPath();
-                  c.ellipse(0, 0, cn.cw * 0.8, cn.ch * 0.8, 0, 0, Math.PI * 2);
-                  c.stroke();
-                  c.fillStyle = "rgba(255,255,255,0.75)";
-                  c.beginPath();
-                  c.ellipse(
-                    -cn.cw * 0.3,
-                    -cn.ch * 0.3,
-                    cn.cw * 0.25,
-                    cn.ch * 0.2,
-                    Math.PI / 4,
-                    0,
-                    Math.PI * 2,
-                  );
-                  c.fill();
-                }
-                c.restore();
-              };
+          if (m.flashTimer === 0) {
+            c.fillStyle = "#ffd700";
+            c.beginPath();
+            c.ellipse(0, 0, cn.cw, cn.ch, 0, 0, Math.PI * 2);
+            c.fill();
+            c.strokeStyle = "#b7950b";
+            c.lineWidth = 0.8;
+            c.beginPath();
+            c.ellipse(0, 0, cn.cw * 0.8, cn.ch * 0.8, 0, 0, Math.PI * 2);
+            c.stroke();
+            c.fillStyle = "rgba(255,255,255,0.75)";
+            c.beginPath();
+            c.ellipse(
+              -cn.cw * 0.3,
+              -cn.ch * 0.3,
+              cn.cw * 0.25,
+              cn.ch * 0.2,
+              Math.PI / 4,
+              0,
+              Math.PI * 2,
+            );
+            c.fill();
+          }
+          c.restore();
+        };
 
-              // 1. Draw BACK half of orbiting rings first (Math.PI to 2*Math.PI)
-              c.save();
-              c.translate(cx, cy);
-              c.strokeStyle = "rgba(241, 196, 15, 0.35)";
-              c.lineWidth = 1;
+        // 1. Draw BACK half of orbiting rings first (Math.PI to 2*Math.PI)
+        c.save();
+        c.translate(cx, cy);
+        c.strokeStyle = "rgba(241, 196, 15, 0.35)";
+        c.lineWidth = 1;
 
-              c.save();
-              c.rotate(Math.PI / 6);
-              c.beginPath();
-              c.ellipse(0, 0, 22, 7, 0, Math.PI, 0); // Upper arc (behind)
-              c.stroke();
-              c.restore();
+        c.save();
+        c.rotate(Math.PI / 6);
+        c.beginPath();
+        c.ellipse(0, 0, 22, 7, 0, Math.PI, 0); // Upper arc (behind)
+        c.stroke();
+        c.restore();
 
-              c.save();
-              c.rotate(-Math.PI / 4);
-              c.beginPath();
-              c.ellipse(0, 0, 26, 8, 0, Math.PI, 0); // Upper arc (behind)
-              c.stroke();
-              c.restore();
-              c.restore();
+        c.save();
+        c.rotate(-Math.PI / 4);
+        c.beginPath();
+        c.ellipse(0, 0, 26, 8, 0, Math.PI, 0); // Upper arc (behind)
+        c.stroke();
+        c.restore();
+        c.restore();
 
-              // 2. Draw BACK coins
-              coinsList.forEach(cn => {
-                if (cn.isBehind) drawCoinPiece(cn);
-              });
+        // 2. Draw BACK coins
+        coinsList.forEach((cn) => {
+          if (cn.isBehind) drawCoinPiece(cn);
+        });
 
-              // 3. Draw central glowing nucleus core
-              let coreGrad = c.createRadialGradient(cx, cy, 1, cx, cy, 10);
-              coreGrad.addColorStop(0, "#ffffff");
-              coreGrad.addColorStop(0.5, "#ffd700");
-              coreGrad.addColorStop(1, "rgba(255, 215, 0, 0)");
-              c.fillStyle = coreGrad;
-              c.beginPath();
-              c.arc(cx, cy, 12, 0, Math.PI * 2);
-              c.fill();
+        // 3. Draw central glowing nucleus core
+        let coreGrad = c.createRadialGradient(cx, cy, 1, cx, cy, 10);
+        coreGrad.addColorStop(0, "#ffffff");
+        coreGrad.addColorStop(0.5, "#ffd700");
+        coreGrad.addColorStop(1, "rgba(255, 215, 0, 0)");
+        c.fillStyle = coreGrad;
+        c.beginPath();
+        c.arc(cx, cy, 12, 0, Math.PI * 2);
+        c.fill();
 
-              // 4. Draw FRONT half of orbiting rings (0 to Math.PI)
-              c.save();
-              c.translate(cx, cy);
-              c.strokeStyle = "rgba(241, 196, 15, 0.35)";
-              c.lineWidth = 1;
+        // 4. Draw FRONT half of orbiting rings (0 to Math.PI)
+        c.save();
+        c.translate(cx, cy);
+        c.strokeStyle = "rgba(241, 196, 15, 0.35)";
+        c.lineWidth = 1;
 
-              c.save();
-              c.rotate(Math.PI / 6);
-              c.beginPath();
-              c.ellipse(0, 0, 22, 7, 0, 0, Math.PI); // Lower arc (in front of body)
-              c.stroke();
-              c.restore();
+        c.save();
+        c.rotate(Math.PI / 6);
+        c.beginPath();
+        c.ellipse(0, 0, 22, 7, 0, 0, Math.PI); // Lower arc (in front of body)
+        c.stroke();
+        c.restore();
 
-              c.save();
-              c.rotate(-Math.PI / 4);
-              c.beginPath();
-              c.ellipse(0, 0, 26, 8, 0, 0, Math.PI); // Lower arc (in front of body)
-              c.stroke();
-              c.restore();
-              c.restore();
+        c.save();
+        c.rotate(-Math.PI / 4);
+        c.beginPath();
+        c.ellipse(0, 0, 26, 8, 0, 0, Math.PI); // Lower arc (in front of body)
+        c.stroke();
+        c.restore();
+        c.restore();
 
-              // 5. Draw FRONT coins
-              coinsList.forEach(cn => {
-                if (!cn.isBehind) drawCoinPiece(cn);
-              });
+        // 5. Draw FRONT coins
+        coinsList.forEach((cn) => {
+          if (!cn.isBehind) drawCoinPiece(cn);
+        });
       } else if (vType === "hoard_mimic") {
         let cx = m.x + m.w / 2;
         let cy = m.y + m.h - 15;
@@ -1598,43 +1598,43 @@
         }
         c.restore();
       } else if (vType === "void_orb") {
-              let hover = Math.sin(Date.now() / 150) * 4;
-              let cx = m.x + m.w / 2;
-              let cy = m.y + m.h / 2 + hover;
-              let rot = Date.now() / 800;
+        let hover = Math.sin(Date.now() / 150) * 4;
+        let cx = m.x + m.w / 2;
+        let cy = m.y + m.h / 2 + hover;
+        let rot = Date.now() / 800;
 
-              // 1. Draw BACK segment of the gravity ring first (Math.PI to 2*Math.PI)
-              if (m.flashTimer === 0) {
-                c.strokeStyle = "#8e44ad";
-                c.lineWidth = 1.8;
-                c.save();
-                c.translate(cx, cy);
-                c.rotate(rot);
-                c.beginPath();
-                c.ellipse(0, 0, 22, 6, 0, Math.PI, 0); // Upper arc (behind core)
-                c.stroke();
-                c.restore();
-              }
+        // 1. Draw BACK segment of the gravity ring first (Math.PI to 2*Math.PI)
+        if (m.flashTimer === 0) {
+          c.strokeStyle = "#8e44ad";
+          c.lineWidth = 1.8;
+          c.save();
+          c.translate(cx, cy);
+          c.rotate(rot);
+          c.beginPath();
+          c.ellipse(0, 0, 22, 6, 0, Math.PI, 0); // Upper arc (behind core)
+          c.stroke();
+          c.restore();
+        }
 
-              // 2. Draw Void Orb core sphere
-              c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#0d011a";
-              c.beginPath();
-              c.arc(cx, cy, 14, 0, Math.PI * 2);
-              c.fill();
-              c.stroke();
+        // 2. Draw Void Orb core sphere
+        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#0d011a";
+        c.beginPath();
+        c.arc(cx, cy, 14, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
 
-              // 3. Draw FRONT segment of the gravity ring last (0 to Math.PI)
-              if (m.flashTimer === 0) {
-                c.strokeStyle = "#8e44ad";
-                c.lineWidth = 1.8;
-                c.save();
-                c.translate(cx, cy);
-                c.rotate(rot);
-                c.beginPath();
-                c.ellipse(0, 0, 22, 6, 0, 0, Math.PI); // Lower arc (in front of core)
-                c.stroke();
-                c.restore();
-              }
+        // 3. Draw FRONT segment of the gravity ring last (0 to Math.PI)
+        if (m.flashTimer === 0) {
+          c.strokeStyle = "#8e44ad";
+          c.lineWidth = 1.8;
+          c.save();
+          c.translate(cx, cy);
+          c.rotate(rot);
+          c.beginPath();
+          c.ellipse(0, 0, 22, 6, 0, 0, Math.PI); // Lower arc (in front of core)
+          c.stroke();
+          c.restore();
+        }
       } else if (vType === "void_crawler") {
         let cx = m.x + m.w / 2;
         let cy = m.y + m.h / 2 + 5;
@@ -2051,126 +2051,126 @@
       }
       c.restore();
     } else if (m.type === "dungeon_boss") {
-          let bounce = 0;
-          let coreColor = "#9b59b6";
-          let glowColor = "#e84393";
-          let shadowColor = "#1a052e";
-          if (m.isCrucible) {
-            bounce = Math.sin(Date.now() / 150) * 4;
-            coreColor = m.flashTimer > 0 ? "#ffffff" : "#9b59b6";
-            let rot1 = Date.now() / 700;
-            let rot2 = -Date.now() / 500;
+      let bounce = 0;
+      let coreColor = "#9b59b6";
+      let glowColor = "#e84393";
+      let shadowColor = "#1a052e";
+      if (m.isCrucible) {
+        bounce = Math.sin(Date.now() / 150) * 4;
+        coreColor = m.flashTimer > 0 ? "#ffffff" : "#9b59b6";
+        let rot1 = Date.now() / 700;
+        let rot2 = -Date.now() / 500;
 
-            // 1. Draw BACK segment of the core orbital rings first (angles Math.PI to 2*Math.PI)
-            c.save();
-            c.translate(m.x + m.w / 2, m.y + m.h / 2 + bounce);
+        // 1. Draw BACK segment of the core orbital rings first (angles Math.PI to 2*Math.PI)
+        c.save();
+        c.translate(m.x + m.w / 2, m.y + m.h / 2 + bounce);
 
-            // Ring 1 Back segment
-            c.strokeStyle = glowColor;
-            c.lineWidth = 1.8;
-            c.save();
-            c.rotate(rot1);
-            c.beginPath();
-            c.ellipse(0, 0, m.w * 0.8, m.h * 0.18, 0, Math.PI, 0); // Upper arc (behind)
-            c.stroke();
-            c.restore();
+        // Ring 1 Back segment
+        c.strokeStyle = glowColor;
+        c.lineWidth = 1.8;
+        c.save();
+        c.rotate(rot1);
+        c.beginPath();
+        c.ellipse(0, 0, m.w * 0.8, m.h * 0.18, 0, Math.PI, 0); // Upper arc (behind)
+        c.stroke();
+        c.restore();
 
-            // Ring 2 Back segment
-            c.strokeStyle = "#9b59b6";
-            c.save();
-            c.rotate(rot2);
-            c.beginPath();
-            c.ellipse(0, 0, m.w * 0.6, m.h * 0.22, 0, Math.PI, 0); // Upper arc (behind)
-            c.stroke();
-            c.restore();
+        // Ring 2 Back segment
+        c.strokeStyle = "#9b59b6";
+        c.save();
+        c.rotate(rot2);
+        c.beginPath();
+        c.ellipse(0, 0, m.w * 0.6, m.h * 0.22, 0, Math.PI, 0); // Upper arc (behind)
+        c.stroke();
+        c.restore();
 
-            c.restore();
+        c.restore();
 
-            // 2. Draw Main Boss Torso
-            c.fillStyle = shadowColor;
-            c.beginPath();
-            c.moveTo(m.x + m.w / 2, m.y + bounce);
-            c.lineTo(m.x + m.w, m.y + m.h * 0.4 + bounce);
-            c.lineTo(m.x + m.w * 0.8, m.y + m.h * 0.95 + bounce);
-            c.lineTo(m.x + m.w * 0.2, m.y + m.h * 0.95 + bounce);
-            c.lineTo(m.x, m.y + m.h * 0.4 + bounce);
-            c.closePath();
-            c.fill();
-            c.strokeStyle = "#000000";
-            c.lineWidth = 2.4;
-            c.stroke();
+        // 2. Draw Main Boss Torso
+        c.fillStyle = shadowColor;
+        c.beginPath();
+        c.moveTo(m.x + m.w / 2, m.y + bounce);
+        c.lineTo(m.x + m.w, m.y + m.h * 0.4 + bounce);
+        c.lineTo(m.x + m.w * 0.8, m.y + m.h * 0.95 + bounce);
+        c.lineTo(m.x + m.w * 0.2, m.y + m.h * 0.95 + bounce);
+        c.lineTo(m.x, m.y + m.h * 0.4 + bounce);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = "#000000";
+        c.lineWidth = 2.4;
+        c.stroke();
 
-            if (m.flashTimer === 0) {
-              let coreRadius = 8 + Math.sin(Date.now() / 100) * 3;
-              c.fillStyle = coreColor;
-              c.shadowBlur = 12;
-              c.shadowColor = coreColor;
-              c.beginPath();
-              c.arc(
-                m.x + m.w / 2,
-                m.y + m.h / 2 - 10 + bounce,
-                coreRadius,
-                0,
-                Math.PI * 2,
-              );
-              c.fill();
-              c.stroke();
-              c.shadowBlur = 0;
-              c.fillStyle = "#ffffff";
-              c.beginPath();
-              c.arc(m.x + m.w / 2, m.y + m.h / 2 - 10 + bounce, 3, 0, Math.PI * 2);
-              c.fill();
-            }
-            c.fillStyle = "#2c3e50";
-            c.beginPath();
-            c.moveTo(m.x + m.w * 0.3, m.y + bounce);
-            c.quadraticCurveTo(
-              m.x + m.w * 0.1,
-              m.y - 15 + bounce,
-              m.x + m.w * 0.05,
-              m.y - 20 + bounce,
-            );
-            c.lineTo(m.x + m.w * 0.4, m.y - 5 + bounce);
-            c.closePath();
-            c.fill();
-            c.stroke();
-            c.beginPath();
-            c.moveTo(m.x + m.w * 0.7, m.y + bounce);
-            c.quadraticCurveTo(
-              m.x + m.w * 0.9,
-              m.y - 15 + bounce,
-              m.x + m.w * 0.95,
-              m.y - 20 + bounce,
-            );
-            c.lineTo(m.x + m.w * 0.6, m.y - 5 + bounce);
-            c.closePath();
-            c.fill();
-            c.stroke();
+        if (m.flashTimer === 0) {
+          let coreRadius = 8 + Math.sin(Date.now() / 100) * 3;
+          c.fillStyle = coreColor;
+          c.shadowBlur = 12;
+          c.shadowColor = coreColor;
+          c.beginPath();
+          c.arc(
+            m.x + m.w / 2,
+            m.y + m.h / 2 - 10 + bounce,
+            coreRadius,
+            0,
+            Math.PI * 2,
+          );
+          c.fill();
+          c.stroke();
+          c.shadowBlur = 0;
+          c.fillStyle = "#ffffff";
+          c.beginPath();
+          c.arc(m.x + m.w / 2, m.y + m.h / 2 - 10 + bounce, 3, 0, Math.PI * 2);
+          c.fill();
+        }
+        c.fillStyle = "#2c3e50";
+        c.beginPath();
+        c.moveTo(m.x + m.w * 0.3, m.y + bounce);
+        c.quadraticCurveTo(
+          m.x + m.w * 0.1,
+          m.y - 15 + bounce,
+          m.x + m.w * 0.05,
+          m.y - 20 + bounce,
+        );
+        c.lineTo(m.x + m.w * 0.4, m.y - 5 + bounce);
+        c.closePath();
+        c.fill();
+        c.stroke();
+        c.beginPath();
+        c.moveTo(m.x + m.w * 0.7, m.y + bounce);
+        c.quadraticCurveTo(
+          m.x + m.w * 0.9,
+          m.y - 15 + bounce,
+          m.x + m.w * 0.95,
+          m.y - 20 + bounce,
+        );
+        c.lineTo(m.x + m.w * 0.6, m.y - 5 + bounce);
+        c.closePath();
+        c.fill();
+        c.stroke();
 
-            // 3. Draw FRONT segment of the core orbital rings last (angles 0 to Math.PI)
-            c.save();
-            c.translate(m.x + m.w / 2, m.y + m.h / 2 + bounce);
+        // 3. Draw FRONT segment of the core orbital rings last (angles 0 to Math.PI)
+        c.save();
+        c.translate(m.x + m.w / 2, m.y + m.h / 2 + bounce);
 
-            // Ring 1 Front segment
-            c.strokeStyle = glowColor;
-            c.lineWidth = 1.8;
-            c.save();
-            c.rotate(rot1);
-            c.beginPath();
-            c.ellipse(0, 0, m.w * 0.8, m.h * 0.18, 0, 0, Math.PI); // Lower arc (in front of body)
-            c.stroke();
-            c.restore();
+        // Ring 1 Front segment
+        c.strokeStyle = glowColor;
+        c.lineWidth = 1.8;
+        c.save();
+        c.rotate(rot1);
+        c.beginPath();
+        c.ellipse(0, 0, m.w * 0.8, m.h * 0.18, 0, 0, Math.PI); // Lower arc (in front of body)
+        c.stroke();
+        c.restore();
 
-            // Ring 2 Front segment
-            c.strokeStyle = "#9b59b6";
-            c.save();
-            c.rotate(rot2);
-            c.beginPath();
-            c.ellipse(0, 0, m.w * 0.6, m.h * 0.22, 0, 0, Math.PI); // Lower arc (in front of body)
-            c.stroke();
-            c.restore();
+        // Ring 2 Front segment
+        c.strokeStyle = "#9b59b6";
+        c.save();
+        c.rotate(rot2);
+        c.beginPath();
+        c.ellipse(0, 0, m.w * 0.6, m.h * 0.22, 0, 0, Math.PI); // Lower arc (in front of body)
+        c.stroke();
+        c.restore();
 
-            c.restore();
+        c.restore();
       } else {
         let dType = window.playerStats.currentDungeon || "gold";
         if (dType === "gold") {
@@ -4100,146 +4100,149 @@
     }
 
     // Draw Subweapon
-        if (equipped.subweapon) {
-          const subType = equipped.subweapon.subType;
-          let isAegis = equipped.subweapon.isUniqueAegis;
-          let isWatch = equipped.subweapon.isUniqueWatch;
-          let isChronicle = equipped.subweapon.isUniqueChronicle;
+    if (equipped.subweapon) {
+      const subType = equipped.subweapon.subType;
+      let isAegis = equipped.subweapon.isUniqueAegis;
+      let isWatch = equipped.subweapon.isUniqueWatch;
+      let isChronicle = equipped.subweapon.isUniqueChronicle;
 
-          if (subType === "shield") {
-            ctx.save();
-            ctx.translate(8, 4 + bounce);
+      if (subType === "shield") {
+        ctx.save();
+        ctx.translate(8, 4 + bounce);
 
-            let shieldItem = equipped.subweapon;
-            let noun = (shieldItem && shieldItem.noun) ? shieldItem.noun.toLowerCase() : "";
-            let tierColor = window.getTierColor(shieldItem ? shieldItem.statsRolled : 0);
+        let shieldItem = equipped.subweapon;
+        let noun =
+          shieldItem && shieldItem.noun ? shieldItem.noun.toLowerCase() : "";
+        let tierColor = window.getTierColor(
+          shieldItem ? shieldItem.statsRolled : 0,
+        );
 
-            if (isAegis) {
-              // --- UNIQUE: VOID-WARPED BULWARK ---
-              ctx.fillStyle = "#25033c";
-              ctx.beginPath();
-              ctx.moveTo(-6, -8);
-              ctx.lineTo(6, -8);
-              ctx.lineTo(8, 0);
-              ctx.lineTo(0, 10);
-              ctx.lineTo(-8, 0);
-              ctx.closePath();
-              ctx.fill();
-              ctx.strokeStyle = "#8e44ad";
-              ctx.lineWidth = penHero + 0.5;
-              ctx.stroke();
+        if (isAegis) {
+          // --- UNIQUE: VOID-WARPED BULWARK ---
+          ctx.fillStyle = "#25033c";
+          ctx.beginPath();
+          ctx.moveTo(-6, -8);
+          ctx.lineTo(6, -8);
+          ctx.lineTo(8, 0);
+          ctx.lineTo(0, 10);
+          ctx.lineTo(-8, 0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = "#8e44ad";
+          ctx.lineWidth = penHero + 0.5;
+          ctx.stroke();
 
-              ctx.strokeStyle = "#e84393";
-              ctx.lineWidth = 1.8;
-              ctx.beginPath();
-              ctx.moveTo(0, -6);
-              ctx.lineTo(0, 6);
-              ctx.moveTo(-5, 0);
-              ctx.lineTo(5, 0);
-              ctx.stroke();
-            } else if (noun.includes("kite")) {
-              // --- KITE SHIELD (Tall & Rounded Taper) ---
-              ctx.fillStyle = "#7f8c8d";
-              ctx.beginPath();
-              ctx.moveTo(-5.5, -9);
-              ctx.quadraticCurveTo(0, -11, 5.5, -9); // Curved top
-              ctx.lineTo(7, -1);
-              ctx.lineTo(0, 11);  // Long pointer
-              ctx.lineTo(-7, -1);
-              ctx.closePath();
-              ctx.fill();
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = penHero + 0.5;
-              ctx.stroke();
+          ctx.strokeStyle = "#e84393";
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(0, -6);
+          ctx.lineTo(0, 6);
+          ctx.moveTo(-5, 0);
+          ctx.lineTo(5, 0);
+          ctx.stroke();
+        } else if (noun.includes("kite")) {
+          // --- KITE SHIELD (Tall & Rounded Taper) ---
+          ctx.fillStyle = "#7f8c8d";
+          ctx.beginPath();
+          ctx.moveTo(-5.5, -9);
+          ctx.quadraticCurveTo(0, -11, 5.5, -9); // Curved top
+          ctx.lineTo(7, -1);
+          ctx.lineTo(0, 11); // Long pointer
+          ctx.lineTo(-7, -1);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero + 0.5;
+          ctx.stroke();
 
-              // Central heraldry cross matching quality tier
-              ctx.strokeStyle = tierColor;
-              ctx.lineWidth = 1.2;
-              ctx.beginPath();
-              ctx.moveTo(0, -8.5);
-              ctx.lineTo(0, 8);
-              ctx.moveTo(-4.5, -1.5);
-              ctx.lineTo(4.5, -1.5);
-              ctx.stroke();
-            } else if (noun.includes("tower")) {
-              // --- TOWER SHIELD (Heavy Protective Rectangle) ---
-              ctx.fillStyle = "#7f8c8d";
-              ctx.beginPath();
-              ctx.roundRect(-7, -9.5, 14, 19, [1.5]);
-              ctx.closePath();
-              ctx.fill();
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = penHero + 0.5;
-              ctx.stroke();
+          // Central heraldry cross matching quality tier
+          ctx.strokeStyle = tierColor;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(0, -8.5);
+          ctx.lineTo(0, 8);
+          ctx.moveTo(-4.5, -1.5);
+          ctx.lineTo(4.5, -1.5);
+          ctx.stroke();
+        } else if (noun.includes("tower")) {
+          // --- TOWER SHIELD (Heavy Protective Rectangle) ---
+          ctx.fillStyle = "#7f8c8d";
+          ctx.beginPath();
+          ctx.roundRect(-7, -9.5, 14, 19, [1.5]);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero + 0.5;
+          ctx.stroke();
 
-              // Inward border frame matching quality tier
-              ctx.strokeStyle = tierColor;
-              ctx.lineWidth = 1.0;
-              ctx.beginPath();
-              ctx.roundRect(-5, -7.5, 10, 15, [1]);
-              ctx.stroke();
+          // Inward border frame matching quality tier
+          ctx.strokeStyle = tierColor;
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.roundRect(-5, -7.5, 10, 15, [1]);
+          ctx.stroke();
 
-              // Central horizontal reinforcing band
-              ctx.strokeStyle = "#1c1c1f";
-              ctx.lineWidth = 1.2;
-              ctx.beginPath();
-              ctx.moveTo(-7, 0);
-              ctx.lineTo(7, 0);
-              ctx.stroke();
-            } else if (noun.includes("buckler")) {
-              // --- BUCKLER (Small Circular Shield) ---
-              ctx.fillStyle = "#7f8c8d";
-              ctx.beginPath();
-              ctx.arc(0, 1, 9.5, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = penHero + 0.5;
-              ctx.stroke();
+          // Central horizontal reinforcing band
+          ctx.strokeStyle = "#1c1c1f";
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(-7, 0);
+          ctx.lineTo(7, 0);
+          ctx.stroke();
+        } else if (noun.includes("buckler")) {
+          // --- BUCKLER (Small Circular Shield) ---
+          ctx.fillStyle = "#7f8c8d";
+          ctx.beginPath();
+          ctx.arc(0, 1, 9.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero + 0.5;
+          ctx.stroke();
 
-              // Quality indicator ring
-              ctx.strokeStyle = tierColor;
-              ctx.lineWidth = 1.5;
-              ctx.beginPath();
-              ctx.arc(0, 1, 6.5, 0, Math.PI * 2);
-              ctx.stroke();
+          // Quality indicator ring
+          ctx.strokeStyle = tierColor;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(0, 1, 6.5, 0, Math.PI * 2);
+          ctx.stroke();
 
-              // Core steel boss center rivet
-              ctx.fillStyle = "#ffffff";
-              ctx.beginPath();
-              ctx.arc(0, 1, 2.5, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 0.8;
-              ctx.stroke();
-            } else {
-              // --- DEFAULT / HEATER SHIELD (The exact shape you love) ---
-              ctx.fillStyle = "#7f8c8d";
-              ctx.beginPath();
-              ctx.moveTo(-6, -8);
-              ctx.lineTo(6, -8);
-              ctx.lineTo(8, 0);
-              ctx.lineTo(0, 10);
-              ctx.lineTo(-8, 0);
-              ctx.closePath();
-              ctx.fill();
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = penHero + 0.5;
-              ctx.stroke();
+          // Core steel boss center rivet
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.arc(0, 1, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        } else {
+          // --- DEFAULT / HEATER SHIELD (The exact shape you love) ---
+          ctx.fillStyle = "#7f8c8d";
+          ctx.beginPath();
+          ctx.moveTo(-6, -8);
+          ctx.lineTo(6, -8);
+          ctx.lineTo(8, 0);
+          ctx.lineTo(0, 10);
+          ctx.lineTo(-8, 0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero + 0.5;
+          ctx.stroke();
 
-              // Draw inner quality-aligned framing border
-              ctx.beginPath();
-              ctx.moveTo(-4, -6.5);
-              ctx.lineTo(4, -6.5);
-              ctx.lineTo(5.5, -0.5);
-              ctx.lineTo(0, 7.5);
-              ctx.lineTo(-5.5, -0.5);
-              ctx.closePath();
-              ctx.strokeStyle = tierColor;
-              ctx.lineWidth = 1.2;
-              ctx.stroke();
-            }
+          // Draw inner quality-aligned framing border
+          ctx.beginPath();
+          ctx.moveTo(-4, -6.5);
+          ctx.lineTo(4, -6.5);
+          ctx.lineTo(5.5, -0.5);
+          ctx.lineTo(0, 7.5);
+          ctx.lineTo(-5.5, -0.5);
+          ctx.closePath();
+          ctx.strokeStyle = tierColor;
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+        }
 
-            ctx.restore();
+        ctx.restore();
         if (
           isAegis &&
           (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
@@ -4262,387 +4265,397 @@
           ctx.restore();
         }
       } else if (subType === "tome") {
-                ctx.save();
-                let tomeFloat = Math.sin(Date.now() / 200) * 5;
-                ctx.translate(24, -6 + bounce + tomeFloat);
-                ctx.rotate(-Math.PI / 12);
-                if (isWatch) {
-                  ctx.fillStyle = "#d4af37";
-                  ctx.strokeStyle = "#000000";
-                  ctx.lineWidth = 1.8;
-                  ctx.beginPath();
-                  ctx.arc(0, 0, 8, 0, Math.PI * 2);
-                  ctx.fill();
-                  ctx.stroke();
-                  ctx.fillStyle = "#fdf6e2";
-                  ctx.beginPath();
-                  ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
-                  ctx.fill();
-                  ctx.stroke();
-                  ctx.strokeStyle = "#111";
-                  ctx.lineWidth = 1.2;
-                  let clockTime = Date.now() / 300;
-                  ctx.beginPath();
-                  ctx.moveTo(0, 0);
-                  ctx.lineTo(Math.cos(clockTime) * 4.5, Math.sin(clockTime) * 4.5);
-                  ctx.stroke();
-                } else if (isChronicle) {
-                  ctx.fillStyle = "#111116";
-                  ctx.strokeStyle = "#f1c40f";
-                  ctx.lineWidth = 1.5;
-                  ctx.beginPath();
-                  ctx.roundRect(-5, -7, 10, 14, [1.5]);
-                  ctx.fill();
-                  ctx.stroke();
-                  ctx.fillStyle = "#fff";
-                  ctx.fillRect(3.5, -6, 1.5, 12);
-                  let pulseRad = 12 + Math.sin(Date.now() / 150) * 2;
-                  ctx.strokeStyle = "rgba(241, 196, 15, 0.25)";
-                  ctx.lineWidth = 1.0;
-                  ctx.beginPath();
-                  ctx.arc(0, 0, pulseRad, 0, Math.PI * 2);
-                  ctx.stroke();
-                } else {
-                  let tomeItem = equipped.subweapon;
-                  let noun = (tomeItem && tomeItem.noun) ? tomeItem.noun.toLowerCase() : "";
-                  let tierColor = window.getTierColor(tomeItem ? tomeItem.statsRolled : 0);
-                  let rgbVals = window.hexToRgbValues ? window.hexToRgbValues(tierColor) : "155, 89, 182";
+        ctx.save();
+        let tomeFloat = Math.sin(Date.now() / 200) * 5;
+        ctx.translate(24, -6 + bounce + tomeFloat);
+        ctx.rotate(-Math.PI / 12);
+        if (isWatch) {
+          ctx.fillStyle = "#d4af37";
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.arc(0, 0, 8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "#fdf6e2";
+          ctx.beginPath();
+          ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.strokeStyle = "#111";
+          ctx.lineWidth = 1.2;
+          let clockTime = Date.now() / 300;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(Math.cos(clockTime) * 4.5, Math.sin(clockTime) * 4.5);
+          ctx.stroke();
+        } else if (isChronicle) {
+          ctx.fillStyle = "#111116";
+          ctx.strokeStyle = "#f1c40f";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(-5, -7, 10, 14, [1.5]);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(3.5, -6, 1.5, 12);
+          let pulseRad = 12 + Math.sin(Date.now() / 150) * 2;
+          ctx.strokeStyle = "rgba(241, 196, 15, 0.25)";
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.arc(0, 0, pulseRad, 0, Math.PI * 2);
+          ctx.stroke();
+        } else {
+          let tomeItem = equipped.subweapon;
+          let noun =
+            tomeItem && tomeItem.noun ? tomeItem.noun.toLowerCase() : "";
+          let tierColor = window.getTierColor(
+            tomeItem ? tomeItem.statsRolled : 0,
+          );
+          let rgbVals = window.hexToRgbValues
+            ? window.hexToRgbValues(tierColor)
+            : "155, 89, 182";
 
-                  // 1. Magical Rarity Glow Aura (Behind-the-book baseline)
-                  let auraRadius = 14 + Math.sin(Date.now() / 150) * 4;
-                  let auraGrad = ctx.createRadialGradient(0, -1, 1, 0, -1, auraRadius);
-                  auraGrad.addColorStop(0, `rgba(${rgbVals}, 0.65)`);
-                  auraGrad.addColorStop(0.5, `rgba(${rgbVals}, 0.2)`);
-                  auraGrad.addColorStop(1, `rgba(${rgbVals}, 0)`);
-                  ctx.fillStyle = auraGrad;
-                  ctx.beginPath();
-                  ctx.arc(0, -1, auraRadius, 0, Math.PI * 2);
-                  ctx.fill();
+          // 1. Magical Rarity Glow Aura (Behind-the-book baseline)
+          let auraRadius = 14 + Math.sin(Date.now() / 150) * 4;
+          let auraGrad = ctx.createRadialGradient(0, -1, 1, 0, -1, auraRadius);
+          auraGrad.addColorStop(0, `rgba(${rgbVals}, 0.65)`);
+          auraGrad.addColorStop(0.5, `rgba(${rgbVals}, 0.2)`);
+          auraGrad.addColorStop(1, `rgba(${rgbVals}, 0)`);
+          ctx.fillStyle = auraGrad;
+          ctx.beginPath();
+          ctx.arc(0, -1, auraRadius, 0, Math.PI * 2);
+          ctx.fill();
 
-                  // 1b. Locally scoped spark drawer helper
-                  let drawSingleSpark = (angle) => {
-                    let ox = Math.cos(angle) * 11;
-                    let oy = Math.sin(angle) * 4.5 - 1;
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.arc(ox, oy, 1.0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = tierColor;
-                    ctx.beginPath();
-                    ctx.arc(ox, oy, 2.5, 0, Math.PI * 2);
-                    ctx.fill();
-                  };
+          // 1b. Locally scoped spark drawer helper
+          let drawSingleSpark = (angle) => {
+            let ox = Math.cos(angle) * 11;
+            let oy = Math.sin(angle) * 4.5 - 1;
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(ox, oy, 1.0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = tierColor;
+            ctx.beginPath();
+            ctx.arc(ox, oy, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          };
 
-                  // 1c. Orbiting Sparks PASS 1: DRAW BEHIND THE BOOK (Y Offset / sin(angle) < 0)
-                  let orbitTime = Date.now() / 350;
-                  for (let i = 0; i < 2; i++) {
-                    let angle = orbitTime + i * Math.PI;
-                    if (Math.sin(angle) < 0) {
-                      drawSingleSpark(angle);
-                    }
-                  }
-
-                  // 2. Resolve custom Book Cover styles
-                  let coverColor = "#8e44ad"; // Default magic purple
-                  if (noun.includes("grimoire")) coverColor = "#1b002a"; // Deep occult black
-                  else if (noun.includes("codex")) coverColor = "#784212"; // Antique brass/bronze
-                  else if (noun.includes("lexicon")) coverColor = "#1b4f72"; // Scholar blue
-                  else if (noun.includes("chronicle")) coverColor = "#4d1a00"; // Rustic relic leather
-
-                  ctx.fillStyle = coverColor;
-                  ctx.beginPath();
-                  ctx.roundRect(-6, -8, 12, 14, [1.5]);
-                  ctx.fill();
-                  ctx.strokeStyle = "#000000";
-                  ctx.lineWidth = penHero;
-                  ctx.stroke();
-
-                  // Draw book spine on left binding edge
-                  ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
-                  ctx.fillRect(-6, -8, 3, 14);
-
-                  // Draw paper edges on the right
-                  ctx.fillStyle = "#f5f5dc";
-                  ctx.beginPath();
-                  ctx.rect(4, -7, 1.5, 12);
-                  ctx.fill();
-                  ctx.stroke();
-
-                  // 3. Render detailed central cover glyphs
-                  ctx.save();
-                  if (noun.includes("grimoire")) {
-                    ctx.fillStyle = "#f1c40f";
-                    ctx.beginPath();
-                    ctx.arc(1, -1, 2.2, -Math.PI / 2, Math.PI / 2, false);
-                    ctx.quadraticCurveTo(2.0, -1, 1, -3.2);
-                    ctx.closePath();
-                    ctx.fill();
-                  } else if (noun.includes("codex")) {
-                    ctx.strokeStyle = "#bdc3c7";
-                    ctx.lineWidth = 0.8;
-                    ctx.beginPath();
-                    ctx.arc(1, -1, 2, 0, Math.PI * 2);
-                    ctx.stroke();
-                    ctx.fillStyle = tierColor;
-                    ctx.beginPath();
-                    ctx.arc(1, -1, 1, 0, Math.PI * 2);
-                    ctx.fill();
-                  } else if (noun.includes("lexicon")) {
-                    ctx.strokeStyle = "#ffffff";
-                    ctx.lineWidth = 0.7;
-                    ctx.beginPath();
-                    ctx.ellipse(1, -1, 2.5, 1.3, 0, 0, Math.PI * 2);
-                    ctx.stroke();
-                    ctx.fillStyle = tierColor;
-                    ctx.beginPath();
-                    ctx.arc(1, -1, 0.8, 0, Math.PI * 2);
-                    ctx.fill();
-                  } else if (noun.includes("chronicle")) {
-                    ctx.fillStyle = "#f1c40f";
-                    ctx.beginPath();
-                    ctx.moveTo(-1, -3);
-                    ctx.lineTo(3, -3);
-                    ctx.lineTo(1, -1);
-                    ctx.lineTo(3, 1);
-                    ctx.lineTo(-1, 1);
-                    ctx.closePath();
-                    ctx.fill();
-                  } else {
-                    ctx.fillStyle = tierColor;
-                    ctx.beginPath();
-                    ctx.arc(1, -1, 2, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = "#000000";
-                    ctx.lineWidth = 0.8;
-                    ctx.stroke();
-                  }
-                  ctx.restore();
-
-                  // 1d. Orbiting Sparks PASS 2: DRAW IN FRONT OF THE BOOK (Y Offset / sin(angle) >= 0)
-                  for (let i = 0; i < 2; i++) {
-                    let angle = orbitTime + i * Math.PI;
-                    if (Math.sin(angle) >= 0) {
-                      drawSingleSpark(angle);
-                    }
-                  }
-                }
-
-                ctx.restore();
-              }
-
-              else if (subType === "dagger") {
-              ctx.save();
-              ctx.translate(8, 8 + bounce);
-              ctx.rotate(Math.PI / 4);
-
-              let dItem = equipped.subweapon;
-              let noun = (dItem && dItem.noun) ? dItem.noun.toLowerCase() : "";
-              let tierColor = window.getTierColor(dItem ? dItem.statsRolled : 0);
-
-              // 1. Draw Hilt Grip & Core Pommel
-              ctx.fillStyle = "#1c1c1f"; // Dark metallic hilt core
-              ctx.beginPath();
-              ctx.arc(0, 10, 2.5, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 1.2;
-              ctx.stroke();
-
-              // Custom pommel core gem matching active tier color
-              ctx.fillStyle = tierColor;
-              ctx.beginPath();
-              ctx.arc(0, 10, 1.2, 0, Math.PI * 2);
-              ctx.fill();
-
-              ctx.fillStyle = "#5c3a21"; // Padded wood hilt
-              ctx.beginPath();
-              ctx.rect(-1.5, 3, 3, 7);
-              ctx.fill();
-              ctx.stroke();
-
-              // 2. Resolve Custom Guards & Blades based on specific Dagger sub-class
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = penHero;
-
-              if (noun.includes("kris")) {
-                // Wavy Kris Flared Guard
-                ctx.fillStyle = tierColor;
-                ctx.beginPath();
-                ctx.moveTo(-6, 3);
-                ctx.lineTo(6, 3);
-                ctx.lineTo(4, 5);
-                ctx.lineTo(-4, 5);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-
-                // Wavy/Serpentine Kris Blade
-                ctx.fillStyle = "#7f8c8d";
-                ctx.beginPath();
-                ctx.moveTo(-2.5, 3);
-                ctx.lineTo(-1.2, -1);
-                ctx.lineTo(-2.2, -4.5);
-                ctx.lineTo(-1.2, -8);
-                ctx.lineTo(0, -13); // Sharp wavy tip
-                ctx.lineTo(1.2, -8);
-                ctx.lineTo(2.2, -4.5);
-                ctx.lineTo(1.2, -1);
-                ctx.lineTo(2.5, 3);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-
-                // Light reflection highlight
-                ctx.fillStyle = "#ffffff";
-                ctx.beginPath();
-                ctx.moveTo(0, 3);
-                ctx.lineTo(0, -13);
-                ctx.lineTo(1.2, -8);
-                ctx.lineTo(2.2, -4.5);
-                ctx.lineTo(1.2, -1);
-                ctx.lineTo(2.5, 3);
-                ctx.closePath();
-                ctx.fill();
-              } else if (noun.includes("baselard")) {
-                // Broad cross H-guard
-                ctx.fillStyle = tierColor;
-                ctx.fillRect(-6, 1.5, 12, 2);
-                ctx.strokeRect(-6, 1.5, 12, 2);
-                // Secondary matching H-pommel
-                ctx.fillRect(-5, 9, 10, 2);
-                ctx.strokeRect(-5, 9, 10, 2);
-
-                // Broad diamond-point blade
-                ctx.fillStyle = "#7f8c8d";
-                ctx.beginPath();
-                ctx.moveTo(-3, 1.5);
-                ctx.lineTo(0, -12); // tip
-                ctx.lineTo(3, 1.5);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = "#ffffff";
-                ctx.beginPath();
-                ctx.moveTo(0, 1.5);
-                ctx.lineTo(0, -12);
-                ctx.lineTo(3, 1.5);
-                ctx.closePath();
-                ctx.fill();
-              } else if (noun.includes("dirk")) {
-                // Standard wide iron guard disc
-                ctx.fillStyle = "#343a40";
-                ctx.beginPath();
-                ctx.ellipse(0, 3, 5, 1.5, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-
-                // Heavy single-edged wedge blade
-                ctx.fillStyle = "#7f8c8d";
-                ctx.beginPath();
-                ctx.moveTo(-2.2, 3);
-                ctx.lineTo(-2.2, -8); // Flat blunt back edge
-                ctx.lineTo(0, -12);   // Blade point
-                ctx.lineTo(2.2, 3);   // Curved cutting slope front
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = "#ffffff";
-                ctx.beginPath();
-                ctx.moveTo(0, 3);
-                ctx.lineTo(0, -12);
-                ctx.lineTo(2.2, 3);
-                ctx.closePath();
-                ctx.fill();
-              } else if (noun.includes("main")) {
-                // Main-Gauche Curved Parrying Guard
-                ctx.strokeStyle = tierColor;
-                ctx.lineWidth = 1.2;
-                ctx.beginPath();
-                ctx.moveTo(-7, 3);
-                ctx.quadraticCurveTo(0, -1.5, 7, 3);
-                ctx.stroke();
-                // Finger protective basket loop
-                ctx.beginPath();
-                ctx.arc(0, 5.5, 3.5, 0, Math.PI);
-                ctx.stroke();
-
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = penHero;
-
-                // Narrow stiletto needle blade
-                ctx.fillStyle = "#7f8c8d";
-                ctx.beginPath();
-                ctx.moveTo(-1.8, 1.5);
-                ctx.lineTo(0, -13);
-                ctx.lineTo(1.8, 1.5);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = "#ffffff";
-                ctx.beginPath();
-                ctx.moveTo(0, 1.5);
-                ctx.lineTo(0, -13);
-                ctx.lineTo(1.8, 1.5);
-                ctx.closePath();
-                ctx.fill();
-              } else {
-                // Default Stiletto Needle structure
-                ctx.fillStyle = tierColor; // Guard matching quality tier
-                ctx.beginPath();
-                ctx.moveTo(-8, 3);
-                ctx.quadraticCurveTo(0, -2, 8, 3);
-                ctx.quadraticCurveTo(0, 2, -8, 3);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-
-                // Straight thin piercing blade
-                ctx.fillStyle = "#7f8c8d";
-                ctx.beginPath();
-                ctx.moveTo(-2.2, 2.5);
-                ctx.lineTo(0, -12);
-                ctx.lineTo(2.2, 2.5);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = "#ffffff";
-                ctx.beginPath();
-                ctx.moveTo(0, 2.5);
-                ctx.lineTo(0, -12);
-                ctx.lineTo(2.2, 2.5);
-                ctx.closePath();
-                ctx.fill();
-              }
-
-              // 3. Emit dripping elemental particles from sheathed blade
-              if (Math.random() < 0.2 && !window.isGamePaused && options.isMainHero) {
-                let dRgb = window.hexToRgbValues ? window.hexToRgbValues(tierColor) : "142, 68, 173";
-                window.particles.push({
-                  x: window.hero.x + 20,
-                  y: window.hero.y + 18 + bounce,
-                  vx: -window.randFloat(0.3, 0.8),
-                  vy: -window.randFloat(0.5, 1.2),
-                  radius: window.randFloat(1, 2.2),
-                  color: `rgba(${dRgb}, 0.65)`,
-                  alpha: 0.8,
-                  life: window.randInt(15, 30),
-                });
-              }
-
-              ctx.restore();
-
-              // 4. Rising elemental vapor matching equipped quality color!
-              let dRgb = window.hexToRgbValues ? window.hexToRgbValues(tierColor) : "46, 204, 113";
-              let mistCycle = (Date.now() / 150) % 6;
-              ctx.fillStyle = `rgba(${dRgb}, ${0.55 - mistCycle / 12})`;
-              ctx.beginPath();
-              ctx.arc(0, -16 - mistCycle, 1.2 + mistCycle / 3, 0, Math.PI * 2);
-              ctx.fill();
+          // 1c. Orbiting Sparks PASS 1: DRAW BEHIND THE BOOK (Y Offset / sin(angle) < 0)
+          let orbitTime = Date.now() / 350;
+          for (let i = 0; i < 2; i++) {
+            let angle = orbitTime + i * Math.PI;
+            if (Math.sin(angle) < 0) {
+              drawSingleSpark(angle);
             }
+          }
+
+          // 2. Resolve custom Book Cover styles
+          let coverColor = "#8e44ad"; // Default magic purple
+          if (noun.includes("grimoire"))
+            coverColor = "#1b002a"; // Deep occult black
+          else if (noun.includes("codex"))
+            coverColor = "#784212"; // Antique brass/bronze
+          else if (noun.includes("lexicon"))
+            coverColor = "#1b4f72"; // Scholar blue
+          else if (noun.includes("chronicle")) coverColor = "#4d1a00"; // Rustic relic leather
+
+          ctx.fillStyle = coverColor;
+          ctx.beginPath();
+          ctx.roundRect(-6, -8, 12, 14, [1.5]);
+          ctx.fill();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+          ctx.stroke();
+
+          // Draw book spine on left binding edge
+          ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+          ctx.fillRect(-6, -8, 3, 14);
+
+          // Draw paper edges on the right
+          ctx.fillStyle = "#f5f5dc";
+          ctx.beginPath();
+          ctx.rect(4, -7, 1.5, 12);
+          ctx.fill();
+          ctx.stroke();
+
+          // 3. Render detailed central cover glyphs
+          ctx.save();
+          if (noun.includes("grimoire")) {
+            ctx.fillStyle = "#f1c40f";
+            ctx.beginPath();
+            ctx.arc(1, -1, 2.2, -Math.PI / 2, Math.PI / 2, false);
+            ctx.quadraticCurveTo(2.0, -1, 1, -3.2);
+            ctx.closePath();
+            ctx.fill();
+          } else if (noun.includes("codex")) {
+            ctx.strokeStyle = "#bdc3c7";
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.arc(1, -1, 2, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = tierColor;
+            ctx.beginPath();
+            ctx.arc(1, -1, 1, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (noun.includes("lexicon")) {
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 0.7;
+            ctx.beginPath();
+            ctx.ellipse(1, -1, 2.5, 1.3, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = tierColor;
+            ctx.beginPath();
+            ctx.arc(1, -1, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (noun.includes("chronicle")) {
+            ctx.fillStyle = "#f1c40f";
+            ctx.beginPath();
+            ctx.moveTo(-1, -3);
+            ctx.lineTo(3, -3);
+            ctx.lineTo(1, -1);
+            ctx.lineTo(3, 1);
+            ctx.lineTo(-1, 1);
+            ctx.closePath();
+            ctx.fill();
+          } else {
+            ctx.fillStyle = tierColor;
+            ctx.beginPath();
+            ctx.arc(1, -1, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+          ctx.restore();
+
+          // 1d. Orbiting Sparks PASS 2: DRAW IN FRONT OF THE BOOK (Y Offset / sin(angle) >= 0)
+          for (let i = 0; i < 2; i++) {
+            let angle = orbitTime + i * Math.PI;
+            if (Math.sin(angle) >= 0) {
+              drawSingleSpark(angle);
+            }
+          }
+        }
+
+        ctx.restore();
+      } else if (subType === "dagger") {
+        ctx.save();
+        ctx.translate(8, 8 + bounce);
+        ctx.rotate(Math.PI / 4);
+
+        let dItem = equipped.subweapon;
+        let noun = dItem && dItem.noun ? dItem.noun.toLowerCase() : "";
+        let tierColor = window.getTierColor(dItem ? dItem.statsRolled : 0);
+
+        // 1. Draw Hilt Grip & Core Pommel
+        ctx.fillStyle = "#1c1c1f"; // Dark metallic hilt core
+        ctx.beginPath();
+        ctx.arc(0, 10, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Custom pommel core gem matching active tier color
+        ctx.fillStyle = tierColor;
+        ctx.beginPath();
+        ctx.arc(0, 10, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#5c3a21"; // Padded wood hilt
+        ctx.beginPath();
+        ctx.rect(-1.5, 3, 3, 7);
+        ctx.fill();
+        ctx.stroke();
+
+        // 2. Resolve Custom Guards & Blades based on specific Dagger sub-class
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = penHero;
+
+        if (noun.includes("kris")) {
+          // Wavy Kris Flared Guard
+          ctx.fillStyle = tierColor;
+          ctx.beginPath();
+          ctx.moveTo(-6, 3);
+          ctx.lineTo(6, 3);
+          ctx.lineTo(4, 5);
+          ctx.lineTo(-4, 5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Wavy/Serpentine Kris Blade
+          ctx.fillStyle = "#7f8c8d";
+          ctx.beginPath();
+          ctx.moveTo(-2.5, 3);
+          ctx.lineTo(-1.2, -1);
+          ctx.lineTo(-2.2, -4.5);
+          ctx.lineTo(-1.2, -8);
+          ctx.lineTo(0, -13); // Sharp wavy tip
+          ctx.lineTo(1.2, -8);
+          ctx.lineTo(2.2, -4.5);
+          ctx.lineTo(1.2, -1);
+          ctx.lineTo(2.5, 3);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Light reflection highlight
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.moveTo(0, 3);
+          ctx.lineTo(0, -13);
+          ctx.lineTo(1.2, -8);
+          ctx.lineTo(2.2, -4.5);
+          ctx.lineTo(1.2, -1);
+          ctx.lineTo(2.5, 3);
+          ctx.closePath();
+          ctx.fill();
+        } else if (noun.includes("baselard")) {
+          // Broad cross H-guard
+          ctx.fillStyle = tierColor;
+          ctx.fillRect(-6, 1.5, 12, 2);
+          ctx.strokeRect(-6, 1.5, 12, 2);
+          // Secondary matching H-pommel
+          ctx.fillRect(-5, 9, 10, 2);
+          ctx.strokeRect(-5, 9, 10, 2);
+
+          // Broad diamond-point blade
+          ctx.fillStyle = "#7f8c8d";
+          ctx.beginPath();
+          ctx.moveTo(-3, 1.5);
+          ctx.lineTo(0, -12); // tip
+          ctx.lineTo(3, 1.5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.moveTo(0, 1.5);
+          ctx.lineTo(0, -12);
+          ctx.lineTo(3, 1.5);
+          ctx.closePath();
+          ctx.fill();
+        } else if (noun.includes("dirk")) {
+          // Standard wide iron guard disc
+          ctx.fillStyle = "#343a40";
+          ctx.beginPath();
+          ctx.ellipse(0, 3, 5, 1.5, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Heavy single-edged wedge blade
+          ctx.fillStyle = "#7f8c8d";
+          ctx.beginPath();
+          ctx.moveTo(-2.2, 3);
+          ctx.lineTo(-2.2, -8); // Flat blunt back edge
+          ctx.lineTo(0, -12); // Blade point
+          ctx.lineTo(2.2, 3); // Curved cutting slope front
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.moveTo(0, 3);
+          ctx.lineTo(0, -12);
+          ctx.lineTo(2.2, 3);
+          ctx.closePath();
+          ctx.fill();
+        } else if (noun.includes("main")) {
+          // Main-Gauche Curved Parrying Guard
+          ctx.strokeStyle = tierColor;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(-7, 3);
+          ctx.quadraticCurveTo(0, -1.5, 7, 3);
+          ctx.stroke();
+          // Finger protective basket loop
+          ctx.beginPath();
+          ctx.arc(0, 5.5, 3.5, 0, Math.PI);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penHero;
+
+          // Narrow stiletto needle blade
+          ctx.fillStyle = "#7f8c8d";
+          ctx.beginPath();
+          ctx.moveTo(-1.8, 1.5);
+          ctx.lineTo(0, -13);
+          ctx.lineTo(1.8, 1.5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.moveTo(0, 1.5);
+          ctx.lineTo(0, -13);
+          ctx.lineTo(1.8, 1.5);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          // Default Stiletto Needle structure
+          ctx.fillStyle = tierColor; // Guard matching quality tier
+          ctx.beginPath();
+          ctx.moveTo(-8, 3);
+          ctx.quadraticCurveTo(0, -2, 8, 3);
+          ctx.quadraticCurveTo(0, 2, -8, 3);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Straight thin piercing blade
+          ctx.fillStyle = "#7f8c8d";
+          ctx.beginPath();
+          ctx.moveTo(-2.2, 2.5);
+          ctx.lineTo(0, -12);
+          ctx.lineTo(2.2, 2.5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.moveTo(0, 2.5);
+          ctx.lineTo(0, -12);
+          ctx.lineTo(2.2, 2.5);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // 3. Emit dripping elemental particles from sheathed blade
+        if (Math.random() < 0.2 && !window.isGamePaused && options.isMainHero) {
+          let dRgb = window.hexToRgbValues
+            ? window.hexToRgbValues(tierColor)
+            : "142, 68, 173";
+          window.particles.push({
+            x: window.hero.x + 20,
+            y: window.hero.y + 18 + bounce,
+            vx: -window.randFloat(0.3, 0.8),
+            vy: -window.randFloat(0.5, 1.2),
+            radius: window.randFloat(1, 2.2),
+            color: `rgba(${dRgb}, 0.65)`,
+            alpha: 0.8,
+            life: window.randInt(15, 30),
+          });
+        }
+
+        ctx.restore();
+
+        // 4. Rising elemental vapor matching equipped quality color!
+        let dRgb = window.hexToRgbValues
+          ? window.hexToRgbValues(tierColor)
+          : "46, 204, 113";
+        let mistCycle = (Date.now() / 150) % 6;
+        ctx.fillStyle = `rgba(${dRgb}, ${0.55 - mistCycle / 12})`;
+        ctx.beginPath();
+        ctx.arc(0, -16 - mistCycle, 1.2 + mistCycle / 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     let costume = stats.equippedCostume || "knight";
@@ -6475,65 +6488,67 @@
         ctx.stroke();
       }
     } else {
-          let weapItem = equipped.weapon;
-          let tierColor = window.getTierColor(weapItem ? weapItem.statsRolled : 0);
-          let rgbVals = window.hexToRgbValues ? window.hexToRgbValues(tierColor) : "236, 240, 241";
+      let weapItem = equipped.weapon;
+      let tierColor = window.getTierColor(weapItem ? weapItem.statsRolled : 0);
+      let rgbVals = window.hexToRgbValues
+        ? window.hexToRgbValues(tierColor)
+        : "236, 240, 241";
 
-          if (options.slashFrame) {
-            ctx.translate(15, -10);
-            ctx.rotate(-Math.PI / 2.3);
+      if (options.slashFrame) {
+        ctx.translate(15, -10);
+        ctx.rotate(-Math.PI / 2.3);
 
-            // --- Sleek, classic sword rendering ---
-            ctx.fillStyle = "#7f8c8d";
-            ctx.beginPath();
-            ctx.rect(-2, -2, 4, 10);
-            ctx.fill();
-            ctx.stroke();
+        // --- Sleek, classic sword rendering ---
+        ctx.fillStyle = "#7f8c8d";
+        ctx.beginPath();
+        ctx.rect(-2, -2, 4, 10);
+        ctx.fill();
+        ctx.stroke();
 
-            ctx.fillStyle = "#8e44ad";
-            ctx.beginPath();
-            ctx.rect(-5, 8, 10, 4);
-            ctx.fill();
-            ctx.stroke();
+        ctx.fillStyle = "#8e44ad";
+        ctx.beginPath();
+        ctx.rect(-5, 8, 10, 4);
+        ctx.fill();
+        ctx.stroke();
 
-            ctx.fillStyle = "#ecf0f1";
-            ctx.beginPath();
-            ctx.rect(-2, 12, 4, 25);
-            ctx.fill();
-            ctx.stroke();
+        ctx.fillStyle = "#ecf0f1";
+        ctx.beginPath();
+        ctx.rect(-2, 12, 4, 25);
+        ctx.fill();
+        ctx.stroke();
 
-            // Premium dynamic slash color trail inheriting quality
-            ctx.fillStyle = `rgba(${rgbVals}, 0.35)`;
-            ctx.beginPath();
-            ctx.arc(0, 20, 35, 0, Math.PI / 2);
-            ctx.lineTo(0, 0);
-            ctx.closePath();
-            ctx.fill();
-            ctx.strokeStyle = `rgba(${rgbVals}, 0.55)`;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-          } else {
-            ctx.rotate(-Math.PI / 8);
+        // Premium dynamic slash color trail inheriting quality
+        ctx.fillStyle = `rgba(${rgbVals}, 0.35)`;
+        ctx.beginPath();
+        ctx.arc(0, 20, 35, 0, Math.PI / 2);
+        ctx.lineTo(0, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = `rgba(${rgbVals}, 0.55)`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else {
+        ctx.rotate(-Math.PI / 8);
 
-            ctx.fillStyle = "#7f8c8d";
-            ctx.beginPath();
-            ctx.rect(-2, -2, 4, 10);
-            ctx.fill();
-            ctx.stroke();
+        ctx.fillStyle = "#7f8c8d";
+        ctx.beginPath();
+        ctx.rect(-2, -2, 4, 10);
+        ctx.fill();
+        ctx.stroke();
 
-            ctx.fillStyle = "#8e44ad";
-            ctx.beginPath();
-            ctx.rect(-5, 8, 10, 4);
-            ctx.fill();
-            ctx.stroke();
+        ctx.fillStyle = "#8e44ad";
+        ctx.beginPath();
+        ctx.rect(-5, 8, 10, 4);
+        ctx.fill();
+        ctx.stroke();
 
-            ctx.fillStyle = "#ecf0f1";
-            ctx.beginPath();
-            ctx.rect(-2, 12, 4, 25);
-            ctx.fill();
-            ctx.stroke();
-          }
-        }
+        ctx.fillStyle = "#ecf0f1";
+        ctx.beginPath();
+        ctx.rect(-2, 12, 4, 25);
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
     ctx.restore();
 
     if (

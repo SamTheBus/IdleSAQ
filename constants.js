@@ -117,11 +117,11 @@ window.etcDex = {
   "Ancient Core":
     "Rare drop from Stage Bosses. Sacrifice 1 at the Altar to summon a Guardian.",
   "Overlord's Sigil":
-    "Guaranteed drop from the Equipment Dungeon Overlord. Used to temper Unique Artifacts at the Forge.",
+    "Guaranteed drop from the Equipment Dungeon Overlord. Spent at the Forge to lock and re-roll equipment modifiers.",
   "Astral Essence":
-    "A pulsing, cosmic residue extracted by salvaging Unique Artifacts. Exceedingly rare.",
+    "A pulsing, cosmic residue extracted by salvaging Unique Artifacts. Spent at the Forge to imbed powerful enchantments (+25% stat boost) on high-tier gear.",
   "Catalyst Core":
-    "Earned in the Crucible or bought from the Alchemy Shop. Spent at the Forge to re-roll and lock select weapon and armor attributes.",
+    "Earned in the Crucible or bought from the Alchemy Shop. Spent at the Forge to temper Unique Artifacts.",
   "Monster Soul":
     "A dark, swirling essence harvested from fallen standard monsters. Spent for basic forging and trades.",
   "Luminous Soul":
@@ -143,19 +143,19 @@ window.useDex = {
     color: "#ffaa00",
   },
   "Clan Reward Sack": {
-    desc: "Standardised Clan Reward. Consume to initiate untying. Guarantees 1 MP, 1x Equipment scaled to Lifetime Peak Stage, and rolls extra loot with consecutive item chances!",
+    desc: "Standardised Clan Reward. Consume to initiate untying. Guarantees 1 QP, 1x Equipment scaled to Lifetime Peak Stage, and rolls extra loot with consecutive item chances!",
     color: "#f1c40f",
   },
   "Clan Weekly Sack": {
-    desc: "Venerable Clan Weekly Reward. Consume to break the seal. Guarantees 3 MP, 1x Ancient Core, 1x Overlord's Sigil, 1x Eridium Shard, and 3x Legendary Scraps!",
+    desc: "Venerable Clan Weekly Reward. Consume to break the seal. Guarantees 3 QP, 1x Ancient Core, 1x Overlord's Sigil, 1x Eridium Shard, and 3x Legendary Scraps!",
     color: "#9b59b6",
   },
   "Daily Reward Sack": {
-    desc: "Standardised Daily Reward. Consume to initiate untying. Guarantees 1 MP, 1x Equipment scaled to Lifetime Peak Stage, and rolls extra loot with consecutive item chances!",
+    desc: "Standardised Daily Reward. Consume to initiate untying. Guarantees 1 QP, 1x Equipment scaled to Lifetime Peak Stage, and rolls extra loot with consecutive item chances!",
     color: "#f1c40f",
   },
   "Weekly Reward Sack": {
-    desc: "Venerable Weekly Reward. Consume to break the seal. Guarantees 3 MP, 1x Ancient Core, 1x Overlord's Sigil, 1x Eridium Shard, and 3x Legendary Scraps!",
+    desc: "Venerable Weekly Reward. Consume to break the seal. Guarantees 3 QP, 1x Ancient Core, 1x Overlord's Sigil, 1x Eridium Shard, and 3x Legendary Scraps!",
     color: "#9b59b6",
   },
   "Cavern Sigil Sack": {
@@ -3248,7 +3248,7 @@ window.ASTRAL_SHOP_STOCK = [
     name: "Catalyst Core",
     cost: 120,
     color: "#2ecc71",
-    desc: "Spent at the Forge to lock and re-roll equipment modifiers.",
+    desc: "Spent at the Forge to temper Unique Artifacts.",
   },
   {
     name: "Ancient Core",
@@ -3260,7 +3260,7 @@ window.ASTRAL_SHOP_STOCK = [
     name: "Overlord's Sigil",
     cost: 180,
     color: "#1abc9c",
-    desc: "Material required for unique artifact tempering.",
+    desc: "Spent at the Forge to lock and re-roll equipment modifiers.",
   },
   {
     name: "Luminous Soul",
