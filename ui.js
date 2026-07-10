@@ -935,15 +935,15 @@ window.updateUI = function () {
     activeStageVal = window.playerStats.crucibleWave || 1;
     stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.cruciblePeak || 1}`;
   } else {
-      displayTitleHtml = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="#3498db" fill-opacity="0.15" /><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88" /></svg> Stage`;
-      stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.lifetimePeakStage || window.playerStats.maxStage || 1}`;
-    }
+    displayTitleHtml = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="#3498db" fill-opacity="0.15" /><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88" /></svg> Stage`;
+    stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.lifetimePeakStage || window.playerStats.maxStage || 1}`;
+  }
 
-    let stageLabelEl = document.getElementById("hud-stage-label");
-    if (stageLabelEl) stageLabelEl.innerHTML = displayTitleHtml;
+  let stageLabelEl = document.getElementById("hud-stage-label");
+  if (stageLabelEl) stageLabelEl.innerHTML = displayTitleHtml;
 
-    let stageSubEl = document.getElementById("hud-stage-sub");
-    if (stageSubEl) stageSubEl.innerText = stageSubText;
+  let stageSubEl = document.getElementById("hud-stage-sub");
+  if (stageSubEl) stageSubEl.innerText = stageSubText;
 
   setText("hud-stage", activeStageVal);
   setText("hud-coins", window.formatNumber(window.playerStats.coins));
@@ -1019,14 +1019,17 @@ window.updateUI = function () {
   }
 
   // Update Crucible Peak & Checkpoint in Activities Menu
-    let cPeak = window.playerStats.cruciblePeak || 1;
-    window.setText("crucible-peak-wave", cPeak);
-    window.setText("tab-crucible-peak-wave", cPeak);
+  let cPeak = window.playerStats.cruciblePeak || 1;
+  window.setText("crucible-peak-wave", cPeak);
+  window.setText("tab-crucible-peak-wave", cPeak);
 
-    let peakLvl = window.playerStats.lifetimePeakStage || 1;
-    let startingStageOffset = Math.max(1, Math.floor(peakLvl * 0.75));
-    window.setText("crucible-checkpoint-wave", `Stage ${startingStageOffset}`);
-    window.setText("tab-crucible-checkpoint-wave", `Stage ${startingStageOffset}`);
+  let peakLvl = window.playerStats.lifetimePeakStage || 1;
+  let startingStageOffset = Math.max(1, Math.floor(peakLvl * 0.75));
+  window.setText("crucible-checkpoint-wave", `Stage ${startingStageOffset}`);
+  window.setText(
+    "tab-crucible-checkpoint-wave",
+    `Stage ${startingStageOffset}`,
+  );
 
   window.setText(
     "tab-etc-souls",
@@ -1143,6 +1146,10 @@ window.updateUI = function () {
 
   if (typeof window.renderCavernSigilConsole === "function") {
     window.renderCavernSigilConsole();
+  }
+
+  if (typeof window.renderCrucibleTab === "function") {
+    window.renderCrucibleTab();
   }
 
   if (typeof window.updateEcoModeStyle === "function") {
@@ -3740,17 +3747,17 @@ window.triggerPrestigeAscension = function () {
   let rewardMultiplier = activeStage / 80;
 
   // Rebalance: Award Eridium Shards and crafting materials instead of gear items (scaling proportionally to fight tier)
-    let awardedShards = Math.round(window.randInt(12, 20) * rewardMultiplier); // Compensated from 8-15
-    let awardedEpic = Math.round(window.randInt(12, 18) * rewardMultiplier); // Compensated from 10-15
-    let awardedLeg = Math.round(window.randInt(6, 12) * rewardMultiplier);   // Compensated from 5-10
-    let awardedMythic = Math.round(window.randInt(3, 6) * rewardMultiplier);  // Compensated from 2-5
+  let awardedShards = Math.round(window.randInt(12, 20) * rewardMultiplier); // Compensated from 8-15
+  let awardedEpic = Math.round(window.randInt(12, 18) * rewardMultiplier); // Compensated from 10-15
+  let awardedLeg = Math.round(window.randInt(6, 12) * rewardMultiplier); // Compensated from 5-10
+  let awardedMythic = Math.round(window.randInt(3, 6) * rewardMultiplier); // Compensated from 2-5
 
-    if (typeof window.addEtcDrop === "function") {
-      window.addEtcDrop("Eridium Shard", awardedShards);
-      window.addEtcDrop("Epic Scrap", awardedEpic);
-      window.addEtcDrop("Legendary Scrap", awardedLeg);
-      window.addEtcDrop("Mythic Scrap", awardedMythic);
-    }
+  if (typeof window.addEtcDrop === "function") {
+    window.addEtcDrop("Eridium Shard", awardedShards);
+    window.addEtcDrop("Epic Scrap", awardedEpic);
+    window.addEtcDrop("Legendary Scrap", awardedLeg);
+    window.addEtcDrop("Mythic Scrap", awardedMythic);
+  }
 
   // Calculate Points: Base, Prestige Level Bonus, and Uncapped Deep Push Bonus! (based on selected fight challenge stage)
   let basePoints = 3;
@@ -4193,181 +4200,187 @@ window.renderPaperDoll = function () {
     "art3",
   ];
   slots.forEach((slot) => {
-      let el = document.getElementById(`slot-${slot}`);
-      if (!el) return;
-      let item = window.equippedSlots[slot];
+    let el = document.getElementById(`slot-${slot}`);
+    if (!el) return;
+    let item = window.equippedSlots[slot];
 
-      let lvl = (window.playerStats.slotUpgrades && window.playerStats.slotUpgrades[slot]) || 0;
-      let lvlBadge = lvl > 0 ? `<span style="position: absolute; top: 4px; right: 4px; background: rgba(15,23,42,0.9); color: #ffd700; border: 1.5px solid #ffd700; border-radius: 4px; font-size: 8px; font-weight: 900; padding: 2px 4px; line-height: 1; z-index: 10; font-family: monospace; box-shadow: 0 0 6px rgba(241,196,15,0.25);">Lv.${lvl}</span>` : "";
+    let lvl =
+      (window.playerStats.slotUpgrades &&
+        window.playerStats.slotUpgrades[slot]) ||
+      0;
+    let lvlBadge =
+      lvl > 0
+        ? `<span style="position: absolute; top: 4px; right: 4px; background: rgba(15,23,42,0.9); color: #ffd700; border: 1.5px solid #ffd700; border-radius: 4px; font-size: 8px; font-weight: 900; padding: 2px 4px; line-height: 1; z-index: 10; font-family: monospace; box-shadow: 0 0 6px rgba(241,196,15,0.25);">Lv.${lvl}</span>`
+        : "";
 
-      if (
-        (slot === "chest" || slot === "leggings") &&
-        window.equippedSlots.overall
-      ) {
-        el.className = "slots-card locked";
-        el.innerHTML = `⚙️ LOCKED BY OVERALL`;
-        el.style.background = "";
-        el.style.borderColor = "";
-        el.style.boxShadow = "";
-        return;
-      }
-      if (
-        slot === "overall" &&
-        (window.equippedSlots.chest || window.equippedSlots.leggings)
-      ) {
-        el.className = "slots-card locked";
-        el.innerHTML = `⚙️ LOCKED BY PIECE GEAR`;
-        el.style.background = "";
-        el.style.borderColor = "";
-        el.style.boxShadow = "";
-        return;
-      }
+    if (
+      (slot === "chest" || slot === "leggings") &&
+      window.equippedSlots.overall
+    ) {
+      el.className = "slots-card locked";
+      el.innerHTML = `⚙️ LOCKED BY OVERALL`;
+      el.style.background = "";
+      el.style.borderColor = "";
+      el.style.boxShadow = "";
+      return;
+    }
+    if (
+      slot === "overall" &&
+      (window.equippedSlots.chest || window.equippedSlots.leggings)
+    ) {
+      el.className = "slots-card locked";
+      el.innerHTML = `⚙️ LOCKED BY PIECE GEAR`;
+      el.style.background = "";
+      el.style.borderColor = "";
+      el.style.boxShadow = "";
+      return;
+    }
 
-      if (item) {
-        let isArt = slot.startsWith("art");
-        el.className = isArt
-          ? "slots-card artifact-slot equipped"
-          : "slots-card equipped";
-        let color = window.getTierColor(item.statsRolled);
-        el.style.borderColor = color;
+    if (item) {
+      let isArt = slot.startsWith("art");
+      el.className = isArt
+        ? "slots-card artifact-slot equipped"
+        : "slots-card equipped";
+      let color = window.getTierColor(item.statsRolled);
+      el.style.borderColor = color;
 
-        let uniqueStyle = window.getUniqueItemStyle(item);
-        if (uniqueStyle) {
-          el.style.background = uniqueStyle.bg;
-          el.style.borderColor = uniqueStyle.border;
-          el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
-        } else {
-          el.style.background = "";
-          el.style.boxShadow = "";
-        }
-
-        let tierLabel =
-          item.statsRolled === "UNIQUE"
-            ? "UNIQUE"
-            : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
-        let temperTag =
-          item.temperLevel > 0
-            ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
-            : "";
-        let lockTag = item.locked ? " 🔒" : "";
-        let isUnique =
-          item.isUniqueStaff ||
-          item.isUniqueSword ||
-          item.isUniqueSingularity ||
-          item.isUniqueMaelstrom ||
-          item.isUniqueAegis ||
-          item.isUniqueWatch ||
-          item.isUniqueChronicle ||
-          item.isUniqueWarpCore ||
-          item.isUniqueTempest;
-
-        let iconBox = `<div style="text-align:center; margin-bottom:4px;">${window.getEquipIconHtml(item, 32)}</div>`;
-        if (isArt) {
-          el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
-        } else {
-          let s = [];
-          let sPlain = [];
-          if (item.atk > 0) {
-            s.push(
-              `${window.getUiIconSvg("atk", 9.5)}${window.formatNumber(item.atk)}`,
-            );
-            sPlain.push(`Atk: ${window.formatNumber(item.atk)}`);
-          }
-          if (item.maxHp > 0) {
-            s.push(
-              `${window.getUiIconSvg("maxHp", 9.5)}${window.formatNumber(item.maxHp)}`,
-            );
-            sPlain.push(`HP: ${window.formatNumber(item.maxHp)}`);
-          }
-          if (item.def > 0) {
-            s.push(
-              `${window.getUiIconSvg("def", 9.5)}${window.formatNumber(item.def)}`,
-            );
-            sPlain.push(`Def: ${window.formatNumber(item.def)}`);
-          }
-          if (item.moveSpeed > 0) {
-            s.push(
-              `${window.getUiIconSvg("moveSpeed", 9.5)}${window.formatNumber(item.moveSpeed)}`,
-            );
-            sPlain.push(`Speed: ${window.formatNumber(item.moveSpeed)}`);
-          }
-          if (item.critChance > 0) {
-            s.push(
-              `${window.getUiIconSvg("critChance", 9.5)}${Math.floor(item.critChance * 100)}%`,
-            );
-            sPlain.push(`Crit: ${Math.floor(item.critChance * 100)}%`);
-          }
-          if (item.critDamage > 0) {
-            s.push(
-              `${window.getUiIconSvg("critDamage", 9.5)}${Math.floor(item.critDamage * 100)}%`,
-            );
-            sPlain.push(`CritDmg: ${Math.floor(item.critDamage * 100)}%`);
-          }
-          if (item.block > 0) {
-            s.push(
-              `${window.getUiIconSvg("block", 9.5)}${Math.floor(item.block * 100)}%`,
-            );
-            sPlain.push(`Block: ${Math.floor(item.block * 100)}%`);
-          }
-          if (item.parry > 0) {
-            s.push(
-              `${window.getUiIconSvg("parry", 9.5)}${Math.floor(item.parry * 100)}%`,
-            );
-            sPlain.push(`Parry: ${Math.floor(item.parry * 100)}%`);
-          }
-          if (item.str > 0) {
-            s.push(`${window.getUiIconSvg("str", 9.5)}S:${item.str}`);
-            sPlain.push(`STR: ${item.str}`);
-          }
-          if (item.dex > 0) {
-            s.push(`${window.getUiIconSvg("dex", 9.5)}D:${item.dex}`);
-            sPlain.push(`DEX: ${item.dex}`);
-          }
-          if (item.int > 0) {
-            s.push(`${window.getUiIconSvg("int", 9.5)}I:${item.int}`);
-            sPlain.push(`INT: ${item.int}`);
-          }
-
-          let setLabelHtml = "";
-          let setName = window.getItemSetName(item);
-          if (setName) {
-            let matchingCount = 0;
-            const setSlots = [
-              "weapon",
-              "subweapon",
-              "helmet",
-              "chest",
-              "leggings",
-              "overall",
-              "boots",
-            ];
-            setSlots.forEach((sKey) => {
-              let eqItem = window.equippedSlots[sKey];
-              if (eqItem) {
-                let eqSetName = window.getItemSetName(eqItem);
-                if (eqSetName === setName)
-                  matchingCount += sKey === "overall" ? 2 : 1;
-              }
-            });
-            if (matchingCount >= 2) {
-              let displayCount = Math.min(3, matchingCount);
-              setLabelHtml = `<div style="font-size:8px; color:#2ecc71; font-weight:bold; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;">✨ ${setName} Set (${displayCount}/3)</div>`;
-            }
-          }
-          el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${sPlain.join(", ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
-        }
+      let uniqueStyle = window.getUniqueItemStyle(item);
+      if (uniqueStyle) {
+        el.style.background = uniqueStyle.bg;
+        el.style.borderColor = uniqueStyle.border;
+        el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
       } else {
-        el.className = "slots-card";
-        let displaySlotName = slot.toUpperCase();
-        if (slot === "art1") displaySlotName = "ARTIFACT 1";
-        else if (slot === "art2") displaySlotName = "ARTIFACT 2";
-        else if (slot === "art3") displaySlotName = "ARTIFACT 3";
-        el.innerHTML = `${lvlBadge}<i>[Empty ${displaySlotName}]</i>`;
         el.style.background = "";
-        el.style.borderColor = "";
         el.style.boxShadow = "";
       }
-    });
+
+      let tierLabel =
+        item.statsRolled === "UNIQUE"
+          ? "UNIQUE"
+          : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
+      let temperTag =
+        item.temperLevel > 0
+          ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
+          : "";
+      let lockTag = item.locked ? " 🔒" : "";
+      let isUnique =
+        item.isUniqueStaff ||
+        item.isUniqueSword ||
+        item.isUniqueSingularity ||
+        item.isUniqueMaelstrom ||
+        item.isUniqueAegis ||
+        item.isUniqueWatch ||
+        item.isUniqueChronicle ||
+        item.isUniqueWarpCore ||
+        item.isUniqueTempest;
+
+      let iconBox = `<div style="text-align:center; margin-bottom:4px;">${window.getEquipIconHtml(item, 32)}</div>`;
+      if (isArt) {
+        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
+      } else {
+        let s = [];
+        let sPlain = [];
+        if (item.atk > 0) {
+          s.push(
+            `${window.getUiIconSvg("atk", 9.5)}${window.formatNumber(item.atk)}`,
+          );
+          sPlain.push(`Atk: ${window.formatNumber(item.atk)}`);
+        }
+        if (item.maxHp > 0) {
+          s.push(
+            `${window.getUiIconSvg("maxHp", 9.5)}${window.formatNumber(item.maxHp)}`,
+          );
+          sPlain.push(`HP: ${window.formatNumber(item.maxHp)}`);
+        }
+        if (item.def > 0) {
+          s.push(
+            `${window.getUiIconSvg("def", 9.5)}${window.formatNumber(item.def)}`,
+          );
+          sPlain.push(`Def: ${window.formatNumber(item.def)}`);
+        }
+        if (item.moveSpeed > 0) {
+          s.push(
+            `${window.getUiIconSvg("moveSpeed", 9.5)}${window.formatNumber(item.moveSpeed)}`,
+          );
+          sPlain.push(`Speed: ${window.formatNumber(item.moveSpeed)}`);
+        }
+        if (item.critChance > 0) {
+          s.push(
+            `${window.getUiIconSvg("critChance", 9.5)}${Math.floor(item.critChance * 100)}%`,
+          );
+          sPlain.push(`Crit: ${Math.floor(item.critChance * 100)}%`);
+        }
+        if (item.critDamage > 0) {
+          s.push(
+            `${window.getUiIconSvg("critDamage", 9.5)}${Math.floor(item.critDamage * 100)}%`,
+          );
+          sPlain.push(`CritDmg: ${Math.floor(item.critDamage * 100)}%`);
+        }
+        if (item.block > 0) {
+          s.push(
+            `${window.getUiIconSvg("block", 9.5)}${Math.floor(item.block * 100)}%`,
+          );
+          sPlain.push(`Block: ${Math.floor(item.block * 100)}%`);
+        }
+        if (item.parry > 0) {
+          s.push(
+            `${window.getUiIconSvg("parry", 9.5)}${Math.floor(item.parry * 100)}%`,
+          );
+          sPlain.push(`Parry: ${Math.floor(item.parry * 100)}%`);
+        }
+        if (item.str > 0) {
+          s.push(`${window.getUiIconSvg("str", 9.5)}S:${item.str}`);
+          sPlain.push(`STR: ${item.str}`);
+        }
+        if (item.dex > 0) {
+          s.push(`${window.getUiIconSvg("dex", 9.5)}D:${item.dex}`);
+          sPlain.push(`DEX: ${item.dex}`);
+        }
+        if (item.int > 0) {
+          s.push(`${window.getUiIconSvg("int", 9.5)}I:${item.int}`);
+          sPlain.push(`INT: ${item.int}`);
+        }
+
+        let setLabelHtml = "";
+        let setName = window.getItemSetName(item);
+        if (setName) {
+          let matchingCount = 0;
+          const setSlots = [
+            "weapon",
+            "subweapon",
+            "helmet",
+            "chest",
+            "leggings",
+            "overall",
+            "boots",
+          ];
+          setSlots.forEach((sKey) => {
+            let eqItem = window.equippedSlots[sKey];
+            if (eqItem) {
+              let eqSetName = window.getItemSetName(eqItem);
+              if (eqSetName === setName)
+                matchingCount += sKey === "overall" ? 2 : 1;
+            }
+          });
+          if (matchingCount >= 2) {
+            let displayCount = Math.min(3, matchingCount);
+            setLabelHtml = `<div style="font-size:8px; color:#2ecc71; font-weight:bold; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;">✨ ${setName} Set (${displayCount}/3)</div>`;
+          }
+        }
+        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${sPlain.join(", ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
+      }
+    } else {
+      el.className = "slots-card";
+      let displaySlotName = slot.toUpperCase();
+      if (slot === "art1") displaySlotName = "ARTIFACT 1";
+      else if (slot === "art2") displaySlotName = "ARTIFACT 2";
+      else if (slot === "art3") displaySlotName = "ARTIFACT 3";
+      el.innerHTML = `${lvlBadge}<i>[Empty ${displaySlotName}]</i>`;
+      el.style.background = "";
+      el.style.borderColor = "";
+      el.style.boxShadow = "";
+    }
+  });
 };
 
 window.renderInventory = function () {
@@ -5648,6 +5661,11 @@ window.switchActivitiesSubTab = function (subTabId) {
 
   if (subTabId === "ALTAR") {
     window.renderAltarTab();
+  } else if (
+    subTabId === "CRUCIBLE" &&
+    typeof window.renderCrucibleTab === "function"
+  ) {
+    window.renderCrucibleTab();
   }
   if (typeof window.hideTooltip === "function") window.hideTooltip();
 };
@@ -7627,6 +7645,160 @@ window.makeWindowDraggable = function (el, handle) {
 
 // --- ALTAR NATIVE CAROUSEL RENDER ENGINE ---
 window.altarSlideIndex = 0;
+
+window.renderCrucibleTab = function () {
+  let sec = document.getElementById("activities-sec-crucible");
+  if (!sec) return;
+
+  let isCrucibleActive = window.playerStats.isCrucibleMode;
+
+  if (isCrucibleActive) {
+    // Render the active Crucible status page showing active card picks
+    let wave = window.playerStats.crucibleWave || 1;
+    let deck = window.playerStats.crucibleDraftDeck || [];
+    let gold = window.playerStats.crucibleAccumulatedGold || 0;
+    let xp = window.playerStats.crucibleAccumulatedXp || 0;
+    let shards = window.playerStats.crucibleAccumulatedShards || 0;
+    let cores = window.playerStats.crucibleAccumulatedCores || 0;
+
+    let deckHtml = "";
+    if (deck.length === 0) {
+      deckHtml = `<div style="font-size:10px; color:#888; font-style:italic; padding: 10px; text-align:center; width:100%;">No active infusions drafted yet. Clear waves to pick cards!</div>`;
+    } else {
+      deckHtml = deck
+        .map((cardId) => {
+          let card = window.CRUCIBLE_DRAFT_POOL.find((c) => c.id === cardId);
+          if (!card) return "";
+          return `
+            <div style="background:#110d1c; border:1px solid #9b59b6; border-radius:6px; padding:6px 10px; text-align:left; font-size:11px;">
+              <strong style="color:#df9ffb; display:block; font-size:11px;">🛠️ ${card.name}</strong>
+              <span style="font-size:9.5px; color:#ccc; display:block; margin-top:2px;">${card.desc}</span>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    sec.innerHTML = `
+      <div style="
+        background: radial-gradient(
+          circle at 50% 25%,
+          rgba(155, 89, 182, 0.15) 0%,
+          #0c0812 100%
+        );
+        border: 2px solid #9b59b6;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+        position: relative;
+        max-width: 580px;
+        margin: 6px auto;
+      ">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #9b59b644; padding-bottom:6px; margin-bottom:10px;">
+          <strong style="color:#df9ffb; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">🔮 Crucible Active Run</strong>
+          <span style="background:rgba(155,89,182,0.15); border:1px solid #9b59b6; color:#df9ffb; font-size:10px; font-weight:bold; padding:2px 10px; border-radius:10px; font-family:monospace;">Wave ${wave}</span>
+        </div>
+
+        <!-- Run Rewards Accumulated Panel -->
+        <div style="background: rgba(0,0,0,0.55); border: 1.5px solid #9b59b680; border-radius: 8px; padding: 10px; margin: 0 auto 12px auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-family: monospace; font-size: 10px; text-align: center; box-shadow: inset 0 0 10px #000;">
+          <div style="background:#07030b; padding:4px; border-radius:4px; border:1px solid #222;">
+            <span style="color:#888; display:block; font-size:8px; text-transform:uppercase;">Shards</span>
+            <strong style="color:#df9ffb; font-size:11px;">+${shards}</strong>
+          </div>
+          <div style="background:#07030b; padding:4px; border-radius:4px; border:1px solid #222;">
+            <span style="color:#888; display:block; font-size:8px; text-transform:uppercase;">Cores</span>
+            <strong style="color:#2ecc71; font-size:11px;">+${cores}</strong>
+          </div>
+          <div style="background:#07030b; padding:4px; border-radius:4px; border:1px solid #222;">
+            <span style="color:#888; display:block; font-size:8px; text-transform:uppercase;">Gold</span>
+            <strong style="color:#f1c40f; font-size:11px;">+${window.formatNumber(gold)}</strong>
+          </div>
+          <div style="background:#07030b; padding:4px; border-radius:4px; border:1px solid #222;">
+            <span style="color:#888; display:block; font-size:8px; text-transform:uppercase;">XP</span>
+            <strong style="color:#a855f7; font-size:11px;">+${window.formatNumber(xp)}</strong>
+          </div>
+        </div>
+
+        <!-- Active Infusions Deck List -->
+        <div style="text-align:left; margin-bottom:12px;">
+          <strong style="color:#df9ffb; font-size:11px; display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">🎴 Active Infusions Deck (${deck.length}):</strong>
+          <div style="display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto; padding-right:4px;">
+            ${deckHtml}
+          </div>
+        </div>
+
+        <!-- Retreat / Safe Claim Control -->
+        <div style="border-top: 1px dashed #4a154b; padding-top:12px; margin-top:6px;">
+          <button class="btn-action un" style="width:100%; font-weight:bold; padding:10px; font-size:11.5px; letter-spacing:0.5px; background:linear-gradient(135deg, #c0392b, #962d22);" onclick="window.leaveActivity()">
+              🛡️ Safe Retreat & Claim (100% Rewards)
+          </button>
+          <span style="font-size:9px; color:#aaa; display:block; margin-top:5px; line-height:1.3;">Retreating now secures 100% of all accumulated Shards, Cores, Gold, and XP. Suffer defeat and only 20% of Shards/Cores are salvaged!</span>
+        </div>
+      </div>
+    `;
+  } else {
+    // Restore starting lobby display
+    let peak = window.playerStats.cruciblePeak || 1;
+    let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
+    let peakLvl = window.playerStats.lifetimePeakStage || 1;
+    let startingStageOffset = Math.max(1, Math.floor(peakLvl * 0.75));
+
+    sec.innerHTML = `
+      <div style="
+        background: radial-gradient(
+          circle at 50% 25%,
+          rgba(155, 89, 182, 0.15) 0%,
+          #0c0812 100%
+        );
+        border: 2px solid #9b59b6;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+        position: relative;
+        max-width: 580px;
+        margin: 6px auto;
+      ">
+        <div style="margin-bottom: 10px; display: flex; justify-content: center; align-items: center;">
+          <svg width="56" height="56" viewBox="0 0 32 32" style="filter: drop-shadow(0 0 8px #9b59b6)">
+            <path d="M16 2 L2 22h28L16 2z" fill="rgba(155, 89, 182, 0.15)" stroke="#9b59b6" stroke-width="2.5" stroke-linejoin="round" />
+            <circle cx="16" cy="15" r="4.5" fill="#fff" stroke="#8e44ad" stroke-width="1.5" />
+          </svg>
+        </div>
+        <h3 style="margin: 0 0 4px 0; color: #df9ffb; font-size: 17px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">
+          Astral Survival Crucible
+        </h3>
+        <span style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px;">Endless Gladiatorial Wave Combat</span>
+
+        <div style="font-size: 11.5px; color: #cbd5e1; max-width: 440px; margin: 14px auto; line-height: 1.55; white-space: normal;">
+          Test your build against a limitless celestial onslaught. Surviving waves awards valuable <strong style="color: #9b59b6">Astral Shards</strong> and drops <strong style="color: #2ecc71">Catalyst Cores</strong> to re-roll equipment modifiers!
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 360px; margin: 18px auto;">
+          <div style="background: rgba(0, 0, 0, 0.55); border: 1px solid #4a154b; border-radius: 8px; padding: 10px;">
+            <span style="font-size: 9.5px; color: #aaa; text-transform: uppercase; display: block; margin-bottom: 2px;">Starting Scale</span>
+            <strong style="font-size: 16px; color: #df9ffb; font-family: monospace;" id="tab-crucible-checkpoint-wave">Stage ${startingStageOffset}</strong>
+          </div>
+          <div style="background: rgba(0, 0, 0, 0.55); border: 1px solid #4a154b; border-radius: 8px; padding: 10px;">
+            <span style="font-size: 9.5px; color: #aaa; text-transform: uppercase; display: block; margin-bottom: 2px;">Peak Wave</span>
+            <strong style="font-size: 16px; color: #df9ffb; font-family: monospace;" id="tab-crucible-peak-wave">${peak}</strong>
+          </div>
+        </div>
+
+        <div style="border-top: 1px dashed #4a154b; max-width: 400px; margin: 0 auto; padding-top: 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #bdc3c7; font-family: monospace; max-width: 280px; margin: 0 auto 12px auto;">
+            <span>Monster Souls: <strong style="color: #9b59b6" id="tab-etc-souls">${soulsOwned.toLocaleString()}</strong></span>
+            <span>Entry Cost: <strong style="color: #f1c40f">100 Souls</strong></span>
+          </div>
+          <button onclick="window.enterCrucible()" class="btn-action btn-pulse" style="background: linear-gradient(135deg, #9b59b6, #8e44ad); width: 100%; max-width: 280px; padding: 11px; font-size: 12px; font-weight: bold; border-radius: 8px; border: 1px solid #fff; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4); text-transform: uppercase; letter-spacing: 0.5px;">
+            COMMENCE PURGE
+          </button>
+        </div>
+      </div>
+    `;
+  }
+};
 
 window.renderAltarTab = function () {
   let sec = document.getElementById("runs-sec-altar");
@@ -11384,6 +11556,7 @@ window.toggleLeaderboard = function () {
   if (modal.style.display === "none" || modal.style.display === "") {
     window.hideTooltip();
     modal.style.display = "block";
+    window.state.leaderboardTab = "campaign"; // Default view
     window.fetchLeaderboardData();
   } else {
     modal.style.display = "none";
@@ -11391,9 +11564,31 @@ window.toggleLeaderboard = function () {
   }
 };
 
+window.switchLeaderboardTab = function (tabId) {
+  window.state.leaderboardTab = tabId;
+  window.fetchLeaderboardData();
+};
+
 window.fetchLeaderboardData = function () {
   const listEl = document.getElementById("leaderboard-list");
   if (!listEl) return;
+
+  const tabsContainer = document.getElementById("leaderboard-tabs-container");
+  if (tabsContainer) {
+    const activeTab = window.state.leaderboardTab || "campaign";
+    tabsContainer.innerHTML = `
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+          <button onclick="window.switchLeaderboardTab('campaign')" class="sub-tab-btn ${activeTab === "campaign" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px; height:34px; display:inline-flex; align-items:center; justify-content:center;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l2 2M11 19l-2 2" /></svg>
+              Campaign
+          </button>
+          <button onclick="window.switchLeaderboardTab('crucible')" class="sub-tab-btn ${activeTab === "crucible" ? "active" : ""}" style="padding:6px; font-weight:bold; font-size:10.5px; height:34px; display:inline-flex; align-items:center; justify-content:center;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+              Crucible
+          </button>
+      </div>
+    `;
+  }
 
   if (!window.GAME_SERVER_URL) {
     listEl.innerHTML = `<div style="color:#666; text-align:center; padding: 20px 0; font-size:11px; font-style:italic;">Leaderboard unavailable in offline/GitHub mode.</div>`;
@@ -11407,7 +11602,8 @@ window.fetchLeaderboardData = function () {
 
   listEl.innerHTML = `<div style="color:#aaa; text-align:center; padding: 20px 0; font-size:11px;">Gathering historical records of the realm...</div>`;
 
-  fetch(`${window.GAME_SERVER_URL}/api/leaderboard`)
+  const activeTab = window.state.leaderboardTab || "campaign";
+  fetch(`${window.GAME_SERVER_URL}/api/leaderboard?type=${activeTab}`)
     .then((response) => response.json())
     .then((data) => {
       if (data.success && data.leaderboard) {
@@ -11432,6 +11628,7 @@ window.renderLeaderboardItems = function (leaderboard) {
   }
 
   let localUserId = window.getGameUserId ? window.getGameUserId() : null;
+  let activeTab = window.state.leaderboardTab || "campaign";
 
   listEl.innerHTML = leaderboard
     .map((player, index) => {
@@ -11444,15 +11641,17 @@ window.renderLeaderboardItems = function (leaderboard) {
         badgeColor = "#f1c40f";
         badgeGlow =
           "box-shadow: 0 0 10px #f1c40f; text-shadow: 0 0 6px #f1c40f;";
-        rankIcon = "👑";
+        rankIcon = "I";
       } else if (rank === 2) {
         badgeColor = "#bdc3c7";
         badgeGlow =
           "box-shadow: 0 0 8px #bdc3c7; text-shadow: 0 0 4px #bdc3c7;";
+        rankIcon = "II";
       } else if (rank === 3) {
         badgeColor = "#e67e22";
         badgeGlow =
           "box-shadow: 0 0 8px #e67e22; text-shadow: 0 0 4px #e67e22;";
+        rankIcon = "III";
       }
 
       let titleTextHtml = "";
@@ -11479,6 +11678,23 @@ window.renderLeaderboardItems = function (leaderboard) {
                     `;
       }
 
+      // Relative Social Active Status Indicators
+      let lastActiveMs = Number(player.lastActive) || 0;
+      let isOnline = Date.now() - lastActiveMs < 300000; // 5 minute online window
+      let statusDotHtml = isOnline
+        ? `<span style="display:inline-block; width:6px; height:6px; background:#2ecc71; border-radius:50%; box-shadow: 0 0 6px #2ecc71; margin-right:5px; vertical-align:middle;" title="Online"></span>`
+        : `<span style="display:inline-block; width:6px; height:6px; background:#7f8c8d; border-radius:50%; margin-right:5px; vertical-align:middle;" title="Offline"></span>`;
+
+      // Dynamic Stat Contextual Sub-labels & High-Contrast Badges
+      let statsSubText = `Prestige ${player.prestigeCount} • Lv. ${player.level}`;
+      let metricBadgeHtml = "";
+
+      if (activeTab === "crucible") {
+        metricBadgeHtml = `<span style="background:rgba(155, 89, 182, 0.15); border:1.5px solid #9b59b6; color:#df9ffb; font-family:monospace; font-size:11px; font-weight:bold; padding:4px 8px; border-radius:4px; box-shadow:0 0 8px rgba(155,89,182,0.25); margin-right:8px; white-space:nowrap;">WAVE ${player.cruciblePeak || 1}</span>`;
+      } else {
+        metricBadgeHtml = `<span style="background:rgba(52, 152, 219, 0.15); border:1.5px solid #3498db; color:#3498db; font-family:monospace; font-size:11px; font-weight:bold; padding:4px 8px; border-radius:4px; box-shadow:0 0 8px rgba(52,152,219,0.25); margin-right:8px; white-space:nowrap;">STG ${player.lifetimePeakStage || 1}</span>`;
+      }
+
       return `
               <div class="bag-item" style="display:flex; justify-content:space-between; align-items:center; padding:6px 12px; gap:8px; cursor:default; ${cardStyle}">
                   <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; text-align:left;">
@@ -11489,14 +11705,18 @@ window.renderLeaderboardItems = function (leaderboard) {
 
                       <div style="flex:1; min-width:0;">
                           <div style="display:flex; align-items:center; flex-wrap:wrap;">
+                              ${statusDotHtml}
                               <strong style="color:${isSelf ? "#f1c40f" : "#fff"}; font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px;">${window.escapeHTML(player.playerName || "Unknown")}${isSelf ? " <span style='font-size:9px; color:#f1c40f;'> (You)</span>" : ""}</strong>
                               ${titleTextHtml}
                               ${guildBadgeHtml}
                           </div>
-                          <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Stage ${player.lifetimePeakStage} • Prestige ${player.prestigeCount} • Lv. ${player.level}</div>
+                          <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">${statsSubText}</div>
                       </div>
                   </div>
-                  <button class="btn-action" style="background:#3498db; color:white; font-size:11px; padding:4px 10px;" onclick="window.inspectPlayer('${player.userId}')">Inspect</button>
+                  <div style="display:flex; align-items:center; flex-shrink:0;">
+                      ${metricBadgeHtml}
+                      <button class="btn-action" style="background:#3498db; color:white; font-size:11px; padding:4px 10px;" onclick="window.inspectPlayer('${player.userId}')">Inspect</button>
+                  </div>
               </div>
             `;
     })
@@ -12022,15 +12242,15 @@ window.openCrucibleChooseTwoStartingDraftModal = function () {
   };
 
   window.executeStartingDraftConfirm = function () {
-      if (tempSelectedIds.length !== 2) return;
+    if (tempSelectedIds.length !== 2) return;
 
-      window.playerStats.crucibleDraftDeck = [...tempSelectedIds];
-      window.invalidatePlayerStats();
-      let p = window.resolvePlayerStats();
-      window.playerStats.currentHp = p.maxHp;
+    window.playerStats.crucibleDraftDeck = [...tempSelectedIds];
+    window.invalidatePlayerStats();
+    let p = window.resolvePlayerStats();
+    window.playerStats.currentHp = p.maxHp;
 
-      overlay.remove();
-      if (window.SoundManager) window.SoundManager.play("revive");
+    overlay.remove();
+    if (window.SoundManager) window.SoundManager.play("revive");
     window.pushHeaderToast("🚀 Starting modifiers infused!", "#2ecc71");
 
     window.setPauseState(false);
@@ -13705,18 +13925,11 @@ window.animateBoosterCards = function () {
     return;
   }
 
-  // Iterates and continuously paints active sprite drawings for flipped card nodes
-  for (let i = 0; i < 5; i++) {
-    let canvas = document.getElementById(`booster-card-canvas-${i}`);
-    if (canvas) {
-      let cKey = canvas.getAttribute("data-card-key");
-      let cardInner = document.getElementById(`gacha-card-inner-${cKey}`);
-      let isFlipped = cardInner && cardInner.classList.contains("flipped");
-      if (isFlipped) {
-        window.drawMonsterOnCanvas(canvas, cKey, false);
-      }
-    }
-  }
+  let canvases = overlay.querySelectorAll("canvas[data-card-key]");
+  canvases.forEach((canvas) => {
+    let cKey = canvas.getAttribute("data-card-key");
+    window.drawMonsterOnCanvas(canvas, cKey, false);
+  });
 
   window.boosterAnimFrameId = requestAnimationFrame(window.animateBoosterCards);
 };

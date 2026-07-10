@@ -930,19 +930,27 @@ window.SaveManager = {
         window.playerStats.claimedMailIds = [];
 
       window.playerStats.isPrestigeBossMode = false;
-            window.playerStats.prestigeApproachTimer = 0;
+      window.playerStats.prestigeApproachTimer = 0;
 
-            if (!window.playerStats.slotUpgrades) {
-              window.playerStats.slotUpgrades = {
-                weapon: 0, subweapon: 0, helmet: 0, chest: 0, leggings: 0, overall: 0, boots: 0,
-                art1: 0, art2: 0, art3: 0
-              };
-            }
-            if (window.playerStats.slotUpgrades.art1 === undefined) {
-              window.playerStats.slotUpgrades.art1 = 0;
-              window.playerStats.slotUpgrades.art2 = 0;
-              window.playerStats.slotUpgrades.art3 = 0;
-            }
+      if (!window.playerStats.slotUpgrades) {
+        window.playerStats.slotUpgrades = {
+          weapon: 0,
+          subweapon: 0,
+          helmet: 0,
+          chest: 0,
+          leggings: 0,
+          overall: 0,
+          boots: 0,
+          art1: 0,
+          art2: 0,
+          art3: 0,
+        };
+      }
+      if (window.playerStats.slotUpgrades.art1 === undefined) {
+        window.playerStats.slotUpgrades.art1 = 0;
+        window.playerStats.slotUpgrades.art2 = 0;
+        window.playerStats.slotUpgrades.art3 = 0;
+      }
 
       if (window.playerStats.crucibleRunActive) {
         let penalizeRewards = () => {
@@ -4244,11 +4252,11 @@ window.CombatEngine = {
       window.playerStats.isDungeonMode &&
       window.mob.type === "dungeon_boss"
     ) {
-      cardSackChance = 0.15; // 15% on dungeon floor boss clears
+      cardSackChance = 0.03; // Reduced from 15% to 3% to preserve premium feel
     } else if (window.playerStats.isUberBoss) {
-      cardSackChance = 0.25; // 25% on Rift Guardians
+      cardSackChance = 0.08; // Reduced from 25% to 8% to preserve premium feel
     } else if (window.mob.type === "boss") {
-      cardSackChance = 0.02; // 2% on Stage Wardens
+      cardSackChance = 0.005; // Reduced from 2% to 0.5% to preserve premium feel
     }
 
     if (cardSackChance > 0 && Math.random() < cardSackChance) {
@@ -4327,17 +4335,17 @@ window.CombatEngine = {
 
     let xpYield = 0;
     let scaleVal = window.playerStats.isDungeonMode
-          ? window.playerStats.currentDungeonStage[
-              window.playerStats.currentDungeon
-            ] || 1
-          : window.playerStats.stage;
+      ? window.playerStats.currentDungeonStage[
+          window.playerStats.currentDungeon
+        ] || 1
+      : window.playerStats.stage;
 
-        if (window.playerStats.isCrucibleMode) {
-          let cWave = window.playerStats.crucibleWave || 1;
-          let peak = window.playerStats.lifetimePeakStage || 1;
-          let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
-          scaleVal = startingStageOffset + cWave - 1;
-        }
+    if (window.playerStats.isCrucibleMode) {
+      let cWave = window.playerStats.crucibleWave || 1;
+      let peak = window.playerStats.lifetimePeakStage || 1;
+      let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
+      scaleVal = startingStageOffset + cWave - 1;
+    }
     if (window.playerStats.isUberBoss) {
       let riftLvl = window.playerStats.activeRiftLevel || 1;
       scaleVal = 50 + riftLvl * 10;
@@ -5082,40 +5090,40 @@ window.CombatEngine = {
     }
 
     if (window.playerStats.isCrucibleMode) {
-          let cWave = window.playerStats.crucibleWave || 1;
-          let peak = window.playerStats.lifetimePeakStage || 1;
-          let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
-          let effectiveStage = startingStageOffset + cWave - 1;
+      let cWave = window.playerStats.crucibleWave || 1;
+      let peak = window.playerStats.lifetimePeakStage || 1;
+      let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
+      let effectiveStage = startingStageOffset + cWave - 1;
 
-          // Absolute exponential wave scaling matching standard campaign progression
-          let scale = Math.pow(1.045, effectiveStage);
+      // Absolute exponential wave scaling matching standard campaign progression
+      let scale = Math.pow(1.045, effectiveStage);
 
-          if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-            let hp = Math.floor(120 * scale * (1 + effectiveStage * 0.06));
-            window.mob = {
-              x: 750,
-              y: 140,
-              w: 45,
-              h: 75,
-              type: "dungeon_boss",
-              isCrucible: true,
-              isRare: false,
-              hp: hp,
-              maxHp: hp,
-              damage: Math.floor(15 * scale),
-              def: 0,
-              flashTimer: 0,
-              isStopped: false,
-              attackCooldown: 100,
-              attackTimer: 100,
-            };
-          } else {
-            let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
-            let chosenVisual =
-              cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
-            let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
+      if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
+        let hp = Math.floor(120 * scale * (1 + effectiveStage * 0.06));
+        window.mob = {
+          x: 750,
+          y: 140,
+          w: 45,
+          h: 75,
+          type: "dungeon_boss",
+          isCrucible: true,
+          isRare: false,
+          hp: hp,
+          maxHp: hp,
+          damage: Math.floor(15 * scale),
+          def: 0,
+          flashTimer: 0,
+          isStopped: false,
+          attackCooldown: 100,
+          attackTimer: 100,
+        };
+      } else {
+        let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
+        let chosenVisual =
+          cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
+        let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
 
-            let hp = Math.floor(25 * scale * (1 + effectiveStage * 0.06));
+        let hp = Math.floor(25 * scale * (1 + effectiveStage * 0.06));
         window.mob = {
           x: 750,
           y: isFlying ? 145 : 195,
@@ -6177,55 +6185,60 @@ window.useItem = function (itemName) {
       delete window.inventory.USE[itemName];
     }
 
-    let normalCardKeys = Object.keys(window.MONSTER_CARDS_DATA).filter(
-      (k) =>
-        !["aegis_goliath", "chronos_arbitrator", "nexus_overseer"].includes(k),
-    );
     let bossCardKeys = [
       "aegis_goliath",
       "chronos_arbitrator",
       "nexus_overseer",
     ];
-    let pulledCards = [];
-    let recycledDust = 0;
+    let normalCardKeys = Object.keys(window.MONSTER_CARDS_DATA).filter(
+      (k) => !bossCardKeys.includes(k),
+    );
 
+    let rolledKeys = [];
     // Draw exactly 5 cards
     for (let i = 0; i < 5; i++) {
       let rolledKey;
       if (Math.random() < 0.05) {
-        // Rare 5% chance to drop an elite boss card
         rolledKey =
           bossCardKeys[Math.floor(Math.random() * bossCardKeys.length)];
       } else {
-        // Standard 95% chance to drop a regular monster card
         rolledKey =
           normalCardKeys[Math.floor(Math.random() * normalCardKeys.length)];
       }
-      let cData = window.MONSTER_CARDS_DATA[rolledKey];
-
-      window.playerStats.monsterCards = window.playerStats.monsterCards || {};
-      let currentOwned = window.playerStats.monsterCards[rolledKey] || 0;
-
-      if (currentOwned >= 600) {
-        recycledDust++;
-        pulledCards.push({
-          key: rolledKey,
-          name: cData.name,
-          isRecycled: true,
-        });
-      } else {
-        window.playerStats.monsterCards[rolledKey] = currentOwned + 1;
-        pulledCards.push({
-          key: rolledKey,
-          name: cData.name,
-          isRecycled: false,
-        });
-      }
+      rolledKeys.push(rolledKey);
     }
 
-    if (recycledDust > 0) {
+    // Consolidated duplicate stacking
+    let aggregatedPulls = {};
+    rolledKeys.forEach((cKey) => {
+      if (!aggregatedPulls[cKey]) {
+        let currentOwned = window.playerStats.monsterCards[cKey] || 0;
+        aggregatedPulls[cKey] = {
+          key: cKey,
+          qty: 0,
+          startCount: currentOwned,
+          endCount: currentOwned,
+          recycledDust: 0,
+        };
+      }
+      let entry = aggregatedPulls[cKey];
+      entry.qty++;
+      if (entry.endCount >= 600) {
+        entry.recycledDust++;
+      } else {
+        entry.endCount++;
+      }
+    });
+
+    let totalRecycledDust = 0;
+    for (let cKey in aggregatedPulls) {
+      let entry = aggregatedPulls[cKey];
+      window.playerStats.monsterCards[cKey] = entry.endCount;
+      totalRecycledDust += entry.recycledDust;
+    }
+    if (totalRecycledDust > 0) {
       window.playerStats.astralDust =
-        (window.playerStats.astralDust || 0) + recycledDust;
+        (window.playerStats.astralDust || 0) + totalRecycledDust;
     }
 
     let overlay = document.createElement("div");
@@ -6245,271 +6258,283 @@ window.useItem = function (itemName) {
 
     window.setPauseState(true);
 
-    overlay.innerHTML = `
-          <style>
-            .pack-wrapper {
-              position: relative;
-              width: 220px;
-              height: 310px;
-              cursor: pointer;
-              perspective: 1000px;
-              animation: floatingPack 3s ease-in-out infinite;
-            }
-            .pack-foil {
-              width: 100%;
-              height: 100%;
-              background: linear-gradient(135deg, #1d0f3a 0%, #3e125c 50%, #1d0f3a 100%);
-              border: 2.5px solid #a855f7;
-              border-radius: 12px;
-              box-shadow: 0 10px 30px rgba(0,0,0,0.85), inset 0 0 15px rgba(168,85,247,0.3);
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              align-items: center;
-              padding: 15px;
-              box-sizing: border-box;
-              position: relative;
-              overflow: hidden;
-            }
-            .pack-foil::before {
-              content: "";
-              position: absolute;
-              top: -150%; left: -50%; width: 200%; height: 200%;
-              background: linear-gradient(135deg, rgba(255,255,255,0) 45%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0) 55%);
-              transform: rotate(-15deg);
-              animation: foilShine 4s linear infinite;
-            }
-            .pack-seal {
-              width: 55px;
-              height: 55px;
-              background: #ff007f;
-              border: 2px solid #fff;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 26px;
-              box-shadow: 0 0 15px #ff007f, inset -3px -3px 6px rgba(0,0,0,0.5);
-              animation: sealGlow 1.5s infinite;
-            }
+    let pulledArray = Object.values(aggregatedPulls);
+          let thresholds = window.CARD_UPGRADE_THRESHOLDS || [1, 50, 150, 300, 750, 1800];
 
-            /* Flip Card Elements */
-            .booster-grid {
-              display: flex;
-              gap: 12px;
-              justify-content: center;
-              flex-wrap: wrap;
-              perspective: 1000px;
-            }
-            .gacha-card {
-              width: 130px;
-              height: 180px;
-              position: relative;
-              cursor: pointer;
-            }
-            .gacha-card-inner {
-              width: 100%;
-              height: 100%;
-              transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-              transform-style: preserve-3d;
-              position: relative;
-            }
-            .gacha-card.flipped .gacha-card-inner {
-              transform: rotateY(180deg);
-            }
-            .gacha-card-front, .gacha-card-back {
-              width: 100%;
-              height: 100%;
-              position: absolute;
-              backface-visibility: hidden;
-              border-radius: 8px;
-              box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              padding: 8px;
-              box-sizing: border-box;
-            }
-            .gacha-card-back {
-              background: linear-gradient(135deg, #120e25 0%, #29124a 100%);
-              border: 2px solid #a855f7;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              color: #df9ffb;
-            }
-            .gacha-card-front {
-              background: #0f1115;
-              transform: rotateY(180deg);
-            }
-
-            @keyframes floatingPack {
-              0%, 100% { transform: translateY(0); }
-              50% { transform: translateY(-10px); }
-            }
-            @keyframes foilShine {
-              0% { transform: translate(-30%, -30%) rotate(-15deg); }
-              100% { transform: translate(130%, 130%) rotate(-15deg); }
-            }
-            @keyframes sealGlow {
-              0%, 100% { box-shadow: 0 0 10px #ff007f; }
-              50% { box-shadow: 0 0 25px #ff007f; }
-            }
-            @keyframes ripFoil {
-              0% { transform: translateY(0) scaleY(1); opacity: 1; }
-              100% { transform: translateY(-100px) scaleY(0); opacity: 0; }
-            }
-            @keyframes cardRevealArc {
-              0% { transform: translateY(120px) scale(0); opacity: 0; }
-              100% { transform: translateY(0) scale(1); opacity: 1; }
-            }
-          </style>
-
-          <div id="booster-pack-stage" style="text-align:center;">
-            <div class="pack-wrapper" onclick="window.ripBoosterPack()">
-              <div class="pack-foil" id="pack-foil-element">
-                <div style="font-size:10px; color:#df9ffb; font-weight:bold; letter-spacing:2px;">BESTIARY ALBUM</div>
-                <div class="pack-seal">🃏</div>
-                <div style="font-size:10px; color:#ff007f; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">Tear Open Booster</div>
-              </div>
-            </div>
-            <div style="font-size:12px; color:#df9ffb; font-weight:bold; margin-top:15px; letter-spacing:1px;">CLICK PACK TO TEAR OPEN</div>
-          </div>
-
-          <div id="booster-cards-stage" style="display:none; text-align:center; width: 100%; max-width:800px; padding:0 20px;">
-            <div style="font-size:13px; font-weight:bold; color:#df9ffb; margin-bottom:12px; letter-spacing:1px;" id="booster-status-text">CARDS OBTAINED: CLICK TO FLIP</div>
-            <div class="booster-grid" id="booster-grid-element"></div>
-            <button id="btn-booster-claim" class="btn-action" style="display:none; background:linear-gradient(135deg, #a855f7, #6c5ce7); border:1px solid #fff; font-weight:bold; font-size:12px; text-transform:uppercase; letter-spacing:1px; padding:12px 35px; border-radius:6px; cursor:pointer; margin-top:20px; box-shadow:0 4px 15px rgba(168,85,247,0.4); animation: pulseGlow 1.5s infinite;">Claim Cards</button>
-          </div>
-        `;
-
-    window.ripBoosterPack = function () {
-      let pack = document.getElementById("booster-pack-stage");
-      let cardsStage = document.getElementById("booster-cards-stage");
-      let grid = document.getElementById("booster-grid-element");
-      if (!pack || !cardsStage || !grid) return;
-
-      if (window.SoundManager) window.SoundManager.play("death"); // Heavy rip sound
-
-      let foil = document.getElementById("pack-foil-element");
-      if (foil) {
-        foil.style.animation =
-          "ripFoil 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards";
-      }
-
-      setTimeout(() => {
-        pack.style.display = "none";
-        cardsStage.style.display = "block";
-        if (window.SoundManager) window.SoundManager.play("revive"); // Mystical cards sound
-
-        let flippedCount = 0;
-        let gridHtml = pulledCards
-          .map((p, idx) => {
-            let cData = window.MONSTER_CARDS_DATA[p.key];
+          let cardsHtml = pulledArray.map((entry, idx) => {
+            let cData = window.MONSTER_CARDS_DATA[entry.key];
             let setDef = window.CARD_SETS_DATA[cData.set];
-            let cardColor = window.getTierColor(p.isRecycled ? 5 : 3);
-
-            let rowHtml = p.isRecycled
-              ? `<div style="font-size:10px; color:#ff007f; font-family:monospace; margin-top:4px; font-weight:bold;">🔄 Recycled (+1 Astral Dust)</div>`
-              : `<span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">New Card Added!</span>`;
+            let isBoss = bossCardKeys.includes(entry.key);
+            let tier = window.getCardTier(entry.endCount);
+            let isLocked = tier < 0;
+            let cardColor = isBoss ? "#ff007f" : window.getTierColor(tier);
 
             let cardCanvasId = `booster-card-canvas-${idx}`;
+            let isHoloClass = isBoss ? "boss-card-glow" : "";
+
+            let labelText = isBoss ? "BOSS CARD" : "MONSTER";
+            let dustHtml = entry.recycledDust > 0
+              ? `<div style="font-size:9.5px; color:#ff007f; font-family:monospace; font-weight:bold; margin-top:2px;">Recycled (+${entry.recycledDust} Dust)</div>`
+              : `<span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Copies added: +${entry.qty}</span>`;
+
+            // Calculate card progression stats to prevent reference errors
+            let nextThreshold = thresholds[tier + 1] || 1800;
+            let baseThreshold = thresholds[tier] || 0;
+            let isMaxed = tier >= 5;
+
+            // Custom Newly Unlocked Visual state logic
+            let isNewUnlock = entry.startCount === 0;
+
+            let flatProgressText = "";
+            let fillPct = 0;
+            let firstThreshold = thresholds[0] || 1;
+
+            let displayCount = entry.endCount;
+            if (isNewUnlock) {
+              flatProgressText = "✨ UNLOCKED!";
+              fillPct = 100; // Render progress bar fully glowing to denote unlock
+            } else if (isMaxed) {
+              flatProgressText = "MAX TIER";
+              fillPct = 100;
+            } else {
+              flatProgressText = `${displayCount} / ${nextThreshold}`;
+              fillPct = ((displayCount - baseThreshold) / (nextThreshold - baseThreshold)) * 100;
+            }
 
             return `
-                                        <div class="gacha-card" style="width:130px; height:180px; position:relative; perspective:1000px;"
-                                             onmouseenter="window.showCardTooltip(event, '${p.key}')"
-                                             onmouseleave="window.hideTooltip()"
-                                             ontouchstart="window.showCardTooltip(event, '${p.key}')">
-                                          <div class="gacha-card-inner" id="gacha-card-inner-${p.key}" style="
-                                            width:100%; height:100%; transition:transform 0.6s; transform-style:preserve-3d; position:relative; cursor:pointer;
-                                          " onclick="window.flipGachaCard('${p.key}')">
-                                            <!-- Front Face (Mystical Card Back) -->
-                                            <div class="gacha-card-back" style="
-                                              width:100%; height:100%; position:absolute; backface-visibility:hidden; border-radius:8px; border:2.5px solid #a855f7; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(135deg, #120e25 0%, #29124a 100%);
-                                            ">
-                                              <div style="font-size:30px; margin-bottom:6px;">🃏</div>
-                                              <div style="font-size:8px; letter-spacing:1px; font-weight:bold; color:#a855f7; text-transform:uppercase;">FLIP CARD</div>
-                                            </div>
-                                            <!-- Back Face (Card illustration Front) -->
-                                            <div class="gacha-card-front" style="
-                                              width:100%; height:100%; position:absolute; backface-visibility:hidden; border-radius:8px; border:2.5px solid ${cardColor}; display:flex; flex-direction:column; justify-content:space-between; padding:8px; background:#0c0812; transform:rotateY(180deg);
-                                            ">
-                                              <div style="display:flex; flex-direction:column; justify-content:space-between; height:100%; text-align:center;">
-                                                <strong style="color:${cardColor}; font-size:11px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cData.name}</strong>
-                                                <span style="font-size:8px; color:#888; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-top:1px;">Set: ${setDef.name.replace(" Set", "")}</span>
-                                                <div style="text-align:center; margin:6px 0; display:flex; justify-content:center; align-items:center;">
-                                                  <div style="background: rgba(0,0,0,0.6); border: 1.5px solid ${cardColor}44; border-radius: 4px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: inset 0 0 6px #000;">
-                                                    <canvas id="${cardCanvasId}" data-card-key="${p.key}" width="48" height="48" style="width:48px; height:48px; pointer-events:none; image-rendering:pixelated;"></canvas>
-                                                  </div>
-                                                </div>
-                                                <div style="border-top:1px dashed #333; margin-top:4px; padding-top:4px;">
-                                                  ${rowHtml}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      `;
-          })
-          .join("");
+              <div class="market-card ${isHoloClass}" style="
+                background: linear-gradient(135deg, #110d1c 0%, #06040a 100%);
+                border: 2px solid ${cardColor};
+                border-radius: 10px;
+                padding: 8px 10px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
+                position: relative;
+                width: 130px;
+                height: 220px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.65), inset 0 0 10px ${cardColor}15;
+                transition: transform 0.18s, box-shadow 0.18s;
+              "
+              onmouseenter="window.showCardTooltip(event, '${entry.key}')"
+              onmouseleave="window.hideTooltip()"
+              ontouchstart="window.showCardTooltip(event, '${entry.key}')">
 
-        grid.innerHTML = gridHtml;
+                <!-- Overlap Duplicate Multiplier Badge -->
+                <span style="position: absolute; top: -6px; right: -6px; background: ${cardColor}; color: ${isBoss ? "#fff" : "#111"}; border: 1.5px solid #fff; border-radius: 50%; font-size: 10px; font-weight: 900; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 10;">
+                  x${entry.qty}
+                </span>
 
-        // Paint all the unboxed monster canvases instantly
-        pulledCards.forEach((p, idx) => {
-          let canvas = document.getElementById(`booster-card-canvas-${idx}`);
-          if (canvas && window.drawMonsterOnCanvas) {
-            window.drawMonsterOnCanvas(canvas, p.key, false); // Always drawn full-color inside reveal
-          }
-        });
+                <div style="width:100%; text-align:center;">
+                  <strong style="color:${cardColor}; font-size:11.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:sans-serif;">${cData.name.replace(" Card", "")}</strong>
+                  <span style="font-size:8px; color:#888; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-top:1px;">${isLocked ? "Locked" : window.getTierName(tier)}</span>
+                </div>
 
-        window.flipGachaCard = function (cKey) {
-          let cardInner = document.getElementById(`gacha-card-inner-${cKey}`);
-          if (!cardInner || cardInner.classList.contains("flipped")) return;
+                <!-- Card Art Canvas Frame (Restored missing data-card-key attribute to enable live portraits) -->
+                <div style="background: rgba(0,0,0,0.6); border: 1.5px solid ${isLocked ? "#222" : cardColor}44; border-radius: 6px; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 4px 0; box-shadow: inset 0 0 8px #000;">
+                  <canvas id="${cardCanvasId}" data-card-key="${entry.key}" width="64" height="64" style="width:64px; height:64px; pointer-events:none; image-rendering:pixelated;"></canvas>
+                </div>
 
-          cardInner.classList.add("flipped");
-          cardInner.style.transform = "rotateY(180deg)";
-          if (window.SoundManager) window.SoundManager.play("spell");
+                <div style="width:100%; text-align:center; min-height: 28px;">
+                  ${dustHtml}
+                </div>
 
-          flippedCount++;
-          let status = document.getElementById("booster-status-text");
-          if (status) {
-            status.innerText = `CARDS REVEALED: ${flippedCount} / 5`;
-          }
+                <!-- Progress Bar Track -->
+                <div style="width:100%; margin-top:4px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; height:18px;">
+                    <span style="font-size:8px; color:#df9ffb; font-family:monospace; font-weight:bold;">${flatProgressText}</span>
+                  </div>
+                  <div class="sink-prog-track" style="margin:0; height:5px !important;">
+                    <div id="progress-fill-${idx}" style="width: 0%; height:100%; transition: width 1.2s cubic-bezier(0.25, 0.8, 0.25, 1); background: ${cardColor};"></div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join("");
 
-          if (flippedCount === 5) {
-            let claimBtn = document.getElementById("btn-booster-claim");
-            if (claimBtn) {
-              claimBtn.style.display = "inline-block";
-              claimBtn.style.opacity = "0";
+          overlay.innerHTML = `
+                <style>
+                  .pack-wrapper {
+                    position: relative;
+                    width: 220px;
+                    height: 310px;
+                    cursor: pointer;
+                    perspective: 1000px;
+                    animation: floatingPack 3s ease-in-out infinite;
+                  }
+                  .pack-foil {
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(135deg, #180a2b 0%, #3e125c 50%, #10061d 100%);
+                    border: 2.5px solid #a855f7;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.85), inset 0 0 15px rgba(168,85,247,0.3);
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 15px;
+                    box-sizing: border-box;
+                    position: relative;
+                    overflow: hidden;
+                  }
+                  .pack-foil::before {
+                    content: "";
+                    position: absolute;
+                    top: -150%; left: -50%; width: 200%; height: 200%;
+                    background: linear-gradient(135deg, rgba(255,255,255,0) 45%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0) 55%);
+                    transform: rotate(-15deg);
+                    animation: foilShine 4s linear infinite;
+                  }
+                  .pack-seal-frame {
+                    width: 55px;
+                    height: 55px;
+                    background: #ff007f;
+                    border: 2.5px solid #fff;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 0 15px #ff007f, inset -3px -3px 6px rgba(0,0,0,0.5);
+                    animation: sealGlow 1.5s infinite;
+                  }
+
+                  /* Consolidated Grid Sizing */
+                  .booster-grid {
+                    display: flex;
+                    gap: 12px;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                  }
+
+                  @keyframes pulseGlowBoss {
+                    0%, 100% { box-shadow: 0 0 10px #ff007f, inset 0 0 8px rgba(255, 0, 127, 0.15); border-color: #ff007f; }
+                    50% { box-shadow: 0 0 25px #ff007f, inset 0 0 15px rgba(255, 0, 127, 0.35); border-color: #ff007f; }
+                  }
+                  .boss-card-glow {
+                    animation: pulseGlowBoss 1.5s infinite !important;
+                  }
+
+                  @keyframes floatingPack {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-10px); }
+                  }
+                  @keyframes foilShine {
+                    0% { transform: translate(-30%, -30%) rotate(-15deg); }
+                    100% { transform: translate(130%, 130%) rotate(-15deg); }
+                  }
+                  @keyframes sealGlow {
+                    0%, 100% { box-shadow: 0 0 10px #ff007f; }
+                    50% { box-shadow: 0 0 25px #ff007f; }
+                  }
+                  @keyframes ripFoil {
+                    0% { transform: translateY(0) scaleY(1); opacity: 1; }
+                    100% { transform: translateY(-120px) scaleY(0); opacity: 0; }
+                  }
+                </style>
+
+                <div id="booster-pack-stage" style="text-align:center;">
+                  <div class="pack-wrapper" onclick="window.ripBoosterPack()">
+                    <div class="pack-foil" id="pack-foil-element">
+                      <div style="font-size:10px; color:#df9ffb; font-weight:bold; letter-spacing:2px; font-family:monospace;">BOOSTER CONSOLE</div>
+                      <div class="pack-seal-frame">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="filter: drop-shadow(0 0 3px #fff);"><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="5" stroke="#fff" fill="#ff007f" fill-opacity="0.15"/><circle cx="12" cy="12" r="1.5" fill="#fff"/></svg>
+                      </div>
+                      <div style="font-size:10px; color:#ff007f; font-weight:bold; letter-spacing:1px; text-transform:uppercase; font-family:monospace;">Tear open booster</div>
+                    </div>
+                  </div>
+                  <div style="font-size:12px; color:#df9ffb; font-weight:bold; margin-top:15px; letter-spacing:1px; font-family:monospace;">CLICK PACK TO TEAR OPEN</div>
+                </div>
+
+                <div id="booster-cards-stage" style="display:none; text-align:center; width: 100%; max-width:800px; padding:0 20px;">
+                  <div style="font-size:13px; font-weight:bold; color:#df9ffb; margin-bottom:12px; letter-spacing:1px; font-family:monospace;" id="booster-status-text">UNBOXED CARDS SUMMARY</div>
+                  <div class="booster-grid" id="booster-grid-element"></div>
+                  <button id="btn-booster-claim" class="btn-action" style="display:none; background:linear-gradient(135deg, #a855f7, #6c5ce7); border:1px solid #fff; font-weight:bold; font-size:12px; text-transform:uppercase; letter-spacing:1px; padding:12px 35px; border-radius:6px; cursor:pointer; margin-top:20px; box-shadow:0 4px 15px rgba(168,85,247,0.4); animation: pulseGlow 1.5s infinite;">Claim Cards</button>
+                </div>
+              `;
+
+          window.ripBoosterPack = function () {
+            let pack = document.getElementById("booster-pack-stage");
+            let cardsStage = document.getElementById("booster-cards-stage");
+            let grid = document.getElementById("booster-grid-element");
+            if (!pack || !cardsStage || !grid) return;
+
+            if (window.SoundManager) {
+              let hasBossCard = pulledArray.some((entry) => bossCardKeys.includes(entry.key));
+              window.SoundManager.play(hasBossCard ? "revive" : "death");
+            }
+
+            let foil = document.getElementById("pack-foil-element");
+            if (foil) {
+              foil.style.animation =
+                "ripFoil 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards";
+            }
+
+            setTimeout(() => {
+              pack.style.display = "none";
+              cardsStage.style.display = "block";
+
+              // Secure Card Drawing Injection: Populate the unboxed card items into the grid dynamically as it is revealed
+              grid.innerHTML = cardsHtml;
+
+              // Trigger progress bar filling animations smoothly
               setTimeout(() => {
-                claimBtn.style.transition = "opacity 0.4s ease";
-                claimBtn.style.opacity = "1";
-              }, 50);
-            }
-            if (status) {
-              status.innerHTML = `<span style="color:#2ecc71; font-weight:bold;">ALL CARDS UNBOXED!</span>`;
-            }
-          }
-        };
+                pulledArray.forEach((entry, idx) => {
+                  let fill = document.getElementById(`progress-fill-${idx}`);
+                  if (fill) {
+                    let isNewUnlock = entry.startCount === 0;
+                    if (isNewUnlock) {
+                      // If it is a new unlock, transition from 0% to 100% to represent the unlock event
+                      fill.style.width = "0%";
+                      setTimeout(() => {
+                        fill.style.width = "100%";
+                      }, 100);
+                    } else {
+                      // Normal duplicate progress bar transitions
+                      let t = window.getCardTier(entry.startCount);
+                      let baseVal = t < 0 ? 0 : (thresholds[t] || 0);
+                      let nextVal = thresholds[t + 1] || 1800;
+                      let startPct = ((entry.startCount - baseVal) / (nextVal - baseVal)) * 100;
+                      let endPct = ((entry.endCount - baseVal) / (nextVal - baseVal)) * 100;
 
-        let claimBtn = document.getElementById("btn-booster-claim");
-        if (claimBtn) {
-          claimBtn.onclick = function () {
-            overlay.remove();
-            window.isGamePaused = false;
-            window.updateUI();
-            window.renderInventory();
+                      fill.style.width = Math.min(100, Math.max(0, startPct)) + "%";
+                      setTimeout(() => {
+                        fill.style.width = Math.min(100, Math.max(0, endPct)) + "%";
+                      }, 100);
+                    }
+                  }
+                });
+              }, 150);
+
+              let claimBtn = document.getElementById("btn-booster-claim");
+              if (claimBtn) {
+                claimBtn.style.display = "inline-block";
+                claimBtn.style.opacity = "0";
+                setTimeout(() => {
+                  claimBtn.style.transition = "opacity 0.4s ease";
+                  claimBtn.style.opacity = "1";
+                }, 400);
+              }
+
+              // Initiate the unboxed cards live-drawing loop
+              if (typeof window.animateBoosterCards === "function") {
+                window.animateBoosterCards();
+              }
+            }, 550);
           };
-        }
 
-        // Initiate the unboxed cards live-animation loop
-        if (typeof window.animateBoosterCards === "function") {
-          window.animateBoosterCards();
-        }
-      }, 550);
-    };
+          // Safely register local click handler to avoid element race conditions
+          let claimBtn = overlay.querySelector("#btn-booster-claim");
+          if (claimBtn) {
+            claimBtn.onclick = function () {
+              overlay.remove();
+              window.isGamePaused = false;
+              window.updateUI();
+              window.renderInventory();
+            };
+          }
+        } else if (itemName === "Cavern Sigil Sack") {
   } else if (itemName === "Cavern Sigil Sack") {
     // Uncapped specialised pouch; not bound by bag space limits
     window.inventory.USE[itemName]--;
@@ -6868,13 +6893,13 @@ window.enterDungeon = function (type) {
       window.playerStats.killCount = 0;
       window.playerStats.targetsRequired = 5;
       window.playerStats.isBossMode = false;
-            window.playerStats.isUberBoss = false;
-            window.mob = null;
+      window.playerStats.isUberBoss = false;
+      window.mob = null;
 
-            window.invalidatePlayerStats();
-            let p = window.resolvePlayerStats();
-            window.playerStats.currentHp = p.maxHp;
-            window.pushLog(
+      window.invalidatePlayerStats();
+      let p = window.resolvePlayerStats();
+      window.playerStats.currentHp = p.maxHp;
+      window.pushLog(
         `<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON] Descended into the Infinite ${dNames[type]} at Stage ${checkpoint}!</span>`,
       );
       let menu = document.getElementById("dungeon-menu");
@@ -6905,41 +6930,41 @@ window.enterCrucible = function () {
   }
 
   let peak = window.playerStats.lifetimePeakStage || 1;
-    let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
+  let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
 
-    window.showCustomConfirm(
-      "Enter Astral Crucible",
-      `Spend 100 Monster Souls to enter the Astral Crucible? (Starts at Wave 1 with enemy stats scaled to Stage ${startingStageOffset})`,
-      "Enter Crucible",
-      "Cancel",
-      "#9b59b6",
-      function () {
-        window.saveCurrentActivityPeak();
-        window.inventory.ETC["Monster Soul"] -= 100;
-        if (window.inventory.ETC["Monster Soul"] === 0) {
-          delete window.inventory.ETC["Monster Soul"];
-        }
+  window.showCustomConfirm(
+    "Enter Astral Crucible",
+    `Spend 100 Monster Souls to enter the Astral Crucible? (Starts at Wave 1 with enemy stats scaled to Stage ${startingStageOffset})`,
+    "Enter Crucible",
+    "Cancel",
+    "#9b59b6",
+    function () {
+      window.saveCurrentActivityPeak();
+      window.inventory.ETC["Monster Soul"] -= 100;
+      if (window.inventory.ETC["Monster Soul"] === 0) {
+        delete window.inventory.ETC["Monster Soul"];
+      }
 
-        // Initialize clean run accumulators
-        window.playerStats.crucibleAccumulatedGold = 0;
-        window.playerStats.crucibleAccumulatedXp = 0;
-        window.playerStats.crucibleDraftDeck = [];
-        window.playerStats.crucibleWavesClearedThisRun = 0; // Local run wave clear tracker
-        window.playerStats.crucibleSelfDmgReduction = 1.0;
-        window.playerStats.crucibleSlotBonuses = {
-          weapon: 0,
-          subweapon: 0,
-          helmet: 0,
-          chest: 0,
-          leggings: 0,
-          overall: 0,
-          boots: 0,
-        };
+      // Initialize clean run accumulators
+      window.playerStats.crucibleAccumulatedGold = 0;
+      window.playerStats.crucibleAccumulatedXp = 0;
+      window.playerStats.crucibleDraftDeck = [];
+      window.playerStats.crucibleWavesClearedThisRun = 0; // Local run wave clear tracker
+      window.playerStats.crucibleSelfDmgReduction = 1.0;
+      window.playerStats.crucibleSlotBonuses = {
+        weapon: 0,
+        subweapon: 0,
+        helmet: 0,
+        chest: 0,
+        leggings: 0,
+        overall: 0,
+        boots: 0,
+      };
 
-        window.playerStats.isCrucibleMode = true;
-        window.playerStats.isDungeonMode = false;
-        window.playerStats.crucibleWave = 1;
-        window.playerStats.crucibleStartWave = 1;
+      window.playerStats.isCrucibleMode = true;
+      window.playerStats.isDungeonMode = false;
+      window.playerStats.crucibleWave = 1;
+      window.playerStats.crucibleStartWave = 1;
       window.playerStats.killCount = 0;
       window.playerStats.targetsRequired = 5;
       window.playerStats.isBossMode = false;
@@ -6952,14 +6977,14 @@ window.enterCrucible = function () {
       window.playerStats.crucibleLootMult = 1.0;
 
       window.playerStats.crucibleRunActive = true;
-            window.playerStats.crucibleAccumulatedShards = 0;
-            window.playerStats.crucibleAccumulatedCores = 0;
+      window.playerStats.crucibleAccumulatedShards = 0;
+      window.playerStats.crucibleAccumulatedCores = 0;
 
-            window.invalidatePlayerStats();
-            let p = window.resolvePlayerStats();
-            window.playerStats.currentHp = p.maxHp;
+      window.invalidatePlayerStats();
+      let p = window.resolvePlayerStats();
+      window.playerStats.currentHp = p.maxHp;
 
-            window.pushLog(
+      window.pushLog(
         `<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE] Commenced Astral Crucible run!</span>`,
       );
 
@@ -7684,25 +7709,25 @@ window.openCrucibleMidRunDraftModal = function () {
 };
 
 window.executeMidRunCardSelection = function (cardId) {
-    let oldMaxHp = window.resolvePlayerStats().maxHp;
+  let oldMaxHp = window.resolvePlayerStats().maxHp;
 
-    window.playerStats.crucibleDraftDeck =
-      window.playerStats.crucibleDraftDeck || [];
-    window.playerStats.crucibleDraftDeck.push(cardId);
+  window.playerStats.crucibleDraftDeck =
+    window.playerStats.crucibleDraftDeck || [];
+  window.playerStats.crucibleDraftDeck.push(cardId);
 
-    // Invalidate character stat cache to capture modifications instantly
-    window.invalidatePlayerStats();
+  // Invalidate character stat cache to capture modifications instantly
+  window.invalidatePlayerStats();
 
-    let newMaxHp = window.resolvePlayerStats().maxHp;
-    window.playerStats.currentHp = Math.max(
-      1,
-      Math.min(
-        newMaxHp,
-        Math.floor((window.playerStats.currentHp / oldMaxHp) * newMaxHp),
-      ),
-    );
+  let newMaxHp = window.resolvePlayerStats().maxHp;
+  window.playerStats.currentHp = Math.max(
+    1,
+    Math.min(
+      newMaxHp,
+      Math.floor((window.playerStats.currentHp / oldMaxHp) * newMaxHp),
+    ),
+  );
 
-    let overlay = document.getElementById("crucible-midrun-draft-overlay");
+  let overlay = document.getElementById("crucible-midrun-draft-overlay");
   if (overlay) overlay.remove();
 
   if (window.SoundManager) window.SoundManager.play("spell");

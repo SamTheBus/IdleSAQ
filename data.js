@@ -1393,7 +1393,9 @@ window.resolvePlayerStats = function (useDraft = false) {
     window.playerStats.crucibleActiveBuff
   ) {
     let b = window.playerStats.crucibleActiveBuff;
-    let d = window.playerStats.crucibleActiveDebuff;
+    // Debuffs have been disabled entirely in the Crucible per tactical review
+    window.playerStats.crucibleActiveDebuff = null;
+    let d = null;
     let isBuffInfused = window.playerStats.crucibleInfusedType === "buff";
     let isDebuffInfused = window.playerStats.crucibleInfusedType === "debuff";
 

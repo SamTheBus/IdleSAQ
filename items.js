@@ -373,30 +373,30 @@ window.renderForgeTab = function () {
   };
 
   if (window.forgeMode === "temper") {
-      let slotsKeys = [
-        "weapon",
-        "subweapon",
-        "helmet",
-        "chest",
-        "leggings",
-        "overall",
-        "boots",
-        "art1",
-        "art2",
-        "art3",
-      ];
-      let slotsLabels = {
-        weapon: "Weapon Slot",
-        subweapon: "Offhand Slot",
-        helmet: "Helmet Slot",
-        chest: "Chest Slot",
-        leggings: "Leggings Slot",
-        overall: "Overall Slot",
-        boots: "Boots Slot",
-        art1: "Artifact Slot 1",
-        art2: "Artifact Slot 2",
-        art3: "Artifact Slot 3",
-      };
+    let slotsKeys = [
+      "weapon",
+      "subweapon",
+      "helmet",
+      "chest",
+      "leggings",
+      "overall",
+      "boots",
+      "art1",
+      "art2",
+      "art3",
+    ];
+    let slotsLabels = {
+      weapon: "Weapon Slot",
+      subweapon: "Offhand Slot",
+      helmet: "Helmet Slot",
+      chest: "Chest Slot",
+      leggings: "Leggings Slot",
+      overall: "Overall Slot",
+      boots: "Boots Slot",
+      art1: "Artifact Slot 1",
+      art2: "Artifact Slot 2",
+      art3: "Artifact Slot 3",
+    };
 
     listEl.innerHTML = slotsKeys
       .map((key) => {
@@ -463,13 +463,13 @@ window.renderForgeTab = function () {
       );
 
     let eqItem = window.equippedSlots[slotKey];
-        let liveComparisonHtml = "";
-        if (eqItem) {
-          let curMult = 1.0 + lvl * 0.01;
-          let nextMult = 1.0 + (lvl + 1) * 0.01;
+    let liveComparisonHtml = "";
+    if (eqItem) {
+      let curMult = 1.0 + lvl * 0.01;
+      let nextMult = 1.0 + (lvl + 1) * 0.01;
 
-          if (eqItem.type === "artifact") {
-            liveComparisonHtml = `
+      if (eqItem.type === "artifact") {
+        liveComparisonHtml = `
               <div style="margin-top:12px; padding:10px; background:#111; border:1px solid #9b59b6; border-radius:6px; font-family:monospace; font-size:10.5px; text-align:left;">
                 <div style="color:#9b59b6; font-weight:bold; margin-bottom:4px; text-transform:uppercase;">📊 Artifact Attunement:</div>
                 <div style="color:#fff;">${eqItem.name}</div>
@@ -478,25 +478,25 @@ window.renderForgeTab = function () {
                 </div>
               </div>
             `;
-          } else {
-            let primaryStatKey =
-              eqItem.type === "weapon"
-                ? "atk"
-                : eqItem.type === "subweapon"
-                  ? eqItem.subType === "shield"
-                    ? "def"
-                    : eqItem.subType === "dagger"
-                      ? "atk"
-                      : "int"
-                  : "def";
-            let labelStat = primaryStatKey.toUpperCase();
-            let baseItemVal = eqItem[primaryStatKey] || 10;
+      } else {
+        let primaryStatKey =
+          eqItem.type === "weapon"
+            ? "atk"
+            : eqItem.type === "subweapon"
+              ? eqItem.subType === "shield"
+                ? "def"
+                : eqItem.subType === "dagger"
+                  ? "atk"
+                  : "int"
+              : "def";
+        let labelStat = primaryStatKey.toUpperCase();
+        let baseItemVal = eqItem[primaryStatKey] || 10;
 
-            let curEffective = Math.ceil(baseItemVal * curMult);
-            let nextEffective = Math.ceil(baseItemVal * nextMult);
-            let diff = nextEffective - curEffective;
+        let curEffective = Math.ceil(baseItemVal * curMult);
+        let nextEffective = Math.ceil(baseItemVal * nextMult);
+        let diff = nextEffective - curEffective;
 
-            liveComparisonHtml = `
+        liveComparisonHtml = `
               <div style="margin-top:12px; padding:10px; background:#111; border:1px solid #3498db; border-radius:6px; font-family:monospace; font-size:10.5px; text-align:left;">
                 <div style="color:#3498db; font-weight:bold; margin-bottom:4px; text-transform:uppercase;">📊 Equipped Item Live Preview:</div>
                 <div style="color:#fff;">${eqItem.name}</div>
@@ -506,8 +506,8 @@ window.renderForgeTab = function () {
                 </div>
               </div>
             `;
-          }
-        } else {
+      }
+    } else {
       liveComparisonHtml = `
         <div style="margin-top:12px; padding:10px; background:#111; border:1px dashed #444; border-radius:6px; font-size:10.5px; color:#aaa; text-align:center;">
           No item currently equipped in this slot.<br>Attunement multiplier (+${lvl}%) is fully prepared and waiting.
@@ -3066,12 +3066,13 @@ Object.assign(window.ForgeManager, {
   selectForgeSlot(slotKey) {
     window.state.selectedForgeSlot = slotKey;
     if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-  }
+  },
 });
 
 // Legacy Compatibility Aliases to protect references
 window.selectForgeItem = (id) => window.ForgeManager.selectForgeItem(id);
-window.selectForgeSlot = (slotKey) => window.ForgeManager.selectForgeSlot(slotKey);
+window.selectForgeSlot = (slotKey) =>
+  window.ForgeManager.selectForgeSlot(slotKey);
 
 // Append setForgeMode inside ForgeManager
 Object.assign(window.ForgeManager, {
@@ -3286,15 +3287,17 @@ Object.assign(window.ForgeManager, {
             );
 
           if (typeof window.resolvePlayerStats === "function") {
-                    let newMaxHp = window.resolvePlayerStats().maxHp;
-                    window.playerStats.currentHp = Math.max(
-                      1,
-                      Math.min(
-                        newMaxHp,
-                        Math.floor((window.playerStats.currentHp / oldMaxHp) * newMaxHp),
-                      ),
-                    );
-                  }
+            let newMaxHp = window.resolvePlayerStats().maxHp;
+            window.playerStats.currentHp = Math.max(
+              1,
+              Math.min(
+                newMaxHp,
+                Math.floor(
+                  (window.playerStats.currentHp / oldMaxHp) * newMaxHp,
+                ),
+              ),
+            );
+          }
 
           if (typeof window.checkAchievements === "function")
             window.checkAchievements();
