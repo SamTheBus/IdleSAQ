@@ -624,47 +624,47 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   let p = {
-      atk: window.playerStats.baseAtk,
-      maxHp: window.playerStats.baseMaxHp,
-      def: window.playerStats.baseDef,
-      moveSpeed: window.playerStats.baseMoveSpeed,
-      idleAttackSpeed: window.playerStats.baseIdleSpeed,
-      activeAttackSpeed: window.playerStats.baseActiveSpeed,
-      drop: window.playerStats.baseDrop,
-      qly: window.playerStats.baseQuality,
-      gold: window.playerStats.baseGold,
-      critChance: window.playerStats.baseCritChance,
-      critDamage: window.playerStats.baseCritDamage,
-      block: window.playerStats.baseBlock,
-      parry: window.playerStats.baseParry,
-      rareSpawn: window.playerStats.baseRareSpawn,
-      str: window.playerStats.baseStr,
-      dex: window.playerStats.baseDex,
-      int: window.playerStats.baseInt,
-      fairySpawn: window.playerStats.baseFairySpawn,
-      arcaneBarrier: 0.0,
-      xpRate: 1.0,
-      crucibleSelfDmgReduction: 1.0,
-      crucibleCritHeal: 0.0,
-      crucibleEchoChance: 0.0,
-      crucibleCapBonus: 0.0,
-      crucibleShardMult: 1.0,
-      crucibleSpellChanceBonus: 0.0,
-      crucibleDaggerBleed: 0,
-    };
+    atk: window.playerStats.baseAtk,
+    maxHp: window.playerStats.baseMaxHp,
+    def: window.playerStats.baseDef,
+    moveSpeed: window.playerStats.baseMoveSpeed,
+    idleAttackSpeed: window.playerStats.baseIdleSpeed,
+    activeAttackSpeed: window.playerStats.baseActiveSpeed,
+    drop: window.playerStats.baseDrop,
+    qly: window.playerStats.baseQuality,
+    gold: window.playerStats.baseGold,
+    critChance: window.playerStats.baseCritChance,
+    critDamage: window.playerStats.baseCritDamage,
+    block: window.playerStats.baseBlock,
+    parry: window.playerStats.baseParry,
+    rareSpawn: window.playerStats.baseRareSpawn,
+    str: window.playerStats.baseStr,
+    dex: window.playerStats.baseDex,
+    int: window.playerStats.baseInt,
+    fairySpawn: window.playerStats.baseFairySpawn,
+    arcaneBarrier: 0.0,
+    xpRate: 1.0,
+    crucibleSelfDmgReduction: 1.0,
+    crucibleCritHeal: 0.0,
+    crucibleEchoChance: 0.0,
+    crucibleCapBonus: 0.0,
+    crucibleShardMult: 1.0,
+    crucibleSpellChanceBonus: 0.0,
+    crucibleDaggerBleed: 0,
+  };
 
-    // Secure Local Slot Bonus Matrix to prevent runaway persistent state compounding
-    p.crucibleSlotBonuses = {
-      weapon: 0,
-      subweapon: 0,
-      helmet: 0,
-      chest: 0,
-      leggings: 0,
-      overall: 0,
-      boots: 0
-    };
+  // Secure Local Slot Bonus Matrix to prevent runaway persistent state compounding
+  p.crucibleSlotBonuses = {
+    weapon: 0,
+    subweapon: 0,
+    helmet: 0,
+    chest: 0,
+    leggings: 0,
+    overall: 0,
+    boots: 0,
+  };
 
-    // Passive cumulative title multipliers applied prior to other calculations
+  // Passive cumulative title multipliers applied prior to other calculations
   if (window.playerStats.unlockedTitles) {
     window.playerStats.unlockedTitles.forEach((tKey) => {
       let tData = window.TITLES_DATA[tKey];
@@ -751,18 +751,18 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   for (let key in window.equippedSlots) {
-      let item = window.equippedSlots[key];
-      if (item) {
-        let slotLvl =
-          (window.playerStats.slotUpgrades &&
-            window.playerStats.slotUpgrades[key]) ||
-          0;
-        let runBonus =
-          (window.playerStats.isCrucibleMode &&
-            p.crucibleSlotBonuses &&
-            p.crucibleSlotBonuses[key]) ||
-          0;
-        let slotMult = 1.0 + slotLvl * 0.01 + runBonus;
+    let item = window.equippedSlots[key];
+    if (item) {
+      let slotLvl =
+        (window.playerStats.slotUpgrades &&
+          window.playerStats.slotUpgrades[key]) ||
+        0;
+      let runBonus =
+        (window.playerStats.isCrucibleMode &&
+          p.crucibleSlotBonuses &&
+          p.crucibleSlotBonuses[key]) ||
+        0;
+      let slotMult = 1.0 + slotLvl * 0.01 + runBonus;
 
       p.atk += (item.atk || 0) * slotMult;
       p.maxHp += (item.maxHp || 0) * slotMult;
@@ -1605,54 +1605,57 @@ window.CRUCIBLE_DRAFT_POOL = [
     },
   },
   {
-      id: "slot_weapon",
-      name: "Bladesmith's Touch",
-      desc: "+15% to all stats of the equipped Weapon slot for this run",
-      apply: (p) => {
-        p.crucibleSlotBonuses.weapon = (p.crucibleSlotBonuses.weapon || 0) + 0.15;
-      },
+    id: "slot_weapon",
+    name: "Bladesmith's Touch",
+    desc: "+15% to all stats of the equipped Weapon slot for this run",
+    apply: (p) => {
+      p.crucibleSlotBonuses.weapon = (p.crucibleSlotBonuses.weapon || 0) + 0.15;
     },
-    {
-      id: "slot_subweapon",
-      name: "Aegis Convergence",
-      desc: "+15% to all stats of the equipped Subweapon (Offhand) slot for this run",
-      apply: (p) => {
-        p.crucibleSlotBonuses.subweapon = (p.crucibleSlotBonuses.subweapon || 0) + 0.15;
-      },
+  },
+  {
+    id: "slot_subweapon",
+    name: "Aegis Convergence",
+    desc: "+15% to all stats of the equipped Subweapon (Offhand) slot for this run",
+    apply: (p) => {
+      p.crucibleSlotBonuses.subweapon =
+        (p.crucibleSlotBonuses.subweapon || 0) + 0.15;
     },
-    {
-      id: "slot_helmet",
-      name: "Crown Alignment",
-      desc: "+15% to all stats of the equipped Helmet slot for this run",
-      apply: (p) => {
-        p.crucibleSlotBonuses.helmet = (p.crucibleSlotBonuses.helmet || 0) + 0.15;
-      },
+  },
+  {
+    id: "slot_helmet",
+    name: "Crown Alignment",
+    desc: "+15% to all stats of the equipped Helmet slot for this run",
+    apply: (p) => {
+      p.crucibleSlotBonuses.helmet = (p.crucibleSlotBonuses.helmet || 0) + 0.15;
     },
-    {
-      id: "slot_torso",
-      name: "Fortress Plate",
-      desc: "+15% to all stats of equipped Chest and Overall slots for this run",
-      apply: (p) => {
-        p.crucibleSlotBonuses.chest = (p.crucibleSlotBonuses.chest || 0) + 0.15;
-        p.crucibleSlotBonuses.overall = (p.crucibleSlotBonuses.overall || 0) + 0.15;
-      },
+  },
+  {
+    id: "slot_torso",
+    name: "Fortress Plate",
+    desc: "+15% to all stats of equipped Chest and Overall slots for this run",
+    apply: (p) => {
+      p.crucibleSlotBonuses.chest = (p.crucibleSlotBonuses.chest || 0) + 0.15;
+      p.crucibleSlotBonuses.overall =
+        (p.crucibleSlotBonuses.overall || 0) + 0.15;
     },
-    {
-      id: "slot_leggings",
-      name: "Reinforced Chausses",
-      desc: "+15% to all stats of the equipped Leggings slot for this run",
-      apply: (p) => {
-        p.crucibleSlotBonuses.leggings = (p.crucibleSlotBonuses.leggings || 0) + 0.15;
-      },
+  },
+  {
+    id: "slot_leggings",
+    name: "Reinforced Chausses",
+    desc: "+15% to all stats of the equipped Leggings slot for this run",
+    apply: (p) => {
+      p.crucibleSlotBonuses.leggings =
+        (p.crucibleSlotBonuses.leggings || 0) + 0.15;
     },
-    {
-      id: "slot_boots",
-      name: "Mercury Wings",
-      desc: "+15% to all stats of the equipped Boots slot for this run",
-      apply: (p) => {
-        p.crucibleSlotBonuses.boots = (p.crucibleSlotBonuses.boots || 0) + 0.15;
-      },
+  },
+  {
+    id: "slot_boots",
+    name: "Mercury Wings",
+    desc: "+15% to all stats of the equipped Boots slot for this run",
+    apply: (p) => {
+      p.crucibleSlotBonuses.boots = (p.crucibleSlotBonuses.boots || 0) + 0.15;
     },
+  },
   {
     id: "aegis_bastion",
     name: "Aegis Bastion",

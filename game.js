@@ -6259,49 +6259,55 @@ window.useItem = function (itemName) {
     window.setPauseState(true);
 
     let pulledArray = Object.values(aggregatedPulls);
-          let thresholds = window.CARD_UPGRADE_THRESHOLDS || [1, 50, 150, 300, 750, 1800];
+    let thresholds = window.CARD_UPGRADE_THRESHOLDS || [
+      1, 50, 150, 300, 750, 1800,
+    ];
 
-          let cardsHtml = pulledArray.map((entry, idx) => {
-            let cData = window.MONSTER_CARDS_DATA[entry.key];
-            let setDef = window.CARD_SETS_DATA[cData.set];
-            let isBoss = bossCardKeys.includes(entry.key);
-            let tier = window.getCardTier(entry.endCount);
-            let isLocked = tier < 0;
-            let cardColor = isBoss ? "#ff007f" : window.getTierColor(tier);
+    let cardsHtml = pulledArray
+      .map((entry, idx) => {
+        let cData = window.MONSTER_CARDS_DATA[entry.key];
+        let setDef = window.CARD_SETS_DATA[cData.set];
+        let isBoss = bossCardKeys.includes(entry.key);
+        let tier = window.getCardTier(entry.endCount);
+        let isLocked = tier < 0;
+        let cardColor = isBoss ? "#ff007f" : window.getTierColor(tier);
 
-            let cardCanvasId = `booster-card-canvas-${idx}`;
-            let isHoloClass = isBoss ? "boss-card-glow" : "";
+        let cardCanvasId = `booster-card-canvas-${idx}`;
+        let isHoloClass = isBoss ? "boss-card-glow" : "";
 
-            let labelText = isBoss ? "BOSS CARD" : "MONSTER";
-            let dustHtml = entry.recycledDust > 0
-              ? `<div style="font-size:9.5px; color:#ff007f; font-family:monospace; font-weight:bold; margin-top:2px;">Recycled (+${entry.recycledDust} Dust)</div>`
-              : `<span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Copies added: +${entry.qty}</span>`;
+        let labelText = isBoss ? "BOSS CARD" : "MONSTER";
+        let dustHtml =
+          entry.recycledDust > 0
+            ? `<div style="font-size:9.5px; color:#ff007f; font-family:monospace; font-weight:bold; margin-top:2px;">Recycled (+${entry.recycledDust} Dust)</div>`
+            : `<span style="font-size:9.5px; color:#2ecc71; font-weight:bold;">Copies added: +${entry.qty}</span>`;
 
-            // Calculate card progression stats to prevent reference errors
-            let nextThreshold = thresholds[tier + 1] || 1800;
-            let baseThreshold = thresholds[tier] || 0;
-            let isMaxed = tier >= 5;
+        // Calculate card progression stats to prevent reference errors
+        let nextThreshold = thresholds[tier + 1] || 1800;
+        let baseThreshold = thresholds[tier] || 0;
+        let isMaxed = tier >= 5;
 
-            // Custom Newly Unlocked Visual state logic
-            let isNewUnlock = entry.startCount === 0;
+        // Custom Newly Unlocked Visual state logic
+        let isNewUnlock = entry.startCount === 0;
 
-            let flatProgressText = "";
-            let fillPct = 0;
-            let firstThreshold = thresholds[0] || 1;
+        let flatProgressText = "";
+        let fillPct = 0;
+        let firstThreshold = thresholds[0] || 1;
 
-            let displayCount = entry.endCount;
-            if (isNewUnlock) {
-              flatProgressText = "✨ UNLOCKED!";
-              fillPct = 100; // Render progress bar fully glowing to denote unlock
-            } else if (isMaxed) {
-              flatProgressText = "MAX TIER";
-              fillPct = 100;
-            } else {
-              flatProgressText = `${displayCount} / ${nextThreshold}`;
-              fillPct = ((displayCount - baseThreshold) / (nextThreshold - baseThreshold)) * 100;
-            }
+        let displayCount = entry.endCount;
+        if (isNewUnlock) {
+          flatProgressText = "✨ UNLOCKED!";
+          fillPct = 100; // Render progress bar fully glowing to denote unlock
+        } else if (isMaxed) {
+          flatProgressText = "MAX TIER";
+          fillPct = 100;
+        } else {
+          flatProgressText = `${displayCount} / ${nextThreshold}`;
+          fillPct =
+            ((displayCount - baseThreshold) / (nextThreshold - baseThreshold)) *
+            100;
+        }
 
-            return `
+        return `
               <div class="market-card ${isHoloClass}" style="
                 background: linear-gradient(135deg, #110d1c 0%, #06040a 100%);
                 border: 2px solid ${cardColor};
@@ -6351,9 +6357,10 @@ window.useItem = function (itemName) {
                 </div>
               </div>
             `;
-          }).join("");
+      })
+      .join("");
 
-          overlay.innerHTML = `
+    overlay.innerHTML = `
                 <style>
                   .pack-wrapper {
                     position: relative;
@@ -6454,87 +6461,91 @@ window.useItem = function (itemName) {
                 </div>
               `;
 
-          window.ripBoosterPack = function () {
-            let pack = document.getElementById("booster-pack-stage");
-            let cardsStage = document.getElementById("booster-cards-stage");
-            let grid = document.getElementById("booster-grid-element");
-            if (!pack || !cardsStage || !grid) return;
+    window.ripBoosterPack = function () {
+      let pack = document.getElementById("booster-pack-stage");
+      let cardsStage = document.getElementById("booster-cards-stage");
+      let grid = document.getElementById("booster-grid-element");
+      if (!pack || !cardsStage || !grid) return;
 
-            if (window.SoundManager) {
-              let hasBossCard = pulledArray.some((entry) => bossCardKeys.includes(entry.key));
-              window.SoundManager.play(hasBossCard ? "revive" : "death");
-            }
+      if (window.SoundManager) {
+        let hasBossCard = pulledArray.some((entry) =>
+          bossCardKeys.includes(entry.key),
+        );
+        window.SoundManager.play(hasBossCard ? "revive" : "death");
+      }
 
-            let foil = document.getElementById("pack-foil-element");
-            if (foil) {
-              foil.style.animation =
-                "ripFoil 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards";
-            }
+      let foil = document.getElementById("pack-foil-element");
+      if (foil) {
+        foil.style.animation =
+          "ripFoil 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards";
+      }
 
-            setTimeout(() => {
-              pack.style.display = "none";
-              cardsStage.style.display = "block";
+      setTimeout(() => {
+        pack.style.display = "none";
+        cardsStage.style.display = "block";
 
-              // Secure Card Drawing Injection: Populate the unboxed card items into the grid dynamically as it is revealed
-              grid.innerHTML = cardsHtml;
+        // Secure Card Drawing Injection: Populate the unboxed card items into the grid dynamically as it is revealed
+        grid.innerHTML = cardsHtml;
 
-              // Trigger progress bar filling animations smoothly
-              setTimeout(() => {
-                pulledArray.forEach((entry, idx) => {
-                  let fill = document.getElementById(`progress-fill-${idx}`);
-                  if (fill) {
-                    let isNewUnlock = entry.startCount === 0;
-                    if (isNewUnlock) {
-                      // If it is a new unlock, transition from 0% to 100% to represent the unlock event
-                      fill.style.width = "0%";
-                      setTimeout(() => {
-                        fill.style.width = "100%";
-                      }, 100);
-                    } else {
-                      // Normal duplicate progress bar transitions
-                      let t = window.getCardTier(entry.startCount);
-                      let baseVal = t < 0 ? 0 : (thresholds[t] || 0);
-                      let nextVal = thresholds[t + 1] || 1800;
-                      let startPct = ((entry.startCount - baseVal) / (nextVal - baseVal)) * 100;
-                      let endPct = ((entry.endCount - baseVal) / (nextVal - baseVal)) * 100;
-
-                      fill.style.width = Math.min(100, Math.max(0, startPct)) + "%";
-                      setTimeout(() => {
-                        fill.style.width = Math.min(100, Math.max(0, endPct)) + "%";
-                      }, 100);
-                    }
-                  }
-                });
-              }, 150);
-
-              let claimBtn = document.getElementById("btn-booster-claim");
-              if (claimBtn) {
-                claimBtn.style.display = "inline-block";
-                claimBtn.style.opacity = "0";
+        // Trigger progress bar filling animations smoothly
+        setTimeout(() => {
+          pulledArray.forEach((entry, idx) => {
+            let fill = document.getElementById(`progress-fill-${idx}`);
+            if (fill) {
+              let isNewUnlock = entry.startCount === 0;
+              if (isNewUnlock) {
+                // If it is a new unlock, transition from 0% to 100% to represent the unlock event
+                fill.style.width = "0%";
                 setTimeout(() => {
-                  claimBtn.style.transition = "opacity 0.4s ease";
-                  claimBtn.style.opacity = "1";
-                }, 400);
-              }
+                  fill.style.width = "100%";
+                }, 100);
+              } else {
+                // Normal duplicate progress bar transitions
+                let t = window.getCardTier(entry.startCount);
+                let baseVal = t < 0 ? 0 : thresholds[t] || 0;
+                let nextVal = thresholds[t + 1] || 1800;
+                let startPct =
+                  ((entry.startCount - baseVal) / (nextVal - baseVal)) * 100;
+                let endPct =
+                  ((entry.endCount - baseVal) / (nextVal - baseVal)) * 100;
 
-              // Initiate the unboxed cards live-drawing loop
-              if (typeof window.animateBoosterCards === "function") {
-                window.animateBoosterCards();
+                fill.style.width = Math.min(100, Math.max(0, startPct)) + "%";
+                setTimeout(() => {
+                  fill.style.width = Math.min(100, Math.max(0, endPct)) + "%";
+                }, 100);
               }
-            }, 550);
-          };
+            }
+          });
+        }, 150);
 
-          // Safely register local click handler to avoid element race conditions
-          let claimBtn = overlay.querySelector("#btn-booster-claim");
-          if (claimBtn) {
-            claimBtn.onclick = function () {
-              overlay.remove();
-              window.isGamePaused = false;
-              window.updateUI();
-              window.renderInventory();
-            };
-          }
-        } else if (itemName === "Cavern Sigil Sack") {
+        let claimBtn = document.getElementById("btn-booster-claim");
+        if (claimBtn) {
+          claimBtn.style.display = "inline-block";
+          claimBtn.style.opacity = "0";
+          setTimeout(() => {
+            claimBtn.style.transition = "opacity 0.4s ease";
+            claimBtn.style.opacity = "1";
+          }, 400);
+        }
+
+        // Initiate the unboxed cards live-drawing loop
+        if (typeof window.animateBoosterCards === "function") {
+          window.animateBoosterCards();
+        }
+      }, 550);
+    };
+
+    // Safely register local click handler to avoid element race conditions
+    let claimBtn = overlay.querySelector("#btn-booster-claim");
+    if (claimBtn) {
+      claimBtn.onclick = function () {
+        overlay.remove();
+        window.isGamePaused = false;
+        window.updateUI();
+        window.renderInventory();
+      };
+    }
+  } else if (itemName === "Cavern Sigil Sack") {
   } else if (itemName === "Cavern Sigil Sack") {
     // Uncapped specialised pouch; not bound by bag space limits
     window.inventory.USE[itemName]--;

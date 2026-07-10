@@ -5,8 +5,38 @@
 
 window.clanActiveTab = "OVERVIEW";
 
-window.getClanEmblemHtml = function (seed, size = 32) {
-  // Use seed to determine colors and icons procedurally
+// Contextual rank shield icons (Custom Vector SVGs replacing emojis)
+window.getRankShieldSvg = function (rank, size = 16) {
+  let mainCol = "#7f8c8d";
+  let symbolPath = "";
+  if (rank === "founder") {
+    mainCol = "#ffd700";
+    // Founder: Radiant Cross Star
+    symbolPath = `<path d="M12,7 L13.5,11.5 L17.5,12 L13.5,12.5 L12,17 L10.5,12.5 L6.5,12 L10.5,11.5 Z" fill="#fff" stroke="#111" stroke-width="0.8"/>`;
+  } else if (rank === "officer") {
+    mainCol = "#c0392b";
+    // Officer: Single Star
+    symbolPath = `<polygon points="12,7 13.5,11 17.5,11 14,13.5 15.5,17.5 12,15 8.5,17.5 10,13.5 6.5,11 10.5,11" fill="#fff" stroke="#111" stroke-width="0.8"/>`;
+  } else if (rank === "vanguard") {
+    mainCol = "#3498db";
+    // Vanguard: Concentric targeting reticle
+    symbolPath = `<circle cx="12" cy="12" r="4.5" stroke="#fff" stroke-width="1.2" fill="none"/><circle cx="12" cy="12" r="1.5" fill="#fff"/>`;
+  } else {
+    // Recruit: Basic banner knot
+    symbolPath = `<path d="M9,8 H15 V13 L12,11.5 L9,13 Z" fill="#fff" stroke="#111" stroke-width="0.8"/>`;
+  }
+
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" style="display:inline-block; vertical-align:middle; filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5));">
+      <path d="M4,4 Q12,2, 20,4 Q19,14, 12,21 Q5,14, 4,4 Z" fill="${mainCol}" stroke="#111" stroke-width="1.8" stroke-linejoin="round" />
+      <path d="M6,6 Q12,4.5, 18,6 L17,14 L12,18 L7,14 Z" fill="rgba(255,255,255,0.06)" />
+      ${symbolPath}
+    </svg>
+  `;
+};
+
+window.getClanEmblemHtml = function (seed, size = 32, clanLevel = 1) {
+  const lvl = Number(clanLevel) || 1;
   const primaryColors = [
     "#3498db",
     "#e74c3c",
@@ -28,6 +58,15 @@ window.getClanEmblemHtml = function (seed, size = 32) {
     "#960018",
   ];
 
+  let pCol = primaryColors[seed % primaryColors.length];
+  let sCol = secondaryColors[(seed + 3) % secondaryColors.length];
+
+  // Determine visual complexity standard tier based on Clan Level
+  let tier = "novice";
+  if (lvl >= 20) tier = "celestial";
+  else if (lvl >= 10) tier = "elite";
+  else if (lvl >= 5) tier = "sturdy";
+
   const shapes = [
     // Shield
     `<path d="M4,4 Q12,2, 20,4 Q19,14, 12,21 Q5,14, 4,4 Z" fill="url(#em_bg_${seed})" stroke="url(#em_border_${seed})" stroke-width="1.5" />`,
@@ -48,19 +87,50 @@ window.getClanEmblemHtml = function (seed, size = 32) {
     `<path d="M10,6 H14 V10 H18 V14 H14 V19 H10 V14 H6 V10 H10 Z" fill="#fff" stroke="#000" stroke-width="0.8" />`,
     // Crown
     `<path d="M6,16 L8,10 L12,14 L16,10 L18,16 Z" fill="#fff" stroke="#000" stroke-width="0.8" /><rect x="6" y="16" width="12" height="2" fill="#f1c40f" stroke="#000" stroke-width="0.8" />`,
-    // Wings/V
-    `<path d="M5,8 Q12,12, 19,8 L17,14 Q12,18, 7,14 Z" fill="#fff" stroke="#000" stroke-width="0.8" />`,
-    // Shield inside shield
-    `<path d="M8,8 Q12,7, 16,8 Q15,14, 12,18 Q9,14, 8,8 Z" fill="#fff" stroke="#000" stroke-width="0.8" />`,
   ];
 
-  let pCol = primaryColors[seed % primaryColors.length];
-  let sCol = secondaryColors[(seed + 3) % secondaryColors.length];
   let shape = shapes[seed % shapes.length];
   let symbol = symbols[(seed + 1) % symbols.length];
 
   let bg = "rgba(170, 170, 170, 0.12)";
   let border = "#444";
+  let inlineStyle = "";
+
+  // Render tier additions dynamically to support visual standard growth
+  let tierAdditions = "";
+  if (tier === "sturdy") {
+    border = "#7f8c8d"; // Polished steel
+    tierAdditions = `
+      <!-- Standard hanging rod -->
+      <rect x="2" y="0" width="20" height="1.5" fill="#5c3a21" stroke="#000" stroke-width="0.5" />
+      <!-- Lower Tassel -->
+      <path d="M10,21 L12,24 L14,21" stroke="#7f8c8d" stroke-width="1" fill="none" />
+    `;
+  } else if (tier === "elite") {
+    border = "#d4af37"; // Polished gold
+    inlineStyle = "filter: drop-shadow(0 0 4px rgba(212,175,55,0.45));";
+    tierAdditions = `
+      <!-- Gold hanging rod with brackets -->
+      <rect x="1" y="0" width="22" height="1.8" fill="#d4af37" stroke="#000" stroke-width="0.6" />
+      <circle cx="2" cy="0.9" r="1.2" fill="#fff" />
+      <circle cx="22" cy="0.9" r="1.2" fill="#fff" />
+      <!-- Double pointed tapestry standard tails -->
+      <path d="M8,21 L8,24 L12,21 L16,24 L16,21" stroke="#d4af37" stroke-width="1.2" fill="none" />
+    `;
+  } else if (tier === "celestial") {
+    border = "#9b59b6"; // Astral purple
+    inlineStyle = "filter: drop-shadow(0 0 6px rgba(155,89,182,0.6));";
+    tierAdditions = `
+      <!-- Rotating celestial runic lines behind crest -->
+      <circle cx="12" cy="12" r="11" fill="none" stroke="#9b59b6" stroke-width="0.8" stroke-dasharray="2 1.5" class="portal-spiral" style="transform-origin: 12px 12px; transform: scale(1.05);" />
+      <!-- Triple-pointed royal standard tapestry tail -->
+      <path d="M6,21 L6,25 L10,21 L12,26 L14,21 L18,25 L18,21" stroke="#9b59b6" stroke-width="1.5" fill="none" />
+      <!-- Miniature space spark particles -->
+      <circle cx="6" cy="8" r="0.4" fill="#fff" />
+      <circle cx="18" cy="15" r="0.4" fill="#fff" />
+      <circle cx="8" cy="16" r="0.4" fill="#fff" />
+    `;
+  }
 
   let innerHtml = `
     <defs>
@@ -73,11 +143,31 @@ window.getClanEmblemHtml = function (seed, size = 32) {
         <stop offset="100%" stop-color="#555555" />
       </linearGradient>
     </defs>
+    ${tierAdditions}
     ${shape}
     ${symbol}
   `;
 
-  return window.AssetCatalog.compile("0 0 24 24", innerHtml, size, bg, border);
+  const shadowStyle = "inset 0 0 6px rgba(0, 0, 0, 0.6)";
+  return `
+    <span style="
+      background: ${bg};
+      border: 1px solid ${border};
+      border-radius: 4px;
+      padding: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: ${size}px;
+      height: ${size}px;
+      box-shadow: ${shadowStyle};
+      ${inlineStyle}
+    ">
+      <svg viewBox="0 0 24 24" width="100%" height="100%" style="display:block;">
+        ${innerHtml}
+      </svg>
+    </span>
+  `;
 };
 
 window.toggleClanHall = function () {
@@ -158,6 +248,7 @@ window.fetchClanData = function () {
             prosperity_accord: data.clan.skill_prosperity_accord,
             voyagers_guidance: data.clan.skill_voyagers_guidance,
             aetheric_wisdom: data.clan.skill_aetheric_wisdom || 0,
+            clan_supply_depot: data.clan.skill_clan_supply_depot || 0,
           };
           window.renderClanDashboard(
             data.clan,
@@ -381,29 +472,39 @@ window.renderClanDashboard = function (clan, members, invitations) {
   }
   window.playerStats.pendingClanQuestsCompletedCount = unclaimedQuestsCount;
 
+  // --- INLINE VECTOR HEADER SVGS (NO EMOJIS) ---
+  const svgs = {
+    overview: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+    members: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    quests: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`,
+    donate: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>`,
+    research: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+    settings: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+  };
+
   let tabHeaderHtml = `
-    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:2px; margin-bottom:12px;">
-        <button onclick="window.switchClanTab('OVERVIEW')" class="sub-tab-btn ${currentTab === "OVERVIEW" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
-            Overview
-        </button>
-        <button onclick="window.switchClanTab('MEMBERS')" class="sub-tab-btn ${currentTab === "MEMBERS" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
-            Members
-        </button>
-        <button onclick="window.switchClanTab('QUESTS')" class="sub-tab-btn ${currentTab === "QUESTS" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px; position:relative;">
-            Quests
-            ${unclaimedQuestsCount > 0 ? `<span style="position:absolute; top:-1px; right:-1px; width:6px; height:6px; background:#e74c3c; border-radius:50%; box-shadow:0 0 4px #e74c3c;"></span>` : ""}
-        </button>
-        <button onclick="window.switchClanTab('DONATE')" class="sub-tab-btn ${currentTab === "DONATE" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
-            Donation
-        </button>
-        <button onclick="window.switchClanTab('RESEARCH')" class="sub-tab-btn ${currentTab === "RESEARCH" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
-            Research
-        </button>
-        <button onclick="window.switchClanTab('SETTINGS')" class="sub-tab-btn ${currentTab === "SETTINGS" ? "active" : ""}" style="padding:4px 1px; font-size:8.5px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:34px;">
-            Settings
-        </button>
-    </div>
-  `;
+      <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; margin-bottom:12px;" class="chiseled-stone-tab-container">
+          <button onclick="window.switchClanTab('OVERVIEW')" class="sub-tab-btn clan-chiseled-tab ${currentTab === "OVERVIEW" ? "active" : ""}" style="padding:4px 1px; font-size:8px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; height:36px; text-transform:uppercase; letter-spacing:0.3px;">
+              ${svgs.overview} Overview
+          </button>
+          <button onclick="window.switchClanTab('MEMBERS')" class="sub-tab-btn clan-chiseled-tab ${currentTab === "MEMBERS" ? "active" : ""}" style="padding:4px 1px; font-size:8px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; height:36px; text-transform:uppercase; letter-spacing:0.3px;">
+              ${svgs.members} Members
+          </button>
+          <button onclick="window.switchClanTab('QUESTS')" class="sub-tab-btn clan-chiseled-tab ${currentTab === "QUESTS" ? "active" : ""}" style="padding:4px 1px; font-size:8px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; height:36px; text-transform:uppercase; letter-spacing:0.3px; position:relative;">
+              ${svgs.quests} Quests
+              ${unclaimedQuestsCount > 0 ? `<span style="position:absolute; top:-1px; right:-1px; width:6px; height:6px; background:#e74c3c; border-radius:50%; box-shadow:0 0 4px #e74c3c;"></span>` : ""}
+          </button>
+          <button onclick="window.switchClanTab('DONATE')" class="sub-tab-btn clan-chiseled-tab ${currentTab === "DONATE" ? "active" : ""}" style="padding:4px 1px; font-size:8px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; height:36px; text-transform:uppercase; letter-spacing:0.3px;">
+              ${svgs.donate} Vault
+          </button>
+          <button onclick="window.switchClanTab('RESEARCH')" class="sub-tab-btn clan-chiseled-tab ${currentTab === "RESEARCH" ? "active" : ""}" style="padding:4px 1px; font-size:8px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; height:36px; text-transform:uppercase; letter-spacing:0.3px;">
+              ${svgs.research} Research
+          </button>
+          <button onclick="window.switchClanTab('SETTINGS')" class="sub-tab-btn clan-chiseled-tab ${currentTab === "SETTINGS" ? "active" : ""}" style="padding:4px 1px; font-size:8px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; height:36px; text-transform:uppercase; letter-spacing:0.3px;">
+              ${svgs.settings} Settings
+          </button>
+      </div>
+    `;
 
   let tabContentHtml = "";
 
@@ -413,154 +514,245 @@ window.renderClanDashboard = function (clan, members, invitations) {
     let emblem = window.getClanEmblemHtml(
       clan.leader_id.charCodeAt(0) || 0,
       32,
+      clan.level,
     );
 
-    tabContentHtml = `
-      <div style="background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; align-items:center; gap:12px; text-align:left;">
-          ${emblem}
-          <div style="flex:1; min-width:0;">
-              <strong style="font-size:14px; color:#df9ffb; text-shadow: 0 0 6px rgba(142,68,173,0.3);">${window.escapeHTML(clan.name)}</strong>
-                  <div style="font-size:10px; color:#aaa; margin-top:2px; font-family:monospace;">Clan Level ${clan.level} (${clan.xp}/${nextXp} XP)</div>
-              <div style="width:100%; height:4px; background:#222; border-radius:2px; overflow:hidden; border:1px solid #333; margin-top:4px;">
-                  <div style="width:${xpPct}%; height:100%; background:#9b59b6;"></div>
-              </div>
-          </div>
-      </div>
+    // Guild Hearth Vectors (Flame changes color based on Level thresholds)
+    let hearthGlow = "#ff5500";
+    let hearthLabel = "Warm Embers";
+    if (clan.level >= 30) {
+      hearthGlow = "#00d2ff";
+      hearthLabel = "Celestial Portal Flame";
+    } else if (clan.level >= 20) {
+      hearthGlow = "#9b59b6";
+      hearthLabel = "Arcane Void Hearth";
+    } else if (clan.level >= 10) {
+      hearthGlow = "#ffd700";
+      hearthLabel = "Vibrant Sunfire Hearth";
+    }
 
-      <div style="background:#111; border:1px solid #222; border-radius:6px; padding:8px 10px; margin-bottom:12px; font-size:11px; text-align:left; line-height:1.4; color:#ddd; white-space:normal;">
-          <span style="color:#888; font-size:9px; font-weight:bold; display:block; margin-bottom:2px; text-transform:uppercase;">📜 CLAN ANNOUNCEMENT:</span>
-          "${window.escapeHTML(clan.description || "Welcome to our Clan!")}"
-      </div>
-
-      <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:6px; padding:8px; margin-bottom:12px; font-size:10.5px; text-align:left;">
-          <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:3px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace;">🏛️ Clan Vault Balances:</div>
-          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; text-align:center; font-family:monospace;">
-              <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #333;"><span style="color:#888; font-size:8px;">GOLD</span><strong style="color:#f1c40f; display:block; margin-top:2px;">${window.formatNumber(clan.gold_bank)}</strong></div>
-              <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #333;"><span style="color:#888; font-size:8px;">SOULS</span><strong style="color:#ffb6c1; display:block; margin-top:2px;">${window.formatNumber(clan.souls_bank)}</strong></div>
-              <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #333;"><span style="color:#888; font-size:8px;">LUMINOUS</span><strong style="color:#ffb6c1; display:block; margin-top:1px;">${window.formatNumber(clan.luminous_bank)}</strong></div>
-          </div>
-      </div>
-
-      <div style="background:#111; border:1px solid #222; border-radius:6px; padding:10px; font-size:11px; text-align:left; line-height:1.45; white-space:normal; color:#aaa;">
-          <strong style="color:#df9ffb;">💡 CLAN INFO:</strong><br>
-          • Join Policy: <span style="color:#fff; font-weight:bold;">${clan.join_policy === "open" ? "Open (Join Instantly)" : "Invite Only"}</span><br>
-          • Minimum Level Requirement: <span style="color:#fff; font-weight:bold;">Lv. ${clan.min_level}</span><br>
-          • Members Enrolled: <span style="color:#fff; font-weight:bold;">${members.length} / 20</span>
-      </div>
+    let pulseDuration = Math.max(0.5, 3.2 - clan.level * 0.08) + "s";
+    let hearthSvg = `
+      <svg width="100%" height="75" viewBox="0 0 200 75" style="display:block; margin: 8px auto; overflow:visible; --hearth-glow-color:${hearthGlow};">
+        <ellipse cx="100" cy="62" rx="42" ry="10" fill="none" stroke="#2d3748" stroke-width="1.2" stroke-dasharray="3 3.5" class="portal-spiral" style="transform-origin: 100px 62px; animation: portalSpiralRotate 7s linear infinite;" />
+        <ellipse cx="100" cy="62" rx="28" ry="6.5" fill="rgba(0,0,0,0.4)" stroke="#4a5568" stroke-width="1.5" />
+        <polygon points="86,58 114,58 109,24 91,14" fill="#2d3748" stroke="#1a202c" stroke-width="2.2" />
+        <path d="M 96,24 L 104,24 M 95,33 L 100,38 L 105,33 M 96,48 L 104,48" fill="none" stroke="${hearthGlow}" stroke-width="2.2" stroke-linecap="round" style="animation: runicHearthPulse ${pulseDuration} ease-in-out infinite;" />
+        <line x1="87" y1="50" x2="113" y2="50" stroke="#d4af37" stroke-width="1.2" />
+      </svg>
     `;
-  } else if (currentTab === "DONATE") {
-    let goldOwned = window.playerStats.coins || 0;
-    let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
-    let luminousOwned = window.inventory.ETC["Luminous Soul"] || 0;
+
+    let logs = clan.activity_log || [
+      "No active records available in treasury catalogs.",
+    ];
+    let ledgerHtml = logs
+      .slice()
+      .reverse()
+      .map(
+        (log) => `
+      <div style="font-family:monospace; font-size:10px; color:#c8b195; border-bottom:1px solid #1a202c; padding:5px 0; display:flex; justify-content:space-between; gap:10px; text-align:left;">
+        <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">✦ ${window.escapeHTML(log)}</span>
+        <span style="color:#4a5568; font-size:8px; font-weight:bold;">LOG</span>
+      </div>
+    `,
+      )
+      .join("");
 
     tabContentHtml = `
-      <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.45;">
-          <strong style="color:#f1c40f; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6M9 13h6"/></svg>
-              Contribution Chamber
-          </strong>
-          Donating resources grows the shared **Clan Vault treasury**, enabling the Clan Founder to initiate powerful skill passive research. (Clan XP is earned through weekly cooperative quests).
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:6px; text-align:left;">
-          <!-- Gold Donation -->
-          <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                  <strong style="color:#f1c40f; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6M9 13h6"/></svg>
-                      Donate Gold
-                  </strong>
-                  <div style="font-size:9.5px; color:#aaa;">Owned: ${window.formatNumber(goldOwned)} Gold</div>
-              </div>
-              <div style="display:flex; gap:4px;">
-                  <button class="btn-action" style="background:#f1c40f; color:#111; font-size:9.5px; padding:4px 8px;" ${goldOwned >= 10000 ? "" : "disabled"} onclick="window.executeClanDonate('gold', 10000)">10K</button>
-                  <button class="btn-action" style="background:#f1c40f; color:#111; font-size:9.5px; padding:4px 8px;" ${goldOwned >= 100000 ? "" : "disabled"} onclick="window.executeClanDonate('gold', 100000)">100K</button>
+      <div class="clan-scroll-frame">
+          <!-- Dangling Crest Tapestry Frame -->
+          <div style="background:rgba(0,0,0,0.5); border: 2px solid #5c4033; border-top-width:6px; border-bottom-width:4px; border-radius:8px; padding:12px; margin-bottom:12px; display:flex; align-items:center; gap:12px; text-align:left; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7); position:relative;">
+              ${emblem}
+              <div style="flex:1; min-width:0;">
+                  <strong style="font-size:14.5px; color:#df9ffb; text-shadow: 0 0 8px rgba(155,89,182,0.4);">${window.escapeHTML(clan.name)}</strong>
+                  <div style="font-size:10.5px; color:#aaa; font-family:monospace;">Clan Level ${clan.level} (${clan.xp}/${nextXp} XP)</div>
+                  <div style="width:100%; height:5px; background:#0f1115; border-radius:3px; overflow:hidden; border:1px solid #222; margin-top:6px;">
+                      <div style="width:${xpPct}%; height:100%; background:linear-gradient(90deg, #9b59b6, #e84393); box-shadow:0 0 6px #9b59b6;"></div>
+                  </div>
               </div>
           </div>
 
-          <!-- Monster Souls Donation -->
-          <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                  <strong style="color:#bdc3c7; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
-                      Donate Monster Souls
-                  </strong>
-                  <div style="font-size:9.5px; color:#aaa;">Owned: ${soulsOwned.toLocaleString()} Souls</div>
+          <div style="display:grid; grid-template-columns: 1.15fr 0.85fr; gap:12px; margin-bottom:12px;">
+              <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
+                  <div style="background:#0c0f12; border:1px solid #222; border-radius:6px; padding:8px 10px; font-size:11px; text-align:left; line-height:1.45; color:#c8b195; font-style:italic;">
+                      <span style="color:#7f8c8d; font-size:8px; font-weight:bold; display:block; margin-bottom:2px; text-transform:uppercase; font-style:normal;">✦ ANNOUNCEMENT:</span>
+                      "${window.escapeHTML(clan.description || "Founders are preparing instructions.")}"
+                  </div>
+
+                  <div style="background:#090b0e; border:1px solid #222; border-radius:6px; padding:8px 10px; display:flex; flex-direction:column; justify-content:flex-start; min-height:115px;">
+                      <span style="color:#9b59b6; font-size:8.5px; font-weight:bold; display:block; margin-bottom:4px; text-transform:uppercase; text-align:left;">✦ CLAN LEDGER FEED:</span>
+                      <div style="overflow-y:auto; max-height:85px; padding-right:4px;">
+                          ${ledgerHtml}
+                      </div>
+                  </div>
               </div>
-              <div style="display:flex; gap:4px;">
-                  <button class="btn-action" style="background:#bdc3c7; color:#111; font-size:9.5px; padding:4px 8px;" ${soulsOwned >= 50 ? "" : "disabled"} onclick="window.executeClanDonate('souls', 50)">50</button>
-                  <button class="btn-action" style="background:#bdc3c7; color:#111; font-size:9.5px; padding:4px 8px;" ${soulsOwned >= 250 ? "" : "disabled"} onclick="window.executeClanDonate('souls', 250)">250</button>
+
+              <!-- Guild Hearth Panel -->
+              <div class="chiseled-stone-panel" style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                  <span style="color:#df9ffb; font-size:8.5px; font-weight:bold; display:block; text-transform:uppercase; letter-spacing:0.5px;">✦ ${hearthLabel}</span>
+                  ${hearthSvg}
+                  <span style="font-size:8.5px; color:#555; font-family:monospace; margin-top:2px;">Runic Intensity: Lv. ${clan.level}</span>
               </div>
           </div>
 
-          <!-- Luminous Souls Donation -->
-          <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                  <strong style="color:#ffb6c1; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
-                      Donate Luminous Souls
-                  </strong>
-                  <div style="font-size:9.5px; color:#aaa;">Owned: ${luminousOwned.toLocaleString()} Souls</div>
-              </div>
-              <div style="display:flex; gap:4px;">
-                  <button class="btn-action" style="background:#ffb6c1; color:#111; font-size:9.5px; padding:4px 8px;" ${luminousOwned >= 5 ? "" : "disabled"} onclick="window.executeClanDonate('luminous', 5)">5</button>
-                  <button class="btn-action" style="background:#ffb6c1; color:#111; font-size:9.5px; padding:4px 8px;" ${luminousOwned >= 25 ? "" : "disabled"} onclick="window.executeClanDonate('luminous', 25)">25</button>
+          <!-- Mini Vault Overview -->
+          <div style="background:rgba(0,0,0,0.55); border:1.5px solid #2d3748; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; box-shadow: inset 0 0 10px #000;">
+              <div style="color:#f1c40f; font-weight:bold; border-bottom:1px dashed #222; padding-bottom:4px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace; font-size:10px;">✦ Shared Vault Assets:</div>
+              <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; text-align:center; font-family:monospace; font-size:11px;">
+                  <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">GOLD</span><strong style="color:#f1c40f; display:block;">${window.formatNumber(clan.gold_bank)}</strong></div>
+                  <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">SOULS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.souls_bank)}</strong></div>
+                  <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">LUMINOUS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.luminous_bank)}</strong></div>
               </div>
           </div>
       </div>
     `;
   } else if (currentTab === "MEMBERS") {
-    function formatRelativeTime(timestamp) {
-      let diff = Date.now() - timestamp;
-      if (diff < 15000) return "Active now";
-      let secs = Math.floor(diff / 1000);
-      if (secs < 60) return `${secs}s ago`;
-      let mins = Math.floor(secs / 60);
-      if (mins < 60) return `${mins}m ago`;
-      let hours = Math.floor(mins / 60);
-      if (hours < 24) return `${hours}h ago`;
-      let days = Math.floor(hours / 24);
-      return `${days}d ago`;
+    // Segregate members list into structured rank groupings
+    let groups = { founder: [], officer: [], vanguard: [], recruit: [] };
+    members.forEach((m) => {
+      let r = m.clan_rank || "recruit";
+      if (groups[r]) groups[r].push(m);
+      else groups["recruit"].push(m);
+    });
+
+    let groupLabels = {
+      founder: "Founder ✦",
+      officer: "Officers ★",
+      vanguard: "Vanguard ⌖",
+      recruit: "Recruits ⚑",
+    };
+
+    // Construct the Weekly Contribution Leaderboard Top 3 podiums
+    let sortedContrib = [...members].sort(
+      (a, b) => (b.weekly_contribution || 0) - (a.weekly_contribution || 0),
+    );
+    let leaderboardHtml = "";
+    if (sortedContrib.length > 0) {
+      let podiumMarkers = ["✦", "★", "⌖"];
+      let podiumColors = ["#ffd700", "#bdc3c7", "#e67e22"];
+
+      leaderboardHtml = `
+        <div class="chiseled-stone-panel" style="margin-bottom:12px; padding:10px; border-color:#9b59b650;">
+            <div style="font-size:10px; font-weight:bold; color:#df9ffb; text-transform:uppercase; letter-spacing:1.5px; text-align:center; border-bottom:1px solid #4a154b; padding-bottom:4px; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:4px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Weekly Contribution Leaderboard
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+      `;
+
+      sortedContrib.slice(0, 5).forEach((m, idx) => {
+        let nameCol = m.userId === userId ? "#ffd700" : "#fff";
+        let rankLabel =
+          idx < 3
+            ? `<strong style="color:${podiumColors[idx]}; font-family:monospace; margin-right:4px;">${podiumMarkers[idx]}</strong>`
+            : `<span style="color:#aaa; font-family:monospace; margin-right:4px;">#${idx + 1}</span>`;
+        leaderboardHtml += `
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:10px; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:4px; border:1px solid #222;">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px; text-align:left;">
+                ${rankLabel} <strong style="color:${nameCol};">${window.escapeHTML(m.name)}</strong>
+            </span>
+            <span style="color:#2ecc71; font-weight:bold;">+${(m.weekly_contribution || 0).toLocaleString()} CP</span>
+          </div>
+        `;
+      });
+
+      leaderboardHtml += `</div></div>`;
     }
 
-    tabContentHtml = `
-      <div style="display:flex; flex-direction:column; gap:4px; max-height: 280px; overflow-y:auto; padding-right:4px;">
-          ${members
-            .map((m, idx) => {
-              let isLeaderRow = m.userId === clan.leader_id;
-              let rankTag = isLeaderRow
-                ? `<span style="color:#f1c40f; font-weight:bold;">Founder</span>`
-                : `<span style="color:#888;">Member</span>`;
-              let canvasId = `clan-member-canvas-${m.userId}`;
+    // Process Roster Group headers
+    let rosterHtml = "";
+    ["founder", "officer", "vanguard", "recruit"].forEach((rKey) => {
+      let rMembers = groups[rKey];
+      if (rMembers.length === 0) return;
 
-              let titleTextHtml = "";
-              if (m.equippedTitle && window.TITLES_DATA[m.equippedTitle]) {
-                let tData = window.TITLES_DATA[m.equippedTitle];
-                titleTextHtml = `<span style="color:${tData.color || "#ff007f"}; font-size:8px; font-weight:bold; margin-left:4px;">[${tData.name}]</span>`;
-              }
+      let sectionHeader = `
+        <div style="font-size:10px; font-weight:bold; color:#7f8c8d; text-transform:uppercase; letter-spacing:1px; margin-top:12px; margin-bottom:6px; border-bottom:1.5px solid #2d3748; padding-bottom:3px; display:flex; justify-content:space-between; align-items:center;">
+          <span>${groupLabels[rKey]} [${rMembers.length}]</span>
+        </div>
+      `;
 
-              let showKickBtn = isLeader && !isLeaderRow;
-              return `
-              <div style="background:#111; border:1px solid #222; border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                  <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; text-align:left;">
-                      <canvas id="${canvasId}" width="30" height="40" style="width:30px; height:40px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:4px; flex-shrink:0; pointer-events:none;"></canvas>
-                      <div style="min-width:0; flex:1;">
-                          <div style="display:flex; align-items:center; flex-wrap:wrap; line-height:1.1;">
-                              <strong style="font-size:11.5px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">${window.escapeHTML(m.name)}</strong>
-                              ${titleTextHtml}
-                          </div>
-                          <span style="font-size:9px; color:#aaa; font-family:monospace; display:block; margin-top:2px;">Lv. ${m.level} • Peak Stg ${m.lifetimePeakStage} • Contribution: <span style="color:#2ecc71;">${window.formatNumber(m.clanContribution)}</span></span>
-                          <span style="font-size:8px; color:#7f8c8d; font-family:monospace;">${formatRelativeTime(Number(m.lastActive))}</span>
-                      </div>
+      let cardsHtml = rMembers
+        .map((m) => {
+          let isLeaderRow = m.userId === clan.leader_id;
+          let isMe = m.userId === userId;
+          let canvasId = `clan-member-canvas-${m.userId}`;
+
+          let titleTextHtml = "";
+          if (m.equippedTitle && window.TITLES_DATA[m.equippedTitle]) {
+            let tData = window.TITLES_DATA[m.equippedTitle];
+            titleTextHtml = `<span style="color:${tData.color || "#ff007f"}; font-size:8px; font-weight:bold; margin-left:4px;">[${tData.name}]</span>`;
+          }
+
+          // Inline admin choices dropdown selector
+          let adminSelectHtml = "";
+          if (isLeader && !isMe) {
+            adminSelectHtml = `
+            <select class="rank-action-select" onchange="window.handleInlineAdminAction(this, '${m.userId}', '${window.escapeHTML(m.name)}')">
+              <option value="">Actions...</option>
+              ${m.clan_rank === "recruit" ? `<option value="promote">Promote to Vanguard</option>` : ""}
+              ${m.clan_rank === "vanguard" ? `<option value="promote">Promote to Officer</option><option value="demote">Demote to Recruit</option>` : ""}
+              ${m.clan_rank === "officer" ? `<option value="demote">Demote to Vanguard</option>` : ""}
+              <option value="founder">Transfer Ownership</option>
+              <option value="kick">Expel Member</option>
+            </select>
+          `;
+          } else if (isLeader && isMe) {
+            adminSelectHtml = `<span style="font-size:8px; color:#f1c40f; font-weight:bold; font-family:monospace;">Leader</span>`;
+          } else if (clan.leader_id !== userId && isLeaderRow) {
+            adminSelectHtml = `<span style="font-size:8px; color:#f1c40f; font-weight:bold; font-family:monospace;">Founder</span>`;
+          } else if (clan.leader_id !== userId && !isLeaderRow && !isMe) {
+            // Check if viewer is Officer and target is a Recruit/Vanguard
+            let myRankRes = members.find((x) => x.userId === userId);
+            let myRank = myRankRes ? myRankRes.clan_rank : "recruit";
+            if (
+              myRank === "officer" &&
+              (m.clan_rank === "recruit" || m.clan_rank === "vanguard")
+            ) {
+              adminSelectHtml = `
+              <select class="rank-action-select" onchange="window.handleInlineAdminAction(this, '${m.userId}', '${window.escapeHTML(m.name)}')">
+                <option value="">Actions...</option>
+                ${m.clan_rank === "recruit" ? `<option value="promote">Promote to Vanguard</option>` : ""}
+                ${m.clan_rank === "vanguard" ? `<option value="demote">Demote to Recruit</option>` : ""}
+                <option value="kick">Expel Member</option>
+              </select>
+            `;
+            }
+          }
+
+          return `
+          <div style="background:#111; border:1px solid #222; border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; text-align:left;">
+                  <div style="position:relative; flex-shrink:0;">
+                    <canvas id="${canvasId}" width="30" height="40" style="width:30px; height:40px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:4px; display:block; pointer-events:none;"></canvas>
+                    <div style="position:absolute; bottom:-3px; right:-3px; z-index:4;">${window.getRankShieldSvg(m.clan_rank || "recruit", 14)}</div>
                   </div>
-                  <div style="display:flex; align-items:center; gap:4px;">
-                      <button class="btn-action" style="background:#3498db; font-size:9.5px; padding:3px 6px;" onclick="window.inspectPlayer('${m.userId}')">Inspect</button>
-                      ${showKickBtn ? `<button class="btn-action un" style="background:#c0392b; font-size:9.5px; padding:3px 6px;" onclick="window.executeKickMember('${m.userId}', '${window.escapeHTML(m.name)}')">Kick</button>` : ""}
+                  <div style="min-width:0; flex:1;">
+                      <div style="display:flex; align-items:center; flex-wrap:wrap; line-height:1.1;">
+                          <strong style="font-size:11.5px; color:${isMe ? "#f1c40f" : "#fff"}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">${window.escapeHTML(m.name)}</strong>
+                          ${titleTextHtml}
+                      </div>
+                      <span style="font-size:9px; color:#aaa; font-family:monospace; display:block; margin-top:2px;">Lv. ${m.level} • Peak Stg ${m.lifetimePeakStage} • Weekly CP: <span style="color:#2ecc71; font-weight:bold;">${(m.weekly_contribution || 0).toLocaleString()}</span></span>
+                      <span style="font-size:8px; color:#7f8c8d; font-family:monospace;">Contribution: ${window.formatNumber(m.clanContribution)}</span>
                   </div>
               </div>
-            `;
-            })
-            .join("")}
+              <div style="display:flex; align-items:center; gap:4px;">
+                  <button class="btn-action" style="background:#3498db; font-size:9.5px; padding:3px 6px; height:24px; line-height:1;" onclick="window.inspectPlayer('${m.userId}')">Inspect</button>
+                  ${adminSelectHtml}
+              </div>
+          </div>
+        `;
+        })
+        .join("");
+
+      rosterHtml +=
+        sectionHeader +
+        `<div style="display:flex; flex-direction:column; gap:4px;">${cardsHtml}</div>`;
+    });
+
+    tabContentHtml = `
+      ${leaderboardHtml}
+      <div style="max-height: 280px; overflow-y:auto; padding-right:4px;">
+          ${rosterHtml}
       </div>
     `;
 
@@ -594,8 +786,25 @@ window.renderClanDashboard = function (clan, members, invitations) {
         1,
         Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1,
       );
-      // Replaced hyper-exponential growth with balanced polynomial curve scaling
       let calculatedGoldMult = 1.0 + Math.pow(stgScale, 1.5) * 1.2;
+
+      // Define inline micro vector icons to completely eradicate emojis
+      const keyIcon =
+        '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px; transform:translateY(-1px);"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M12 11l9-9M16 4h4v4h-2V6"/></svg>';
+      const coreIcon =
+        '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px; transform:translateY(-1px);"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="12" cy="12" r="4"/></svg>';
+      const essenceIcon =
+        '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px; transform:translateY(-1px);"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-5.82 2.15L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+      const shardIcon =
+        '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px; transform:translateY(-1px);"><polygon points="12 2 22 12 12 22 2 12"/></svg>';
+      const soulIcon =
+        '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px; transform:translateY(-1px);"><path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z"/></svg>';
+      const ppIcon =
+        '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px; transform:translateY(-1px);"><polygon points="12 2 15 8.5 22 9 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9 9 8.5"/></svg>';
+      const sackIcon =
+        '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px; transform:translateY(-1px);"><path d="M6 18c0-4 4-6 6-6s6 2 6 6M12 2a4 4 0 0 0-4 4v6M12 12h.01"/></svg>';
+      const goldIcon =
+        '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px; transform:translateY(-1px);"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 10h6"/></svg>';
 
       listHtml = questsData.activeList
         .map((q) => {
@@ -607,39 +816,40 @@ window.renderClanDashboard = function (clan, members, invitations) {
           if (hasClaimed) {
             claimBtnHtml = `<span style="color:#7f8c8d; font-size:10px; font-weight:bold;">Claimed ✓</span>`;
           } else if (q.completed) {
-            claimBtnHtml = `<button class="btn-action btn-pulse" style="padding:4px 10px; font-size:10px; background:#2ecc71; border-color:#fff;" onclick="window.executeClaimClanQuestReward('${q.id}')">Claim</button>`;
+            // Completed quests pulse with an overlay trigger
+            claimBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:4px 10px; font-size:10px;" onclick="window.executeClaimClanQuestReward('${q.id}')">Claim</button>`;
           } else {
-            claimBtnHtml = `<span style="color:#aaa; font-size:10px; font-family:monospace;">${q.current.toLocaleString()} / ${q.target.toLocaleString()}</span>`;
+            claimBtnHtml = `<span style="color:#fff; font-size:10.5px; font-family:monospace; font-weight:bold; background:rgba(0,0,0,0.45); border: 1.5px solid #5c4033; padding:3px 8px; border-radius:4px;">${q.current.toLocaleString()} / ${q.target.toLocaleString()}</span>`;
           }
 
           let rewardItems = [];
           if (q.rewards.keys > 0)
             rewardItems.push(
-              `<span style="color:#f1c40f;">+${q.rewards.keys} Keys</span>`,
+              `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${keyIcon}+${q.rewards.keys} Keys</span>`,
             );
           if (q.rewards.cores > 0)
             rewardItems.push(
-              `<span style="color:#2ecc71;">+${q.rewards.cores} Cores</span>`,
+              `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${coreIcon}+${q.rewards.cores} Cores</span>`,
             );
           if (q.rewards.essence > 0)
             rewardItems.push(
-              `<span style="color:#9b59b6;">+${q.rewards.essence} Essence</span>`,
+              `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${essenceIcon}+${q.rewards.essence} Essence</span>`,
             );
           if (q.rewards.shards > 0)
             rewardItems.push(
-              `<span style="color:#8e44ad;">+${q.rewards.shards} Shards</span>`,
+              `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${shardIcon}+${q.rewards.shards} Shards</span>`,
             );
           if (q.rewards.souls > 0)
             rewardItems.push(
-              `<span style="color:#ffb6c1;">+${q.rewards.souls} Souls</span>`,
+              `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${soulIcon}+${q.rewards.souls} Souls</span>`,
             );
           if (q.rewards.pp > 0)
             rewardItems.push(
-              `<span style="color:#ff007f;">+${q.rewards.pp} PP</span>`,
+              `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${ppIcon}+${q.rewards.pp} PP</span>`,
             );
           if (q.rewards.sacks > 0)
             rewardItems.push(
-              `<span style="color:#f1c40f;">+${q.rewards.sacks}x Clan Sack</span>`,
+              `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${sackIcon}+${q.rewards.sacks}x Clan Sack</span>`,
             );
 
           if (q.rewards.goldBase > 0) {
@@ -647,50 +857,212 @@ window.renderClanDashboard = function (clan, members, invitations) {
               q.rewards.goldBase * calculatedGoldMult,
             );
             rewardItems.push(
-              `<span style="color:#ffd700;">+${window.formatNumber(actualGoldReward)} Gold</span>`,
+              `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${goldIcon}+${window.formatNumber(actualGoldReward)} Gold</span>`,
             );
           }
 
+          // Completed bounty cards receive a 3D Wax Seal Stamp overlay!
           let completedOverlay = q.completed
-            ? `<div style="position:absolute; top:2px; right:8px; width:12px; height:12px; background:#2ecc71; border-radius:50%; box-shadow:0 0 6px #2ecc71; display:flex; align-items:center; justify-content:center; color:#fff; font-size:8px; font-weight:bold;">✓</div>`
+            ? `
+                <div class="wax-seal-stamp" style="--final-rot:-15deg;">
+                    <div class="wax-seal-inner">
+                        <span style="color:#fff; font-size:8px; font-family:sans-serif; font-weight:900; letter-spacing:0.5px;">DONE</span>
+                    </div>
+                </div>`
             : "";
 
+          let completedButUnclaimed = q.completed && !hasClaimed;
+          let cardClass = "clan-bounty-card";
+          let particleOverlayHtml = "";
+          if (completedButUnclaimed) {
+            cardClass += " claim-pulse-aura";
+            particleOverlayHtml = `<div class="quest-particle-overlay"></div>`;
+          }
+
           return `
-          <div style="position:relative; background:#111; border:1.5px solid ${q.completed ? "#2ecc71" : "#2d3748"}; border-radius:6px; padding:10px; margin-bottom:8px; text-align:left;">
-              ${completedOverlay}
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:8px;">
-                  <strong style="font-size:12.5px; color:#fff; display:block;">${q.label}</strong>
-                  ${claimBtnHtml}
-              </div>
-              <p style="font-size:10px; color:#aaa; margin-bottom:8px; line-height:1.35; white-space:normal;">${q.desc}</p>
+            <div class="${cardClass}" style="border: 2.2px solid ${q.completed ? "#1e824c" : "#5c4033"}; padding: 12px; margin-bottom: 8px;">
+                ${completedOverlay}
+                ${particleOverlayHtml}
+                <div style="position: relative; z-index: 2;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:8px;">
+                        <strong style="font-size:12.5px; font-family:sans-serif; text-transform:uppercase; letter-spacing:0.5px;">${q.label}</strong>
+                        ${claimBtnHtml}
+                    </div>
+                    <p style="font-size:10px; margin:0 0 8px 0; line-height:1.35; white-space:normal;">${q.desc}</p>
 
-              <div style="background:#090a0f; border:1px solid #222; border-radius:4px; padding:6px; font-size:9.5px; margin-bottom:8px; display:flex; flex-wrap:wrap; gap:4px 8px; font-family:monospace; line-height:1.2;">
-                  <div style="width:100%; color:#9b59b6; font-weight:bold; margin-bottom:2px;">🎁 Quest Rewards (Completed):</div>
-                  <div style="color:#df9ffb; font-weight:bold;">+${q.xpReward} Clan XP</div>
-                  ${rewardItems.map((item) => `<div>${item}</div>`).join("")}
-              </div>
+                    <div style="background:rgba(255, 255, 255, 0.22); border:1.2px solid #5c4033; border-radius:4px; padding:6px; font-size:9.5px; margin-bottom:8px; display:flex; flex-wrap:wrap; gap:4px 8px; font-family:monospace; line-height:1.2;">
+                        <div style="width:100%; color:#5c4033; font-weight:bold; margin-bottom:2px; display:inline-flex; align-items:center; gap:4px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-0.5px);"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 2v6M7 5h10"/></svg>
+                            QUEST REWARDS:
+                        </div>
+                        <div style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1px);"><polygon points="12 2 15 8.5 22 9 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9 9 8.5"/></svg>
+                            +${q.xpReward} Clan XP
+                        </div>
+                        ${rewardItems.map((item) => `<div>${item}</div>`).join("")}
+                    </div>
 
-              <div style="width:100%; height:6px; background:#222; border-radius:3px; overflow:hidden; border:1px solid #333; margin-top:2px;">
-                  <div style="width:${pct}%; height:100%; background:${q.completed ? "#2ecc71" : "#9b59b6"};"></div>
-              </div>
-          </div>
-        `;
+                    <!-- Styled progress line -->
+                    <div style="width:100%; height:5px; background:rgba(0,0,0,0.15); border-radius:3px; overflow:hidden; border:1px solid #5c4033; margin-top:2px;">
+                        <div style="width:${pct}%; height:100%; background:${q.completed ? "#1e824c" : "#8a6d3b"};"></div>
+                    </div>
+                </div>
+            </div>
+          `;
         })
         .join("");
     }
 
     tabContentHtml = `
-              <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.4;">
-                  <strong style="color:#df9ffb; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 2px rgba(155, 89, 182, 0.4));"><path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z"/></svg>
-                      Weekly Clan Quests
+                <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.4;">
+                    <strong style="color:#df9ffb; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 2px rgba(155, 89, 182, 0.4));"><path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z"/></svg>
+                        Weekly Clan Quests
+                    </strong>
+                    Cooperate with your Clan to achieve these weekly active goals. Each completed quest yields massive rewards like **Gacha Keys, Catalyst Cores, Astral Essence, Eridium Shards, or PP** for every single member!
+                </div>
+                <div style="max-height: 280px; overflow-y:auto; padding-right:4px;">
+                    ${listHtml}
+                </div>
+              `;
+  } else if (currentTab === "DONATE") {
+    let goldOwned = window.playerStats.coins || 0;
+    let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
+    let luminousOwned = window.inventory.ETC["Luminous Soul"] || 0;
+
+    // Track weekly cooperative points to render Cooperative Vault Chest Bar
+    let vaultPoints = clan.vault_points || 0;
+    let currentChestTier = "common";
+    if (vaultPoints >= 30000) currentChestTier = "mythic";
+    else if (vaultPoints >= 15000) currentChestTier = "legendary";
+    else if (vaultPoints >= 7500) currentChestTier = "epic";
+    else if (vaultPoints >= 3000) currentChestTier = "magic";
+    else if (vaultPoints >= 1000) currentChestTier = "rare";
+
+    // Progress percentage mapping
+    let maxThreshold = 30000;
+    let chestPct = Math.min(100, (vaultPoints / maxThreshold) * 100);
+
+    let nextThresholdLabel = "";
+    let nextThresholdVal = 0;
+    if (currentChestTier === "common") {
+      nextThresholdLabel = "Rare";
+      nextThresholdVal = 1000;
+    } else if (currentChestTier === "rare") {
+      nextThresholdLabel = "Magic";
+      nextThresholdVal = 3000;
+    } else if (currentChestTier === "magic") {
+      nextThresholdLabel = "Epic";
+      nextThresholdVal = 7500;
+    } else if (currentChestTier === "epic") {
+      nextThresholdLabel = "Legendary";
+      nextThresholdVal = 15000;
+    } else if (currentChestTier === "legendary") {
+      nextThresholdLabel = "Mythic";
+      nextThresholdVal = 30000;
+    } else {
+      nextThresholdLabel = "Maxed";
+      nextThresholdVal = 30000;
+    }
+
+    let personalCP = 0;
+    let meMember = members.find((x) => x.userId === userId);
+    if (meMember) {
+      personalCP = meMember.weekly_contribution || 0;
+    }
+
+    tabContentHtml = `
+      <!-- Cooperative Vault Chest Progression Card -->
+      <div class="chiseled-stone-panel" style="margin-bottom:12px; padding:12px; border-color:#d4af3780;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <strong style="color:#ffd700; font-size:12px; display:inline-flex; align-items:center; gap:4px; text-transform:uppercase;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M12 2v5M17 5H7"/></svg>
+                  Cooperative Vault Chest
+              </strong>
+              <span style="font-family:monospace; font-size:10px; color:#ffd700; background:rgba(241,196,15,0.08); padding:2px 6px; border-radius:3px; border:1px solid rgba(241,196,15,0.3); font-weight:bold;">
+                  ${currentChestTier.toUpperCase()} CHEST
+              </span>
+          </div>
+          <div style="font-size:10.5px; color:#aaa; line-height:1.45; text-align:left; margin-bottom:8px;">
+              Weekly Group Score: <strong style="color:#fff;">${vaultPoints.toLocaleString()} / 30,000</strong>. Resets every Monday. All active members who contributed at least <strong style="color:#2ecc71;">100 CP</strong> will receive a Vault reward sack!
+          </div>
+
+          <!-- Progress track with markers -->
+          <div class="cooperative-vault-track">
+              <!-- Threshold marker notches at 1,000 (3.3%), 3,000 (10%), 7,500 (25%), 15,000 (50%) -->
+              <div class="vault-threshold-marker" style="left:3.3%;"></div>
+              <div class="vault-threshold-marker" style="left:10%;"></div>
+              <div class="vault-threshold-marker" style="left:25%;"></div>
+              <div class="vault-threshold-marker" style="left:50%;"></div>
+              <div class="cooperative-vault-fill ${currentChestTier}" style="width: ${chestPct}%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:9px; color:#888; margin-top:4px; font-family:monospace; line-height:1;">
+              <span>Current: ${currentChestTier.toUpperCase()}</span>
+              <span>Next Milestone: <strong style="color:#ffd700;">${nextThresholdLabel} (${vaultPoints.toLocaleString()}/${nextThresholdVal.toLocaleString()})</strong></span>
+          </div>
+
+          <div style="margin-top:10px; background:rgba(0,0,0,0.4); border:1px solid #222; padding:6px; border-radius:4px; text-align:left; font-size:10px; line-height:1.35;">
+              👤 <strong style="color:#2ecc71;">YOUR INVOLVEMENT:</strong><br>
+              You have contributed <strong style="color:#fff;">${personalCP.toLocaleString()} CP</strong> this week.<br>
+              Status: ${personalCP >= 100 ? `<span style="color:#2ecc71; font-weight:bold;">QUALIFIED ✓ (Weekly rewards active!)</span>` : `<span style="color:#e74c3c; font-weight:bold;">INELIGIBLE ✗ (Requires 100 CP. Slay mobs or Donate!)</span>`}
+          </div>
+      </div>
+
+      <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.45;">
+          <strong style="color:#f1c40f; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6M9 13h6"/></svg>
+              Contribution Chamber
+          </strong>
+          Donating resources grows the shared **Clan Vault treasury** and awards you **Leaderboard Contribution Points (CP)** to progress the weekly chest!
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px; text-align:left;">
+          <!-- Gold Donation -->
+          <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                  <strong style="color:#f1c40f; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6M9 13h6"/></svg>
+                      Donate Gold
                   </strong>
-                  Cooperate with your Clan to achieve these weekly active goals. Completing quests is the <strong style="color:#df9ffb;">only way</strong> to gain Clan XP and level up! Each completed quest yields massive rewards like **Gacha Keys, Catalyst Cores, Astral Essence, Eridium Shards, or PP** for every single member!
+                  <div style="font-size:9.5px; color:#aaa;">Owned: ${window.formatNumber(goldOwned)} Gold</div>
               </div>
-              <div style="max-height: 280px; overflow-y:auto; padding-right:4px;">
-                  ${listHtml}
+              <div style="display:flex; gap:4px;">
+                  <button class="btn-action" style="background:#f1c40f; color:#111; font-size:9.5px; padding:4px 8px;" ${goldOwned >= 10000 ? "" : "disabled"} onclick="window.executeClanDonate('gold', 10000)">10K (+1 CP)</button>
+                  <button class="btn-action" style="background:#f1c40f; color:#111; font-size:9.5px; padding:4px 8px;" ${goldOwned >= 100000 ? "" : "disabled"} onclick="window.executeClanDonate('gold', 100000)">100K (+10 CP)</button>
               </div>
-            `;
+          </div>
+
+          <!-- Monster Souls Donation -->
+          <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                  <strong style="color:#bdc3c7; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6M9 13h6"/></svg>
+                      Donate Monster Souls
+                  </strong>
+                  <div style="font-size:9.5px; color:#aaa;">Owned: ${soulsOwned.toLocaleString()} Souls</div>
+              </div>
+              <div style="display:flex; gap:4px;">
+                  <button class="btn-action" style="background:#bdc3c7; color:#111; font-size:9.5px; padding:4px 8px;" ${soulsOwned >= 50 ? "" : "disabled"} onclick="window.executeClanDonate('souls', 50)">50 (+50 CP)</button>
+                  <button class="btn-action" style="background:#bdc3c7; color:#111; font-size:9.5px; padding:4px 8px;" ${soulsOwned >= 250 ? "" : "disabled"} onclick="window.executeClanDonate('souls', 250)">250 (+250 CP)</button>
+              </div>
+          </div>
+
+          <!-- Luminous Souls Donation -->
+          <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                  <strong style="color:#ffb6c1; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+                      Donate Luminous Souls
+                  </strong>
+                  <div style="font-size:9.5px; color:#aaa;">Owned: ${luminousOwned.toLocaleString()} Souls</div>
+              </div>
+              <div style="display:flex; gap:4px;">
+                  <button class="btn-action" style="background:#ffb6c1; color:#111; font-size:9.5px; padding:4px 8px;" ${luminousOwned >= 5 ? "" : "disabled"} onclick="window.executeClanDonate('luminous', 5)">5 (+100 CP)</button>
+                  <button class="btn-action" style="background:#ffb6c1; color:#111; font-size:9.5px; padding:4px 8px;" ${luminousOwned >= 25 ? "" : "disabled"} onclick="window.executeClanDonate('luminous', 25)">25 (+500 CP)</button>
+              </div>
+          </div>
+      </div>
+    `;
   } else if (currentTab === "SETTINGS") {
     let isJoinOpen = clan.join_policy === "open";
     tabContentHtml = `
@@ -750,7 +1122,7 @@ window.renderClanDashboard = function (clan, members, invitations) {
       let costGold = 0;
       let costSoul = 0;
       let soulName = "";
-      let bankField = "";
+      let rawSoulName = "";
 
       if (key === "steel_phalanx" || key === "vitality_well") {
         costGold = Math.floor(
@@ -758,7 +1130,7 @@ window.renderClanDashboard = function (clan, members, invitations) {
         );
         costSoul = Math.floor(200 * Math.pow(1.25, currentL));
         soulName = "Monster Souls";
-        bankField = "souls_bank";
+        rawSoulName = "Monster Soul";
       } else {
         let baseG =
           key === "prosperity_accord"
@@ -775,40 +1147,37 @@ window.renderClanDashboard = function (clan, members, invitations) {
         costGold = Math.floor(baseG * Math.pow(scaleG, currentL));
         costSoul = Math.floor(baseS * Math.pow(scaleS, currentL));
         soulName = "Luminous Souls";
-        bankField = "luminous_bank";
+        rawSoulName = "Luminous Soul";
       }
+
+      // Stage-Scaled Gold Model matching player's current stage income curve
+      let peakStage =
+        window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+      costGold = Math.floor(costGold * Math.pow(1.045, peakStage));
 
       let isMaxed = currentL >= maxL;
       let clanLevel = clan.level || 1;
       let isGated = currentL >= clanLevel * 2;
-      let canAffordGold = clan.gold_bank >= costGold;
-      let canAffordSoul = clan[bankField] >= costSoul;
 
-      let goldDeficit = Math.max(0, costGold - clan.gold_bank);
-      let soulsDeficit = Math.max(0, costSoul - clan[bankField]);
+      let progress = clan.research_progress || {};
+      let skillProgress = progress[key] || { gold: 0, souls: 0 };
+
+      let currentGoldProgress = skillProgress.gold || 0;
+      let currentSoulsProgress = skillProgress.souls || 0;
+
+      let goldPct = isMaxed
+        ? 100
+        : Math.min(100, (currentGoldProgress / costGold) * 100);
+      let soulsPct = isMaxed
+        ? 100
+        : Math.min(100, (currentSoulsProgress / costSoul) * 100);
 
       let personalGold = window.playerStats.coins || 0;
-      let rawSoulName =
-        bankField === "souls_bank" ? "Monster Soul" : "Luminous Soul";
       let personalSouls = window.inventory.ETC[rawSoulName] || 0;
 
-      let canBridgeGold = personalGold >= goldDeficit;
-      let canBridgeSouls = personalSouls >= soulsDeficit;
-      let canAutoDepositAndUpgrade =
-        isLeader &&
-        !isMaxed &&
-        !isGated &&
-        canBridgeGold &&
-        canBridgeSouls &&
-        (goldDeficit > 0 || soulsDeficit > 0);
-
-      let canUpgradeDirectly =
-        isLeader && !isMaxed && !isGated && canAffordGold && canAffordSoul;
       let bgStyle = window.hexToRgba
         ? window.hexToRgba(col, 0.04)
         : "rgba(255,255,255,0.02)";
-      let btnTextColor =
-        col === "#f1c40f" || col === "#ffb6c1" ? "#111" : "#fff";
 
       let icon = "";
       if (key === "steel_phalanx")
@@ -824,113 +1193,107 @@ window.renderClanDashboard = function (clan, members, invitations) {
       else if (key === "clan_supply_depot")
         icon = window.getUiIconSvg("gold", 13);
 
-      let statusBadge = `<span style="background:rgba(255,255,255,0.04); border:1px solid #333; color:#aaa; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace;">LOCKED</span>`;
+      let statusBadge = `<span style="background:rgba(255,255,255,0.04); border:1px solid #333; color:#aaa; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace;">ACTIVE</span>`;
       if (isMaxed) {
         statusBadge = `<span style="background:rgba(46,204,113,0.15); border:1px solid #2ecc71; color:#2ecc71; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace;">MAX RANK</span>`;
       } else if (isGated) {
         statusBadge = `<span style="background:rgba(231,76,60,0.15); border:1px solid #e74c3c; color:#e74c3c; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace;">GATED</span>`;
-      } else if (canUpgradeDirectly) {
-        statusBadge = `<span style="background:rgba(241,196,15,0.15); border:1px solid #f1c40f; color:#f1c40f; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace; animation:pulseGlow 1.2s infinite;">READY</span>`;
-      } else if (canAutoDepositAndUpgrade) {
-        statusBadge = `<span style="background:rgba(52,152,219,0.15); border:1px solid #3498db; color:#3498db; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace;">BRIDGEABLE</span>`;
       }
 
-      let barWidth = (currentL / maxL) * 100;
       let gateWarningText = "";
       if (isGated && !isMaxed) {
         gateWarningText = `<div style="margin-top:6px; background:rgba(231,76,60,0.06); border:1px dashed #e74c3c; padding:5px; border-radius:4px; font-size:8.5px; color:#ff7675; text-align:center; font-weight:bold; line-height:1.2;">🔒 RESEARCH BLOCKED: Level up your Clan to Level ${Math.ceil((currentL + 1) / 2)} to expand the caps!</div>`;
       }
 
-      let buttonControls = "";
-      if (isLeader && !isMaxed && !isGated) {
-        if (canUpgradeDirectly) {
-          buttonControls = `
-              <button class="btn-action" style="background:${col}; color:${btnTextColor}; font-weight:bold; font-size:10px; padding:8px; width:100%; border-radius:4px; border:1px solid #fff; box-shadow:0 3px 10px ${col}44;" onclick="window.executeUpgradeClanSkill('${key}')">Upgrade Research</button>
-            `;
-        } else if (canAutoDepositAndUpgrade) {
-          buttonControls = `
-              <button class="btn-action" style="background:linear-gradient(135deg, #2ecc71, #27ae60); color:#fff; font-weight:bold; font-size:10px; padding:8px; width:100%; border-radius:4px; border:1px solid #fff; box-shadow:0 3px 10px rgba(46,204,113,0.3);" onclick="window.executeDeficitContributeAndUpgrade('${key}', ${costGold}, ${costSoul}, '${bankField}')">⚡ Fund Deficit & Research</button>
-            `;
-        } else {
-          buttonControls = `
-              <button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-weight:bold; font-size:10px; padding:8px; width:100%; border-radius:4px; cursor:not-allowed;" disabled>Lacking Treasury & Inventory Bags</button>
-            `;
-        }
-      } else if (!isLeader && !isMaxed && !isGated) {
-        buttonControls = `<div style="font-size:8.5px; color:#888; font-style:italic; text-align:center; margin-top:2px;">* Only the Clan Founder can initiate research upgrades.</div>`;
-      }
-
       return `
-          <div class="shop-row" style="border:1.5px solid ${col}44; border-left: 4.5px solid ${col} !important; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:6px; padding:12px; margin-bottom:0; cursor:help;">
-            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-              <strong style="color:${col}; font-size:12px; display:inline-flex; align-items:center; gap:6px;">${icon} ${label}</strong>
-              ${statusBadge}
-            </div>
-
-            <div style="font-size:10px; color:#cbd5e1; line-height:1.4;">
-              Current Active Bonus: <strong style="color:#fff;">${bonusText}</strong>
-            </div>
-
-            <!-- Progress Bar through cap limit -->
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:8.5px; color:#aaa; font-family:monospace; margin-top:2px;">
-              <span>RESEARCH INTENSITY:</span>
-              <span style="color:#df9ffb; font-weight:bold;">Lv. ${currentL} / ${maxL}</span>
-            </div>
-            <div class="sink-prog-track" style="margin:0 0 6px 0; height:5px !important;">
-              <div class="sink-prog-fill" style="width:${barWidth}%; height:100%; background:${col};"></div>
-            </div>
-
-            ${
-              !isMaxed
-                ? `
-            <div style="background:rgba(0,0,0,0.4); border:1px solid #222; border-radius:4px; padding:6px; font-size:9.5px; font-family:monospace; display:flex; flex-direction:column; gap:2.5px;">
-              <div style="display:flex; justify-content:space-between;">
-                <span>• Required Gold:</span>
-                <strong style="${canAffordGold ? "color:#2ecc71;" : "color:#e74c3c;"}">${window.formatNumber(costGold)} <span style="color:#888;">(Vault: ${window.formatNumber(clan.gold_bank)})</span></strong>
+            <div class="shop-row" style="border:1.5px solid ${col}44; border-left: 4.5px solid ${col} !important; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:8px; padding:12px; margin-bottom:0; cursor:default; position:relative; z-index:1;">
+              <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                <strong style="color:${col}; font-size:12px; display:inline-flex; align-items:center; gap:6px;">${icon} ${label}</strong>
+                ${statusBadge}
               </div>
-              <div style="display:flex; justify-content:space-between;">
-                <span>• Required ${soulName.replace(" Souls", "")}s:</span>
-                <strong style="${canAffordSoul ? "color:#2ecc71;" : "color:#e74c3c;"}">${costSoul} <span style="color:#888;">(Vault: ${clan[bankField]})</span></strong>
+
+              <div style="font-size:10px; color:#cbd5e1; line-height:1.4;">
+                Current Active Bonus: <strong style="color:#fff;">${bonusText}</strong>
               </div>
+
+              <!-- Progress Bar through cap limit -->
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:8.5px; color:#aaa; font-family:monospace; margin-top:2px;">
+                <span>RESEARCH INTENSITY:</span>
+                <span style="color:#df9ffb; font-weight:bold;">Lv. ${currentL} / ${maxL}</span>
+              </div>
+
               ${
-                goldDeficit > 0 || soulsDeficit > 0
+                !isMaxed && !isGated
                   ? `
-              <div style="border-top:1px dashed #333; margin-top:4px; padding-top:4px; display:flex; flex-direction:column; gap:1.5px; color:#aaa;">
-                <div style="display:flex; justify-content:space-between;">
-                  <span>• Missing Gold:</span>
-                  <strong style="${canBridgeGold ? "color:#3498db;" : "color:#e74c3c;"}">${window.formatNumber(goldDeficit)} <span style="color:#555;">(You: ${window.formatNumber(personalGold)})</span></strong>
+              <!-- Gold Progress Track -->
+              <div style="margin-top:6px; background:rgba(0,0,0,0.22); padding:8px; border:1px solid #222; border-radius:6px; position:relative; z-index:5;">
+                <div style="display:flex; justify-content:space-between; font-size:9.5px; font-family:monospace; margin-bottom:4px; color:#aaa;">
+                  <span>🟡 Gold Progress:</span>
+                  <strong style="color:#fff;">${window.formatNumber(currentGoldProgress)} / ${window.formatNumber(costGold)}</strong>
                 </div>
-                <div style="display:flex; justify-content:space-between;">
-                  <span>• Missing ${soulName.replace(" Souls", "")}s:</span>
-                  <strong style="${canBridgeSouls ? "color:#3498db;" : "color:#e74c3c;"}">${soulsDeficit} <span style="color:#555;">(You: ${personalSouls})</span></strong>
+                <div class="sink-prog-track" style="margin:0 0 6px 0; height:5px !important;">
+                  <div class="sink-prog-fill" style="width:${goldPct}%; height:100%; background:#f1c40f;"></div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:6px;">
+                  <button class="btn-action" style="padding:4px 0; font-size:9.5px; background:#2c3e50; border:1px solid #34495e;" onclick="window.openResearchDonateModal('${key}', 'gold', ${costGold}, ${currentGoldProgress})">Donate</button>
+                  <button class="btn-action" style="padding:4px 0; font-size:9.5px; background:#f1c40f; color:#111;" onclick="window.confirmResearchDonateMax('${key}', 'gold', ${costGold}, ${currentGoldProgress})">Donate Max</button>
+                </div>
+              </div>
+
+              <!-- Souls Progress Track -->
+              <div style="margin-top:6px; background:rgba(0,0,0,0.22); padding:8px; border:1px solid #222; border-radius:6px; position:relative; z-index:5;">
+                <div style="display:flex; justify-content:space-between; font-size:9.5px; font-family:monospace; margin-bottom:4px; color:#aaa;">
+                  <span>💀 ${soulName} Progress:</span>
+                  <strong style="color:#fff;">${currentSoulsProgress.toLocaleString()} / ${costSoul.toLocaleString()}</strong>
+                </div>
+                <div class="sink-prog-track" style="margin:0 0 6px 0; height:5px !important;">
+                  <div class="sink-prog-fill" style="width:${soulsPct}%; height:100%; background:#9b59b6;"></div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:6px;">
+                  <button class="btn-action" style="padding:4px 0; font-size:9.5px; background:#2c3e50; border:1px solid #34495e;" onclick="window.openResearchDonateModal('${key}', 'souls', ${costSoul}, ${currentSoulsProgress})">Donate</button>
+                  <button class="btn-action" style="padding:4px 0; font-size:9.5px; background:#9b59b6; color:#fff;" onclick="window.confirmResearchDonateMax('${key}', 'souls', ${costSoul}, ${currentSoulsProgress})">Donate Max</button>
                 </div>
               </div>
               `
                   : ""
               }
-            </div>
-            `
-                : ""
-            }
 
-            ${gateWarningText}
-            <div style="margin-top:4px; width:100%;">
-              ${buttonControls}
+              ${gateWarningText}
             </div>
-          </div>
-        `;
+          `;
     };
 
-    tabContentHtml = `
-        <div style="display:flex; flex-direction:column; gap:10px; max-height:280px; overflow-y:auto; padding-right:4px;">
-            ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", "+" + ((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1) + "% Attack & Defense", clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
-            ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", "+" + ((clan.skill_vitality_well || 0) * 0.8).toFixed(1) + "% Max HP", clan.skill_vitality_well || 0, 50, "#3498db")}
-            ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", "+" + ((clan.skill_prosperity_accord || 0) * 1.0).toFixed(1) + "% Gold Multiplier", clan.skill_prosperity_accord || 0, 30, "#f1c40f")}
-            ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager's Guidance", "+" + ((clan.skill_voyagers_guidance || 0) * 0.5).toFixed(1) + "% Drop Rate & Quality", clan.skill_voyagers_guidance || 0, 30, "#2ecc71")}
-            ${getSkillUpgradeCardHtml("aetheric_wisdom", "Aetheric Wisdom", "+" + ((clan.skill_aetheric_wisdom || 0) * 1.0).toFixed(1) + "% XP Rate", clan.skill_aetheric_wisdom || 0, 30, "#9b59b6")}
-            ${getSkillUpgradeCardHtml("clan_supply_depot", "Supply Depot", "Crate yields: +" + (clan.skill_clan_supply_depot || 0) * 20 + "% Gold & +" + (clan.skill_clan_supply_depot || 0) * 10 + "% Souls", clan.skill_clan_supply_depot || 0, 30, "#ffaa00")}
+    // Include the infinite Aetheric Hearth repeatable contribution portal at the bottom of the list
+    let hearthHtml = `
+        <div class="shop-row" style="border:1.5px solid #ff007f44; border-left:4.5px solid #ff007f !important; background:rgba(255, 0, 127, 0.04); flex-direction:column; align-items:stretch; text-align:left; gap:6px; padding:12px; margin-bottom:0; cursor:default; position:relative; z-index:1;">
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <strong style="color:#ff007f; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; filter:drop-shadow(0 0 3px #ff007f);"><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/><path d="m15 9-6 6M9 9h6v6" stroke="#ff007f"/></svg>
+              Aetheric Hearth
+            </strong>
+            <span style="background:rgba(255, 0, 127, 0.15); border:1px solid #ff007f; color:#ffb6c1; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; font-family:monospace;">INFINITE</span>
+          </div>
+          <div style="font-size:10px; color:#cbd5e1; line-height:1.45;">
+            A repeatable contribution channel for maxed clans. Inject extra resources directly into the hearth, raising your personal contribution and generating **Renown** directly to progress the weekly chest!
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:4px; position:relative; z-index:5;">
+            <button class="btn-action" style="padding:6px 0; font-size:10px; background:#ffd700; color:#111; font-weight:bold; border:1px solid #fff;" onclick="window.openHearthDonateModal('gold')">🟡 Donate Gold</button>
+            <button class="btn-action" style="padding:6px 0; font-size:10px; background:#9b59b6; color:#fff; font-weight:bold; border:1px solid #fff;" onclick="window.openHearthDonateModal('souls')">💀 Donate Souls</button>
+          </div>
         </div>
       `;
+
+    tabContentHtml = `
+          <div style="display:flex; flex-direction:column; gap:10px; max-height:280px; overflow-y:auto; padding-right:4px;">
+              ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", "+" + ((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1) + "% Attack & Defense", clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
+              ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", "+" + ((clan.skill_vitality_well || 0) * 0.8).toFixed(1) + "% Max HP", clan.skill_vitality_well || 0, 50, "#3498db")}
+              ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", "+" + ((clan.skill_prosperity_accord || 0) * 1.0).toFixed(1) + "% Gold Multiplier", clan.skill_prosperity_accord || 0, 30, "#f1c40f")}
+              ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager's Guidance", "+" + ((clan.skill_voyagers_guidance || 0) * 0.5).toFixed(1) + "% Drop Rate & Quality", clan.skill_voyagers_guidance || 0, 30, "#2ecc71")}
+              ${getSkillUpgradeCardHtml("aetheric_wisdom", "Aetheric Wisdom", "+" + ((clan.skill_aetheric_wisdom || 0) * 1.0).toFixed(1) + "% XP Rate", clan.skill_aetheric_wisdom || 0, 30, "#9b59b6")}
+              ${getSkillUpgradeCardHtml("clan_supply_depot", "Supply Depot", "Crate yields: +" + (clan.skill_clan_supply_depot || 0) * 20 + "% Gold & +" + (clan.skill_clan_supply_depot || 0) * 10 + "% Souls", clan.skill_clan_supply_depot || 0, 30, "#ffaa00")}
+              ${hearthHtml}
+          </div>
+        `;
   }
 
   contentEl.innerHTML = `
@@ -1112,6 +1475,78 @@ window.executeKickMember = function (targetUserId, targetName) {
   );
 };
 
+// --- PILLAR 2: INLINE ADMINISTRATIVE RANK MANAGEMENT CONTROLLER ---
+window.handleInlineAdminAction = function (selectEl, targetUserId, targetName) {
+  const action = selectEl.value;
+  if (!action) return;
+
+  // Reset selected state to prompt actions cleanly
+  selectEl.value = "";
+
+  if (action === "kick") {
+    window.executeKickMember(targetUserId, targetName);
+    return;
+  }
+
+  let popupTitle = "";
+  let popupMessage = "";
+  let confirmText = "";
+  let accentColor = "#9b59b6";
+
+  if (action === "promote") {
+    popupTitle = "Promote Member";
+    popupMessage = `Are you sure you want to promote **${targetName}**? This elevates their rank, unlocking higher administrative privileges within the Clan hierarchy.`;
+    confirmText = "Promote";
+    accentColor = "#2ecc71";
+  } else if (action === "demote") {
+    popupTitle = "Demote Member";
+    popupMessage = `Are you sure you want to demote **${targetName}**? This reduces their active rank and restricts access to previously held administrative actions.`;
+    confirmText = "Demote";
+    accentColor = "#e67e22";
+  } else if (action === "founder") {
+    popupTitle = "Transfer Clan Leadership";
+    popupMessage = `⚠️ <strong style="color:#e74c3c;">CRITICAL ACTION:</strong> Are you sure you want to transfer ownership of the Clan to **${targetName}**?<br><br>This will demote your rank to Officer and hand full control over settings, upgrades, and disband actions to them. This cannot be undone!`;
+    confirmText = "Transfer Ownership";
+    accentColor = "#ff007f";
+  }
+
+  window.showCustomConfirm(
+    popupTitle,
+    popupMessage,
+    confirmText,
+    "Cancel",
+    accentColor,
+    function () {
+      const userId = window.getGameUserId();
+      fetch(`${window.GAME_SERVER_URL}/api/clan/promote-demote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, targetUserId, action }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success) {
+            window.pushHeaderToast(
+              `✓ Successfully modified rank of ${targetName}!`,
+              accentColor,
+            );
+            window.fetchClanData();
+            window.updateUI();
+            window.saveGame();
+          } else {
+            window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+          }
+        })
+        .catch(() => {
+          window.pushHeaderToast(
+            "❌ Network error updating member rank.",
+            "#e74c3c",
+          );
+        });
+    },
+  );
+};
+
 window.executeUpgradeClanSkill = function (skillKey) {
   if (!window.GAME_SERVER_URL) {
     let currentL = window.playerStats.clanSkills[skillKey] || 0;
@@ -1179,6 +1614,8 @@ window.executeDisbandClan = function () {
               vitality_well: 0,
               prosperity_accord: 0,
               voyagers_guidance: 0,
+              aetheric_wisdom: 0,
+              clan_supply_depot: 0,
             };
             window.pushHeaderToast("🏃 You have departed the Clan.", "#7f8c8d");
             if (modal) modal.remove();
@@ -1241,8 +1678,13 @@ window.executeClanDonate = function (type, amount) {
     .then((r) => r.json())
     .then((data) => {
       if (data.success) {
+        let cpGain = 0;
+        if (type === "gold") cpGain = Math.floor(amount / 10000);
+        else if (type === "souls") cpGain = amount;
+        else if (type === "luminous") cpGain = amount * 20;
+
         window.pushHeaderToast(
-          `🙏 Contribution Recorded! +${amount.toLocaleString()}`,
+          `🙏 Contribution Recorded! +${amount.toLocaleString()} (+${cpGain} CP)`,
           "#2ecc71",
         );
         window.fetchClanData();
@@ -1389,4 +1831,439 @@ window.executeDeficitContributeAndUpgrade = function (
       }
     },
   );
+};
+
+window.openResearchDonateModal = function (
+  skillKey,
+  resType,
+  requiredAmt,
+  currentAmt,
+) {
+  let needed = requiredAmt - currentAmt;
+  if (needed <= 0) return;
+
+  let labelMap = {
+    steel_phalanx: "Steel Phalanx",
+    vitality_well: "Vitality Well",
+    prosperity_accord: "Prosperity Accord",
+    voyagers_guidance: "Voyager's Guidance",
+    aetheric_wisdom: "Aetheric Wisdom",
+    clan_supply_depot: "Supply Depot",
+  };
+
+  let skillName = labelMap[skillKey] || "Research";
+  let personalBalance = 0;
+  let rawName = "";
+  let accentColor = resType === "gold" ? "#f1c40f" : "#9b59b6";
+
+  if (resType === "gold") {
+    personalBalance = window.playerStats.coins || 0;
+    rawName = "Gold";
+  } else {
+    let rawSoulName =
+      skillKey === "steel_phalanx" || skillKey === "vitality_well"
+        ? "Monster Soul"
+        : "Luminous Soul";
+    personalBalance = window.inventory.ETC[rawSoulName] || 0;
+    rawName = rawSoulName + "s";
+  }
+
+  let limit = Math.min(personalBalance, needed);
+  if (limit <= 0) {
+    window.pushHeaderToast(
+      `❌ You have no ${rawName} available to donate!`,
+      "#e74c3c",
+    );
+    return;
+  }
+
+  // Create Custom slider modal
+  let overlay = document.createElement("div");
+  overlay.id = "research-donation-modal-overlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundColor = "rgba(0,0,0,0.85)";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = "40000";
+  overlay.style.backdropFilter = "blur(4px)";
+  document.body.appendChild(overlay);
+
+  overlay.innerHTML = `
+    <div style="background:#151515; border: 2px solid ${accentColor}; border-radius: 8px; width:90%; max-width:380px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.95); text-align:center;">
+        <h3 style="margin:0 0 6px 0; color:${accentColor}; text-transform:uppercase; letter-spacing:1px; font-size:14px;">🎯 Research Contribution</h3>
+        <p style="font-size:10.5px; color:#aaa; margin:0 0 12px 0;">Donating to <strong>${skillName}</strong></p>
+        <div style="height:1px; background:linear-gradient(90deg, transparent, ${accentColor}, transparent); margin-bottom:15px;"></div>
+
+        <div style="background:#0c0f12; border:1px solid #222; padding:10px; border-radius:4px; font-family:monospace; font-size:11px; text-align:left; margin-bottom:15px; display:flex; flex-direction:column; gap:4px;">
+            <div style="display:flex; justify-content:space-between;"><span>• Balance:</span><strong style="color:#fff;">${personalBalance.toLocaleString()} ${rawName}</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span>• Required to Max:</span><strong style="color:${accentColor};">${needed.toLocaleString()} ${rawName}</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span>• Earned Renown:</span><strong id="re-renown-calc" style="color:#2ecc71;">+0 Renown</strong></div>
+        </div>
+
+        <!-- Custom Input & Slider controls -->
+        <div style="margin-bottom:15px;">
+            <input type="range" id="re-donate-slider" min="1" max="${limit}" value="${limit}" style="width:100%; height:4px; accent-color:${accentColor}; cursor:pointer;" oninput="window.updateResearchDonateModal(${limit}, '${resType}', '${rawName}')" />
+            <div style="display:flex; gap:6px; justify-content:center; align-items:center; margin-top:8px;">
+                <input type="number" id="re-donate-num-input" min="1" max="${limit}" value="${limit}" style="width:90px; background:#111; color:#fff; border:1px solid #444; border-radius:3px; padding:4px; text-align:center; font-family:monospace; font-size:11px;" oninput="window.updateResearchDonateModalNum(${limit}, '${resType}', '${rawName}')" />
+                <span style="font-size:11px; color:#666;">/ ${limit.toLocaleString()}</span>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px; margin-bottom:20px;">
+            <button class="sub-tab-btn" style="padding:4px; font-size:9px; height:24px;" onclick="window.setResearchDonatePercent(0.25, ${limit}, '${resType}', '${rawName}')">25%</button>
+            <button class="sub-tab-btn" style="padding:4px; font-size:9px; height:24px;" onclick="window.setResearchDonatePercent(0.50, ${limit}, '${resType}', '${rawName}')">50%</button>
+            <button class="sub-tab-btn" style="padding:4px; font-size:9px; height:24px;" onclick="window.setResearchDonatePercent(0.75, ${limit}, '${resType}', '${rawName}')">75%</button>
+            <button class="sub-tab-btn" style="padding:4px; font-size:9px; height:24px;" onclick="window.setResearchDonatePercent(1.0, ${limit}, '${resType}', '${rawName}')">MAX</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button class="btn-action" style="background:#222; border:1px solid #444; color:#aaa; font-weight:bold; padding:10px; font-size:11px;" onclick="document.getElementById('research-donation-modal-overlay').remove()">Cancel</button>
+            <button class="btn-action" style="background:${accentColor}; color:${resType === "gold" ? "#111" : "#fff"}; font-weight:bold; padding:10px; font-size:11px; border:1px solid #fff;" onclick="window.submitResearchDonation('${skillKey}', '${resType}', ${costGold})">Confirm</button>
+        </div>
+    </div>
+  `;
+
+  window.updateResearchDonateModal(limit, resType, rawName);
+};
+
+window.updateResearchDonateModal = function (limit, resType, rawName) {
+  let slider = document.getElementById("re-donate-slider");
+  let input = document.getElementById("re-donate-num-input");
+  let renownText = document.getElementById("re-renown-calc");
+  if (!slider || !input || !renownText) return;
+
+  let val = parseInt(slider.value, 10) || 1;
+  input.value = val;
+
+  let earned = 0;
+  if (resType === "gold") {
+    // Uses the formula of costGold
+    let sliderMax = parseInt(slider.max, 10) || 1;
+    earned = Math.floor((val / sliderMax) * 300);
+    if (earned < 1 && val > 0) earned = 1;
+  } else {
+    earned = rawName.includes("Monster") ? val * 5 : val * 150;
+  }
+  renownText.innerText = `+${earned.toLocaleString()} Renown`;
+};
+
+window.updateResearchDonateModalNum = function (limit, resType, rawName) {
+  let slider = document.getElementById("re-donate-slider");
+  let input = document.getElementById("re-donate-num-input");
+  let renownText = document.getElementById("re-renown-calc");
+  if (!slider || !input || !renownText) return;
+
+  let val = parseInt(input.value, 10) || 1;
+  if (val < 1) val = 1;
+  if (val > limit) val = limit;
+  slider.value = val;
+
+  let earned = 0;
+  if (resType === "gold") {
+    let sliderMax = parseInt(slider.max, 10) || 1;
+    earned = Math.floor((val / sliderMax) * 300);
+    if (earned < 1 && val > 0) earned = 1;
+  } else {
+    earned = rawName.includes("Monster") ? val * 5 : val * 150;
+  }
+  renownText.innerText = `+${earned.toLocaleString()} Renown`;
+};
+
+window.setResearchDonatePercent = function (pct, limit, resType, rawName) {
+  let slider = document.getElementById("re-donate-slider");
+  if (!slider) return;
+  slider.value = Math.max(1, Math.floor(limit * pct));
+  window.updateResearchDonateModal(limit, resType, rawName);
+};
+
+window.submitResearchDonation = function (skillKey, resType, costGold) {
+  let input = document.getElementById("re-donate-num-input");
+  if (!input) return;
+
+  let val = parseInt(input.value, 10) || 0;
+  if (val <= 0) return;
+
+  document.getElementById("research-donation-modal-overlay").remove();
+  window.executeClanResearchDonate(skillKey, resType, val);
+};
+
+window.confirmResearchDonateMax = function (
+  skillKey,
+  resType,
+  requiredAmt,
+  currentAmt,
+) {
+  let needed = requiredAmt - currentAmt;
+  if (needed <= 0) return;
+
+  let personalBalance = 0;
+  let rawName = "";
+  let accentColor = resType === "gold" ? "#f1c40f" : "#9b59b6";
+
+  if (resType === "gold") {
+    personalBalance = window.playerStats.coins || 0;
+    rawName = "Gold";
+  } else {
+    let rawSoulName =
+      skillKey === "steel_phalanx" || skillKey === "vitality_well"
+        ? "Monster Soul"
+        : "Luminous Soul";
+    personalBalance = window.inventory.ETC[rawSoulName] || 0;
+    rawName = rawSoulName + "s";
+  }
+
+  let limit = Math.min(personalBalance, needed);
+  if (limit <= 0) {
+    window.pushHeaderToast(
+      `❌ You have no ${rawName} available to donate!`,
+      "#e74c3c",
+    );
+    return;
+  }
+
+  window.showCustomConfirm(
+    "Confirm Max Donation",
+    `Are you sure you want to sacrifice <strong>${limit.toLocaleString()} ${rawName}</strong> to fund this research?`,
+    "Donate Max",
+    "Cancel",
+    accentColor,
+    function () {
+      window.executeClanResearchDonate(skillKey, resType, limit);
+    },
+  );
+};
+
+window.executeClanResearchDonate = function (skillKey, resType, amount) {
+  const userId = window.getGameUserId();
+  fetch(`${window.GAME_SERVER_URL}/api/clan/research-donate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, skillKey, resType, amount }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.success) {
+        let label = resType === "gold" ? "Gold" : "Souls";
+        window.pushHeaderToast(
+          `🙏 Contributed +${data.addedAmount.toLocaleString()} ${label}! (+${data.renownEarned} Renown)`,
+          "#2ecc71",
+        );
+        if (window.SoundManager) window.SoundManager.play("fairy");
+
+        // Award resources locally to stay responsive before reload
+        if (resType === "gold") {
+          window.playerStats.coins -= data.addedAmount;
+        } else {
+          let rawSoulName =
+            skillKey === "steel_phalanx" || skillKey === "vitality_well"
+              ? "Monster Soul"
+              : "Luminous Soul";
+          window.inventory.ETC[rawSoulName] -= data.addedAmount;
+          if (window.inventory.ETC[rawSoulName] === 0)
+            delete window.inventory.ETC[rawSoulName];
+        }
+
+        if (data.leveledUp) {
+          window.pushHeaderToast(
+            `🎉 Research Upgraded to Lv. ${data.newLevel}!`,
+            "#ffd700",
+          );
+          if (window.SoundManager) window.SoundManager.play("revive");
+          if (window.spawnPurchaseCelebration) {
+            window.spawnPurchaseCelebration("alchemy", "#f1c40f", 5);
+          }
+        }
+
+        window.fetchClanData();
+        window.updateUI();
+        window.renderInventory();
+        window.saveGame();
+      } else {
+        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+      }
+    })
+    .catch(() => {
+      window.pushHeaderToast(
+        "❌ Network error contributing resources.",
+        "#e74c3c",
+      );
+    });
+};
+
+// --- REPEATABLE ENDGAME HEARTH MODAL SYSTEM ---
+
+window.openHearthDonateModal = function (resType) {
+  let personalBalance = 0;
+  let rawName = "";
+  let accentColor = resType === "gold" ? "#f1c40f" : "#9b59b6";
+
+  if (resType === "gold") {
+    personalBalance = window.playerStats.coins || 0;
+    rawName = "Gold";
+  } else {
+    // Prompt choice of Monster or Luminous Souls
+    window.showCustomConfirm(
+      "Infuse Hearth Souls",
+      "Which soul matrix would you like to fuse into the Hearth?",
+      "Monster Souls",
+      "Luminous Souls",
+      "#ff007f",
+      function () {
+        window.launchHearthResourceModal(
+          "Monster Soul",
+          window.inventory.ETC["Monster Soul"] || 0,
+        );
+      },
+      function () {
+        window.launchHearthResourceModal(
+          "Luminous Soul",
+          window.inventory.ETC["Luminous Soul"] || 0,
+        );
+      },
+    );
+    return;
+  }
+
+  window.launchHearthResourceModal("Gold", personalBalance);
+};
+
+window.launchHearthResourceModal = function (resName, balance) {
+  if (balance <= 0) {
+    window.pushHeaderToast(
+      `❌ You have no ${resName}s available to donate!`,
+      "#e74c3c",
+    );
+    return;
+  }
+
+  let accentColor =
+    resName === "Gold"
+      ? "#f1c40f"
+      : resName.includes("Monster")
+        ? "#bdc3c7"
+        : "#ffb6c1";
+
+  let overlay = document.createElement("div");
+  overlay.id = "hearth-donation-modal-overlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundColor = "rgba(0,0,0,0.85)";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = "40000";
+  overlay.style.backdropFilter = "blur(4px)";
+  document.body.appendChild(overlay);
+
+  overlay.innerHTML = `
+    <div style="background:#151515; border: 2px solid ${accentColor}; border-radius: 8px; width:90%; max-width:380px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.95); text-align:center;">
+        <h3 style="margin:0 0 6px 0; color:${accentColor}; text-transform:uppercase; letter-spacing:1px; font-size:14px;">🔥 Hearth Infusion</h3>
+        <p style="font-size:10.5px; color:#aaa; margin:0 0 12px 0;">Infusing resources into the Aetheric Hearth</p>
+        <div style="height:1px; background:linear-gradient(90deg, transparent, ${accentColor}, transparent); margin-bottom:15px;"></div>
+
+        <div style="background:#0c0f12; border:1px solid #222; padding:10px; border-radius:4px; font-family:monospace; font-size:11px; text-align:left; margin-bottom:15px; display:flex; flex-direction:column; gap:4px;">
+            <div style="display:flex; justify-content:space-between;"><span>• Balance:</span><strong style="color:#fff;">${balance.toLocaleString()} ${resName}</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span>• Earned Renown:</span><strong id="he-renown-calc" style="color:#2ecc71;">+0 Renown</strong></div>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <input type="range" id="he-donate-slider" min="1" max="${balance}" value="${balance}" style="width:100%; height:4px; accent-color:${accentColor}; cursor:pointer;" oninput="window.updateHearthDonateModal(${balance}, '${resName}')" />
+            <div style="display:flex; gap:6px; justify-content:center; align-items:center; margin-top:8px;">
+                <input type="number" id="he-donate-num-input" min="1" max="${balance}" value="${balance}" style="width:90px; background:#111; color:#fff; border:1px solid #444; border-radius:3px; padding:4px; text-align:center; font-family:monospace; font-size:11px;" oninput="window.updateHearthDonateModalNum(${balance}, '${resName}')" />
+                <span style="font-size:11px; color:#666;">/ ${balance.toLocaleString()}</span>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px; margin-bottom:20px;">
+            <button class="sub-tab-btn" style="padding:4px; font-size:9px; height:24px;" onclick="window.setHearthDonatePercent(0.25, ${balance}, '${resName}')">25%</button>
+            <button class="sub-tab-btn" style="padding:4px; font-size:9px; height:24px;" onclick="window.setHearthDonatePercent(0.50, ${balance}, '${resName}')">50%</button>
+            <button class="sub-tab-btn" style="padding:4px; font-size:9px; height:24px;" onclick="window.setHearthDonatePercent(0.75, ${balance}, '${resName}')">75%</button>
+            <button class="sub-tab-btn" style="padding:4px; font-size:9px; height:24px;" onclick="window.setHearthDonatePercent(1.0, ${balance}, '${resName}')">MAX</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button class="btn-action" style="background:#222; border:1px solid #444; color:#aaa; font-weight:bold; padding:10px; font-size:11px;" onclick="document.getElementById('hearth-donation-modal-overlay').remove()">Cancel</button>
+            <button class="btn-action" style="background:${accentColor}; color:#111; font-weight:bold; padding:10px; font-size:11px; border:1px solid #fff;" onclick="window.submitHearthDonation('${resName}')">Confirm</button>
+        </div>
+    </div>
+  `;
+
+  window.updateHearthDonateModal(balance, resName);
+};
+
+window.updateHearthDonateModal = function (limit, resName) {
+  let slider = document.getElementById("he-donate-slider");
+  let input = document.getElementById("he-donate-num-input");
+  let renownText = document.getElementById("he-renown-calc");
+  if (!slider || !input || !renownText) return;
+
+  let val = parseInt(slider.value, 10) || 1;
+  input.value = val;
+
+  let earned = 0;
+  if (resName === "Gold") {
+    // Standard static scale: 1 Renown per 10k Gold
+    earned = Math.floor(val / 10000);
+    if (earned < 1 && val > 0) earned = 1;
+  } else {
+    earned = resName.includes("Monster") ? val * 5 : val * 150;
+  }
+  renownText.innerText = `+${earned.toLocaleString()} Renown`;
+};
+
+window.updateHearthDonateModalNum = function (limit, resName) {
+  let slider = document.getElementById("he-donate-slider");
+  let input = document.getElementById("he-donate-num-input");
+  let renownText = document.getElementById("he-renown-calc");
+  if (!slider || !input || !renownText) return;
+
+  let val = parseInt(input.value, 10) || 1;
+  if (val < 1) val = 1;
+  if (val > limit) val = limit;
+  slider.value = val;
+
+  let earned = 0;
+  if (resName === "Gold") {
+    earned = Math.floor(val / 10000);
+    if (earned < 1 && val > 0) earned = 1;
+  } else {
+    earned = resName.includes("Monster") ? val * 5 : val * 150;
+  }
+  renownText.innerText = `+${earned.toLocaleString()} Renown`;
+};
+
+window.setHearthDonatePercent = function (pct, limit, resName) {
+  let slider = document.getElementById("he-donate-slider");
+  if (!slider) return;
+  slider.value = Math.max(1, Math.floor(limit * pct));
+  window.updateHearthDonateModal(limit, resName);
+};
+
+window.submitHearthDonation = function (resName) {
+  let input = document.getElementById("he-donate-num-input");
+  if (!input) return;
+
+  let val = parseInt(input.value, 10) || 0;
+  if (val <= 0) return;
+
+  document.getElementById("hearth-donation-modal-overlay").remove();
+
+  // Call the same backend route, passing "Aetheric Hearth" key triggers
+  let skillKey = "hearth_infusion";
+  let resType =
+    resName === "Gold"
+      ? "gold"
+      : resName.includes("Monster")
+        ? "souls"
+        : "luminous";
+
+  window.executeClanResearchDonate(skillKey, resType, val);
 };

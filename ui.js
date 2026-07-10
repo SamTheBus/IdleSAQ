@@ -7684,46 +7684,53 @@ window.renderCrucibleTab = function () {
       if (deckListEl) {
         // Group and count duplicate card draft picks
         let groupedDeck = {};
-        deck.forEach(cardId => {
+        deck.forEach((cardId) => {
           groupedDeck[cardId] = (groupedDeck[cardId] || 0) + 1;
         });
         let groupedKeys = Object.keys(groupedDeck);
         let currentChildCount = deckListEl.children.length;
 
         if (currentChildCount !== groupedKeys.length) {
-          deckListEl.innerHTML = groupedKeys.map(cardId => {
-            let card = window.CRUCIBLE_DRAFT_POOL.find(c => c.id === cardId);
-            if (!card) return "";
-            let count = groupedDeck[cardId];
-            let countBadge = count > 1 ? ` <span style="color:#f1c40f; font-weight:bold;">x${count}</span>` : "";
+          deckListEl.innerHTML = groupedKeys
+            .map((cardId) => {
+              let card = window.CRUCIBLE_DRAFT_POOL.find(
+                (c) => c.id === cardId,
+              );
+              if (!card) return "";
+              let count = groupedDeck[cardId];
+              let countBadge =
+                count > 1
+                  ? ` <span style="color:#f1c40f; font-weight:bold;">x${count}</span>`
+                  : "";
 
-            // Calculate combined stats text for duplicates
-            let descText = card.desc;
-            if (count > 1) {
-              if (cardId === "overcharge") {
-                descText = `+${(20 * count)}% Crit Multiplier, +${(2.5 * count)}% Crit Chance`;
-              } else if (cardId === "sanguine_tide") {
-                descText = `Heal ${(1.5 * count).toFixed(1)}% Max HP on every Critical Strike hit`;
-              } else if (cardId === "phantom_echo") {
-                descText = `+${(15 * count)}% chance to trigger secondary Phantom Strike (deals 35% damage)`;
-              } else if (cardId === "titans_wall") {
-                descText = `+${(3 * count)}% base armor and +${(3 * count)}% Block/Parry cap limits`;
-              } else if (cardId === "temporal_accel") {
-                descText = `+${(15 * count)}% Active & Idle Attack Speed multipliers`;
-              } else if (cardId === "astral_attune") {
-                descText = `Earn +${(25 * count)}% Astral Shards from this run`;
-              } else if (cardId.startsWith("slot_")) {
-                descText = `+${(15 * count)}% to all stats of the equipped slot for this run`;
+              // Calculate combined stats text for duplicates
+              let descText = card.desc;
+              if (count > 1) {
+                if (cardId === "overcharge") {
+                  descText = `+${20 * count}% Crit Multiplier, +${2.5 * count}% Crit Chance`;
+                } else if (cardId === "sanguine_tide") {
+                  descText = `Heal ${(1.5 * count).toFixed(1)}% Max HP on every Critical Strike hit`;
+                } else if (cardId === "phantom_echo") {
+                  descText = `+${15 * count}% chance to trigger secondary Phantom Strike (deals 35% damage)`;
+                } else if (cardId === "titans_wall") {
+                  descText = `+${3 * count}% base armor and +${3 * count}% Block/Parry cap limits`;
+                } else if (cardId === "temporal_accel") {
+                  descText = `+${15 * count}% Active & Idle Attack Speed multipliers`;
+                } else if (cardId === "astral_attune") {
+                  descText = `Earn +${25 * count}% Astral Shards from this run`;
+                } else if (cardId.startsWith("slot_")) {
+                  descText = `+${15 * count}% to all stats of the equipped slot for this run`;
+                }
               }
-            }
 
-            return `
+              return `
               <div style="background:#110d1c; border:1px solid #9b59b6; border-radius:6px; padding:6px 10px; text-align:left; font-size:11px;">
                 <strong style="color:#df9ffb; display:block; font-size:11px;">🛠️ ${card.name}${countBadge}</strong>
                 <span style="font-size:9.5px; color:#ccc; display:block; margin-top:2px;">${descText}</span>
               </div>
             `;
-          }).join("");
+            })
+            .join("");
         }
       }
       return;
@@ -7731,41 +7738,46 @@ window.renderCrucibleTab = function () {
 
     // If not rendered yet, build the base structure (runs only once upon entering)
     let groupedDeck = {};
-    deck.forEach(cardId => {
+    deck.forEach((cardId) => {
       groupedDeck[cardId] = (groupedDeck[cardId] || 0) + 1;
     });
-    let deckHtml = Object.keys(groupedDeck).map(cardId => {
-      let card = window.CRUCIBLE_DRAFT_POOL.find(c => c.id === cardId);
-      if (!card) return "";
-      let count = groupedDeck[cardId];
-      let countBadge = count > 1 ? ` <span style="color:#f1c40f; font-weight:bold;">x${count}</span>` : "";
+    let deckHtml = Object.keys(groupedDeck)
+      .map((cardId) => {
+        let card = window.CRUCIBLE_DRAFT_POOL.find((c) => c.id === cardId);
+        if (!card) return "";
+        let count = groupedDeck[cardId];
+        let countBadge =
+          count > 1
+            ? ` <span style="color:#f1c40f; font-weight:bold;">x${count}</span>`
+            : "";
 
-      let descText = card.desc;
-      if (count > 1) {
-        if (cardId === "overcharge") {
-          descText = `+${(20 * count)}% Crit Multiplier, +${(2.5 * count)}% Crit Chance`;
-        } else if (cardId === "sanguine_tide") {
-          descText = `Heal ${(1.5 * count).toFixed(1)}% Max HP on every Critical Strike hit`;
-        } else if (cardId === "phantom_echo") {
-          descText = `+${(15 * count)}% chance to trigger secondary Phantom Strike (deals 35% damage)`;
-        } else if (cardId === "titans_wall") {
-          descText = `+${(3 * count)}% base armor and +${(3 * count)}% Block/Parry cap limits`;
-        } else if (cardId === "temporal_accel") {
-          descText = `+${(15 * count)}% Active & Idle Attack Speed multipliers`;
-        } else if (cardId === "astral_attune") {
-          descText = `Earn +${(25 * count)}% Astral Shards from this run`;
-        } else if (cardId.startsWith("slot_")) {
-          descText = `+${(15 * count)}% to all stats of the equipped slot for this run`;
+        let descText = card.desc;
+        if (count > 1) {
+          if (cardId === "overcharge") {
+            descText = `+${20 * count}% Crit Multiplier, +${2.5 * count}% Crit Chance`;
+          } else if (cardId === "sanguine_tide") {
+            descText = `Heal ${(1.5 * count).toFixed(1)}% Max HP on every Critical Strike hit`;
+          } else if (cardId === "phantom_echo") {
+            descText = `+${15 * count}% chance to trigger secondary Phantom Strike (deals 35% damage)`;
+          } else if (cardId === "titans_wall") {
+            descText = `+${3 * count}% base armor and +${3 * count}% Block/Parry cap limits`;
+          } else if (cardId === "temporal_accel") {
+            descText = `+${15 * count}% Active & Idle Attack Speed multipliers`;
+          } else if (cardId === "astral_attune") {
+            descText = `Earn +${25 * count}% Astral Shards from this run`;
+          } else if (cardId.startsWith("slot_")) {
+            descText = `+${15 * count}% to all stats of the equipped slot for this run`;
+          }
         }
-      }
 
-      return `
+        return `
         <div style="background:#110d1c; border:1px solid #9b59b6; border-radius:6px; padding:6px 10px; text-align:left; font-size:11px;">
           <strong style="color:#df9ffb; display:block; font-size:11px;">🛠️ ${card.name}${countBadge}</strong>
           <span style="font-size:9.5px; color:#ccc; display:block; margin-top:2px;">${descText}</span>
         </div>
       `;
-    }).join("");
+      })
+      .join("");
 
     sec.innerHTML = `
       <div id="crucible-active-run-panel" style="
@@ -11758,12 +11770,17 @@ window.renderLeaderboardItems = function (leaderboard) {
 
       let guildBadgeHtml = "";
       if (player.guildName) {
-        let emblem = window.getClanEmblemHtml(player.guildEmblem || 0, 12);
+        // Retrieve actual guild level from database parameters to draw correctly evolved emblems
+        let emblem = window.getClanEmblemHtml(
+          player.guildEmblem || 0,
+          12,
+          player.guildLevel || 1,
+        );
         guildBadgeHtml = `
-                      <div style="display: inline-flex; align-items: center; gap: 3px; background: rgba(142, 68, 173, 0.1); border: 1px solid #8e44ad; padding: 1px 4px; border-radius: 3px; font-size: 8.5px; color: #df9ffb; font-weight: bold; margin-left: 6px;">
-                        ${emblem} <span>${window.escapeHTML(player.guildName)}</span>
-                      </div>
-                    `;
+                                <div style="display: inline-flex; align-items: center; gap: 3px; background: rgba(142, 68, 173, 0.1); border: 1px solid #8e44ad; padding: 1px 4px; border-radius: 3px; font-size: 8.5px; color: #df9ffb; font-weight: bold; margin-left: 6px;">
+                                  ${emblem} <span>${window.escapeHTML(player.guildName)}</span>
+                                </div>
+                              `;
       }
 
       // Relative Social Active Status Indicators

@@ -3564,9 +3564,181 @@ canvas {
   }
 }
 
-/* ==========================================================================
-   PREMIUM GLASSMORPHIC TOAST OVERHAUL
-   ========================================================================= */
+/* --- PILLAR 1: CLAN HALL REVAMP LAYOUTS --- */
+.clan-scroll-frame {
+  background: linear-gradient(135deg, #181d24 0%, #0d1117 100%) !important;
+  border: 3px solid #2d3748 !important;
+  box-shadow:
+    inset 0 0 15px rgba(0, 0, 0, 0.95),
+    0 4px 15px rgba(0, 0, 0, 0.75) !important;
+  border-radius: 12px !important;
+  padding: 14px !important;
+}
+
+@keyframes runicHearthPulse {
+  0%,
+  100% {
+    stroke-opacity: 0.35;
+    filter: drop-shadow(0 0 2px #ff4500);
+  }
+  50% {
+    stroke-opacity: 1;
+    filter: drop-shadow(0 0 8px var(--hearth-glow-color, #ffaa00));
+    stroke: var(--hearth-glow-color, #ffaa00);
+  }
+}
+
+/* Chiseled Stone UI Textures */
+.chiseled-stone-panel {
+  background: linear-gradient(135deg, #1f2530 0%, #12161f 50%, #0a0d14 100%);
+  border: 3px solid #2d3748;
+  border-top-color: #4a5568;
+  border-bottom-color: #1a202c;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.85);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.chiseled-stone-header {
+  background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+  border-bottom: 2.5px solid #4a5568;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  font-family: monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* Medieval Bounty Board & Parchment Quest Cards */
+.clan-bounty-card {
+  background: linear-gradient(135deg, #f3e5ab 0%, #e1cc8a 100%);
+  border: 2px solid #5c4033;
+  color: #1a0f02 !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: "Georgia", serif;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.clan-bounty-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.65);
+}
+
+.clan-bounty-card strong,
+.clan-bounty-card span,
+.clan-bounty-card p {
+  color: #1a0f02 !important;
+}
+
+/* Old-World Wax Seal Stamp */
+.wax-seal-stamp {
+  position: absolute;
+  top: 15px;
+  right: 115px; /* Shifted left to prevent blocking the right-aligned claim buttons */
+  width: 44px;
+  height: 44px;
+  background: radial-gradient(circle, #d63031 60%, #b33939 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.5),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.4);
+  transform: rotate(-10deg);
+  z-index: 5; /* Lowered so the claim button completely overlaps and handles touches */
+  pointer-events: none;
+  animation: stampSlam 0.28s cubic-bezier(0.25, 0.8, 0.25, 1.15) forwards;
+}
+
+/* Ensure all claim and action buttons take touch and visual priority */
+.clan-bounty-card button,
+.bag-item-actions button {
+  position: relative;
+  z-index: 15 !important;
+  pointer-events: auto !important;
+}
+
+.wax-seal-inner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Progressive Cooperative Chest track */
+.cooperative-vault-track {
+  height: 10px !important;
+  background: #090b0e !important;
+  border-radius: 20px !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  margin-top: 8px !important;
+  border: 1px solid #1e293b !important;
+  position: relative;
+}
+
+.cooperative-vault-fill {
+  height: 100% !important;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+.cooperative-vault-fill.common {
+  background: linear-gradient(90deg, #bdc3c7, #7f8c8d);
+}
+.cooperative-vault-fill.rare {
+  background: linear-gradient(90deg, #3498db, #2980b9);
+}
+.cooperative-vault-fill.magic {
+  background: linear-gradient(90deg, #9b59b6, #8e44ad);
+}
+.cooperative-vault-fill.epic {
+  background: linear-gradient(90deg, #e67e22, #d35400);
+}
+.cooperative-vault-fill.legendary {
+  background: linear-gradient(90deg, #f1c40f, #f39c12);
+}
+.cooperative-vault-fill.mythic {
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+/* Decorative Chest Threshold Markers */
+.vault-threshold-marker {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.25);
+  z-index: 5;
+}
+
+/* Contextual Dropdowns */
+.rank-action-select {
+  background: #111;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 4px;
+  font-size: 10px;
+  padding: 3px 6px;
+  outline: none;
+  font-family: monospace;
+}
+.rank-action-select:focus {
+  border-color: #9b59b6;
+}
+
+/* --- PREMIUM GLASSMORPHIC TOAST OVERHAUL --- */
 .premium-toast {
   display: flex;
   align-items: center;
@@ -3635,4 +3807,114 @@ canvas {
   100% {
     left: 150%;
   }
+}
+
+/* --- PILLAR 3: CHISELED STONE UI & QUEST BOARD --- */
+.chiseled-stone-tab-container {
+  background: linear-gradient(180deg, #10141b 0%, #07090f 100%) !important;
+  border: 2px solid #2d3748 !important;
+  border-radius: 8px !important;
+  padding: 4px !important;
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(255, 255, 255, 0.05) !important;
+}
+
+.clan-chiseled-tab {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+  border: 1px solid #10141b !important;
+  border-radius: 4px !important;
+  color: #a0aec0 !important;
+  font-family: monospace;
+  box-shadow:
+    inset 1px 1px 0px rgba(255, 255, 255, 0.1),
+    1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+  transition: all 0.1s ease-in-out !important;
+}
+
+.clan-chiseled-tab:hover {
+  background: linear-gradient(135deg, #3a475c 0%, #202736 100%) !important;
+  color: #fff !important;
+}
+
+.clan-chiseled-tab.active {
+  background: linear-gradient(135deg, #1a202c 0%, #0d1117 100%) !important;
+  color: #ffd700 !important;
+  border-color: #ffd70033 !important;
+  box-shadow:
+    inset -1px -1px 1px rgba(255, 255, 255, 0.05),
+    inset 1px 1px 3px rgba(0, 0, 0, 0.8) !important;
+}
+
+@keyframes questClaimPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 8px rgba(46, 204, 113, 0.35),
+      inset 0 0 10px rgba(46, 204, 113, 0.15);
+    border-color: #1e824c !important;
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow:
+      0 0 18px rgba(46, 204, 113, 0.8),
+      inset 0 0 12px rgba(46, 204, 113, 0.3);
+    border-color: #2ecc71 !important;
+    transform: translateY(-2px);
+  }
+}
+.claim-pulse-aura {
+  animation: questClaimPulse 1.8s ease-in-out infinite !important;
+}
+
+@keyframes particleDrift {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-40px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+.quest-particle-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.quest-particle-overlay::before,
+.quest-particle-overlay::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  width: 4px;
+  height: 4px;
+  background: #2ecc71;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #2ecc71;
+  opacity: 0;
+}
+
+.quest-particle-overlay::before {
+  left: 20%;
+  animation: particleDrift 2.4s infinite linear;
+}
+
+.quest-particle-overlay::after {
+  left: 75%;
+  animation: particleDrift 3.2s infinite linear;
+  animation-delay: 1.2s;
 }
