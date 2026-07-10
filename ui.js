@@ -7653,7 +7653,6 @@ window.renderCrucibleTab = function () {
   let isCrucibleActive = window.playerStats.isCrucibleMode;
 
   if (isCrucibleActive) {
-    // Render the active Crucible status page showing active card picks
     let wave = window.playerStats.crucibleWave || 1;
     let deck = window.playerStats.crucibleDraftDeck || [];
     let gold = window.playerStats.crucibleAccumulatedGold || 0;
@@ -7661,26 +7660,115 @@ window.renderCrucibleTab = function () {
     let shards = window.playerStats.crucibleAccumulatedShards || 0;
     let cores = window.playerStats.crucibleAccumulatedCores || 0;
 
-    let deckHtml = "";
-    if (deck.length === 0) {
-      deckHtml = `<div style="font-size:10px; color:#888; font-style:italic; padding: 10px; text-align:center; width:100%;">No active infusions drafted yet. Clear waves to pick cards!</div>`;
-    } else {
-      deckHtml = deck
-        .map((cardId) => {
-          let card = window.CRUCIBLE_DRAFT_POOL.find((c) => c.id === cardId);
-          if (!card) return "";
-          return `
-            <div style="background:#110d1c; border:1px solid #9b59b6; border-radius:6px; padding:6px 10px; text-align:left; font-size:11px;">
-              <strong style="color:#df9ffb; display:block; font-size:11px;">🛠️ ${card.name}</strong>
-              <span style="font-size:9.5px; color:#ccc; display:block; margin-top:2px;">${card.desc}</span>
-            </div>
-          `;
-        })
-        .join("");
+    // Check if our active container is already rendered to prevent scroll snapping
+    let activeContainer = document.getElementById("crucible-active-run-panel");
+    if (activeContainer) {
+      // Just update the dynamic values inside the existing DOM structure
+      let waveEl = document.getElementById("crucible-run-wave-badge");
+      if (waveEl) waveEl.innerText = `Wave ${wave}`;
+
+      let shardsEl = document.getElementById("crucible-run-shards");
+      if (shardsEl) shardsEl.innerText = `+${shards}`;
+
+      let coresEl = document.getElementById("crucible-run-cores");
+      if (coresEl) coresEl.innerText = `+${cores}`;
+
+      let goldEl = document.getElementById("crucible-run-gold");
+      if (goldEl) goldEl.innerText = `+${window.formatNumber(gold)}`;
+
+      let xpEl = document.getElementById("crucible-run-xp");
+      if (xpEl) xpEl.innerText = `+${window.formatNumber(xp)}`;
+
+      // Update deck list only if count/structure changes to avoid rebuilding scroll areas
+      let deckListEl = document.getElementById("crucible-run-deck-list");
+      if (deckListEl) {
+        // Group and count duplicate card draft picks
+        let groupedDeck = {};
+        deck.forEach(cardId => {
+          groupedDeck[cardId] = (groupedDeck[cardId] || 0) + 1;
+        });
+        let groupedKeys = Object.keys(groupedDeck);
+        let currentChildCount = deckListEl.children.length;
+
+        if (currentChildCount !== groupedKeys.length) {
+          deckListEl.innerHTML = groupedKeys.map(cardId => {
+            let card = window.CRUCIBLE_DRAFT_POOL.find(c => c.id === cardId);
+            if (!card) return "";
+            let count = groupedDeck[cardId];
+            let countBadge = count > 1 ? ` <span style="color:#f1c40f; font-weight:bold;">x${count}</span>` : "";
+
+            // Calculate combined stats text for duplicates
+            let descText = card.desc;
+            if (count > 1) {
+              if (cardId === "overcharge") {
+                descText = `+${(20 * count)}% Crit Multiplier, +${(2.5 * count)}% Crit Chance`;
+              } else if (cardId === "sanguine_tide") {
+                descText = `Heal ${(1.5 * count).toFixed(1)}% Max HP on every Critical Strike hit`;
+              } else if (cardId === "phantom_echo") {
+                descText = `+${(15 * count)}% chance to trigger secondary Phantom Strike (deals 35% damage)`;
+              } else if (cardId === "titans_wall") {
+                descText = `+${(3 * count)}% base armor and +${(3 * count)}% Block/Parry cap limits`;
+              } else if (cardId === "temporal_accel") {
+                descText = `+${(15 * count)}% Active & Idle Attack Speed multipliers`;
+              } else if (cardId === "astral_attune") {
+                descText = `Earn +${(25 * count)}% Astral Shards from this run`;
+              } else if (cardId.startsWith("slot_")) {
+                descText = `+${(15 * count)}% to all stats of the equipped slot for this run`;
+              }
+            }
+
+            return `
+              <div style="background:#110d1c; border:1px solid #9b59b6; border-radius:6px; padding:6px 10px; text-align:left; font-size:11px;">
+                <strong style="color:#df9ffb; display:block; font-size:11px;">🛠️ ${card.name}${countBadge}</strong>
+                <span style="font-size:9.5px; color:#ccc; display:block; margin-top:2px;">${descText}</span>
+              </div>
+            `;
+          }).join("");
+        }
+      }
+      return;
     }
 
+    // If not rendered yet, build the base structure (runs only once upon entering)
+    let groupedDeck = {};
+    deck.forEach(cardId => {
+      groupedDeck[cardId] = (groupedDeck[cardId] || 0) + 1;
+    });
+    let deckHtml = Object.keys(groupedDeck).map(cardId => {
+      let card = window.CRUCIBLE_DRAFT_POOL.find(c => c.id === cardId);
+      if (!card) return "";
+      let count = groupedDeck[cardId];
+      let countBadge = count > 1 ? ` <span style="color:#f1c40f; font-weight:bold;">x${count}</span>` : "";
+
+      let descText = card.desc;
+      if (count > 1) {
+        if (cardId === "overcharge") {
+          descText = `+${(20 * count)}% Crit Multiplier, +${(2.5 * count)}% Crit Chance`;
+        } else if (cardId === "sanguine_tide") {
+          descText = `Heal ${(1.5 * count).toFixed(1)}% Max HP on every Critical Strike hit`;
+        } else if (cardId === "phantom_echo") {
+          descText = `+${(15 * count)}% chance to trigger secondary Phantom Strike (deals 35% damage)`;
+        } else if (cardId === "titans_wall") {
+          descText = `+${(3 * count)}% base armor and +${(3 * count)}% Block/Parry cap limits`;
+        } else if (cardId === "temporal_accel") {
+          descText = `+${(15 * count)}% Active & Idle Attack Speed multipliers`;
+        } else if (cardId === "astral_attune") {
+          descText = `Earn +${(25 * count)}% Astral Shards from this run`;
+        } else if (cardId.startsWith("slot_")) {
+          descText = `+${(15 * count)}% to all stats of the equipped slot for this run`;
+        }
+      }
+
+      return `
+        <div style="background:#110d1c; border:1px solid #9b59b6; border-radius:6px; padding:6px 10px; text-align:left; font-size:11px;">
+          <strong style="color:#df9ffb; display:block; font-size:11px;">🛠️ ${card.name}${countBadge}</strong>
+          <span style="font-size:9.5px; color:#ccc; display:block; margin-top:2px;">${descText}</span>
+        </div>
+      `;
+    }).join("");
+
     sec.innerHTML = `
-      <div style="
+      <div id="crucible-active-run-panel" style="
         background: radial-gradient(
           circle at 50% 25%,
           rgba(155, 89, 182, 0.15) 0%,
@@ -7697,34 +7785,34 @@ window.renderCrucibleTab = function () {
       ">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #9b59b644; padding-bottom:6px; margin-bottom:10px;">
           <strong style="color:#df9ffb; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">🔮 Crucible Active Run</strong>
-          <span style="background:rgba(155,89,182,0.15); border:1px solid #9b59b6; color:#df9ffb; font-size:10px; font-weight:bold; padding:2px 10px; border-radius:10px; font-family:monospace;">Wave ${wave}</span>
+          <span id="crucible-run-wave-badge" style="background:rgba(155,89,182,0.15); border:1px solid #9b59b6; color:#df9ffb; font-size:10px; font-weight:bold; padding:2px 10px; border-radius:10px; font-family:monospace;">Wave ${wave}</span>
         </div>
 
         <!-- Run Rewards Accumulated Panel -->
         <div style="background: rgba(0,0,0,0.55); border: 1.5px solid #9b59b680; border-radius: 8px; padding: 10px; margin: 0 auto 12px auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-family: monospace; font-size: 10px; text-align: center; box-shadow: inset 0 0 10px #000;">
           <div style="background:#07030b; padding:4px; border-radius:4px; border:1px solid #222;">
             <span style="color:#888; display:block; font-size:8px; text-transform:uppercase;">Shards</span>
-            <strong style="color:#df9ffb; font-size:11px;">+${shards}</strong>
+            <strong id="crucible-run-shards" style="color:#df9ffb; font-size:11px;">+${shards}</strong>
           </div>
           <div style="background:#07030b; padding:4px; border-radius:4px; border:1px solid #222;">
             <span style="color:#888; display:block; font-size:8px; text-transform:uppercase;">Cores</span>
-            <strong style="color:#2ecc71; font-size:11px;">+${cores}</strong>
+            <strong id="crucible-run-cores" style="color:#2ecc71; font-size:11px;">+${cores}</strong>
           </div>
           <div style="background:#07030b; padding:4px; border-radius:4px; border:1px solid #222;">
             <span style="color:#888; display:block; font-size:8px; text-transform:uppercase;">Gold</span>
-            <strong style="color:#f1c40f; font-size:11px;">+${window.formatNumber(gold)}</strong>
+            <strong id="crucible-run-gold" style="color:#f1c40f; font-size:11px;">+${window.formatNumber(gold)}</strong>
           </div>
           <div style="background:#07030b; padding:4px; border-radius:4px; border:1px solid #222;">
             <span style="color:#888; display:block; font-size:8px; text-transform:uppercase;">XP</span>
-            <strong style="color:#a855f7; font-size:11px;">+${window.formatNumber(xp)}</strong>
+            <strong id="crucible-run-xp" style="color:#a855f7; font-size:11px;">+${window.formatNumber(xp)}</strong>
           </div>
         </div>
 
         <!-- Active Infusions Deck List -->
         <div style="text-align:left; margin-bottom:12px;">
-          <strong style="color:#df9ffb; font-size:11px; display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">🎴 Active Infusions Deck (${deck.length}):</strong>
-          <div style="display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto; padding-right:4px;">
-            ${deckHtml}
+          <strong style="color:#df9ffb; font-size:11px; display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">🎴 Active Infusions Deck:</strong>
+          <div id="crucible-run-deck-list" style="display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto; padding-right:4px;">
+            ${deckHtml || `<div style="font-size:10px; color:#888; font-style:italic; padding: 10px; text-align:center; width:100%;">No active infusions drafted yet. Clear waves to pick cards!</div>`}
           </div>
         </div>
 
