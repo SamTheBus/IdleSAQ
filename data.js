@@ -644,6 +644,13 @@ window.resolvePlayerStats = function (useDraft = false) {
     fairySpawn: window.playerStats.baseFairySpawn,
     arcaneBarrier: 0.0,
     xpRate: 1.0,
+    crucibleSelfDmgReduction: 1.0,
+    crucibleCritHeal: 0.0,
+    crucibleEchoChance: 0.0,
+    crucibleCapBonus: 0.0,
+    crucibleShardMult: 1.0,
+    crucibleSpellChanceBonus: 0.0,
+    crucibleDaggerBleed: 0,
   };
 
   // Passive cumulative title multipliers applied prior to other calculations
@@ -721,39 +728,61 @@ window.resolvePlayerStats = function (useDraft = false) {
   achDexPct *= paragonMult;
   achIntPct *= paragonMult;
 
+  // Apply active run-only Crucible Draft deck modifiers
+  if (
+    window.playerStats.isCrucibleMode &&
+    window.playerStats.crucibleDraftDeck
+  ) {
+    window.playerStats.crucibleDraftDeck.forEach((cardId) => {
+      let card = window.CRUCIBLE_DRAFT_POOL.find((c) => c.id === cardId);
+      if (card) card.apply(p);
+    });
+  }
+
   for (let key in window.equippedSlots) {
     let item = window.equippedSlots[key];
     if (item) {
-      p.atk += item.atk || 0;
-      p.maxHp += item.maxHp || 0;
-      p.moveSpeed += item.moveSpeed || 0;
+      let slotLvl =
+        (window.playerStats.slotUpgrades &&
+          window.playerStats.slotUpgrades[key]) ||
+        0;
+      let runBonus =
+        (window.playerStats.isCrucibleMode &&
+          window.playerStats.crucibleSlotBonuses &&
+          window.playerStats.crucibleSlotBonuses[key]) ||
+        0;
+      let slotMult = 1.0 + slotLvl * 0.01 + runBonus;
+
+      p.atk += (item.atk || 0) * slotMult;
+      p.maxHp += (item.maxHp || 0) * slotMult;
+      p.moveSpeed += (item.moveSpeed || 0) * slotMult;
 
       let itemIdleSpeed = item.idleAttackSpeed || 0;
       if (itemIdleSpeed < 0) itemIdleSpeed = Math.abs(itemIdleSpeed) * 0.05;
-      idleSpeedPct += itemIdleSpeed;
+      idleSpeedPct += itemIdleSpeed * slotMult;
 
       let itemActiveSpeed = item.activeAttackSpeed || 0;
       if (itemActiveSpeed < 0)
         itemActiveSpeed = Math.abs(itemActiveSpeed) * 0.05;
-      activeSpeedPct += itemActiveSpeed;
+      activeSpeedPct += itemActiveSpeed * slotMult;
 
-      p.drop += item.dropRate || 0;
-      p.qly += item.quality || 0;
-      p.gold += item.goldMulti || 0;
-      p.critChance += item.critChance || 0;
-      p.critDamage += item.critDamage || 0;
-      p.block += item.block || 0;
-      p.parry += item.parry || 0;
-      p.str += item.str || 0;
-      p.dex += item.dex || 0;
-      p.int += item.int || 0;
-      p.rareSpawn += item.rareSpawn || 0;
-      p.fairySpawn += item.fairySpawn || 0;
+      p.drop += (item.dropRate || 0) * slotMult;
+      p.qly += (item.quality || 0) * slotMult;
+      p.gold += (item.goldMulti || 0) * slotMult;
+      p.critChance += (item.critChance || 0) * slotMult;
+      p.critDamage += (item.critDamage || 0) * slotMult;
+      p.block += (item.block || 0) * slotMult;
+      p.parry += (item.parry || 0) * slotMult;
+      p.str += (item.str || 0) * slotMult;
+      p.dex += (item.dex || 0) * slotMult;
+      p.int += (item.int || 0) * slotMult;
+      p.rareSpawn += (item.rareSpawn || 0) * slotMult;
+      p.fairySpawn += (item.fairySpawn || 0) * slotMult;
 
-      if (item.atkPct) itemAtkPct += item.atkPct;
-      if (item.maxHpPct) itemHpPct += item.maxHpPct;
-      if (item.defPct) itemDefPct += item.defPct;
-      if (item.moveSpeedPct) itemSpdPct += item.moveSpeedPct;
+      if (item.atkPct) itemAtkPct += item.atkPct * slotMult;
+      if (item.maxHpPct) itemHpPct += item.maxHpPct * slotMult;
+      if (item.defPct) itemDefPct += item.defPct * slotMult;
+      if (item.moveSpeedPct) itemSpdPct += item.moveSpeedPct * slotMult;
     }
   }
 
@@ -967,10 +996,15 @@ window.resolvePlayerStats = function (useDraft = false) {
   for (let key in window.equippedSlots) {
     let item = window.equippedSlots[key];
     if (item) {
-      flatDef += item.def || 0;
+      let slotLvl =
+        (window.playerStats.slotUpgrades &&
+          window.playerStats.slotUpgrades[key]) ||
+        0;
+      let slotMult = 1.0 + slotLvl * 0.01;
+      flatDef += (item.def || 0) * slotMult;
       if (["chest", "leggings", "overall", "helmet"].includes(item.type)) {
         let stars = item.statsRolled === "UNIQUE" ? 5 : item.statsRolled || 0;
-        defMultiplier += stars * 0.03 + item.temperLevel * 0.01;
+        defMultiplier += stars * 0.03 + slotLvl * 0.01;
       }
     }
   }
@@ -982,13 +1016,23 @@ window.resolvePlayerStats = function (useDraft = false) {
   let maxBlockCap = 0.0;
   let maxParryCap = window.checkArtifactTrait("titan_grip") ? 0.18 : 0.15;
 
+  // Apply run-only Block/Parry cap expansions
+  if (p.crucibleCapBonus) {
+    maxParryCap += p.crucibleCapBonus;
+  }
+
   if (hasSubweapon) {
     if (subType === "shield") {
       let shield = window.equippedSlots.subweapon;
       let shieldStars =
         shield.statsRolled === "UNIQUE" ? 5 : shield.statsRolled || 0;
-      defMultiplier += 0.12 + shieldStars * 0.02 + shield.temperLevel * 0.01;
+      let subLvl =
+        (window.playerStats.slotUpgrades &&
+          window.playerStats.slotUpgrades.subweapon) ||
+        0;
+      defMultiplier += 0.12 + shieldStars * 0.02 + subLvl * 0.01;
       maxBlockCap = window.checkArtifactTrait("titan_grip") ? 0.25 : 0.2;
+      if (p.crucibleCapBonus) maxBlockCap += p.crucibleCapBonus;
       p.parry = 0.0; // STRICT: Can't parry with a shield
     } else if (subType === "tome") {
       let intScale = Math.max(0, p.int - 5);
@@ -1001,6 +1045,7 @@ window.resolvePlayerStats = function (useDraft = false) {
       p.parry = 0.0; // STRICT: Can't parry with a tome
     } else if (subType === "dagger") {
       maxParryCap = window.checkArtifactTrait("titan_grip") ? 0.3 : 0.25;
+      if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
       p.block = 0.0; // STRICT: Can't block with a dagger
     }
   } else {
@@ -1187,8 +1232,14 @@ window.resolvePlayerStats = function (useDraft = false) {
   let scale = limit - 0.01;
   p.rareSpawn = 0.01 + (excessRare * scale) / (excessRare + scale);
 
-  // Set default targets required
-  window.playerStats.targetsRequired = 5;
+  // Set default targets required based on current active gameplay mode
+  if (!window.playerStats.isCrucibleMode && !window.playerStats.isDungeonMode) {
+    window.playerStats.targetsRequired = 5;
+  } else if (window.playerStats.isCrucibleMode) {
+    window.playerStats.targetsRequired = 3; // Exactly 3 enemies per wave in the Crucible!
+  } else if (window.playerStats.isDungeonMode) {
+    window.playerStats.targetsRequired = 5; // Standard 5 for Infinite Caverns
+  }
 
   // UNIQUE: Warp-Core Greaves "Time Dilation" missing health attack speed scaling
   if (
@@ -1460,6 +1511,8 @@ window.resolvePlayerStats = function (useDraft = false) {
         (rawDropBonus - 1.0 + softCapLimit);
   }
 
+  window.playerStats.crucibleSelfDmgReduction = p.crucibleSelfDmgReduction;
+
   if (!useDraft) {
     window.cachedPlayerStats = p;
     window.playerStatsDirty = false;
@@ -1470,7 +1523,195 @@ window.resolvePlayerStats = function (useDraft = false) {
 
 // --- INITIAL GLOBAL STATE ---
 
+window.CRUCIBLE_DRAFT_POOL = [
+  {
+    id: "overcharge",
+    name: "Overcharge",
+    desc: "+20% Crit Multiplier, +2.5% Crit Chance",
+    apply: (p) => {
+      p.critDamage = (p.critDamage || 0) + 0.2;
+      p.critChance = (p.critChance || 0) + 0.025;
+    },
+  },
+  {
+    id: "sanguine_tide",
+    name: "Sanguine Tide",
+    desc: "Heal 1.5% Max HP on every Critical Strike hit",
+    apply: (p) => {
+      p.crucibleCritHeal = (p.crucibleCritHeal || 0) + 0.015;
+    },
+  },
+  {
+    id: "phantom_echo",
+    name: "Phantom Echo",
+    desc: "+15% chance to trigger secondary Phantom Strike (deals 35% damage)",
+    apply: (p) => {
+      p.crucibleEchoChance = (p.crucibleEchoChance || 0) + 0.15;
+    },
+  },
+  {
+    id: "titans_wall",
+    name: "Titan's Wall",
+    desc: "+8% base armor and +3% Block/Parry cap limits",
+    apply: (p) => {
+      p.defPctBonus = (p.defPctBonus || 0) + 0.08;
+      p.crucibleCapBonus = (p.crucibleCapBonus || 0) + 0.03;
+    },
+  },
+  {
+    id: "freeze_frame",
+    name: "Freeze-Frame",
+    desc: "All active permanent Elixir durations are completely frozen",
+    apply: (p) => {
+      p.crucibleFreezePotions = true;
+    },
+  },
+  {
+    id: "temporal_accel",
+    name: "Temporal Acceleration",
+    desc: "+15% Active & Idle Attack Speed multipliers",
+    apply: (p) => {
+      p.activeSpeedPct = (p.activeSpeedPct || 0) + 0.15;
+      p.idleSpeedPct = (p.idleSpeedPct || 0) + 0.15;
+    },
+  },
+  {
+    id: "astral_attune",
+    name: "Astral Attunement",
+    desc: "Earn +25% Astral Shards from this run",
+    apply: (p) => {
+      p.crucibleShardMult = (p.crucibleShardMult || 1.0) + 0.25;
+    },
+  },
+  {
+    id: "grounding",
+    name: "Aetheric Grounding",
+    desc: "Reduces all recoil, decay, and feedback self-damage by 75% for this run (stacks multiplicatively)",
+    apply: (p) => {
+      p.crucibleSelfDmgReduction = (p.crucibleSelfDmgReduction || 1.0) * 0.25;
+    },
+  },
+  {
+    id: "slot_weapon",
+    name: "Bladesmith's Touch",
+    desc: "+15% to all stats of the equipped Weapon slot for this run",
+    apply: (p) => {
+      window.playerStats.crucibleSlotBonuses =
+        window.playerStats.crucibleSlotBonuses || {};
+      window.playerStats.crucibleSlotBonuses.weapon =
+        (window.playerStats.crucibleSlotBonuses.weapon || 0) + 0.15;
+    },
+  },
+  {
+    id: "slot_subweapon",
+    name: "Aegis Convergence",
+    desc: "+15% to all stats of the equipped Subweapon (Offhand) slot for this run",
+    apply: (p) => {
+      window.playerStats.crucibleSlotBonuses =
+        window.playerStats.crucibleSlotBonuses || {};
+      window.playerStats.crucibleSlotBonuses.subweapon =
+        (window.playerStats.crucibleSlotBonuses.subweapon || 0) + 0.15;
+    },
+  },
+  {
+    id: "slot_helmet",
+    name: "Crown Alignment",
+    desc: "+15% to all stats of the equipped Helmet slot for this run",
+    apply: (p) => {
+      window.playerStats.crucibleSlotBonuses =
+        window.playerStats.crucibleSlotBonuses || {};
+      window.playerStats.crucibleSlotBonuses.helmet =
+        (window.playerStats.crucibleSlotBonuses.helmet || 0) + 0.15;
+    },
+  },
+  {
+    id: "slot_torso",
+    name: "Fortress Plate",
+    desc: "+15% to all stats of equipped Chest and Overall slots for this run",
+    apply: (p) => {
+      window.playerStats.crucibleSlotBonuses =
+        window.playerStats.crucibleSlotBonuses || {};
+      window.playerStats.crucibleSlotBonuses.chest =
+        (window.playerStats.crucibleSlotBonuses.chest || 0) + 0.15;
+      window.playerStats.crucibleSlotBonuses.overall =
+        (window.playerStats.crucibleSlotBonuses.overall || 0) + 0.15;
+    },
+  },
+  {
+    id: "slot_leggings",
+    name: "Reinforced Chausses",
+    desc: "+15% to all stats of the equipped Leggings slot for this run",
+    apply: (p) => {
+      window.playerStats.crucibleSlotBonuses =
+        window.playerStats.crucibleSlotBonuses || {};
+      window.playerStats.crucibleSlotBonuses.leggings =
+        (window.playerStats.crucibleSlotBonuses.leggings || 0) + 0.15;
+    },
+  },
+  {
+    id: "slot_boots",
+    name: "Mercury Wings",
+    desc: "+15% to all stats of the equipped Boots slot for this run",
+    apply: (p) => {
+      window.playerStats.crucibleSlotBonuses =
+        window.playerStats.crucibleSlotBonuses || {};
+      window.playerStats.crucibleSlotBonuses.boots =
+        (window.playerStats.crucibleSlotBonuses.boots || 0) + 0.15;
+    },
+  },
+  {
+    id: "aegis_bastion",
+    name: "Aegis Bastion",
+    desc: "Wielding a Shield increases Block Rate and maximum Block Cap by +5%",
+    apply: (p) => {
+      if (window.equippedSlots.subweapon?.subType === "shield") {
+        p.block = (p.block || 0) + 0.05;
+        p.crucibleCapBonus = (p.crucibleCapBonus || 0) + 0.05;
+      }
+    },
+  },
+  {
+    id: "poison_tip",
+    name: "Poison Tip",
+    desc: "Wielding a Dagger adds +5% Parry Rate and causes successful Ripostes to apply 2 stacks of Sanguine Bleed",
+    apply: (p) => {
+      if (window.equippedSlots.subweapon?.subType === "dagger") {
+        p.parry = (p.parry || 0) + 0.05;
+        p.crucibleCapBonus = (p.crucibleCapBonus || 0) + 0.05;
+        p.crucibleDaggerBleed = (p.crucibleDaggerBleed || 0) + 2;
+      }
+    },
+  },
+  {
+    id: "catalyst_resonance",
+    name: "Catalyst Resonance",
+    desc: "Wielding a Tome increases all elemental spell cast chances by +5% and increases Arcane Barrier absorption by +5%",
+    apply: (p) => {
+      if (window.equippedSlots.subweapon?.subType === "tome") {
+        p.crucibleSpellChanceBonus = (p.crucibleSpellChanceBonus || 0) + 0.05;
+        p.arcaneBarrier = (p.arcaneBarrier || 0) + 0.05;
+      }
+    },
+  },
+];
+
 window.playerStats = {
+  slotUpgrades: {
+    weapon: 0,
+    subweapon: 0,
+    helmet: 0,
+    chest: 0,
+    leggings: 0,
+    overall: 0,
+    boots: 0,
+    art1: 0,
+    art2: 0,
+    art3: 0,
+  },
+  crucibleAccumulatedGold: 0,
+  crucibleAccumulatedXp: 0,
+  crucibleDraftDeck: [],
+  hasRefundedLegacyTempers: false,
   level: 1,
   xp: 0,
   xpReq: 100,

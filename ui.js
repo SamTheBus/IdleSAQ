@@ -935,14 +935,15 @@ window.updateUI = function () {
     activeStageVal = window.playerStats.crucibleWave || 1;
     stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.cruciblePeak || 1}`;
   } else {
-    displayTitleHtml = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="#3498db" fill-opacity="0.15" /><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88" /></svg> Stage`;
-  }
+      displayTitleHtml = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="#3498db" fill-opacity="0.15" /><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88" /></svg> Stage`;
+      stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.lifetimePeakStage || window.playerStats.maxStage || 1}`;
+    }
 
-  let stageLabelEl = document.getElementById("hud-stage-label");
-  if (stageLabelEl) stageLabelEl.innerHTML = displayTitleHtml;
+    let stageLabelEl = document.getElementById("hud-stage-label");
+    if (stageLabelEl) stageLabelEl.innerHTML = displayTitleHtml;
 
-  let stageSubEl = document.getElementById("hud-stage-sub");
-  if (stageSubEl) stageSubEl.innerText = stageSubText;
+    let stageSubEl = document.getElementById("hud-stage-sub");
+    if (stageSubEl) stageSubEl.innerText = stageSubText;
 
   setText("hud-stage", activeStageVal);
   setText("hud-coins", window.formatNumber(window.playerStats.coins));
@@ -1018,13 +1019,14 @@ window.updateUI = function () {
   }
 
   // Update Crucible Peak & Checkpoint in Activities Menu
-  let cPeak = window.playerStats.cruciblePeak || 1;
-  window.setText("crucible-peak-wave", cPeak);
-  window.setText("tab-crucible-peak-wave", cPeak);
+    let cPeak = window.playerStats.cruciblePeak || 1;
+    window.setText("crucible-peak-wave", cPeak);
+    window.setText("tab-crucible-peak-wave", cPeak);
 
-  let cCheck = Math.max(1, Math.floor(cPeak * 0.8));
-  window.setText("crucible-checkpoint-wave", cCheck);
-  window.setText("tab-crucible-checkpoint-wave", cCheck);
+    let peakLvl = window.playerStats.lifetimePeakStage || 1;
+    let startingStageOffset = Math.max(1, Math.floor(peakLvl * 0.75));
+    window.setText("crucible-checkpoint-wave", `Stage ${startingStageOffset}`);
+    window.setText("tab-crucible-checkpoint-wave", `Stage ${startingStageOffset}`);
 
   window.setText(
     "tab-etc-souls",
@@ -2300,21 +2302,29 @@ window.leaveActivity = function () {
 
         let shards = window.playerStats.crucibleAccumulatedShards || 0;
         let cores = window.playerStats.crucibleAccumulatedCores || 0;
+        let gold = window.playerStats.crucibleAccumulatedGold || 0;
+        let xp = window.playerStats.crucibleAccumulatedXp || 0;
 
-        // Keep 100% of rewards on safe retreat
+        // Safe Retreat credits 100% of accumulated rewards
         window.playerStats.astralShards =
           (window.playerStats.astralShards || 0) + shards;
-        if (cores > 0) {
-          window.addEtcDrop("Catalyst Core", cores);
-        }
+        if (cores > 0) window.addEtcDrop("Catalyst Core", cores);
+
+        window.playerStats.coins += gold;
+        window.playerStats.totalGoldEarned =
+          (window.playerStats.totalGoldEarned || 0) + gold;
+        window.gainXp(xp, true);
 
         window.playerStats.crucibleAccumulatedShards = 0;
         window.playerStats.crucibleAccumulatedCores = 0;
+        window.playerStats.crucibleAccumulatedGold = 0;
+        window.playerStats.crucibleAccumulatedXp = 0;
         window.playerStats.crucibleRunActive = false;
+        window.playerStats.crucibleDraftDeck = [];
 
         if (typeof window.pushLog === "function")
           window.pushLog(
-            `<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE RETREAT] Safely left the Crucible at Wave ${finalWave}. Earned 100% rewards: ${shards} Shards and ${cores} Catalyst Cores!</span>`,
+            `<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE RETREAT] Safely left the Crucible at Wave ${finalWave}. Claimed: ${shards} Shards, ${cores} Cores, ${gold.toLocaleString()} Gold, and ${xp.toLocaleString()} XP!</span>`,
           );
         if (typeof window.pushHeaderToast === "function")
           window.pushHeaderToast(
@@ -2323,7 +2333,14 @@ window.leaveActivity = function () {
           );
 
         if (typeof window.showCrucibleSummaryModal === "function")
-          window.showCrucibleSummaryModal(finalWave, shards, cores, false); // Retreated
+          window.showCrucibleSummaryModal(
+            finalWave,
+            shards,
+            cores,
+            gold,
+            xp,
+            false,
+          );
       } else if (window.playerStats.isDungeonMode) {
         let dType = window.playerStats.currentDungeon;
         let dStage = window.playerStats.currentDungeonStage[dType] || 1;
@@ -3574,8 +3591,7 @@ window.renderPrestigeTab = function () {
                                                 <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">💎 Projected Ascension Loot:</div>
                                                 <div style="display:flex; flex-direction:column; gap:2px; padding:2px;">
                                                     <div style="display:flex; justify-content:space-between;"><span>✨ Prestige Points (PP):</span><strong style="color:#f1c40f;">+${totalPP} PP</strong></div>
-                                                    <div style="display:flex; justify-content:space-between;"><span>🔋 Catalyst Cores:</span><strong style="color:#2ecc71;">~ ${estCores}</strong></div>
-                                                    <div style="display:flex; justify-content:space-between;"><span>🔮 Eridium Shards:</span><strong style="color:#8e44ad;">~ ${estShards}</strong></div>
+                                                                                                        <div style="display:flex; justify-content:space-between;"><span>🔮 Eridium Shards:</span><strong style="color:#8e44ad;">~ ${estShards}</strong></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -3723,20 +3739,18 @@ window.triggerPrestigeAscension = function () {
   let activeStage = window.playerStats.selectedPrestigeStage || 80;
   let rewardMultiplier = activeStage / 80;
 
-  // Rebalance: Award Catalyst Cores, Eridium Shards, and crafting materials instead of gear items (scaling proportionally to fight tier)
-  let awardedCores = Math.round(window.randInt(3, 5) * rewardMultiplier);
-  let awardedShards = Math.round(window.randInt(8, 15) * rewardMultiplier);
-  let awardedEpic = Math.round(window.randInt(10, 15) * rewardMultiplier);
-  let awardedLeg = Math.round(window.randInt(5, 10) * rewardMultiplier);
-  let awardedMythic = Math.round(window.randInt(2, 5) * rewardMultiplier);
+  // Rebalance: Award Eridium Shards and crafting materials instead of gear items (scaling proportionally to fight tier)
+    let awardedShards = Math.round(window.randInt(12, 20) * rewardMultiplier); // Compensated from 8-15
+    let awardedEpic = Math.round(window.randInt(12, 18) * rewardMultiplier); // Compensated from 10-15
+    let awardedLeg = Math.round(window.randInt(6, 12) * rewardMultiplier);   // Compensated from 5-10
+    let awardedMythic = Math.round(window.randInt(3, 6) * rewardMultiplier);  // Compensated from 2-5
 
-  if (typeof window.addEtcDrop === "function") {
-    window.addEtcDrop("Catalyst Core", awardedCores);
-    window.addEtcDrop("Eridium Shard", awardedShards);
-    window.addEtcDrop("Epic Scrap", awardedEpic);
-    window.addEtcDrop("Legendary Scrap", awardedLeg);
-    window.addEtcDrop("Mythic Scrap", awardedMythic);
-  }
+    if (typeof window.addEtcDrop === "function") {
+      window.addEtcDrop("Eridium Shard", awardedShards);
+      window.addEtcDrop("Epic Scrap", awardedEpic);
+      window.addEtcDrop("Legendary Scrap", awardedLeg);
+      window.addEtcDrop("Mythic Scrap", awardedMythic);
+    }
 
   // Calculate Points: Base, Prestige Level Bonus, and Uncapped Deep Push Bonus! (based on selected fight challenge stage)
   let basePoints = 3;
@@ -3818,7 +3832,6 @@ window.triggerPrestigeAscension = function () {
                                                                                                   • Base & Rank Award: <strong style="color:#fff;">+${Math.min(10, basePoints + bonusPoints)} PP</strong><br>
                                                                                                   • Deep Push Bonus (Stage ${activeStage}): <strong style="color:#2ecc71;">+${pushBonus} PP</strong> (1 per 10 stages over 80)
                                                                                               </div>
-                                                                                              <div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">🔋 Catalyst Cores: +${awardedCores}</div>
                                                                                               <div style="font-size:11px; color:#8e44ad; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">🔮 Eridium Shards: +${awardedShards}</div>
                                                                                               <div style="font-size:11px; color:#e67e22; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">🟧 Epic Scraps: +${awardedEpic}</div>
                                                                                               <div style="font-size:11px; color:#f1c40f; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">🟨 Legendary Scraps: +${awardedLeg}</div>
@@ -4180,178 +4193,181 @@ window.renderPaperDoll = function () {
     "art3",
   ];
   slots.forEach((slot) => {
-    let el = document.getElementById(`slot-${slot}`);
-    if (!el) return;
-    let item = window.equippedSlots[slot];
+      let el = document.getElementById(`slot-${slot}`);
+      if (!el) return;
+      let item = window.equippedSlots[slot];
 
-    if (
-      (slot === "chest" || slot === "leggings") &&
-      window.equippedSlots.overall
-    ) {
-      el.className = "slots-card locked";
-      el.innerHTML = `⚙️ LOCKED BY OVERALL`;
-      el.style.background = "";
-      el.style.borderColor = "";
-      el.style.boxShadow = "";
-      return;
-    }
-    if (
-      slot === "overall" &&
-      (window.equippedSlots.chest || window.equippedSlots.leggings)
-    ) {
-      el.className = "slots-card locked";
-      el.innerHTML = `⚙️ LOCKED BY PIECE GEAR`;
-      el.style.background = "";
-      el.style.borderColor = "";
-      el.style.boxShadow = "";
-      return;
-    }
+      let lvl = (window.playerStats.slotUpgrades && window.playerStats.slotUpgrades[slot]) || 0;
+      let lvlBadge = lvl > 0 ? `<span style="position: absolute; top: 4px; right: 4px; background: rgba(15,23,42,0.9); color: #ffd700; border: 1.5px solid #ffd700; border-radius: 4px; font-size: 8px; font-weight: 900; padding: 2px 4px; line-height: 1; z-index: 10; font-family: monospace; box-shadow: 0 0 6px rgba(241,196,15,0.25);">Lv.${lvl}</span>` : "";
 
-    if (item) {
-      let isArt = slot.startsWith("art");
-      el.className = isArt
-        ? "slots-card artifact-slot equipped"
-        : "slots-card equipped";
-      let color = window.getTierColor(item.statsRolled);
-      el.style.borderColor = color;
-
-      let uniqueStyle = window.getUniqueItemStyle(item);
-      if (uniqueStyle) {
-        el.style.background = uniqueStyle.bg;
-        el.style.borderColor = uniqueStyle.border;
-        el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
-      } else {
+      if (
+        (slot === "chest" || slot === "leggings") &&
+        window.equippedSlots.overall
+      ) {
+        el.className = "slots-card locked";
+        el.innerHTML = `⚙️ LOCKED BY OVERALL`;
         el.style.background = "";
+        el.style.borderColor = "";
+        el.style.boxShadow = "";
+        return;
+      }
+      if (
+        slot === "overall" &&
+        (window.equippedSlots.chest || window.equippedSlots.leggings)
+      ) {
+        el.className = "slots-card locked";
+        el.innerHTML = `⚙️ LOCKED BY PIECE GEAR`;
+        el.style.background = "";
+        el.style.borderColor = "";
+        el.style.boxShadow = "";
+        return;
+      }
+
+      if (item) {
+        let isArt = slot.startsWith("art");
+        el.className = isArt
+          ? "slots-card artifact-slot equipped"
+          : "slots-card equipped";
+        let color = window.getTierColor(item.statsRolled);
+        el.style.borderColor = color;
+
+        let uniqueStyle = window.getUniqueItemStyle(item);
+        if (uniqueStyle) {
+          el.style.background = uniqueStyle.bg;
+          el.style.borderColor = uniqueStyle.border;
+          el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
+        } else {
+          el.style.background = "";
+          el.style.boxShadow = "";
+        }
+
+        let tierLabel =
+          item.statsRolled === "UNIQUE"
+            ? "UNIQUE"
+            : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
+        let temperTag =
+          item.temperLevel > 0
+            ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
+            : "";
+        let lockTag = item.locked ? " 🔒" : "";
+        let isUnique =
+          item.isUniqueStaff ||
+          item.isUniqueSword ||
+          item.isUniqueSingularity ||
+          item.isUniqueMaelstrom ||
+          item.isUniqueAegis ||
+          item.isUniqueWatch ||
+          item.isUniqueChronicle ||
+          item.isUniqueWarpCore ||
+          item.isUniqueTempest;
+
+        let iconBox = `<div style="text-align:center; margin-bottom:4px;">${window.getEquipIconHtml(item, 32)}</div>`;
+        if (isArt) {
+          el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
+        } else {
+          let s = [];
+          let sPlain = [];
+          if (item.atk > 0) {
+            s.push(
+              `${window.getUiIconSvg("atk", 9.5)}${window.formatNumber(item.atk)}`,
+            );
+            sPlain.push(`Atk: ${window.formatNumber(item.atk)}`);
+          }
+          if (item.maxHp > 0) {
+            s.push(
+              `${window.getUiIconSvg("maxHp", 9.5)}${window.formatNumber(item.maxHp)}`,
+            );
+            sPlain.push(`HP: ${window.formatNumber(item.maxHp)}`);
+          }
+          if (item.def > 0) {
+            s.push(
+              `${window.getUiIconSvg("def", 9.5)}${window.formatNumber(item.def)}`,
+            );
+            sPlain.push(`Def: ${window.formatNumber(item.def)}`);
+          }
+          if (item.moveSpeed > 0) {
+            s.push(
+              `${window.getUiIconSvg("moveSpeed", 9.5)}${window.formatNumber(item.moveSpeed)}`,
+            );
+            sPlain.push(`Speed: ${window.formatNumber(item.moveSpeed)}`);
+          }
+          if (item.critChance > 0) {
+            s.push(
+              `${window.getUiIconSvg("critChance", 9.5)}${Math.floor(item.critChance * 100)}%`,
+            );
+            sPlain.push(`Crit: ${Math.floor(item.critChance * 100)}%`);
+          }
+          if (item.critDamage > 0) {
+            s.push(
+              `${window.getUiIconSvg("critDamage", 9.5)}${Math.floor(item.critDamage * 100)}%`,
+            );
+            sPlain.push(`CritDmg: ${Math.floor(item.critDamage * 100)}%`);
+          }
+          if (item.block > 0) {
+            s.push(
+              `${window.getUiIconSvg("block", 9.5)}${Math.floor(item.block * 100)}%`,
+            );
+            sPlain.push(`Block: ${Math.floor(item.block * 100)}%`);
+          }
+          if (item.parry > 0) {
+            s.push(
+              `${window.getUiIconSvg("parry", 9.5)}${Math.floor(item.parry * 100)}%`,
+            );
+            sPlain.push(`Parry: ${Math.floor(item.parry * 100)}%`);
+          }
+          if (item.str > 0) {
+            s.push(`${window.getUiIconSvg("str", 9.5)}S:${item.str}`);
+            sPlain.push(`STR: ${item.str}`);
+          }
+          if (item.dex > 0) {
+            s.push(`${window.getUiIconSvg("dex", 9.5)}D:${item.dex}`);
+            sPlain.push(`DEX: ${item.dex}`);
+          }
+          if (item.int > 0) {
+            s.push(`${window.getUiIconSvg("int", 9.5)}I:${item.int}`);
+            sPlain.push(`INT: ${item.int}`);
+          }
+
+          let setLabelHtml = "";
+          let setName = window.getItemSetName(item);
+          if (setName) {
+            let matchingCount = 0;
+            const setSlots = [
+              "weapon",
+              "subweapon",
+              "helmet",
+              "chest",
+              "leggings",
+              "overall",
+              "boots",
+            ];
+            setSlots.forEach((sKey) => {
+              let eqItem = window.equippedSlots[sKey];
+              if (eqItem) {
+                let eqSetName = window.getItemSetName(eqItem);
+                if (eqSetName === setName)
+                  matchingCount += sKey === "overall" ? 2 : 1;
+              }
+            });
+            if (matchingCount >= 2) {
+              let displayCount = Math.min(3, matchingCount);
+              setLabelHtml = `<div style="font-size:8px; color:#2ecc71; font-weight:bold; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;">✨ ${setName} Set (${displayCount}/3)</div>`;
+            }
+          }
+          el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${sPlain.join(", ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
+        }
+      } else {
+        el.className = "slots-card";
+        let displaySlotName = slot.toUpperCase();
+        if (slot === "art1") displaySlotName = "ARTIFACT 1";
+        else if (slot === "art2") displaySlotName = "ARTIFACT 2";
+        else if (slot === "art3") displaySlotName = "ARTIFACT 3";
+        el.innerHTML = `${lvlBadge}<i>[Empty ${displaySlotName}]</i>`;
+        el.style.background = "";
+        el.style.borderColor = "";
         el.style.boxShadow = "";
       }
-
-      let tierLabel =
-        item.statsRolled === "UNIQUE"
-          ? "UNIQUE"
-          : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
-      let temperTag =
-        item.temperLevel > 0
-          ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
-          : "";
-      let lockTag = item.locked ? " 🔒" : "";
-      let isUnique =
-        item.isUniqueStaff ||
-        item.isUniqueSword ||
-        item.isUniqueSingularity ||
-        item.isUniqueMaelstrom ||
-        item.isUniqueAegis ||
-        item.isUniqueWatch ||
-        item.isUniqueChronicle ||
-        item.isUniqueWarpCore ||
-        item.isUniqueTempest;
-
-      let iconBox = `<div style="text-align:center; margin-bottom:4px;">${window.getEquipIconHtml(item, 32)}</div>`;
-      if (isArt) {
-        el.innerHTML = `${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
-      } else {
-        let s = [];
-        let sPlain = [];
-        if (item.atk > 0) {
-          s.push(
-            `${window.getUiIconSvg("atk", 9.5)}${window.formatNumber(item.atk)}`,
-          );
-          sPlain.push(`Atk: ${window.formatNumber(item.atk)}`);
-        }
-        if (item.maxHp > 0) {
-          s.push(
-            `${window.getUiIconSvg("maxHp", 9.5)}${window.formatNumber(item.maxHp)}`,
-          );
-          sPlain.push(`HP: ${window.formatNumber(item.maxHp)}`);
-        }
-        if (item.def > 0) {
-          s.push(
-            `${window.getUiIconSvg("def", 9.5)}${window.formatNumber(item.def)}`,
-          );
-          sPlain.push(`Def: ${window.formatNumber(item.def)}`);
-        }
-        if (item.moveSpeed > 0) {
-          s.push(
-            `${window.getUiIconSvg("moveSpeed", 9.5)}${window.formatNumber(item.moveSpeed)}`,
-          );
-          sPlain.push(`Speed: ${window.formatNumber(item.moveSpeed)}`);
-        }
-        if (item.critChance > 0) {
-          s.push(
-            `${window.getUiIconSvg("critChance", 9.5)}${Math.floor(item.critChance * 100)}%`,
-          );
-          sPlain.push(`Crit: ${Math.floor(item.critChance * 100)}%`);
-        }
-        if (item.critDamage > 0) {
-          s.push(
-            `${window.getUiIconSvg("critDamage", 9.5)}${Math.floor(item.critDamage * 100)}%`,
-          );
-          sPlain.push(`CritDmg: ${Math.floor(item.critDamage * 100)}%`);
-        }
-        if (item.block > 0) {
-          s.push(
-            `${window.getUiIconSvg("block", 9.5)}${Math.floor(item.block * 100)}%`,
-          );
-          sPlain.push(`Block: ${Math.floor(item.block * 100)}%`);
-        }
-        if (item.parry > 0) {
-          s.push(
-            `${window.getUiIconSvg("parry", 9.5)}${Math.floor(item.parry * 100)}%`,
-          );
-          sPlain.push(`Parry: ${Math.floor(item.parry * 100)}%`);
-        }
-        if (item.str > 0) {
-          s.push(`${window.getUiIconSvg("str", 9.5)}S:${item.str}`);
-          sPlain.push(`STR: ${item.str}`);
-        }
-        if (item.dex > 0) {
-          s.push(`${window.getUiIconSvg("dex", 9.5)}D:${item.dex}`);
-          sPlain.push(`DEX: ${item.dex}`);
-        }
-        if (item.int > 0) {
-          s.push(`${window.getUiIconSvg("int", 9.5)}I:${item.int}`);
-          sPlain.push(`INT: ${item.int}`);
-        }
-
-        let setLabelHtml = "";
-        let setName = window.getItemSetName(item);
-        if (setName) {
-          let matchingCount = 0;
-          const setSlots = [
-            "weapon",
-            "subweapon",
-            "helmet",
-            "chest",
-            "leggings",
-            "overall",
-            "boots",
-          ];
-          setSlots.forEach((sKey) => {
-            let eqItem = window.equippedSlots[sKey];
-            if (eqItem) {
-              let eqSetName = window.getItemSetName(eqItem);
-              if (eqSetName === setName)
-                matchingCount += sKey === "overall" ? 2 : 1;
-            }
-          });
-          if (matchingCount >= 2) {
-            let displayCount = Math.min(3, matchingCount);
-            setLabelHtml = `<div style="font-size:8px; color:#2ecc71; font-weight:bold; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;">✨ ${setName} Set (${displayCount}/3)</div>`;
-          }
-        }
-        el.innerHTML = `${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${sPlain.join(", ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
-      }
-    } else {
-      el.className = "slots-card";
-      let displaySlotName = slot.toUpperCase();
-      if (slot === "art1") displaySlotName = "ARTIFACT 1";
-      else if (slot === "art2") displaySlotName = "ARTIFACT 2";
-      else if (slot === "art3") displaySlotName = "ARTIFACT 3";
-      el.innerHTML = `<i>[Empty ${displaySlotName}]</i>`;
-      el.style.background = "";
-      el.style.borderColor = "";
-      el.style.boxShadow = "";
-    }
-  });
+    });
 };
 
 window.renderInventory = function () {
@@ -8389,44 +8405,44 @@ window.showMissionShopItemTooltip = function (e, itemName) {
     desc =
       "A glowing, alien fragment used in the Forge to Tier Up an item's Star Rarity.";
     color = "#8e44ad";
-    cost = 4;
+    cost = 25;
   } else if (normalizedName === "Ancient Core") {
     desc = "Sacrifice at the Altar to summon a Guardian.";
     color = "#e74c3c";
-    cost = 2;
+    cost = 15;
   } else if (normalizedName === "Overlords Sigil") {
     desc = "Spent at the Forge to lock and re-roll equipment modifiers.";
     color = "#1abc9c";
-    cost = 6;
+    cost = 45;
   } else if (normalizedName === "Gacha Key") {
     desc =
       "Used at the Vending Machine to dispense a guaranteed random equipment piece.";
     color = "#f1c40f";
-    cost = 4;
+    cost = 20;
   } else if (normalizedName === "Catalyst Core") {
     desc = "Spent at the Forge to temper Unique Artifacts.";
     color = "#2ecc71";
-    cost = 3;
+    cost = 30;
   } else if (normalizedName === "Astral Essence") {
     desc =
       "A pulsing, cosmic residue extracted by salvaging Unique Artifacts. Spent at the Forge to imbed powerful enchantments.";
     color = "#9b59b6";
-    cost = 4;
+    cost = 35;
   } else if (normalizedName === "Double XP Elixir") {
     desc =
       "Doubles all acquired experience gains (+100% EXP) for 5 minutes (scales with INT).";
     color = "#a855f7";
-    cost = 3;
+    cost = 12;
   } else if (normalizedName === "Double Drop Elixir") {
     desc =
       "Doubles current drop rate multiplier (+100%) for 5 minutes (scales with INT).";
-    color = "#2ecc71";
-    cost = 4;
+    color = "#22c55e";
+    cost = 18;
   } else if (normalizedName === "Drop Quality Elixir") {
     desc =
       "Boosts item drop quality checks by +50% for 5 minutes (scales with INT).";
     color = "#3b82f6";
-    cost = 5;
+    cost = 22;
   }
 
   // Preserve correct format strings for UI outputs
@@ -8957,56 +8973,56 @@ window.renderMissionsWindow = function () {
     let reagents = [
       {
         key: "Eridium Shard",
-        cost: 4,
+        cost: 25,
         color: "#8e44ad",
         desc: "Awaken equipment star ratings (rarities)",
       },
       {
         key: "Ancient Core",
-        cost: 2,
+        cost: 15,
         color: "#e74c3c",
         desc: "Activate the Altar of Rifts",
       },
       {
         key: "Overlord's Sigil",
         queryKey: "Overlords Sigil",
-        cost: 6,
+        cost: 45,
         color: "#1abc9c",
         desc: "Material required for unique artifact tempering",
       },
       {
         key: "Gacha Key",
-        cost: 4,
+        cost: 20,
         color: "#f1c40f",
         desc: "Roll standard vending crate",
       },
       {
         key: "Catalyst Core",
-        cost: 3,
+        cost: 30,
         color: "#2ecc71",
         desc: "Lock & re-roll item properties",
       },
       {
         key: "Astral Essence",
-        cost: 4,
+        cost: 35,
         color: "#9b59b6",
         desc: "Infuse powerful gear enchantments",
       },
       {
         key: "Double XP Elixir",
-        cost: 3,
+        cost: 12,
         color: "#a855f7",
         desc: "Doubles monster EXP gains (+100% EXP)",
       },
       {
         key: "Double Drop Elixir",
-        cost: 4,
+        cost: 18,
         color: "#22c55e",
-        desc: "Doubles global drop rate modifier (+100%)",
+        desc: "Doubles global drop rate multiplier (+100%)",
       },
       {
         key: "Drop Quality Elixir",
-        cost: 5,
+        cost: 22,
         color: "#3b82f6",
         desc: "Boosts drop quality checks (+50% Qly)",
       },
@@ -11942,276 +11958,130 @@ window.resolveInspectedPlayerStats = function (profile) {
 
 // --- ACTIVITIES & RUNS CONTROLLER (CRUCIBLE, CAVERNS & AUTO-SALVAGE) ---
 
-window.openCrucibleDraftModal = function () {
-  if (
-    window.playerStats.isDungeonMode ||
-    window.playerStats.isCrucibleMode ||
-    window.playerStats.isPrestigeBossMode ||
-    window.playerStats.isUberBoss
-  ) {
-    window.pushHeaderToast(
-      "Cannot enter: already in another activity!",
-      "#e74c3c",
-    );
-    return;
-  }
-  let souls = window.inventory.ETC["Monster Soul"] || 0;
-  if (souls < 100) {
-    window.pushHeaderToast("Requires 100 Monster Souls!", "#e74c3c");
-    return;
-  }
+window.openCrucibleChooseTwoStartingDraftModal = function () {
+  window.setPauseState(true);
 
-  let checkpoint = Math.max(
-    1,
-    Math.floor((window.playerStats.cruciblePeak || 1) * 0.8),
-  );
+  let pool = [...window.CRUCIBLE_DRAFT_POOL].sort(() => Math.random() - 0.5);
+  let selectedCards = pool.slice(0, 4); // Draw 4 options for Choose-2 starting layout
 
-  // Create drafting state
-  let draftState = {
-    checkpoint: checkpoint,
-    buffs: [],
-    debuffs: [],
-    selectedBuff: null,
-    selectedDebuff: null,
-    infusedType: "none", // "buff", "debuff", "none"
-    rerollsSpent: 0,
-  };
-
-  let rollDraftCards = () => {
-    // Draw 3 unique random buffs
-    let bPool = [...window.CAVERN_BUFFS].sort(() => Math.random() - 0.5);
-    draftState.buffs = bPool.slice(0, 3);
-    // Draw 3 unique random debuffs
-    let dPool = [...window.CAVERN_DEBUFFS].sort(() => Math.random() - 0.5);
-    draftState.debuffs = dPool.slice(0, 3);
-
-    draftState.selectedBuff = null;
-    draftState.selectedDebuff = null;
-    draftState.infusedType = "none";
-  };
-
-  rollDraftCards();
-
-  // Modal container creation
   let overlay = document.createElement("div");
-  overlay.id = "crucible-draft-overlay";
+  overlay.id = "crucible-starting-draft-overlay";
   overlay.style.position = "fixed";
   overlay.style.top = "0";
   overlay.style.left = "0";
   overlay.style.width = "100%";
   overlay.style.height = "100%";
-  overlay.style.backgroundColor = "rgba(0,0,0,0.92)";
+  overlay.style.backgroundColor = "rgba(0,0,0,0.95)";
   overlay.style.display = "flex";
   overlay.style.justifyContent = "center";
   overlay.style.alignItems = "center";
-  overlay.style.zIndex = "40000";
-  overlay.style.backdropFilter = "blur(6px)";
+  overlay.style.zIndex = "45000";
+  overlay.style.backdropFilter = "blur(10px)";
   document.body.appendChild(overlay);
 
-  let renderDraftUI = () => {
-    let rerollCost = 15 + Math.floor(checkpoint * 0.5);
-    let ownedSouls = window.inventory.ETC["Monster Soul"] || 0;
-    let ownedLuminous = window.inventory.ETC["Luminous Soul"] || 0;
+  let tempSelectedIds = [];
 
-    let buffCardsHtml = draftState.buffs
-      .map((b, idx) => {
-        let isSel = draftState.selectedBuff?.id === b.id;
-        let isInfused = isSel && draftState.infusedType === "buff";
-        let borderCol = isSel ? "#2ecc71" : "#333";
-        let shadowStyle = isSel ? `box-shadow: 0 0 10px #2ecc71;` : "";
-        let bgStyle = isSel
-          ? `background: rgba(46, 204, 113, 0.1);`
-          : `background: #111;`;
-        let displayDesc = isInfused
-          ? `${b.desc} <strong style="color:#f1c40f;">(+50% Potency!)</strong>`
-          : b.desc;
+  window.toggleStartingCardSelection = function (cardId) {
+    let cardEl = document.getElementById(`starting-card-${cardId}`);
+    if (!cardEl) return;
 
-        return `
-        <div style="border: 2px solid ${borderCol}; border-radius: 6px; padding: 10px; margin-bottom: 6px; ${shadowStyle} ${bgStyle} cursor:pointer; text-align:left;" onclick="window.selectDraftCard('buff', ${idx})">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <strong style="color:#2ecc71; font-size:11px;">☀️ ${b.name}</strong>
-            ${isSel ? `<span style="font-size:10px; color:#2ecc71;">Selected ✓</span>` : ""}
-          </div>
-          <div style="font-size:10px; color:#aaa; margin-top:4px;">${displayDesc}</div>
-        </div>
-      `;
-      })
-      .join("");
-
-    let debuffCardsHtml = draftState.debuffs
-      .map((d, idx) => {
-        let isSel = draftState.selectedDebuff?.id === d.id;
-        let isInfused = isSel && draftState.infusedType === "debuff";
-        let borderCol = isSel ? "#e74c3c" : "#333";
-        let shadowStyle = isSel ? `box-shadow: 0 0 10px #e74c3c;` : "";
-        let bgStyle = isSel
-          ? `background: rgba(231, 76, 60, 0.1);`
-          : `background: #111;`;
-        let displayDesc = isInfused
-          ? `${d.desc} <strong style="color:#f1c40f;">(+50% Penalty!)</strong>`
-          : d.desc;
-
-        return `
-        <div style="border: 2px solid ${borderCol}; border-radius: 6px; padding: 10px; margin-bottom: 6px; ${shadowStyle} ${bgStyle} cursor:pointer; text-align:left;" onclick="window.selectDraftCard('debuff', ${idx})">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <strong style="color:#e74c3c; font-size:11px;">🌑 ${d.name}</strong>
-            ${isSel ? `<span style="font-size:10px; color:#e74c3c;">Selected ✓</span>` : ""}
-          </div>
-          <div style="font-size:10px; color:#aaa; margin-top:4px;">${displayDesc}</div>
-        </div>
-      `;
-      })
-      .join("");
-
-    let canReroll = ownedSouls >= rerollCost;
-    let canInfuse =
-      ownedLuminous >= 1 &&
-      (draftState.selectedBuff || draftState.selectedDebuff);
-    let canStart = draftState.selectedBuff && draftState.selectedDebuff;
-
-    let infusionControlHtml = "";
-    if (draftState.selectedBuff || draftState.selectedDebuff) {
-      infusionControlHtml = `
-        <div style="background:#15121b; border: 1.5px dashed #9b59b6; border-radius: 8px; padding: 12px; margin-bottom: 12px; text-align:center;">
-          <strong style="color:#df9ffb; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">🔮 INFUSE SELECTION (1x Limit)</strong>
-          <span style="font-size:9.5px; color:#aaa; display:block; margin-bottom:8px;">Spend 1 Luminous Soul to empower a card's baseline properties.</span>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
-            <button class="btn-action" style="background:#2980b9; font-size:10px; padding:6px;" ${canInfuse && draftState.selectedBuff && draftState.infusedType !== "buff" ? "" : 'disabled style="opacity:0.5;"'} onclick="window.infuseDraftCard('buff')">Infuse Buff (+50% strength)</button>
-            <button class="btn-action" style="background:#c0392b; font-size:10px; padding:6px;" ${canInfuse && draftState.selectedDebuff && draftState.infusedType !== "debuff" ? "" : 'disabled style="opacity:0.5;"'} onclick="window.infuseDraftCard('debuff')">Infuse Debuff (+Loot Mult)</button>
-          </div>
-          ${draftState.infusedType !== "none" ? `<span style="display:block; margin-top:6px; font-size:10px; color:#2ecc71; font-weight:bold;">Active Infusion: ${draftState.infusedType.toUpperCase()} (+1 Luminous Soul spent)</span>` : ""}
-        </div>
-      `;
-    }
-
-    overlay.innerHTML = `
-      <div style="background:#1a1a1a; border:3px solid #9b59b6; border-radius:12px; width:95%; max-width:440px; box-shadow:0 15px 45px rgba(0,0,0,0.95); text-align:center; padding:15px; animation: toastFadeIn 0.3s;">
-        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; border-bottom:1px solid #9b59b6; padding-bottom:6px; margin-bottom:10px;">
-          <h3 style="margin:0; color:#df9ffb; font-size:13px; letter-spacing:1px; display:flex; align-items:center; gap:6px;">🔮 CRUCIBLE DRAFT DECK</h3>
-          <button onclick="document.getElementById('crucible-draft-overlay').remove(); window.setPauseState(false); window.hideTooltip();" style="background:#222; border:1px solid #444; color:#aaa; font-weight:bold; cursor:pointer; font-size:10px; padding:3px 8px; border-radius:4px;">Close</button>
-        </div>
-
-        <div style="font-size:10.5px; color:#aaa; line-height:1.45; text-align:center; margin-bottom:12px;">
-          Select exactly <strong>1 Buff</strong> to protect yourself and <strong>1 Debuff</strong> to challenge your resolve. Starting checkpoint Wave <strong>${checkpoint}</strong>.
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
-          <div>
-            <strong style="color:#2ecc71; font-size:11px; display:block; margin-bottom:6px; border-bottom:1px solid #222; padding-bottom:4px;">☀️ SELECT A BUFF</strong>
-            ${buffCardsHtml}
-          </div>
-          <div>
-            <strong style="color:#e74c3c; font-size:11px; display:block; margin-bottom:6px; border-bottom:1px solid #222; padding-bottom:4px;">🌑 SELECT A DEBUFF</strong>
-            ${debuffCardsHtml}
-          </div>
-        </div>
-
-        ${infusionControlHtml}
-
-        <!-- Costs bar -->
-        <div style="background:#111; border:1px solid #222; border-radius:6px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:10px; margin-bottom:12px;">
-          <span>Souls Owned: <strong style="color:#ffb6c1;">${ownedSouls} / ${rerollCost}</strong></span>
-          <span>Luminous: <strong style="color:#ffb6c1;">${ownedLuminous}</strong></span>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <button class="btn-action" style="background:#555; border-color:#666;" ${canReroll ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.rerollDraftDeck()">🔄 Reroll Deck (${rerollCost})</button>
-          <button class="btn-action btn-pulse" style="background:linear-gradient(135deg, #9b59b6, #8e44ad); border-color:#fff;" ${canStart ? "" : 'disabled style="opacity:0.5; cursor:not-allowed; background:#333; color:#666;"'} onclick="window.executeCrucibleStart()">Commence Purge</button>
-        </div>
-      </div>
-    `;
-  };
-
-  // Expose state mutator triggers directly under window for click bindings
-  window.selectDraftCard = (type, idx) => {
-    if (type === "buff") {
-      draftState.selectedBuff = draftState.buffs[idx];
+    if (tempSelectedIds.includes(cardId)) {
+      tempSelectedIds = tempSelectedIds.filter((id) => id !== cardId);
+      cardEl.style.borderColor = "#9b59b6";
+      cardEl.style.background =
+        "linear-gradient(135deg, #13111c 0%, #06040a 100%)";
+      cardEl.style.transform = "none";
     } else {
-      draftState.selectedDebuff = draftState.debuffs[idx];
-    }
-    renderDraftUI();
-  };
-
-  window.infuseDraftCard = (type) => {
-    let ownedLuminous = window.inventory.ETC["Luminous Soul"] || 0;
-    if (ownedLuminous < 1) return;
-    draftState.infusedType = type;
-    renderDraftUI();
-  };
-
-  window.rerollDraftDeck = () => {
-    let rerollCost = 15 + Math.floor(checkpoint * 0.5);
-    let ownedSouls = window.inventory.ETC["Monster Soul"] || 0;
-    if (ownedSouls < rerollCost) return;
-
-    window.inventory.ETC["Monster Soul"] -= rerollCost;
-    if (window.inventory.ETC["Monster Soul"] === 0)
-      delete window.inventory.ETC["Monster Soul"];
-
-    draftState.rerollsSpent++;
-    rollDraftCards();
-    renderDraftUI();
-  };
-
-  window.executeCrucibleStart = () => {
-    if (!draftState.selectedBuff || !draftState.selectedDebuff) return;
-
-    // Perform final deduction
-    window.inventory.ETC["Monster Soul"] -= 100;
-    if (window.inventory.ETC["Monster Soul"] === 0)
-      delete window.inventory.ETC["Monster Soul"];
-
-    let lootMult = 1.0;
-    if (draftState.infusedType === "buff") {
-      window.inventory.ETC["Luminous Soul"]--;
-      if (window.inventory.ETC["Luminous Soul"] === 0)
-        delete window.inventory.ETC["Luminous Soul"];
-    } else if (draftState.infusedType === "debuff") {
-      window.inventory.ETC["Luminous Soul"]--;
-      if (window.inventory.ETC["Luminous Soul"] === 0)
-        delete window.inventory.ETC["Luminous Soul"];
-      // Infusing a debuff awards a +25% to +50% Shards & Core drop multiplier
-      lootMult = 1.0 + (Math.random() * 0.25 + 0.25);
+      if (tempSelectedIds.length >= 2) {
+        if (window.SoundManager) window.SoundManager.play("block");
+        return;
+      }
+      tempSelectedIds.push(cardId);
+      cardEl.style.borderColor = "#2ecc71";
+      cardEl.style.background = "rgba(46, 204, 113, 0.1)";
+      cardEl.style.transform = "translateY(-4px)";
+      if (window.SoundManager) window.SoundManager.play("swing");
     }
 
-    // Commit active draft onto live running stats
-    window.playerStats.isCrucibleMode = true;
-    window.playerStats.isDungeonMode = false;
-    window.playerStats.crucibleWave = checkpoint;
-    window.playerStats.crucibleStartWave = checkpoint;
-    window.playerStats.killCount = 0;
-    window.playerStats.targetsRequired = 5;
-    window.playerStats.isBossMode = false;
-    window.playerStats.isUberBoss = false;
-    window.mob = null;
+    let btn = document.getElementById("btn-starting-draft-confirm");
+    if (btn) {
+      if (tempSelectedIds.length === 2) {
+        btn.disabled = false;
+        btn.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+        btn.style.borderColor = "#fff";
+        btn.style.boxShadow = "0 0 15px rgba(46, 204, 113, 0.6)";
+        btn.innerText = "CONFIRM 2 SELECTIONS";
+      } else {
+        btn.disabled = true;
+        btn.style.background = "#333";
+        btn.style.borderColor = "#444";
+        btn.style.boxShadow = "none";
+        btn.innerText = `SELECT ${2 - tempSelectedIds.length} MORE CARD(S)`;
+      }
+    }
+  };
 
-    // Active modifiers state mapping
-    window.playerStats.crucibleActiveBuff = draftState.selectedBuff;
-    window.playerStats.crucibleActiveDebuff = draftState.selectedDebuff;
-    window.playerStats.crucibleInfusedType = draftState.infusedType;
-    window.playerStats.crucibleLootMult = lootMult;
+  window.executeStartingDraftConfirm = function () {
+      if (tempSelectedIds.length !== 2) return;
 
-    // Secure state flags
-    window.playerStats.crucibleRunActive = true;
-    window.playerStats.crucibleAccumulatedShards = 0;
-    window.playerStats.crucibleAccumulatedCores = 0;
+      window.playerStats.crucibleDraftDeck = [...tempSelectedIds];
+      window.invalidatePlayerStats();
+      let p = window.resolvePlayerStats();
+      window.playerStats.currentHp = p.maxHp;
 
-    let p = window.resolvePlayerStats();
-    window.playerStats.currentHp = p.maxHp;
+      overlay.remove();
+      if (window.SoundManager) window.SoundManager.play("revive");
+    window.pushHeaderToast("🚀 Starting modifiers infused!", "#2ecc71");
 
-    window.pushLog(
-      `<span style='color:#9b59b6; font-weight:bold;'>[CRUCIBLE] Commenced Astral Crucible run! Active Modifiers: ${draftState.selectedBuff.name} (Buff) & ${draftState.selectedDebuff.name} (Debuff).</span>`,
-    );
-
-    document.getElementById("crucible-draft-overlay").remove();
-    let menu = document.getElementById("dungeon-menu");
-    if (menu) menu.style.display = "none";
-
+    window.setPauseState(false);
     window.updateUI();
+    window.renderInventory();
     window.saveGame();
   };
 
-  renderDraftUI();
+  let cardsHtml = selectedCards
+    .map((card) => {
+      return `
+      <div id="starting-card-${card.id}" class="market-card" style="
+        background: linear-gradient(135deg, #13111c 0%, #06040a 100%);
+        border: 2px solid #9b59b6;
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        width: 125px;
+        height: 215px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.65);
+        transition: transform 0.15s, border-color 0.15s;
+      "
+      onclick="window.toggleStartingCardSelection('${card.id}')">
+        <div style="text-align:center; width:100%;">
+          <strong style="color:#df9ffb; font-size:11.5px; display:block; margin-bottom:2px;">☀️ ${card.name}</strong>
+          <span style="font-size:8px; color:#888; text-transform:uppercase; letter-spacing:0.5px;">INITIAL INFUSION</span>
+        </div>
+        <div style="font-size:24px; margin: 8px 0;">🔮</div>
+        <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:55px;">
+          ${card.desc}
+        </div>
+        <span style="font-size:8.5px; color:#aaa; font-weight:bold;">Tap to Choose</span>
+      </div>
+    `;
+    })
+    .join("");
+
+  overlay.innerHTML = `
+    <div style="text-align:center; color:white; animation: toastFadeIn 0.3s ease-out; max-width:580px; width:95%;">
+      <div style="font-size: 16px; font-weight: 950; color:#2ecc71; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 8px rgba(46,204,113,0.3); margin-bottom:4px;">✨ DRAFT 2 STARTING INFUSIONS ✨</div>
+      <div style="font-size:10px; color:#aaa; margin-bottom:20px;">Prepare your baseline deck. Choose exactly 2 initial cards from the pool:</div>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
+        ${cardsHtml}
+      </div>
+      <button id="btn-starting-draft-confirm" class="btn-action" style="background:#333; border:1px solid #444; color:#777; font-weight:bold; font-size:11.5px; text-transform:uppercase; letter-spacing:1px; padding:12px 35px; border-radius:6px; cursor:pointer;" disabled onclick="window.executeStartingDraftConfirm()">SELECT 2 MORE CARDS</button>
+    </div>
+  `;
 };
 
 window.renderCavernSigilConsole = function () {

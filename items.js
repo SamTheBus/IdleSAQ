@@ -19,6 +19,78 @@ window.PitySystem = {
   },
 };
 
+window.getSlotUpgradeCost = function (slotKey, currentLevel) {
+  let targetLevel = currentLevel + 1; // 1 to 100
+  let gold = 0;
+  if (targetLevel <= 30) {
+    gold = Math.floor(100000 * Math.pow(2.25, targetLevel));
+  } else {
+    let costAt30 = 100000 * Math.pow(2.25, 30);
+    gold = Math.floor(costAt30 * Math.pow(3.0, targetLevel - 30));
+  }
+
+  let materials = [];
+  if (targetLevel <= 10) {
+    // Copper Attunement (Lv. 1 - 10)
+    materials.push({
+      name: "Monster Soul",
+      qty: Math.floor(50 * Math.pow(1.4, targetLevel)),
+    });
+  } else if (targetLevel <= 25) {
+    // Iron Attunement (Lv. 11 - 25)
+    materials.push({
+      name: "Monster Soul",
+      qty: Math.floor(1000 * Math.pow(1.2, targetLevel - 10)),
+    });
+    materials.push({
+      name: "Rare Scrap",
+      qty: Math.floor(15 * Math.pow(1.25, targetLevel - 10)),
+    });
+  } else if (targetLevel <= 45) {
+    // Steel Attunement (Lv. 26 - 45)
+    materials.push({
+      name: "Luminous Soul",
+      qty: Math.floor(5 * Math.pow(1.18, targetLevel - 25)),
+    });
+    materials.push({
+      name: "Magic Scrap",
+      qty: Math.floor(25 * Math.pow(1.22, targetLevel - 25)),
+    });
+  } else if (targetLevel <= 70) {
+    // Mythril Attunement (Lv. 46 - 70)
+    materials.push({
+      name: "Epic Scrap",
+      qty: Math.floor(50 * Math.pow(1.16, targetLevel - 45)),
+    });
+    materials.push({
+      name: "Astral Shards",
+      qty: Math.floor(1 * Math.pow(1.15, targetLevel - 45)),
+    });
+  } else if (targetLevel <= 90) {
+    // Celestial Attunement (Lv. 71 - 90)
+    materials.push({
+      name: "Legendary Scrap",
+      qty: Math.floor(250 * Math.pow(1.15, targetLevel - 70)),
+    });
+    materials.push({
+      name: "Astral Shards",
+      qty: Math.floor(5 * Math.pow(1.16, targetLevel - 70)),
+    });
+  } else if (targetLevel <= 100) {
+    // Void Singularity Attunement (Lv. 91 - 100)
+    materials.push({
+      name: "Mythic Scrap",
+      qty: Math.floor(500 * Math.pow(1.15, targetLevel - 90)),
+    });
+    materials.push({
+      name: "Astral Shards",
+      qty: Math.floor(15 * Math.pow(1.16, targetLevel - 90)),
+    });
+  }
+
+  return { gold, materials };
+};
+
 window.forgeSelectedItem = null;
 window.forgeMode = "temper";
 
@@ -290,6 +362,177 @@ window.renderForgeTab = function () {
   let detailEl = document.getElementById("forge-details");
   if (!listEl || !detailEl) return;
 
+  window.playerStats.slotUpgrades = window.playerStats.slotUpgrades || {
+    weapon: 0,
+    subweapon: 0,
+    helmet: 0,
+    chest: 0,
+    leggings: 0,
+    overall: 0,
+    boots: 0,
+  };
+
+  if (window.forgeMode === "temper") {
+      let slotsKeys = [
+        "weapon",
+        "subweapon",
+        "helmet",
+        "chest",
+        "leggings",
+        "overall",
+        "boots",
+        "art1",
+        "art2",
+        "art3",
+      ];
+      let slotsLabels = {
+        weapon: "Weapon Slot",
+        subweapon: "Offhand Slot",
+        helmet: "Helmet Slot",
+        chest: "Chest Slot",
+        leggings: "Leggings Slot",
+        overall: "Overall Slot",
+        boots: "Boots Slot",
+        art1: "Artifact Slot 1",
+        art2: "Artifact Slot 2",
+        art3: "Artifact Slot 3",
+      };
+
+    listEl.innerHTML = slotsKeys
+      .map((key) => {
+        let lvl = window.playerStats.slotUpgrades[key] || 0;
+        let isSelected = window.state.selectedForgeSlot === key;
+        let equippedItem = window.equippedSlots[key];
+        let itemNameHtml = equippedItem
+          ? `<span style="color:${window.getTierColor(equippedItem.statsRolled)}; font-weight:bold;">${equippedItem.name}</span>`
+          : `<span style="color:#666; font-style:italic;">[Empty Slot]</span>`;
+
+        let borderCol = isSelected ? "#a855f7" : "#202632";
+        let bg = isSelected
+          ? "background: rgba(168, 85, 247, 0.15);"
+          : "background: rgba(15, 17, 26, 0.65);";
+
+        return `
+        <div class="bag-item-forge" style="border: 1.5px solid ${borderCol}; border-left: 4.5px solid #a855f7 !important; ${bg} display: flex; align-items: center; padding: 8px 10px; margin-bottom: 6px; border-radius: 6px; cursor: pointer; transition: all 0.15s;" onclick="window.selectForgeSlot('${key}')">
+          <div style="flex:1; text-align:left;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong style="color:#df9ffb; font-size:12px;">${slotsLabels[key]}</strong>
+              <span style="font-family:monospace; font-size:10px; color:#fff; font-weight:bold;">Lv. ${lvl} / 100</span>
+            </div>
+            <div style="font-size:9.5px; color:#aaa; margin-top:2px;">Equipped: ${itemNameHtml}</div>
+          </div>
+        </div>
+      `;
+      })
+      .join("");
+
+    let slotKey = window.state.selectedForgeSlot || "weapon";
+    let lvl = window.playerStats.slotUpgrades[slotKey] || 0;
+    let displayLabel = slotsLabels[slotKey];
+
+    if (lvl >= 100) {
+      detailEl.innerHTML = `
+        <div style="font-weight:bold; font-size:13px; color:#f1c40f; border-bottom:1px solid #333; padding-bottom:4px; margin-bottom:10px;">${displayLabel}</div>
+        <div style="color:#2ecc71; font-weight:bold; text-align:center; padding: 25px 0; font-size:12px;">🏆 MAXIMUM ATTUNEMENT REACHED (Lv. 100)<br><br><span style="color:#aaa; font-weight:normal;">This slot's equipped items now receive an absolute +100% (2.0x) stat multiplier!</span></div>
+      `;
+      return;
+    }
+
+    let cost = window.getSlotUpgradeCost(slotKey, lvl);
+    let goldCost = cost.gold;
+    let goldOwned = window.playerStats.coins || 0;
+    let goldColor = goldOwned >= goldCost ? "#2ecc71" : "#e74c3c";
+
+    let materialsHtml = cost.materials
+      .map((mat) => {
+        let owned =
+          window.inventory.ETC[mat.name] || window.inventory.USE[mat.name] || 0;
+        let isAfford = owned >= mat.qty;
+        let color = isAfford ? "#bdc3c7" : "#e74c3c";
+        return `<div style="font-size:11px; color:${color}; margin-bottom:3px;">• ${mat.qty}x ${mat.name} (Owned: ${owned.toLocaleString()})</div>`;
+      })
+      .join("");
+
+    let canAfford =
+      goldOwned >= goldCost &&
+      cost.materials.every(
+        (m) =>
+          (window.inventory.ETC[m.name] || window.inventory.USE[m.name] || 0) *
+            1 >=
+          m.qty,
+      );
+
+    let eqItem = window.equippedSlots[slotKey];
+        let liveComparisonHtml = "";
+        if (eqItem) {
+          let curMult = 1.0 + lvl * 0.01;
+          let nextMult = 1.0 + (lvl + 1) * 0.01;
+
+          if (eqItem.type === "artifact") {
+            liveComparisonHtml = `
+              <div style="margin-top:12px; padding:10px; background:#111; border:1px solid #9b59b6; border-radius:6px; font-family:monospace; font-size:10.5px; text-align:left;">
+                <div style="color:#9b59b6; font-weight:bold; margin-bottom:4px; text-transform:uppercase;">📊 Artifact Attunement:</div>
+                <div style="color:#fff;">${eqItem.name}</div>
+                <div style="font-size:10px; color:#aaa; margin-top:4px; line-height:1.4; white-space:normal;">
+                  Attuning this slot multiplies all base and bonus attributes (including Drop Rate, Gold Multipliers, Crit stats, and flat Attributes) on this artifact by <strong style="color:#2ecc71; font-size:11px;">+1%</strong> per Level!
+                </div>
+              </div>
+            `;
+          } else {
+            let primaryStatKey =
+              eqItem.type === "weapon"
+                ? "atk"
+                : eqItem.type === "subweapon"
+                  ? eqItem.subType === "shield"
+                    ? "def"
+                    : eqItem.subType === "dagger"
+                      ? "atk"
+                      : "int"
+                  : "def";
+            let labelStat = primaryStatKey.toUpperCase();
+            let baseItemVal = eqItem[primaryStatKey] || 10;
+
+            let curEffective = Math.ceil(baseItemVal * curMult);
+            let nextEffective = Math.ceil(baseItemVal * nextMult);
+            let diff = nextEffective - curEffective;
+
+            liveComparisonHtml = `
+              <div style="margin-top:12px; padding:10px; background:#111; border:1px solid #3498db; border-radius:6px; font-family:monospace; font-size:10.5px; text-align:left;">
+                <div style="color:#3498db; font-weight:bold; margin-bottom:4px; text-transform:uppercase;">📊 Equipped Item Live Preview:</div>
+                <div style="color:#fff;">${eqItem.name}</div>
+                <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                  <span>Effective ${labelStat}:</span>
+                  <span><span style="color:#aaa;">${curEffective}</span> ➔ <strong style="color:#fff;">${nextEffective}</strong> <span style="color:#2ecc71;">(+${diff})</span></span>
+                </div>
+              </div>
+            `;
+          }
+        } else {
+      liveComparisonHtml = `
+        <div style="margin-top:12px; padding:10px; background:#111; border:1px dashed #444; border-radius:6px; font-size:10.5px; color:#aaa; text-align:center;">
+          No item currently equipped in this slot.<br>Attunement multiplier (+${lvl}%) is fully prepared and waiting.
+        </div>
+      `;
+    }
+
+    detailEl.innerHTML = `
+      <div style="font-weight:bold; font-size:13px; color:#df9ffb; border-bottom:1px solid #333; padding-bottom:4px; margin-bottom:10px; text-align:left;">${displayLabel}</div>
+      <div style="font-size:11px; margin-bottom:10px; color:#aaa; text-align:left;">Attunement multiplier: <span style="color:#fff; font-weight:bold;">+${lvl}% ➔ <span style="color:#2ecc71;">+${lvl + 1}%</span></span></div>
+      <div class="forge-progress-bg"><div class="forge-progress-fill" style="width:${lvl}%; background:linear-gradient(90deg, #9b59b6, #e84393);"></div></div>
+
+      <div style="margin-top:10px; text-align:left;">
+        <div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(goldCost)} Gold Required (Owned: ${window.formatNumber(goldOwned)})</div>
+        ${materialsHtml}
+      </div>
+
+      ${liveComparisonHtml}
+
+      <button class="forge-anvil-button" style="width:100%; margin-top:15px; border-color:#9b59b6; background:linear-gradient(135deg, #4a154b, #0c0812);" ${canAfford ? "" : "disabled"} onclick="window.temperItem()">Harness Heat</button>
+    `;
+    return;
+  }
+
+  // Draw standard item explorers for the remaining modes
   let allValidItems = [
     ...window.inventory.EQUIP.filter((item) => item.type !== "sigil"),
     ...(window.inventory.ARTIFACT || []),
@@ -329,7 +572,6 @@ window.renderForgeTab = function () {
           ? `background: rgba(${window.hexToRgbValues(nameColor)}, 0.15); box-shadow: inset 0 0 10px rgba(${window.hexToRgbValues(nameColor)}, 0.22), 0 0 12px rgba(${window.hexToRgbValues(nameColor)}, 0.15);`
           : "background: rgba(15, 17, 26, 0.65);";
 
-        // Set Diablo Uber Unique visual profiles in Forge Selection Lists
         let uniqueStyleStr = "";
         let uniqueStyle = window.getUniqueItemStyle(item);
         if (uniqueStyle) {
@@ -561,13 +803,18 @@ window.renderForgeTab = function () {
   } else if (window.forgeMode === "enchant") {
     let maxEnchants = window.getMaxEnchants(item);
     let currentEnchants = item.totalEnchants || 0;
-    let maxT = window.getMaxTemper(item.statsRolled, item.type);
-    let isFullyTempered = item.temperLevel >= maxT;
+
+    let slotKey = item.type === "subweapon" ? "subweapon" : item.type;
+    let slotLevel =
+      (window.playerStats.slotUpgrades &&
+        window.playerStats.slotUpgrades[slotKey]) ||
+      0;
+    let isFullyTempered = slotLevel >= 50;
 
     if (maxEnchants === 0) {
       html += `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 20px 0; font-size:11px;">THIS ITEM QUALITY CANNOT HOLD ENCHANTMENTS.<br><br><span style="color:#aaa; font-weight:normal;">Only Magic (2★), Epic (3★), Legendary (4★), and Mythic (5★) items can hold enchantments.</span></div>`;
     } else if (!isFullyTempered) {
-      html += `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 20px 0; font-size:11px;">ITEM MUST BE FULLY TEMPERED FIRST<br><br><span style="color:#aaa; font-weight:normal;">Current Temper: [+${item.temperLevel}/${maxT}]. Temper this item to its absolute limit before infusing cosmic enchantments.</span></div>`;
+      html += `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 20px 0; font-size:11px;">SLOT ATTUNEMENT LEVEL 50 REQUIRED<br><br><span style="color:#aaa; font-weight:normal;">Current Slot Attunement Level: [${slotLevel}/100]. Attune this slot to at least Level 50 before infusing cosmic enchantments.</span></div>`;
     } else if (currentEnchants >= maxEnchants) {
       html += `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 20px 0; font-size:11px;">MAXIMUM ENCHANTMENT LIMIT REACHED (${maxEnchants}/${maxEnchants})<br><br><span style="color:#aaa; font-weight:normal;">Reset this item's enchantments in "Reset Enchants" mode to enchant again.</span></div>`;
     } else {
@@ -2816,10 +3063,15 @@ Object.assign(window.ForgeManager, {
     window.forgeSelectedItem = item;
     if (typeof window.renderForgeTab === "function") window.renderForgeTab();
   },
+  selectForgeSlot(slotKey) {
+    window.state.selectedForgeSlot = slotKey;
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+  }
 });
 
 // Legacy Compatibility Aliases to protect references
 window.selectForgeItem = (id) => window.ForgeManager.selectForgeItem(id);
+window.selectForgeSlot = (slotKey) => window.ForgeManager.selectForgeSlot(slotKey);
 
 // Append setForgeMode inside ForgeManager
 Object.assign(window.ForgeManager, {
@@ -3034,12 +3286,15 @@ Object.assign(window.ForgeManager, {
             );
 
           if (typeof window.resolvePlayerStats === "function") {
-            let newMaxHp = window.resolvePlayerStats().maxHp;
-            window.playerStats.currentHp = Math.min(
-              window.playerStats.currentHp,
-              newMaxHp,
-            );
-          }
+                    let newMaxHp = window.resolvePlayerStats().maxHp;
+                    window.playerStats.currentHp = Math.max(
+                      1,
+                      Math.min(
+                        newMaxHp,
+                        Math.floor((window.playerStats.currentHp / oldMaxHp) * newMaxHp),
+                      ),
+                    );
+                  }
 
           if (typeof window.checkAchievements === "function")
             window.checkAchievements();
@@ -3063,93 +3318,87 @@ window.triggerBulkSalvage = () => window.ForgeManager.triggerBulkSalvage();
 // Append temperItem inside ForgeManager
 Object.assign(window.ForgeManager, {
   temperItem() {
-    if (!window.forgeSelectedItem) return;
-    let isArt = window.forgeSelectedItem.type === "artifact";
-    if (window.playerStats.pendingClanProgress) {
-      window.playerStats.pendingClanProgress.tempers =
-        (window.playerStats.pendingClanProgress.tempers || 0) + 1;
-    }
-
     if (window.forgeMode === "temper") {
-      let maxT = this.getMaxTemper(
-        window.forgeSelectedItem.statsRolled,
-        window.forgeSelectedItem.type,
-      );
-      if (window.forgeSelectedItem.temperLevel >= maxT) return;
-      let costGold = this.getTemperGoldCost(window.forgeSelectedItem);
-      let scrapReqAmount = this.getRequiredScrapAmountForTemper(
-        window.forgeSelectedItem,
-      );
-      let scrapReq = this.getRequiredScrapForTemper(window.forgeSelectedItem);
+      let slotKey = window.state.selectedForgeSlot || "weapon";
+      window.playerStats.slotUpgrades = window.playerStats.slotUpgrades || {
+        weapon: 0,
+        subweapon: 0,
+        helmet: 0,
+        chest: 0,
+        leggings: 0,
+        overall: 0,
+        boots: 0,
+      };
+      let curLvl = window.playerStats.slotUpgrades[slotKey] || 0;
+      if (curLvl >= 100) return;
 
-      if (window.playerStats.coins < costGold) {
-        if (typeof window.pushLog === "function")
-          window.pushLog(
-            `<span style='color:#e74c3c;'>Not enough Gold to temper!</span>`,
-          );
-        return;
-      }
-      if (
-        !window.inventory.ETC[scrapReq] ||
-        window.inventory.ETC[scrapReq] < scrapReqAmount
-      ) {
-        if (typeof window.pushLog === "function")
-          window.pushLog(
-            `<span style='color:#e74c3c;'>Not enough ${scrapReq} to temper!</span>`,
+      let cost = window.getSlotUpgradeCost(slotKey, curLvl);
+      if (window.playerStats.coins < cost.gold) {
+        if (typeof window.pushHeaderToast === "function")
+          window.pushHeaderToast(
+            "❌ Not enough Gold to attune slot!",
+            "#e74c3c",
           );
         return;
       }
 
-      let failChance = window.forgeSelectedItem.temperLevel * 5;
-      let isSuccess = Math.random() >= failChance / 100;
+      for (let mat of cost.materials) {
+        let owned =
+          window.inventory.ETC[mat.name] || window.inventory.USE[mat.name] || 0;
+        if (owned < mat.qty) {
+          if (typeof window.pushHeaderToast === "function")
+            window.pushHeaderToast(
+              `❌ Lacking required ${mat.name}!`,
+              "#e74c3c",
+            );
+          return;
+        }
+      }
 
-      window.playerStats.coins -= costGold;
-      window.inventory.ETC[scrapReq] -= scrapReqAmount;
-      if (window.inventory.ETC[scrapReq] === 0)
-        delete window.inventory.ETC[scrapReq];
-
+      // Deduct resources
+      window.playerStats.coins -= cost.gold;
       if (window.playerStats.coins === 0) {
         window.playerStats.hasTriggeredExactChange = true;
       }
 
-      if (isSuccess) {
-        window.forgeSelectedItem.temperLevel++;
-        window.forgeSelectedItem.consecutiveFailures = 0;
-        window.recalculateItemStats(window.forgeSelectedItem);
-        window.playerStats.totalTempers =
-          (window.playerStats.totalTempers || 0) + 1;
-        if (typeof window.progressMission === "function")
-          window.progressMission("tempers", 1);
-        if (typeof window.pushLog === "function")
-          window.pushLog(
-            `<span style='color:#e67e22;'>[FORGE]</span> Successfully tempered ${window.forgeSelectedItem.name} to [+${window.forgeSelectedItem.temperLevel}]!`,
-          );
-        if (typeof window.pushHeaderToast === "function")
-          window.pushHeaderToast(
-            "🔨 Success! [+" + window.forgeSelectedItem.temperLevel + "]",
-            "#2ecc71",
-          );
-        if (typeof window.spawnTemperParticles === "function")
-          window.spawnTemperParticles(true);
-        if (typeof window.checkAchievements === "function")
-          window.checkAchievements();
-      } else {
-        if (failChance <= 10) window.playerStats.hasTriggeredMurphysLaw = true;
-        if (window.forgeSelectedItem.temperLevel < 9) {
-          window.forgeSelectedItem.consecutiveFailures =
-            (window.forgeSelectedItem.consecutiveFailures || 0) + 1;
-          if (window.forgeSelectedItem.consecutiveFailures >= 3)
-            window.playerStats.hasTriggeredUnfortunateSoul = true;
+      for (let mat of cost.materials) {
+        if (window.inventory.ETC[mat.name] !== undefined) {
+          window.inventory.ETC[mat.name] -= mat.qty;
+          if (window.inventory.ETC[mat.name] === 0)
+            delete window.inventory.ETC[mat.name];
+        } else if (window.inventory.USE[mat.name] !== undefined) {
+          window.inventory.USE[mat.name] -= mat.qty;
+          if (window.inventory.USE[mat.name] === 0)
+            delete window.inventory.USE[mat.name];
         }
-        if (typeof window.pushLog === "function")
-          window.pushLog(
-            `<span style='color:#e74c3c;'>[FORGE]</span> Temper failed on ${window.forgeSelectedItem.name}! Materials lost.`,
-          );
-        if (typeof window.pushHeaderToast === "function")
-          window.pushHeaderToast(`💥 Temper Failed!`, "#e74c3c");
-        if (typeof window.spawnTemperParticles === "function")
-          window.spawnTemperParticles(false);
       }
+
+      window.playerStats.slotUpgrades[slotKey]++;
+      window.playerStats.totalTempers =
+        (window.playerStats.totalTempers || 0) + 1;
+
+      if (window.playerStats.pendingClanProgress) {
+        window.playerStats.pendingClanProgress.tempers =
+          (window.playerStats.pendingClanProgress.tempers || 0) + 1;
+      }
+      if (typeof window.progressMission === "function") {
+        window.progressMission("tempers", 1);
+      }
+
+      let displayKey = slotKey.toUpperCase();
+      if (typeof window.pushLog === "function")
+        window.pushLog(
+          `<span style='color:#e67e22;'>[FORGE]</span> Successfully attuned the <strong style='color:#f1c40f;'>${displayKey} SLOT</strong> to Level ${window.playerStats.slotUpgrades[slotKey]}!`,
+        );
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast(
+          `🔨 Attuned ${displayKey} to Lv. ${window.playerStats.slotUpgrades[slotKey]}!`,
+          "#2ecc71",
+        );
+      if (typeof window.spawnTemperParticles === "function")
+        window.spawnTemperParticles(true);
+      if (typeof window.checkAchievements === "function")
+        window.checkAchievements();
     } else if (window.forgeMode === "tier") {
       if (window.forgeSelectedItem.statsRolled >= 5) return;
       let currentStars = window.forgeSelectedItem.statsRolled;
@@ -3234,11 +3483,15 @@ Object.assign(window.ForgeManager, {
     if (!window.forgeSelectedItem) return;
     let item = window.forgeSelectedItem;
 
-    let maxT = this.getMaxTemper(item.statsRolled, item.type);
-    if (item.temperLevel < maxT) {
+    let slotKey = item.type === "subweapon" ? "subweapon" : item.type;
+    let slotLevel =
+      (window.playerStats.slotUpgrades &&
+        window.playerStats.slotUpgrades[slotKey]) ||
+      0;
+    if (slotLevel < 50) {
       if (typeof window.pushHeaderToast === "function")
         window.pushHeaderToast(
-          `Item must be fully Tempered first! (+${maxT})`,
+          `Slot Attunement Level 50 Required! (${slotLevel}/50)`,
           "#e74c3c",
         );
       return;
