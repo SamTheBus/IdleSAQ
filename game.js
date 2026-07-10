@@ -1118,14 +1118,14 @@ window.SaveManager = {
           let keyTime = window.playerStats.nextDungeonKeyTime || now;
           let msSinceNextKey = now - keyTime;
           if (msSinceNextKey >= 0) {
-            let keysEarned = 1 + Math.floor(msSinceNextKey / 21600000);
+            let keysEarned = 1 + Math.floor(msSinceNextKey / 14400000);
             window.playerStats.dungeonKeys = Math.min(
               5,
               window.playerStats.dungeonKeys + keysEarned,
             );
             window.playerStats.nextDungeonKeyTime =
               window.playerStats.dungeonKeys < 5
-                ? now + (21600000 - (msSinceNextKey % 21600000))
+                ? now + (14400000 - (msSinceNextKey % 14400000))
                 : 0;
           }
         }
@@ -2317,20 +2317,20 @@ function update() {
       window.snowflakes.splice(i, 1);
   }
 
-  // Unified Dungeon Keys real-time regeneration (max 5 keys, 6-hour rate)
+  // Unified Dungeon Keys real-time regeneration (max 5 keys, 4-hour rate)
   if (window.playerStats.dungeonKeys < 5) {
     if (!window.playerStats.nextDungeonKeyTime) {
-      window.playerStats.nextDungeonKeyTime = now + 21600000; // 6 Hours
+      window.playerStats.nextDungeonKeyTime = now + 14400000; // 4 Hours
     } else if (now >= window.playerStats.nextDungeonKeyTime) {
       let msOver = now - window.playerStats.nextDungeonKeyTime;
-      let keysEarned = 1 + Math.floor(msOver / 21600000);
+      let keysEarned = 1 + Math.floor(msOver / 14400000);
       window.playerStats.dungeonKeys = Math.min(
         5,
         window.playerStats.dungeonKeys + keysEarned,
       );
       window.playerStats.nextDungeonKeyTime =
         window.playerStats.dungeonKeys < 5
-          ? now + (21600000 - (msOver % 21600000))
+          ? now + (14400000 - (msOver % 14400000))
           : 0;
     }
   }
@@ -4515,6 +4515,23 @@ window.CombatEngine = {
 
         let oldWave = window.playerStats.crucibleWave || 1;
         window.playerStats.crucibleWave++;
+
+        // Dynamically roll a debuff on every 10th wave, and a buff on all other waves
+        let nextWave = window.playerStats.crucibleWave;
+        if (nextWave % 10 === 0) {
+          window.playerStats.crucibleActiveDebuff =
+            window.CAVERN_DEBUFFS[
+              Math.floor(Math.random() * window.CAVERN_DEBUFFS.length)
+            ];
+          window.playerStats.crucibleActiveBuff = null;
+        } else {
+          window.playerStats.crucibleActiveBuff =
+            window.CAVERN_BUFFS[
+              Math.floor(Math.random() * window.CAVERN_BUFFS.length)
+            ];
+          window.playerStats.crucibleActiveDebuff = null;
+        }
+
         window.playerStats.crucibleWavesClearedThisRun =
           (window.playerStats.crucibleWavesClearedThisRun || 0) + 1;
         window.playerStats.cruciblePeak = Math.max(
@@ -6546,7 +6563,6 @@ window.useItem = function (itemName) {
       };
     }
   } else if (itemName === "Cavern Sigil Sack") {
-  } else if (itemName === "Cavern Sigil Sack") {
     // Uncapped specialised pouch; not bound by bag space limits
     window.inventory.USE[itemName]--;
     if (window.inventory.USE[itemName] === 0) {
@@ -6877,7 +6893,7 @@ window.enterDungeon = function (type) {
       window.saveCurrentActivityPeak();
       window.playerStats.dungeonKeys--;
       if (window.playerStats.dungeonKeys === 4)
-        window.playerStats.nextDungeonKeyTime = Date.now() + 21600000; // 6 Hours
+        window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
 
       window.playerStats.isDungeonMode = true;
 
@@ -6982,7 +6998,10 @@ window.enterCrucible = function () {
       window.playerStats.isUberBoss = false;
       window.mob = null;
 
-      window.playerStats.crucibleActiveBuff = null;
+      window.playerStats.crucibleActiveBuff =
+        window.CAVERN_BUFFS[
+          Math.floor(Math.random() * window.CAVERN_BUFFS.length)
+        ];
       window.playerStats.crucibleActiveDebuff = null;
       window.playerStats.crucibleInfusedType = "none";
       window.playerStats.crucibleLootMult = 1.0;

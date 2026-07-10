@@ -12965,7 +12965,7 @@ window.executeCavernsDescent = function () {
   // Consume key and launch!
   window.playerStats.dungeonKeys--;
   if (window.playerStats.dungeonKeys === 4) {
-    window.playerStats.nextDungeonKeyTime = Date.now() + 21600000; // 6 Hours
+    window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
   }
 
   // Consume and Lock Slotted Cavern Sigil if applied

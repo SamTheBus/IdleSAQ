@@ -6772,11 +6772,14 @@
         skyGrad.addColorStop(1, "#030005");
       } else {
         if (tier === 0) {
-          skyGrad.addColorStop(0, "#2c3e50");
-          skyGrad.addColorStop(1, "#3498db");
+          skyGrad.addColorStop(0, "#121829"); // Deep night-indigo blue
+          skyGrad.addColorStop(0.45, "#4a154b"); // Plum violet
+          skyGrad.addColorStop(0.8, "#ff7675"); // Warm sunset peach
+          skyGrad.addColorStop(1, "#ffeaa7"); // Horizon golden dawn mist
         } else if (tier === 1) {
-          skyGrad.addColorStop(0, "#2c3e50");
-          skyGrad.addColorStop(1, "#1a252f");
+          skyGrad.addColorStop(0, "#080b18"); // Deep midnight blue
+          skyGrad.addColorStop(0.5, "#0d1b2a"); // Midnight teal
+          skyGrad.addColorStop(1, "#1b263b"); // Horizon twilight teal
         } else if (tier === 2) {
           skyGrad.addColorStop(0, "#5a0e0e");
           skyGrad.addColorStop(1, "#0e0202");
@@ -6792,122 +6795,363 @@
       ctx.fillRect(0, 0, canvas.width, 230);
 
       if (tier === 0) {
-        ctx.fillStyle = "rgba(255,255,255,0.06)";
-        let cloudScroll1 = ((Date.now() / 250) % (canvas.width + 100)) - 50;
+        // 1. Giant Solstice Dawn Sun (Radiating light)
+        ctx.save();
+        let sunPulse = 35 + Math.sin(Date.now() / 600) * 1.5;
+        let sunGrad = ctx.createRadialGradient(
+          180,
+          90,
+          2,
+          180,
+          90,
+          sunPulse + 30,
+        );
+        sunGrad.addColorStop(0, "#ffffff");
+        sunGrad.addColorStop(0.2, "#ffe082");
+        sunGrad.addColorStop(0.6, "rgba(255, 118, 117, 0.15)");
+        sunGrad.addColorStop(1, "rgba(255, 118, 117, 0)");
+        ctx.fillStyle = sunGrad;
+        ctx.beginPath();
+        ctx.arc(180, 90, sunPulse + 30, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // 2. Stylized Fluffy Pixel-Art Clouds
+        ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+        let cloudScroll1 = ((Date.now() / 320) % (canvas.width + 120)) - 60;
         let cloudScroll2 =
-          ((Date.now() / 400 + 300) % (canvas.width + 100)) - 50;
+          ((Date.now() / 480 + 350) % (canvas.width + 120)) - 60;
+
         ctx.beginPath();
-        ctx.arc(cloudScroll1, 55, 20, 0, Math.PI * 2);
-        ctx.arc(cloudScroll1 + 25, 50, 25, 0, Math.PI * 2);
-        ctx.arc(cloudScroll1 - 25, 58, 15, 0, Math.PI * 2);
+        ctx.arc(cloudScroll1, 40, 12, 0, Math.PI * 2);
+        ctx.arc(cloudScroll1 + 14, 35, 16, 0, Math.PI * 2);
+        ctx.arc(cloudScroll1 + 28, 40, 10, 0, Math.PI * 2);
+        ctx.arc(cloudScroll1 - 10, 43, 8, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
         ctx.lineWidth = penSky;
         ctx.stroke();
+
         ctx.beginPath();
-        ctx.arc(cloudScroll2, 80, 15, 0, Math.PI * 2);
-        ctx.arc(cloudScroll2 + 18, 75, 20, 0, Math.PI * 2);
+        ctx.arc(cloudScroll2, 60, 9, 0, Math.PI * 2);
+        ctx.arc(cloudScroll2 + 12, 56, 13, 0, Math.PI * 2);
+        ctx.arc(cloudScroll2 + 24, 60, 8, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-        ctx.fillStyle = "#1e3d29";
+
+        // 3. Jagged Distant Violet Peaks (Parallax Mountain Range)
+        ctx.fillStyle = "#271b3e"; // Deep violet
         ctx.beginPath();
         ctx.moveTo(0, 230);
-        ctx.quadraticCurveTo(100, 160, 220, 230);
-        ctx.quadraticCurveTo(350, 145, 480, 230);
-        ctx.quadraticCurveTo(620, 165, 800, 230);
+        ctx.lineTo(0, 150);
+        ctx.lineTo(100, 90);
+        ctx.lineTo(180, 160);
+        ctx.lineTo(290, 75);
+        ctx.lineTo(390, 150);
+        ctx.lineTo(510, 65);
+        ctx.lineTo(610, 160);
+        ctx.lineTo(680, 105);
+        ctx.lineTo(800, 230);
+        ctx.closePath();
         ctx.fill();
         ctx.strokeStyle = "#000000";
-        ctx.lineWidth = penFar;
+        ctx.lineWidth = penSky;
         ctx.stroke();
-        ctx.fillStyle = "#154f2c";
+
+        // 4. Horizon Dawn Mist Overlap
+        let horizonMist = ctx.createLinearGradient(0, 120, 0, 230);
+        horizonMist.addColorStop(0, "rgba(255, 234, 167, 0)");
+        horizonMist.addColorStop(0.7, "rgba(255, 234, 167, 0.15)");
+        horizonMist.addColorStop(1, "rgba(255, 234, 167, 0.45)");
+        ctx.fillStyle = horizonMist;
+        ctx.fillRect(0, 120, canvas.width, 110);
+
+        // 5. Silhouette Pine Forest Row (Jagged horizon tree lines)
+        ctx.save();
+        ctx.fillStyle = "#0c1f13"; // Deepest pine silhouette green
         ctx.beginPath();
         ctx.moveTo(0, 230);
-        ctx.quadraticCurveTo(150, 180, 320, 230);
-        ctx.quadraticCurveTo(500, 170, 680, 230);
-        ctx.quadraticCurveTo(740, 200, 800, 230);
-        ctx.fill();
-        ctx.stroke();
-      } else if (tier === 1) {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-        for (let i = 0; i < 20; i++) {
-          ctx.fillRect((i * 37) % canvas.width, (i * 13) % 130, 1, 1);
+        let treeX = 0;
+        while (treeX < canvas.width + 30) {
+          let py = 175 + Math.sin(treeX * 0.01) * 6; // slow hill wave
+          let treeHeight =
+            12 + Math.sin(treeX * 0.05) * 4 + (treeX % 3 === 0 ? 3 : -2); // varied natural heights
+
+          ctx.lineTo(treeX, py);
+          ctx.lineTo(treeX + 4, py - treeHeight * 0.4); // First branch tier (left)
+          ctx.lineTo(treeX + 2, py - treeHeight * 0.35); // Inward notch
+          ctx.lineTo(treeX + 6, py - treeHeight * 0.7); // Second branch tier (left)
+          ctx.lineTo(treeX + 4, py - treeHeight * 0.65); // Inward notch
+          ctx.lineTo(treeX + 8, py - treeHeight); // Apex / Spire tip
+          ctx.lineTo(treeX + 12, py - treeHeight * 0.65); // Second branch tier (right)
+          ctx.lineTo(treeX + 10, py - treeHeight * 0.7); // Inward notch
+          ctx.lineTo(treeX + 14, py - treeHeight * 0.35); // First branch tier (right)
+          ctx.lineTo(treeX + 12, py - treeHeight * 0.4); // Inward notch
+          ctx.lineTo(treeX + 16, py); // Base right
+
+          treeX += 13 + (treeX % 4); // overlapping spacing
         }
-        ctx.fillStyle = "#1c2833";
-        ctx.beginPath();
-        ctx.moveTo(0, 230);
-        ctx.lineTo(100, 130);
-        ctx.lineTo(180, 180);
-        ctx.lineTo(310, 110);
-        ctx.lineTo(450, 200);
-        ctx.lineTo(580, 125);
-        ctx.lineTo(700, 190);
-        ctx.lineTo(800, 230);
-        ctx.lineTo(0, 230);
+        ctx.lineTo(canvas.width, 230);
         ctx.closePath();
         ctx.fill();
+
+        // Soft dark green contour stroke instead of harsh black to keep it misty and cohesive
+        ctx.strokeStyle = "#07130a";
+        ctx.lineWidth = 1.0;
+        ctx.stroke();
+        ctx.restore();
+      } else if (tier === 1) {
+              // 1. Clean Atmospheric Twilight Sky
+              let skyGrad = ctx.createLinearGradient(0, 0, 0, 230);
+              skyGrad.addColorStop(0, "#060a12");
+              skyGrad.addColorStop(1, "#121b2d");
+              ctx.fillStyle = skyGrad;
+              ctx.fillRect(0, 0, canvas.width, 230);
+
+              // 2. Flowing Vector Aurora Ribbon (Three-layered, vertical-fading curtains)
+                      ctx.save();
+                      let auroraTime = Date.now() / 2200;
+
+                      // Ribbon A: Luminous Emerald-Teal (Primary sweeping ribbon)
+                      let gA = ctx.createLinearGradient(0, 15, 0, 115);
+                      gA.addColorStop(0, "rgba(0, 255, 136, 0.0)");
+                      gA.addColorStop(0.5, "rgba(0, 255, 136, 0.16)");
+                      gA.addColorStop(1, "rgba(0, 255, 136, 0.0)");
+                      ctx.fillStyle = gA;
+
+                      let waveA1 = Math.sin(auroraTime) * 12;
+                      let waveA2 = Math.cos(auroraTime * 0.9) * 8;
+
+                      ctx.beginPath();
+                      ctx.moveTo(0, 45 + waveA1);
+                      ctx.bezierCurveTo(
+                        canvas.width * 0.35, 15 + waveA2,
+                        canvas.width * 0.65, 85 - waveA1,
+                        canvas.width, 35 + waveA2
+                      );
+                      ctx.lineTo(canvas.width, 75 + waveA2);
+                      ctx.bezierCurveTo(
+                        canvas.width * 0.65, 115 - waveA1,
+                        canvas.width * 0.35, 55 + waveA2,
+                        0, 85 + waveA1
+                      );
+                      ctx.closePath();
+                      ctx.fill();
+
+                      // Ribbon B: Electric Cyan (Secondary crossing ribbon)
+                      let gB = ctx.createLinearGradient(0, 25, 0, 125);
+                      gB.addColorStop(0, "rgba(0, 240, 255, 0.0)");
+                      gB.addColorStop(0.5, "rgba(0, 240, 255, 0.14)");
+                      gB.addColorStop(1, "rgba(0, 240, 255, 0.0)");
+                      ctx.fillStyle = gB;
+
+                      let waveB1 = Math.cos(auroraTime * 1.1) * 10;
+                      let waveB2 = Math.sin(auroraTime * 0.7) * 14;
+
+                      ctx.beginPath();
+                      ctx.moveTo(0, 60 + waveB1);
+                      ctx.bezierCurveTo(
+                        canvas.width * 0.25, 85 + waveB2,
+                        canvas.width * 0.75, 25 - waveB1,
+                        canvas.width, 50 + waveB2
+                      );
+                      ctx.lineTo(canvas.width, 85 + waveB2);
+                      ctx.bezierCurveTo(
+                        canvas.width * 0.75, 55 - waveB1,
+                        canvas.width * 0.25, 115 + waveB2,
+                        0, 95 + waveB1
+                      );
+                      ctx.closePath();
+                      ctx.fill();
+
+                      // Ribbon C: Soft Cosmic Purple (Deep background accent)
+                      let gC = ctx.createLinearGradient(0, 35, 0, 135);
+                      gC.addColorStop(0, "rgba(155, 89, 182, 0.0)");
+                      gC.addColorStop(0.5, "rgba(155, 89, 182, 0.1)");
+                      gC.addColorStop(1, "rgba(155, 89, 182, 0.0)");
+                      ctx.fillStyle = gC;
+
+                      let waveC1 = Math.sin(auroraTime * 1.3) * 8;
+
+                      ctx.beginPath();
+                      ctx.moveTo(0, 75 + waveC1);
+                      ctx.bezierCurveTo(
+                        canvas.width * 0.45, 105 - waveC1,
+                        canvas.width * 0.55, 45 + waveC1,
+                        canvas.width, 85 - waveC1
+                      );
+                      ctx.lineTo(canvas.width, 105 - waveC1);
+                      ctx.bezierCurveTo(
+                        canvas.width * 0.55, 65 + waveC1,
+                        canvas.width * 0.45, 125 - waveC1,
+                        0, 95 + waveC1
+                      );
+                      ctx.closePath();
+                      ctx.fill();
+
+                      ctx.restore();
+
+              // 3. Twinkling Celestial Pixel Stars
+              for (let i = 0; i < 12; i++) {
+                let starX = (i * 123 + 17) % canvas.width;
+                let starY = (i * 37 + 11) % 110;
+                let pulse = 0.3 + Math.sin(Date.now() / 350 + i) * 0.7;
+                ctx.fillStyle = `rgba(255, 255, 255, ${0.15 + pulse * 0.5})`;
+                ctx.fillRect(starX, starY, i % 4 === 0 ? 1.5 : 0.8, i % 4 === 0 ? 1.5 : 0.8);
+              }
+
+              // 4. Elegant 4-Point Sparkle Stars (✦)
+              let drawSparkleStar = (cx, cy, size, pulseSpeed, offset) => {
+                let scale = 0.4 + Math.sin(Date.now() / pulseSpeed + offset) * 0.6;
+                let s = size * scale;
+                if (s <= 0.5) return;
+                ctx.fillStyle = `rgba(165, 243, 252, ${0.3 + scale * 0.6})`;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - s);
+                ctx.quadraticCurveTo(cx, cy, cx + s, cy);
+                ctx.quadraticCurveTo(cx, cy, cx, cy + s);
+                ctx.quadraticCurveTo(cx, cy, cx - s, cy);
+                ctx.quadraticCurveTo(cx, cy, cx, cy - s);
+                ctx.closePath();
+                ctx.fill();
+              };
+              drawSparkleStar(240, 35, 6, 600, 0);
+              drawSparkleStar(480, 25, 4.5, 850, 2);
+              drawSparkleStar(110, 55, 5, 700, 4);
+              drawSparkleStar(630, 45, 5.5, 900, 1);
+
+              // 5. Slow Drifting Shooting Star (Diagonal gliding streak)
+              let shootTime = Date.now() / 4000;
+              let shootX = (shootTime * 180) % (canvas.width + 250) - 100;
+              let shootY = 20 + (shootX * 0.25);
+              if (shootX > -50 && shootX < canvas.width + 50) {
+                let cometGrad = ctx.createLinearGradient(shootX, shootY, shootX - 35, shootY - 9);
+                cometGrad.addColorStop(0, "rgba(255, 255, 255, 0.85)");
+                cometGrad.addColorStop(0.3, "rgba(56, 189, 248, 0.4)");
+                cometGrad.addColorStop(1, "rgba(56, 189, 248, 0.0)");
+                ctx.strokeStyle = cometGrad;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(shootX, shootY);
+                ctx.lineTo(shootX - 35, shootY - 9);
+                ctx.stroke();
+              }
+
+        // 3. Layered Geometric Mountain Spires with Crisp Snowcaps
         ctx.strokeStyle = "#000000";
         ctx.lineWidth = penFar;
-        ctx.stroke();
-        ctx.fillStyle = "#ecf0f1";
-        ctx.lineWidth = penSky;
-        ctx.beginPath();
-        ctx.moveTo(100, 130);
-        ctx.lineTo(85, 145);
-        ctx.lineTo(115, 145);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(310, 110);
-        ctx.lineTo(290, 135);
-        ctx.lineTo(330, 135);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(580, 125);
-        ctx.lineTo(565, 140);
-        ctx.lineTo(595, 140);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = "#2c3e50";
-        ctx.beginPath();
-        ctx.moveTo(0, 230);
-        ctx.lineTo(150, 160);
-        ctx.lineTo(280, 230);
-        ctx.lineTo(440, 150);
-        ctx.lineTo(600, 230);
-        ctx.lineTo(700, 170);
-        ctx.lineTo(800, 230);
-        ctx.lineTo(0, 230);
-        ctx.closePath();
-        ctx.fill();
+        ctx.lineJoin = "round";
+
+        let drawGeometricPeak = (peakX, peakY, width, height) => {
+          // Base Mountain
+          ctx.fillStyle = "#1c233a";
+          ctx.beginPath();
+          ctx.moveTo(peakX - width, 230);
+          ctx.lineTo(peakX, peakY);
+          ctx.lineTo(peakX + width, 230);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Geometric Snowcap
+          let capHeight = height * 0.35;
+          let capY = peakY + capHeight;
+          let capLeftX = peakX - width * (capHeight / height);
+          let capRightX = peakX + width * (capHeight / height);
+
+          ctx.fillStyle = "#f8fafc";
+          ctx.beginPath();
+          ctx.moveTo(peakX, peakY);
+          ctx.lineTo(capRightX, capY);
+          ctx.lineTo(peakX + width * 0.1, capY + 3);
+          ctx.lineTo(peakX, capY - 2);
+          ctx.lineTo(peakX - width * 0.1, capY + 4);
+          ctx.lineTo(capLeftX, capY);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        };
+
+        drawGeometricPeak(150, 100, 140, 130);
+        drawGeometricPeak(520, 80, 160, 150);
+        drawGeometricPeak(330, 115, 120, 115);
+
+        // 4. Subtle Arctic Valley Fog
+        let fogGrad = ctx.createLinearGradient(0, 150, 0, 230);
+        fogGrad.addColorStop(0, "rgba(224, 242, 254, 0)");
+        fogGrad.addColorStop(1, "rgba(224, 242, 254, 0.08)");
+        ctx.fillStyle = fogGrad;
+        ctx.fillRect(0, 150, canvas.width, 80);
+
+        // 5. Clean, Non-distracting Ancient Ruins Pillars
+        ctx.fillStyle = "#111625";
         ctx.strokeStyle = "#000000";
         ctx.lineWidth = penFar;
-        ctx.stroke();
-        ctx.fillStyle = "#ecf0f1";
-        ctx.lineWidth = penSky;
+
+        let drawCleanPillar = (x, y, w, h) => {
+          ctx.beginPath();
+          ctx.rect(x, y, w, h);
+          ctx.fill();
+          ctx.stroke();
+
+          // Slabs
+          ctx.beginPath();
+          ctx.rect(x - 3, y, w + 6, 6);
+          ctx.fill();
+          ctx.stroke();
+
+          // Vertical fractures
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x + w / 2, y + 6);
+          ctx.lineTo(x + w / 2, y + h);
+          ctx.stroke();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penFar;
+        };
+
+        drawCleanPillar(45, 80, 18, 150);
+        drawCleanPillar(715, 95, 18, 135);
+
+        // 6. Crisp Geometric Glacial Ground Wall
+        let groundWallGrad = ctx.createLinearGradient(0, 180, 0, 230);
+        groundWallGrad.addColorStop(0, "#101b2b");
+        groundWallGrad.addColorStop(1, "#080d16");
+        ctx.fillStyle = groundWallGrad;
+
         ctx.beginPath();
-        ctx.moveTo(150, 160);
-        ctx.lineTo(135, 172);
-        ctx.lineTo(165, 172);
+        ctx.moveTo(0, 230);
+        ctx.lineTo(0, 185);
+        ctx.lineTo(220, 175);
+        ctx.lineTo(460, 188);
+        ctx.lineTo(620, 170);
+        ctx.lineTo(canvas.width, 185);
+        ctx.lineTo(canvas.width, 230);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
+
+        // Luminescent Ice Ledge Stroke
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 2.0;
         ctx.beginPath();
-        ctx.moveTo(440, 150);
-        ctx.lineTo(420, 165);
-        ctx.lineTo(460, 165);
-        ctx.closePath();
-        ctx.fill();
+        ctx.moveTo(0, 185);
+        ctx.lineTo(220, 175);
+        ctx.lineTo(460, 188);
+        ctx.lineTo(620, 170);
+        ctx.lineTo(canvas.width, 185);
         ctx.stroke();
+
+        // Fine White Ledge Highlight
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.0;
         ctx.beginPath();
-        ctx.moveTo(700, 170);
-        ctx.lineTo(685, 180);
-        ctx.lineTo(715, 180);
-        ctx.closePath();
-        ctx.fill();
+        ctx.moveTo(0, 184);
+        ctx.lineTo(220, 174);
+        ctx.lineTo(460, 187);
+        ctx.lineTo(620, 169);
+        ctx.lineTo(canvas.width, 184);
         ctx.stroke();
       } else if (tier === 2) {
         ctx.fillStyle = "rgba(230, 126, 34, 0.08)";
@@ -7188,192 +7432,452 @@
       } else {
         if (s.type === "tree") {
           let tx = s.x,
-            ty = s.y - 40 * ts;
+            ty = s.y - 68 * ts; // Raised canopy height from 40 to 68 to make trees towering!
           if (tier === 0) {
             if (s.seed < 0.35) {
-              // Oak Tree Canopy & Trunk Outlined
-              ctx.fillStyle = "#5c4033";
+              // --- THE ELDER OAK (Fantasy Stylized - Thick & Robust) ---
+              // Ancient thick trunk with root flares
+              ctx.fillStyle = "#3b220c"; // Rich warm bark
               ctx.beginPath();
-              ctx.rect(tx - 6 * ts, ty, 12 * ts, 40 * ts);
-              ctx.fill();
-              ctx.stroke();
-              ctx.fillStyle = "#3e2723";
-              ctx.beginPath();
-              ctx.rect(tx + 2 * ts, ty, 4 * ts, 40 * ts);
-              ctx.fill();
-              ctx.stroke();
-
-              ctx.fillStyle = "#165e34";
-              ctx.beginPath();
-              ctx.arc(tx, ty - 12 * ts, 24 * ts, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.stroke();
-              ctx.fillStyle = "#1e8449";
-              ctx.beginPath();
-              ctx.arc(tx - 10 * ts, ty - 5 * ts, 18 * ts, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.stroke();
-              ctx.beginPath();
-              ctx.arc(tx + 10 * ts, ty - 5 * ts, 18 * ts, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.stroke();
-              ctx.fillStyle = "#2ecc71";
-              ctx.beginPath();
-              ctx.arc(tx, ty - 18 * ts, 15 * ts, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.stroke();
-            } else if (s.seed < 0.7) {
-              // Spruce Tree Outlined
-              ctx.fillStyle = "#3d2a1d";
-              ctx.beginPath();
-              ctx.rect(tx - 4 * ts, ty, 8 * ts, 40 * ts);
-              ctx.fill();
-              ctx.stroke();
-
-              ctx.fillStyle = "#0e3a1d";
-              ctx.beginPath();
-              ctx.moveTo(tx - 25 * ts, ty + 15 * ts);
-              ctx.lineTo(tx, ty - 15 * ts);
-              ctx.lineTo(tx + 25 * ts, ty + 15 * ts);
+              ctx.moveTo(tx - 7 * ts, s.y);
+              ctx.lineTo(tx - 3.5 * ts, ty + 20 * ts);
+              // Left heavy fork
+              ctx.quadraticCurveTo(
+                tx - 12 * ts,
+                ty + 12 * ts,
+                tx - 18 * ts,
+                ty + 4 * ts,
+              );
+              ctx.lineTo(tx - 14 * ts, ty + 2 * ts);
+              ctx.quadraticCurveTo(tx - 4 * ts, ty + 10 * ts, tx, ty + 15 * ts);
+              // Right heavy fork
+              ctx.quadraticCurveTo(
+                tx + 4 * ts,
+                ty + 10 * ts,
+                tx + 14 * ts,
+                ty + 2 * ts,
+              );
+              ctx.lineTo(tx + 18 * ts, ty + 4 * ts);
+              ctx.quadraticCurveTo(
+                tx + 12 * ts,
+                ty + 12 * ts,
+                tx + 3.5 * ts,
+                ty + 20 * ts,
+              );
+              ctx.lineTo(tx + 7 * ts, s.y);
               ctx.closePath();
               ctx.fill();
               ctx.stroke();
-              ctx.fillStyle = "#145229";
-              ctx.beginPath();
-              ctx.moveTo(tx - 20 * ts, ty - 2 * ts);
-              ctx.lineTo(tx, ty - 25 * ts);
-              ctx.lineTo(tx + 20 * ts, ty - 2 * ts);
-              ctx.closePath();
-              ctx.fill();
-              ctx.stroke();
-              ctx.fillStyle = "#2ecc71";
-              ctx.beginPath();
-              ctx.moveTo(tx - 14 * ts, ty - 15 * ts);
-              ctx.lineTo(tx, ty - 32 * ts);
-              ctx.lineTo(tx + 14 * ts, ty - 15 * ts);
-              ctx.closePath();
-              ctx.fill();
-              ctx.stroke();
-            } else {
-              // Slender Aspen Outlined
-              ctx.fillStyle = "#dcdde1";
-              ctx.beginPath();
-              ctx.rect(tx - 3 * ts, ty - 15 * ts, 6 * ts, 55 * ts);
-              ctx.fill();
-              ctx.stroke();
-              ctx.fillStyle = "#2f3640";
-              ctx.beginPath();
-              ctx.rect(tx - 3 * ts, ty + 15 * ts, 3 * ts, 2);
-              ctx.fill();
-              ctx.stroke();
-              ctx.beginPath();
-              ctx.rect(tx, ty - 5 * ts, 3 * ts, 2);
-              ctx.fill();
-              ctx.stroke();
 
-              ctx.fillStyle = "#27ae60";
+              // Strong bark details
+              ctx.strokeStyle = "#1a0f07";
+              ctx.lineWidth = 1.8 * ts;
               ctx.beginPath();
-              ctx.ellipse(
-                tx,
-                ty - 20 * ts,
-                16 * ts,
-                22 * ts,
-                0,
-                0,
-                Math.PI * 2,
+              ctx.moveTo(tx - 2 * ts, s.y - 3 * ts);
+              ctx.quadraticCurveTo(
+                tx - 3 * ts,
+                ty + 30 * ts,
+                tx - 1 * ts,
+                ty + 22 * ts,
               );
-              ctx.fill();
+              ctx.moveTo(tx + 2 * ts, s.y - 8 * ts);
+              ctx.quadraticCurveTo(tx + 1 * ts, ty + 32 * ts, tx, ty + 24 * ts);
               ctx.stroke();
-              ctx.fillStyle = "#f1c40f";
-              ctx.beginPath();
-              ctx.ellipse(
-                tx - 6 * ts,
-                ty - 18 * ts,
-                10 * ts,
-                14 * ts,
-                0,
-                0,
-                Math.PI * 2,
-              );
-              ctx.fill();
-              ctx.stroke();
-              ctx.beginPath();
-              ctx.ellipse(
-                tx + 6 * ts,
-                ty - 24 * ts,
-                8 * ts,
-                12 * ts,
-                0,
-                0,
-                Math.PI * 2,
-              );
-              ctx.fill();
-              ctx.stroke();
-            }
+              ctx.strokeStyle = "#000000"; // reset
+              ctx.lineWidth = penBgScenery * ts;
 
-            // Draw a detailed procedural cobweb clinging to the trunk branches inside the Tier 0 scope
-            if (s.seed < 0.45) {
-              ctx.save();
-              ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
-              ctx.lineWidth = 0.8;
-              let webX = tx + (s.seed > 0.22 ? -15 : 15) * ts;
-              let webY = ty - 12 * ts;
-              let webRad = 22 * ts;
-              let lines = 6;
-              for (let j = 0; j < lines; j++) {
-                let angle =
-                  (j * Math.PI) / (lines - 1) + (s.seed > 0.2 ? Math.PI : 0);
-                ctx.beginPath();
-                ctx.moveTo(webX, webY);
-                ctx.lineTo(
-                  webX + Math.cos(angle) * webRad,
-                  webY + Math.sin(angle) * webRad,
+              // Leafy Canopy Clumps (Thicker, overlapping foliage clouds)
+              let drawCanopyClump = (cx, cy, r, c1, c2) => {
+                let foliageGrad = ctx.createRadialGradient(
+                  cx - r * 0.3,
+                  cy - r * 0.3,
+                  1,
+                  cx,
+                  cy,
+                  r,
                 );
-                ctx.stroke();
-              }
-              for (let rVal = 5; rVal <= webRad; rVal += 5) {
+                foliageGrad.addColorStop(0, c1);
+                foliageGrad.addColorStop(1, c2);
+                ctx.fillStyle = foliageGrad;
                 ctx.beginPath();
-                for (let j = 0; j < lines; j++) {
-                  let angle =
-                    (j * Math.PI) / (lines - 1) + (s.seed > 0.2 ? Math.PI : 0);
-                  let px = webX + Math.cos(angle) * rVal;
-                  let py = webY + Math.sin(angle) * rVal;
-                  if (j === 0) ctx.moveTo(px, py);
-                  else ctx.lineTo(px, py);
-                }
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.stroke();
-              }
-              ctx.restore();
-            }
-          } else if (tier === 1) {
-            if (s.seed < 0.5) {
-              ctx.strokeStyle = "#34495e";
-              ctx.lineWidth = 4 * ts;
+              };
+
+              // Base depth layers (Large and voluminous)
+              drawCanopyClump(tx, ty - 12 * ts, 36 * ts, "#123318", "#081d0c");
+              drawCanopyClump(
+                tx - 22 * ts,
+                ty - 2 * ts,
+                28 * ts,
+                "#123318",
+                "#081d0c",
+              );
+              drawCanopyClump(
+                tx + 22 * ts,
+                ty - 2 * ts,
+                28 * ts,
+                "#123318",
+                "#081d0c",
+              );
+
+              // Mid-green body
+              drawCanopyClump(tx, ty - 18 * ts, 30 * ts, "#1e8449", "#114620");
+              drawCanopyClump(
+                tx - 16 * ts,
+                ty - 6 * ts,
+                22 * ts,
+                "#1e8449",
+                "#114620",
+              );
+              drawCanopyClump(
+                tx + 16 * ts,
+                ty - 6 * ts,
+                22 * ts,
+                "#1e8449",
+                "#114620",
+              );
+
+              // High-fidelity highlights
+              drawCanopyClump(
+                tx - 8 * ts,
+                ty - 24 * ts,
+                16 * ts,
+                "#58d68d",
+                "#145a32",
+              );
+              drawCanopyClump(
+                tx + 8 * ts,
+                ty - 24 * ts,
+                16 * ts,
+                "#58d68d",
+                "#145a32",
+              );
+            } else if (s.seed < 0.7) {
+              // --- HIGHLAND SPRUCE (Dense, Wide, & Majestic) ---
+              // Sturdy thick trunk
+              ctx.fillStyle = "#2d1a04";
               ctx.beginPath();
-              ctx.moveTo(tx, 230);
-              ctx.lineTo(tx, ty + 10 * ts);
+              ctx.rect(tx - 4 * ts, ty + 10 * ts, 8 * ts, s.y - (ty + 10 * ts));
+              ctx.fill();
+              ctx.stroke();
+
+              // Wide scalloped boughs (Overlapping dense pine layers)
+              let drawPineBough = (by, w, h, c1, c2) => {
+                ctx.save();
+                let boughGrad = ctx.createLinearGradient(
+                  tx - w,
+                  by,
+                  tx + w,
+                  by + h,
+                );
+                boughGrad.addColorStop(0, c1);
+                boughGrad.addColorStop(1, c2);
+                ctx.fillStyle = boughGrad;
+
+                ctx.beginPath();
+                ctx.moveTo(tx, by);
+                ctx.lineTo(tx + w, by + h);
+                // Beautiful scalloped branch needles
+                let toothCount = 7;
+                for (let i = 0; i <= toothCount; i++) {
+                  let ratio = i / toothCount;
+                  let kx = tx + w - ratio * w * 2;
+                  let ky =
+                    by +
+                    h -
+                    Math.sin(ratio * Math.PI) * (h * 0.2) +
+                    (i % 2 === 0 ? 3 * ts : -2 * ts);
+                  ctx.lineTo(kx, ky);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+              };
+
+              // Tier 1 (Fat Base)
+              drawPineBough(
+                ty + 15 * ts,
+                38 * ts,
+                20 * ts,
+                "#11381c",
+                "#051308",
+              );
+              // Tier 2 (Lower Mid)
+              drawPineBough(
+                ty - 2 * ts,
+                30 * ts,
+                16 * ts,
+                "#195c2b",
+                "#09240f",
+              );
+              // Tier 3 (Upper Mid)
+              drawPineBough(
+                ty - 16 * ts,
+                22 * ts,
+                13 * ts,
+                "#228b22",
+                "#0c3b17",
+              );
+              // Tier 4 (Top Spire)
+              drawPineBough(
+                ty - 28 * ts,
+                14 * ts,
+                11 * ts,
+                "#58d68d",
+                "#145229",
+              );
+
+              // Hanging pine cones (Earthy brown droplets)
+              ctx.fillStyle = "#5c3a21";
+              let drawPineCone = (cx, cy) => {
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, 2.2 * ts, 4.2 * ts, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+              };
+              drawPineCone(tx - 18 * ts, ty + 28 * ts);
+              drawPineCone(tx + 18 * ts, ty + 28 * ts);
+              drawPineCone(tx - 12 * ts, ty + 10 * ts);
+              drawPineCone(tx + 12 * ts, ty + 10 * ts);
+            } else {
+              // --- GOLDEN WHISPERING ASPEN (Fluffy Gold Clouds) ---
+              // Thicker white birch trunk with characteristic bark eye knots
+              ctx.fillStyle = "#f1f5f9"; // Solid slate white
+              ctx.beginPath();
+              ctx.rect(tx - 3 * ts, ty - 15 * ts, 6 * ts, s.y - (ty - 15 * ts));
+              ctx.fill();
+              ctx.stroke();
+
+              // Black birch knots
+              ctx.fillStyle = "#1e293b";
+              for (let kY = ty - 10 * ts; kY < s.y - 10 * ts; kY += 14 * ts) {
+                ctx.beginPath();
+                ctx.ellipse(
+                  tx - 3 * ts,
+                  kY,
+                  2.5 * ts,
+                  1.2 * ts,
+                  0,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.ellipse(
+                  tx + 3 * ts,
+                  kY + 7 * ts,
+                  2.5 * ts,
+                  1.2 * ts,
+                  0,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.fill();
+              }
+
+              // Main branches reaching up into the canopy
+              ctx.strokeStyle = "#475569";
+              ctx.lineWidth = 1.8 * ts;
+              ctx.beginPath();
+              ctx.moveTo(tx, ty - 5 * ts);
               ctx.quadraticCurveTo(
                 tx - 10 * ts,
-                ty,
-                tx - 18 * ts,
-                ty - 10 * ts,
+                ty - 15 * ts,
+                tx - 16 * ts,
+                ty - 24 * ts,
               );
-              ctx.moveTo(tx, ty + 15 * ts);
+              ctx.moveTo(tx, ty - 10 * ts);
               ctx.quadraticCurveTo(
-                tx + 8 * ts,
-                ty + 5 * ts,
-                tx + 14 * ts,
-                ty - 5 * ts,
+                tx + 10 * ts,
+                ty - 20 * ts,
+                tx + 16 * ts,
+                ty - 28 * ts,
               );
               ctx.stroke();
-            } else {
-              ctx.fillStyle = "#2c3e50";
+              ctx.strokeStyle = "#000000"; // reset
+              ctx.lineWidth = penBgScenery * ts;
+
+              // High-fidelity layered autumn cloud clusters (Matches the cozy Oak styling!)
+              let drawAspenClump = (cx, cy, r, c1, c2) => {
+                let foliageGrad = ctx.createRadialGradient(
+                  cx - r * 0.3,
+                  cy - r * 0.3,
+                  1,
+                  cx,
+                  cy,
+                  r,
+                );
+                foliageGrad.addColorStop(0, c1);
+                foliageGrad.addColorStop(1, c2);
+                ctx.fillStyle = foliageGrad;
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+              };
+
+              // Base Warm Amber Layer
+              drawAspenClump(tx, ty - 14 * ts, 30 * ts, "#d35400", "#7e2200");
+              drawAspenClump(
+                tx - 18 * ts,
+                ty - 6 * ts,
+                22 * ts,
+                "#d35400",
+                "#7e2200",
+              );
+              drawAspenClump(
+                tx + 18 * ts,
+                ty - 6 * ts,
+                22 * ts,
+                "#d35400",
+                "#7e2200",
+              );
+
+              // Bright Golden-Orange Mid-Layer
+              drawAspenClump(tx, ty - 20 * ts, 24 * ts, "#f39c12", "#ca6f1e");
+              drawAspenClump(
+                tx - 14 * ts,
+                ty - 10 * ts,
+                18 * ts,
+                "#f39c12",
+                "#ca6f1e",
+              );
+              drawAspenClump(
+                tx + 14 * ts,
+                ty - 10 * ts,
+                18 * ts,
+                "#f39c12",
+                "#ca6f1e",
+              );
+
+              // Sun-kissed Yellow Highlights
+              drawAspenClump(
+                tx - 6 * ts,
+                ty - 26 * ts,
+                13 * ts,
+                "#f9e79f",
+                "#f1c40f",
+              );
+              drawAspenClump(
+                tx + 6 * ts,
+                ty - 26 * ts,
+                13 * ts,
+                "#f9e79f",
+                "#f1c40f",
+              );
+            }
+          } else if (tier === 1) {
+            if (s.seed < 0.55) {
+              // --- FROZEN ALPINE SPRUCE (Snow-covered evergreens) ---
+              ctx.fillStyle = "#1c0d02"; // Dark wood
               ctx.beginPath();
-              ctx.moveTo(tx - 15 * ts, 230);
-              ctx.lineTo(tx, ty - 10 * ts);
-              ctx.lineTo(tx + 15 * ts, 230);
+              ctx.rect(tx - 3 * ts, ty + 10 * ts, 6 * ts, s.y - (ty + 10 * ts));
               ctx.fill();
               ctx.stroke();
+
+              let drawSnowyBough = (by, w, h, foliageColor, snowColor) => {
+                ctx.save();
+                // 1. Dark Pine Needles Base
+                ctx.fillStyle = foliageColor;
+                ctx.beginPath();
+                ctx.moveTo(tx, by);
+                ctx.lineTo(tx + w, by + h);
+                let toothCount = 5;
+                for (let i = 0; i <= toothCount; i++) {
+                  let ratio = i / toothCount;
+                  let kx = tx + w - ratio * w * 2;
+                  let ky =
+                    by +
+                    h -
+                    Math.sin(ratio * Math.PI) * (h * 0.2) +
+                    (i % 2 === 0 ? 2 * ts : -2 * ts);
+                  ctx.lineTo(kx, ky);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // 2. Thick Snow Blanket overlay
+                ctx.fillStyle = snowColor;
+                ctx.beginPath();
+                ctx.moveTo(tx, by);
+                ctx.lineTo(tx + w * 0.8, by + h * 0.8);
+                ctx.quadraticCurveTo(
+                  tx,
+                  by + h * 0.4,
+                  tx - w * 0.8,
+                  by + h * 0.8,
+                );
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+              };
+
+              // 4 Overlapping thick snow layers
+              drawSnowyBough(
+                ty + 15 * ts,
+                32 * ts,
+                16 * ts,
+                "#09240f",
+                "#cbd5e1",
+              ); // bottom shadow
+              drawSnowyBough(
+                ty + 13 * ts,
+                28 * ts,
+                14 * ts,
+                "#0c3b17",
+                "#ffffff",
+              ); // bottom snow
+              drawSnowyBough(
+                ty - 2 * ts,
+                22 * ts,
+                12 * ts,
+                "#0c3b17",
+                "#cbd5e1",
+              ); // mid shadow
+              drawSnowyBough(
+                ty - 4 * ts,
+                18 * ts,
+                10 * ts,
+                "#1a5e2f",
+                "#ffffff",
+              ); // mid snow
+              drawSnowyBough(
+                ty - 16 * ts,
+                12 * ts,
+                8 * ts,
+                "#1a5e2f",
+                "#ffffff",
+              ); // top
+            } else {
+              // --- FROZEN DECIDUOUS LARCH ---
+              ctx.fillStyle = "#1c0d02";
+              ctx.beginPath();
+              ctx.moveTo(tx - 2 * ts, s.y);
+              ctx.lineTo(tx - 0.5 * ts, ty + 10 * ts);
+              ctx.quadraticCurveTo(tx - 8 * ts, ty, tx - 14 * ts, ty - 10 * ts);
+              ctx.moveTo(tx + 2 * ts, s.y);
+              ctx.lineTo(tx + 0.5 * ts, ty + 10 * ts);
+              ctx.quadraticCurveTo(tx + 8 * ts, ty, tx + 14 * ts, ty - 10 * ts);
+              ctx.stroke();
+              ctx.fill();
+
+              // Ice-crystals clumps on branches
+              let drawIceSpire = (ix, iy, r) => {
+                let grad = ctx.createRadialGradient(ix, iy, 1, ix, iy, r);
+                grad.addColorStop(0, "#ffffff");
+                grad.addColorStop(1, "rgba(56, 189, 248, 0.65)");
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(ix, iy, r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+              };
+              drawIceSpire(tx - 14 * ts, ty - 10 * ts, 8 * ts);
+              drawIceSpire(tx + 14 * ts, ty - 10 * ts, 8 * ts);
+              drawIceSpire(tx, ty + 5 * ts, 10 * ts);
             }
           } else if (tier === 2) {
             if (s.seed < 0.5) {
@@ -7524,35 +8028,61 @@
             }
           } else if (tier === 1) {
             if (s.seed < 0.5) {
-              ctx.fillStyle = "#5d6d7e";
+              // --- ANCIENT ALPS STONE ARCHWAY ---
+              ctx.fillStyle = "#334155"; // Grey slate
+              // Left Pillar
               ctx.beginPath();
-              ctx.roundRect(bx - 16 * bs, by - 12 * bs, 32 * bs, 12 * bs, [
-                4 * bs,
-                4 * bs,
-                0,
-                0,
+              ctx.rect(bx - 14 * bs, by - 24 * bs, 6 * bs, 24 * bs);
+              ctx.fill();
+              ctx.stroke();
+              // Right Pillar
+              ctx.beginPath();
+              ctx.rect(bx + 8 * bs, by - 24 * bs, 6 * bs, 24 * bs);
+              ctx.fill();
+              ctx.stroke();
+              // Lintel arch brick
+              ctx.fillStyle = "#475569";
+              ctx.beginPath();
+              ctx.roundRect(bx - 18 * bs, by - 30 * bs, 36 * bs, 7 * bs, [
+                2 * bs,
               ]);
               ctx.fill();
               ctx.stroke();
+
+              // ICICLES hanging from archway
+              ctx.fillStyle = "rgba(209, 250, 255, 0.7)";
+              ctx.strokeStyle = "#475569";
+              ctx.lineWidth = 0.8;
+              let drawIcicle = (ix, iy, ih) => {
+                ctx.beginPath();
+                ctx.moveTo(ix - 1.5 * bs, iy);
+                ctx.lineTo(ix, iy + ih * bs);
+                ctx.lineTo(ix + 1.5 * bs, iy);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+              };
+              drawIcicle(bx - 6 * bs, by - 23 * bs, 6);
+              drawIcicle(bx + 4 * bs, by - 23 * bs, 8);
+              drawIcicle(bx - 12 * bs, by - 23 * bs, 5);
+              ctx.lineWidth = penBgScenery * bs; // reset
             } else {
-              ctx.fillStyle = "#47525e";
+              // --- ANCIENT FALLEN OBELISK ---
+              ctx.fillStyle = "#1e293b"; // Dark slate
               ctx.beginPath();
-              ctx.arc(bx, by, 12 * bs, 0, Math.PI * 2);
+              ctx.rect(bx - 10 * bs, by - 6 * bs, 20 * bs, 6 * bs);
               ctx.fill();
               ctx.stroke();
-              ctx.fillStyle = "#27ae60";
+
+              ctx.save();
+              ctx.translate(bx, by - 6 * bs);
+              ctx.rotate(0.35 + s.seed * 0.4);
+              ctx.fillStyle = "#334155";
               ctx.beginPath();
-              ctx.ellipse(
-                bx - 3 * bs,
-                by - 6 * bs,
-                8 * bs,
-                4 * bs,
-                0,
-                0,
-                Math.PI * 2,
-              );
+              ctx.rect(-6 * bs, -15 * bs, 12 * bs, 15 * bs);
               ctx.fill();
               ctx.stroke();
+              ctx.restore();
             }
           } else if (tier === 2) {
             if (s.seed < 0.5) {
@@ -7835,37 +8365,47 @@
           ctx.fill();
         }
       } else if (tier === 1) {
+        // Thick snow-tundra ground fill
         let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
-        groundGrad.addColorStop(0, "#2c3e50");
-        groundGrad.addColorStop(1, "#111a24");
+        groundGrad.addColorStop(0, "#f8fafc"); // Pristine snow surface
+        groundGrad.addColorStop(0.15, "#cbd5e1"); // Shadow snow layer
+        groundGrad.addColorStop(1, "#1e293b"); // Deep frozen slate base
         ctx.fillStyle = groundGrad;
         ctx.fillRect(0, 230, canvas.width, 90);
-        ctx.strokeStyle = "rgba(52, 152, 219, 0.4)";
-        ctx.shadowColor = "#3498db";
+
+        // Wind-swept horizontal snow drift patterns
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
         ctx.lineWidth = 1.5;
+        for (let i = -120; i < canvas.width + 120; i += 120) {
+          let gx = i - ((window.groundScroll + totalShift) % 120);
+          ctx.beginPath();
+          ctx.moveTo(gx, 250);
+          ctx.quadraticCurveTo(gx + 30, 255, gx + 60, 250);
+          ctx.stroke();
+        }
+
+        // Glacial blue ice cracks deep under snow
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 1.0;
         for (let i = -160; i < canvas.width + 160; i += 160) {
-          ctx.save();
           let gx = i - ((window.groundScroll + totalShift) % 160);
-          ctx.shadowBlur = Math.sin(Date.now() / 180 + i) * 5 + 5;
           ctx.beginPath();
-          ctx.moveTo(gx, 238);
-          ctx.lineTo(gx + 30, 255);
-          ctx.lineTo(gx + 10, 285);
-          ctx.lineTo(gx + 80, 295);
-          ctx.stroke();
-          ctx.restore();
-        }
-        ctx.strokeStyle = "#1a252f";
-        ctx.lineWidth = 1.5;
-        for (let i = -100; i < canvas.width + 100; i += 100) {
-          let gx = i - ((window.groundScroll + totalShift) % 100);
-          ctx.beginPath();
-          ctx.moveTo(gx, 230);
-          ctx.quadraticCurveTo(gx + 50, 260, gx + 100, 230);
-          ctx.moveTo(gx + 20, 260);
-          ctx.lineTo(gx - 30, 300);
+          ctx.moveTo(gx, 265);
+          ctx.lineTo(gx + 12, 285);
+          ctx.lineTo(gx - 4, 310);
           ctx.stroke();
         }
+
+        // Horizon snow drift fluff sitting on the border
+        ctx.fillStyle = "#f8fafc";
+        ctx.beginPath();
+        ctx.moveTo(0, 230);
+        for (let x = 0; x < canvas.width + 20; x += 20) {
+          ctx.quadraticCurveTo(x - 10, 230 - 3, x, 230);
+        }
+        ctx.lineTo(canvas.width, 230);
+        ctx.closePath();
+        ctx.fill();
       } else if (tier === 2) {
         let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
         groundGrad.addColorStop(0, "#1a0805");
@@ -8264,61 +8804,121 @@
       } else {
         if (tier === 0) {
           if (s.type === "grass") {
-            ctx.fillStyle = "#2ecc71";
-            let sway = Math.sin(Date.now() / 250 + s.seed * 100) * 4 * ss;
+            let sway = Math.sin(Date.now() / 220 + s.seed * 80) * 3.5 * ss;
+
+            // 1. Shadow grass blades in background (Darker forest green)
+            ctx.fillStyle = "#1e4620";
             ctx.beginPath();
-            ctx.moveTo(sx, sy);
+            // Back blade 1
+            ctx.moveTo(sx - 2 * ss, sy);
             ctx.quadraticCurveTo(
-              sx - 3 * ss + sway,
-              sy - 15 * ss,
-              sx - 8 * ss + sway,
-              sy - 22 * ss,
+              sx - 6 * ss + sway,
+              sy - 14 * ss,
+              sx - 11 * ss + sway,
+              sy - 19 * ss,
             );
             ctx.quadraticCurveTo(
               sx - 2 * ss + sway,
-              sy - 10 * ss,
+              sy - 8 * ss,
               sx + 2 * ss,
               sy,
             );
+            // Back blade 2
             ctx.moveTo(sx + 3 * ss, sy);
             ctx.quadraticCurveTo(
+              sx + 8 * ss + sway,
+              sy - 16 * ss,
               sx + 5 * ss + sway,
-              sy - 18 * ss,
-              sx + 2 * ss + sway,
-              sy - 26 * ss,
+              sy - 23 * ss,
             );
             ctx.quadraticCurveTo(
-              sx + 7 * ss + sway,
-              sy - 12 * ss,
-              sx + 8 * ss,
+              sx + 8 * ss + sway,
+              sy - 10 * ss,
+              sx + 7 * ss,
               sy,
             );
             ctx.fill();
             ctx.stroke();
-          } else if (s.type === "flower") {
-            let swayF = Math.sin(Date.now() / 200 + s.seed * 100) * 3 * ss;
-            let fx = sx + swayF,
-              fy = sy - 14 * ss;
-            ctx.fillStyle = "#27ae60";
+
+            // 2. Main foreground grass blades (Vibrant meadow green)
+            ctx.fillStyle = "#2ecc71";
             ctx.beginPath();
-            ctx.rect(sx - 1 * ss, sy - 14 * ss, 2 * ss, 14 * ss);
+            // Center tall blade
+            ctx.moveTo(sx - 1 * ss, sy);
+            ctx.quadraticCurveTo(
+              sx + sway * 0.7,
+              sy - 18 * ss,
+              sx - 2 * ss + sway,
+              sy - 25 * ss,
+            );
+            ctx.quadraticCurveTo(
+              sx + 1 * ss + sway * 0.5,
+              sy - 12 * ss,
+              sx + 3 * ss,
+              sy,
+            );
+            // Left blade
+            ctx.moveTo(sx - 4 * ss, sy);
+            ctx.quadraticCurveTo(
+              sx - 8 * ss + sway * 1.2,
+              sy - 10 * ss,
+              sx - 12 * ss + sway * 1.2,
+              sy - 13 * ss,
+            );
+            ctx.quadraticCurveTo(
+              sx - 5 * ss + sway,
+              sy - 5 * ss,
+              sx - 1 * ss,
+              sy,
+            );
             ctx.fill();
             ctx.stroke();
+
+            // 3. Tiny Clover Leaves at the Base (Adds lovely high-fidelity details!)
+            ctx.fillStyle = "#27ae60";
+            let drawCloverLeaf = (cx, cy, r) => {
+              ctx.beginPath();
+              ctx.arc(cx - r * 0.5, cy, r, 0, Math.PI * 2);
+              ctx.arc(cx + r * 0.5, cy, r, 0, Math.PI * 2);
+              ctx.arc(cx, cy - r * 0.5, r, 0, Math.PI * 2);
+              ctx.closePath();
+              ctx.fill();
+              ctx.stroke();
+            };
+            drawCloverLeaf(sx - 5 * ss, sy - 2 * ss, 2 * ss);
+            drawCloverLeaf(sx + 6 * ss, sy - 3 * ss, 1.8 * ss);
+          } else if (s.type === "flower") {
+            let swayF = Math.sin(Date.now() / 200 + s.seed * 100) * 3 * ss;
+            let fx = sx + swayF;
+            let fy = sy - 16 * ss;
+
+            // 1. Organic curving stem (Green vines)
+            ctx.strokeStyle = "#1b5e20";
+            ctx.lineWidth = 1.8 * ss;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.quadraticCurveTo(sx + swayF * 0.5, sy - 8 * ss, fx, fy);
+            ctx.stroke();
+            ctx.strokeStyle = "#000000"; // reset
+            ctx.lineWidth = penFgScenery * ss;
+
+            // Delicate pointed stem leaves
+            ctx.fillStyle = "#27ae60";
             ctx.beginPath();
             ctx.ellipse(
-              sx - 4 * ss,
+              sx - 2 * ss + swayF * 0.3,
               sy - 6 * ss,
-              4 * ss,
+              5 * ss,
               2 * ss,
               Math.PI / 4,
               0,
               Math.PI * 2,
             );
             ctx.ellipse(
-              sx + 4 * ss,
+              sx + 2 * ss + swayF * 0.4,
               sy - 10 * ss,
-              4 * ss,
-              2 * ss,
+              4.5 * ss,
+              1.8 * ss,
               -Math.PI / 4,
               0,
               Math.PI * 2,
@@ -8326,109 +8926,250 @@
             ctx.fill();
             ctx.stroke();
 
-            ctx.fillStyle = s.color;
+            // 2. Layered Blooming Flower Head (Swaying with the stem)
+            // Shadow/Base Petal ring
+            ctx.fillStyle = "#7e1b1b"; // Dark contrast base
             for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 3) {
               ctx.beginPath();
               ctx.arc(
-                fx + Math.cos(angle) * 5 * ss,
-                fy + Math.sin(angle) * 5 * ss,
-                4 * ss,
+                fx + Math.cos(angle) * 6 * ss,
+                fy + Math.sin(angle) * 6 * ss,
+                5 * ss,
                 0,
                 Math.PI * 2,
               );
               ctx.fill();
               ctx.stroke();
             }
-            ctx.fillStyle = "#f1c40f";
+
+            // Bright Colorful Main Petals
+            ctx.fillStyle = s.color;
+            for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 3) {
+              ctx.beginPath();
+              ctx.arc(
+                fx + Math.cos(angle) * 5 * ss,
+                fy + Math.sin(angle) * 5 * ss,
+                4.2 * ss,
+                0,
+                Math.PI * 2,
+              );
+              ctx.fill();
+              ctx.stroke();
+            }
+
+            // Glowing Golden Flower Center Core
+            let centerGrad = ctx.createRadialGradient(
+              fx - 1 * ss,
+              fy - 1 * ss,
+              0.5,
+              fx,
+              fy,
+              4 * ss,
+            );
+            centerGrad.addColorStop(0, "#ffffff");
+            centerGrad.addColorStop(0.4, "#f1c40f");
+            centerGrad.addColorStop(1, "#ca8a04");
+            ctx.fillStyle = centerGrad;
             ctx.beginPath();
-            ctx.arc(fx, fy, 3.5 * ss, 0, Math.PI * 2);
+            ctx.arc(fx, fy, 4 * ss, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
           } else {
             if (s.seed < 0.5) {
-              ctx.fillStyle = "#196f3d";
+              // Majestic layered default bush (Larger, more voluminous!)
+              ctx.fillStyle = "#14421e"; // Deep shadow base
               ctx.beginPath();
-              ctx.arc(sx, sy - 10 * ss, 16 * ss, 0, Math.PI * 2);
-              ctx.arc(sx - 12 * ss, sy - 6 * ss, 12 * ss, 0, Math.PI * 2);
-              ctx.arc(sx + 12 * ss, sy - 6 * ss, 12 * ss, 0, Math.PI * 2);
+              ctx.arc(sx, sy - 12 * ss, 22 * ss, 0, Math.PI * 2);
+              ctx.arc(sx - 16 * ss, sy - 8 * ss, 16 * ss, 0, Math.PI * 2);
+              ctx.arc(sx + 16 * ss, sy - 8 * ss, 16 * ss, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+
+              ctx.fillStyle = "#196f3d"; // Bright highlight layer
+              ctx.beginPath();
+              ctx.arc(sx, sy - 14 * ss, 16 * ss, 0, Math.PI * 2);
+              ctx.arc(sx - 11 * ss, sy - 10 * ss, 12 * ss, 0, Math.PI * 2);
+              ctx.arc(sx + 11 * ss, sy - 10 * ss, 12 * ss, 0, Math.PI * 2);
               ctx.fill();
               ctx.stroke();
             } else {
-              ctx.fillStyle = "#1e824c";
-              for (let i = 0; i < 4; i++) {
-                let curve = Math.sin(Date.now() / 180 + s.seed * 50 + i) * 3;
+              if (s.seed < 0.75) {
+                // --- PREMIUM WILD BERRY BUSH (Scaled up & layered) ---
+                let bx = sx,
+                  by = sy,
+                  bs = ss * 1.35; // Expanded volume scale factor
+                // Base dark foliage layer
+                ctx.fillStyle = "#144222";
                 ctx.beginPath();
-                ctx.moveTo(sx - 6 + i * 4, sy);
-                ctx.quadraticCurveTo(
-                  sx + curve,
-                  sy - 25 * ss,
-                  sx - 10 + i * 6 + curve,
-                  sy - 28 * ss,
-                );
-                ctx.quadraticCurveTo(sx + curve, sy - 10, sx + 6, sy);
+                ctx.arc(bx, by - 6 * bs, 16 * bs, 0, Math.PI * 2);
+                ctx.arc(bx - 10 * bs, by - 2 * bs, 11 * bs, 0, Math.PI * 2);
+                ctx.arc(bx + 10 * bs, by - 2 * bs, 11 * bs, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
+
+                // Highlight leafy layer
+                ctx.fillStyle = "#2ecc71";
+                ctx.beginPath();
+                ctx.arc(bx - 3 * bs, by - 8 * bs, 11 * bs, 0, Math.PI * 2);
+                ctx.arc(bx + 3 * bs, by - 6 * bs, 10 * bs, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Glowing Wild Berries (Ruby red circles with specular highlights!)
+                ctx.fillStyle = "#ef4444";
+                let drawBerry = (bxOffset, byOffset, br) => {
+                  ctx.beginPath();
+                  ctx.arc(
+                    bx + bxOffset * bs,
+                    by + byOffset * bs,
+                    br * bs,
+                    0,
+                    Math.PI * 2,
+                  );
+                  ctx.fill();
+                  ctx.stroke();
+                  ctx.fillStyle = "#fff";
+                  ctx.beginPath();
+                  ctx.arc(
+                    bx + (bxOffset - 0.5) * bs,
+                    by + (byOffset - 0.5) * bs,
+                    br * 0.3 * bs,
+                    0,
+                    Math.PI * 2,
+                  );
+                  ctx.fill();
+                  ctx.fillStyle = "#ef4444"; // reset
+                };
+                drawBerry(-8, -6, 2.2);
+                drawBerry(6, -8, 2.5);
+                drawBerry(-2, -2, 2.0);
+                drawBerry(8, -1, 2.2);
+              } else {
+                // --- PREMIUM WILD FERNS / LEAFY SHRUBS (Scaled up & dense) ---
+                ctx.fillStyle = "#1e824c";
+                let fs = ss * 1.35; // Expanded height scale factor
+                for (let i = 0; i < 4; i++) {
+                  let curve = Math.sin(Date.now() / 180 + s.seed * 50 + i) * 3;
+                  ctx.beginPath();
+                  ctx.moveTo(sx - 8 + i * 5, sy);
+                  ctx.quadraticCurveTo(
+                    sx + curve,
+                    sy - 28 * fs,
+                    sx - 12 + i * 8 + curve,
+                    sy - 32 * fs,
+                  );
+                  ctx.quadraticCurveTo(sx + curve, sy - 12, sx + 8, sy);
+                  ctx.fill();
+                  ctx.stroke();
+                }
               }
-            }
-
-            // Nested glistening spider egg sacs inside the foreground bushes of Tier 0
-            if (s.seed < 0.4) {
-              ctx.save();
-              // Glistening cobwebs anchoring the egg cluster
-              ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
-              ctx.lineWidth = 0.8;
-              ctx.beginPath();
-              ctx.moveTo(sx - 8 * ss, sy - 10 * ss);
-              ctx.lineTo(sx + 8 * ss, sy - 4 * ss);
-              ctx.moveTo(sx - 4 * ss, sy - 16 * ss);
-              ctx.lineTo(sx + 4 * ss, sy - 2 * ss);
-              ctx.stroke();
-
-              // Silk-wrapped egg sac cluster (3 small overlapping textured orbs)
-              ctx.fillStyle = "rgba(240, 240, 245, 0.9)";
-              ctx.strokeStyle = "#150802";
-              ctx.lineWidth = 1.0;
-              ctx.beginPath();
-              ctx.arc(sx - 2 * ss, sy - 10 * ss, 3.5 * ss, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.stroke();
-              ctx.beginPath();
-              ctx.arc(sx + 2 * ss, sy - 8 * ss, 3.2 * ss, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.stroke();
-              ctx.beginPath();
-              ctx.arc(sx, sy - 13 * ss, 2.8 * ss, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.stroke();
-              ctx.restore();
             }
           }
         } else if (tier === 1) {
           if (s.type === "grass") {
-            ctx.fillStyle = "#7f8c8d";
+            // --- COZY FROST-BITTEN ALPINE GRASS ---
+            let sway = Math.sin(Date.now() / 200 + s.seed * 50) * 2 * ss;
+            // Dark frozen backing blade
+            ctx.fillStyle = "#1e293b";
             ctx.beginPath();
-            ctx.arc(sx, sy - 2 * ss, 4 * ss, 0, Math.PI * 2);
+            ctx.moveTo(sx - 3 * ss, sy);
+            ctx.quadraticCurveTo(
+              sx - 5 * ss + sway,
+              sy - 14 * ss,
+              sx - 9 * ss + sway,
+              sy - 18 * ss,
+            );
+            ctx.quadraticCurveTo(
+              sx - 1 * ss + sway,
+              sy - 8 * ss,
+              sx + 2 * ss,
+              sy,
+            );
             ctx.fill();
             ctx.stroke();
-          } else if (s.type === "flower") {
-            ctx.fillStyle = "#7f8c8d";
-            ctx.strokeStyle = "#5d6d7e";
-            ctx.lineWidth = 1;
+
+            // Light blue/teal frost blade
+            ctx.fillStyle = "#93c5fd"; // Soft ice blue
             ctx.beginPath();
-            ctx.moveTo(sx, sy);
-            ctx.lineTo(sx - 10 * ss, sy - 12 * ss);
-            ctx.lineTo(sx + 10 * ss, sy - 12 * ss);
+            ctx.moveTo(sx - 1 * ss, sy);
+            ctx.quadraticCurveTo(
+              sx + sway,
+              sy - 16 * ss,
+              sx - 3 * ss + sway,
+              sy - 21 * ss,
+            );
+            ctx.quadraticCurveTo(
+              sx + 1 * ss + sway,
+              sy - 10 * ss,
+              sx + 3 * ss,
+              sy,
+            );
+            ctx.fill();
+            ctx.stroke();
+
+            // Tiny white snowcap on the grass tip
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(sx - 3 * ss + sway, sy - 21 * ss, 2 * ss, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (s.type === "flower") {
+            // --- GLACIAL FROST CRYSTAL ---
+            let hover = Math.sin(Date.now() / 250 + s.seed * 100) * 3 * ss;
+            let cx = sx,
+              cy = sy - 12 * ss + hover;
+
+            ctx.save();
+            ctx.shadowBlur = 10 * ss;
+            ctx.shadowColor = "#38bdf8";
+
+            // Translucent outer blue shard
+            ctx.fillStyle = "rgba(14, 165, 233, 0.4)";
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - 14 * ss);
+            ctx.lineTo(cx + 8 * ss, cy);
+            ctx.lineTo(cx, cy + 14 * ss);
+            ctx.lineTo(cx - 8 * ss, cy);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
-          } else {
-            ctx.strokeStyle = "#5d6d7e";
-            ctx.lineWidth = 1.5;
+
+            // Bright white core shard
+            ctx.fillStyle = "#ffffff";
             ctx.beginPath();
-            ctx.moveTo(sx, sy);
-            ctx.lineTo(sx - 8 * ss, sy - 15 * ss);
-            ctx.moveTo(sx, sy);
-            ctx.lineTo(sx + 8 * ss, sy - 18 * ss);
+            ctx.moveTo(cx, cy - 10 * ss);
+            ctx.lineTo(cx + 5 * ss, cy);
+            ctx.lineTo(cx, cy + 10 * ss);
+            ctx.lineTo(cx - 5 * ss, cy);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+
+            // Tiny sparkly ice particles drifting upward
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            let sparkY = (Date.now() / 20 + s.seed * 100) % 25;
+            ctx.fillRect(cx - 4 * ss, cy - sparkY, 1.2 * ss, 1.2 * ss);
+          } else {
+            // --- MOSS-COVERED SNOWY RUIN BRICK (Replaces bushes) ---
+            ctx.fillStyle = "#334155"; // Slate stone
+            ctx.beginPath();
+            ctx.rect(sx - 12 * ss, sy - 12 * ss, 24 * ss, 12 * ss);
+            ctx.fill();
+            ctx.stroke();
+
+            // Frosty moss patch
+            ctx.fillStyle = "#164d1f";
+            ctx.beginPath();
+            ctx.rect(sx - 12 * ss, sy - 12 * ss, 14 * ss, 3 * ss);
+            ctx.fill();
+
+            // Fluffy snow cap on the stone block
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.roundRect(sx - 14 * ss, sy - 15 * ss, 28 * ss, 4.5 * ss, [
+              1.5 * ss,
+            ]);
+            ctx.fill();
             ctx.stroke();
           }
         } else if (tier === 2) {
@@ -8530,6 +9271,54 @@
       }
       ctx.restore();
     });
+
+    if (window.getStageTier() === 1 && !window.playerStats.isDungeonMode) {
+      if (Math.random() < 0.4) {
+        window.snowflakes.push({
+          x: Math.random() * canvas.width,
+          y: -10,
+          r: Math.random() * 1.8 + 0.8,
+          speed: Math.random() * 0.8 + 0.4,
+          swingSpeed: Math.random() * 0.02 + 0.01,
+          swingRange: Math.random() * 1.5 + 0.5,
+        });
+      }
+    } else {
+      window.snowflakes = [];
+    }
+
+    // Spawn floating morning fireflies in the Forest environment (Tier 0)
+    if (
+      window.getStageTier() === 0 &&
+      !window.playerStats.isDungeonMode &&
+      !window.playerStats.isCrucibleMode &&
+      !window.playerStats.isPrestigeBossMode &&
+      !window.isGamePaused
+    ) {
+      if (Math.random() < 0.12 && window.particles.length < 300) {
+        window.particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * 240, // Spawn across the entire vertical height of the sky!
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: -window.randFloat(0.15, 0.45), // Slow, drifting vertical float
+          radius: window.randFloat(1.0, 2.5), // Beautiful pulsing bodies
+          color:
+            Math.random() > 0.45
+              ? "rgba(163, 253, 131, 0.65)" // Glowing soft gold-green
+              : "rgba(254, 240, 138, 0.55)", // Soft morning sun yellow
+          alpha: 1.0,
+          gravity: -0.005, // Drifts upward
+          life: window.randInt(120, 200), // Longer lifespan to fill empty areas
+        });
+      }
+    }
+    for (let i = window.snowflakes.length - 1; i >= 0; i--) {
+      let sf = window.snowflakes[i];
+      sf.y += sf.speed;
+      sf.x += Math.sin(window.logicClock * sf.swingSpeed) * sf.swingRange * 0.4;
+      if (sf.y > canvas.height + 10 || sf.x < -10 || sf.x > canvas.width + 10)
+        window.snowflakes.splice(i, 1);
+    }
 
     // 7. REVIVE EFFECT
     if (window.reviveTimer > 0) {

@@ -1572,14 +1572,6 @@ window.CRUCIBLE_DRAFT_POOL = [
     },
   },
   {
-    id: "freeze_frame",
-    name: "Freeze-Frame",
-    desc: "All active permanent Elixir durations are completely frozen",
-    apply: (p) => {
-      p.crucibleFreezePotions = true;
-    },
-  },
-  {
     id: "temporal_accel",
     name: "Temporal Acceleration",
     desc: "+15% Active & Idle Attack Speed multipliers",
@@ -1594,14 +1586,6 @@ window.CRUCIBLE_DRAFT_POOL = [
     desc: "Earn +25% Astral Shards from this run",
     apply: (p) => {
       p.crucibleShardMult = (p.crucibleShardMult || 1.0) + 0.25;
-    },
-  },
-  {
-    id: "grounding",
-    name: "Aetheric Grounding",
-    desc: "Reduces all recoil, decay, and feedback self-damage by 75% for this run (stacks multiplicatively)",
-    apply: (p) => {
-      p.crucibleSelfDmgReduction = (p.crucibleSelfDmgReduction || 1.0) * 0.25;
     },
   },
   {
