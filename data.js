@@ -1451,35 +1451,34 @@ window.resolvePlayerStats = function (useDraft = false) {
     }
 
     // 2. Apply Debuffs
-    if (d.id === "iron_gaze") {
-      p.idleAttackSpeed = Math.round(
-        p.idleAttackSpeed * (1.0 + 0.2 * debuffStrength),
-      );
-      p.activeAttackSpeed = Math.round(
-        p.activeAttackSpeed * (1.0 + 0.2 * debuffStrength),
-      );
-    } else if (d.id === "shattered_armour") {
-      p.def = Math.floor(p.def * Math.max(0.1, 1.0 - 0.25 * debuffStrength));
-    } else if (d.id === "frail_vessel") {
-      p.maxHp = Math.floor(p.maxHp * Math.max(0.1, 1.0 - 0.2 * debuffStrength));
-    } else if (d.id === "dull_blades") {
-      p.atk = Math.floor(p.atk * Math.max(0.1, 1.0 - 0.2 * debuffStrength));
-    } else if (d.id === "heavy_mist") {
-      p.moveSpeed = Math.max(
-        1.0,
-        p.moveSpeed * Math.max(0.1, 1.0 - 0.3 * debuffStrength),
-      );
-    } else if (d.id === "blind_spot") {
-      p.critChance = Math.max(0.0, p.critChance - 0.1 * debuffStrength);
-    } else if (d.id === "feeble_mind") {
-      p.arcaneBarrier = 0.0;
-    } else if (d.id === "curse_greed") {
-      p.gold = Math.max(0.1, p.gold - 0.4 * debuffStrength);
-    } else if (d.id === "lead_boots") {
-      p.block = Math.max(0.0, p.block - 0.08 * debuffStrength);
-      p.parry = Math.max(0.0, p.parry - 0.08 * debuffStrength);
-    }
-  }
+        if (d) {
+          if (d.id === "iron_gaze") {
+            p.idleAttackSpeed = Math.round(
+              p.idleAttackSpeed * (1.0 + 0.2 * debuffStrength),
+            );
+          } else if (d.id === "shattered_armour") {
+            p.def = Math.floor(p.def * Math.max(0.1, 1.0 - 0.25 * debuffStrength));
+          } else if (d.id === "frail_vessel") {
+            p.maxHp = Math.floor(p.maxHp * Math.max(0.1, 1.0 - 0.2 * debuffStrength));
+          } else if (d.id === "dull_blades") {
+            p.atk = Math.floor(p.atk * Math.max(0.1, 1.0 - 0.2 * debuffStrength));
+          } else if (d.id === "heavy_mist") {
+            p.moveSpeed = Math.max(
+              1.0,
+              p.moveSpeed * Math.max(0.1, 1.0 - 0.3 * debuffStrength),
+            );
+          } else if (d.id === "blind_spot") {
+            p.critChance = Math.max(0.0, p.critChance - 0.1 * debuffStrength);
+          } else if (d.id === "feeble_mind") {
+            p.arcaneBarrier = 0.0;
+          } else if (d.id === "curse_greed") {
+            p.gold = Math.max(0.1, p.gold - 0.4 * debuffStrength);
+          } else if (d.id === "lead_boots") {
+            p.block = Math.max(0.0, p.block - 0.08 * debuffStrength);
+            p.parry = Math.max(0.0, p.parry - 0.08 * debuffStrength);
+          }
+        }
+      }
 
   // Apply Shared Cooperative Clan Skill Multipliers
   let phalanx = Math.min(50, window.playerStats.clanSkills?.steel_phalanx || 0);
