@@ -6748,21 +6748,307 @@
           ctx.stroke();
         }
       } else if (window.playerStats.currentDungeon === "equip") {
-        ctx.strokeStyle = "#1b2126";
-        ctx.lineWidth = 2;
-        for (let i = 180; i < canvas.width; i += 250) {
-          ctx.beginPath();
-          ctx.moveTo(i, 0);
-          ctx.bezierCurveTo(i - 10, 70, i + 15, 130, i, 190);
-          ctx.stroke();
+              // Vaulted roof support girders/trusses (Dark structural framework)
+              ctx.save();
+              ctx.strokeStyle = "#07080a";
+              ctx.lineWidth = 14;
+              ctx.beginPath();
+              // Horizontal main support truss
+              ctx.moveTo(0, 30);
+              ctx.lineTo(canvas.width, 30);
+              ctx.stroke();
+
+              ctx.strokeStyle = "#000000";
+              ctx.lineWidth = 2;
+              // Diagonal lattice bracing lines
+              for (let tx = 0; tx < canvas.width; tx += 60) {
+                ctx.beginPath();
+                ctx.moveTo(tx, 0);
+                ctx.lineTo(tx + 30, 30);
+                ctx.lineTo(tx + 60, 0);
+                ctx.stroke();
+              }
+              ctx.restore();
+
+              // 1. Central Smeltery Hearth (Glowing Background Furnace)
+              let hearthX = canvas.width / 2;
+              let hearthY = 230;
+              let hearthW = 120;
+              let hearthH = 140;
+
+              ctx.save();
+              ctx.fillStyle = "#0c0d12"; // Inner deep fire pit shadow
+              ctx.strokeStyle = "#000000";
+              ctx.lineWidth = 3;
+              ctx.beginPath();
+              ctx.moveTo(hearthX - hearthW / 2, hearthY);
+              ctx.lineTo(hearthX - hearthW / 2, hearthY - hearthH + 30);
+              ctx.quadraticCurveTo(hearthX, hearthY - hearthH - 10, hearthX + hearthW / 2, hearthY - hearthH + 30);
+              ctx.lineTo(hearthX + hearthW / 2, hearthY);
+              ctx.closePath();
+              ctx.fill();
+              ctx.stroke();
+
+              // Slow, heavily dampened breathing core (period slowed to 1.8 seconds, amplitude reduced to 0.035)
+              let firePulse = 0.965 + Math.sin(Date.now() / 1800) * 0.035;
+              let fireGrad = ctx.createRadialGradient(hearthX, hearthY - 10, 5, hearthX, hearthY - 10, (hearthW / 2) * firePulse);
+              fireGrad.addColorStop(0, "#ffffff");
+              fireGrad.addColorStop(0.25, "#f1c40f"); // Searing gold
+              fireGrad.addColorStop(0.55, "#e67e22"); // Molten orange
+              fireGrad.addColorStop(0.88, "#960018"); // Ashy crimson
+              fireGrad.addColorStop(1, "rgba(0,0,0,0)");
+              ctx.fillStyle = fireGrad;
+              ctx.beginPath();
+              ctx.moveTo(hearthX - hearthW / 2 + 5, hearthY);
+              ctx.lineTo(hearthX - hearthW / 2 + 5, hearthY - hearthH + 35);
+              ctx.quadraticCurveTo(hearthX, hearthY - hearthH, hearthX + hearthW / 2 - 5, hearthY - hearthH + 35);
+              ctx.lineTo(hearthX + hearthW / 2 - 5, hearthY);
+              ctx.closePath();
+              ctx.fill();
+
+              // Solid iron horizontal structural band and rivets across the furnace face
+              ctx.strokeStyle = "#101317";
+              ctx.lineWidth = 4;
+              ctx.fillStyle = "#1e222b";
+              ctx.beginPath();
+              ctx.rect(hearthX - hearthW / 2 - 4, hearthY - 45, hearthW + 8, 12);
+              ctx.fill();
+              ctx.stroke();
+              ctx.fillStyle = "#0c0d12";
+              for (let rx = -hearthW / 2; rx <= hearthW / 2; rx += 24) {
+                ctx.beginPath();
+                ctx.arc(hearthX + rx, hearthY - 39, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+              }
+
+              // Bricked Border (Heavier industrial frame)
+              ctx.fillStyle = "#1e222b";
+              ctx.lineWidth = 2;
+              for (let angle = Math.PI; angle <= Math.PI * 2; angle += Math.PI / 10) {
+                let bx = hearthX + Math.cos(angle) * (hearthW / 2 + 10);
+                let by = (hearthY - hearthH + 30) + Math.sin(angle) * 30;
+                ctx.beginPath();
+                ctx.arc(bx, by, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+              }
+              ctx.restore();
+
+              // 2. Silhouette Gearworks (Slowed down significantly to feel heavy and non-distracting)
+              let drawBackgroundGear = (gx, gy, radius, teeth, speedMult, direction) => {
+                ctx.save();
+                ctx.translate(gx, gy);
+                ctx.rotate((Date.now() / speedMult) * direction);
+                ctx.fillStyle = "#0c0d12"; // Solid silhouette dark grey
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 2;
+
+                // Base gear circle
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Draw gear teeth
+                for (let j = 0; j < teeth; j++) {
+                  ctx.save();
+                  ctx.rotate((j * Math.PI * 2) / teeth);
+                  ctx.beginPath();
+                  ctx.rect(-radius * 0.12, -radius - radius * 0.15, radius * 0.24, radius * 0.25);
+                  ctx.fill();
+                  ctx.stroke();
+                  ctx.restore();
+                }
+
+                // Inner axle cutout
+                ctx.fillStyle = "#030406";
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 0.35, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+              };
+
+              // Rotations slowed down to 11s and 9.5s periods
+              drawBackgroundGear(110, 75, 45, 12, 11000, 1);   // Clockwise
+              drawBackgroundGear(690, 95, 35, 10, 9500, -1);   // Counter-clockwise
+
+        // 3. Detailed Industrial Pipe & Valve Networks
+        ctx.save();
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 8;
+        ctx.lineJoin = "round";
+
+        // Draw master horizontal pipe path
+        ctx.beginPath();
+        ctx.moveTo(-10, 50);
+        ctx.lineTo(240, 50);
+        ctx.lineTo(240, 110);
+        ctx.lineTo(560, 110);
+        ctx.lineTo(560, 50);
+        ctx.lineTo(canvas.width + 10, 50);
+        ctx.stroke();
+
+        // Draw secondary vertical feed pipes
+        ctx.beginPath();
+        ctx.moveTo(110, 50);
+        ctx.lineTo(110, 160);
+        ctx.moveTo(690, 50);
+        ctx.lineTo(690, 160);
+        ctx.stroke();
+
+        // Outer copper pipe shading
+        ctx.strokeStyle = "#7e5109"; // Weathered bronze/copper
+        ctx.lineWidth = 5;
+        ctx.stroke();
+
+        // Inner glowing core line (Hot thermal energy flow)
+        let pipePulse = 0.5 + Math.sin(Date.now() / 180) * 0.5;
+        ctx.strokeStyle = `rgba(241, 196, 15, ${0.6 + pipePulse * 0.4})`; // Pulsing gold steam
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Draw Pressure Gauges
+        let drawPressureGauge = (pgX, pgY) => {
+          ctx.fillStyle = "#f8fafc";
           ctx.strokeStyle = "#000000";
-          ctx.lineWidth = penFar;
-          ctx.stroke();
-          ctx.fillStyle = "#13181c";
+          ctx.lineWidth = 2.5;
           ctx.beginPath();
-          ctx.rect(i - 6, 190, 12, 8);
+          ctx.arc(pgX, pgY, 11, 0, Math.PI * 2);
           ctx.fill();
           ctx.stroke();
+
+          // Copper bezel
+          ctx.strokeStyle = "#7e5109";
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(pgX, pgY, 9, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Moving Indicator Needle
+          let angle = -Math.PI / 1.5 + Math.sin(Date.now() / 400 + pgX) * 0.4;
+          ctx.strokeStyle = "#c0392b"; // Red needle
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(pgX, pgY);
+          ctx.lineTo(pgX + Math.cos(angle) * 7, pgY + Math.sin(angle) * 7);
+          ctx.stroke();
+        };
+        drawPressureGauge(240, 80);
+        drawPressureGauge(560, 80);
+        ctx.restore();
+
+        // 4. Zero-Allocation Floating Foundry Sparks (Deterministically generated)
+        ctx.save();
+        for (let j = 0; j < 12; j++) {
+          let seed = Math.sin(j * 432.18);
+          // Normalize time factor to a loop of 1.4 seconds
+          let sparkTime = (Date.now() / 1400 + seed) % 1.0;
+
+          // Spawn along the width of the canvas, rising upward
+          let spX =
+            ((j * 73) % (canvas.width + 40)) -
+            20 +
+            Math.sin(sparkTime * Math.PI * 2 + j) * 8;
+          let spY = 230 - sparkTime * 180; // Rise from floor level (230) up to 50
+
+          let spAlpha =
+            Math.min(1.0, (1.0 - sparkTime) * 1.5) * (0.3 + (j % 4) * 0.25);
+          let spSize = 1.0 + (j % 3) * 0.8;
+
+          ctx.fillStyle =
+            j % 2 === 0
+              ? `rgba(255, 170, 0, ${spAlpha})`
+              : `rgba(255, 220, 80, ${spAlpha})`;
+          ctx.fillRect(spX, spY, spSize, spSize);
+        }
+        ctx.restore();
+
+        // 5. Heavy Iron Hanging Chains and Glowing Pendulum Lanterns
+        for (let i = 180; i < canvas.width; i += 220) {
+          ctx.save();
+          // Asynchronous, physics-aligned subtle sway logic
+          // Use a unique period and a non-rational phase modifier per loop index
+          let period = 1500 + (i % 3) * 200; // Varying rates: 1500ms, 1700ms, 1900ms
+          let phase = i * 0.77; // Breaking neat 2*PI spatial alignments
+          let swingAngle = Math.sin(Date.now() / period + phase) * 0.032; // Highly subtle, heavy 0.032 radians arc
+
+          ctx.translate(i, 0);
+          ctx.rotate(swingAngle);
+
+          // Draw Heavy Hanging Chain (vertical dark loops)
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 2.5;
+          let chainLen = 140;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(0, chainLen);
+          ctx.stroke();
+
+          // Overlay individual chain links
+          ctx.fillStyle = "#2c3e50";
+          for (let y = 10; y < chainLen; y += 14) {
+            ctx.beginPath();
+            ctx.arc(0, y, 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Draw detailed Iron Lantern Housing at bottom of the chain
+          let ly = chainLen;
+          ctx.translate(0, ly);
+
+          // Lantern Cap
+          ctx.fillStyle = "#1e272e";
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penFar;
+          ctx.beginPath();
+          ctx.moveTo(-10, 0);
+          ctx.lineTo(10, 0);
+          ctx.lineTo(6, -6);
+          ctx.lineTo(-6, -6);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Lantern Glowing Glass Body
+          let pulse = 0.8 + Math.sin(Date.now() / 150 + i * 1.3) * 0.2;
+          ctx.fillStyle = `rgba(241, 196, 15, ${0.4 + pulse * 0.45})`; // Warm firelight glow
+          ctx.beginPath();
+          ctx.moveTo(-7, 0);
+          ctx.lineTo(7, 0);
+          ctx.lineTo(5, 14);
+          ctx.lineTo(-5, 14);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // White-hot lantern filament
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.arc(0, 6, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Lantern Iron Guard Cage (Vertical side bars)
+          ctx.strokeStyle = "#1e272e";
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(-7, 0);
+          ctx.lineTo(-5, 14);
+          ctx.moveTo(7, 0);
+          ctx.lineTo(5, 14);
+          ctx.moveTo(0, 0);
+          ctx.lineTo(0, 14); // center guard bar
+          ctx.stroke();
+
+          // Bottom Cap & Finial Ring
+          ctx.fillStyle = "#1e272e";
+          ctx.beginPath();
+          ctx.rect(-5, 14, 10, 3);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.restore();
         }
       }
     } else {
@@ -6901,141 +7187,169 @@
         ctx.stroke();
         ctx.restore();
       } else if (tier === 1) {
-              // 1. Clean Atmospheric Twilight Sky
-              let skyGrad = ctx.createLinearGradient(0, 0, 0, 230);
-              skyGrad.addColorStop(0, "#060a12");
-              skyGrad.addColorStop(1, "#121b2d");
-              ctx.fillStyle = skyGrad;
-              ctx.fillRect(0, 0, canvas.width, 230);
+        // 1. Clean Atmospheric Twilight Sky
+        let skyGrad = ctx.createLinearGradient(0, 0, 0, 230);
+        skyGrad.addColorStop(0, "#060a12");
+        skyGrad.addColorStop(1, "#121b2d");
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, canvas.width, 230);
 
-              // 2. Flowing Vector Aurora Ribbon (Three-layered, vertical-fading curtains)
-                      ctx.save();
-                      let auroraTime = Date.now() / 2200;
+        // 2. Flowing Vector Aurora Ribbon (Three-layered, vertical-fading curtains)
+        ctx.save();
+        let auroraTime = Date.now() / 2200;
 
-                      // Ribbon A: Luminous Emerald-Teal (Primary sweeping ribbon)
-                      let gA = ctx.createLinearGradient(0, 15, 0, 115);
-                      gA.addColorStop(0, "rgba(0, 255, 136, 0.0)");
-                      gA.addColorStop(0.5, "rgba(0, 255, 136, 0.16)");
-                      gA.addColorStop(1, "rgba(0, 255, 136, 0.0)");
-                      ctx.fillStyle = gA;
+        // Ribbon A: Luminous Emerald-Teal (Primary sweeping ribbon)
+        let gA = ctx.createLinearGradient(0, 15, 0, 115);
+        gA.addColorStop(0, "rgba(0, 255, 136, 0.0)");
+        gA.addColorStop(0.5, "rgba(0, 255, 136, 0.16)");
+        gA.addColorStop(1, "rgba(0, 255, 136, 0.0)");
+        ctx.fillStyle = gA;
 
-                      let waveA1 = Math.sin(auroraTime) * 12;
-                      let waveA2 = Math.cos(auroraTime * 0.9) * 8;
+        let waveA1 = Math.sin(auroraTime) * 12;
+        let waveA2 = Math.cos(auroraTime * 0.9) * 8;
 
-                      ctx.beginPath();
-                      ctx.moveTo(0, 45 + waveA1);
-                      ctx.bezierCurveTo(
-                        canvas.width * 0.35, 15 + waveA2,
-                        canvas.width * 0.65, 85 - waveA1,
-                        canvas.width, 35 + waveA2
-                      );
-                      ctx.lineTo(canvas.width, 75 + waveA2);
-                      ctx.bezierCurveTo(
-                        canvas.width * 0.65, 115 - waveA1,
-                        canvas.width * 0.35, 55 + waveA2,
-                        0, 85 + waveA1
-                      );
-                      ctx.closePath();
-                      ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(0, 45 + waveA1);
+        ctx.bezierCurveTo(
+          canvas.width * 0.35,
+          15 + waveA2,
+          canvas.width * 0.65,
+          85 - waveA1,
+          canvas.width,
+          35 + waveA2,
+        );
+        ctx.lineTo(canvas.width, 75 + waveA2);
+        ctx.bezierCurveTo(
+          canvas.width * 0.65,
+          115 - waveA1,
+          canvas.width * 0.35,
+          55 + waveA2,
+          0,
+          85 + waveA1,
+        );
+        ctx.closePath();
+        ctx.fill();
 
-                      // Ribbon B: Electric Cyan (Secondary crossing ribbon)
-                      let gB = ctx.createLinearGradient(0, 25, 0, 125);
-                      gB.addColorStop(0, "rgba(0, 240, 255, 0.0)");
-                      gB.addColorStop(0.5, "rgba(0, 240, 255, 0.14)");
-                      gB.addColorStop(1, "rgba(0, 240, 255, 0.0)");
-                      ctx.fillStyle = gB;
+        // Ribbon B: Electric Cyan (Secondary crossing ribbon)
+        let gB = ctx.createLinearGradient(0, 25, 0, 125);
+        gB.addColorStop(0, "rgba(0, 240, 255, 0.0)");
+        gB.addColorStop(0.5, "rgba(0, 240, 255, 0.14)");
+        gB.addColorStop(1, "rgba(0, 240, 255, 0.0)");
+        ctx.fillStyle = gB;
 
-                      let waveB1 = Math.cos(auroraTime * 1.1) * 10;
-                      let waveB2 = Math.sin(auroraTime * 0.7) * 14;
+        let waveB1 = Math.cos(auroraTime * 1.1) * 10;
+        let waveB2 = Math.sin(auroraTime * 0.7) * 14;
 
-                      ctx.beginPath();
-                      ctx.moveTo(0, 60 + waveB1);
-                      ctx.bezierCurveTo(
-                        canvas.width * 0.25, 85 + waveB2,
-                        canvas.width * 0.75, 25 - waveB1,
-                        canvas.width, 50 + waveB2
-                      );
-                      ctx.lineTo(canvas.width, 85 + waveB2);
-                      ctx.bezierCurveTo(
-                        canvas.width * 0.75, 55 - waveB1,
-                        canvas.width * 0.25, 115 + waveB2,
-                        0, 95 + waveB1
-                      );
-                      ctx.closePath();
-                      ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(0, 60 + waveB1);
+        ctx.bezierCurveTo(
+          canvas.width * 0.25,
+          85 + waveB2,
+          canvas.width * 0.75,
+          25 - waveB1,
+          canvas.width,
+          50 + waveB2,
+        );
+        ctx.lineTo(canvas.width, 85 + waveB2);
+        ctx.bezierCurveTo(
+          canvas.width * 0.75,
+          55 - waveB1,
+          canvas.width * 0.25,
+          115 + waveB2,
+          0,
+          95 + waveB1,
+        );
+        ctx.closePath();
+        ctx.fill();
 
-                      // Ribbon C: Soft Cosmic Purple (Deep background accent)
-                      let gC = ctx.createLinearGradient(0, 35, 0, 135);
-                      gC.addColorStop(0, "rgba(155, 89, 182, 0.0)");
-                      gC.addColorStop(0.5, "rgba(155, 89, 182, 0.1)");
-                      gC.addColorStop(1, "rgba(155, 89, 182, 0.0)");
-                      ctx.fillStyle = gC;
+        // Ribbon C: Soft Cosmic Purple (Deep background accent)
+        let gC = ctx.createLinearGradient(0, 35, 0, 135);
+        gC.addColorStop(0, "rgba(155, 89, 182, 0.0)");
+        gC.addColorStop(0.5, "rgba(155, 89, 182, 0.1)");
+        gC.addColorStop(1, "rgba(155, 89, 182, 0.0)");
+        ctx.fillStyle = gC;
 
-                      let waveC1 = Math.sin(auroraTime * 1.3) * 8;
+        let waveC1 = Math.sin(auroraTime * 1.3) * 8;
 
-                      ctx.beginPath();
-                      ctx.moveTo(0, 75 + waveC1);
-                      ctx.bezierCurveTo(
-                        canvas.width * 0.45, 105 - waveC1,
-                        canvas.width * 0.55, 45 + waveC1,
-                        canvas.width, 85 - waveC1
-                      );
-                      ctx.lineTo(canvas.width, 105 - waveC1);
-                      ctx.bezierCurveTo(
-                        canvas.width * 0.55, 65 + waveC1,
-                        canvas.width * 0.45, 125 - waveC1,
-                        0, 95 + waveC1
-                      );
-                      ctx.closePath();
-                      ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(0, 75 + waveC1);
+        ctx.bezierCurveTo(
+          canvas.width * 0.45,
+          105 - waveC1,
+          canvas.width * 0.55,
+          45 + waveC1,
+          canvas.width,
+          85 - waveC1,
+        );
+        ctx.lineTo(canvas.width, 105 - waveC1);
+        ctx.bezierCurveTo(
+          canvas.width * 0.55,
+          65 + waveC1,
+          canvas.width * 0.45,
+          125 - waveC1,
+          0,
+          95 + waveC1,
+        );
+        ctx.closePath();
+        ctx.fill();
 
-                      ctx.restore();
+        ctx.restore();
 
-              // 3. Twinkling Celestial Pixel Stars
-              for (let i = 0; i < 12; i++) {
-                let starX = (i * 123 + 17) % canvas.width;
-                let starY = (i * 37 + 11) % 110;
-                let pulse = 0.3 + Math.sin(Date.now() / 350 + i) * 0.7;
-                ctx.fillStyle = `rgba(255, 255, 255, ${0.15 + pulse * 0.5})`;
-                ctx.fillRect(starX, starY, i % 4 === 0 ? 1.5 : 0.8, i % 4 === 0 ? 1.5 : 0.8);
-              }
+        // 3. Twinkling Celestial Pixel Stars
+        for (let i = 0; i < 12; i++) {
+          let starX = (i * 123 + 17) % canvas.width;
+          let starY = (i * 37 + 11) % 110;
+          let pulse = 0.3 + Math.sin(Date.now() / 350 + i) * 0.7;
+          ctx.fillStyle = `rgba(255, 255, 255, ${0.15 + pulse * 0.5})`;
+          ctx.fillRect(
+            starX,
+            starY,
+            i % 4 === 0 ? 1.5 : 0.8,
+            i % 4 === 0 ? 1.5 : 0.8,
+          );
+        }
 
-              // 4. Elegant 4-Point Sparkle Stars (✦)
-              let drawSparkleStar = (cx, cy, size, pulseSpeed, offset) => {
-                let scale = 0.4 + Math.sin(Date.now() / pulseSpeed + offset) * 0.6;
-                let s = size * scale;
-                if (s <= 0.5) return;
-                ctx.fillStyle = `rgba(165, 243, 252, ${0.3 + scale * 0.6})`;
-                ctx.beginPath();
-                ctx.moveTo(cx, cy - s);
-                ctx.quadraticCurveTo(cx, cy, cx + s, cy);
-                ctx.quadraticCurveTo(cx, cy, cx, cy + s);
-                ctx.quadraticCurveTo(cx, cy, cx - s, cy);
-                ctx.quadraticCurveTo(cx, cy, cx, cy - s);
-                ctx.closePath();
-                ctx.fill();
-              };
-              drawSparkleStar(240, 35, 6, 600, 0);
-              drawSparkleStar(480, 25, 4.5, 850, 2);
-              drawSparkleStar(110, 55, 5, 700, 4);
-              drawSparkleStar(630, 45, 5.5, 900, 1);
+        // 4. Elegant 4-Point Sparkle Stars (✦)
+        let drawSparkleStar = (cx, cy, size, pulseSpeed, offset) => {
+          let scale = 0.4 + Math.sin(Date.now() / pulseSpeed + offset) * 0.6;
+          let s = size * scale;
+          if (s <= 0.5) return;
+          ctx.fillStyle = `rgba(165, 243, 252, ${0.3 + scale * 0.6})`;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy - s);
+          ctx.quadraticCurveTo(cx, cy, cx + s, cy);
+          ctx.quadraticCurveTo(cx, cy, cx, cy + s);
+          ctx.quadraticCurveTo(cx, cy, cx - s, cy);
+          ctx.quadraticCurveTo(cx, cy, cx, cy - s);
+          ctx.closePath();
+          ctx.fill();
+        };
+        drawSparkleStar(240, 35, 6, 600, 0);
+        drawSparkleStar(480, 25, 4.5, 850, 2);
+        drawSparkleStar(110, 55, 5, 700, 4);
+        drawSparkleStar(630, 45, 5.5, 900, 1);
 
-              // 5. Slow Drifting Shooting Star (Diagonal gliding streak)
-              let shootTime = Date.now() / 4000;
-              let shootX = (shootTime * 180) % (canvas.width + 250) - 100;
-              let shootY = 20 + (shootX * 0.25);
-              if (shootX > -50 && shootX < canvas.width + 50) {
-                let cometGrad = ctx.createLinearGradient(shootX, shootY, shootX - 35, shootY - 9);
-                cometGrad.addColorStop(0, "rgba(255, 255, 255, 0.85)");
-                cometGrad.addColorStop(0.3, "rgba(56, 189, 248, 0.4)");
-                cometGrad.addColorStop(1, "rgba(56, 189, 248, 0.0)");
-                ctx.strokeStyle = cometGrad;
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.moveTo(shootX, shootY);
-                ctx.lineTo(shootX - 35, shootY - 9);
-                ctx.stroke();
-              }
+        // 5. Slow Drifting Shooting Star (Diagonal gliding streak)
+        let shootTime = Date.now() / 4000;
+        let shootX = ((shootTime * 180) % (canvas.width + 250)) - 100;
+        let shootY = 20 + shootX * 0.25;
+        if (shootX > -50 && shootX < canvas.width + 50) {
+          let cometGrad = ctx.createLinearGradient(
+            shootX,
+            shootY,
+            shootX - 35,
+            shootY - 9,
+          );
+          cometGrad.addColorStop(0, "rgba(255, 255, 255, 0.85)");
+          cometGrad.addColorStop(0.3, "rgba(56, 189, 248, 0.4)");
+          cometGrad.addColorStop(1, "rgba(56, 189, 248, 0.0)");
+          ctx.strokeStyle = cometGrad;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(shootX, shootY);
+          ctx.lineTo(shootX - 35, shootY - 9);
+          ctx.stroke();
+        }
 
         // 3. Layered Geometric Mountain Spires with Crisp Snowcaps
         ctx.strokeStyle = "#000000";
@@ -7154,68 +7468,327 @@
         ctx.lineTo(canvas.width, 184);
         ctx.stroke();
       } else if (tier === 2) {
-        ctx.fillStyle = "rgba(230, 126, 34, 0.08)";
+        // 1. Soot and Ash Sky Gradient
+        let skyGrad = ctx.createLinearGradient(0, 0, 0, 230);
+        skyGrad.addColorStop(0, "#080201"); // Ashy soot
+        skyGrad.addColorStop(0.6, "#240602"); // Crimson dust
+        skyGrad.addColorStop(1, "#3f0c02"); // Horizon orange-red
+        ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, canvas.width, 230);
-        for (let i = 0; i < 8; i++) {
-          ctx.fillStyle = "#e67e22";
-          ctx.fillRect(
-            ((Date.now() / 15 + i * 90) % (canvas.width + 20)) - 10,
-            210 - ((Date.now() / 8 + i * 43) % 150),
-            2,
-            2,
-          );
+
+        // 2. Billowing Volcanic Storm Clouds with Orange Rim-Lighting
+        ctx.fillStyle = "#160f0f";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.8;
+        let drawBillow = (cx, cy, r) => {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          // Luminous under-glow highlighting
+          ctx.strokeStyle = "#d35400";
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(cx, cy, r - 1.5, Math.PI * 0.2, Math.PI * 0.8);
+          ctx.stroke();
+          ctx.restore();
+        };
+        drawBillow(100, 15, 30);
+        drawBillow(140, 10, 40);
+        drawBillow(190, 15, 30);
+        drawBillow(600, 15, 35);
+        drawBillow(650, 10, 42);
+
+        // 3. Rising Volcanic Ash Embers (Deterministic lightweight loop)
+        for (let i = 0; i < 15; i++) {
+          let emberX =
+            ((i * 97 + Date.now() * 0.05) % (canvas.width + 20)) - 10;
+          let emberY = 210 - ((i * 41 + Date.now() * 0.12) % 180);
+          let size = 1.5 + (i % 3) * 0.8;
+          let alpha = 0.2 + (i % 4) * 0.2;
+          ctx.fillStyle = `rgba(230, 126, 34, ${alpha})`;
+          ctx.fillRect(emberX, emberY, size, size);
         }
-        ctx.fillStyle = "#200401";
-        ctx.beginPath();
-        ctx.moveTo(0, 230);
-        ctx.lineTo(80, 140);
-        ctx.lineTo(120, 165);
-        ctx.lineTo(250, 90);
-        ctx.lineTo(320, 175);
-        ctx.lineTo(500, 100);
-        ctx.lineTo(620, 190);
-        ctx.lineTo(720, 130);
-        ctx.lineTo(800, 230);
-        ctx.fill();
+
+        // Set outlining defaults for background structures
         ctx.strokeStyle = "#000000";
         ctx.lineWidth = penFar;
-        ctx.stroke();
-        ctx.strokeStyle = "#e74c3c";
-        ctx.lineWidth = 3;
+        ctx.lineJoin = "round";
+
+        // 4. Far Left Dormant Volcano with Shaded Side Profile
+        ctx.fillStyle = "#2d0b06";
         ctx.beginPath();
-        ctx.moveTo(250, 90);
-        ctx.lineTo(250, 110);
-        ctx.moveTo(500, 100);
-        ctx.lineTo(500, 125);
-        ctx.stroke();
-        ctx.fillStyle = "#110200";
-        ctx.beginPath();
-        ctx.moveTo(0, 230);
-        ctx.lineTo(80, 190);
-        ctx.lineTo(95, 192);
-        ctx.lineTo(140, 165);
-        ctx.lineTo(160, 165);
-        ctx.lineTo(210, 200);
-        ctx.lineTo(220, 198);
-        ctx.lineTo(300, 230);
-        ctx.moveTo(300, 230);
-        ctx.lineTo(380, 175);
-        ctx.lineTo(395, 178);
-        ctx.lineTo(440, 155);
-        ctx.lineTo(460, 155);
-        ctx.lineTo(520, 195);
-        ctx.lineTo(650, 230);
+        ctx.moveTo(-50, 230);
+        ctx.lineTo(80, 130);
+        ctx.lineTo(110, 130);
+        ctx.lineTo(240, 230);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        ctx.strokeStyle = "#e74c3c";
-        ctx.lineWidth = 2.5;
+
+        // Dimensional Shading on the right slope
+        ctx.fillStyle = "#1e0402";
         ctx.beginPath();
-        ctx.moveTo(140, 165);
-        ctx.lineTo(160, 165);
-        ctx.moveTo(440, 155);
-        ctx.lineTo(460, 155);
+        ctx.moveTo(95, 130);
+        ctx.lineTo(240, 230);
+        ctx.lineTo(110, 130);
+        ctx.closePath();
+        ctx.fill();
+
+        // 5. Active Center-Right Volcano with Erupting Caldera Pool
+        ctx.fillStyle = "#2d0b06";
+        ctx.beginPath();
+        ctx.moveTo(220, 230);
+        ctx.lineTo(330, 95); // Left caldera lip
+        ctx.lineTo(370, 95); // Right caldera lip
+        ctx.lineTo(480, 230);
+        ctx.closePath();
+        ctx.fill();
         ctx.stroke();
+
+        // Dimensional shading on the left slope of Active Peak
+        ctx.fillStyle = "#1e0402";
+        ctx.beginPath();
+        ctx.moveTo(330, 95);
+        ctx.lineTo(220, 230);
+        ctx.lineTo(350, 95);
+        ctx.closePath();
+        ctx.fill();
+
+        // Active boiling crater core (glowing pool inside caldera)
+        ctx.fillStyle = "#ff2200";
+        ctx.beginPath();
+        ctx.ellipse(350, 95, 20, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 6. Erupting Magma Fountain (Spewing droplets loop)
+        let erTime = Date.now() / 1200;
+        let erX = 350;
+        let erY = 95;
+        for (let i = 0; i < 6; i++) {
+          let tSeed = (erTime + i * 1.5) % 1.0;
+          let dropX = erX + Math.sin(i * 12 + erTime * 0.5) * 35 * tSeed;
+          let dropY = erY - 55 * Math.sin(tSeed * Math.PI) + 10 * tSeed;
+          let r = 2.0 * (1.0 - tSeed * 0.4);
+          if (tSeed > 0.1) {
+            ctx.fillStyle = i % 2 === 0 ? "#ffd700" : "#ff5500";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 1.0;
+            ctx.beginPath();
+            ctx.arc(dropX, dropY, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+        }
+
+        // 7. Winding Molten Fissure Cracks (Static paths, creeping inner flow)
+        let drawMoltenFissure = (startX, startY, segmentPoints, delay) => {
+          ctx.save();
+
+          // Outer solid orange crack
+          ctx.strokeStyle = "#e67e22";
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          segmentPoints.forEach((pt) => ctx.lineTo(pt.x, pt.y));
+          ctx.stroke();
+
+          // Viscous, slow-creeping flow inside crack (Slowed divisor to 110)
+          ctx.strokeStyle = "#ffd700";
+          ctx.lineWidth = 0.8;
+          ctx.setLineDash([8, 12]);
+          ctx.lineDashOffset = -(Date.now() / 110 + delay * 15) % 20;
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          segmentPoints.forEach((pt) => ctx.lineTo(pt.x, pt.y));
+          ctx.stroke();
+
+          ctx.restore();
+        };
+
+        drawMoltenFissure(
+          100,
+          135,
+          [
+            { x: 85, y: 155 },
+            { x: 95, y: 175 },
+            { x: 75, y: 195 },
+            { x: 80, y: 230 },
+          ],
+          0,
+        );
+        drawMoltenFissure(
+          350,
+          98,
+          [
+            { x: 360, y: 125 },
+            { x: 345, y: 155 },
+            { x: 370, y: 185 },
+            { x: 355, y: 230 },
+          ],
+          2,
+        );
+
+        // 8. Branching Molten Lava Waterfalls (Static rock channels, creeping flow)
+        let drawWaterfall = (tx, ty, bx, by, delay) => {
+          ctx.save();
+          let ctrlX = (tx + bx) / 2;
+          let ctrlY = (ty + by) / 2;
+
+          // Rigid outer black outlined channel
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 6.5;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(tx, ty);
+          ctx.quadraticCurveTo(ctrlX, ctrlY, bx, by);
+          ctx.stroke();
+
+          // Rigid orange lava stream
+          ctx.strokeStyle = "#ff4500";
+          ctx.lineWidth = 4.5;
+          ctx.beginPath();
+          ctx.moveTo(tx, ty);
+          ctx.quadraticCurveTo(ctrlX, ctrlY, bx, by);
+          ctx.stroke();
+
+          // Heavy creeping liquid core highlight (Slowed divisor to 80)
+          ctx.strokeStyle = "#ffd700";
+          ctx.lineWidth = 2.0;
+          ctx.setLineDash([12, 18]);
+          ctx.lineDashOffset = -(Date.now() / 80 + delay * 10) % 30;
+          ctx.beginPath();
+          ctx.moveTo(tx, ty);
+          ctx.quadraticCurveTo(ctrlX, ctrlY, bx, by);
+          ctx.stroke();
+
+          ctx.restore();
+        };
+        drawWaterfall(350, 95, 330, 150, 0);
+        drawWaterfall(330, 150, 310, 230, 2);
+        drawWaterfall(330, 150, 360, 230, 4);
+
+        // 9. Mid-Ground Obsidian Basalt Crags
+        ctx.fillStyle = "#160402";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = penFar;
+
+        ctx.beginPath();
+        ctx.moveTo(0, 230);
+        ctx.lineTo(80, 160);
+        ctx.lineTo(130, 185);
+        ctx.lineTo(220, 140);
+        ctx.lineTo(290, 195);
+        ctx.lineTo(410, 150);
+        ctx.lineTo(490, 210);
+        ctx.lineTo(600, 135);
+        ctx.lineTo(680, 180);
+        ctx.lineTo(800, 115);
+        ctx.lineTo(canvas.width, 230);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 10. Hexagonal Basalt Pillar Clusters (Edges)
+        let drawBasaltCluster = (baseX, height, width, count) => {
+          ctx.save();
+          ctx.fillStyle = "#120302";
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penFar;
+
+          for (let i = 0; i < count; i++) {
+            let colX = baseX + i * (width * 0.7);
+            let colH =
+              height - Math.sin(i * 1.5) * 20 - (i % 2 === 0 ? 10 : -10);
+            let colY = 230 - colH;
+
+            // Hexagonal flat top cap
+            ctx.beginPath();
+            ctx.moveTo(colX - width / 2, colY);
+            ctx.lineTo(colX - width / 4, colY - 5);
+            ctx.lineTo(colX + width / 4, colY - 5);
+            ctx.lineTo(colX + width / 2, colY);
+            ctx.lineTo(colX + width / 4, colY + 3);
+            ctx.lineTo(colX - width / 4, colY + 3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Column shaft
+            ctx.beginPath();
+            ctx.rect(colX - width / 2, colY, width, colH);
+            ctx.fill();
+            ctx.stroke();
+
+            // Column edge highlight
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(colX, colY + 3);
+            ctx.lineTo(colX, 230);
+            ctx.stroke();
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penFar;
+          }
+          ctx.restore();
+        };
+        drawBasaltCluster(20, 95, 16, 4);
+        drawBasaltCluster(730, 110, 16, 4);
+
+        // 11. Slow Undulating Molten Lava River (Subtle, high-viscosity basaltic wave)
+        let lavaBaseGrad = ctx.createLinearGradient(0, 215, 0, 230);
+        lavaBaseGrad.addColorStop(0, "#ffd700");
+        lavaBaseGrad.addColorStop(0.3, "#ff5500");
+        lavaBaseGrad.addColorStop(1, "#3c0401");
+        ctx.fillStyle = lavaBaseGrad;
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2.0;
+
+        ctx.beginPath();
+        ctx.moveTo(0, 230);
+        for (let x = 0; x <= canvas.width; x += 30) {
+          // Locked wave to tight 1.0px height to avoid fast water look
+          let waveY = 224 + Math.sin(Date.now() / 500 + x * 0.06) * 1.0;
+          ctx.lineTo(x, waveY);
+        }
+        ctx.lineTo(canvas.width, 230);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 12. Spawning & Deflating Magma Bubble Domes
+        for (let i = 0; i < 3; i++) {
+          let bubbleX =
+            ((i * 240 + Date.now() * 0.02) % (canvas.width - 60)) + 30;
+          let bubbleCycle = (Date.now() / 600 + i * 2) % Math.PI;
+          let bubbleR = 5.0 * Math.sin(bubbleCycle);
+          let bubbleY = 224 + Math.sin(Date.now() / 500 + bubbleX * 0.06) * 1.0;
+          if (bubbleR > 1.0) {
+            ctx.save();
+            ctx.fillStyle = "#ff5500";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(bubbleX, bubbleY, bubbleR, Math.PI, 0); // half circle bubble dome
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            // Specular light highlight on the dome
+            ctx.fillStyle = "#ffd700";
+            ctx.beginPath();
+            ctx.arc(
+              bubbleX - bubbleR * 0.3,
+              bubbleY - bubbleR * 0.4,
+              bubbleR * 0.2,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fill();
+            ctx.restore();
+          }
+        }
       } else if (tier === 3) {
         let mistGrad = ctx.createLinearGradient(0, 170, 0, 230);
         mistGrad.addColorStop(0, "rgba(39, 174, 96, 0)");
@@ -7381,55 +7954,83 @@
         return;
       }
       if (window.playerStats.isDungeonMode) {
-        let isCeiling = s.seed < 0.45;
-        if (isCeiling) {
-          let h = 35 + s.seed * 50 * ts;
-          let w = 12 + s.seed * 22 * ts;
-          let color =
-            window.playerStats.currentDungeon === "gold"
-              ? "#332211"
-              : window.playerStats.currentDungeon === "mat"
-                ? "#1b2d1f"
-                : "#20262e";
-          ctx.fillStyle = color;
-          ctx.beginPath();
-          ctx.moveTo(s.x - w / 2, 0);
-          ctx.lineTo(s.x, h);
-          ctx.lineTo(s.x + w / 2, 0);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-          ctx.strokeStyle = "rgba(255,255,255,0.06)";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(s.x, h);
-          ctx.lineTo(s.x - w / 4, 0);
-          ctx.stroke();
-        } else {
-          let h = 22 + s.seed * 45 * ts;
-          let w = 10 + s.seed * 18 * ts;
-          let color =
-            window.playerStats.currentDungeon === "gold"
-              ? "#261a0c"
-              : window.playerStats.currentDungeon === "mat"
-                ? "#121f16"
-                : "#191e24";
-          ctx.fillStyle = color;
-          ctx.beginPath();
-          ctx.moveTo(s.x - w / 2, 230);
-          ctx.lineTo(s.x, 230 - h);
-          ctx.lineTo(s.x + w / 2, 230);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-          ctx.strokeStyle = "rgba(255,255,255,0.04)";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(s.x, 230 - h);
-          ctx.lineTo(s.x + w / 4, 230);
-          ctx.stroke();
-        }
-      } else {
+                let isCeiling = s.seed < 0.45;
+                if (isCeiling) {
+                  let h = 35 + s.seed * 50 * ts;
+                  let w = 12 + s.seed * 22 * ts;
+                  if (window.playerStats.currentDungeon === "equip") {
+                    // Hanging iron structural girder supporting the roof
+                    ctx.fillStyle = "#1e242c";
+                    ctx.beginPath();
+                    ctx.rect(s.x - 4, 0, 8, h);
+                    ctx.fill();
+                    ctx.stroke();
+                    // Horizontal cross brackets along the structural shaft
+                    ctx.fillStyle = "#0c0d12";
+                    for (let gy = 10; gy < h; gy += 15) {
+                      ctx.beginPath();
+                      ctx.rect(s.x - 6, gy, 12, 3);
+                      ctx.fill();
+                      ctx.stroke();
+                    }
+                  } else {
+                    let color =
+                      window.playerStats.currentDungeon === "gold"
+                        ? "#332211"
+                        : "#1b2d1f";
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.moveTo(s.x - w / 2, 0);
+                    ctx.lineTo(s.x, h);
+                    ctx.lineTo(s.x + w / 2, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.strokeStyle = "rgba(255,255,255,0.06)";
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(s.x, h);
+                    ctx.lineTo(s.x - w / 4, 0);
+                    ctx.stroke();
+                  }
+                } else {
+                  let h = 22 + s.seed * 45 * ts;
+                  let w = 10 + s.seed * 18 * ts;
+                  if (window.playerStats.currentDungeon === "equip") {
+                    // Vertical floor support pillar
+                    ctx.fillStyle = "#1e242c";
+                    ctx.beginPath();
+                    ctx.rect(s.x - 6, 230 - h, 12, h);
+                    ctx.fill();
+                    ctx.stroke();
+                    // Cast-iron bolted plates at base
+                    ctx.fillStyle = "#0c0d12";
+                    ctx.beginPath();
+                    ctx.rect(s.x - 8, 224, 16, 6);
+                    ctx.fill();
+                    ctx.stroke();
+                  } else {
+                    let color =
+                      window.playerStats.currentDungeon === "gold"
+                        ? "#261a0c"
+                        : "#121f16";
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.moveTo(s.x - w / 2, 230);
+                    ctx.lineTo(s.x, 230 - h);
+                    ctx.lineTo(s.x + w / 2, 230);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.strokeStyle = "rgba(255,255,255,0.04)";
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(s.x, 230 - h);
+                    ctx.lineTo(s.x + w / 4, 230);
+                    ctx.stroke();
+                  }
+                }
+              } else {
         if (s.type === "tree") {
           let tx = s.x,
             ty = s.y - 68 * ts; // Raised canopy height from 40 to 68 to make trees towering!
@@ -8317,30 +8918,59 @@
           }
         }
       } else {
+        // 1. Volcanic Iron-Vault Ground Base (Rich deep soot)
         let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
-        groundGrad.addColorStop(0, "#1c2229");
-        groundGrad.addColorStop(1, "#0c0f13");
+        groundGrad.addColorStop(0, "#11161b"); // Slate industrial iron
+        groundGrad.addColorStop(1, "#07090c"); // Deep coal-black
         ctx.fillStyle = groundGrad;
         ctx.fillRect(0, 230, canvas.width, 90);
-        ctx.strokeStyle = "#10141a";
-        ctx.lineWidth = 2;
+
+        // 2. Thick Molten Orange Under-Grate Seams
+        let pulse = 0.8 + Math.sin(Date.now() / 250) * 0.2;
+        ctx.strokeStyle = `rgba(230, 126, 34, ${0.4 + pulse * 0.4})`; // Molten orange seams
+        ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(0, 230);
-        ctx.lineTo(canvas.width, 230);
+        // Horizontal molten lines peeking through iron plate joints
         ctx.moveTo(0, 252);
         ctx.lineTo(canvas.width, 252);
         ctx.moveTo(0, 276);
         ctx.lineTo(canvas.width, 276);
         ctx.stroke();
-        for (let i = -100; i < canvas.width + 100; i += 80) {
-          let gx = i - ((window.groundScroll + totalShift) % 80);
+
+        ctx.strokeStyle = `rgba(241, 196, 15, ${0.4 + pulse * 0.5})`; // White-hot inner core line
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 3. Rigid Heavy Iron-Grate Plate Panels (Locked solid to window.groundScroll - NO swaying)
+        ctx.fillStyle = "#1c2229";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = penFar;
+
+        // Draw top horizon outline of the vault plates
+        ctx.beginPath();
+        ctx.moveTo(0, 230);
+        ctx.lineTo(canvas.width, 230);
+        ctx.stroke();
+
+        // We draw vertical plate seams scrolling linearly on groundScroll only (NO swaying totalShift!)
+        let scrollOffset = window.groundScroll % 80;
+        for (let i = -80; i < canvas.width + 80; i += 80) {
+          let gx = i - scrollOffset;
+
+          // Draw solid dark iron-plate border cuts
           ctx.beginPath();
           ctx.moveTo(gx, 230);
-          ctx.lineTo(gx, 252);
-          ctx.moveTo(gx + 40, 252);
-          ctx.lineTo(gx + 40, 276);
-          ctx.moveTo(gx + 10, 276);
-          ctx.lineTo(gx + 10, 300);
+          ctx.lineTo(gx, 320);
+          ctx.stroke();
+
+          // Draw heavy rivets on the plate corners
+          ctx.fillStyle = "#0c0f13";
+          ctx.beginPath();
+          ctx.arc(gx - 4, 235, 1.5, 0, Math.PI * 2);
+          ctx.arc(gx + 4, 235, 1.5, 0, Math.PI * 2);
+          ctx.arc(gx - 4, 315, 1.5, 0, Math.PI * 2);
+          ctx.arc(gx + 4, 315, 1.5, 0, Math.PI * 2);
+          ctx.fill();
           ctx.stroke();
         }
       }
@@ -8407,29 +9037,91 @@
         ctx.closePath();
         ctx.fill();
       } else if (tier === 2) {
+        // 1. Obsidian Basalt Ground Base
         let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
-        groundGrad.addColorStop(0, "#1a0805");
-        groundGrad.addColorStop(1, "#080201");
+        groundGrad.addColorStop(0, "#120302"); // Dark cooled basalt
+        groundGrad.addColorStop(0.3, "#080100"); // Depth shadows
+        groundGrad.addColorStop(1, "#020000"); // Pitch black
         ctx.fillStyle = groundGrad;
         ctx.fillRect(0, 230, canvas.width, 90);
-        let pulse = Math.sin(Date.now() / 150) * 0.15 + 0.85;
-        for (let i = -140; i < canvas.width + 140; i += 140) {
-          let gx = i - ((window.groundScroll + totalShift) % 140);
-          ctx.strokeStyle = `rgba(230, 126, 34, ${0.8 * pulse})`;
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.moveTo(gx, 230);
-          ctx.quadraticCurveTo(gx + 35, 255, gx + 20, 275);
-          ctx.quadraticCurveTo(gx + 5, 295, gx + 70, 300);
-          ctx.stroke();
-          ctx.strokeStyle = `rgba(241, 196, 15, ${0.9 * pulse})`;
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.moveTo(gx, 230);
-          ctx.quadraticCurveTo(gx + 35, 255, gx + 20, 275);
-          ctx.quadraticCurveTo(gx + 5, 295, gx + 70, 300);
-          ctx.stroke();
-        }
+
+        // 2. Cooling Plate Boundaries (Procedural Index-Based Random Spider Fractures)
+        let drawCrackedTectonicGrid = (lineW, color) => {
+          ctx.save();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = lineW;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+
+          // Fast sine-based hash to deterministically randomize crack shapes based on grid index
+          let hash = (val) => {
+            let x = Math.sin(val) * 10000;
+            return x - Math.floor(x);
+          };
+
+          let spacing = 120; // Structural grid gap
+          let startI = Math.floor(window.groundScroll / spacing) - 2;
+          let endI = startI + Math.ceil(canvas.width / spacing) + 4;
+
+          for (let i = startI; i <= endI; i++) {
+            let worldX = i * spacing;
+            let gx = worldX - window.groundScroll;
+
+            // Generate unique, non-repeating offsets for each coordinate index
+            let h1 = hash(i) * 14 - 7;
+            let h2 = hash(i + 0.5) * 14 - 7;
+            let h3 = hash(i + 1.2) * 18 - 9;
+            let h4 = hash(i + 1.9) * 18 - 9;
+            let h5 = hash(i + 2.5) * 14 - 7;
+
+            // Major jagged vertical/diagonal fissure (cooling crack)
+            ctx.beginPath();
+            ctx.moveTo(gx, 230);
+            ctx.lineTo(gx - 10 + h1, 248);
+            ctx.lineTo(gx + 8 + h2, 268);
+            ctx.lineTo(gx - 18 + h3, 292);
+            ctx.lineTo(gx + 12 + h4, 320);
+            ctx.stroke();
+
+            // Branching diagonal spider cracks (procedurally distributed via hash)
+            if (hash(i + 3.1) > 0.3) {
+              ctx.beginPath();
+              ctx.moveTo(gx + 8 + h2, 268);
+              ctx.lineTo(gx + 45 + h5, 275);
+              ctx.lineTo(gx + 72 + h1, 262);
+              ctx.lineTo(gx + 115 + h3, 280);
+              ctx.stroke();
+            }
+
+            if (hash(i + 4.2) > 0.4) {
+              ctx.beginPath();
+              ctx.moveTo(gx - 12 + h1, 248);
+              ctx.lineTo(gx + 30 + h4, 252);
+              ctx.lineTo(gx + 65 + h2, 238);
+              ctx.stroke();
+            }
+
+            if (hash(i + 5.7) > 0.3) {
+              ctx.beginPath();
+              ctx.moveTo(gx - 18 + h3, 292);
+              ctx.lineTo(gx + 40 + h1, 305);
+              ctx.lineTo(gx + 90 + h5, 295);
+              ctx.lineTo(gx + 130 + h2, 315);
+              ctx.stroke();
+            }
+          }
+          ctx.restore();
+        };
+
+        // Render deep, glowing lava crust crack under-glow first
+        drawCrackedTectonicGrid(3.5, "rgba(192, 57, 43, 0.75)");
+
+        // Render thin bright golden-yellow molten core on top
+        let pulse = 0.7 + Math.sin(Date.now() / 200) * 0.3;
+        drawCrackedTectonicGrid(
+          1.5,
+          `rgba(241, 196, 15, ${0.45 + pulse * 0.45})`,
+        );
       } else if (tier === 3) {
         let groundGrad = ctx.createLinearGradient(0, 230, 0, 320);
         groundGrad.addColorStop(0, "#0e1a12");
@@ -8730,77 +9422,173 @@
             ctx.stroke();
           }
         } else if (window.playerStats.currentDungeon === "mat") {
-          if (s.type === "grass") {
-            ctx.fillStyle = "#27ae60";
-            ctx.beginPath();
-            ctx.ellipse(sx, sy - 3 * ss, 9 * ss, 5 * ss, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle = "#2ecc71";
-            ctx.beginPath();
-            ctx.arc(sx, sy - 5 * ss, 2.5 * ss, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-          } else if (s.type === "flower") {
-            ctx.fillStyle = "#95a5a6";
-            ctx.beginPath();
-            ctx.rect(sx - 1.5 * ss, sy - 12 * ss, 3 * ss, 12 * ss);
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle = "#2ecc71";
-            ctx.beginPath();
-            ctx.arc(sx, sy - 12 * ss, 7 * ss, Math.PI, 0);
-            ctx.fill();
-            ctx.stroke();
-          } else {
-            ctx.fillStyle = "#7f8c8d";
-            ctx.beginPath();
-            ctx.rect(sx - 8 * ss, sy - 18 * ss, 16 * ss, 18 * ss);
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle = "#34495e";
-            ctx.beginPath();
-            ctx.rect(sx - 8 * ss, sy - 15 * ss, 16 * ss, 2 * ss);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.rect(sx - 8 * ss, sy - 6 * ss, 16 * ss, 2 * ss);
-            ctx.fill();
-            ctx.stroke();
-          }
-        } else {
-          if (s.type === "grass") {
-            ctx.fillStyle = "#34495e";
-            ctx.beginPath();
-            ctx.moveTo(sx - 4 * ss, sy);
-            ctx.lineTo(sx, sy - 14 * ss);
-            ctx.lineTo(sx + 4 * ss, sy);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-          } else if (s.type === "flower") {
-            ctx.fillStyle = "#ecf0f1";
-            ctx.beginPath();
-            ctx.arc(sx, sy - 4 * ss, 4 * ss, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.rect(sx - 2 * ss, sy - 2 * ss, 4 * ss, 3 * ss);
-            ctx.fill();
-            ctx.stroke();
-          } else {
-            ctx.fillStyle = "#2c3e50";
-            ctx.beginPath();
-            ctx.rect(sx - 1.5, sy - 16 * ss, 3, 16 * ss);
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle = "#7f8c8d";
-            ctx.beginPath();
-            ctx.arc(sx, sy - 14 * ss, 6 * ss, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-          }
-        }
+                  if (s.type === "grass") {
+                    ctx.fillStyle = "#27ae60";
+                    ctx.beginPath();
+                    ctx.ellipse(sx, sy - 3 * ss, 9 * ss, 5 * ss, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                  } else if (s.type === "flower") {
+                    ctx.fillStyle = "#95a5a6";
+                    ctx.beginPath();
+                    ctx.rect(sx - 1.5 * ss, sy - 12 * ss, 3 * ss, 12 * ss);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.fillStyle = "#2ecc71";
+                    ctx.beginPath();
+                    ctx.arc(sx, sy - 12 * ss, 7 * ss, Math.PI, 0);
+                    ctx.fill();
+                    ctx.stroke();
+                  } else {
+                    ctx.fillStyle = "#7f8c8d";
+                    ctx.beginPath();
+                    ctx.rect(sx - 8 * ss, sy - 18 * ss, 16 * ss, 18 * ss);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.fillStyle = "#34495e";
+                    ctx.beginPath();
+                    ctx.rect(sx - 8 * ss, sy - 15 * ss, 16 * ss, 2 * ss);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.rect(sx - 8 * ss, sy - 6 * ss, 16 * ss, 2 * ss);
+                    ctx.fill();
+                    ctx.stroke();
+                  }
+                } else if (window.playerStats.currentDungeon === "equip") {
+                          if (s.type === "grass") {
+                            // Robust stacks of refined metal ingots
+                            let w = 18 * ss;
+                            let h = 6 * ss;
+                            ctx.fillStyle = "#34495e"; // Steel body
+                            ctx.strokeStyle = "#000000";
+                            ctx.lineWidth = penFgScenery * ss;
+
+                            // Bottom Left Bar
+                            ctx.beginPath();
+                            ctx.roundRect(sx - w * 0.7, sy - h, w, h, [1.5]);
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // Bottom Right Bar
+                            ctx.beginPath();
+                            ctx.roundRect(sx - w * 0.1, sy - h, w, h, [1.5]);
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // Top Center Bar
+                            ctx.beginPath();
+                            ctx.roundRect(sx - w * 0.4, sy - h * 1.8, w, h, [1.5]);
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // Shiny metallic reflection line highlights
+                            ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+                            ctx.lineWidth = 1.2 * ss;
+                            ctx.beginPath();
+                            ctx.moveTo(sx - w * 0.2, sy - h * 1.4);
+                            ctx.lineTo(sx + w * 0.4, sy - h * 1.4);
+                            ctx.stroke();
+                          } else if (s.type === "flower") {
+                            // Thick brass steam exhaust pipe
+                            let pipeW = 10 * ss;
+                            let pipeH = 22 * ss;
+
+                            // Main vertical pipe body
+                            ctx.fillStyle = "#7e5109"; // Weathered brass
+                            ctx.strokeStyle = "#000000";
+                            ctx.lineWidth = penFgScenery * ss;
+                            ctx.beginPath();
+                            ctx.rect(sx - pipeW / 2, sy - pipeH, pipeW, pipeH);
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // Heavy flange joint collar at base
+                            ctx.fillStyle = "#1e222b";
+                            ctx.beginPath();
+                            ctx.roundRect(sx - pipeW * 0.8, sy - 4 * ss, pipeW * 1.6, 4 * ss, [1]);
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // Flared bell mouth at the top of the exhaust
+                            ctx.fillStyle = "#1e222b";
+                            ctx.beginPath();
+                            ctx.moveTo(sx - pipeW * 0.8, sy - pipeH);
+                            ctx.lineTo(sx + pipeW * 0.8, sy - pipeH);
+                            ctx.lineTo(sx + pipeW * 0.5, sy - pipeH + 4 * ss);
+                            ctx.lineTo(sx - pipeW * 0.5, sy - pipeH + 4 * ss);
+                            ctx.closePath();
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // Zero-allocation rising steam puff animation
+                            ctx.save();
+                            let animTime = ((Date.now() / 900) + s.seed * 5) % 1.0;
+                            let steamY = sy - pipeH - (animTime * 15 * ss);
+                            let steamR = (2.5 + animTime * 4.5) * ss;
+                            let steamAlpha = (1.0 - animTime) * 0.45;
+                            ctx.fillStyle = `rgba(220, 224, 230, ${steamAlpha})`;
+                            ctx.beginPath();
+                            ctx.arc(sx + Math.sin(animTime * 5) * 3 * ss, steamY, steamR, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.restore();
+                          } else {
+                            // Sturdy wooden stump base
+                            let stumpW = 18 * ss;
+                            let stumpH = 12 * ss;
+                            ctx.fillStyle = "#5c3a21"; // Rich wood stump
+                            ctx.strokeStyle = "#000000";
+                            ctx.lineWidth = penFgScenery * ss;
+                            ctx.beginPath();
+                            ctx.rect(sx - stumpW / 2, sy - stumpH, stumpW, stumpH);
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // Stump bark grain texture lines
+                            ctx.strokeStyle = "#3d2514";
+                            ctx.lineWidth = 1 * ss;
+                            ctx.beginPath();
+                            ctx.moveTo(sx - stumpW * 0.2, sy - stumpH + 2 * ss);
+                            ctx.lineTo(sx - stumpW * 0.2, sy - 2 * ss);
+                            ctx.moveTo(sx + stumpW * 0.25, sy - stumpH + 3 * ss);
+                            ctx.lineTo(sx + stumpW * 0.25, sy - 1 * ss);
+                            ctx.stroke();
+
+                            // Robust steel anvil sitting on top
+                            let anvilY = sy - stumpH;
+                            ctx.fillStyle = "#2c3e50"; // Dark forge steel
+                            ctx.strokeStyle = "#000000";
+                            ctx.lineWidth = penFgScenery * ss;
+                            ctx.beginPath();
+                            // Horn (pointed left beak)
+                            ctx.moveTo(sx - 11 * ss, anvilY - 8 * ss);
+                            ctx.quadraticCurveTo(sx - 5 * ss, anvilY - 7 * ss, sx - 3 * ss, anvilY - 8 * ss);
+                            // Block flat top surface
+                            ctx.lineTo(sx + 8 * ss, anvilY - 8 * ss);
+                            // Heel (right step edge)
+                            ctx.lineTo(sx + 9 * ss, anvilY - 6 * ss);
+                            ctx.lineTo(sx + 4 * ss, anvilY - 6 * ss);
+                            // Narrow waisted mid-section
+                            ctx.lineTo(sx + 3 * ss, anvilY - 3 * ss);
+                            // Flanged bottom base feet
+                            ctx.lineTo(sx + 7 * ss, anvilY);
+                            ctx.lineTo(sx - 7 * ss, anvilY);
+                            ctx.lineTo(sx - 3 * ss, anvilY - 3 * ss);
+                            ctx.lineTo(sx - 4 * ss, anvilY - 6 * ss);
+                            ctx.lineTo(sx - 11 * ss, anvilY - 6 * ss);
+                            ctx.closePath();
+                            ctx.fill();
+                            ctx.stroke();
+
+                            // Shiny horizontal reflection highlight on top of anvil block
+                            ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+                            ctx.lineWidth = 1 * ss;
+                            ctx.beginPath();
+                            ctx.moveTo(sx - 3 * ss, anvilY - 7 * ss);
+                            ctx.lineTo(sx + 7 * ss, anvilY - 7 * ss);
+                            ctx.stroke();
+                          }
+                        }
       } else {
         if (tier === 0) {
           if (s.type === "grass") {
@@ -9174,31 +9962,147 @@
           }
         } else if (tier === 2) {
           if (s.type === "grass") {
-            let hover = (Date.now() / 15 + s.seed * 300) % 30;
-            ctx.fillStyle = "rgba(231, 76, 60, " + (1 - hover / 30) + ")";
+            // Active Volcanic Fumarole (Puffing ash and sparks)
+            ctx.fillStyle = "#1c0b08";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penFgScenery * ss;
             ctx.beginPath();
-            ctx.arc(sx, sy - hover, 2.5 * ss, 0, Math.PI * 2);
+            ctx.moveTo(sx - 9 * ss, sy);
+            ctx.lineTo(sx - 4 * ss, sy - 7 * ss);
+            ctx.lineTo(sx + 4 * ss, sy - 7 * ss);
+            ctx.lineTo(sx + 9 * ss, sy);
+            ctx.closePath();
             ctx.fill();
             ctx.stroke();
+
+            // Glowing molten core inside mouth
+            ctx.fillStyle = "#e67e22";
+            ctx.beginPath();
+            ctx.ellipse(sx, sy - 7 * ss, 4 * ss, 1.5 * ss, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Translucent, expanding volcanic soot clouds
+            let animT = (Date.now() / 800 + s.seed * 10) % 1.0;
+            let puffY = sy - 8 * ss - animT * 22 * ss;
+            let puffR = (2.2 + animT * 4.5) * ss;
+            let puffAlpha = (1.0 - animT) * 0.45;
+
+            ctx.fillStyle = `rgba(100, 95, 95, ${puffAlpha})`;
+            ctx.beginPath();
+            ctx.arc(
+              sx + Math.sin(animT * 4) * 3 * ss,
+              puffY,
+              puffR,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fill();
+
+            // Rising single golden spark
+            let sparkY =
+              sy - 8 * ss - ((Date.now() / 400 + s.seed * 15) % 1.0) * 30 * ss;
+            ctx.fillStyle = "#ffd700";
+            ctx.fillRect(
+              sx + Math.cos(Date.now() / 150 + s.seed * 5) * 3 * ss,
+              sparkY,
+              1.2 * ss,
+              1.2 * ss,
+            );
           } else if (s.type === "flower") {
-            ctx.fillStyle = "#110200";
+            // Sharp Glowing Fire Crystal Cluster
+            ctx.save();
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penFgScenery * ss;
+            ctx.lineJoin = "miter";
+
+            // Middle Crystal (Tallest)
+            ctx.fillStyle = "#e74c3c";
             ctx.beginPath();
             ctx.moveTo(sx, sy);
-            ctx.quadraticCurveTo(
-              sx - 3 * ss,
-              sy - 8 * ss,
-              sx - 6 * ss,
-              sy - 12 * ss,
-            );
-            ctx.lineTo(sx + 6 * ss, sy);
+            ctx.lineTo(sx - 3 * ss, sy - 14 * ss);
+            ctx.lineTo(sx, sy - 18 * ss);
+            ctx.lineTo(sx + 3 * ss, sy - 14 * ss);
+            ctx.closePath();
             ctx.fill();
             ctx.stroke();
+
+            // Left side Crystal
+            ctx.fillStyle = "#d35400";
+            ctx.beginPath();
+            ctx.moveTo(sx - 2 * ss, sy);
+            ctx.lineTo(sx - 8 * ss, sy - 10 * ss);
+            ctx.lineTo(sx - 5 * ss, sy - 13 * ss);
+            ctx.lineTo(sx, sy - 6 * ss);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Right side Crystal
+            ctx.fillStyle = "#ffd700";
+            ctx.beginPath();
+            ctx.moveTo(sx + 2 * ss, sy);
+            ctx.lineTo(sx + 7 * ss, sy - 8 * ss);
+            ctx.lineTo(sx + 4 * ss, sy - 11 * ss);
+            ctx.lineTo(sx, sy - 5 * ss);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Glowing inner facet (pulses over time)
+            let pulse = 0.5 + Math.sin(Date.now() / 180 + s.seed * 50) * 0.5;
+            ctx.fillStyle = `rgba(255, 242, 0, ${0.45 + pulse * 0.45})`;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy - 4 * ss);
+            ctx.lineTo(sx - 1.2 * ss, sy - 12 * ss);
+            ctx.lineTo(sx, sy - 15 * ss);
+            ctx.lineTo(sx + 1.2 * ss, sy - 12 * ss);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
           } else {
-            ctx.fillStyle = "#2c0e08";
+            // Scorched Roots & Basalt Brimstone Stone
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penFgScenery * ss;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+
+            // Basalt base stone
+            ctx.fillStyle = "#2d0b06";
+            ctx.beginPath();
+            ctx.moveTo(sx - 12 * ss, sy);
+            ctx.lineTo(sx - 6 * ss, sy - 8 * ss);
+            ctx.lineTo(sx + 6 * ss, sy - 8 * ss);
+            ctx.lineTo(sx + 12 * ss, sy);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#ff5500";
+            ctx.beginPath();
+            ctx.rect(sx - 3 * ss, sy - 8 * ss, 6 * ss, 2 * ss);
+            ctx.fill();
+
+            // Burnt black roots wrapping around the hot stone
+            ctx.fillStyle = "#110200";
             ctx.beginPath();
             ctx.moveTo(sx - 14 * ss, sy);
-            ctx.lineTo(sx, sy - 6 * ss);
-            ctx.lineTo(sx + 14 * ss, sy);
+            ctx.quadraticCurveTo(sx - 6 * ss, sy - 11 * ss, sx, sy - 4 * ss);
+            ctx.lineTo(sx - 2 * ss, sy);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(sx + 14 * ss, sy);
+            ctx.quadraticCurveTo(
+              sx + 4 * ss,
+              sy - 14 * ss,
+              sx - 2 * ss,
+              sy - 6 * ss,
+            );
+            ctx.lineTo(sx + 1 * ss, sy);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
