@@ -22,8 +22,11 @@ window.PitySystem = {
 window.getSlotUpgradeCost = function (slotKey, currentLevel) {
   let targetLevel = currentLevel + 1; // 1 to 100
   let gold = 0;
-  if (targetLevel <= 30) {
-    gold = Math.floor(100000 * Math.pow(2.25, targetLevel));
+  if (targetLevel <= 10) {
+    gold = Math.floor(2500 * Math.pow(1.35, targetLevel));
+  } else if (targetLevel <= 30) {
+    let costAt10 = Math.floor(2500 * Math.pow(1.35, 10)); // ~50,253
+    gold = Math.floor(costAt10 * Math.pow(3.55, targetLevel - 10));
   } else {
     let costAt30 = 100000 * Math.pow(2.25, 30);
     gold = Math.floor(costAt30 * Math.pow(3.0, targetLevel - 30));
@@ -34,7 +37,7 @@ window.getSlotUpgradeCost = function (slotKey, currentLevel) {
     // Copper Attunement (Lv. 1 - 10)
     materials.push({
       name: "Monster Soul",
-      qty: Math.floor(50 * Math.pow(1.4, targetLevel)),
+      qty: Math.floor(15 * Math.pow(1.25, targetLevel)),
     });
   } else if (targetLevel <= 25) {
     // Iron Attunement (Lv. 11 - 25)

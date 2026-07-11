@@ -4574,172 +4574,437 @@ window.CombatEngine = {
     }
 
     if (window.playerStats.isDungeonMode) {
-      if (window.playerStats.currentDungeon === "equip") {
-        if (window.mob.type === "dungeon_boss") {
-          // Guaranteed Equipment Drop for defeating the Floor Boss
-          if (typeof window.rollEquipmentDrop === "function") {
-            let minStarsRoll = Math.random() < 0.2 ? 1 : 0; // 20% chance to guarantee 1★+ minimum
-            window.rollEquipmentDrop(true, false, minStarsRoll, false, true); // isMilestone = true bypasses rng check
-          }
-          // Balanced unique artifact tempering speed by adjusting Overlord's Sigil rate to 20%
-          if (Math.random() < 0.05) {
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop("Overlord's Sigil", 1);
-            if (typeof window.pushToast === "function")
-              window.pushToast("Overlord's Sigil", null, "#1abc9c", true, 1);
+          if (window.playerStats.currentDungeon === "equip") {
+            if (window.mob.type === "dungeon_boss") {
+              // Guaranteed Equipment Drop for defeating the Floor Boss
+              if (typeof window.rollEquipmentDrop === "function") {
+                let minStarsRoll = Math.random() < 0.2 ? 1 : 0; // 20% chance to guarantee 1★+ minimum
+                window.rollEquipmentDrop(true, false, minStarsRoll, false, true); // isMilestone = true bypasses rng check
+              }
+              // Balanced unique artifact tempering speed by adjusting Overlord's Sigil rate to 20%
+              if (Math.random() < 0.05) {
+                if (typeof window.addEtcDrop === "function")
+                  window.addEtcDrop("Overlord's Sigil", 1);
+                if (typeof window.pushToast === "function")
+                  window.pushToast("Overlord's Sigil", null, "#1abc9c", true, 1);
+              }
+            } else {
+              // Let the single-roll loot and Pity system handle minion kills cleanly
+              if (typeof window.rollEquipmentDrop === "function") {
+                window.rollEquipmentDrop(false, false, 0, false);
+              }
+            }
+          } else if (window.playerStats.currentDungeon === "mat") {
+            let dStage = window.playerStats.currentDungeonStage["mat"] || 1;
+            if (window.mob.type === "dungeon_boss") {
+              // Soft progression depth-based calculations replacing hard dungeon floor gates
+              let dDepthQ = window.getDepthQualityMultiplier(dStage);
+              let dCoreChance = 0.008 * (dDepthQ - 1.0);
+              let dKeyChance = 0.0005 * (dDepthQ - 1.0);
+              let dShardChance = 0.0016 * (dDepthQ - 1.0);
+
+              if (dDepthQ > 1.0 && Math.random() < dCoreChance) {
+                if (typeof window.addEtcDrop === "function")
+                  window.addEtcDrop("Ancient Core", 1);
+                if (typeof window.pushToast === "function")
+                  window.pushToast("Ancient Core", null, "#9b59b6", true, 1);
+              }
+              if (dDepthQ > 1.0 && Math.random() < dKeyChance) {
+                if (typeof window.addEtcDrop === "function")
+                  window.addEtcDrop("Gacha Key", 1);
+                if (typeof window.pushToast === "function")
+                  window.pushToast("Gacha Key", null, "#f1c40f", true, 1);
+              }
+              if (dDepthQ > 1.0 && Math.random() < dShardChance) {
+                if (typeof window.addEtcDrop === "function")
+                  window.addEtcDrop("Eridium Shard", 1);
+                if (typeof window.pushToast === "function")
+                  window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
+              }
+
+              // Gated progression scrap drops for Material Cavern Bosses
+              let sigMult = 1.0;
+              if (
+                window.playerStats.isDungeonMode &&
+                window.playerStats.activeDungeonSigil
+              ) {
+                sigMult +=
+                  window.playerStats.activeDungeonSigil.rewardMultiplier || 0;
+              }
+              if (dStage < 150) {
+                if (typeof window.addEtcDrop === "function") {
+                  let scrapAmt = Math.ceil(window.randInt(1, 3) * sigMult);
+                  window.addEtcDrop("Rare Scrap", scrapAmt);
+                  window.effects.push({
+                    type: "item_drop",
+                    itemType: "scrap",
+                    iconColor: "#3498db",
+                    x: window.mob.x + 10,
+                    y: window.mob.y - 15,
+                    text: `+${scrapAmt} Rare Scrap`,
+                    color: "#85c1e9",
+                    life: 55
+                  });
+                }
+              } else if (dStage < 350) {
+                if (Math.random() < 0.3) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Magic Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#9b59b6",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Magic Scrap",
+                      color: "#bb8fce",
+                      life: 55
+                    });
+                  }
+                } else {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Rare Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#3498db",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Rare Scrap",
+                      color: "#85c1e9",
+                      life: 55
+                    });
+                  }
+                }
+              } else if (dStage < 600) {
+                let rRoll = Math.random();
+                if (rRoll < 0.1) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Legendary Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#f1c40f",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Legendary Scrap",
+                      color: "#f7dc6f",
+                      life: 55
+                    });
+                  }
+                } else if (rRoll < 0.5) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Epic Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#e67e22",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Epic Scrap",
+                      color: "#f5b041",
+                      life: 55
+                    });
+                  }
+                } else {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Magic Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#9b59b6",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Magic Scrap",
+                      color: "#bb8fce",
+                      life: 55
+                    });
+                  }
+                }
+              } else if (dStage < 850) {
+                let rRoll = Math.random();
+                if (rRoll < 0.2) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Mythic Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#e74c3c",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Mythic Scrap",
+                      color: "#f1948a",
+                      life: 55
+                    });
+                  }
+                } else if (rRoll < 0.6) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Legendary Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#f1c40f",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Legendary Scrap",
+                      color: "#f7dc6f",
+                      life: 55
+                    });
+                  }
+                } else {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Epic Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#e67e22",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Epic Scrap",
+                      color: "#f5b041",
+                      life: 55
+                    });
+                  }
+                }
+              } else {
+                let yieldAmt = Math.ceil(1 * sigMult);
+                if (Math.random() < 0.7) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Mythic Scrap", yieldAmt);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#e74c3c",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: `+${yieldAmt} Mythic Scrap`,
+                      color: "#f1948a",
+                      life: 55
+                    });
+                  }
+                } else {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Legendary Scrap", yieldAmt);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#f1c40f",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: `+${yieldAmt} Legendary Scrap`,
+                      color: "#f7dc6f",
+                      life: 55
+                    });
+                  }
+                }
+              }
+            } else {
+              // Normal minion drops inside the Material Pit
+              let r = Math.random();
+              if (dStage < 150) {
+                if (typeof window.addEtcDrop === "function") {
+                  window.addEtcDrop("Monster Soul", 1);
+                  window.effects.push({
+                    type: "item_drop",
+                    itemType: "soul",
+                    iconColor: "#888888",
+                    x: window.mob.x,
+                    y: window.mob.y - 15,
+                    text: "+1 Monster Soul",
+                    color: "#bdc3c7",
+                    life: 45
+                  });
+                  // 15% bonus chance for a direct early-game Rare Scrap drop
+                  if (Math.random() < 0.15) {
+                    window.addEtcDrop("Rare Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#3498db",
+                      x: window.mob.x + 15,
+                      y: window.mob.y - 28,
+                      text: "+1 Rare Scrap",
+                      color: "#85c1e9",
+                      life: 48
+                    });
+                  }
+                }
+              } else if (dStage < 350) {
+                if (r < 0.25) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Rare Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#3498db",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Rare Scrap",
+                      color: "#85c1e9",
+                      life: 45
+                    });
+                  }
+                } else {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Monster Soul", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "soul",
+                      iconColor: "#888888",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Monster Soul",
+                      color: "#bdc3c7",
+                      life: 45
+                    });
+                  }
+                }
+              } else if (dStage < 600) {
+                if (r < 0.2) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Magic Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#9b59b6",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Magic Scrap",
+                      color: "#bb8fce",
+                      life: 45
+                    });
+                  }
+                } else if (r < 0.6) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Rare Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#3498db",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Rare Scrap",
+                      color: "#85c1e9",
+                      life: 45
+                    });
+                  }
+                } else {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Monster Soul", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "soul",
+                      iconColor: "#888888",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Monster Soul",
+                      color: "#bdc3c7",
+                      life: 45
+                    });
+                  }
+                }
+              } else if (dStage < 850) {
+                if (r < 0.2) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Epic Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#e67e22",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Epic Scrap",
+                      color: "#f5b041",
+                      life: 45
+                    });
+                  }
+                } else if (r < 0.6) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Magic Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#9b59b6",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Magic Scrap",
+                      color: "#bb8fce",
+                      life: 45
+                    });
+                  }
+                } else {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Rare Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#3498db",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Rare Scrap",
+                      color: "#85c1e9",
+                      life: 45
+                    });
+                  }
+                }
+              } else {
+                if (r < 0.2) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Legendary Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#f1c40f",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Legendary Scrap",
+                      color: "#f7dc6f",
+                      life: 45
+                    });
+                  }
+                } else if (r < 0.7) {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Epic Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#e67e22",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Epic Scrap",
+                      color: "#f5b041",
+                      life: 45
+                    });
+                  }
+                } else {
+                  if (typeof window.addEtcDrop === "function") {
+                    window.addEtcDrop("Magic Scrap", 1);
+                    window.effects.push({
+                      type: "item_drop",
+                      itemType: "scrap",
+                      iconColor: "#9b59b6",
+                      x: window.mob.x,
+                      y: window.mob.y - 15,
+                      text: "+1 Magic Scrap",
+                      color: "#bb8fce",
+                      life: 45
+                    });
+                  }
+                }
+              }
+            }
           }
         } else {
-          // Let the single-roll loot and Pity system handle minion kills cleanly
-          if (typeof window.rollEquipmentDrop === "function") {
-            window.rollEquipmentDrop(false, false, 0, false);
-          }
-        }
-      } else if (window.playerStats.currentDungeon === "mat") {
-        let dStage = window.playerStats.currentDungeonStage["mat"] || 1;
-        if (window.mob.type === "dungeon_boss") {
-          // Soft progression depth-based calculations replacing hard dungeon floor gates
-          let dDepthQ = window.getDepthQualityMultiplier(dStage);
-          let dCoreChance = 0.008 * (dDepthQ - 1.0);
-          let dKeyChance = 0.0005 * (dDepthQ - 1.0);
-          let dShardChance = 0.0016 * (dDepthQ - 1.0);
-
-          if (dDepthQ > 1.0 && Math.random() < dCoreChance) {
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop("Ancient Core", 1);
-            if (typeof window.pushToast === "function")
-              window.pushToast("Ancient Core", null, "#9b59b6", true, 1);
-          }
-          if (dDepthQ > 1.0 && Math.random() < dKeyChance) {
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop("Gacha Key", 1);
-            if (typeof window.pushToast === "function")
-              window.pushToast("Gacha Key", null, "#f1c40f", true, 1);
-          }
-          if (dDepthQ > 1.0 && Math.random() < dShardChance) {
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop("Eridium Shard", 1);
-            if (typeof window.pushToast === "function")
-              window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
-          }
-
-          // Gated progression scrap drops for Material Cavern Bosses
-          let sigMult = 1.0;
+          // Let the single-roll loot function evaluate rates and progress pity natively
           if (
-            window.playerStats.isDungeonMode &&
-            window.playerStats.activeDungeonSigil
+            typeof window.rollEquipmentDrop === "function" &&
+            !window.playerStats.isCrucibleMode
           ) {
-            sigMult +=
-              window.playerStats.activeDungeonSigil.rewardMultiplier || 0;
-          }
-          if (dStage < 150) {
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop(
-                "Rare Scrap",
-                Math.ceil(window.randInt(1, 3) * sigMult),
-              );
-          } else if (dStage < 350) {
-            if (Math.random() < 0.3) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Magic Scrap", 1);
-            } else {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Rare Scrap", 1);
-            }
-          } else if (dStage < 600) {
-            let rRoll = Math.random();
-            if (rRoll < 0.1) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Legendary Scrap", 1);
-            } else if (rRoll < 0.5) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Epic Scrap", 1);
-            } else {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Magic Scrap", 1);
-            }
-          } else if (dStage < 850) {
-            let rRoll = Math.random();
-            if (rRoll < 0.2) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Mythic Scrap", 1);
-            } else if (rRoll < 0.6) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Legendary Scrap", 1);
-            } else {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Epic Scrap", 1);
-            }
-          } else {
-            let yieldAmt = Math.ceil(1 * sigMult);
-            if (Math.random() < 0.7) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Mythic Scrap", yieldAmt);
-            } else {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Legendary Scrap", yieldAmt);
-            }
-          }
-        } else {
-          // Normal minion drops inside the Material Pit
-          let r = Math.random();
-          if (dStage < 150) {
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop("Monster Soul", 1);
-          } else if (dStage < 350) {
-            if (r < 0.25) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Rare Scrap", 1);
-            } else {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Monster Soul", 1);
-            }
-          } else if (dStage < 600) {
-            if (r < 0.2) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Magic Scrap", 1);
-            } else if (r < 0.6) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Rare Scrap", 1);
-            } else {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Monster Soul", 1);
-            }
-          } else if (dStage < 850) {
-            if (r < 0.2) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Epic Scrap", 1);
-            } else if (r < 0.6) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Magic Scrap", 1);
-            } else {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Rare Scrap", 1);
-            }
-          } else {
-            if (r < 0.2) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Legendary Scrap", 1);
-            } else if (r < 0.7) {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Epic Scrap", 1);
-            } else {
-              if (typeof window.addEtcDrop === "function")
-                window.addEtcDrop("Magic Scrap", 1);
-            }
+            window.rollEquipmentDrop(isBoss, false, 0, window.mob.isRare);
           }
         }
-      }
-    } else {
-      // Let the single-roll loot function evaluate rates and progress pity natively
-      if (
-        typeof window.rollEquipmentDrop === "function" &&
-        !window.playerStats.isCrucibleMode
-      ) {
-        window.rollEquipmentDrop(isBoss, false, 0, window.mob.isRare);
-      }
-    }
 
-    if (window.playerStats.isUberBoss) {
+        if (window.playerStats.isUberBoss) {
       let bossType = window.playerStats.currentUberBoss || "guardian";
       let riftLvl = window.playerStats.activeRiftLevel || 1;
 
@@ -4867,18 +5132,21 @@ window.CombatEngine = {
         window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
       }
     } else if (!isBoss && !window.playerStats.isDungeonMode) {
-      if (Math.random() < (window.mob.isRare ? 0.08 : 0.03)) {
-        let etcItemName = window.mob.isRare ? "Luminous Soul" : "Monster Soul";
-        if (typeof window.addEtcDrop === "function")
-          window.addEtcDrop(etcItemName);
-        window.effects.push({
-          x: window.mob.x + 10,
-          y: window.mob.y + 10,
-          text: "+1 " + etcItemName,
-          color: window.mob.isRare ? "#f1c40f" : "#bdc3c7",
-          life: 70,
-        });
-      }
+          if (Math.random() < (window.mob.isRare ? 0.08 : 0.03)) {
+            let etcItemName = window.mob.isRare ? "Luminous Soul" : "Monster Soul";
+            if (typeof window.addEtcDrop === "function")
+              window.addEtcDrop(etcItemName);
+            window.effects.push({
+              type: "item_drop",
+              itemType: "soul",
+              iconColor: window.mob.isRare ? "#ffb6c1" : "#888888",
+              x: window.mob.x + 10,
+              y: window.mob.y + 10,
+              text: "+1 " + etcItemName,
+              color: window.mob.isRare ? "#ffd1dc" : "#bdc3c7",
+              life: 70,
+            });
+          }
       // Progression-Locked Campaign Rare Spawn Ancient Core / Sigil / Shard drops (Flat rare)
       if (window.mob && window.mob.isRare) {
         let activeStage = window.playerStats.stage;
@@ -5444,17 +5712,17 @@ window.CombatEngine = {
     window.SoundManager.play("defeat");
 
     if (wasCrucible) {
-      let shards = window.playerStats.crucibleAccumulatedShards || 0;
-      let cores = window.playerStats.crucibleAccumulatedCores || 0;
-      let gold = window.playerStats.crucibleAccumulatedGold || 0;
-      let xp = window.playerStats.crucibleAccumulatedXp || 0;
+          let shards = window.playerStats.crucibleAccumulatedShards || 0;
+          let cores = window.playerStats.crucibleAccumulatedCores || 0;
+          let gold = window.playerStats.crucibleAccumulatedGold || 0;
+          let xp = window.playerStats.crucibleAccumulatedXp || 0;
 
-      // Defeated penalty applied to Shards/Cores only (20% kept)
-      let keptShards = Math.floor(shards * 0.2);
-      let keptCores = Math.floor(cores * 0.2);
+          // No defeat penalty; full rewards are preserved!
+          let keptShards = shards;
+          let keptCores = cores;
 
-      // Gold & XP are always kept at 100% since those targets were successfully slayed!
-      window.playerStats.coins += gold;
+          // Gold & XP are always kept at 100% since those targets were successfully slayed!
+          window.playerStats.coins += gold;
       window.playerStats.totalGoldEarned =
         (window.playerStats.totalGoldEarned || 0) + gold;
       window.gainXp(xp, true);
@@ -7590,12 +7858,12 @@ window.showCrucibleSummaryModal = function (
   modal.style.padding = "15px";
 
   let headerText = died
-    ? "💀 CRUCIBLE DEFEAT (Consolidated Claim)"
+    ? "💀 CRUCIBLE DEFEAT (100% Claim)"
     : "🔮 CRUCIBLE RETREAT (100% Claim)";
   let colorText = died ? "#e74c3c" : "#9b59b6";
   let footerTip = died
-    ? "You fell! Standard Gold and XP are kept at 100%. Shards and Cores are reduced to a 20% salvage value. Retreat safely next time to claim 100%!"
-    : "Safely retreated! You claimed 100% of all accumulated Shards, Cores, Gold, and XP.";
+    ? "You fell! But, you have have escaped with all accumulated Shards, Cores, Gold, and XP!"
+    : "Safely retreated! You retreated with all accumulated Shards, Cores, Gold, and XP.";
 
   modal.innerHTML = `
         <div style="background:#161616; border: 2.5px solid ${colorText}; border-radius: 12px; width:100%; max-width:440px; display:flex; flex-direction:column; box-shadow: 0 15px 45px rgba(0,0,0,0.95); animation: toastFadeIn 0.3s; overflow:hidden;">

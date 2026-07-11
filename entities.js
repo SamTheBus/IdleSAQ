@@ -11237,48 +11237,124 @@
         ctx.fillStyle = eff.color || "#f1c40f";
         ctx.fillText(hitText, hx + 14, hy + 4);
       } else if (eff.type === "bleed") {
-        // 1. Draw Shiny Crimson Blood Droplet (Cel-Shaded)
-        ctx.fillStyle = "#c0392b"; // Deep crimson blood
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 3.5;
-        ctx.lineJoin = "round";
-        ctx.beginPath();
-        ctx.moveTo(hx, hy - 8);
-        ctx.quadraticCurveTo(hx - 6, hy, hx - 6, hy + 4);
-        ctx.quadraticCurveTo(hx - 6, hy + 9, hx, hy + 9);
-        ctx.quadraticCurveTo(hx + 6, hy + 9, hx + 6, hy + 4);
-        ctx.quadraticCurveTo(hx + 6, hy - 2, hx, hy - 8);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
+              // 1. Draw Shiny Crimson Blood Droplet (Cel-Shaded)
+              ctx.fillStyle = "#c0392b"; // Deep crimson blood
+              ctx.strokeStyle = "#000000";
+              ctx.lineWidth = 3.5;
+              ctx.lineJoin = "round";
+              ctx.beginPath();
+              ctx.moveTo(hx, hy - 8);
+              ctx.quadraticCurveTo(hx - 6, hy, hx - 6, hy + 4);
+              ctx.quadraticCurveTo(hx - 6, hy + 9, hx, hy + 9);
+              ctx.quadraticCurveTo(hx + 6, hy + 9, hx + 6, hy + 4);
+              ctx.quadraticCurveTo(hx + 6, hy - 2, hx, hy - 8);
+              ctx.closePath();
+              ctx.fill();
+              ctx.stroke();
 
-        // Specular shine
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.ellipse(hx - 2, hy + 2, 1.2, 2.5, Math.PI / 4, 0, Math.PI * 2);
-        ctx.fill();
+              // Specular shine
+              ctx.fillStyle = "#ffffff";
+              ctx.beginPath();
+              ctx.ellipse(hx - 2, hy + 2, 1.2, 2.5, Math.PI / 4, 0, Math.PI * 2);
+              ctx.fill();
 
-        // 2. Draw Damage Text (Dark Crimson)
-        let hitText = window.formatNumber(eff.amount);
-        ctx.font = "bold 15px monospace";
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 3.5;
-        ctx.lineJoin = "round";
-        ctx.strokeText(hitText, hx + 14, hy + 4);
-        ctx.fillStyle = eff.color || "#960018";
-        ctx.fillText(hitText, hx + 14, hy + 4);
-      } else {
-        ctx.font = "bold 18px sans-serif";
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 4;
-        ctx.lineJoin = "miter";
-        ctx.miterLimit = 2;
-        ctx.strokeText(eff.text, eff.x, eff.y);
-        ctx.fillStyle = eff.color;
-        ctx.fillText(eff.text, eff.x, eff.y);
-      }
-      ctx.restore();
-    });
+              // 2. Draw Damage Text (Dark Crimson)
+              let hitText = window.formatNumber(eff.amount);
+              ctx.font = "bold 15px monospace";
+              ctx.strokeStyle = "#000000";
+              ctx.lineWidth = 3.5;
+              ctx.lineJoin = "round";
+              ctx.strokeText(hitText, hx + 14, hy + 4);
+              ctx.fillStyle = eff.color || "#960018";
+              ctx.fillText(hitText, hx + 14, hy + 4);
+            } else if (eff.type === "item_drop") {
+              ctx.font = "bold 13px sans-serif";
+              ctx.strokeStyle = "#000000";
+              ctx.lineWidth = 3.5;
+              ctx.lineJoin = "round";
+
+              let text = eff.text;
+              let iconColor = eff.iconColor || "#ffb6c1";
+              let itemType = eff.itemType || "soul";
+
+              let textWidth = ctx.measureText(text).width;
+
+              ctx.strokeText(text, hx, hy);
+              ctx.fillStyle = eff.color || "#ffffff";
+              ctx.fillText(text, hx, hy);
+
+              ctx.save();
+              ctx.translate(hx + textWidth + 8, hy - 4);
+              ctx.strokeStyle = "#000000";
+              ctx.lineWidth = 1.5;
+              ctx.fillStyle = iconColor;
+
+              if (itemType === "soul") {
+                ctx.beginPath();
+                ctx.moveTo(0, -6);
+                ctx.bezierCurveTo(-4, 0, -4, 5, 0, 5);
+                ctx.bezierCurveTo(4, 5, 4, 0, 0, -6);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                ctx.arc(-1.2, 1.2, 0.7, 0, Math.PI * 2);
+                ctx.fill();
+              } else if (itemType === "scrap") {
+                ctx.beginPath();
+                ctx.moveTo(-3, -3);
+                ctx.lineTo(3, -5);
+                ctx.lineTo(5, 2);
+                ctx.lineTo(-2, 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+              } else if (itemType === "core") {
+                ctx.beginPath();
+                ctx.rect(-3.5, -3.5, 7, 7);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(-1, -1, 2, 2);
+              } else if (itemType === "key") {
+                ctx.beginPath();
+                ctx.arc(-1.5, -1.5, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(1, -1.5);
+                ctx.lineTo(5, -1.5);
+                ctx.lineTo(5, 1);
+                ctx.stroke();
+              } else if (itemType === "shard") {
+                ctx.beginPath();
+                ctx.moveTo(0, -5);
+                ctx.lineTo(3.5, 0);
+                ctx.lineTo(0, 5);
+                ctx.lineTo(-3.5, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+              } else {
+                ctx.beginPath();
+                ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+              }
+              ctx.restore();
+            } else {
+              ctx.font = "bold 18px sans-serif";
+              ctx.strokeStyle = "#000000";
+              ctx.lineWidth = 4;
+              ctx.lineJoin = "miter";
+              ctx.miterLimit = 2;
+              ctx.strokeText(eff.text, eff.x, eff.y);
+              ctx.fillStyle = eff.color;
+              ctx.fillText(eff.text, eff.x, eff.y);
+            }
+            ctx.restore();
+          });
 
     if (
       window.isGamePaused &&
