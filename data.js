@@ -2197,7 +2197,7 @@ window.equippedSlots = {
   art2: null,
   art3: null,
 };
-window.inventory = { EQUIP: [], ARTIFACT: [], ETC: {}, USE: {} };
+window.inventory = { EQUIP: [], ARTIFACT: [], SIGIL: [], ETC: {}, USE: {} };
 window.logsHistory = [];
 window.frozenItemDb = {};
 window.idCounter = 0;

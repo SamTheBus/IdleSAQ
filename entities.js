@@ -6748,131 +6748,160 @@
           ctx.stroke();
         }
       } else if (window.playerStats.currentDungeon === "equip") {
-              // Vaulted roof support girders/trusses (Dark structural framework)
-              ctx.save();
-              ctx.strokeStyle = "#07080a";
-              ctx.lineWidth = 14;
-              ctx.beginPath();
-              // Horizontal main support truss
-              ctx.moveTo(0, 30);
-              ctx.lineTo(canvas.width, 30);
-              ctx.stroke();
+        // Vaulted roof support girders/trusses (Dark structural framework)
+        ctx.save();
+        ctx.strokeStyle = "#07080a";
+        ctx.lineWidth = 14;
+        ctx.beginPath();
+        // Horizontal main support truss
+        ctx.moveTo(0, 30);
+        ctx.lineTo(canvas.width, 30);
+        ctx.stroke();
 
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 2;
-              // Diagonal lattice bracing lines
-              for (let tx = 0; tx < canvas.width; tx += 60) {
-                ctx.beginPath();
-                ctx.moveTo(tx, 0);
-                ctx.lineTo(tx + 30, 30);
-                ctx.lineTo(tx + 60, 0);
-                ctx.stroke();
-              }
-              ctx.restore();
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2;
+        // Diagonal lattice bracing lines
+        for (let tx = 0; tx < canvas.width; tx += 60) {
+          ctx.beginPath();
+          ctx.moveTo(tx, 0);
+          ctx.lineTo(tx + 30, 30);
+          ctx.lineTo(tx + 60, 0);
+          ctx.stroke();
+        }
+        ctx.restore();
 
-              // 1. Central Smeltery Hearth (Glowing Background Furnace)
-              let hearthX = canvas.width / 2;
-              let hearthY = 230;
-              let hearthW = 120;
-              let hearthH = 140;
+        // 1. Central Smeltery Hearth (Glowing Background Furnace)
+        let hearthX = canvas.width / 2;
+        let hearthY = 230;
+        let hearthW = 120;
+        let hearthH = 140;
 
-              ctx.save();
-              ctx.fillStyle = "#0c0d12"; // Inner deep fire pit shadow
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 3;
-              ctx.beginPath();
-              ctx.moveTo(hearthX - hearthW / 2, hearthY);
-              ctx.lineTo(hearthX - hearthW / 2, hearthY - hearthH + 30);
-              ctx.quadraticCurveTo(hearthX, hearthY - hearthH - 10, hearthX + hearthW / 2, hearthY - hearthH + 30);
-              ctx.lineTo(hearthX + hearthW / 2, hearthY);
-              ctx.closePath();
-              ctx.fill();
-              ctx.stroke();
+        ctx.save();
+        ctx.fillStyle = "#0c0d12"; // Inner deep fire pit shadow
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(hearthX - hearthW / 2, hearthY);
+        ctx.lineTo(hearthX - hearthW / 2, hearthY - hearthH + 30);
+        ctx.quadraticCurveTo(
+          hearthX,
+          hearthY - hearthH - 10,
+          hearthX + hearthW / 2,
+          hearthY - hearthH + 30,
+        );
+        ctx.lineTo(hearthX + hearthW / 2, hearthY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
 
-              // Slow, heavily dampened breathing core (period slowed to 1.8 seconds, amplitude reduced to 0.035)
-              let firePulse = 0.965 + Math.sin(Date.now() / 1800) * 0.035;
-              let fireGrad = ctx.createRadialGradient(hearthX, hearthY - 10, 5, hearthX, hearthY - 10, (hearthW / 2) * firePulse);
-              fireGrad.addColorStop(0, "#ffffff");
-              fireGrad.addColorStop(0.25, "#f1c40f"); // Searing gold
-              fireGrad.addColorStop(0.55, "#e67e22"); // Molten orange
-              fireGrad.addColorStop(0.88, "#960018"); // Ashy crimson
-              fireGrad.addColorStop(1, "rgba(0,0,0,0)");
-              ctx.fillStyle = fireGrad;
-              ctx.beginPath();
-              ctx.moveTo(hearthX - hearthW / 2 + 5, hearthY);
-              ctx.lineTo(hearthX - hearthW / 2 + 5, hearthY - hearthH + 35);
-              ctx.quadraticCurveTo(hearthX, hearthY - hearthH, hearthX + hearthW / 2 - 5, hearthY - hearthH + 35);
-              ctx.lineTo(hearthX + hearthW / 2 - 5, hearthY);
-              ctx.closePath();
-              ctx.fill();
+        // Slow, heavily dampened breathing core (period slowed to 1.8 seconds, amplitude reduced to 0.035)
+        let firePulse = 0.965 + Math.sin(Date.now() / 1800) * 0.035;
+        let fireGrad = ctx.createRadialGradient(
+          hearthX,
+          hearthY - 10,
+          5,
+          hearthX,
+          hearthY - 10,
+          (hearthW / 2) * firePulse,
+        );
+        fireGrad.addColorStop(0, "#ffffff");
+        fireGrad.addColorStop(0.25, "#f1c40f"); // Searing gold
+        fireGrad.addColorStop(0.55, "#e67e22"); // Molten orange
+        fireGrad.addColorStop(0.88, "#960018"); // Ashy crimson
+        fireGrad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = fireGrad;
+        ctx.beginPath();
+        ctx.moveTo(hearthX - hearthW / 2 + 5, hearthY);
+        ctx.lineTo(hearthX - hearthW / 2 + 5, hearthY - hearthH + 35);
+        ctx.quadraticCurveTo(
+          hearthX,
+          hearthY - hearthH,
+          hearthX + hearthW / 2 - 5,
+          hearthY - hearthH + 35,
+        );
+        ctx.lineTo(hearthX + hearthW / 2 - 5, hearthY);
+        ctx.closePath();
+        ctx.fill();
 
-              // Solid iron horizontal structural band and rivets across the furnace face
-              ctx.strokeStyle = "#101317";
-              ctx.lineWidth = 4;
-              ctx.fillStyle = "#1e222b";
-              ctx.beginPath();
-              ctx.rect(hearthX - hearthW / 2 - 4, hearthY - 45, hearthW + 8, 12);
-              ctx.fill();
-              ctx.stroke();
-              ctx.fillStyle = "#0c0d12";
-              for (let rx = -hearthW / 2; rx <= hearthW / 2; rx += 24) {
-                ctx.beginPath();
-                ctx.arc(hearthX + rx, hearthY - 39, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-              }
+        // Solid iron horizontal structural band and rivets across the furnace face
+        ctx.strokeStyle = "#101317";
+        ctx.lineWidth = 4;
+        ctx.fillStyle = "#1e222b";
+        ctx.beginPath();
+        ctx.rect(hearthX - hearthW / 2 - 4, hearthY - 45, hearthW + 8, 12);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#0c0d12";
+        for (let rx = -hearthW / 2; rx <= hearthW / 2; rx += 24) {
+          ctx.beginPath();
+          ctx.arc(hearthX + rx, hearthY - 39, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
 
-              // Bricked Border (Heavier industrial frame)
-              ctx.fillStyle = "#1e222b";
-              ctx.lineWidth = 2;
-              for (let angle = Math.PI; angle <= Math.PI * 2; angle += Math.PI / 10) {
-                let bx = hearthX + Math.cos(angle) * (hearthW / 2 + 10);
-                let by = (hearthY - hearthH + 30) + Math.sin(angle) * 30;
-                ctx.beginPath();
-                ctx.arc(bx, by, 8, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-              }
-              ctx.restore();
+        // Bricked Border (Heavier industrial frame)
+        ctx.fillStyle = "#1e222b";
+        ctx.lineWidth = 2;
+        for (let angle = Math.PI; angle <= Math.PI * 2; angle += Math.PI / 10) {
+          let bx = hearthX + Math.cos(angle) * (hearthW / 2 + 10);
+          let by = hearthY - hearthH + 30 + Math.sin(angle) * 30;
+          ctx.beginPath();
+          ctx.arc(bx, by, 8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+        ctx.restore();
 
-              // 2. Silhouette Gearworks (Slowed down significantly to feel heavy and non-distracting)
-              let drawBackgroundGear = (gx, gy, radius, teeth, speedMult, direction) => {
-                ctx.save();
-                ctx.translate(gx, gy);
-                ctx.rotate((Date.now() / speedMult) * direction);
-                ctx.fillStyle = "#0c0d12"; // Solid silhouette dark grey
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 2;
+        // 2. Silhouette Gearworks (Slowed down significantly to feel heavy and non-distracting)
+        let drawBackgroundGear = (
+          gx,
+          gy,
+          radius,
+          teeth,
+          speedMult,
+          direction,
+        ) => {
+          ctx.save();
+          ctx.translate(gx, gy);
+          ctx.rotate((Date.now() / speedMult) * direction);
+          ctx.fillStyle = "#0c0d12"; // Solid silhouette dark grey
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 2;
 
-                // Base gear circle
-                ctx.beginPath();
-                ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
+          // Base gear circle
+          ctx.beginPath();
+          ctx.arc(0, 0, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
 
-                // Draw gear teeth
-                for (let j = 0; j < teeth; j++) {
-                  ctx.save();
-                  ctx.rotate((j * Math.PI * 2) / teeth);
-                  ctx.beginPath();
-                  ctx.rect(-radius * 0.12, -radius - radius * 0.15, radius * 0.24, radius * 0.25);
-                  ctx.fill();
-                  ctx.stroke();
-                  ctx.restore();
-                }
+          // Draw gear teeth
+          for (let j = 0; j < teeth; j++) {
+            ctx.save();
+            ctx.rotate((j * Math.PI * 2) / teeth);
+            ctx.beginPath();
+            ctx.rect(
+              -radius * 0.12,
+              -radius - radius * 0.15,
+              radius * 0.24,
+              radius * 0.25,
+            );
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+          }
 
-                // Inner axle cutout
-                ctx.fillStyle = "#030406";
-                ctx.beginPath();
-                ctx.arc(0, 0, radius * 0.35, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-                ctx.restore();
-              };
+          // Inner axle cutout
+          ctx.fillStyle = "#030406";
+          ctx.beginPath();
+          ctx.arc(0, 0, radius * 0.35, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        };
 
-              // Rotations slowed down to 11s and 9.5s periods
-              drawBackgroundGear(110, 75, 45, 12, 11000, 1);   // Clockwise
-              drawBackgroundGear(690, 95, 35, 10, 9500, -1);   // Counter-clockwise
+        // Rotations slowed down to 11s and 9.5s periods
+        drawBackgroundGear(110, 75, 45, 12, 11000, 1); // Clockwise
+        drawBackgroundGear(690, 95, 35, 10, 9500, -1); // Counter-clockwise
 
         // 3. Detailed Industrial Pipe & Valve Networks
         ctx.save();
@@ -7954,83 +7983,83 @@
         return;
       }
       if (window.playerStats.isDungeonMode) {
-                let isCeiling = s.seed < 0.45;
-                if (isCeiling) {
-                  let h = 35 + s.seed * 50 * ts;
-                  let w = 12 + s.seed * 22 * ts;
-                  if (window.playerStats.currentDungeon === "equip") {
-                    // Hanging iron structural girder supporting the roof
-                    ctx.fillStyle = "#1e242c";
-                    ctx.beginPath();
-                    ctx.rect(s.x - 4, 0, 8, h);
-                    ctx.fill();
-                    ctx.stroke();
-                    // Horizontal cross brackets along the structural shaft
-                    ctx.fillStyle = "#0c0d12";
-                    for (let gy = 10; gy < h; gy += 15) {
-                      ctx.beginPath();
-                      ctx.rect(s.x - 6, gy, 12, 3);
-                      ctx.fill();
-                      ctx.stroke();
-                    }
-                  } else {
-                    let color =
-                      window.playerStats.currentDungeon === "gold"
-                        ? "#332211"
-                        : "#1b2d1f";
-                    ctx.fillStyle = color;
-                    ctx.beginPath();
-                    ctx.moveTo(s.x - w / 2, 0);
-                    ctx.lineTo(s.x, h);
-                    ctx.lineTo(s.x + w / 2, 0);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.strokeStyle = "rgba(255,255,255,0.06)";
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(s.x, h);
-                    ctx.lineTo(s.x - w / 4, 0);
-                    ctx.stroke();
-                  }
-                } else {
-                  let h = 22 + s.seed * 45 * ts;
-                  let w = 10 + s.seed * 18 * ts;
-                  if (window.playerStats.currentDungeon === "equip") {
-                    // Vertical floor support pillar
-                    ctx.fillStyle = "#1e242c";
-                    ctx.beginPath();
-                    ctx.rect(s.x - 6, 230 - h, 12, h);
-                    ctx.fill();
-                    ctx.stroke();
-                    // Cast-iron bolted plates at base
-                    ctx.fillStyle = "#0c0d12";
-                    ctx.beginPath();
-                    ctx.rect(s.x - 8, 224, 16, 6);
-                    ctx.fill();
-                    ctx.stroke();
-                  } else {
-                    let color =
-                      window.playerStats.currentDungeon === "gold"
-                        ? "#261a0c"
-                        : "#121f16";
-                    ctx.fillStyle = color;
-                    ctx.beginPath();
-                    ctx.moveTo(s.x - w / 2, 230);
-                    ctx.lineTo(s.x, 230 - h);
-                    ctx.lineTo(s.x + w / 2, 230);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.strokeStyle = "rgba(255,255,255,0.04)";
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(s.x, 230 - h);
-                    ctx.lineTo(s.x + w / 4, 230);
-                    ctx.stroke();
-                  }
-                }
-              } else {
+        let isCeiling = s.seed < 0.45;
+        if (isCeiling) {
+          let h = 35 + s.seed * 50 * ts;
+          let w = 12 + s.seed * 22 * ts;
+          if (window.playerStats.currentDungeon === "equip") {
+            // Hanging iron structural girder supporting the roof
+            ctx.fillStyle = "#1e242c";
+            ctx.beginPath();
+            ctx.rect(s.x - 4, 0, 8, h);
+            ctx.fill();
+            ctx.stroke();
+            // Horizontal cross brackets along the structural shaft
+            ctx.fillStyle = "#0c0d12";
+            for (let gy = 10; gy < h; gy += 15) {
+              ctx.beginPath();
+              ctx.rect(s.x - 6, gy, 12, 3);
+              ctx.fill();
+              ctx.stroke();
+            }
+          } else {
+            let color =
+              window.playerStats.currentDungeon === "gold"
+                ? "#332211"
+                : "#1b2d1f";
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(s.x - w / 2, 0);
+            ctx.lineTo(s.x, h);
+            ctx.lineTo(s.x + w / 2, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.strokeStyle = "rgba(255,255,255,0.06)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(s.x, h);
+            ctx.lineTo(s.x - w / 4, 0);
+            ctx.stroke();
+          }
+        } else {
+          let h = 22 + s.seed * 45 * ts;
+          let w = 10 + s.seed * 18 * ts;
+          if (window.playerStats.currentDungeon === "equip") {
+            // Vertical floor support pillar
+            ctx.fillStyle = "#1e242c";
+            ctx.beginPath();
+            ctx.rect(s.x - 6, 230 - h, 12, h);
+            ctx.fill();
+            ctx.stroke();
+            // Cast-iron bolted plates at base
+            ctx.fillStyle = "#0c0d12";
+            ctx.beginPath();
+            ctx.rect(s.x - 8, 224, 16, 6);
+            ctx.fill();
+            ctx.stroke();
+          } else {
+            let color =
+              window.playerStats.currentDungeon === "gold"
+                ? "#261a0c"
+                : "#121f16";
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(s.x - w / 2, 230);
+            ctx.lineTo(s.x, 230 - h);
+            ctx.lineTo(s.x + w / 2, 230);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.strokeStyle = "rgba(255,255,255,0.04)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(s.x, 230 - h);
+            ctx.lineTo(s.x + w / 4, 230);
+            ctx.stroke();
+          }
+        }
+      } else {
         if (s.type === "tree") {
           let tx = s.x,
             ty = s.y - 68 * ts; // Raised canopy height from 40 to 68 to make trees towering!
@@ -9422,173 +9451,190 @@
             ctx.stroke();
           }
         } else if (window.playerStats.currentDungeon === "mat") {
-                  if (s.type === "grass") {
-                    ctx.fillStyle = "#27ae60";
-                    ctx.beginPath();
-                    ctx.ellipse(sx, sy - 3 * ss, 9 * ss, 5 * ss, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                  } else if (s.type === "flower") {
-                    ctx.fillStyle = "#95a5a6";
-                    ctx.beginPath();
-                    ctx.rect(sx - 1.5 * ss, sy - 12 * ss, 3 * ss, 12 * ss);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.fillStyle = "#2ecc71";
-                    ctx.beginPath();
-                    ctx.arc(sx, sy - 12 * ss, 7 * ss, Math.PI, 0);
-                    ctx.fill();
-                    ctx.stroke();
-                  } else {
-                    ctx.fillStyle = "#7f8c8d";
-                    ctx.beginPath();
-                    ctx.rect(sx - 8 * ss, sy - 18 * ss, 16 * ss, 18 * ss);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.fillStyle = "#34495e";
-                    ctx.beginPath();
-                    ctx.rect(sx - 8 * ss, sy - 15 * ss, 16 * ss, 2 * ss);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.rect(sx - 8 * ss, sy - 6 * ss, 16 * ss, 2 * ss);
-                    ctx.fill();
-                    ctx.stroke();
-                  }
-                } else if (window.playerStats.currentDungeon === "equip") {
-                          if (s.type === "grass") {
-                            // Robust stacks of refined metal ingots
-                            let w = 18 * ss;
-                            let h = 6 * ss;
-                            ctx.fillStyle = "#34495e"; // Steel body
-                            ctx.strokeStyle = "#000000";
-                            ctx.lineWidth = penFgScenery * ss;
+          if (s.type === "grass") {
+            ctx.fillStyle = "#27ae60";
+            ctx.beginPath();
+            ctx.ellipse(sx, sy - 3 * ss, 9 * ss, 5 * ss, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          } else if (s.type === "flower") {
+            ctx.fillStyle = "#95a5a6";
+            ctx.beginPath();
+            ctx.rect(sx - 1.5 * ss, sy - 12 * ss, 3 * ss, 12 * ss);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "#2ecc71";
+            ctx.beginPath();
+            ctx.arc(sx, sy - 12 * ss, 7 * ss, Math.PI, 0);
+            ctx.fill();
+            ctx.stroke();
+          } else {
+            ctx.fillStyle = "#7f8c8d";
+            ctx.beginPath();
+            ctx.rect(sx - 8 * ss, sy - 18 * ss, 16 * ss, 18 * ss);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "#34495e";
+            ctx.beginPath();
+            ctx.rect(sx - 8 * ss, sy - 15 * ss, 16 * ss, 2 * ss);
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.rect(sx - 8 * ss, sy - 6 * ss, 16 * ss, 2 * ss);
+            ctx.fill();
+            ctx.stroke();
+          }
+        } else if (window.playerStats.currentDungeon === "equip") {
+          if (s.type === "grass") {
+            // Robust stacks of refined metal ingots
+            let w = 18 * ss;
+            let h = 6 * ss;
+            ctx.fillStyle = "#34495e"; // Steel body
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penFgScenery * ss;
 
-                            // Bottom Left Bar
-                            ctx.beginPath();
-                            ctx.roundRect(sx - w * 0.7, sy - h, w, h, [1.5]);
-                            ctx.fill();
-                            ctx.stroke();
+            // Bottom Left Bar
+            ctx.beginPath();
+            ctx.roundRect(sx - w * 0.7, sy - h, w, h, [1.5]);
+            ctx.fill();
+            ctx.stroke();
 
-                            // Bottom Right Bar
-                            ctx.beginPath();
-                            ctx.roundRect(sx - w * 0.1, sy - h, w, h, [1.5]);
-                            ctx.fill();
-                            ctx.stroke();
+            // Bottom Right Bar
+            ctx.beginPath();
+            ctx.roundRect(sx - w * 0.1, sy - h, w, h, [1.5]);
+            ctx.fill();
+            ctx.stroke();
 
-                            // Top Center Bar
-                            ctx.beginPath();
-                            ctx.roundRect(sx - w * 0.4, sy - h * 1.8, w, h, [1.5]);
-                            ctx.fill();
-                            ctx.stroke();
+            // Top Center Bar
+            ctx.beginPath();
+            ctx.roundRect(sx - w * 0.4, sy - h * 1.8, w, h, [1.5]);
+            ctx.fill();
+            ctx.stroke();
 
-                            // Shiny metallic reflection line highlights
-                            ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
-                            ctx.lineWidth = 1.2 * ss;
-                            ctx.beginPath();
-                            ctx.moveTo(sx - w * 0.2, sy - h * 1.4);
-                            ctx.lineTo(sx + w * 0.4, sy - h * 1.4);
-                            ctx.stroke();
-                          } else if (s.type === "flower") {
-                            // Thick brass steam exhaust pipe
-                            let pipeW = 10 * ss;
-                            let pipeH = 22 * ss;
+            // Shiny metallic reflection line highlights
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+            ctx.lineWidth = 1.2 * ss;
+            ctx.beginPath();
+            ctx.moveTo(sx - w * 0.2, sy - h * 1.4);
+            ctx.lineTo(sx + w * 0.4, sy - h * 1.4);
+            ctx.stroke();
+          } else if (s.type === "flower") {
+            // Thick brass steam exhaust pipe
+            let pipeW = 10 * ss;
+            let pipeH = 22 * ss;
 
-                            // Main vertical pipe body
-                            ctx.fillStyle = "#7e5109"; // Weathered brass
-                            ctx.strokeStyle = "#000000";
-                            ctx.lineWidth = penFgScenery * ss;
-                            ctx.beginPath();
-                            ctx.rect(sx - pipeW / 2, sy - pipeH, pipeW, pipeH);
-                            ctx.fill();
-                            ctx.stroke();
+            // Main vertical pipe body
+            ctx.fillStyle = "#7e5109"; // Weathered brass
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penFgScenery * ss;
+            ctx.beginPath();
+            ctx.rect(sx - pipeW / 2, sy - pipeH, pipeW, pipeH);
+            ctx.fill();
+            ctx.stroke();
 
-                            // Heavy flange joint collar at base
-                            ctx.fillStyle = "#1e222b";
-                            ctx.beginPath();
-                            ctx.roundRect(sx - pipeW * 0.8, sy - 4 * ss, pipeW * 1.6, 4 * ss, [1]);
-                            ctx.fill();
-                            ctx.stroke();
+            // Heavy flange joint collar at base
+            ctx.fillStyle = "#1e222b";
+            ctx.beginPath();
+            ctx.roundRect(
+              sx - pipeW * 0.8,
+              sy - 4 * ss,
+              pipeW * 1.6,
+              4 * ss,
+              [1],
+            );
+            ctx.fill();
+            ctx.stroke();
 
-                            // Flared bell mouth at the top of the exhaust
-                            ctx.fillStyle = "#1e222b";
-                            ctx.beginPath();
-                            ctx.moveTo(sx - pipeW * 0.8, sy - pipeH);
-                            ctx.lineTo(sx + pipeW * 0.8, sy - pipeH);
-                            ctx.lineTo(sx + pipeW * 0.5, sy - pipeH + 4 * ss);
-                            ctx.lineTo(sx - pipeW * 0.5, sy - pipeH + 4 * ss);
-                            ctx.closePath();
-                            ctx.fill();
-                            ctx.stroke();
+            // Flared bell mouth at the top of the exhaust
+            ctx.fillStyle = "#1e222b";
+            ctx.beginPath();
+            ctx.moveTo(sx - pipeW * 0.8, sy - pipeH);
+            ctx.lineTo(sx + pipeW * 0.8, sy - pipeH);
+            ctx.lineTo(sx + pipeW * 0.5, sy - pipeH + 4 * ss);
+            ctx.lineTo(sx - pipeW * 0.5, sy - pipeH + 4 * ss);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
 
-                            // Zero-allocation rising steam puff animation
-                            ctx.save();
-                            let animTime = ((Date.now() / 900) + s.seed * 5) % 1.0;
-                            let steamY = sy - pipeH - (animTime * 15 * ss);
-                            let steamR = (2.5 + animTime * 4.5) * ss;
-                            let steamAlpha = (1.0 - animTime) * 0.45;
-                            ctx.fillStyle = `rgba(220, 224, 230, ${steamAlpha})`;
-                            ctx.beginPath();
-                            ctx.arc(sx + Math.sin(animTime * 5) * 3 * ss, steamY, steamR, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.restore();
-                          } else {
-                            // Sturdy wooden stump base
-                            let stumpW = 18 * ss;
-                            let stumpH = 12 * ss;
-                            ctx.fillStyle = "#5c3a21"; // Rich wood stump
-                            ctx.strokeStyle = "#000000";
-                            ctx.lineWidth = penFgScenery * ss;
-                            ctx.beginPath();
-                            ctx.rect(sx - stumpW / 2, sy - stumpH, stumpW, stumpH);
-                            ctx.fill();
-                            ctx.stroke();
+            // Zero-allocation rising steam puff animation
+            ctx.save();
+            let animTime = (Date.now() / 900 + s.seed * 5) % 1.0;
+            let steamY = sy - pipeH - animTime * 15 * ss;
+            let steamR = (2.5 + animTime * 4.5) * ss;
+            let steamAlpha = (1.0 - animTime) * 0.45;
+            ctx.fillStyle = `rgba(220, 224, 230, ${steamAlpha})`;
+            ctx.beginPath();
+            ctx.arc(
+              sx + Math.sin(animTime * 5) * 3 * ss,
+              steamY,
+              steamR,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fill();
+            ctx.restore();
+          } else {
+            // Sturdy wooden stump base
+            let stumpW = 18 * ss;
+            let stumpH = 12 * ss;
+            ctx.fillStyle = "#5c3a21"; // Rich wood stump
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penFgScenery * ss;
+            ctx.beginPath();
+            ctx.rect(sx - stumpW / 2, sy - stumpH, stumpW, stumpH);
+            ctx.fill();
+            ctx.stroke();
 
-                            // Stump bark grain texture lines
-                            ctx.strokeStyle = "#3d2514";
-                            ctx.lineWidth = 1 * ss;
-                            ctx.beginPath();
-                            ctx.moveTo(sx - stumpW * 0.2, sy - stumpH + 2 * ss);
-                            ctx.lineTo(sx - stumpW * 0.2, sy - 2 * ss);
-                            ctx.moveTo(sx + stumpW * 0.25, sy - stumpH + 3 * ss);
-                            ctx.lineTo(sx + stumpW * 0.25, sy - 1 * ss);
-                            ctx.stroke();
+            // Stump bark grain texture lines
+            ctx.strokeStyle = "#3d2514";
+            ctx.lineWidth = 1 * ss;
+            ctx.beginPath();
+            ctx.moveTo(sx - stumpW * 0.2, sy - stumpH + 2 * ss);
+            ctx.lineTo(sx - stumpW * 0.2, sy - 2 * ss);
+            ctx.moveTo(sx + stumpW * 0.25, sy - stumpH + 3 * ss);
+            ctx.lineTo(sx + stumpW * 0.25, sy - 1 * ss);
+            ctx.stroke();
 
-                            // Robust steel anvil sitting on top
-                            let anvilY = sy - stumpH;
-                            ctx.fillStyle = "#2c3e50"; // Dark forge steel
-                            ctx.strokeStyle = "#000000";
-                            ctx.lineWidth = penFgScenery * ss;
-                            ctx.beginPath();
-                            // Horn (pointed left beak)
-                            ctx.moveTo(sx - 11 * ss, anvilY - 8 * ss);
-                            ctx.quadraticCurveTo(sx - 5 * ss, anvilY - 7 * ss, sx - 3 * ss, anvilY - 8 * ss);
-                            // Block flat top surface
-                            ctx.lineTo(sx + 8 * ss, anvilY - 8 * ss);
-                            // Heel (right step edge)
-                            ctx.lineTo(sx + 9 * ss, anvilY - 6 * ss);
-                            ctx.lineTo(sx + 4 * ss, anvilY - 6 * ss);
-                            // Narrow waisted mid-section
-                            ctx.lineTo(sx + 3 * ss, anvilY - 3 * ss);
-                            // Flanged bottom base feet
-                            ctx.lineTo(sx + 7 * ss, anvilY);
-                            ctx.lineTo(sx - 7 * ss, anvilY);
-                            ctx.lineTo(sx - 3 * ss, anvilY - 3 * ss);
-                            ctx.lineTo(sx - 4 * ss, anvilY - 6 * ss);
-                            ctx.lineTo(sx - 11 * ss, anvilY - 6 * ss);
-                            ctx.closePath();
-                            ctx.fill();
-                            ctx.stroke();
+            // Robust steel anvil sitting on top
+            let anvilY = sy - stumpH;
+            ctx.fillStyle = "#2c3e50"; // Dark forge steel
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = penFgScenery * ss;
+            ctx.beginPath();
+            // Horn (pointed left beak)
+            ctx.moveTo(sx - 11 * ss, anvilY - 8 * ss);
+            ctx.quadraticCurveTo(
+              sx - 5 * ss,
+              anvilY - 7 * ss,
+              sx - 3 * ss,
+              anvilY - 8 * ss,
+            );
+            // Block flat top surface
+            ctx.lineTo(sx + 8 * ss, anvilY - 8 * ss);
+            // Heel (right step edge)
+            ctx.lineTo(sx + 9 * ss, anvilY - 6 * ss);
+            ctx.lineTo(sx + 4 * ss, anvilY - 6 * ss);
+            // Narrow waisted mid-section
+            ctx.lineTo(sx + 3 * ss, anvilY - 3 * ss);
+            // Flanged bottom base feet
+            ctx.lineTo(sx + 7 * ss, anvilY);
+            ctx.lineTo(sx - 7 * ss, anvilY);
+            ctx.lineTo(sx - 3 * ss, anvilY - 3 * ss);
+            ctx.lineTo(sx - 4 * ss, anvilY - 6 * ss);
+            ctx.lineTo(sx - 11 * ss, anvilY - 6 * ss);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
 
-                            // Shiny horizontal reflection highlight on top of anvil block
-                            ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
-                            ctx.lineWidth = 1 * ss;
-                            ctx.beginPath();
-                            ctx.moveTo(sx - 3 * ss, anvilY - 7 * ss);
-                            ctx.lineTo(sx + 7 * ss, anvilY - 7 * ss);
-                            ctx.stroke();
-                          }
-                        }
+            // Shiny horizontal reflection highlight on top of anvil block
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+            ctx.lineWidth = 1 * ss;
+            ctx.beginPath();
+            ctx.moveTo(sx - 3 * ss, anvilY - 7 * ss);
+            ctx.lineTo(sx + 7 * ss, anvilY - 7 * ss);
+            ctx.stroke();
+          }
+        }
       } else {
         if (tier === 0) {
           if (s.type === "grass") {
@@ -11237,124 +11283,124 @@
         ctx.fillStyle = eff.color || "#f1c40f";
         ctx.fillText(hitText, hx + 14, hy + 4);
       } else if (eff.type === "bleed") {
-              // 1. Draw Shiny Crimson Blood Droplet (Cel-Shaded)
-              ctx.fillStyle = "#c0392b"; // Deep crimson blood
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 3.5;
-              ctx.lineJoin = "round";
-              ctx.beginPath();
-              ctx.moveTo(hx, hy - 8);
-              ctx.quadraticCurveTo(hx - 6, hy, hx - 6, hy + 4);
-              ctx.quadraticCurveTo(hx - 6, hy + 9, hx, hy + 9);
-              ctx.quadraticCurveTo(hx + 6, hy + 9, hx + 6, hy + 4);
-              ctx.quadraticCurveTo(hx + 6, hy - 2, hx, hy - 8);
-              ctx.closePath();
-              ctx.fill();
-              ctx.stroke();
+        // 1. Draw Shiny Crimson Blood Droplet (Cel-Shaded)
+        ctx.fillStyle = "#c0392b"; // Deep crimson blood
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(hx, hy - 8);
+        ctx.quadraticCurveTo(hx - 6, hy, hx - 6, hy + 4);
+        ctx.quadraticCurveTo(hx - 6, hy + 9, hx, hy + 9);
+        ctx.quadraticCurveTo(hx + 6, hy + 9, hx + 6, hy + 4);
+        ctx.quadraticCurveTo(hx + 6, hy - 2, hx, hy - 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
 
-              // Specular shine
-              ctx.fillStyle = "#ffffff";
-              ctx.beginPath();
-              ctx.ellipse(hx - 2, hy + 2, 1.2, 2.5, Math.PI / 4, 0, Math.PI * 2);
-              ctx.fill();
+        // Specular shine
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.ellipse(hx - 2, hy + 2, 1.2, 2.5, Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
 
-              // 2. Draw Damage Text (Dark Crimson)
-              let hitText = window.formatNumber(eff.amount);
-              ctx.font = "bold 15px monospace";
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 3.5;
-              ctx.lineJoin = "round";
-              ctx.strokeText(hitText, hx + 14, hy + 4);
-              ctx.fillStyle = eff.color || "#960018";
-              ctx.fillText(hitText, hx + 14, hy + 4);
-            } else if (eff.type === "item_drop") {
-              ctx.font = "bold 13px sans-serif";
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 3.5;
-              ctx.lineJoin = "round";
+        // 2. Draw Damage Text (Dark Crimson)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#960018";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "item_drop") {
+        ctx.font = "bold 13px sans-serif";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
 
-              let text = eff.text;
-              let iconColor = eff.iconColor || "#ffb6c1";
-              let itemType = eff.itemType || "soul";
+        let text = eff.text;
+        let iconColor = eff.iconColor || "#ffb6c1";
+        let itemType = eff.itemType || "soul";
 
-              let textWidth = ctx.measureText(text).width;
+        let textWidth = ctx.measureText(text).width;
 
-              ctx.strokeText(text, hx, hy);
-              ctx.fillStyle = eff.color || "#ffffff";
-              ctx.fillText(text, hx, hy);
+        ctx.strokeText(text, hx, hy);
+        ctx.fillStyle = eff.color || "#ffffff";
+        ctx.fillText(text, hx, hy);
 
-              ctx.save();
-              ctx.translate(hx + textWidth + 8, hy - 4);
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 1.5;
-              ctx.fillStyle = iconColor;
+        ctx.save();
+        ctx.translate(hx + textWidth + 8, hy - 4);
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.5;
+        ctx.fillStyle = iconColor;
 
-              if (itemType === "soul") {
-                ctx.beginPath();
-                ctx.moveTo(0, -6);
-                ctx.bezierCurveTo(-4, 0, -4, 5, 0, 5);
-                ctx.bezierCurveTo(4, 5, 4, 0, 0, -6);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-                ctx.fillStyle = "#ffffff";
-                ctx.beginPath();
-                ctx.arc(-1.2, 1.2, 0.7, 0, Math.PI * 2);
-                ctx.fill();
-              } else if (itemType === "scrap") {
-                ctx.beginPath();
-                ctx.moveTo(-3, -3);
-                ctx.lineTo(3, -5);
-                ctx.lineTo(5, 2);
-                ctx.lineTo(-2, 4);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-              } else if (itemType === "core") {
-                ctx.beginPath();
-                ctx.rect(-3.5, -3.5, 7, 7);
-                ctx.fill();
-                ctx.stroke();
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(-1, -1, 2, 2);
-              } else if (itemType === "key") {
-                ctx.beginPath();
-                ctx.arc(-1.5, -1.5, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(1, -1.5);
-                ctx.lineTo(5, -1.5);
-                ctx.lineTo(5, 1);
-                ctx.stroke();
-              } else if (itemType === "shard") {
-                ctx.beginPath();
-                ctx.moveTo(0, -5);
-                ctx.lineTo(3.5, 0);
-                ctx.lineTo(0, 5);
-                ctx.lineTo(-3.5, 0);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-              } else {
-                ctx.beginPath();
-                ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-              }
-              ctx.restore();
-            } else {
-              ctx.font = "bold 18px sans-serif";
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 4;
-              ctx.lineJoin = "miter";
-              ctx.miterLimit = 2;
-              ctx.strokeText(eff.text, eff.x, eff.y);
-              ctx.fillStyle = eff.color;
-              ctx.fillText(eff.text, eff.x, eff.y);
-            }
-            ctx.restore();
-          });
+        if (itemType === "soul") {
+          ctx.beginPath();
+          ctx.moveTo(0, -6);
+          ctx.bezierCurveTo(-4, 0, -4, 5, 0, 5);
+          ctx.bezierCurveTo(4, 5, 4, 0, 0, -6);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.arc(-1.2, 1.2, 0.7, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (itemType === "scrap") {
+          ctx.beginPath();
+          ctx.moveTo(-3, -3);
+          ctx.lineTo(3, -5);
+          ctx.lineTo(5, 2);
+          ctx.lineTo(-2, 4);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        } else if (itemType === "core") {
+          ctx.beginPath();
+          ctx.rect(-3.5, -3.5, 7, 7);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(-1, -1, 2, 2);
+        } else if (itemType === "key") {
+          ctx.beginPath();
+          ctx.arc(-1.5, -1.5, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(1, -1.5);
+          ctx.lineTo(5, -1.5);
+          ctx.lineTo(5, 1);
+          ctx.stroke();
+        } else if (itemType === "shard") {
+          ctx.beginPath();
+          ctx.moveTo(0, -5);
+          ctx.lineTo(3.5, 0);
+          ctx.lineTo(0, 5);
+          ctx.lineTo(-3.5, 0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+        ctx.restore();
+      } else {
+        ctx.font = "bold 18px sans-serif";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4;
+        ctx.lineJoin = "miter";
+        ctx.miterLimit = 2;
+        ctx.strokeText(eff.text, eff.x, eff.y);
+        ctx.fillStyle = eff.color;
+        ctx.fillText(eff.text, eff.x, eff.y);
+      }
+      ctx.restore();
+    });
 
     if (
       window.isGamePaused &&

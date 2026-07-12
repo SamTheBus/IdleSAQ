@@ -2775,20 +2775,20 @@ window.salvageItem = function (id) {
     : Math.floor(Math.random() * 3) + 1;
 
   if (typeof window.addEtcDrop === "function")
-    window.addEtcDrop(scrapName, yieldAmount);
-  scrapsGained.push(`x${yieldAmount} ${scrapName}`);
+      window.addEtcDrop(scrapName, yieldAmount, true);
+    scrapsGained.push(`x${yieldAmount} ${scrapName}`);
 
-  if (!isArt) {
-    for (let t = rolledTier - 1; t >= 0; t--) {
-      if (Math.random() < 0.6) {
-        let lowerYield = Math.floor(Math.random() * 2) + 1;
-        let lowerName = window.getScrapYieldName(t);
-        if (typeof window.addEtcDrop === "function")
-          window.addEtcDrop(lowerName, lowerYield);
-        scrapsGained.push(`x${lowerYield} ${lowerName}`);
+    if (!isArt) {
+      for (let t = rolledTier - 1; t >= 0; t--) {
+        if (Math.random() < 0.6) {
+          let lowerYield = Math.floor(Math.random() * 2) + 1;
+          let lowerName = window.getScrapYieldName(t);
+          if (typeof window.addEtcDrop === "function")
+            window.addEtcDrop(lowerName, lowerYield, true);
+          scrapsGained.push(`x${lowerYield} ${lowerName}`);
+        }
       }
     }
-  }
 
   let cvs = document.getElementById("gameCanvas");
   let w = cvs ? cvs.width : 750;
@@ -3165,7 +3165,7 @@ Object.assign(window.ForgeManager, {
     window.state.bulkSalvageTarget = parseInt(val, 10);
     if (typeof window.updateSalvagePadUI === "function")
       window.updateSalvagePadUI();
-  },
+  }
 });
 
 // Legacy Compatibility Aliases to protect references
@@ -3175,47 +3175,47 @@ window.selectBulkSalvageRarity = (val) =>
 // Append triggerBulkSalvage inside ForgeManager
 Object.assign(window.ForgeManager, {
   triggerBulkSalvage() {
-    if (typeof window.hideTooltip === "function") window.hideTooltip();
-    let maxStars =
-      window.state.bulkSalvageTarget !== undefined
-        ? window.state.bulkSalvageTarget
-        : 0;
+        if (typeof window.hideTooltip === "function") window.hideTooltip();
+        let maxStars =
+          window.state.bulkSalvageTarget !== undefined
+            ? window.state.bulkSalvageTarget
+            : 0;
 
-    let targetItems = window.inventory.EQUIP.filter(
-      (item) =>
-        !item.locked &&
-        item.statsRolled !== "UNIQUE" &&
-        item.statsRolled <= maxStars,
-    );
-    if (targetItems.length === 0) {
-      if (typeof window.pushHeaderToast === "function")
-        window.pushHeaderToast(
-          "No eligible unlocked items found under this rarity!",
-          "#e74c3c",
+        let targetItems = window.inventory.EQUIP.filter(
+          (item) =>
+            !item.locked &&
+            item.statsRolled !== "UNIQUE" &&
+            item.statsRolled <= maxStars,
         );
-      return;
-    }
+        if (targetItems.length === 0) {
+          if (typeof window.pushHeaderToast === "function")
+            window.pushHeaderToast(
+              "No eligible unlocked items found under this rarity!",
+              "#e74c3c",
+            );
+          return;
+        }
 
-    let label =
-      maxStars === 0
-        ? "Common Gear (0★)"
-        : window.getTierName(maxStars) + " & Under";
+        let label =
+          maxStars === 0
+            ? "Common Gear (0★)"
+            : window.getTierName(maxStars) + " & Under";
 
-    if (typeof window.showCustomConfirm === "function") {
-      window.showCustomConfirm(
-        "Bulk Deconstruct",
-        `Are you sure you want to bulk salvage ${targetItems.length} unlocked items (${label})?`,
-        "Deconstruct",
-        "Cancel",
-        "#e74c3c",
-        () => {
-          let bulkScrapsHarvested = {};
-          function incrementScrap(name, amount) {
-            if (!bulkScrapsHarvested[name]) bulkScrapsHarvested[name] = 0;
-            bulkScrapsHarvested[name] += amount;
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop(name, amount);
-          }
+        if (typeof window.showCustomConfirm === "function") {
+          window.showCustomConfirm(
+            "Bulk Deconstruct",
+            `Are you sure you want to bulk salvage ${targetItems.length} unlocked items (${label})?`,
+            "Deconstruct",
+            "Cancel",
+            "#e74c3c",
+            () => {
+              let bulkScrapsHarvested = {};
+              function incrementScrap(name, amount) {
+                if (!bulkScrapsHarvested[name]) bulkScrapsHarvested[name] = 0;
+                bulkScrapsHarvested[name] += amount;
+                if (typeof window.addEtcDrop === "function")
+                  window.addEtcDrop(name, amount, true);
+              }
 
           targetItems.forEach((item) => {
             let rolledTier = item.statsRolled;

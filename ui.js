@@ -4862,6 +4862,30 @@ window.generateItemCardHtml = function (
   if (!item) return "";
   let html = "";
 
+  let slotMult = 1.0;
+  if (item.isEquippedSlot && window.playerStats.slotUpgrades) {
+    let slotLvl = window.playerStats.slotUpgrades[item.isEquippedSlot] || 0;
+    let runBonus = 0;
+    if (
+      window.playerStats.isCrucibleMode &&
+      window.cachedPlayerStats &&
+      window.cachedPlayerStats.crucibleSlotBonuses
+    ) {
+      runBonus =
+        window.cachedPlayerStats.crucibleSlotBonuses[item.isEquippedSlot] || 0;
+    }
+    slotMult = 1.0 + slotLvl * 0.01 + runBonus;
+  }
+
+  if (slotMult > 1.0) {
+    let pctBonus = Math.round((slotMult - 1.0) * 100);
+    html += `
+      <div style="background: rgba(46, 204, 113, 0.1); border: 1px solid #2ecc71; border-radius: 4px; padding: 4px 8px; font-size: 9px; font-weight: 800; color: #2ecc71; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; margin-bottom: 8px; line-height: 1;">
+        ⚡ Slot Attunement Active: +${pctBonus}% Stats!
+      </div>
+    `;
+  }
+
   // Custom Cavern Sigil card renderer
   if (item.type === "sigil") {
     let color = window.getTierColor(item.statsRolled);
@@ -4980,51 +5004,86 @@ window.generateItemCardHtml = function (
     let baseStats = [];
 
     if (item.baseAtk > 0) {
+      let displayVal = window.formatNumber(item.baseAtk);
+      if (slotMult > 1.0) {
+        let scaled = Math.ceil(item.baseAtk * slotMult);
+        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
+      }
       baseStats.push({
         label: "Weapon Damage",
-        val: window.formatNumber(item.baseAtk),
+        val: displayVal,
         icon: window.getUiIconSvg("atk", 14),
       });
     }
     if (item.baseDef > 0) {
+      let displayVal = window.formatNumber(item.baseDef);
+      if (slotMult > 1.0) {
+        let scaled = Math.ceil(item.baseDef * slotMult);
+        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
+      }
       baseStats.push({
         label: "Armor",
-        val: window.formatNumber(item.baseDef),
+        val: displayVal,
         icon: window.getUiIconSvg("def", 14),
       });
     }
     if (item.baseMaxHp > 0) {
+      let displayVal = window.formatNumber(item.baseMaxHp);
+      if (slotMult > 1.0) {
+        let scaled = Math.ceil(item.baseMaxHp * slotMult);
+        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
+      }
       baseStats.push({
         label: "Max Life",
-        val: window.formatNumber(item.baseMaxHp),
+        val: displayVal,
         icon: window.getUiIconSvg("maxHp", 14),
       });
     }
     if (item.baseMoveSpeed > 0) {
+      let displayVal = window.formatNumber(item.baseMoveSpeed);
+      if (slotMult > 1.0) {
+        let scaled = Math.ceil(item.baseMoveSpeed * slotMult);
+        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
+      }
       baseStats.push({
         label: "Speed",
-        val: window.formatNumber(item.baseMoveSpeed),
+        val: displayVal,
         icon: window.getUiIconSvg("moveSpeed", 14),
       });
     }
     if (item.baseBlock > 0) {
+      let displayVal = Math.round(item.baseBlock * 100) + "%";
+      if (slotMult > 1.0) {
+        let scaled = Math.round(item.baseBlock * slotMult * 100) + "%";
+        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${scaled})</span>`;
+      }
       baseStats.push({
         label: "Block Rate",
-        val: Math.round(item.baseBlock * 100) + "%",
+        val: displayVal,
         icon: window.getUiIconSvg("block", 14),
       });
     }
     if (item.baseParry > 0) {
+      let displayVal = Math.round(item.baseParry * 100) + "%";
+      if (slotMult > 1.0) {
+        let scaled = Math.round(item.baseParry * slotMult * 100) + "%";
+        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${scaled})</span>`;
+      }
       baseStats.push({
         label: "Parry Rate",
-        val: Math.round(item.baseParry * 100) + "%",
+        val: displayVal,
         icon: window.getUiIconSvg("parry", 14),
       });
     }
     if (item.baseInt > 0) {
+      let displayVal = window.formatNumber(item.baseInt);
+      if (slotMult > 1.0) {
+        let scaled = Math.ceil(item.baseInt * slotMult);
+        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
+      }
       baseStats.push({
         label: "Intelligence",
-        val: window.formatNumber(item.baseInt),
+        val: displayVal,
         icon: window.getUiIconSvg("int", 14),
       });
     }
@@ -5126,12 +5185,23 @@ window.generateItemCardHtml = function (
           affixVal > 0)
       ) {
         let displayVal = "";
-        if (s.isDoublePct) {
-          displayVal = `+${(affixVal * 100).toFixed(2)}%`;
-        } else if (s.isPct) {
-          displayVal = `+${Math.floor(affixVal * 100)}%`;
+        if (slotMult > 1.0) {
+          let scaledVal = affixVal * slotMult;
+          if (s.isDoublePct) {
+            displayVal = `+${(affixVal * 100).toFixed(2)}% <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${(scaledVal * 100).toFixed(2)}%)</span>`;
+          } else if (s.isPct) {
+            displayVal = `+${Math.floor(affixVal * 100)}% <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${Math.floor(scaledVal * 100)}%)</span>`;
+          } else {
+            displayVal = `+${window.formatNumber(affixVal)} <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${window.formatNumber(scaledVal)})</span>`;
+          }
         } else {
-          displayVal = `+${window.formatNumber(affixVal)}`;
+          if (s.isDoublePct) {
+            displayVal = `+${(affixVal * 100).toFixed(2)}%`;
+          } else if (s.isPct) {
+            displayVal = `+${Math.floor(affixVal * 100)}%`;
+          } else {
+            displayVal = `+${window.formatNumber(affixVal)}`;
+          }
         }
 
         let iconSvg = window.getUiIconSvg(s.key, 11);
@@ -5265,15 +5335,26 @@ function getStatEnchantSuffix(item, statKey) {
 }
 
 function getEquippedItemForComparison(type) {
+  let slotKey = type;
   if (type === "overall") {
-    if (window.equippedSlots.overall) return window.equippedSlots.overall;
+    if (window.equippedSlots.overall) {
+      window.equippedSlots.overall.isEquippedSlot = "overall";
+      return window.equippedSlots.overall;
+    }
     return getCombinedEquippedTorso();
   }
   if (type === "chest" || type === "leggings") {
-    if (window.equippedSlots.overall) return window.equippedSlots.overall;
-    return window.equippedSlots[type];
+    if (window.equippedSlots.overall) {
+      window.equippedSlots.overall.isEquippedSlot = "overall";
+      return window.equippedSlots.overall;
+    }
+    slotKey = type;
   }
-  return window.equippedSlots[type];
+  let item = window.equippedSlots[slotKey];
+  if (item) {
+    item.isEquippedSlot = slotKey;
+  }
+  return item;
 }
 
 function getCombinedEquippedTorso() {
@@ -9970,13 +10051,13 @@ window.openDailyRewardSack = function (specificName) {
   }
 
   // Credit rewards
-  receivedRewards.forEach((r) => {
-    if (r.type === "use") {
-      window.addUseDrop(r.name, r.qty);
-    } else if (r.type === "etc") {
-      window.addEtcDrop(r.name, r.qty);
-    }
-  });
+    receivedRewards.forEach((r) => {
+      if (r.type === "use") {
+        window.addUseDrop(r.name, r.qty, true);
+      } else if (r.type === "etc") {
+        window.addEtcDrop(r.name, r.qty, true);
+      }
+    });
 
   // Create cool opening overlay card
   let overlay = document.createElement("div");
@@ -10300,13 +10381,13 @@ window.openWeeklyRewardSack = function (specificName) {
   }
 
   // Credit rewards safely once
-  receivedRewards.forEach((r) => {
-    if (r.type === "use") {
-      window.addUseDrop(r.name, r.qty);
-    } else if (r.type === "etc") {
-      window.addEtcDrop(r.name, r.qty);
-    }
-  });
+    receivedRewards.forEach((r) => {
+      if (r.type === "use") {
+        window.addUseDrop(r.name, r.qty, true);
+      } else if (r.type === "etc") {
+        window.addEtcDrop(r.name, r.qty, true);
+      }
+    });
 
   // Create cool opening overlay card
   let overlay = document.createElement("div");
@@ -12483,7 +12564,7 @@ window.renderCavernSigilConsole = function () {
   }
 
   // Search if any sigils exist
-  let sigils = window.inventory.SIGIL.filter(
+  let sigils = (window.inventory.SIGIL || []).filter(
     (item) => item && item.type === "sigil",
   );
 
@@ -12527,7 +12608,7 @@ window.openCavernSigilSelectorModal = function (e) {
   win.style.left = "40px";
   win.style.top = "110px";
 
-  let sigils = window.inventory.SIGIL.filter(
+  let sigils = (window.inventory.SIGIL || []).filter(
     (item) => item && item.type === "sigil",
   );
 
