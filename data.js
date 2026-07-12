@@ -687,12 +687,18 @@ window.checkAchievements = function () {
   );
 
   let unlockedAny = false;
-  window.AchievementsData.forEach((ach) => {
-    if (window.playerStats.unlockedAchievements.includes(ach.id)) return;
-    let progress = window.getAchievementProgress(ach);
-    let targetValue = ach.isSingleTier ? 1 : ach.reqValue;
-    if (progress >= targetValue) {
-      window.playerStats.unlockedAchievements.push(ach.id);
+    window.AchievementsData.forEach((ach) => {
+      if (window.playerStats.unlockedAchievements.includes(ach.id)) return;
+      let progress = window.getAchievementProgress(ach);
+      let targetValue = ach.isSingleTier ? 1 : ach.reqValue;
+      let isUnlocked = false;
+      if (progress instanceof BigNum) {
+        isUnlocked = progress.gte(targetValue);
+      } else {
+        isUnlocked = progress >= targetValue;
+      }
+      if (isUnlocked) {
+        window.playerStats.unlockedAchievements.push(ach.id);
       window.playerStats.achievementTimestamps =
         window.playerStats.achievementTimestamps || {};
       window.playerStats.achievementTimestamps[ach.id] = Date.now();
