@@ -14,6 +14,212 @@ document.addEventListener(
   { passive: true },
 );
 
+// High-performance, Garbage Collection-free particle pool
+class PoolParticle {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.radius = 0;
+    this.color = "";
+    this.alpha = 1;
+    this.life = 0;
+    this.maxLife = 0;
+    this.gravity = undefined;
+    this.fade = false;
+    this.growth = undefined;
+  }
+  init(
+    x,
+    y,
+    vx,
+    vy,
+    radius,
+    color,
+    alpha,
+    life,
+    maxLife = 0,
+    gravity = undefined,
+    fade = false,
+    growth = undefined,
+  ) {
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+    this.radius = radius;
+    this.color = color;
+    this.alpha = alpha;
+    this.life = life;
+    this.maxLife = maxLife;
+    this.gravity = gravity;
+    this.fade = fade;
+    this.growth = growth;
+  }
+}
+
+class ParticlePoolClass {
+  constructor(initialSize = 500) {
+    this.pool = [];
+    for (let i = 0; i < initialSize; i++) {
+      this.pool.push(new PoolParticle());
+    }
+  }
+  get(
+    x,
+    y,
+    vx,
+    vy,
+    radius,
+    color,
+    alpha,
+    life,
+    maxLife = 0,
+    gravity = undefined,
+    fade = false,
+    growth = undefined,
+  ) {
+    let p = null;
+    for (let i = 0; i < this.pool.length; i++) {
+      if (this.pool[i].life <= 0) {
+        p = this.pool[i];
+        break;
+      }
+    }
+    if (!p) {
+      if (this.pool.length < 2000) {
+        p = new PoolParticle();
+        this.pool.push(p);
+      } else {
+        p = this.pool[0]; // Recycle oldest active item as a fallback
+      }
+    }
+    p.init(
+      x,
+      y,
+      vx,
+      vy,
+      radius,
+      color,
+      alpha,
+      life,
+      maxLife,
+      gravity,
+      fade,
+      growth,
+    );
+    return p;
+  }
+}
+
+class PoolCombatEffect {
+  constructor() {
+    this.type = undefined;
+    this.x = 0;
+    this.y = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.amount = 0;
+    this.color = "";
+    this.life = 0;
+    this.maxLife = 0;
+    this.text = "";
+    this.isCumulative = false;
+    this.iconColor = "";
+    this.itemType = "";
+  }
+  init(
+    type,
+    x,
+    y,
+    vx,
+    vy,
+    amount,
+    color,
+    life,
+    maxLife = 0,
+    text = "",
+    isCumulative = false,
+    iconColor = "",
+    itemType = "",
+  ) {
+    this.type = type;
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+    this.amount = amount;
+    this.color = color;
+    this.life = life;
+    this.maxLife = maxLife;
+    this.text = text;
+    this.isCumulative = isCumulative;
+    this.iconColor = iconColor;
+    this.itemType = itemType;
+  }
+}
+
+class CombatEffectPoolClass {
+  constructor(initialSize = 150) {
+    this.pool = [];
+    for (let i = 0; i < initialSize; i++) {
+      this.pool.push(new PoolCombatEffect());
+    }
+  }
+  get(
+    type,
+    x,
+    y,
+    vx,
+    vy,
+    amount,
+    color,
+    life,
+    maxLife = 0,
+    text = "",
+    isCumulative = false,
+    iconColor = "",
+    itemType = "",
+  ) {
+    let f = null;
+    for (let i = 0; i < this.pool.length; i++) {
+      if (this.pool[i].life <= 0) {
+        f = this.pool[i];
+        break;
+      }
+    }
+    if (!f) {
+      if (this.pool.length < 500) {
+        f = new PoolCombatEffect();
+        this.pool.push(f);
+      } else {
+        f = this.pool[0]; // Recycle oldest active item as a fallback
+      }
+    }
+    f.init(
+      type,
+      x,
+      y,
+      vx,
+      vy,
+      amount,
+      color,
+      life,
+      maxLife,
+      text,
+      isCumulative,
+      iconColor,
+      itemType,
+    );
+    return f;
+  }
+}
+
+window.CombatEffectPool = new CombatEffectPoolClass(150);
+
+window.ParticlePool = new ParticlePoolClass(500);
+
 // Validates whether an incoming hover event is a simulated mobile ghost-trigger
 window.isSimulatedMouseEvent = function (e) {
   if (e && (e.type === "mouseenter" || e.type === "mouseover")) {
@@ -1080,10 +1286,15 @@ window.updateUI = function () {
   }
 
   // XP Bar (Stable tracking)
-  let xpPct = (window.playerStats.xp / window.playerStats.xpReq) * 100;
+  let bXp = BigNum.from(window.playerStats.xp || 0);
+  let bXpReq = BigNum.from(window.playerStats.xpReq || 100);
+  let xpPct =
+    Number(bXp.div(bXpReq).m * Math.pow(10, Math.min(15, bXp.div(bXpReq).e))) *
+    100;
+
   setText(
     "char-xp-text",
-    `${window.formatNumber(window.playerStats.xp)} / ${window.formatNumber(window.playerStats.xpReq)} (${xpPct.toFixed(1)}%)`,
+    `${window.formatNumber(bXp)} / ${window.formatNumber(bXpReq)} (${xpPct.toFixed(1)}%)`,
   );
 
   const xpFill = document.getElementById("char-xp-fill");
@@ -1747,6 +1958,18 @@ window.showSPPreview = function (e, statKey) {
 
 // --- LOG & TOAST SYSTEMS ---
 
+// Lightweight cloner to replace expensive JSON parse/stringify operations
+window.cloneItemForTooltip = function (item) {
+  if (!item) return null;
+  let clone = { ...item };
+  if (item.buffs) clone.buffs = item.buffs.map((b) => ({ ...b }));
+  if (item.debuffs) clone.debuffs = item.debuffs.map((d) => ({ ...d }));
+  if (item.enchantments) clone.enchantments = { ...item.enchantments };
+  return clone;
+};
+
+window.logDOMDirty = false;
+
 window.pushLog = function (text, itemId = null) {
   if (itemId !== null) {
     let item =
@@ -1760,7 +1983,7 @@ window.pushLog = function (text, itemId = null) {
       }
     }
     if (item) {
-      window.frozenItemDb[itemId] = JSON.parse(JSON.stringify(item));
+      window.frozenItemDb[itemId] = window.cloneItemForTooltip(item);
       text = text.replace(
         item.name,
         `<span class="log-item-link" onmouseenter="window.showLogTooltip(event, ${itemId})" onmouseleave="window.hideTooltip()">${item.name}</span>`,
@@ -1769,9 +1992,20 @@ window.pushLog = function (text, itemId = null) {
   }
   window.logsHistory.unshift(text);
   if (window.logsHistory.length > 50) window.logsHistory.pop();
-  let box = document.getElementById("log-box");
-  if (box) box.innerHTML = window.logsHistory.join("<br><br>");
+
+  window.logDOMDirty = true;
 };
+
+// Batch log box updates at 10 FPS (100ms) to eliminate browser layout thrashing
+setInterval(() => {
+  if (window.logDOMDirty) {
+    let box = document.getElementById("log-box");
+    if (box) {
+      box.innerHTML = window.logsHistory.join("<br><br>");
+    }
+    window.logDOMDirty = false;
+  }
+}, 100);
 
 window.pushToast = function (
   name,
@@ -2220,7 +2454,7 @@ window.toggleAuto = function () {
       ? "btn-toggle active"
       : "btn-toggle";
   }
-  window.state.efficiency = window.state.autoAttack ? 1.0 : 1.15;
+  window.state.efficiency = window.state.autoAttack ? 1.0 : 1.05;
   if (typeof window.updateUI === "function") window.updateUI();
 };
 
@@ -2807,14 +3041,14 @@ window.renderMarketShop = function () {
                 </div>
             </div>
             <div style="position:relative; z-index:4; display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(255,255,255,0.08); padding-top:10px; padding-left:4px; padding-right:4px;">
-                <div>
-                    <span style="font-size:9.5px; color:#888; display:block; text-align:left;">MERCHANT COST</span>
-                    <strong style="color:${costColor}; font-size:14px; font-family:monospace;">${window.formatNumber(iotdItem.cost)} Gold</strong>
-                </div>
-                <button class="btn-action" style="${btnStyle} padding:8px 16px; font-size:11px;" onclick="window.buyShopItem(${window.playerStats.shopItems.indexOf(iotdItem)})">
-                    ${isSold ? "SOLD" : "ACQUIRE"}
-                </button>
-            </div>
+                            <div>
+                                <span style="font-size:9.5px; color:#888; display:block; text-align:left;">MERCHANT COST</span>
+                                <strong style="color:${costColor}; font-size:14px; font-family:monospace;">${window.formatNumber(iotdItem.cost)} Gold</strong>
+                            </div>
+                            <button class="btn-action" style="${btnStyle} padding:8px 16px; font-size:11px;" onclick="window.buyShopItem(${window.playerStats.shopItems.indexOf(iotdItem)})" onpointerdown="window.buyShopItem(${window.playerStats.shopItems.indexOf(iotdItem)})">
+                                ${isSold ? "SOLD" : "ACQUIRE"}
+                            </button>
+                        </div>
         </div>
       `;
   }
@@ -2868,11 +3102,11 @@ window.renderMarketShop = function () {
                 </div>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:4; border-top:1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:2px;">
-                <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(shopItem.cost)} Gold</span>
-                <button class="btn-action" style="${btnStyle} font-size:10px; padding:4px 8px; border-radius:4px;" onclick="window.buyShopItem(${idx})">
-                    ${isSold ? "SOLD" : "BUY"}
-                </button>
-            </div>
+                            <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(shopItem.cost)} Gold</span>
+                            <button class="btn-action" style="${btnStyle} font-size:10px; padding:4px 8px; border-radius:4px;" onclick="window.buyShopItem(${idx})" onpointerdown="window.buyShopItem(${idx})">
+                                ${isSold ? "SOLD" : "BUY"}
+                            </button>
+                        </div>
         </div>
       `;
   });
@@ -3075,12 +3309,13 @@ window.renderGoldUpgrades = function () {
       let btnHtml = "";
       if (canAfford) {
         btnHtml = `
-        <button class="btn-action"
-                style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
-                onclick="window.buyGoldUpgrade('${u.id}')">
-            Upgrade Sink
-        </button>
-      `;
+              <button class="btn-action"
+                      style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
+                      onclick="window.buyGoldUpgrade('${u.id}')"
+                      onpointerdown="window.buyGoldUpgrade('${u.id}')">
+                  Upgrade Sink
+              </button>
+            `;
       } else {
         btnHtml = `
         <button class="btn-action"
@@ -3218,9 +3453,9 @@ window.renderMysticalShop = function () {
               <div style="font-size:10px; color:#94a3b8; margin-bottom:10px; line-height:1.4; white-space:normal;">${item.desc}</div>
           </div>
           <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
-              <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(displayCost)} ${currencyLabel}</span>
-              <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px; box-shadow:0 0 6px ${item.color}33;" onclick="window.buyMysticalItem(${index})">Purchase</button>
-          </div>
+                       <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(displayCost)} ${currencyLabel}</span>
+                       <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px; box-shadow:0 0 6px ${item.color}33;" onclick="window.buyMysticalItem(${index})" onpointerdown="window.buyMysticalItem(${index})">Purchase</button>
+                   </div>
       </div>
     `;
     }).join("") +
@@ -3272,9 +3507,9 @@ window.renderMysticalShop = function () {
            </div>
 
            <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-               <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${recipe.amount}x Ingredients</span>
-               <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.transmutePotion(${index})">Transmute</button>
-           </div>
+                          <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${recipe.amount}x Ingredients</span>
+                          <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.transmutePotion(${index})" onpointerdown="window.transmutePotion(${index})">Transmute</button>
+                      </div>
        </div>
      `;
     }).join("") +
@@ -3320,8 +3555,8 @@ window.renderAstralShop = function () {
           </div>
 
           <div style="position:relative; z-index:2; border-top: 1px dashed rgba(255,255,255,0.08); padding-top:8px; margin-top:6px;">
-              <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.buyAstralShopItem(${index})">Infuse Shards</button>
-          </div>
+                        <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.buyAstralShopItem(${index})" onpointerdown="window.buyAstralShopItem(${index})">Infuse Shards</button>
+                    </div>
       </div>
     `;
   });
@@ -3875,7 +4110,9 @@ window.showMarketTooltip = function (e, index) {
 
   let goldStr = window.formatNumber(window.playerStats.coins);
   let costStr = window.formatNumber(item.cost);
-  let goldColor = window.playerStats.coins >= item.cost ? "#2ecc71" : "#e74c3c";
+  let goldColor = BigNum.from(window.playerStats.coins).gte(item.cost)
+    ? "#2ecc71"
+    : "#e74c3c";
 
   let footer = `<div style="background:#0b0f12; border-top:1px solid #333; padding:8px 10px; font-size:10px; font-family:monospace; text-align:center; border-radius: 0 0 6px 6px;">
                                                <span style="color:#aaa;">Your Gold:</span> <strong style="color:${goldColor};">${goldStr}</strong> <span style="color:#666;">|</span> <span style="color:#aaa;">Cost:</span> <strong style="color:#f1c40f;">${costStr}</strong>
@@ -4276,7 +4513,7 @@ window.renderPaperDoll = function () {
 
       let iconBox = `<div style="text-align:center; margin-bottom:4px;">${window.getEquipIconHtml(item, 32)}</div>`;
       if (isArt) {
-        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
+        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')" onpointerdown="window.unequipItem('${slot}')">Remove</button>`;
       } else {
         let s = [];
         let sPlain = [];
@@ -4367,7 +4604,7 @@ window.renderPaperDoll = function () {
             setLabelHtml = `<div style="font-size:8px; color:#2ecc71; font-weight:bold; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;">✨ ${setName} Set (${displayCount}/3)</div>`;
           }
         }
-        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${sPlain.join(", ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
+        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${sPlain.join(", ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')" onpointerdown="window.unequipItem('${slot}')">Remove</button>`;
       }
     } else {
       el.className = "slots-card";
@@ -4385,129 +4622,142 @@ window.renderPaperDoll = function () {
 
 window.renderInventory = function () {
   let maxBag = window.getMaxBagSlots();
+  let activeSubTab = window.state.currentSubTab || "EQUIP";
 
   // 1. Equip Sack
   let eqBox = document.getElementById("bag-equip");
   if (eqBox) {
-    if (window.inventory.EQUIP.length === 0) {
-      eqBox.innerHTML =
-        "<div style='color:#666;text-align:center;padding-top:40px;'>No equipment in sack.</div>";
+    if (activeSubTab !== "EQUIP") {
+      eqBox.innerHTML = "";
     } else {
-      eqBox.innerHTML = window.inventory.EQUIP.map((item) => {
-        let nameColor = window.getTierColor(item.statsRolled);
-        let tierStr =
-          item.statsRolled === "UNIQUE"
-            ? "UNIQUE"
-            : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
-        let temperTag =
-          item.temperLevel > 0
-            ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
-            : "";
-        let lockTag = item.locked ? " 🔒" : "";
-        let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
-        let lockIcon = item.locked ? "🔒" : "🔓";
-        let typeText = item.type.toUpperCase();
-        if (item.type === "subweapon" && item.subType) {
-          typeText = `${item.type.toUpperCase()} (${item.subType.toUpperCase()})`;
-        }
-        let comparisonBadge = window.getComparisonDeltaBadge(item);
+      if (window.inventory.EQUIP.length === 0) {
+        eqBox.innerHTML =
+          "<div style='color:#666;text-align:center;padding-top:40px;'>No equipment in sack.</div>";
+      } else {
+        eqBox.innerHTML = window.inventory.EQUIP.map((item) => {
+          let nameColor = window.getTierColor(item.statsRolled);
+          let tierStr =
+            item.statsRolled === "UNIQUE"
+              ? "UNIQUE"
+              : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
+          let temperTag =
+            item.temperLevel > 0
+              ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
+              : "";
+          let lockTag = item.locked ? " 🔒" : "";
+          let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
+          let lockIcon = item.locked ? "🔒" : "🔓";
+          let typeText = item.type.toUpperCase();
+          if (item.type === "subweapon" && item.subType) {
+            typeText = `${item.type.toUpperCase()} (${item.subType.toUpperCase()})`;
+          }
+          let comparisonBadge = window.getComparisonDeltaBadge(item);
 
-        let details = `<span style="font-size:10px;color:#aaa;">Slot: ${typeText} | <span style="color:${nameColor};font-weight:bold;">${tierStr}</span></span>`;
-        let uniqueStyle = window.getUniqueItemStyle(item);
-        let itemStyleStr = uniqueStyle
-          ? `background: ${uniqueStyle.bg}; border: 1.5px solid ${uniqueStyle.border}; box-shadow: inset 0 0 6px ${uniqueStyle.shadow}, 0 0 8px ${uniqueStyle.glow};`
-          : `border-left: 4.5px solid ${nameColor} !important; background: rgba(15, 17, 26, 0.65);`;
+          let details = `<span style="font-size:10px;color:#aaa;">Slot: ${typeText} | <span style="color:${nameColor};font-weight:bold;">${tierStr}</span></span>`;
+          let uniqueStyle = window.getUniqueItemStyle(item);
+          let itemStyleStr = uniqueStyle
+            ? `background: ${uniqueStyle.bg}; border: 1.5px solid ${uniqueStyle.border}; box-shadow: inset 0 0 6px ${uniqueStyle.shadow}, 0 0 8px ${uniqueStyle.glow};`
+            : `border-left: 4.5px solid ${nameColor} !important; background: rgba(15, 17, 26, 0.65);`;
 
-        let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center; flex-shrink:0;">${window.getEquipIconHtml(item, 28)}</div>`;
+          let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center; flex-shrink:0;">${window.getEquipIconHtml(item, 28)}</div>`;
 
-        return `<div class="bag-item" style="display:flex; align-items:center; ${itemStyleStr}">
-                                                          <div style="flex:1; min-width:0; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
-                                                              ${iconBox}
-                                                              <div style="flex:1; min-width:0;">
-                                                                  <div style="display:flex; align-items:center; gap:4px; margin-bottom:1px; flex-wrap:wrap;">
-                                                                      <strong style="color:${nameColor}; font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${item.name}${temperTag}${lockTag}</strong>
-                                                                      ${comparisonBadge}
-                                                                  </div>
-                                                                  ${details}
-                                                              </div>
-                                                          </div>
-                                          <div class="bag-item-actions" style="position:relative; z-index:10; display:inline-flex; gap:3px; margin-left: 8px; flex-shrink:0;">
-                                              <button class="btn-action" style="padding:4px 8px; font-size:10px;" onclick="window.equipItem(${item.id})">Equip</button>
-                                              <button class="btn-action" style="background:${lockBg}; padding:4px 6px; font-size:10px;" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
-                                              <button class="btn-action un" style="padding:4px 8px; font-size:10px;" onclick="window.salvageItem(${item.id})">Salvage</button>
-                                          </div>
-                                      </div>`;
-      }).join("");
+          return `<div class="bag-item" style="display:flex; align-items:center; ${itemStyleStr}">
+                                                            <div style="flex:1; min-width:0; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
+                                                                ${iconBox}
+                                                                <div style="flex:1; min-width:0;">
+                                                                    <div style="display:flex; align-items:center; gap:4px; margin-bottom:1px; flex-wrap:wrap;">
+                                                                        <strong style="color:${nameColor}; font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${item.name}${temperTag}${lockTag}</strong>
+                                                                        ${comparisonBadge}
+                                                                    </div>
+                                                                    ${details}
+                                                                </div>
+                                                            </div>
+                                            <div class="bag-item-actions" style="position:relative; z-index:10; display:inline-flex; gap:3px; margin-left: 8px; flex-shrink:0;">
+                                                                                          <button class="btn-action" style="padding:4px 8px; font-size:10px;" onclick="window.equipItem(${item.id})" onpointerdown="window.equipItem(${item.id})">Equip</button>
+                                                                                          <button class="btn-action" style="background:${lockBg}; padding:4px 6px; font-size:10px;" onclick="window.toggleLock(${item.id})" onpointerdown="window.toggleLock(${item.id})">${lockIcon}</button>
+                                                                                          <button class="btn-action un" style="padding:4px 8px; font-size:10px;" onclick="window.salvageItem(${item.id})" onpointerdown="window.salvageItem(${item.id})">Salvage</button>
+                                                                                      </div>
+                                        </div>`;
+        }).join("");
+      }
     }
   }
 
   // 2. Artifact Sack
   let artBox = document.getElementById("bag-art");
   if (artBox) {
-    if (window.inventory.ARTIFACT.length === 0) {
-      artBox.innerHTML =
-        "<div style='color:#666;text-align:center;padding-top:40px;'>No artifacts in sack.</div>";
+    if (activeSubTab !== "ART") {
+      artBox.innerHTML = "";
     } else {
-      artBox.innerHTML = window.inventory.ARTIFACT.map((item) => {
-        let nameColor = window.getTierColor(item.statsRolled);
-        let lockTag = item.locked ? " 🔒" : "";
-        let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
-        let lockIcon = item.locked ? "🔒" : "🔓";
+      if (window.inventory.ARTIFACT.length === 0) {
+        artBox.innerHTML =
+          "<div style='color:#666;text-align:center;padding-top:40px;'>No artifacts in sack.</div>";
+      } else {
+        artBox.innerHTML = window.inventory.ARTIFACT.map((item) => {
+          let nameColor = window.getTierColor(item.statsRolled);
+          let lockTag = item.locked ? " 🔒" : "";
+          let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
+          let lockIcon = item.locked ? "🔒" : "🔓";
 
-        let details = `<span style="font-size:10px;color:#d2b4de;font-weight:bold;">Trait: ${item.desc}</span>`;
-        let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center;">${window.getArtifactIconHtml(item.trait, 28)}</div>`;
+          let details = `<span style="font-size:10px;color:#d2b4de;font-weight:bold;">Trait: ${item.desc}</span>`;
+          let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center;">${window.getArtifactIconHtml(item.trait, 28)}</div>`;
 
-        return `<div class="bag-item">
-                                          <div style="flex:1; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
-                                              ${iconBox}
-                                              <div style="flex:1;">
-                                                  <strong style="color:${nameColor};">${item.name}${lockTag}</strong><br>${details}
-                                              </div>
-                                          </div>
-                              <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
-                                  <button class="btn-action" onclick="window.equipItem(${item.id})">Equip</button>
-                                  <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
-                                  <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})">Salvage</button>
-                              </div>
-                          </div>`;
-      }).join("");
+          return `<div class="bag-item">
+                                            <div style="flex:1; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
+                                                ${iconBox}
+                                                <div style="flex:1;">
+                                                    <strong style="color:${nameColor};">${item.name}${lockTag}</strong><br>${details}
+                                                </div>
+                                            </div>
+                                <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
+                                                                  <button class="btn-action" onclick="window.equipItem(${item.id})" onpointerdown="window.equipItem(${item.id})">Equip</button>
+                                                                  <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="window.toggleLock(${item.id})" onpointerdown="window.toggleLock(${item.id})">${lockIcon}</button>
+                                                                  <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})" onpointerdown="window.salvageItem(${item.id})">Salvage</button>
+                                                                </div>
+                            </div>`;
+        }).join("");
+      }
     }
   }
 
   // 2.5. Sigils Sack
   let sigilBox = document.getElementById("bag-sigil");
   if (sigilBox) {
-    if (!window.inventory.SIGIL) window.inventory.SIGIL = [];
-    if (window.inventory.SIGIL.length === 0) {
-      sigilBox.innerHTML =
-        "<div style='color:#666;text-align:center;padding-top:40px;'>No Cavern Sigils in sack. Explore Infinite Caverns to find them!</div>";
+    if (activeSubTab !== "SIGIL") {
+      sigilBox.innerHTML = "";
     } else {
-      sigilBox.innerHTML = window.inventory.SIGIL.map((item) => {
-        let nameColor = window.getTierColor(item.statsRolled);
-        let starLabel = `${item.statsRolled}★`;
-        let lockTag = item.locked ? " 🔒" : "";
-        let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
-        let lockIcon = item.locked ? "🔒" : "🔓";
+      if (!window.inventory.SIGIL) window.inventory.SIGIL = [];
+      if (window.inventory.SIGIL.length === 0) {
+        sigilBox.innerHTML =
+          "<div style='color:#666;text-align:center;padding-top:40px;'>No Cavern Sigils in sack. Explore Infinite Caverns to find them!</div>";
+      } else {
+        sigilBox.innerHTML = window.inventory.SIGIL.map((item) => {
+          let nameColor = window.getTierColor(item.statsRolled);
+          let starLabel = `${item.statsRolled}★`;
+          let lockTag = item.locked ? " 🔒" : "";
+          let lockBg = item.locked ? "#e74c3c" : "#7f8c8d";
+          let lockIcon = item.locked ? "🔒" : "🔓";
 
-        let buffList = item.buffs.map((b) => `☀️ ${b.name}`).join(", ");
-        let debuffList = item.debuffs.map((d) => `🌑 ${d.name}`).join(", ");
+          let buffsList = item.buffs.map((b) => `☀️ ${b.name}`).join(", ");
+          let debuffsList = item.debuffs.map((d) => `🌑 ${d.name}`).join(", ");
 
-        let details = `<span style="font-size:10px;color:#9b59b6;font-weight:bold;">${buffList} | ${debuffList}</span>`;
-        let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center;">${window.getEquipIconHtml(item, 28)}</div>`;
+          let details = `<span style="font-size:10px;color:#9b59b6;font-weight:bold;">${buffsList} | ${debuffsList}</span>`;
+          let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center;">${window.getEquipIconHtml(item, 28)}</div>`;
 
-        return `<div class="bag-item" style="border-left: 4.5px solid ${nameColor} !important;">
-                    <div style="flex:1; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
-                        ${iconBox}
-                        <div style="flex:1;">
-                            <strong style="color:${nameColor};">${item.name}${lockTag}</strong><br>${details}
-                        </div>
-                    </div>
-                    <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
-                                              <button class="btn-action" style="background:${lockBg};" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
-                                              <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})">Salvage</button>
-                                          </div>
-                </div>`;
-      }).join("");
+          return `<div class="bag-item" style="border-left: 4.5px solid ${nameColor} !important;">
+                      <div style="flex:1; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
+                          ${iconBox}
+                          <div style="flex:1;">
+                              <strong style="color:${nameColor};">${item.name}${lockTag}</strong><br>${details}
+                          </div>
+                      </div>
+                      <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
+                                                                    <button class="btn-action" style="background:${lockBg};" onclick="window.toggleLock(${item.id})" onpointerdown="window.toggleLock(${item.id})">${lockIcon}</button>
+                                                                    <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})" onpointerdown="window.salvageItem(${item.id})">Salvage</button>
+                                                                </div>
+                  </div>`;
+        }).join("");
+      }
     }
   }
 
@@ -4549,78 +4799,88 @@ window.renderInventory = function () {
   ];
 
   let etcBox = document.getElementById("bag-etc");
-  let etcKeys = Object.keys(window.inventory.ETC).filter(
-    (k) => window.inventory.ETC[k] > 0,
-  );
-  if (etcKeys.length === 0) {
-    etcBox.innerHTML =
-      "<div style='color:#666;text-align:center;padding-top:40px;'>No materials collected.</div>";
-  } else {
-    // Apply priority structured ordering to materials
-    etcKeys.sort((a, b) => {
-      let idxA = ETC_SORT_ORDER.indexOf(a);
-      let idxB = ETC_SORT_ORDER.indexOf(b);
-      if (idxA === -1) idxA = 999;
-      if (idxB === -1) idxB = 999;
-      return idxA - idxB;
-    });
+  if (etcBox) {
+    if (activeSubTab !== "ETC") {
+      etcBox.innerHTML = "";
+    } else {
+      let etcKeys = Object.keys(window.inventory.ETC).filter(
+        (k) => window.inventory.ETC[k] > 0,
+      );
+      if (etcKeys.length === 0) {
+        etcBox.innerHTML =
+          "<div style='color:#666;text-align:center;padding-top:40px;'>No materials collected.</div>";
+      } else {
+        // Apply priority structured ordering to materials
+        etcKeys.sort((a, b) => {
+          let idxA = ETC_SORT_ORDER.indexOf(a);
+          let idxB = ETC_SORT_ORDER.indexOf(b);
+          if (idxA === -1) idxA = 999;
+          if (idxB === -1) idxB = 999;
+          return idxA - idxB;
+        });
 
-    etcBox.innerHTML =
-      `<div class="material-grid">` +
-      etcKeys
-        .map((key) => {
-          let escapedKey = key.replace(/'/g, "\\'");
-          return `
-                <div class="material-badge" onmouseenter="window.showEtcTooltip(event, '${escapedKey}')" ontouchstart="window.showEtcTooltip(event, '${escapedKey}')" onmouseleave="window.hideTooltip()">
-                    ${getEtcIconHtml(key)}
-                    <span style="font-size:11px; font-weight:bold; color:#f1f5f9; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:85px;">${key}</span>
-                    <span class="material-count">x${window.inventory.ETC[key]}</span>
-                </div>
-                `;
-        })
-        .join("") +
-      `</div>`;
+        etcBox.innerHTML =
+          `<div class="material-grid">` +
+          etcKeys
+            .map((key) => {
+              let escapedKey = key.replace(/'/g, "\\'");
+              return `
+                    <div class="material-badge" onmouseenter="window.showEtcTooltip(event, '${escapedKey}')" ontouchstart="window.showEtcTooltip(event, '${escapedKey}')" onmouseleave="window.hideTooltip()">
+                        ${getEtcIconHtml(key)}
+                        <span style="font-size:11px; font-weight:bold; color:#f1f5f9; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:85px;">${key}</span>
+                        <span class="material-count">x${window.inventory.ETC[key]}</span>
+                    </div>
+                    `;
+            })
+            .join("") +
+          `</div>`;
+      }
+    }
   }
 
   // 4. Usable Potions Sack
   let useBox = document.getElementById("bag-use");
   if (useBox) {
-    let useKeys = Object.keys(window.inventory.USE || {}).filter(
-      (k) => window.inventory.USE[k] > 0,
-    );
-    if (useKeys.length === 0) {
-      useBox.innerHTML =
-        "<div style='color:#666;text-align:center;padding-top:40px;'>No usable items. Purchase potions/scrolls at the Market!</div>";
+    if (activeSubTab !== "USE") {
+      useBox.innerHTML = "";
     } else {
-      // Apply priority structured ordering to usable potions
-      useKeys.sort((a, b) => {
-        let idxA = USE_SORT_ORDER.indexOf(a);
-        let idxB = USE_SORT_ORDER.indexOf(b);
-        if (idxA === -1) idxA = 999;
-        if (idxB === -1) idxB = 999;
-        return idxA - idxB;
-      });
+      let useKeys = Object.keys(window.inventory.USE || {}).filter(
+        (k) => window.inventory.USE[k] > 0,
+      );
+      if (useKeys.length === 0) {
+        useBox.innerHTML =
+          "<div style='color:#666;text-align:center;padding-top:40px;'>No usable items. Purchase potions/scrolls at the Market!</div>";
+      } else {
+        // Apply priority structured ordering to usable potions
+        useKeys.sort((a, b) => {
+          let idxA = USE_SORT_ORDER.indexOf(a);
+          let idxB = USE_SORT_ORDER.indexOf(b);
+          if (idxA === -1) idxA = 999;
+          if (idxB === -1) idxB = 999;
+          return idxA - idxB;
+        });
 
-      useBox.innerHTML =
-        `<div class="consumable-grid">` +
-        useKeys
-          .map((key) => {
-            let count = window.inventory.USE[key];
-            return `
-                        <div class="consumable-badge" onmouseenter="window.showUseTooltip(event, '${key}')" ontouchstart="window.showUseTooltip(event, '${key}')" onmouseleave="window.hideTooltip()">
-                            <div style="display:flex; align-items:center; width:100%; gap:4px;">
-                                ${getUseIconHtml(key)}
-                                <div style="text-align:left; min-width:0; flex:1;">
-                                    <strong style="font-size:11px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${key}</strong>
-                                    <span style="font-size:10px; color:#94a3b8;">Qty: ${count}</span>
-                                </div>
-                            </div>
-                            <button class="btn-action" style="background:#2ecc71; width:100%; padding:4px 0; font-size:10.5px; font-weight:bold; border-radius:4px; margin-top:2px;" onclick="window.useItem('${key}')">Consume</button>
-                        </div>
-                    `;
-          })
-          .join("") +
-        `</div>`;
+        useBox.innerHTML =
+          `<div class="consumable-grid">` +
+          useKeys
+            .map((key) => {
+              let count = window.inventory.USE[key];
+              return `
+                          <div class="consumable-badge" onmouseenter="window.showUseTooltip(event, '${key}')" ontouchstart="window.showUseTooltip(event, '${key}')" onmouseleave="window.hideTooltip()">
+                              <div style="display:flex; align-items:center; width:100%; gap:4px;">
+                                  ${getUseIconHtml(key)}
+                                  <div style="text-align:left; min-width:0; flex:1;">
+                                      <strong style="font-size:11px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${key}</strong>
+                                      <span style="font-size:10px; color:#94a3b8;">Qty: ${count}</span>
+                                  </div>
+                              </div>
+                              <button class="btn-action" style="background:#2ecc71; width:100%; padding:4px 0; font-size:10.5px; font-weight:bold; border-radius:4px; margin-top:2px;" onclick="window.useItem('${key}')" onpointerdown="window.useItem('${key}')">Consume</button>
+                          </div>
+                      `;
+            })
+            .join("") +
+          `</div>`;
+      }
     }
   }
 };
@@ -4990,8 +5250,8 @@ window.generateItemCardHtml = function (
   html += `<div class="tt-subtitle">${subtitle}</div>`;
 
   if (item.id !== "dummy" && item.type === "subweapon") {
-      if (item.subType === "shield") {
-        html += `
+    if (item.subType === "shield") {
+      html += `
           <details style="margin-bottom:8px; border: 1px dashed #3498db; border-radius:4px; background: rgba(52, 152, 219, 0.05); pointer-events: auto;">
             <summary style="color:#3498db; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
               <span>🛡️ BULWARK PASSIVE</span>
@@ -5005,8 +5265,8 @@ window.generateItemCardHtml = function (
             </div>
           </details>
         `;
-      } else if (item.subType === "dagger") {
-        html += `
+    } else if (item.subType === "dagger") {
+      html += `
           <details style="margin-bottom:8px; border: 1px dashed #e74c3c; border-radius:4px; background: rgba(231, 76, 60, 0.05); pointer-events: auto;">
             <summary style="color:#e74c3c; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
               <span>🗡️ RIPOSTE PASSIVE</span>
@@ -5019,8 +5279,8 @@ window.generateItemCardHtml = function (
             </div>
           </details>
         `;
-      } else if (item.subType === "tome") {
-        html += `
+    } else if (item.subType === "tome") {
+      html += `
           <details style="margin-bottom:8px; border: 1px dashed #9b59b6; border-radius:4px; background: rgba(155, 89, 182, 0.05); pointer-events: auto;">
             <summary style="color:#9b59b6; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
               <span>🔮 ARCANE BARRIER</span>
@@ -5032,8 +5292,8 @@ window.generateItemCardHtml = function (
             </div>
           </details>
         `;
-      }
     }
+  }
 
   // --- BASE STATS SECTION ---
   if (item.id !== "dummy" && item.type !== "artifact") {
@@ -5342,14 +5602,14 @@ window.generateItemCardHtml = function (
   }
 
   if (uniqueStyle) {
-      if (uniqueStyle.lore) {
-        html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
-      }
-      html = `<div style="background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 12px; border-radius: 4px; box-sizing: border-box; width: 100%;">
+    if (uniqueStyle.lore) {
+      html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
+    }
+    html = `<div style="background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 12px; border-radius: 4px; box-sizing: border-box; width: 100%;">
                           ${runicBadge}
                           ${html}
                       </div>`;
-    }
+  }
 
   return html;
 };
@@ -10087,13 +10347,13 @@ window.openDailyRewardSack = function (specificName) {
   }
 
   // Credit rewards
-    receivedRewards.forEach((r) => {
-      if (r.type === "use") {
-        window.addUseDrop(r.name, r.qty, true);
-      } else if (r.type === "etc") {
-        window.addEtcDrop(r.name, r.qty, true);
-      }
-    });
+  receivedRewards.forEach((r) => {
+    if (r.type === "use") {
+      window.addUseDrop(r.name, r.qty, true);
+    } else if (r.type === "etc") {
+      window.addEtcDrop(r.name, r.qty, true);
+    }
+  });
 
   // Create cool opening overlay card
   let overlay = document.createElement("div");
@@ -10118,16 +10378,18 @@ window.openDailyRewardSack = function (specificName) {
   for (let i = 0; i < 40; i++) {
     let angle = Math.random() * Math.PI * 2;
     let vel = window.randFloat(3, 8);
-    window.particles.push({
-      x: w / 2,
-      y: h / 2,
-      vx: Math.cos(angle) * vel,
-      vy: Math.sin(angle) * vel - 2,
-      radius: window.randFloat(2, 5),
-      color: window.getTierColor(newEquip.statsRolled),
-      alpha: 1,
-      life: window.randInt(30, 50),
-    });
+    window.particles.push(
+      window.ParticlePool.get(
+        w / 2,
+        h / 2,
+        Math.cos(angle) * vel,
+        Math.sin(angle) * vel - 2,
+        window.randFloat(2, 5),
+        window.getTierColor(newEquip.statsRolled),
+        1,
+        window.randInt(30, 50),
+      ),
+    );
   }
 
   overlay.innerHTML = `
@@ -10417,13 +10679,13 @@ window.openWeeklyRewardSack = function (specificName) {
   }
 
   // Credit rewards safely once
-    receivedRewards.forEach((r) => {
-      if (r.type === "use") {
-        window.addUseDrop(r.name, r.qty, true);
-      } else if (r.type === "etc") {
-        window.addEtcDrop(r.name, r.qty, true);
-      }
-    });
+  receivedRewards.forEach((r) => {
+    if (r.type === "use") {
+      window.addUseDrop(r.name, r.qty, true);
+    } else if (r.type === "etc") {
+      window.addEtcDrop(r.name, r.qty, true);
+    }
+  });
 
   // Create cool opening overlay card
   let overlay = document.createElement("div");
@@ -10448,16 +10710,18 @@ window.openWeeklyRewardSack = function (specificName) {
   for (let i = 0; i < 60; i++) {
     let angle = Math.random() * Math.PI * 2;
     let vel = window.randFloat(4, 10);
-    window.particles.push({
-      x: w / 2,
-      y: h / 2,
-      vx: Math.cos(angle) * vel,
-      vy: Math.sin(angle) * vel - 2,
-      radius: window.randFloat(2.5, 6),
-      color: "#9b59b6",
-      alpha: 1,
-      life: window.randInt(40, 60),
-    });
+    window.particles.push(
+      window.ParticlePool.get(
+        w / 2,
+        h / 2,
+        Math.cos(angle) * vel,
+        Math.sin(angle) * vel - 2,
+        window.randFloat(2.5, 6),
+        "#9b59b6",
+        1,
+        window.randInt(40, 60),
+      ),
+    );
   }
 
   // Draw the animation phase first
@@ -13429,7 +13693,7 @@ window.renderBestiaryAlbum = function () {
     if (isMaxed) {
       upgradeBtnHtml = `<span style="color:#2ecc71; font-weight:bold; font-size:8px; font-family:monospace;">MAX</span>`;
     } else if (canUpgrade) {
-      upgradeBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:2px 6px; font-size:8px; font-weight:bold; height:18px; line-height:1;" onclick="window.upgradeBestiaryCard('${cKey}')">UP</button>`;
+      upgradeBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:2px 6px; font-size:8px; font-weight:bold; height:18px; line-height:1;" onclick="window.upgradeBestiaryCard('${cKey}')" onpointerdown="window.upgradeBestiaryCard('${cKey}')">UP</button>`;
     } else if (canAffordDuplicates) {
       let mColor = soulsOwned >= costs.mSouls ? "#2ecc71" : "#e74c3c";
       upgradeBtnHtml = `<span style="font-size:8px; color:#888; font-family:monospace; line-height:1; display:block;">Req: <span style="color:${mColor}">${costs.mSouls}</span></span>`;
@@ -13617,9 +13881,9 @@ window.renderAstralRecyclingShop = function (dustOwned) {
             </div>
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:4px;">
-            <span style="color:${costColor}; font-family:monospace; font-size:10.5px; font-weight:bold;">${item.cost} Dust</span>
-            <button class="btn-action" style="${btnStyle} font-size:9.5px; padding:4px 10px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.buyBestiaryExchangeItem('${item.key}')">Recycle</button>
-          </div>
+                      <span style="color:${costColor}; font-family:monospace; font-size:10.5px; font-weight:bold;">${item.cost} Dust</span>
+                      <button class="btn-action" style="${btnStyle} font-size:9.5px; padding:4px 10px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.buyBestiaryExchangeItem('${item.key}')" onpointerdown="window.buyBestiaryExchangeItem('${item.key}')">Recycle</button>
+                    </div>
         </div>
       `;
     })
@@ -13778,16 +14042,18 @@ window.upgradeBestiaryCard = function (cardKey) {
   for (let i = 0; i < 40; i++) {
     let angle = Math.random() * Math.PI * 2;
     let vel = window.randFloat(3, 8);
-    window.particles.push({
-      x: w / 2,
-      y: h / 2,
-      vx: Math.cos(angle) * vel,
-      vy: Math.sin(angle) * vel,
-      radius: window.randFloat(2, 4),
-      color: tColor,
-      alpha: 1,
-      life: 45,
-    });
+    window.particles.push(
+      window.ParticlePool.get(
+        w / 2,
+        h / 2,
+        Math.cos(angle) * vel,
+        Math.sin(angle) * vel,
+        window.randFloat(2, 4),
+        tColor,
+        1,
+        45,
+      ),
+    );
   }
 
   window.invalidatePlayerStats();
@@ -13970,16 +14236,18 @@ window.buyBestiaryExchangeItem = function (itemKey) {
     let w = cvs ? cvs.width : 750;
     let h = cvs ? cvs.height : 250;
     for (let i = 0; i < 30; i++) {
-      window.particles.push({
-        x: w / 2,
-        y: h / 2,
-        vx: (Math.random() - 0.5) * 8,
-        vy: (Math.random() - 0.5) * 8,
-        radius: Math.random() * 2 + 1,
-        color: "#ff007f",
-        alpha: 1,
-        life: 30,
-      });
+      window.particles.push(
+        window.ParticlePool.get(
+          w / 2,
+          h / 2,
+          (Math.random() - 0.5) * 8,
+          (Math.random() - 0.5) * 8,
+          Math.random() * 2 + 1,
+          "#ff007f",
+          1,
+          30,
+        ),
+      );
     }
 
     window.pushHeaderToast(

@@ -97,12 +97,17 @@ window.getSlotUpgradeCost = function (slotKey, currentLevel) {
 window.forgeSelectedItem = null;
 window.forgeMode = "temper";
 
+window.hexToRgbCache = window.hexToRgbCache || {};
+
 window.hexToRgbValues = function (hex) {
   if (!hex || hex.charAt(0) !== "#") return "30, 41, 59";
-  let r = parseInt(hex.slice(1, 3), 16);
-  let g = parseInt(hex.slice(3, 5), 16);
-  let b = parseInt(hex.slice(5, 7), 16);
-  return `${r}, ${g}, ${b}`;
+  if (!window.hexToRgbCache[hex]) {
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
+    window.hexToRgbCache[hex] = `${r}, ${g}, ${b}`;
+  }
+  return window.hexToRgbCache[hex];
 };
 
 // Initialize window.ItemFactory Namespace to encapsulate item math and properties
@@ -530,7 +535,7 @@ window.renderForgeTab = function () {
 
       ${liveComparisonHtml}
 
-      <button class="forge-anvil-button" style="width:100%; margin-top:15px; border-color:#9b59b6; background:linear-gradient(135deg, #4a154b, #0c0812);" ${canAfford ? "" : "disabled"} onclick="window.temperItem()">Harness Heat</button>
+      <button class="forge-anvil-button" style="width:100%; margin-top:15px; border-color:#9b59b6; background:linear-gradient(135deg, #4a154b, #0c0812);" ${canAfford ? "" : "disabled"} onclick="window.temperItem()" onpointerdown="window.temperItem()">Harness Heat</button>
     `;
     return;
   }
@@ -737,21 +742,21 @@ window.renderForgeTab = function () {
 
           html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
           html += `<div style="font-size:11px; color:${sigilColor}; margin-bottom:12px;">• 1x Overlord's Sigil (Owned: ${ownedSigils.toLocaleString()})</div>`;
-          html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Execute Reforge</button>`;
+          html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()" onpointerdown="window.reforgeItemStat()">Execute Reforge</button>`;
         }
       } else {
         let rProp = item.reforgedProperty;
         let valText = item[rProp] > 0 ? `+${item[rProp]}` : `${item[rProp]}`;
 
         html += `<div style="background:#111; padding:8px; border-radius:4px; border:1px solid #9b59b6; font-size:11px; margin-bottom:12px; text-align:center;">
-                          <span style="color:#9b59b6; font-weight:bold;">REFORGIBLE SLOT (LOCKED):</span><br>
-                          <strong style="color:#2ecc71; font-size:12px;">${window.getStatLabel(rProp)} (${valText})</strong><br>
-                          <span style="font-size:9px; color:#aaa;">(All other stat lines on this item are permanently locked!)</span>
-                      </div>`;
+                                    <span style="color:#9b59b6; font-weight:bold;">REFORGIBLE SLOT (LOCKED):</span><br>
+                                    <strong style="color:#2ecc71; font-size:12px;">${window.getStatLabel(rProp)} (${valText})</strong><br>
+                                    <span style="font-size:9px; color:#aaa;">(All other stat lines on this item are permanently locked!)</span>
+                                </div>`;
 
         html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
         html += `<div style="font-size:11px; color:${sigilColor}; margin-bottom:12px;">• 1x Overlord's Sigil (Owned: ${ownedSigils.toLocaleString()})</div>`;
-        html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Re-Roll Locked Modifier</button>`;
+        html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()" onpointerdown="window.reforgeItemStat()">Re-Roll Locked Modifier</button>`;
       }
     }
   } else if (window.forgeMode === "tier") {
@@ -789,7 +794,7 @@ window.renderForgeTab = function () {
       html += `<div style="font-size:11px; color:${shardColor}; margin-bottom:3px;">• ${shardReq}x Eridium Shard (Owned: ${playerShards})</div>`;
       html += `<div style="font-size:11px; color:${scrapColor}; margin-bottom:10px;">• ${scrapReqAmount}x ${targetScrapName} (Owned: ${playerScraps})</div>`;
       html += `<div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:15px;">✨ 100% Awakening Guaranteed</div>`;
-      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e67e22;" ${window.playerStats.coins >= costGold && playerShards >= shardReq && playerScraps >= scrapReqAmount ? "" : "disabled"} onclick="window.temperItem()">Awaken Rarity</button>`;
+      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e67e22;" ${window.playerStats.coins >= costGold && playerShards >= shardReq && playerScraps >= scrapReqAmount ? "" : "disabled"} onclick="window.temperItem()" onpointerdown="window.temperItem()">Awaken Rarity</button>`;
 
       previewHtml = `
                     <div style="margin-top:15px; padding:12px; background:#111; border:1px solid #e67e22; border-radius:6px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
@@ -829,7 +834,7 @@ window.renderForgeTab = function () {
       html += `<div class="forge-progress-bg"><div class="forge-progress-fill" style="width:${pct}%; background: linear-gradient(90deg, #9b59b6, #e84393);"></div></div>`;
       html += `<div style="font-size:11px; color:${sigilColor}; margin-bottom:15px;">• 1x Overlord's Sigil Required (Owned: ${playerSigil})</div>`;
       html += `<div style="font-size:11px; color:#9b59b6; font-weight:bold; margin-bottom:15px;">🔮 Randomly boosts one active parameter by +25%!</div>`;
-      html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #1a0221);" ${playerSigil >= 1 ? "" : "disabled"} onclick="window.enchantItem()">Infuse Enchantment</button>`;
+      html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #1a0221);" ${playerSigil >= 1 ? "" : "disabled"} onclick="window.enchantItem()" onpointerdown="window.enchantItem()">Infuse Enchantment</button>`;
     }
   } else if (window.forgeMode === "reset_enchant") {
     let currentEnchants = item.totalEnchants || 0;
@@ -843,7 +848,7 @@ window.renderForgeTab = function () {
       html += `<div style="font-size:11px; margin-bottom:10px; color:#aaa;">Active Enchantments to Purge: <span style="color:#9b59b6; font-weight:bold;">${currentEnchants}</span></div>`;
       html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:15px;">• ${resetGoldCost.toLocaleString()} Gold Required (Owned: ${Math.floor(window.playerStats.coins).toLocaleString()})</div>`;
       html += `<div style="font-size:11px; color:#e74c3c; font-weight:bold; margin-bottom:15px;">⚠️ Restores all enchanted parameters to their original pre-enchanted values. Material scraps are non-refundable.</div>`;
-      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e74c3c; background: linear-gradient(135deg, #c0392b, #111);" ${window.playerStats.coins >= resetGoldCost ? "" : "disabled"} onclick="window.resetItemEnchants()">Purge Enchantments</button>`;
+      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e74c3c; background: linear-gradient(135deg, #c0392b, #111);" ${window.playerStats.coins >= resetGoldCost ? "" : "disabled"} onclick="window.resetItemEnchants()" onpointerdown="window.resetItemEnchants()">Purge Enchantments</button>`;
     }
   } else if (window.forgeMode === "set") {
     let costGold = window.getSetRerollGoldCost(item);
@@ -858,7 +863,7 @@ window.renderForgeTab = function () {
     html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
     html += `<div style="font-size:11px; color:${soulsColor}; margin-bottom:10px;">• ${soulCost}x Monster Soul (Owned: ${ownedSouls.toLocaleString()})</div>`;
     html += `<div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:15px;">✨ Randomly rolls a different Set bonus!</div>`;
-    html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedSouls >= soulCost ? "" : "disabled"} onclick="window.rerollItemSet()">Re-Resonate Set</button>`;
+    html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedSouls >= soulCost ? "" : "disabled"} onclick="window.rerollItemSet()" onpointerdown="window.rerollItemSet()">Re-Resonate Set</button>`;
 
     previewHtml = `
                     <div style="margin-top:15px; padding:12px; background:#111; border:1px dashed #2ecc71; border-radius:6px;">
@@ -2775,20 +2780,20 @@ window.salvageItem = function (id) {
     : Math.floor(Math.random() * 3) + 1;
 
   if (typeof window.addEtcDrop === "function")
-      window.addEtcDrop(scrapName, yieldAmount, true);
-    scrapsGained.push(`x${yieldAmount} ${scrapName}`);
+    window.addEtcDrop(scrapName, yieldAmount, true);
+  scrapsGained.push(`x${yieldAmount} ${scrapName}`);
 
-    if (!isArt) {
-      for (let t = rolledTier - 1; t >= 0; t--) {
-        if (Math.random() < 0.6) {
-          let lowerYield = Math.floor(Math.random() * 2) + 1;
-          let lowerName = window.getScrapYieldName(t);
-          if (typeof window.addEtcDrop === "function")
-            window.addEtcDrop(lowerName, lowerYield, true);
-          scrapsGained.push(`x${lowerYield} ${lowerName}`);
-        }
+  if (!isArt) {
+    for (let t = rolledTier - 1; t >= 0; t--) {
+      if (Math.random() < 0.6) {
+        let lowerYield = Math.floor(Math.random() * 2) + 1;
+        let lowerName = window.getScrapYieldName(t);
+        if (typeof window.addEtcDrop === "function")
+          window.addEtcDrop(lowerName, lowerYield, true);
+        scrapsGained.push(`x${lowerYield} ${lowerName}`);
       }
     }
+  }
 
   let cvs = document.getElementById("gameCanvas");
   let w = cvs ? cvs.width : 750;
@@ -3165,7 +3170,7 @@ Object.assign(window.ForgeManager, {
     window.state.bulkSalvageTarget = parseInt(val, 10);
     if (typeof window.updateSalvagePadUI === "function")
       window.updateSalvagePadUI();
-  }
+  },
 });
 
 // Legacy Compatibility Aliases to protect references
@@ -3175,47 +3180,47 @@ window.selectBulkSalvageRarity = (val) =>
 // Append triggerBulkSalvage inside ForgeManager
 Object.assign(window.ForgeManager, {
   triggerBulkSalvage() {
-        if (typeof window.hideTooltip === "function") window.hideTooltip();
-        let maxStars =
-          window.state.bulkSalvageTarget !== undefined
-            ? window.state.bulkSalvageTarget
-            : 0;
+    if (typeof window.hideTooltip === "function") window.hideTooltip();
+    let maxStars =
+      window.state.bulkSalvageTarget !== undefined
+        ? window.state.bulkSalvageTarget
+        : 0;
 
-        let targetItems = window.inventory.EQUIP.filter(
-          (item) =>
-            !item.locked &&
-            item.statsRolled !== "UNIQUE" &&
-            item.statsRolled <= maxStars,
+    let targetItems = window.inventory.EQUIP.filter(
+      (item) =>
+        !item.locked &&
+        item.statsRolled !== "UNIQUE" &&
+        item.statsRolled <= maxStars,
+    );
+    if (targetItems.length === 0) {
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast(
+          "No eligible unlocked items found under this rarity!",
+          "#e74c3c",
         );
-        if (targetItems.length === 0) {
-          if (typeof window.pushHeaderToast === "function")
-            window.pushHeaderToast(
-              "No eligible unlocked items found under this rarity!",
-              "#e74c3c",
-            );
-          return;
-        }
+      return;
+    }
 
-        let label =
-          maxStars === 0
-            ? "Common Gear (0★)"
-            : window.getTierName(maxStars) + " & Under";
+    let label =
+      maxStars === 0
+        ? "Common Gear (0★)"
+        : window.getTierName(maxStars) + " & Under";
 
-        if (typeof window.showCustomConfirm === "function") {
-          window.showCustomConfirm(
-            "Bulk Deconstruct",
-            `Are you sure you want to bulk salvage ${targetItems.length} unlocked items (${label})?`,
-            "Deconstruct",
-            "Cancel",
-            "#e74c3c",
-            () => {
-              let bulkScrapsHarvested = {};
-              function incrementScrap(name, amount) {
-                if (!bulkScrapsHarvested[name]) bulkScrapsHarvested[name] = 0;
-                bulkScrapsHarvested[name] += amount;
-                if (typeof window.addEtcDrop === "function")
-                  window.addEtcDrop(name, amount, true);
-              }
+    if (typeof window.showCustomConfirm === "function") {
+      window.showCustomConfirm(
+        "Bulk Deconstruct",
+        `Are you sure you want to bulk salvage ${targetItems.length} unlocked items (${label})?`,
+        "Deconstruct",
+        "Cancel",
+        "#e74c3c",
+        () => {
+          let bulkScrapsHarvested = {};
+          function incrementScrap(name, amount) {
+            if (!bulkScrapsHarvested[name]) bulkScrapsHarvested[name] = 0;
+            bulkScrapsHarvested[name] += amount;
+            if (typeof window.addEtcDrop === "function")
+              window.addEtcDrop(name, amount, true);
+          }
 
           targetItems.forEach((item) => {
             let rolledTier = item.statsRolled;
@@ -3339,7 +3344,8 @@ Object.assign(window.ForgeManager, {
       if (curLvl >= 100) return;
 
       let cost = window.getSlotUpgradeCost(slotKey, curLvl);
-      if (window.playerStats.coins < cost.gold) {
+      let coins = BigNum.from(window.playerStats.coins);
+      if (coins.lt(cost.gold)) {
         if (typeof window.pushHeaderToast === "function")
           window.pushHeaderToast(
             "❌ Not enough Gold to attune slot!",
@@ -3362,8 +3368,10 @@ Object.assign(window.ForgeManager, {
       }
 
       // Deduct resources
-      window.playerStats.coins -= cost.gold;
-      if (window.playerStats.coins === 0) {
+      window.playerStats.coins = BigNum.from(window.playerStats.coins).sub(
+        cost.gold,
+      );
+      if (window.playerStats.coins.eq(0)) {
         window.playerStats.hasTriggeredExactChange = true;
       }
 
@@ -3416,8 +3424,9 @@ Object.assign(window.ForgeManager, {
 
       let playerShards = window.inventory.ETC["Eridium Shard"] || 0;
       let playerScraps = window.inventory.ETC[targetScrapName] || 0;
+      let coins = BigNum.from(window.playerStats.coins);
 
-      if (window.playerStats.coins < costGold) {
+      if (coins.lt(costGold)) {
         if (typeof window.pushLog === "function")
           window.pushLog(
             `<span style='color:#e74c3c;'>Not enough Gold to Tier Up!</span>`,
@@ -3439,7 +3448,9 @@ Object.assign(window.ForgeManager, {
         return;
       }
 
-      window.playerStats.coins -= costGold;
+      window.playerStats.coins = BigNum.from(window.playerStats.coins).sub(
+        costGold,
+      );
       window.inventory.ETC["Eridium Shard"] -= shardReq;
       if (window.inventory.ETC["Eridium Shard"] === 0)
         delete window.inventory.ETC["Eridium Shard"];
@@ -3650,13 +3661,14 @@ Object.assign(window.ForgeManager, {
     }
 
     let resetGoldCost = 1000 * item.stageLevel * (item.statsRolled || 1);
-    if (window.playerStats.coins < resetGoldCost) {
+    let coins = BigNum.from(window.playerStats.coins);
+    if (coins.lt(resetGoldCost)) {
       if (typeof window.pushHeaderToast === "function")
         window.pushHeaderToast("Not enough Gold to reset!", "#e74c3c");
       return;
     }
 
-    window.playerStats.coins -= resetGoldCost;
+    window.playerStats.coins = coins.sub(resetGoldCost);
 
     if (item.originalStats) {
       for (let key in item.originalStats) {
@@ -3816,8 +3828,9 @@ Object.assign(window.ForgeManager, {
     );
 
     let ownedSigil = window.inventory.ETC["Overlord's Sigil"] || 0;
+    let coins = BigNum.from(window.playerStats.coins);
 
-    if (window.playerStats.coins < costGold) {
+    if (coins.lt(costGold)) {
       if (typeof window.pushHeaderToast === "function")
         window.pushHeaderToast("Not enough Gold!", "#e74c3c");
       return;
@@ -3828,7 +3841,9 @@ Object.assign(window.ForgeManager, {
       return;
     }
 
-    window.playerStats.coins -= costGold;
+    window.playerStats.coins = BigNum.from(window.playerStats.coins).sub(
+      costGold,
+    );
     window.inventory.ETC["Overlord's Sigil"]--;
     if (window.inventory.ETC["Overlord's Sigil"] === 0)
       delete window.inventory.ETC["Overlord's Sigil"];
@@ -4108,7 +4123,7 @@ window.rollGachaCrateItem = function (
   if (window.playerStats.gachaHistory.length > 5) {
     window.playerStats.gachaHistory.pop();
   }
-  window.frozenItemDb[newItem.id] = JSON.parse(JSON.stringify(newItem));
+  window.frozenItemDb[newItem.id] = window.cloneItemForTooltip(newItem);
 
   if (typeof window.logHighTierPull === "function") {
     window.logHighTierPull(newItem);
@@ -4125,7 +4140,9 @@ window.buyShopItem = function (index) {
   let item = window.playerStats.shopItems[index];
   if (!item || item.purchased) return;
 
-  if (window.playerStats.coins < item.cost) {
+  let coins = BigNum.from(window.playerStats.coins);
+  let cost = BigNum.from(item.cost);
+  if (coins.lt(cost)) {
     window.pushHeaderToast("❌ Insufficient Gold!", "#e74c3c");
     return;
   }
@@ -4136,16 +4153,16 @@ window.buyShopItem = function (index) {
     return;
   }
 
-  window.playerStats.coins -= item.cost;
+  window.playerStats.coins = coins.sub(cost);
   item.purchased = true;
   item.justPurchased = true;
 
-  if (window.playerStats.coins === 0) {
+  if (window.playerStats.coins.eq(0)) {
     window.playerStats.hasTriggeredExactChange = true;
   }
 
   window.inventory.EQUIP.push(item);
-  window.frozenItemDb[item.id] = JSON.parse(JSON.stringify(item));
+  window.frozenItemDb[item.id] = window.cloneItemForTooltip(item);
 
   window.pushHeaderToast(`🛒 Purchased ${item.name}!`, "#2ecc71");
   window.SoundManager.play("fairy");
@@ -4171,12 +4188,13 @@ window.buyMysticalItem = function (index) {
 
   if (currency === "Gold") {
     cost = Math.ceil(item.cost * Math.pow(1.08, window.playerStats.stage));
-    if (window.playerStats.coins < cost) {
+    let coins = BigNum.from(window.playerStats.coins);
+    if (coins.lt(cost)) {
       window.pushHeaderToast("❌ Insufficient Gold!", "#e74c3c");
       return;
     }
-    window.playerStats.coins -= cost;
-    if (window.playerStats.coins === 0) {
+    window.playerStats.coins = coins.sub(cost);
+    if (window.playerStats.coins.eq(0)) {
       window.playerStats.hasTriggeredExactChange = true;
     }
   } else if (currency === "Luminous Soul") {
@@ -4239,15 +4257,17 @@ window.buyGoldUpgrade = function (type) {
     cost = Math.floor(100000 * Math.pow(1.28, p.globalQLevel || 0));
   }
 
-  if (p.coins < cost) {
+  let coins = BigNum.from(p.coins);
+  let costBig = BigNum.from(cost);
+  if (coins.lt(costBig)) {
     window.pushHeaderToast("❌ Insufficient Gold!", "#e74c3c");
     return;
   }
 
-  p.coins -= cost;
+  p.coins = coins.sub(costBig);
   p[levelField] = (p[levelField] || 0) + 1;
 
-  if (p.coins === 0) {
+  if (p.coins.eq(0)) {
     p.hasTriggeredExactChange = true;
   }
 
@@ -4317,8 +4337,9 @@ Object.assign(window.ForgeManager, {
     let costGold = window.getSetRerollGoldCost(item);
     let soulCost = 25 + item.statsRolled * 25;
     let ownedSouls = window.inventory.ETC["Monster Soul"] || 0;
+    let coins = BigNum.from(window.playerStats.coins);
 
-    if (window.playerStats.coins < costGold) {
+    if (coins.lt(costGold)) {
       if (typeof window.pushHeaderToast === "function")
         window.pushHeaderToast("❌ Not enough Gold!", "#e74c3c");
       return;
@@ -4329,7 +4350,9 @@ Object.assign(window.ForgeManager, {
       return;
     }
 
-    window.playerStats.coins -= costGold;
+    window.playerStats.coins = BigNum.from(window.playerStats.coins).sub(
+      costGold,
+    );
     window.inventory.ETC["Monster Soul"] -= soulCost;
     if (window.inventory.ETC["Monster Soul"] === 0) {
       delete window.inventory.ETC["Monster Soul"];
@@ -4436,14 +4459,14 @@ window.executeParagonUpgrade = function () {
   let costEpic = Math.floor(350 * Math.pow(1.3, parLevel));
   let costCores = Math.floor(10 * Math.pow(1.15, parLevel));
 
-  let goldOwned = p.coins || 0;
+  let goldOwned = BigNum.from(p.coins || 0);
   let mythicScrapsOwned = window.inventory.ETC["Mythic Scrap"] || 0;
   let legendaryScrapsOwned = window.inventory.ETC["Legendary Scrap"] || 0;
   let epicScrapsOwned = window.inventory.ETC["Epic Scrap"] || 0;
   let coresOwned = window.inventory.ETC["Catalyst Core"] || 0;
 
   if (
-    goldOwned < costGold ||
+    goldOwned.lt(costGold) ||
     mythicScrapsOwned < costMythic ||
     legendaryScrapsOwned < costLegendary ||
     epicScrapsOwned < costEpic ||
@@ -4463,7 +4486,7 @@ window.executeParagonUpgrade = function () {
     "Cancel",
     "#ff007f",
     function () {
-      p.coins -= costGold;
+      p.coins = goldOwned.sub(costGold);
 
       window.inventory.ETC["Mythic Scrap"] -= costMythic;
       if (window.inventory.ETC["Mythic Scrap"] === 0)

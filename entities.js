@@ -143,18 +143,22 @@
       for (let i = 0; i < count; i++) {
         let angle = Math.random() * Math.PI * 2;
         let velocity = window.randFloat(1, speed);
-        window.particles.push({
-          x: x,
-          y: y,
-          vx: Math.cos(angle) * velocity,
-          vy: Math.sin(angle) * velocity - window.randFloat(1, 3),
-          radius: window.randFloat(1.5, 4.5),
-          color: colors[Math.floor(Math.random() * colors.length)],
-          alpha: 1,
-          fade: true,
-          maxLife: window.randInt(25, 45),
-          life: window.randInt(25, 45),
-        });
+        let randLife = window.randInt(25, 45);
+        window.particles.push(
+          window.ParticlePool.get(
+            x,
+            y,
+            Math.cos(angle) * velocity,
+            Math.sin(angle) * velocity - window.randFloat(1, 3),
+            window.randFloat(1.5, 4.5),
+            colors[Math.floor(Math.random() * colors.length)],
+            1,
+            randLife,
+            randLife,
+            undefined,
+            true,
+          ),
+        );
       }
     },
   });
@@ -174,16 +178,18 @@
         : ["#7f8c8d", "#c0392b", "#2c3e50"];
 
       for (let i = 0; i < 50; i++) {
-        window.particles.push({
-          x: w / 2,
-          y: h / 2,
-          vx: (Math.random() - 0.5) * 16,
-          vy: (Math.random() - 0.5) * 16,
-          radius: Math.random() * 4 + 1.5,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          alpha: 1,
-          life: isSuccess ? 45 : 30,
-        });
+        window.particles.push(
+          window.ParticlePool.get(
+            w / 2,
+            h / 2,
+            (Math.random() - 0.5) * 16,
+            (Math.random() - 0.5) * 16,
+            Math.random() * 4 + 1.5,
+            colors[Math.floor(Math.random() * colors.length)],
+            1,
+            isSuccess ? 45 : 30,
+          ),
+        );
       }
     },
   });
@@ -230,19 +236,21 @@
       }
 
       for (let i = 0; i < count; i++) {
-        window.particles.push({
-          x: spawnX + window.randFloat(-15, 15),
-          y: spawnY + window.randFloat(-10, 10),
-          vx: (Math.random() - 0.5) * speed,
-          vy: (Math.random() - 0.7) * speed - 2.5,
-          radius: window.randFloat(
-            1.5,
-            rarity === 5 || rarity === "UNIQUE" ? 5.0 : 3.5,
+        window.particles.push(
+          window.ParticlePool.get(
+            spawnX + window.randFloat(-15, 15),
+            spawnY + window.randFloat(-10, 10),
+            (Math.random() - 0.5) * speed,
+            (Math.random() - 0.7) * speed - 2.5,
+            window.randFloat(
+              1.5,
+              rarity === 5 || rarity === "UNIQUE" ? 5.0 : 3.5,
+            ),
+            color || "#f1c40f",
+            1,
+            window.randInt(25, 60),
           ),
-          color: color || "#f1c40f",
-          alpha: 1,
-          life: window.randInt(25, 60),
-        });
+        );
       }
 
       window.effects.push({
@@ -346,27 +354,32 @@
       let offsetY = window.randFloat(-50, 15);
 
       if (isCrit) {
-        window.effects.push({
-          type: "crit",
-          x: window.mob.x + window.mob.w / 2 + offsetX,
-          y: window.mob.y + offsetY,
-          vx: window.randFloat(-1.2, 1.2),
-          vy: window.randFloat(-2.0, -1.0), // Float up slightly faster/bouncier on crits
-          amount: amount,
-          life: 45,
-        });
+        window.effects.push(
+          window.CombatEffectPool.get(
+            "crit",
+            window.mob.x + window.mob.w / 2 + offsetX,
+            window.mob.y + offsetY,
+            window.randFloat(-1.2, 1.2),
+            window.randFloat(-2.0, -1.0),
+            amount,
+            undefined,
+            45,
+          ),
+        );
       } else {
         // Enforce cel-shaded vector rendering for every single combat damage source!
-        window.effects.push({
-          type: type, // "slash", "dagger", "echo", "counter", "bleed", "lightning", "fire", "frost"
-          x: window.mob.x + window.mob.w / 2 + offsetX,
-          y: window.mob.y + offsetY,
-          vx: window.randFloat(-1.2, 1.2),
-          vy: window.randFloat(-1.5, -0.6),
-          amount: amount,
-          color: hitColor,
-          life: 40,
-        });
+        window.effects.push(
+          window.CombatEffectPool.get(
+            type,
+            window.mob.x + window.mob.w / 2 + offsetX,
+            window.mob.y + offsetY,
+            window.randFloat(-1.2, 1.2),
+            window.randFloat(-1.5, -0.6),
+            amount,
+            hitColor,
+            40,
+          ),
+        );
       }
 
       let existingTotal = window.effects.find(
@@ -379,17 +392,21 @@
         existingTotal.x = window.mob.x + window.mob.w / 2 - 25;
         existingTotal.y = window.mob.y - 25;
       } else {
-        window.effects.push({
-          x: window.mob.x + window.mob.w / 2 - 25,
-          y: window.mob.y - 25,
-          vx: 0,
-          vy: -0.4,
-          text: `TOTAL: ${window.formatNumber(amount)}`,
-          color: "#f1c40f",
-          life: 55,
-          isCumulative: true,
-          amount: amount,
-        });
+        window.effects.push(
+          window.CombatEffectPool.get(
+            undefined,
+            window.mob.x + window.mob.w / 2 - 25,
+            window.mob.y - 25,
+            0,
+            -0.4,
+            amount,
+            "#f1c40f",
+            55,
+            0,
+            `TOTAL: ${window.formatNumber(amount)}`,
+            true,
+          ),
+        );
       }
     },
   });
@@ -415,7 +432,7 @@
         return;
       }
 
-      let renderMob = JSON.parse(JSON.stringify(mobData));
+      let renderMob = { ...mobData };
       renderMob.flashTimer = 0;
 
       // Calculate containing scale to keep the sprite within 80% of canvas bounds
@@ -9285,8 +9302,20 @@
     // 5. STYLIZED MONSTERS DRAW
     if (window.mob) {
       window.drawSingleMob(ctx, window.mob);
+      let bHp = BigNum.from(window.mob.hp);
+      let bMaxHp = BigNum.from(window.mob.maxHp);
+      let hpPct = Math.max(
+        0,
+        Math.min(
+          1,
+          Number(
+            bHp.div(bMaxHp).m * Math.pow(10, Math.min(15, bHp.div(bMaxHp).e)),
+          ),
+        ),
+      );
+
       if (
-        window.mob.hp < window.mob.maxHp &&
+        hpPct < 1.0 &&
         window.mob.type !== "boss" &&
         window.mob.type !== "dungeon_boss" &&
         window.mob.type !== "prestige_boss" &&
@@ -9301,20 +9330,24 @@
         ctx.beginPath();
         ctx.rect(barX, window.mob.y - 13, barW, 7);
         ctx.fill();
-        let trailingPct = Math.max(
-          0,
-          Math.min(
-            1,
-            (window.mob.trailingHp !== undefined
-              ? window.mob.trailingHp
-              : window.mob.hp) / window.mob.maxHp,
-          ),
-        );
+
+        // High-performance percentage lerp replaces heavy float trailing HP updates
+        window.mob.trailingPct =
+          window.mob.trailingPct !== undefined ? window.mob.trailingPct : hpPct;
+        if (window.mob.trailingPct > hpPct) {
+          window.mob.trailingPct = Math.max(
+            hpPct,
+            window.mob.trailingPct - 0.015,
+          );
+        } else {
+          window.mob.trailingPct = hpPct;
+        }
+        let trailingPct = window.mob.trailingPct;
+
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
         ctx.rect(barX, window.mob.y - 13, trailingPct * barW, 7);
         ctx.fill();
-        let hpPct = Math.max(0, Math.min(1, window.mob.hp / window.mob.maxHp));
         ctx.fillStyle = "#e74c3c";
         ctx.beginPath();
         ctx.rect(barX, window.mob.y - 13, hpPct * barW, 7);
@@ -10484,13 +10517,31 @@
       ctx.fill();
       ctx.stroke();
 
-      let trailingPct = Math.max(
+      let bHp = BigNum.from(window.mob.hp);
+      let bMaxHp = BigNum.from(window.mob.maxHp);
+      let hpPct = Math.max(
         0,
         Math.min(
           1,
-          (window.mob.trailingHp || window.mob.hp) / window.mob.maxHp,
+          Number(
+            bHp.div(bMaxHp).m * Math.pow(10, Math.min(15, bHp.div(bMaxHp).e)),
+          ),
         ),
       );
+
+      // High-performance percentage lerp replaces heavy float trailing HP updates
+      window.mob.trailingPct =
+        window.mob.trailingPct !== undefined ? window.mob.trailingPct : hpPct;
+      if (window.mob.trailingPct > hpPct) {
+        window.mob.trailingPct = Math.max(
+          hpPct,
+          window.mob.trailingPct - 0.012,
+        );
+      } else {
+        window.mob.trailingPct = hpPct;
+      }
+      let trailingPct = window.mob.trailingPct;
+
       ctx.fillStyle = "#ffffff";
       ctx.beginPath();
       if (ctx.roundRect)
@@ -10510,7 +10561,6 @@
         );
       ctx.fill();
 
-      let hpPct = Math.max(0, Math.min(1, window.mob.hp / window.mob.maxHp));
       let fillGrad = ctx.createLinearGradient(barX, barY, barX, barY + barH);
       fillGrad.addColorStop(0, barColor);
       fillGrad.addColorStop(1, barGlow);

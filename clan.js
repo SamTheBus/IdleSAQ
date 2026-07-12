@@ -35,7 +35,14 @@ window.getRankShieldSvg = function (rank, size = 16) {
   `;
 };
 
+window.clanEmblemCache = window.clanEmblemCache || {};
+
 window.getClanEmblemHtml = function (seed, size = 32, clanLevel = 1) {
+  let cacheKey = `${seed}_${size}_${clanLevel}`;
+  if (window.clanEmblemCache[cacheKey] !== undefined) {
+    return window.clanEmblemCache[cacheKey];
+  }
+
   const lvl = Number(clanLevel) || 1;
   const primaryColors = [
     "#3498db",
@@ -122,7 +129,7 @@ window.getClanEmblemHtml = function (seed, size = 32, clanLevel = 1) {
     inlineStyle = "filter: drop-shadow(0 0 6px rgba(155,89,182,0.6));";
     tierAdditions = `
       <!-- Rotating celestial runic lines behind crest -->
-      <circle cx="12" cy="12" r="11" fill="none" stroke="#9b59b6" stroke-width="0.8" stroke-dasharray="2 1.5" class="portal-spiral" style="transform-origin: 12px 12px; transform: scale(1.05);" />
+      <circle cx="12" cy="12" r="11" fill="none" stroke="#9b59b6" stroke-dasharray="2 1.5" stroke-width="0.8" class="portal-spiral" style="transform-origin: 12px 12px; transform: scale(1.05);" />
       <!-- Triple-pointed royal standard tapestry tail -->
       <path d="M6,21 L6,25 L10,21 L12,26 L14,21 L18,25 L18,21" stroke="#9b59b6" stroke-width="1.5" fill="none" />
       <!-- Miniature space spark particles -->
@@ -149,7 +156,7 @@ window.getClanEmblemHtml = function (seed, size = 32, clanLevel = 1) {
   `;
 
   const shadowStyle = "inset 0 0 6px rgba(0, 0, 0, 0.6)";
-  return `
+  let result = `
     <span style="
       background: ${bg};
       border: 1px solid ${border};
@@ -168,6 +175,8 @@ window.getClanEmblemHtml = function (seed, size = 32, clanLevel = 1) {
       </svg>
     </span>
   `;
+  window.clanEmblemCache[cacheKey] = result;
+  return result;
 };
 
 window.toggleClanHall = function () {
@@ -392,7 +401,8 @@ window.executeCreateClan = function () {
     return;
   }
 
-  if (window.playerStats.coins < 100000) {
+  let coins = BigNum.from(window.playerStats.coins);
+  if (coins.lt(100000)) {
     window.pushHeaderToast(
       "❌ Insufficient Gold! Foundation requires 100,000 Gold.",
       "#e74c3c",
@@ -409,7 +419,7 @@ window.executeCreateClan = function () {
     .then((r) => r.json())
     .then((data) => {
       if (data.success) {
-        window.playerStats.coins -= 100000;
+        window.playerStats.coins = coins.sub(100000);
         window.pushHeaderToast(
           `🏰 Clan ${name} successfully founded!`,
           "#2ecc71",
@@ -1722,25 +1732,25 @@ window.executeDisbandClan = function () {
 
 window.executeClanDonate = function (type, amount) {
   const userId = window.getGameUserId();
-  let balance = 0;
+  let balance = BigNum.from(0);
 
   if (type === "gold") {
-    balance = window.playerStats.coins || 0;
+    balance = BigNum.from(window.playerStats.coins || 0);
   } else if (type === "souls") {
-    balance = window.inventory.ETC["Monster Soul"] || 0;
+    balance = BigNum.from(window.inventory.ETC["Monster Soul"] || 0);
   } else if (type === "luminous") {
-    balance = window.inventory.ETC["Luminous Soul"] || 0;
+    balance = BigNum.from(window.inventory.ETC["Luminous Soul"] || 0);
   }
 
-  if (balance < amount) {
+  if (balance.lt(amount)) {
     window.pushHeaderToast("❌ Insufficient funds for donation!", "#e74c3c");
     return;
   }
 
   // Deduct locally first
   if (type === "gold") {
-    window.playerStats.coins -= amount;
-    if (window.playerStats.coins === 0) {
+    window.playerStats.coins = balance.sub(amount);
+    if (window.playerStats.coins.eq(0)) {
       window.playerStats.hasTriggeredExactChange = true;
     }
   } else if (type === "souls") {
@@ -1785,7 +1795,9 @@ window.executeClanDonate = function (type, amount) {
       } else {
         // Rollback local deduction
         if (type === "gold") {
-          window.playerStats.coins += amount;
+          window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
+            amount,
+          );
         } else if (type === "souls") {
           window.inventory.ETC["Monster Soul"] =
             (window.inventory.ETC["Monster Soul"] || 0) + amount;
@@ -1847,12 +1859,12 @@ window.executeDeficitContributeAndUpgrade = function (
   let goldDeficit = Math.max(0, costGold - clan.gold_bank);
   let soulsDeficit = Math.max(0, costSoul - clan[bankField]);
 
-  let personalGold = window.playerStats.coins || 0;
+  let personalGold = BigNum.from(window.playerStats.coins || 0);
   let rawSoulName =
     bankField === "souls_bank" ? "Monster Soul" : "Luminous Soul";
   let personalSouls = window.inventory.ETC[rawSoulName] || 0;
 
-  if (personalGold < goldDeficit) {
+  if (personalGold.lt(goldDeficit)) {
     window.pushHeaderToast(
       "❌ Insufficient personal Gold to cover the research deficit!",
       "#e74c3c",
@@ -1884,8 +1896,8 @@ window.executeDeficitContributeAndUpgrade = function (
 
         // 1. Bridges Gold Deficit
         if (goldDeficit > 0) {
-          window.playerStats.coins -= goldDeficit;
-          if (window.playerStats.coins === 0)
+          window.playerStats.coins = personalGold.sub(goldDeficit);
+          if (window.playerStats.coins.eq(0))
             window.playerStats.hasTriggeredExactChange = true;
 
           await fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
@@ -1949,7 +1961,8 @@ window.openResearchDonateModal = function (
   let accentColor = resType === "gold" ? "#f1c40f" : "#9b59b6";
 
   if (resType === "gold") {
-    personalBalance = window.playerStats.coins || 0;
+    let coins = BigNum.from(window.playerStats.coins);
+    personalBalance = Number(coins.m * Math.pow(10, Math.min(15, coins.e))); // Safely downscale for HTML5 slider limits
     rawName = "Gold";
   } else {
     let rawSoulName =
@@ -2149,7 +2162,9 @@ window.executeClanResearchDonate = function (skillKey, resType, amount) {
 
         // Award resources locally to stay responsive before reload
         if (resType === "gold") {
-          window.playerStats.coins -= data.addedAmount;
+          window.playerStats.coins = BigNum.from(window.playerStats.coins).sub(
+            data.addedAmount,
+          );
         } else {
           let rawSoulName =
             skillKey === "steel_phalanx" || skillKey === "vitality_well"

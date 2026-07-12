@@ -17,10 +17,21 @@ window.escapeHTML = function (str) {
   );
 };
 
+window.uiIconSvgCache = window.uiIconSvgCache || {};
+
 window.getUiIconSvg = function (key, size = 12) {
+  let cacheKey = `${key}_${size}`;
+  if (window.uiIconSvgCache[cacheKey] !== undefined) {
+    return window.uiIconSvgCache[cacheKey];
+  }
   let icon = window.AssetCatalog.uiIcons[key];
-  if (!icon) return "";
-  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${icon.color}" fill-opacity="${icon.opacity}" stroke="${icon.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; transform: translateY(-1.5px); line-height: 1; margin-right: 3px;">${icon.path}</svg>`;
+  if (!icon) {
+    window.uiIconSvgCache[cacheKey] = "";
+    return "";
+  }
+  let svg = `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${icon.color}" fill-opacity="${icon.opacity}" stroke="${icon.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; transform: translateY(-1.5px); line-height: 1; margin-right: 3px;">${icon.path}</svg>`;
+  window.uiIconSvgCache[cacheKey] = svg;
+  return svg;
 };
 
 // --- SYSTEM UTILS ---
@@ -56,13 +67,167 @@ function getUtilityCardValue(tier) {
 }
 window.getUtilityCardValue = getUtilityCardValue;
 
-window.formatNumber = function (num) {
-  if (num === null || num === undefined) return "0";
-  num = Number(num);
-  if (isNaN(num)) return "0";
-  if (num < 1000) {
+// High-performance arbitrary-precision scientific notation library for infinite scalability
+class BigNum {
+  constructor(m = 0, e = 0) {
+    this.m = m;
+    this.e = e;
+    this.normalize();
+  }
+
+  normalize() {
+    if (this.m === 0) {
+      this.e = 0;
+      return this;
+    }
+    let absM = Math.abs(this.m);
+    if (absM >= 10) {
+      let shift = Math.floor(Math.log10(absM));
+      this.m /= Math.pow(10, shift);
+      this.e += shift;
+    } else if (absM < 1) {
+      let shift = Math.floor(Math.log10(absM));
+      this.m /= Math.pow(10, shift);
+      this.e += shift;
+    }
+    // Prevent floating-point precision drift
+    this.m = Math.round(this.m * 1e12) / 1e12;
+    if (this.m === 0) this.e = 0;
+    return this;
+  }
+
+  static from(val) {
+    if (val instanceof BigNum) return val;
+    if (typeof val === "number") return BigNum.fromNumber(val);
+    if (typeof val === "string") {
+      let parts = val.toLowerCase().split("e");
+      if (parts.length === 2) {
+        return new BigNum(parseFloat(parts[0]), parseInt(parts[1], 10));
+      }
+      return BigNum.fromNumber(parseFloat(val));
+    }
+    return new BigNum(0, 0);
+  }
+
+  static fromNumber(num) {
+    if (num === 0 || isNaN(num) || !isFinite(num)) return new BigNum(0, 0);
+    let e = Math.floor(Math.log10(Math.abs(num)));
+    let m = num / Math.pow(10, e);
+    return new BigNum(m, e);
+  }
+
+  add(other) {
+    let b = BigNum.from(other);
+    if (this.m === 0) return b;
+    if (b.m === 0) return this;
+
+    let diff = this.e - b.e;
+    if (diff >= 15) return this; // Other is too small to affect this
+    if (diff <= -15) return b; // This is too small to affect other
+
+    let newM = this.m + b.m * Math.pow(10, -diff);
+    return new BigNum(newM, this.e);
+  }
+
+  sub(other) {
+    let b = BigNum.from(other);
+    if (this.m === 0) return new BigNum(-b.m, b.e);
+    if (b.m === 0) return this;
+
+    let diff = this.e - b.e;
+    if (diff >= 15) return this;
+    if (diff <= -15) return new BigNum(-b.m, b.e);
+
+    let newM = this.m - b.m * Math.pow(10, -diff);
+    return new BigNum(newM, this.e);
+  }
+
+  mul(other) {
+    let b = BigNum.from(other);
+    return new BigNum(this.m * b.m, this.e + b.e);
+  }
+
+  div(other) {
+    let b = BigNum.from(other);
+    if (b.m === 0) throw new Error("Division by zero in BigNum");
+    return new BigNum(this.m / b.m, this.e - b.e);
+  }
+
+  // Fast binary exponentiation for infinite scale exponents
+  pow(power) {
+    let p = Math.floor(power);
+    if (p < 0)
+      throw new Error("Negative powers not supported in lightweight BigNum");
+    let result = new BigNum(1, 0);
+    let base = this;
+    while (p > 0) {
+      if (p % 2 === 1) result = result.mul(base);
+      base = base.mul(base);
+      p = Math.floor(p / 2);
+    }
+    return result;
+  }
+
+  compareTo(other) {
+    let b = BigNum.from(other);
+    // Both are zero
+    if (this.m === 0 && b.m === 0) return 0;
+    // Signs are different
+    if (this.m > 0 && b.m <= 0) return 1;
+    if (this.m < 0 && b.m >= 0) return -1;
+    if (this.m === 0) {
+      return b.m > 0 ? -1 : 1;
+    }
+    if (b.m === 0) {
+      return this.m > 0 ? 1 : -1;
+    }
+
+    // Both are positive
+    if (this.m > 0 && b.m > 0) {
+      if (this.e !== b.e) return this.e > b.e ? 1 : -1;
+      if (this.m !== b.m) return this.m > b.m ? 1 : -1;
+      return 0;
+    }
+
+    // Both are negative (larger exponent means more negative, hence smaller)
+    if (this.m < 0 && b.m < 0) {
+      if (this.e !== b.e) return this.e > b.e ? -1 : 1;
+      if (this.m !== b.m) return this.m > b.m ? 1 : -1;
+      return 0;
+    }
+    return 0;
+  }
+
+  gt(other) {
+    return this.compareTo(other) > 0;
+  }
+  gte(other) {
+    return this.compareTo(other) >= 0;
+  }
+  lt(other) {
+    return this.compareTo(other) < 0;
+  }
+  lte(other) {
+    return this.compareTo(other) <= 0;
+  }
+  eq(other) {
+    return this.compareTo(other) === 0;
+  }
+}
+
+window.BigNum = BigNum;
+
+window.formatNumber = function (val) {
+  if (val === null || val === undefined) return "0";
+  let b = BigNum.from(val);
+  if (b.m === 0) return "0";
+
+  // Format small values directly
+  if (b.e < 3) {
+    let num = b.m * Math.pow(10, b.e);
     return num % 1 === 0 ? num.toFixed(0) : num.toFixed(1);
   }
+
   const standardSuffixes = [
     "",
     "K",
@@ -77,12 +242,16 @@ window.formatNumber = function (num) {
     "No",
     "Dc",
   ];
-  const i = Math.floor(Math.log10(num) / 3);
+
+  let i = Math.floor(b.e / 3);
+  let rem = b.e % 3;
+  let displayVal = b.m * Math.pow(10, rem);
+
   if (i < standardSuffixes.length) {
-    return `${(num / Math.pow(10, i * 3)).toFixed(2)} ${standardSuffixes[i]}`;
+    return `${displayVal.toFixed(2)} ${standardSuffixes[i]}`;
   }
 
-  // Procedural alphabetical suffix engine (aa - zz, then aaa - zzz)
+  // Alphabetical suffix generator (aa - zz, then aaa - zzz)
   let baseAlpha = i - standardSuffixes.length;
   let suffix = "";
   if (baseAlpha < 676) {
@@ -96,18 +265,24 @@ window.formatNumber = function (num) {
     let char3 = String.fromCharCode(97 + (temp % 26));
     suffix = char1 + char2 + char3;
   }
-  suffix = suffix.toUpperCase(); // Gives it the premium 'AAA' look!
+  suffix = suffix.toUpperCase();
 
-  const formatted = (num / Math.pow(10, i * 3)).toFixed(2);
-  return `${formatted} ${suffix}`;
+  return `${displayVal.toFixed(2)} ${suffix}`;
 };
 
 window.randInt = (min, max) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 window.randFloat = (min, max) => Math.random() * (max - min) + min;
 
+window.rarityProbCache = window.rarityProbCache || {};
+
 // Universal Normalized Weight-Based Rarity Probability Solver
 window.calculateRarityProbabilities = function (qly, isGacha = false) {
+  let cacheKey = `${qly}_${isGacha}`;
+  if (window.rarityProbCache[cacheKey]) {
+    return window.rarityProbCache[cacheKey];
+  }
+
   let weights = [0, 0, 0, 0, 0, 0]; // Index maps to stars quality (0 to 5)
 
   if (isGacha) {
@@ -135,7 +310,9 @@ window.calculateRarityProbabilities = function (qly, isGacha = false) {
   if (totalWeight <= 0) return [100, 0, 0, 0, 0, 0]; // Fallback sanity check
 
   // Return normalized percentage list (0.0% to 100.0%)
-  return weights.map((w) => (w / totalWeight) * 100);
+  let result = weights.map((w) => (w / totalWeight) * 100);
+  window.rarityProbCache[cacheKey] = result;
+  return result;
 };
 
 window.getDepthQualityMultiplier = function (stage) {
@@ -149,24 +326,35 @@ window.getDepthQualityMultiplier = function (stage) {
 // Initialize transaction-safe GameState manager
 window.GameState = {
   gainXp(amount, isOffline = false) {
-    if (isNaN(amount) || amount <= 0) return;
+    let amt = BigNum.from(amount);
+    if (amt.lte(0)) return;
 
     let p = window.resolvePlayerStats();
-    let finalAmount = Math.ceil(amount * (p.xpRate || 1.0));
-    window.playerStats.xp += finalAmount;
+    let finalAmount = amt.mul(p.xpRate || 1.0);
+    window.playerStats.xp = BigNum.from(window.playerStats.xp || 0).add(
+      finalAmount,
+    );
     let leveledUp = false;
 
+    let xp = BigNum.from(window.playerStats.xp);
+    let xpReq = BigNum.from(window.playerStats.xpReq || 100);
+
     // Process potential consecutive level-ups via a loop (important for offline catch-up)
-    while (window.playerStats.xp >= window.playerStats.xpReq) {
-      window.playerStats.xp -= window.playerStats.xpReq;
+    while (xp.gte(xpReq)) {
+      xp = xp.sub(xpReq);
       window.playerStats.level++;
       window.playerStats.sp += 6; // Award 6 Skill Points per level up
 
-      // Exponential scaling thresholds prevent runaway level inflation
-      window.playerStats.xpReq = Math.floor(
-        100 * Math.pow(1.2, window.playerStats.level - 1),
+      // Calculate next xpReq safely using BigNum exponential power scaling
+      xpReq = BigNum.from(100).mul(
+        BigNum.from(1.2).pow(window.playerStats.level - 1),
       );
       leveledUp = true;
+    }
+
+    if (leveledUp) {
+      window.playerStats.xp = xp;
+      window.playerStats.xpReq = xpReq;
 
       // Keep active UI Attribute Matrix draft allocations in sync
       if (window.draftAllocations !== null) {
@@ -226,18 +414,22 @@ window.GameState = {
   },
 
   addCoins(amount) {
-    if (isNaN(amount) || amount <= 0) return;
-    window.playerStats.coins += amount;
-    window.playerStats.totalGoldEarned =
-      (window.playerStats.totalGoldEarned || 0) + amount;
+    let amt = BigNum.from(amount);
+    if (amt.lte(0)) return;
+    window.playerStats.coins = BigNum.from(window.playerStats.coins).add(amt);
+    window.playerStats.totalGoldEarned = BigNum.from(
+      window.playerStats.totalGoldEarned || 0,
+    ).add(amt);
     if (typeof window.updateUI === "function") window.updateUI();
   },
 
   spendCoins(amount) {
-    if (isNaN(amount) || amount <= 0) return false;
-    if (window.playerStats.coins < amount) return false;
-    window.playerStats.coins -= amount;
-    if (window.playerStats.coins === 0) {
+    let amt = BigNum.from(amount);
+    if (amt.lte(0)) return false;
+    let coins = BigNum.from(window.playerStats.coins);
+    if (coins.lt(amt)) return false;
+    window.playerStats.coins = coins.sub(amt);
+    if (window.playerStats.coins.eq(0)) {
       window.playerStats.hasTriggeredExactChange = true;
     }
     if (typeof window.updateUI === "function") window.updateUI();
@@ -1737,7 +1929,7 @@ window.playerStats = {
   baseRareSpawn: 0.01,
   baseFairySpawn: 1.0,
   currentHp: 100,
-  coins: 0,
+  coins: new BigNum(0, 0),
   stage: 1,
   maxStage: 1,
   killCount: 0,
@@ -2237,7 +2429,7 @@ window.lastUpdateTime = Date.now();
 window.sessionStartTime = Date.now();
 window.respawnIntervalId = null;
 window.recalculateXpRequirement = function () {
-  window.playerStats.xpReq = Math.floor(
-    100 * Math.pow(1.2, window.playerStats.level - 1),
+  window.playerStats.xpReq = BigNum.from(100).mul(
+    BigNum.from(1.2).pow(window.playerStats.level - 1),
   );
 };

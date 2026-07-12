@@ -1349,24 +1349,24 @@ summary {
   }
 
   .tooltip-base {
-      max-width: 95vw;
-      max-height: 75vh;
-      overflow-y: auto;
-      overflow-x: hidden; /* Block layout spilling */
-      pointer-events: auto;
-      overscroll-behavior: contain; /* Stop background page scrolls */
-    }
+    max-width: 95vw;
+    max-height: 75vh;
+    overflow-y: auto;
+    overflow-x: hidden; /* Block layout spilling */
+    pointer-events: auto;
+    overscroll-behavior: contain; /* Stop background page scrolls */
+  }
 
-    .tooltip-flex-container {
-      flex-direction: column;
-      width: 100%;
-    }
+  .tooltip-flex-container {
+    flex-direction: column;
+    width: 100%;
+  }
 
-    .tooltip-card {
-      width: 100%;
-      max-width: 100%;
-      min-width: 240px; /* Hold standard baseline sizing */
-    }
+  .tooltip-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 240px; /* Hold standard baseline sizing */
+  }
 
   .tooltip-card.compare-border {
     border-right: none;
@@ -2271,21 +2271,21 @@ summary {
   }
 
   /* --- COMPACT HIGH-YIELD TOOLTIPS --- */
-    .tooltip-base {
-      max-width: 95vw !important;
-      max-height: 75vh !important;
-      overflow-y: auto !important;
-      overflow-x: hidden !important;
-      overscroll-behavior: contain;
-    }
+  .tooltip-base {
+    max-width: 95vw !important;
+    max-height: 75vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain;
+  }
 
-    .tooltip-card {
-      padding: 8px !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      min-width: 200px !important;
-      font-size: 10px !important;
-    }
+  .tooltip-card {
+    padding: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 200px !important;
+    font-size: 10px !important;
+  }
 
   .tt-title {
     font-size: 11px !important;

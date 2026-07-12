@@ -3270,10 +3270,11 @@
       <!-- Tabulated Control Centers -->
       <div id="menu-panel">
         <div class="tabs">
-          <!-- 1. HERO TAB: Crested Shield & Sword of Valor with Interactive Flourish & Clang -->
+          <!-- 1. HERO TAB -->
           <button
             class="tab-btn active"
             onclick="window.switchTab('hero')"
+            onpointerdown="window.switchTab('hero')"
             style="
               display: inline-flex;
               align-items: center;
@@ -3436,10 +3437,11 @@
             Hero
           </button>
 
-          <!-- 2. SACK TAB: High-Fidelity Leather Adventurer's Rucksack with Unbuckling & Loot Reveal -->
+          <!-- 2. SACK TAB -->
           <button
             class="tab-btn"
             onclick="window.switchTab('inv')"
+            onpointerdown="window.switchTab('inv')"
             style="
               display: inline-flex;
               align-items: center;
@@ -3709,10 +3711,11 @@
             Sack
           </button>
 
-          <!-- 3. FORGE TAB: Heavy Iron Anvil with Animated Hammer Strike -->
+          <!-- 3. FORGE TAB -->
           <button
             class="tab-btn"
             onclick="window.switchTab('forge')"
+            onpointerdown="window.switchTab('forge')"
             style="
               display: inline-flex;
               align-items: center;
@@ -3833,10 +3836,11 @@
             Forge
           </button>
 
-          <!-- 4. RUNS TAB: Eldritch Interdimensional Rift Portal -->
+          <!-- 4. RUNS TAB -->
           <button
             class="tab-btn"
             onclick="window.switchTab('activities')"
+            onpointerdown="window.switchTab('activities')"
             style="
               display: inline-flex;
               align-items: center;
@@ -4016,10 +4020,11 @@
             Runs
           </button>
 
-          <!-- 5. PRESTIGE TAB: Crown of Scarlet Ascension with Floating Hover & Beating Ruby -->
+          <!-- 5. PRESTIGE TAB -->
           <button
             class="tab-btn"
             onclick="window.switchTab('prestige')"
+            onpointerdown="window.switchTab('prestige')"
             style="
               display: inline-flex;
               align-items: center;
@@ -4149,10 +4154,11 @@
             Prestige
           </button>
 
-          <!-- 6. MARKET TAB: High-Fidelity Royal Alchemist & Vault Cart SVG -->
+          <!-- 6. MARKET TAB -->
           <button
             class="tab-btn"
             onclick="window.switchTab('market')"
+            onpointerdown="window.switchTab('market')"
             style="
               display: inline-flex;
               align-items: center;
@@ -4340,6 +4346,7 @@
               id="activities-sub-tab-dungeons"
               class="sub-tab-btn active"
               onclick="window.switchActivitiesSubTab('DUNGEONS')"
+              onpointerdown="window.switchActivitiesSubTab('DUNGEONS')"
             >
               <svg
                 width="12"
@@ -4372,6 +4379,7 @@
               id="activities-sub-tab-crucible"
               class="sub-tab-btn"
               onclick="window.switchActivitiesSubTab('CRUCIBLE')"
+              onpointerdown="window.switchActivitiesSubTab('CRUCIBLE')"
             >
               <svg
                 width="12"
@@ -4403,6 +4411,7 @@
               id="activities-sub-tab-altar"
               class="sub-tab-btn"
               onclick="window.switchActivitiesSubTab('ALTAR')"
+              onpointerdown="window.switchActivitiesSubTab('ALTAR')"
             >
               <svg
                 width="12"
@@ -6312,6 +6321,7 @@
               id="sub-tab-equip"
               class="sub-tab-btn active"
               onclick="window.switchSubTab('EQUIP')"
+              onpointerdown="window.switchSubTab('EQUIP')"
             >
               Equips (<span id="btn-bag-count">0</span>/<span id="btn-bag-max"
                 >20</span
@@ -6321,6 +6331,7 @@
               id="sub-tab-art"
               class="sub-tab-btn"
               onclick="window.switchSubTab('ART')"
+              onpointerdown="window.switchSubTab('ART')"
             >
               Artifacts (<span id="btn-art-count">0</span>/<span
                 id="btn-art-max"
@@ -6331,6 +6342,7 @@
               id="sub-tab-sigil"
               class="sub-tab-btn"
               onclick="window.switchSubTab('SIGIL')"
+              onpointerdown="window.switchSubTab('SIGIL')"
             >
               Sigils (<span id="btn-sigil-count">0</span>)
             </button>
@@ -6338,6 +6350,7 @@
               id="sub-tab-use"
               class="sub-tab-btn"
               onclick="window.switchSubTab('USE')"
+              onpointerdown="window.switchSubTab('USE')"
             >
               Consumables
             </button>
@@ -6345,6 +6358,7 @@
               id="sub-tab-etc"
               class="sub-tab-btn"
               onclick="window.switchSubTab('ETC')"
+              onpointerdown="window.switchSubTab('ETC')"
             >
               Materials
             </button>
@@ -6546,6 +6560,7 @@
                 <button
                   class="btn-action un"
                   onclick="window.triggerBulkSalvage()"
+                  onpointerdown="window.triggerBulkSalvage()"
                   style="
                     font-size: 11px;
                     padding: 6px 12px;
@@ -6670,6 +6685,7 @@
                 font-size: 11px;
               "
               onclick="window.setForgeMode('temper')"
+              onpointerdown="window.setForgeMode('temper')"
             >
               Mode: TEMPER
             </button>
@@ -6683,6 +6699,7 @@
                 font-size: 11px;
               "
               onclick="window.setForgeMode('reforge')"
+              onpointerdown="window.setForgeMode('reforge')"
             >
               Mode: REFORGE STAT
             </button>
@@ -6696,6 +6713,7 @@
                 font-size: 11px;
               "
               onclick="window.setForgeMode('tier')"
+              onpointerdown="window.setForgeMode('tier')"
             >
               Mode: TIER UP
             </button>
@@ -6709,6 +6727,7 @@
                 font-size: 11px;
               "
               onclick="window.setForgeMode('set')"
+              onpointerdown="window.setForgeMode('set')"
             >
               Mode: RE-ROLL SET
             </button>
@@ -6727,6 +6746,7 @@
                 font-size: 11px;
               "
               onclick="window.setForgeMode('enchant')"
+              onpointerdown="window.setForgeMode('enchant')"
             >
               Mode: ENCHANT
             </button>
@@ -6740,6 +6760,7 @@
                 font-size: 11px;
               "
               onclick="window.setForgeMode('reset_enchant')"
+              onpointerdown="window.setForgeMode('reset_enchant')"
             >
               Mode: RESET ENCHANTS
             </button>
@@ -6766,6 +6787,7 @@
               id="market-sub-tab-gacha"
               class="sub-tab-btn active"
               onclick="window.switchMarketSubTab('GACHA')"
+              onpointerdown="window.switchMarketSubTab('GACHA')"
             >
               <svg
                 width="14"
@@ -6849,6 +6871,7 @@
               id="market-sub-tab-sinks"
               class="sub-tab-btn"
               onclick="window.switchMarketSubTab('SINKS')"
+              onpointerdown="window.switchMarketSubTab('SINKS')"
             >
               <svg
                 width="14"
@@ -6928,6 +6951,7 @@
               id="market-sub-tab-alchemy"
               class="sub-tab-btn"
               onclick="window.switchMarketSubTab('ALCHEMY')"
+              onpointerdown="window.switchMarketSubTab('ALCHEMY')"
             >
               <svg
                 width="14"
@@ -6978,6 +7002,7 @@
               id="market-sub-tab-shop"
               class="sub-tab-btn"
               onclick="window.switchMarketSubTab('GOLD_SHOP')"
+              onpointerdown="window.switchMarketSubTab('GOLD_SHOP')"
             >
               <svg
                 width="14"
@@ -7053,6 +7078,7 @@
               id="market-sub-tab-boutique"
               class="sub-tab-btn"
               onclick="window.switchMarketSubTab('BOUTIQUE')"
+              onpointerdown="window.switchMarketSubTab('BOUTIQUE')"
             >
               <svg
                 width="14"
@@ -7114,6 +7140,7 @@
               id="market-sub-tab-astral"
               class="sub-tab-btn"
               onclick="window.switchMarketSubTab('ASTRAL')"
+              onpointerdown="window.switchMarketSubTab('ASTRAL')"
             >
               <svg
                 width="14"
@@ -7784,6 +7811,7 @@
               <button
                 id="btn-boutique-costumes"
                 onclick="window.switchBoutiqueCategory('costumes')"
+                onpointerdown="window.switchBoutiqueCategory('costumes')"
                 class="sub-tab-btn active"
                 style="padding: 6px; font-weight: bold; font-size: 10.5px"
               >
@@ -7792,6 +7820,7 @@
               <button
                 id="btn-boutique-dyes"
                 onclick="window.switchBoutiqueCategory('dyes')"
+                onpointerdown="window.switchBoutiqueCategory('dyes')"
                 class="sub-tab-btn"
                 style="padding: 6px; font-weight: bold; font-size: 10.5px"
               >
