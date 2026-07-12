@@ -1960,11 +1960,19 @@ window.onload = function () {
     let el = document.getElementById(id);
     if (el) {
       el.addEventListener("pointerdown", (e) => {
+        if (e.target.closest("summary") || e.target.closest("details") || e.target.closest("button") || e.target.closest("select") || e.target.closest("option")) {
+          e.stopPropagation(); // Stop click-through, but do NOT close the tooltip
+          return;
+        }
         e.stopPropagation();
         e.preventDefault();
         window.hideTooltip();
       });
       el.addEventListener("touchstart", (e) => {
+        if (e.target.closest("summary") || e.target.closest("details") || e.target.closest("button") || e.target.closest("select") || e.target.closest("option")) {
+          e.stopPropagation(); // Stop click-through, but do NOT close the tooltip
+          return;
+        }
         e.stopPropagation();
         e.preventDefault();
         window.hideTooltip();
@@ -4850,83 +4858,59 @@ window.CombatEngine = {
                           }
                         }
         } else {
-                    // Normal minion drops inside the Material Pit
-                    let r = Math.random();
-                    // Safe sub-linear (square root) progressive scaling for souls
-                    let soulAmt = 1 + Math.floor(Math.sqrt(dStage / 40));
+                    // Normal minion drops inside the Material Pit (Additive Redesign)
+                              if (typeof window.addEtcDrop === "function") {
+                                // 1. Every minion kill guarantees scaled Monster Souls
+                                let soulAmt = 1 + Math.floor(Math.sqrt(dStage / 40));
+                                window.addEtcDrop("Monster Soul", soulAmt);
 
-                    if (dStage < 150) {
-                      if (typeof window.addEtcDrop === "function") {
-                        window.addEtcDrop("Monster Soul", soulAmt);
-                        // 15% bonus chance for a direct early-game Rare Scrap drop
-                        if (Math.random() < 0.15) {
-                          let scrapAmt = 1 + Math.floor(Math.sqrt(dStage / 150));
-                          window.addEtcDrop("Rare Scrap", scrapAmt);
-                        }
-                      }
-                    } else if (dStage < 350) {
-                      if (r < 0.25) {
-                        if (typeof window.addEtcDrop === "function") {
-                          let scrapAmt = 1 + Math.floor(Math.sqrt((dStage - 150) / 100));
-                          window.addEtcDrop("Rare Scrap", scrapAmt);
-                        }
-                      } else {
-                        if (typeof window.addEtcDrop === "function") {
-                          window.addEtcDrop("Monster Soul", soulAmt);
-                        }
-                      }
-                    } else if (dStage < 600) {
-                      if (r < 0.2) {
-                        if (typeof window.addEtcDrop === "function") {
-                          let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
-                          window.addEtcDrop("Magic Scrap", magicAmt);
-                        }
-                      } else if (r < 0.6) {
-                        if (typeof window.addEtcDrop === "function") {
-                          let rareAmt = 1 + Math.floor(Math.sqrt((dStage - 150) / 100));
-                          window.addEtcDrop("Rare Scrap", rareAmt);
-                        }
-                      } else {
-                        if (typeof window.addEtcDrop === "function") {
-                          window.addEtcDrop("Monster Soul", soulAmt);
-                        }
-                      }
-                    } else if (dStage < 850) {
-                      if (r < 0.2) {
-                        if (typeof window.addEtcDrop === "function") {
-                          let epicAmt = 1 + Math.floor(Math.sqrt((dStage - 600) / 150));
-                          window.addEtcDrop("Epic Scrap", epicAmt);
-                        }
-                      } else if (r < 0.6) {
-                        if (typeof window.addEtcDrop === "function") {
-                          let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
-                          window.addEtcDrop("Magic Scrap", magicAmt);
-                        }
-                      } else {
-                        if (typeof window.addEtcDrop === "function") {
-                          let rareAmt = 1 + Math.floor(Math.sqrt((dStage - 150) / 100));
-                          window.addEtcDrop("Rare Scrap", rareAmt);
-                        }
-                      }
-                    } else {
-                      if (r < 0.2) {
-                        if (typeof window.addEtcDrop === "function") {
-                          let legAmt = 1 + Math.floor(Math.sqrt((dStage - 850) / 200));
-                          window.addEtcDrop("Legendary Scrap", legAmt);
-                        }
-                      } else if (r < 0.7) {
-                        if (typeof window.addEtcDrop === "function") {
-                          let epicAmt = 1 + Math.floor(Math.sqrt((dStage - 600) / 150));
-                          window.addEtcDrop("Epic Scrap", epicAmt);
-                        }
-                      } else {
-                        if (typeof window.addEtcDrop === "function") {
-                          let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
-                          window.addEtcDrop("Magic Scrap", magicAmt);
-                        }
-                      }
-                    }
-                  }
+                                // 2. Independent, non-exclusive rolls for material scraps
+                                let r = Math.random();
+                                if (dStage < 150) {
+                                  // 15% bonus chance for an early-game Rare Scrap
+                                  if (r < 0.15) {
+                                    let scrapAmt = 1 + Math.floor(Math.sqrt(dStage / 150));
+                                    window.addEtcDrop("Rare Scrap", scrapAmt);
+                                  }
+                                } else if (dStage < 350) {
+                                  // 25% independent chance for Rare Scrap
+                                  if (r < 0.25) {
+                                    let scrapAmt = 1 + Math.floor(Math.sqrt((dStage - 150) / 100));
+                                    window.addEtcDrop("Rare Scrap", scrapAmt);
+                                  }
+                                } else if (dStage < 600) {
+                                  // 20% Magic, 40% Rare
+                                  if (r < 0.20) {
+                                    let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
+                                    window.addEtcDrop("Magic Scrap", magicAmt);
+                                  } else if (r < 0.60) {
+                                    let rareAmt = 1 + Math.floor(Math.sqrt((dStage - 150) / 100));
+                                    window.addEtcDrop("Rare Scrap", rareAmt);
+                                  }
+                                } else if (dStage < 850) {
+                                  // 20% Epic, 40% Magic
+                                  if (r < 0.20) {
+                                    let epicAmt = 1 + Math.floor(Math.sqrt((dStage - 600) / 150));
+                                    window.addEtcDrop("Epic Scrap", epicAmt);
+                                  } else if (r < 0.60) {
+                                    let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
+                                    window.addEtcDrop("Magic Scrap", magicAmt);
+                                  }
+                                } else {
+                                  // 20% Legendary, 50% Epic, 30% Magic (ReferenceError crash repaired)
+                                  if (r < 0.20) {
+                                    let legAmt = 1 + Math.floor(Math.sqrt((dStage - 850) / 200));
+                                    window.addEtcDrop("Legendary Scrap", legAmt);
+                                  } else if (r < 0.70) {
+                                    let epicAmt = 1 + Math.floor(Math.sqrt((dStage - 600) / 150));
+                                    window.addEtcDrop("Epic Scrap", epicAmt);
+                                  } else {
+                                    let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
+                                    window.addEtcDrop("Magic Scrap", magicAmt);
+                                  }
+                                }
+                              }
+                            }
       }
     } else {
       // Let the single-roll loot function evaluate rates and progress pity natively

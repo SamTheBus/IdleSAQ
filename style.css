@@ -830,6 +830,7 @@ canvas {
   z-index: 50000;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.85);
   pointer-events: none; /* Prevents cursor collisions and flickering spasms */
+  overflow: hidden; /* Prevent child backgrounds from bleeding out of rounded corners */
 }
 
 .tooltip-flex-container {
@@ -846,6 +847,13 @@ canvas {
 
 .tooltip-card.compare-border {
   border-right: 1px solid #333333;
+}
+
+summary::-webkit-details-marker {
+  display: none !important; /* Hide default Details triangle */
+}
+summary {
+  list-style: none !important; /* Hide default list marker */
 }
 
 .tt-title {
@@ -1341,20 +1349,24 @@ canvas {
   }
 
   .tooltip-base {
-    max-width: 90vw;
-    max-height: 75vh;
-    overflow-y: auto;
-    pointer-events: auto;
-  }
+      max-width: 95vw;
+      max-height: 75vh;
+      overflow-y: auto;
+      overflow-x: hidden; /* Block layout spilling */
+      pointer-events: auto;
+      overscroll-behavior: contain; /* Stop background page scrolls */
+    }
 
-  .tooltip-flex-container {
-    flex-direction: column;
-  }
+    .tooltip-flex-container {
+      flex-direction: column;
+      width: 100%;
+    }
 
-  .tooltip-card {
-    width: 100%;
-    max-width: 100%;
-  }
+    .tooltip-card {
+      width: 100%;
+      max-width: 100%;
+      min-width: 240px; /* Hold standard baseline sizing */
+    }
 
   .tooltip-card.compare-border {
     border-right: none;
@@ -2259,17 +2271,21 @@ canvas {
   }
 
   /* --- COMPACT HIGH-YIELD TOOLTIPS --- */
-  .tooltip-base {
-    max-width: 90vw;
-    max-height: 75vh;
-    overflow-y: auto;
-  }
+    .tooltip-base {
+      max-width: 95vw !important;
+      max-height: 75vh !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      overscroll-behavior: contain;
+    }
 
-  .tooltip-card {
-    padding: 8px !important;
-    width: 200px !important; /* Narrower to prevent offscreen clipping */
-    font-size: 10px !important;
-  }
+    .tooltip-card {
+      padding: 8px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 200px !important;
+      font-size: 10px !important;
+    }
 
   .tt-title {
     font-size: 11px !important;

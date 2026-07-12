@@ -4990,14 +4990,50 @@ window.generateItemCardHtml = function (
   html += `<div class="tt-subtitle">${subtitle}</div>`;
 
   if (item.id !== "dummy" && item.type === "subweapon") {
-    if (item.subType === "shield") {
-      html += `<div style="color:#3498db; font-size:10px; font-weight:bold; margin-bottom:8px; border: 1px dashed #3498db; padding: 4px; border-radius:3px; background: rgba(52, 152, 219, 0.05); text-align: center; white-space:normal; line-height:1.3;">🛡️ BULWARK PASSIVE:<br>Grants +12% Defense multiplier and enables Block (Caps at 20% / 25% with Titan\\'s Grip). Fully negates all incoming damage on Block.</div>`;
-    } else if (item.subType === "dagger") {
-      html += `<div style="color:#e74c3c; font-size:10px; font-weight:bold; margin-bottom:8px; border: 1px dashed #e74c3c; padding: 4px; border-radius:3px; background: rgba(231, 76, 60, 0.05); text-align: center; white-space:normal; line-height:1.3;">🗡️ RIPOSTE PASSIVE:<br>Enables Parry (Caps at 25% / 30% with Titan\\'s Grip). Successfully parrying mitigates 60% of damage and triggers an instant DEX-scaled counter-strike.</div>`;
-    } else if (item.subType === "tome") {
-      html += `<div style="color:#9b59b6; font-size:10px; font-weight:bold; margin-bottom:8px; border: 1px dashed #9b59b6; padding: 4px; border-radius:3px; background: rgba(155, 89, 182, 0.05); text-align: center; white-space:normal; line-height:1.3;">🔮 ARCANE SHIELD PASSIVE:<br>Absorbs 20% of all incoming damage before defense calculations. Scales with INT up to a 35% absorption cap.</div>`;
+      if (item.subType === "shield") {
+        html += `
+          <details style="margin-bottom:8px; border: 1px dashed #3498db; border-radius:4px; background: rgba(52, 152, 219, 0.05); pointer-events: auto;">
+            <summary style="color:#3498db; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
+              <span>🛡️ BULWARK PASSIVE</span>
+              <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
+            </summary>
+            <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(52, 152, 219, 0.2); margin-top: 3px;">
+              • Grants <strong style="color:#fff;">+12% Defense</strong> multiplier.<br>
+              • Enables <strong>Block Rate</strong> (Capped at 20% Base / 25% with Titan's Grip).<br>
+              • Successful Blocks completely negate incoming damage.<br>
+              • <strong>Shield Bash:</strong> Blocks trigger instant counters dealing <strong style="color:#3498db;">150% Defense</strong> damage (+0.2% scaling per Strength point).
+            </div>
+          </details>
+        `;
+      } else if (item.subType === "dagger") {
+        html += `
+          <details style="margin-bottom:8px; border: 1px dashed #e74c3c; border-radius:4px; background: rgba(231, 76, 60, 0.05); pointer-events: auto;">
+            <summary style="color:#e74c3c; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
+              <span>🗡️ RIPOSTE PASSIVE</span>
+              <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
+            </summary>
+            <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(231, 76, 60, 0.2); margin-top: 3px;">
+              • Enables <strong>Parry Rate</strong> (Capped at 25% Base / 30% with Titan's Grip).<br>
+              • Successful Parries mitigate <strong style="color:#fff;">60% of damage</strong>.<br>
+              • <strong>Riposte:</strong> Parries trigger instant counters dealing <strong style="color:#e74c3c;">150% Attack</strong> damage (+0.3% scaling per Dexterity point).
+            </div>
+          </details>
+        `;
+      } else if (item.subType === "tome") {
+        html += `
+          <details style="margin-bottom:8px; border: 1px dashed #9b59b6; border-radius:4px; background: rgba(155, 89, 182, 0.05); pointer-events: auto;">
+            <summary style="color:#9b59b6; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
+              <span>🔮 ARCANE BARRIER</span>
+              <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
+            </summary>
+            <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(155, 89, 182, 0.2); margin-top: 3px;">
+              • Absorbs a base <strong style="color:#fff;">20% of damage</strong> before Defense checks, scaling with Intelligence (INT) up to a 35% cap.<br>
+              • <strong>Tome Spells:</strong> Slashes trigger random elemental spells dealing <strong style="color:#9b59b6;">25% Attack</strong> damage (+1.0% scaling per Intelligence point).
+            </div>
+          </details>
+        `;
+      }
     }
-  }
 
   // --- BASE STATS SECTION ---
   if (item.id !== "dummy" && item.type !== "artifact") {
@@ -5306,14 +5342,14 @@ window.generateItemCardHtml = function (
   }
 
   if (uniqueStyle) {
-    if (uniqueStyle.lore) {
-      html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
+      if (uniqueStyle.lore) {
+        html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
+      }
+      html = `<div style="background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 12px; border-radius: 4px; box-sizing: border-box; width: 100%;">
+                          ${runicBadge}
+                          ${html}
+                      </div>`;
     }
-    html = `<div style="background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 12px; margin: -10px; border-radius: 4px; box-sizing: border-box; min-width: 250px;">
-                        ${runicBadge}
-                        ${html}
-                    </div>`;
-  }
 
   return html;
 };
