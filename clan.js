@@ -978,16 +978,17 @@ window.renderClanDashboard = function (clan, members, invitations) {
     }
 
     let personalCP = 0;
-    let meMember = members.find((x) => x.userId === userId);
-    if (meMember) {
-      personalCP = meMember.weekly_contribution || 0;
-    }
+        let meMember = members.find((x) => x.userId === userId);
+        if (meMember) {
+          personalCP = meMember.weekly_contribution || 0;
+        }
 
-    // Direct, dynamic Stage-scaling calculation for display boxes
-    let peakStage =
-      window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-    let costGoldSmall = Math.floor(10000 * Math.pow(1.045, peakStage));
-    let costGoldLarge = Math.floor(50000 * Math.pow(1.045, peakStage));
+        // Direct, dynamic Stage-scaling calculation for display boxes
+        let peakStage =
+          window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+        let costGoldSmall = Math.floor(10000 * Math.pow(1.045, peakStage));
+        let costGoldLarge = Math.floor(50000 * Math.pow(1.045, peakStage));
+        let goldOwnedBig = BigNum.from(goldOwned);
 
     tabContentHtml = `
                 <!-- Cooperative Vault Chest Progression Card -->
@@ -1036,26 +1037,26 @@ window.renderClanDashboard = function (clan, members, invitations) {
 
                 <div style="display:flex; flex-direction:column; gap:6px; text-align:left;">
                     <!-- Gold Donation 1 -->
-                    <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                        <div style="text-align:left;">
-                            <div style="font-size:11.5px; font-weight:bold; color:#f1c40f;">Small Gold Tithe</div>
-                            <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-${window.formatNumber(costGoldSmall)} Gold</span> (Owned: ${window.formatNumber(goldOwned)})</div>
-                        </div>
-                        <button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${goldOwned >= costGoldSmall ? "" : "disabled"} onclick="window.executeClanDonate('gold', ${costGoldSmall})">
-                            +50 Renown
-                        </button>
-                    </div>
+                                        <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                                            <div style="text-align:left;">
+                                                <div style="font-size:11.5px; font-weight:bold; color:#f1c40f;">Small Gold Tithe</div>
+                                                <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-${window.formatNumber(costGoldSmall)} Gold</span> (Owned: ${window.formatNumber(goldOwned)})</div>
+                                            </div>
+                                            <button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${goldOwnedBig.gte(costGoldSmall) ? "" : "disabled"} onclick="window.executeClanDonate('gold', ${costGoldSmall})">
+                                                +50 Renown
+                                            </button>
+                                        </div>
 
-                    <!-- Gold Donation 2 -->
-                    <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                        <div style="text-align:left;">
-                            <div style="font-size:11.5px; font-weight:bold; color:#f1c40f;">Large Gold Tithe</div>
-                            <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-${window.formatNumber(costGoldLarge)} Gold</span> (Owned: ${window.formatNumber(goldOwned)})</div>
-                        </div>
-                        <button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${goldOwned >= costGoldLarge ? "" : "disabled"} onclick="window.executeClanDonate('gold', ${costGoldLarge})">
-                            +300 Renown
-                        </button>
-                    </div>
+                                        <!-- Gold Donation 2 -->
+                                        <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                                            <div style="text-align:left;">
+                                                <div style="font-size:11.5px; font-weight:bold; color:#f1c40f;">Large Gold Tithe</div>
+                                                <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-${window.formatNumber(costGoldLarge)} Gold</span> (Owned: ${window.formatNumber(goldOwned)})</div>
+                                            </div>
+                                            <button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${goldOwnedBig.gte(costGoldLarge) ? "" : "disabled"} onclick="window.executeClanDonate('gold', ${costGoldLarge})">
+                                                +300 Renown
+                                            </button>
+                                        </div>
 
                     <!-- Monster Souls Donation 1 -->
                     <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">

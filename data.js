@@ -97,17 +97,20 @@ class BigNum {
   }
 
   static from(val) {
-    if (val instanceof BigNum) return val;
-    if (typeof val === "number") return BigNum.fromNumber(val);
-    if (typeof val === "string") {
-      let parts = val.toLowerCase().split("e");
-      if (parts.length === 2) {
-        return new BigNum(parseFloat(parts[0]), parseInt(parts[1], 10));
+      if (val instanceof BigNum) return val;
+      if (val && typeof val === "object" && val.m !== undefined && val.e !== undefined) {
+        return new BigNum(val.m, val.e);
       }
-      return BigNum.fromNumber(parseFloat(val));
+      if (typeof val === "number") return BigNum.fromNumber(val);
+      if (typeof val === "string") {
+        let parts = val.toLowerCase().split("e");
+        if (parts.length === 2) {
+          return new BigNum(parseFloat(parts[0]), parseInt(parts[1], 10));
+        }
+        return BigNum.fromNumber(parseFloat(val));
+      }
+      return new BigNum(0, 0);
     }
-    return new BigNum(0, 0);
-  }
 
   static fromNumber(num) {
     if (num === 0 || isNaN(num) || !isFinite(num)) return new BigNum(0, 0);

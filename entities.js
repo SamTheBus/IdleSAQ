@@ -291,15 +291,15 @@
       if (!window.mob) return;
 
       const isBoss =
-        window.mob.type === "boss" ||
-        window.mob.type === "dungeon_boss" ||
-        window.mob.type === "prestige_boss" ||
-        window.mob.type === "rift_guardian" ||
-        window.mob.type === "aegis_goliath" ||
-        window.mob.type === "chronos_arbitrator" ||
-        window.mob.type === "nexus_overseer";
-      if (isBoss && amount >= window.mob.maxHp * 0.6) {
-        const funnyPhrases = [
+              window.mob.type === "boss" ||
+              window.mob.type === "dungeon_boss" ||
+              window.mob.type === "prestige_boss" ||
+              window.mob.type === "rift_guardian" ||
+              window.mob.type === "aegis_goliath" ||
+              window.mob.type === "chronos_arbitrator" ||
+              window.mob.type === "nexus_overseer";
+            if (isBoss && BigNum.from(amount).gte(BigNum.from(window.mob.maxHp).mul(0.6))) {
+              const funnyPhrases = [
           "OUCH!!",
           "OW!!!",
           "OWWY!!",

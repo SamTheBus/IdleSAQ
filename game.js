@@ -2872,12 +2872,12 @@ function update() {
       window.checkAchievements();
 
     // Active Debuff: Withering Decay (Periodic combat damage drain)
-    if (
-      window.playerStats.isCrucibleMode &&
-      window.playerStats.crucibleActiveDebuff?.id === "withering_decay" &&
-      window.mob &&
-      window.mob.hp > 0
-    ) {
+        if (
+          window.playerStats.isCrucibleMode &&
+          window.playerStats.crucibleActiveDebuff?.id === "withering_decay" &&
+          window.mob &&
+          window.mob.hp.gt(0)
+        ) {
       let debuffStrength =
         window.playerStats.crucibleInfusedType === "debuff" ? 1.5 : 1.0;
       let reduction =
@@ -3022,10 +3022,10 @@ function update() {
     if (window.playerStats.fireballCooldown > 0)
       window.playerStats.fireballCooldown--;
     if (
-      window.playerStats.fireballCooldown <= 0 &&
-      window.mob &&
-      window.mob.hp > 0
-    ) {
+          window.playerStats.fireballCooldown <= 0 &&
+          window.mob &&
+          window.mob.hp.gt(0)
+        ) {
       window.projectiles.push({
         x: window.hero.x + 35,
         y: window.hero.y + 10,
@@ -3320,11 +3320,11 @@ function update() {
       }
 
       if (window.mob.attackTimer === undefined)
-        window.mob.attackTimer = window.mob.attackCooldown || 120;
-      if (!window.isGamePaused) window.mob.attackTimer--;
+              window.mob.attackTimer = window.mob.attackCooldown || 120;
+            if (!window.isGamePaused) window.mob.attackTimer--;
 
-      if (window.mob.attackTimer <= 0 && window.mob && window.mob.hp > 0) {
-        window.mob.attackTimer = window.mob.attackCooldown || 120;
+            if (window.mob.attackTimer <= 0 && window.mob && window.mob.hp.gt(0)) {
+              window.mob.attackTimer = window.mob.attackCooldown || 120;
 
         let isBlocked = Math.random() < p.block;
 
@@ -3339,8 +3339,8 @@ function update() {
           window.SoundManager.play("block");
 
           // High-Powered Shield Bash Counter-Attack for all Shields!
-          if (window.mob && window.mob.hp > 0) {
-            let bashDmg = Math.ceil(p.def * 1.5 * (1.0 + p.str * 0.002));
+                    if (window.mob && window.mob.hp.gt(0)) {
+                      let bashDmg = Math.ceil(p.def * 1.5 * (1.0 + p.str * 0.002));
             let isAegis =
               window.equippedSlots.subweapon &&
               window.equippedSlots.subweapon.isUniqueAegis;
@@ -3521,8 +3521,8 @@ function update() {
               });
 
               // Apply Poison Tip (Dagger-specific parry card) bleed stacks
-              if (p.crucibleDaggerBleed && window.mob && window.mob.hp > 0) {
-                window.mob.bleedStacks = Math.min(
+                          if (p.crucibleDaggerBleed && window.mob && window.mob.hp.gt(0)) {
+                            window.mob.bleedStacks = Math.min(
                   5,
                   (window.mob.bleedStacks || 0) + p.crucibleDaggerBleed,
                 );
@@ -3598,11 +3598,11 @@ function update() {
           });
 
           if (
-            window.equippedSlots.helmet &&
-            window.equippedSlots.helmet.isUniqueTempest &&
-            window.mob &&
-            window.mob.hp > 0
-          ) {
+                      window.equippedSlots.helmet &&
+                      window.equippedSlots.helmet.isUniqueTempest &&
+                      window.mob &&
+                      window.mob.hp.gt(0)
+                    ) {
             if (window.playerStats.tempestCooldown === undefined)
               window.playerStats.tempestCooldown = 0;
             if (window.playerStats.tempestCooldown <= 0) {
@@ -3771,7 +3771,7 @@ window.registerMaelstromTap = function () {
 };
 
 window.detonateGaleFlurry = function () {
-  if (!window.mob || window.mob.hp <= 0) {
+  if (!window.mob || window.mob.hp.lte(0)) {
     window.playerStats.galeCharges = 0;
     return;
   }
@@ -4091,13 +4091,13 @@ window.CombatEngine = {
       }
 
       // UNIQUE: Maelstrom Glaive Wind Crescent projectile on critical hit and Resonance trigger
-      if (
-        window.equippedSlots.weapon &&
-        window.equippedSlots.weapon.isUniqueMaelstrom &&
-        isCrit &&
-        window.mob &&
-        window.mob.hp > 0
-      ) {
+            if (
+              window.equippedSlots.weapon &&
+              window.equippedSlots.weapon.isUniqueMaelstrom &&
+              isCrit &&
+              window.mob &&
+              window.mob.hp.gt(0)
+            ) {
         // Fire wind crescent gale projectile
         window.projectiles.push({
           x: window.hero.x + 35,
@@ -4462,15 +4462,18 @@ window.CombatEngine = {
     }
 
     // Universal Overkill Splash / Stage-Skip Mechanic (Now available in Dungeons!)
-    if (
-      window.mob &&
-      window.mob.hp < 0 &&
-      !window.playerStats.isCrucibleMode &&
-      !window.playerStats.isBossMode &&
-      !window.playerStats.isFarmingLoop
-    ) {
-      let overkillRatio = Math.abs(window.mob.hp) / window.mob.maxHp;
-      if (overkillRatio >= 2.0) {
+        if (
+          window.mob &&
+          window.mob.hp.lt(0) &&
+          !window.playerStats.isCrucibleMode &&
+          !window.playerStats.isBossMode &&
+          !window.playerStats.isFarmingLoop
+        ) {
+          let b_absHp = new BigNum(Math.abs(window.mob.hp.m), window.mob.hp.e);
+          let b_maxHp = BigNum.from(window.mob.maxHp);
+          let ratioNum = b_absHp.div(b_maxHp);
+          let overkillRatio = Number(ratioNum.m * Math.pow(10, Math.min(15, ratioNum.e)));
+          if (overkillRatio >= 2.0) {
         // Overkilled by at least 200% of mob Max HP
         let extraKills = Math.min(3, Math.floor(overkillRatio)); // Cap at 3 extra progress kills
         window.playerStats.killCount = Math.min(
@@ -5814,10 +5817,11 @@ window.CombatEngine = {
       let keptCores = cores;
 
       // Gold & XP are always kept at 100% since those targets were successfully slayed!
-      window.playerStats.coins += gold;
-      window.playerStats.totalGoldEarned =
-        (window.playerStats.totalGoldEarned || 0) + gold;
-      window.gainXp(xp, true);
+            window.playerStats.coins = BigNum.from(window.playerStats.coins).add(gold);
+            window.playerStats.totalGoldEarned = BigNum.from(
+              window.playerStats.totalGoldEarned || 0,
+            ).add(gold);
+            window.gainXp(xp, true);
 
       window.playerStats.astralShards =
         (window.playerStats.astralShards || 0) + keptShards;
@@ -6104,15 +6108,16 @@ window.useItem = function (itemName) {
 
     // Scaling yields based on Depot Level research
     let baseGold = Math.floor(
-      50000 * itemLvlMultiplier * (1 + depotLevel * 0.2),
-    );
-    let baseSouls = Math.floor(100 * (1 + depotLevel * 0.1));
-    let baseKeys = 1;
+          50000 * itemLvlMultiplier * (1 + depotLevel * 0.2),
+        );
+        let baseSouls = Math.floor(100 * (1 + depotLevel * 0.1));
+        let baseKeys = 1;
 
-    window.playerStats.coins += baseGold;
-    window.playerStats.totalGoldEarned =
-      (window.playerStats.totalGoldEarned || 0) + baseGold;
-    window.addEtcDrop("Monster Soul", baseSouls);
+        window.playerStats.coins = BigNum.from(window.playerStats.coins).add(baseGold);
+        window.playerStats.totalGoldEarned = BigNum.from(
+          window.playerStats.totalGoldEarned || 0,
+        ).add(baseGold);
+        window.addEtcDrop("Monster Soul", baseSouls);
     window.addEtcDrop("Gacha Key", baseKeys);
 
     // Dynamic Sacks scaling with Clan Supply Depot research level

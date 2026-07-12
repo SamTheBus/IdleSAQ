@@ -6337,11 +6337,12 @@ window.submitConsoleCommand = function () {
   let mainCmd = args[0].toLowerCase();
 
   if (mainCmd === "/gold") {
-    let amt = parseInt(args[1], 10) || 100000;
-    window.playerStats.coins += amt;
-    window.playerStats.totalGoldEarned =
-      (window.playerStats.totalGoldEarned || 0) + amt;
-    if (typeof window.pushLog === "function")
+      let amt = parseInt(args[1], 10) || 100000;
+      window.playerStats.coins = BigNum.from(window.playerStats.coins).add(amt);
+      window.playerStats.totalGoldEarned = BigNum.from(
+        window.playerStats.totalGoldEarned || 0,
+      ).add(amt);
+      if (typeof window.pushLog === "function")
       window.pushLog(
         `<span style="color:#2ecc71;">[DEV] Granted ${amt.toLocaleString()} Gold!</span>`,
       );
@@ -11555,11 +11556,12 @@ window.buyBoutiqueCostume = function (costumeKey) {
       canAfford = true;
     }
   } else {
-    if (p.coins >= skin.cost) {
-      p.coins -= skin.cost;
-      canAfford = true;
+      let coinsObj = BigNum.from(p.coins);
+      if (coinsObj.gte(skin.cost)) {
+        p.coins = coinsObj.sub(skin.cost);
+        canAfford = true;
+      }
     }
-  }
 
   if (!canAfford) {
     window.pushHeaderToast("❌ Cannot afford this costume!", "#e74c3c");
@@ -11621,11 +11623,12 @@ window.buyBoutiqueSkin = function (skinKey) {
       canAfford = true;
     }
   } else {
-    if (p.coins >= skin.cost) {
-      p.coins -= skin.cost;
-      canAfford = true;
+      let coinsObj = BigNum.from(p.coins);
+      if (coinsObj.gte(skin.cost)) {
+        p.coins = coinsObj.sub(skin.cost);
+        canAfford = true;
+      }
     }
-  }
 
   if (!canAfford) {
     window.pushHeaderToast("❌ Cannot afford this skin!", "#e74c3c");
