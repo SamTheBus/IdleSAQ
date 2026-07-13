@@ -81,36 +81,32 @@ class ParticlePoolClass {
     growth = undefined,
   ) {
     let p = null;
-    for (let i = 0; i < this.pool.length; i++) {
-      if (this.pool[i].life <= 0) {
-        p = this.pool[i];
-        break;
+        for (let i = 0; i < this.pool.length; i++) {
+          if (this.pool[i].life <= 0) {
+            p = this.pool[i];
+            break;
+          }
+        }
+        if (!p) {
+          if (this.pool.length < 2000) {
+            p = new PoolParticle();
+            this.pool.push(p);
+          } else {
+            let lowestLife = Infinity;
+            let lowestIdx = 0;
+            for (let i = 0; i < this.pool.length; i++) {
+              if (this.pool[i].life < lowestLife) {
+                lowestLife = this.pool[i].life;
+                lowestIdx = i;
+              }
+            }
+            p = this.pool[lowestIdx];
+            p.life = 0;
+          }
+        }
+        p.init(x, y, vx, vy, radius, color, alpha, life, maxLife, gravity, fade, growth);
+        return p;
       }
-    }
-    if (!p) {
-      if (this.pool.length < 2000) {
-        p = new PoolParticle();
-        this.pool.push(p);
-      } else {
-        p = this.pool[0]; // Recycle oldest active item as a fallback
-      }
-    }
-    p.init(
-      x,
-      y,
-      vx,
-      vy,
-      radius,
-      color,
-      alpha,
-      life,
-      maxLife,
-      gravity,
-      fade,
-      growth,
-    );
-    return p;
-  }
 }
 
 class PoolCombatEffect {
@@ -183,37 +179,32 @@ class CombatEffectPoolClass {
     itemType = "",
   ) {
     let f = null;
-    for (let i = 0; i < this.pool.length; i++) {
-      if (this.pool[i].life <= 0) {
-        f = this.pool[i];
-        break;
+        for (let i = 0; i < this.pool.length; i++) {
+          if (this.pool[i].life <= 0) {
+            f = this.pool[i];
+            break;
+          }
+        }
+        if (!f) {
+          if (this.pool.length < 500) {
+            f = new PoolCombatEffect();
+            this.pool.push(f);
+          } else {
+            let lowestLife = Infinity;
+            let lowestIdx = 0;
+            for (let i = 0; i < this.pool.length; i++) {
+              if (this.pool[i].life < lowestLife) {
+                lowestLife = this.pool[i].life;
+                lowestIdx = i;
+              }
+            }
+            f = this.pool[lowestIdx];
+            f.life = 0;
+          }
+        }
+        f.init(type, x, y, vx, vy, amount, color, life, maxLife, text, isCumulative, iconColor, itemType);
+        return f;
       }
-    }
-    if (!f) {
-      if (this.pool.length < 500) {
-        f = new PoolCombatEffect();
-        this.pool.push(f);
-      } else {
-        f = this.pool[0]; // Recycle oldest active item as a fallback
-      }
-    }
-    f.init(
-      type,
-      x,
-      y,
-      vx,
-      vy,
-      amount,
-      color,
-      life,
-      maxLife,
-      text,
-      isCumulative,
-      iconColor,
-      itemType,
-    );
-    return f;
-  }
 }
 
 window.CombatEffectPool = new CombatEffectPoolClass(150);

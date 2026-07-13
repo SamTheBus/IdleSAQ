@@ -4446,8 +4446,11 @@ window.CombatEngine = {
   },
 
   handleMobDeath() {
-    window.effects = window.effects.filter((e) => !e.isCumulative);
-    let p = window.resolvePlayerStats();
+      window.effects.forEach((e) => {
+        if (e.isCumulative) e.life = 0;
+      });
+      window.effects = window.effects.filter((e) => !e.isCumulative);
+      let p = window.resolvePlayerStats();
 
     // Trigger time-based and environmental achievements on active mob slay
     let hr = new Date().getHours();
@@ -5780,8 +5783,11 @@ window.CombatEngine = {
   },
 
   handlePlayerDefeat() {
-    window.effects = window.effects.filter((e) => !e.isCumulative);
-    window.isGamePaused = true;
+      window.effects.forEach((e) => {
+        if (e.isCumulative) e.life = 0;
+      });
+      window.effects = window.effects.filter((e) => !e.isCumulative);
+      window.isGamePaused = true;
     window.deathAnimationTimer = 0;
     window.playerStats.deathCount = (window.playerStats.deathCount || 0) + 1;
 
