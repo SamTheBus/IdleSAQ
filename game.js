@@ -5146,42 +5146,35 @@ window.CombatEngine = {
           (window.playerStats.crucibleAccumulatedCores || 0) + finalCores;
 
         let oldWave = window.playerStats.crucibleWave || 1;
-        window.playerStats.crucibleWave++;
+                window.playerStats.crucibleWave++;
 
-        // Dynamically roll a debuff on every 10th wave, and a buff on all other waves
-        let nextWave = window.playerStats.crucibleWave;
-        let titleText = "";
-        let descText = "";
-        let isDebuff = nextWave % 10 === 0;
+                // Dynamically roll a debuff on every 10th wave; normal waves have no active cavern buff
+                let nextWave = window.playerStats.crucibleWave;
+                let isDebuff = nextWave % 10 === 0;
 
-        if (isDebuff) {
-          window.playerStats.crucibleActiveDebuff =
-            window.CAVERN_DEBUFFS[
-              Math.floor(Math.random() * window.CAVERN_DEBUFFS.length)
-            ];
-          window.playerStats.crucibleActiveBuff = null;
-          let debuff = window.playerStats.crucibleActiveDebuff;
-          titleText = debuff ? debuff.name : "Anomaly";
-          descText = debuff ? debuff.desc : "";
-        } else {
-          window.playerStats.crucibleActiveBuff =
-            window.CAVERN_BUFFS[
-              Math.floor(Math.random() * window.CAVERN_BUFFS.length)
-            ];
-          window.playerStats.crucibleActiveDebuff = null;
-          let buff = window.playerStats.crucibleActiveBuff;
-          titleText = buff ? buff.name : "Blessing";
-          descText = buff ? buff.desc : "";
-        }
+                if (isDebuff) {
+                  window.playerStats.crucibleActiveDebuff =
+                    window.CAVERN_DEBUFFS[
+                      Math.floor(Math.random() * window.CAVERN_DEBUFFS.length)
+                    ];
+                  window.playerStats.crucibleActiveBuff = null;
+                  let debuff = window.playerStats.crucibleActiveDebuff;
+                  let titleText = debuff ? debuff.name : "Anomaly";
+                  let descText = debuff ? debuff.desc : "";
 
-        // Trigger Elegant On-Screen Cinematic Wave Splash
-        window.crucibleTransitionSplash = {
-          title: `WAVE ${nextWave}: ${titleText.toUpperCase()}`,
-          sub: descText,
-          color: isDebuff ? "#e74c3c" : "#9b59b6",
-          timer: 150,
-          maxTimer: 150,
-        };
+                  // Trigger Elegant On-Screen Cinematic Wave Splash ONLY on debuff waves
+                  window.crucibleTransitionSplash = {
+                    title: `WAVE ${nextWave}: ${titleText.toUpperCase()}`,
+                    sub: descText,
+                    color: "#e74c3c",
+                    timer: 150,
+                    maxTimer: 150,
+                  };
+                } else {
+                  window.playerStats.crucibleActiveBuff = null;
+                  window.playerStats.crucibleActiveDebuff = null;
+                  window.crucibleTransitionSplash = null;
+                }
 
         window.playerStats.crucibleWavesClearedThisRun =
           (window.playerStats.crucibleWavesClearedThisRun || 0) + 1;
@@ -7682,21 +7675,18 @@ window.enterCrucible = function () {
       };
 
       window.playerStats.isCrucibleMode = true;
-      window.playerStats.isDungeonMode = false;
-      window.playerStats.crucibleWave = 1;
-      window.playerStats.crucibleStartWave = 1;
-      window.playerStats.killCount = 0;
-      window.playerStats.targetsRequired = 5;
-      window.playerStats.isBossMode = false;
-      window.playerStats.isUberBoss = false;
-      window.mob = null;
+            window.playerStats.isDungeonMode = false;
+            window.playerStats.crucibleWave = 1;
+            window.playerStats.crucibleStartWave = 1;
+            window.playerStats.killCount = 0;
+            window.playerStats.targetsRequired = 5;
+            window.playerStats.isBossMode = false;
+            window.playerStats.isUberBoss = false;
+            window.mob = null;
 
-      window.playerStats.crucibleActiveBuff =
-        window.CAVERN_BUFFS[
-          Math.floor(Math.random() * window.CAVERN_BUFFS.length)
-        ];
-      window.playerStats.crucibleActiveDebuff = null;
-      window.playerStats.crucibleInfusedType = "none";
+            window.playerStats.crucibleActiveBuff = null;
+            window.playerStats.crucibleActiveDebuff = null;
+            window.playerStats.crucibleInfusedType = "none";
       window.playerStats.crucibleLootMult = 1.0;
 
       window.playerStats.crucibleRunActive = true;
