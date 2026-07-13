@@ -3059,39 +3059,57 @@ function update() {
     }
 
     // Roll for Anomalous Shard spawn (8% chance per second when idle and no active rifts)
-    if (
-      window.activeRiftOrbs.length === 0 &&
-      Math.random() < 0.08 &&
-      !window.isGamePaused
-    ) {
-      window.spawnAnomalousShard();
-    }
+        if (
+          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.08 &&
+          !window.isGamePaused
+        ) {
+          window.spawnAnomalousShard();
+        }
 
-    // Roll for Perfect Strike Reticle (5% chance per second when combat is active and no active orbs)
-    if (
-      window.mob &&
-      window.mob.hp.gt(0) &&
-      window.activeRiftOrbs.length === 0 &&
-      Math.random() < 0.05 &&
-      !window.isGamePaused
-    ) {
-      window.spawnPerfectStrikeReticle();
-          }
+        // Roll for Perfect Strike Reticle (5% chance per second when combat is active and no active orbs)
+        if (
+          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) &&
+          window.mob &&
+          window.mob.hp.gt(0) &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.05 &&
+          !window.isGamePaused
+        ) {
+          window.spawnPerfectStrikeReticle();
+        }
 
-          // Roll for Aetheric Conduit spawn (4% chance per second when no active orbs)
-              if (window.activeRiftOrbs.length === 0 && Math.random() < 0.04 && !window.isGamePaused) {
-                window.spawnAethericConduit();
-              }
+        // Roll for Aetheric Conduit spawn (4% chance per second when no active orbs)
+        if (
+          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.04 &&
+          !window.isGamePaused
+        ) {
+          window.spawnAethericConduit();
+        }
 
-              // Roll for Aetheric Spark (6% chance per second when no active orbs and not awakened)
-                  if (window.activeRiftOrbs.length === 0 && Math.random() < 0.06 && !(window.playerStats.astralAwakeningTimer > 0) && !window.isGamePaused) {
-                    window.spawnAethericSpark(0); // Commences the chain at Index 0
-                  }
+        // Roll for Aetheric Spark (6% chance per second when no active orbs and not awakened)
+        if (
+          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.06 &&
+          !(window.playerStats.astralAwakeningTimer > 0) &&
+          !window.isGamePaused
+        ) {
+          window.spawnAethericSpark(0); // Commences the chain at Index 0
+        }
 
-                  // Roll for Glimmering Pixie (5% chance per second when no active orbs)
-                  if (window.activeRiftOrbs.length === 0 && Math.random() < 0.05 && !window.isGamePaused) {
-                    window.spawnGlimmeringPixie();
-                  }
+        // Roll for Glimmering Pixie (5% chance per second when no active orbs)
+        if (
+          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.05 &&
+          !window.isGamePaused
+        ) {
+          window.spawnGlimmeringPixie();
+        }
 
     // Active Debuff: Withering Decay (Periodic combat damage drain)
     if (
