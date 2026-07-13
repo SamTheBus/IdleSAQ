@@ -447,9 +447,9 @@ window.renderForgeTab = function () {
     }
 
     let cost = window.getSlotUpgradeCost(slotKey, lvl);
-        let goldCost = cost.gold;
-        let goldOwned = BigNum.from(window.playerStats.coins || 0);
-        let goldColor = goldOwned.gte(goldCost) ? "#2ecc71" : "#e74c3c";
+    let goldCost = cost.gold;
+    let goldOwned = BigNum.from(window.playerStats.coins || 0);
+    let goldColor = goldOwned.gte(goldCost) ? "#2ecc71" : "#e74c3c";
 
     let materialsHtml = cost.materials
       .map((mat) => {
@@ -462,13 +462,13 @@ window.renderForgeTab = function () {
       .join("");
 
     let canAfford =
-          goldOwned.gte(goldCost) &&
-          cost.materials.every(
-            (m) =>
-              (window.inventory.ETC[m.name] || window.inventory.USE[m.name] || 0) *
-                1 >=
-              m.qty,
-          );
+      goldOwned.gte(goldCost) &&
+      cost.materials.every(
+        (m) =>
+          (window.inventory.ETC[m.name] || window.inventory.USE[m.name] || 0) *
+            1 >=
+          m.qty,
+      );
 
     let eqItem = window.equippedSlots[slotKey];
     let liveComparisonHtml = "";

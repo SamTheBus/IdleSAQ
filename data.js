@@ -97,20 +97,25 @@ class BigNum {
   }
 
   static from(val) {
-      if (val instanceof BigNum) return val;
-      if (val && typeof val === "object" && val.m !== undefined && val.e !== undefined) {
-        return new BigNum(val.m, val.e);
-      }
-      if (typeof val === "number") return BigNum.fromNumber(val);
-      if (typeof val === "string") {
-        let parts = val.toLowerCase().split("e");
-        if (parts.length === 2) {
-          return new BigNum(parseFloat(parts[0]), parseInt(parts[1], 10));
-        }
-        return BigNum.fromNumber(parseFloat(val));
-      }
-      return new BigNum(0, 0);
+    if (val instanceof BigNum) return val;
+    if (
+      val &&
+      typeof val === "object" &&
+      val.m !== undefined &&
+      val.e !== undefined
+    ) {
+      return new BigNum(val.m, val.e);
     }
+    if (typeof val === "number") return BigNum.fromNumber(val);
+    if (typeof val === "string") {
+      let parts = val.toLowerCase().split("e");
+      if (parts.length === 2) {
+        return new BigNum(parseFloat(parts[0]), parseInt(parts[1], 10));
+      }
+      return BigNum.fromNumber(parseFloat(val));
+    }
+    return new BigNum(0, 0);
+  }
 
   static fromNumber(num) {
     if (num === 0 || isNaN(num) || !isFinite(num)) return new BigNum(0, 0);
@@ -687,18 +692,18 @@ window.checkAchievements = function () {
   );
 
   let unlockedAny = false;
-    window.AchievementsData.forEach((ach) => {
-      if (window.playerStats.unlockedAchievements.includes(ach.id)) return;
-      let progress = window.getAchievementProgress(ach);
-      let targetValue = ach.isSingleTier ? 1 : ach.reqValue;
-      let isUnlocked = false;
-      if (progress instanceof BigNum) {
-        isUnlocked = progress.gte(targetValue);
-      } else {
-        isUnlocked = progress >= targetValue;
-      }
-      if (isUnlocked) {
-        window.playerStats.unlockedAchievements.push(ach.id);
+  window.AchievementsData.forEach((ach) => {
+    if (window.playerStats.unlockedAchievements.includes(ach.id)) return;
+    let progress = window.getAchievementProgress(ach);
+    let targetValue = ach.isSingleTier ? 1 : ach.reqValue;
+    let isUnlocked = false;
+    if (progress instanceof BigNum) {
+      isUnlocked = progress.gte(targetValue);
+    } else {
+      isUnlocked = progress >= targetValue;
+    }
+    if (isUnlocked) {
+      window.playerStats.unlockedAchievements.push(ach.id);
       window.playerStats.achievementTimestamps =
         window.playerStats.achievementTimestamps || {};
       window.playerStats.achievementTimestamps[ach.id] = Date.now();
@@ -1314,29 +1319,32 @@ window.resolvePlayerStats = function (useDraft = false) {
       }
     });
 
-    activeSig.debuffs.forEach((d) => {
-      if (d.id === "iron_gaze") {
-        p.idleAttackSpeed = Math.round(p.idleAttackSpeed * 1.2);
-        p.activeAttackSpeed = Math.round(p.activeAttackSpeed * 1.2);
-      } else if (d.id === "shattered_armour") {
-        p.def = Math.floor(p.def * 0.75);
-      } else if (d.id === "frail_vessel") {
-        p.maxHp = Math.floor(p.maxHp * 0.8);
-      } else if (d.id === "dull_blades") {
-        p.atk = Math.floor(p.atk * 0.8);
-      } else if (d.id === "heavy_mist") {
-        p.moveSpeed = Math.max(1.0, p.moveSpeed * 0.7);
-      } else if (d.id === "blind_spot") {
-        p.critChance = Math.max(0.0, p.critChance - 0.1);
-      } else if (d.id === "feeble_mind") {
-        p.arcaneBarrier = 0.0;
-      } else if (d.id === "curse_greed") {
-        p.gold = Math.max(0.1, p.gold - 0.4);
-      } else if (d.id === "lead_boots") {
-        p.block = Math.max(0.0, p.block - 0.08);
-        p.parry = Math.max(0.0, p.parry - 0.08);
-      }
-    });
+    // Skip debuffs if protected by Purified Aegis
+    if (!(window.playerStats.purifiedAegisTimer > 0)) {
+      activeSig.debuffs.forEach((d) => {
+        if (d.id === "iron_gaze") {
+          p.idleAttackSpeed = Math.round(p.idleAttackSpeed * 1.2);
+          p.activeAttackSpeed = Math.round(p.activeAttackSpeed * 1.2);
+        } else if (d.id === "shattered_armour") {
+          p.def = Math.floor(p.def * 0.75);
+        } else if (d.id === "frail_vessel") {
+          p.maxHp = Math.floor(p.maxHp * 0.8);
+        } else if (d.id === "dull_blades") {
+          p.atk = Math.floor(p.atk * 0.8);
+        } else if (d.id === "heavy_mist") {
+          p.moveSpeed = Math.max(1.0, p.moveSpeed * 0.7);
+        } else if (d.id === "blind_spot") {
+          p.critChance = Math.max(0.0, p.critChance - 0.1);
+        } else if (d.id === "feeble_mind") {
+          p.arcaneBarrier = 0.0;
+        } else if (d.id === "curse_greed") {
+          p.gold = Math.max(0.1, p.gold - 0.4);
+        } else if (d.id === "lead_boots") {
+          p.block = Math.max(0.0, p.block - 0.08);
+          p.parry = Math.max(0.0, p.parry - 0.08);
+        }
+      });
+    }
   }
 
   let potStrengthMultiplier = 1.0;
@@ -1350,13 +1358,22 @@ window.resolvePlayerStats = function (useDraft = false) {
   if (window.checkArtifactTrait("alchemist_alembic"))
     potStrengthMultiplier += 0.3;
 
-  if (window.playerStats.atkPotionTimer > 0)
-    p.atk = Math.ceil(
-      p.atk *
-        (1 +
-          (window.playerStats.atkPotionStrength || 0.1) *
-            potStrengthMultiplier),
-    );
+  // Apply compounding Aetheric Spark modifiers / Astral Awakening state multiplier
+    if (window.playerStats.astralAwakeningTimer > 0) {
+      p.atk = Math.floor(p.atk * 2.0); // +100% Total Damage
+      activeSpeedPct += 0.15; // +15% Active Atk Spd
+      idleSpeedPct += 0.15; // +15% Idle Atk Spd
+    } else if (window.playerStats.sparkChainCount > 0) {
+      p.atk = Math.floor(p.atk * (1.0 + window.playerStats.sparkChainCount * 0.10)); // +10% damage per chain link
+    }
+
+    if (window.playerStats.atkPotionTimer > 0)
+      p.atk = Math.ceil(
+        p.atk *
+          (1 +
+            (window.playerStats.atkPotionStrength || 0.1) *
+              potStrengthMultiplier),
+      );
   if (window.playerStats.hpPotionTimer > 0)
     p.maxHp = Math.ceil(
       p.maxHp *
@@ -1477,6 +1494,14 @@ window.resolvePlayerStats = function (useDraft = false) {
   if (window.playerStats.maelstromSpeedStacks > 0) {
     idleSpeedPct += window.playerStats.maelstromSpeedStacks * 0.1;
     activeSpeedPct += window.playerStats.maelstromSpeedStacks * 0.1;
+  }
+
+  // Deduct active attack speed per active Anomalous Shard (Apathy Distortion)
+  let activeShardsList = window.activeRiftOrbs
+    ? window.activeRiftOrbs.filter((orb) => orb.type === "anomalous_shard")
+    : [];
+  if (activeShardsList.length > 0) {
+    activeSpeedPct -= activeShardsList.length * 0.1;
   }
 
   if (
@@ -1605,9 +1630,10 @@ window.resolvePlayerStats = function (useDraft = false) {
     window.playerStats.crucibleActiveBuff
   ) {
     let b = window.playerStats.crucibleActiveBuff;
-    // Debuffs have been disabled entirely in the Crucible per tactical review
-    window.playerStats.crucibleActiveDebuff = null;
-    let d = null;
+    let d =
+      window.playerStats.purifiedAegisTimer > 0
+        ? null
+        : window.playerStats.crucibleActiveDebuff;
     let isBuffInfused = window.playerStats.crucibleInfusedType === "buff";
     let isDebuffInfused = window.playerStats.crucibleInfusedType === "debuff";
 
@@ -1844,34 +1870,34 @@ window.CRUCIBLE_DRAFT_POOL = [
   },
   {
     id: "aegis_bastion",
-    name: "Aegis Bastion",
-    desc: "Wielding a Shield increases Block Rate and maximum Block Cap by +5%",
+    name: "Stalwart Bastion",
+    desc: "+3% Block & Parry Rate, and +5% Max HP. HP bonus is doubled (+10% total) if wielding a Shield.",
     apply: (p) => {
-      if (window.equippedSlots.subweapon?.subType === "shield") {
-        p.block = (p.block || 0) + 0.05;
-        p.crucibleCapBonus = (p.crucibleCapBonus || 0) + 0.05;
-      }
+      p.block = (p.block || 0) + 0.03;
+      p.parry = (p.parry || 0) + 0.03;
+      let hpBonus =
+        window.equippedSlots.subweapon?.subType === "shield" ? 0.1 : 0.05;
+      p.maxHpPctBonus = (p.maxHpPctBonus || 0) + hpBonus;
     },
   },
   {
     id: "poison_tip",
-    name: "Poison Tip",
-    desc: "Wielding a Dagger adds +5% Parry Rate and causes successful Ripostes to apply 2 stacks of Sanguine Bleed",
+    name: "Viper's Precision",
+    desc: "+4% Crit Chance. Your critical hits apply 1 stack of Sanguine Bleed. Applied stacks are doubled to 2 if wielding a Dagger.",
     apply: (p) => {
-      if (window.equippedSlots.subweapon?.subType === "dagger") {
-        p.parry = (p.parry || 0) + 0.05;
-        p.crucibleCapBonus = (p.crucibleCapBonus || 0) + 0.05;
-        p.crucibleDaggerBleed = (p.crucibleDaggerBleed || 0) + 2;
-      }
+      p.critChance = (p.critChance || 0) + 0.04;
+      let bleedAmt =
+        window.equippedSlots.subweapon?.subType === "dagger" ? 2 : 1;
+      p.crucibleDaggerBleed = (p.crucibleDaggerBleed || 0) + bleedAmt;
     },
   },
   {
     id: "catalyst_resonance",
-    name: "Catalyst Resonance",
-    desc: "Wielding a Tome increases all elemental spell cast chances by +5% and increases Arcane Barrier absorption by +5%",
+    name: "Aetheric Focus",
+    desc: "+8% Spell & Tome damage. Wielding a Tome also increases Arcane Barrier absorption by +5% and extends barrier caps.",
     apply: (p) => {
+      p.crucibleSpellChanceBonus = (p.crucibleSpellChanceBonus || 0) + 0.08;
       if (window.equippedSlots.subweapon?.subType === "tome") {
-        p.crucibleSpellChanceBonus = (p.crucibleSpellChanceBonus || 0) + 0.05;
         p.arcaneBarrier = (p.arcaneBarrier || 0) + 0.05;
       }
     },
@@ -2048,70 +2074,75 @@ window.playerStats = {
   },
 
   // Achievement Checkpoint Flags
-            hasTriggeredMurphysLaw: false,
-            hasTriggeredAgainstOdds: false,
-            hasTriggeredLuckySeven: false,
-            hasTriggeredBackFromBrink: false,
-            hasTriggeredElementalConvergence: false,
-            hasTriggeredLookMaNoHands: false,
-            hasTriggeredOverkill: false,
-            hasTriggeredSpeedrun: false,
-            hasTriggeredExactChange: false,
-            hasTriggeredUnfortunateSoul: false,
-            hasTriggeredAlchemicalSynthesis: false,
-            hasTriggeredPatientShepherd: false,
-            hasTriggeredBareFists: false,
-            hasTriggeredPerfectDeflection: false,
-            hasTriggeredWitchingHour: false,
-            hasTriggeredHighNoon: false,
-            hasTriggeredTimeCapsule: false,
-            hasTriggeredAethericRecharge: false,
-            hasTriggeredNightOwl: false,
-            hasTriggeredEarlyBird: false,
-            hasTriggeredCoffeeRun: false,
-            hasTriggeredWeekendWarrior: false,
-            hasTriggeredPhoenixRising: false,
-            hasTriggeredPerfectDeflection: false,
-            hasTriggeredWitchingHour: false,
-            hasTriggeredTimeCapsule: false,
-            hasTriggeredAethericRecharge: false,
-            hasClickedThisBattle: false,
-            damageTakenThisBattle: 0,
-            ankhTriggeredThisBattle: false,
-            dailyMissions: [],
-            weeklyMissions: [],
-            monsterCards: {},
-            astralDust: 0,
-            dailyRerollsDone: 0, // Reset daily at 12:00 AM PST/PDT
-            lastDailyResetTime: 0,
-            lastWeeklyResetTime: 0,
-            dailyRewardClaimed: false,
-            weeklyRewardClaimed: false,
-            unviewedAchievements: [],
-            selectedPrestigeStage: 80,
-            unlockedTitles: [],
-            equippedTitle: null,
-            achievementTimestamps: {},
-            claimedMailIds: [],
-            unlockedSkins: ["default"],
-            equippedCostume: "knight",
-            unlockedCostumes: ["knight"],
-            playerName: "Guest",
-            clanId: null,
-            clanName: null,
-            clanEmblem: null,
-            clanSkills: {
-              steel_phalanx: 0,
-              vitality_well: 0,
-              prosperity_accord: 0,
-              voyagers_guidance: 0,
-              aetheric_wisdom: 0,
-              clan_supply_depot: 0,
-            },
-            clanContribution: 0,
-            paragonLevel: 0,
-            totalGoldEarned: new BigNum(0, 0),
-          };
+  hasTriggeredMurphysLaw: false,
+  hasTriggeredAgainstOdds: false,
+  hasTriggeredLuckySeven: false,
+  hasTriggeredBackFromBrink: false,
+  hasTriggeredElementalConvergence: false,
+  hasTriggeredLookMaNoHands: false,
+  hasTriggeredOverkill: false,
+  hasTriggeredSpeedrun: false,
+  hasTriggeredExactChange: false,
+  hasTriggeredUnfortunateSoul: false,
+  hasTriggeredAlchemicalSynthesis: false,
+  hasTriggeredPatientShepherd: false,
+  hasTriggeredBareFists: false,
+  hasTriggeredPerfectDeflection: false,
+  hasTriggeredWitchingHour: false,
+  hasTriggeredHighNoon: false,
+  hasTriggeredTimeCapsule: false,
+  hasTriggeredAethericRecharge: false,
+  hasTriggeredNightOwl: false,
+  hasTriggeredEarlyBird: false,
+  hasTriggeredCoffeeRun: false,
+  hasTriggeredWeekendWarrior: false,
+  hasTriggeredPhoenixRising: false,
+  hasTriggeredPerfectDeflection: false,
+  hasTriggeredWitchingHour: false,
+  hasTriggeredTimeCapsule: false,
+  hasTriggeredAethericRecharge: false,
+  hasClickedThisBattle: false,
+  damageTakenThisBattle: 0,
+  ankhTriggeredThisBattle: false,
+  purifiedAegisTimer: 0,
+              apathyDecayStacks: 0,
+              apathyDecayTimer: 0,
+              astralAwakeningTimer: 0,
+              sparkChainCount: 0,
+              dailyMissions: [],
+              weeklyMissions: [],
+  monsterCards: {},
+  astralDust: 0,
+  dailyRerollsDone: 0, // Reset daily at 12:00 AM PST/PDT
+  lastDailyResetTime: 0,
+  lastWeeklyResetTime: 0,
+  dailyRewardClaimed: false,
+  weeklyRewardClaimed: false,
+  unviewedAchievements: [],
+  selectedPrestigeStage: 80,
+  unlockedTitles: [],
+  equippedTitle: null,
+  achievementTimestamps: {},
+  claimedMailIds: [],
+  unlockedSkins: ["default"],
+  equippedCostume: "knight",
+  unlockedCostumes: ["knight"],
+  playerName: "Guest",
+  clanId: null,
+  clanName: null,
+  clanEmblem: null,
+  clanSkills: {
+    steel_phalanx: 0,
+    vitality_well: 0,
+    prosperity_accord: 0,
+    voyagers_guidance: 0,
+    aetheric_wisdom: 0,
+    clan_supply_depot: 0,
+  },
+  clanContribution: 0,
+  paragonLevel: 0,
+  totalGoldEarned: new BigNum(0, 0),
+};
 
 // Initialize the QuestSystem namespace and define generateDailyMissions
 window.QuestSystem = {
@@ -2415,6 +2446,7 @@ window.beams = [];
 window.snowflakes = [];
 window.bgScenery = [];
 window.fgScenery = [];
+window.activeRiftOrbs = [];
 window.activeFairies = [];
 window.damageHistory = [];
 window.projectiles = [];

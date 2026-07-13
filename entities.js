@@ -291,15 +291,18 @@
       if (!window.mob) return;
 
       const isBoss =
-              window.mob.type === "boss" ||
-              window.mob.type === "dungeon_boss" ||
-              window.mob.type === "prestige_boss" ||
-              window.mob.type === "rift_guardian" ||
-              window.mob.type === "aegis_goliath" ||
-              window.mob.type === "chronos_arbitrator" ||
-              window.mob.type === "nexus_overseer";
-            if (isBoss && BigNum.from(amount).gte(BigNum.from(window.mob.maxHp).mul(0.6))) {
-              const funnyPhrases = [
+        window.mob.type === "boss" ||
+        window.mob.type === "dungeon_boss" ||
+        window.mob.type === "prestige_boss" ||
+        window.mob.type === "rift_guardian" ||
+        window.mob.type === "aegis_goliath" ||
+        window.mob.type === "chronos_arbitrator" ||
+        window.mob.type === "nexus_overseer";
+      if (
+        isBoss &&
+        BigNum.from(amount).gte(BigNum.from(window.mob.maxHp).mul(0.6))
+      ) {
+        const funnyPhrases = [
           "OUCH!!",
           "OW!!!",
           "OWWY!!",
@@ -11451,6 +11454,467 @@
       }
       ctx.restore();
     });
+
+    // Render Crucible Cinematic Wave Transition Splash
+    if (
+      window.playerStats.isCrucibleMode &&
+      window.crucibleTransitionSplash &&
+      window.crucibleTransitionSplash.timer > 0
+    ) {
+      ctx.save();
+      let splash = window.crucibleTransitionSplash;
+      let progress = (splash.maxTimer - splash.timer) / splash.maxTimer;
+      let opacity = 1.0;
+
+      // Smoothly fade in/out
+      if (progress < 0.15) opacity = progress / 0.15;
+      else if (progress > 0.85) opacity = (1.0 - progress) / 0.15;
+
+      ctx.globalAlpha = opacity;
+      let cy = canvas.height / 2;
+
+      // Draw translucent dark background banner
+      ctx.fillStyle = "rgba(10, 8, 16, 0.88)";
+      ctx.strokeStyle = splash.color;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.rect(0, cy - 35, canvas.width, 65);
+      ctx.fill();
+      ctx.stroke();
+
+      // Draw Title Text
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "900 13px 'Arial Black', Impact, sans-serif";
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 4;
+      ctx.strokeText(splash.title, canvas.width / 2, cy - 12);
+      ctx.fillStyle = splash.color;
+      ctx.fillText(splash.title, canvas.width / 2, cy - 12);
+
+      // Draw Subtitle Description
+      ctx.font = "bold 9.5px monospace";
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 3;
+      ctx.strokeText(splash.sub, canvas.width / 2, cy + 12);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(splash.sub, canvas.width / 2, cy + 12);
+
+      ctx.restore();
+      splash.timer--;
+    }
+
+    // Render Void Suppression Orbs on canvas
+        if (window.activeRiftOrbs && window.activeRiftOrbs.length > 0) {
+          window.activeRiftOrbs.forEach(orb => {
+            if (orb.type === "glimmering_pixie") {
+              ctx.save();
+
+              let flap = Math.abs(Math.sin(Date.now() / 80 + orb.id)) * 6 + 2;
+              let hover = orb.pauseTimer > 0 ? Math.sin(Date.now() / 100) * 1.5 : 0;
+              let ox = orb.x;
+              let oy = orb.y + hover;
+
+              // 1. Draw glowing outer radial backdrop
+              let glowGrad = ctx.createRadialGradient(ox, oy, 1, ox, oy, orb.radius * 2);
+              glowGrad.addColorStop(0, "rgba(46, 204, 113, 0.45)");
+              glowGrad.addColorStop(0.6, "rgba(85, 239, 196, 0.15)");
+              glowGrad.addColorStop(1, "rgba(0,0,0,0)");
+              ctx.fillStyle = glowGrad;
+              ctx.beginPath();
+              ctx.arc(ox, oy, orb.radius * 2, 0, Math.PI * 2);
+              ctx.fill();
+
+              // 2. Draw flapping wings
+              ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+              ctx.strokeStyle = "#000000";
+              ctx.lineWidth = 1.2;
+              ctx.beginPath();
+              ctx.ellipse(ox - 4, oy - 2, 5, flap, Math.PI / 6, 0, Math.PI * 2);
+              ctx.ellipse(ox + 4, oy - 2, 5, flap, -Math.PI / 6, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+
+              // 3. Draw central sprite core ball
+              let coreGrad = ctx.createRadialGradient(ox - 2, oy - 2, 1, ox, oy, orb.radius);
+              if (window.isGamePaused) {
+                coreGrad.addColorStop(0, "#cbd5e1");
+                coreGrad.addColorStop(1, "#475569");
+              } else {
+                coreGrad.addColorStop(0, "#ffffff"); // White-hot center
+                coreGrad.addColorStop(0.3, "#2ecc71"); // Emerald
+                coreGrad.addColorStop(1, "#145a32"); // Deep forest green
+              }
+              ctx.fillStyle = coreGrad;
+              ctx.beginPath();
+              ctx.arc(ox, oy, orb.radius, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.strokeStyle = "#000000";
+              ctx.lineWidth = 1.5;
+              ctx.stroke();
+
+              // 4. Draw outer shrinking timer ring
+              let progress = orb.timer / orb.maxTimer;
+              ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+              ctx.lineWidth = 1.0;
+              ctx.beginPath();
+              ctx.arc(ox, oy, orb.radius * 1.5 * progress, 0, Math.PI * 2);
+              ctx.stroke();
+
+              ctx.restore();
+              return;
+            }
+
+            if (orb.type === "aetheric_spark") {
+              ctx.save();
+
+              // 1. Draw glowing outer radial backdrop
+              let glowGrad = ctx.createRadialGradient(orb.x, orb.y, 2, orb.x, orb.y, orb.radius * 2);
+              glowGrad.addColorStop(0, "rgba(255, 215, 0, 0.4)");
+              glowGrad.addColorStop(0.6, "rgba(241, 196, 15, 0.15)");
+              glowGrad.addColorStop(1, "rgba(0,0,0,0)");
+              ctx.fillStyle = glowGrad;
+              ctx.beginPath();
+              ctx.arc(orb.x, orb.y, orb.radius * 2, 0, Math.PI * 2);
+              ctx.fill();
+
+              // 2. Draw central core with bright yellow radial gradient
+              let coreGrad = ctx.createRadialGradient(orb.x - 2, orb.y - 2, 1, orb.x, orb.y, orb.radius);
+              if (window.isGamePaused) {
+                coreGrad.addColorStop(0, "#cbd5e1");
+                coreGrad.addColorStop(1, "#64748b");
+              } else {
+                coreGrad.addColorStop(0, "#ffffff"); // White-hot center
+                coreGrad.addColorStop(0.5, "#ffd700"); // Rich gold
+                coreGrad.addColorStop(1, "#b58700"); // Dark bronze/gold
+              }
+              ctx.fillStyle = coreGrad;
+              ctx.beginPath();
+              ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+              ctx.fill();
+
+              // Cel-shaded outline
+              ctx.strokeStyle = "#000000";
+              ctx.lineWidth = 1.8;
+              ctx.stroke();
+
+              // 3. Draw Orbiting Star Rays
+              if (!window.isGamePaused) {
+                ctx.strokeStyle = "#ffd700";
+                ctx.lineWidth = 1.5;
+                let rot = Date.now() / 100 + orb.id;
+                ctx.save();
+                ctx.translate(orb.x, orb.y);
+                ctx.rotate(rot);
+                for (let j = 0; j < 4; j++) {
+                  ctx.rotate(Math.PI / 2);
+                  ctx.beginPath();
+                  ctx.moveTo(0, -orb.radius * 1.1);
+                  ctx.lineTo(0, -orb.radius * 1.5);
+                  ctx.stroke();
+                }
+                ctx.restore();
+              }
+
+              // 4. Draw shrinking outer countdown ring
+              let progress = orb.timer / orb.maxTimer;
+              ctx.strokeStyle = "#ffffff";
+              ctx.lineWidth = 1.2;
+              ctx.beginPath();
+              ctx.arc(orb.x, orb.y, orb.radius * 1.5 * progress, 0, Math.PI * 2);
+              ctx.stroke();
+
+              ctx.restore();
+              return;
+            }
+
+            if (orb.type === "aetheric_conduit") {
+              ctx.save();
+
+              // 1. Draw Dotted Connecting Path
+              ctx.strokeStyle = "rgba(0, 210, 255, 0.22)";
+              ctx.lineWidth = 1.8;
+              ctx.setLineDash([4, 6]);
+              ctx.beginPath();
+              ctx.moveTo(orb.x, orb.y);
+              ctx.lineTo(orb.endX, orb.endY);
+              ctx.stroke();
+              ctx.setLineDash([]); // Reset
+
+              // 2. Draw Solid Glowing Active Traced Path
+              if (orb.progress > 0) {
+                let px = orb.x + orb.progress * (orb.endX - orb.x);
+                let py = orb.y + orb.progress * (orb.endY - orb.y);
+
+                ctx.strokeStyle = "#00d2ff"; // Neon Cyan
+                ctx.lineWidth = 3.0;
+                ctx.beginPath();
+                ctx.moveTo(orb.x, orb.y);
+                ctx.lineTo(px, py);
+                ctx.stroke();
+
+                // Draw spark following their finger
+                let pulse = 2.5 + Math.sin(Date.now() / 80) * 1.5;
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                ctx.arc(px, py, pulse, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#00ffff";
+                ctx.lineWidth = 1;
+                ctx.stroke();
+              }
+
+              // 3. Draw Start Crystal (A)
+              let startGrad = ctx.createRadialGradient(orb.x - 2, orb.y - 2, 1, orb.x, orb.y, orb.radius);
+              startGrad.addColorStop(0, "#ffffff");
+              startGrad.addColorStop(0.4, "#00d2ff");
+              startGrad.addColorStop(1, "#031d0d");
+              ctx.fillStyle = startGrad;
+
+              ctx.beginPath();
+              ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.strokeStyle = "#000000";
+              ctx.lineWidth = 1.8;
+              ctx.stroke();
+
+              // 4. Draw End Crystal (B)
+              let endGrad = ctx.createRadialGradient(orb.endX - 2, orb.endY - 2, 1, orb.endX, orb.endY, orb.radius);
+              endGrad.addColorStop(0, "#ffffff");
+              endGrad.addColorStop(0.4, "#ff007f"); // Contrasting hot pink target
+              endGrad.addColorStop(1, "#110521");
+              ctx.fillStyle = endGrad;
+
+              ctx.beginPath();
+              ctx.arc(orb.endX, orb.endY, orb.radius, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+
+              // Glowing receiver ring if fully charged
+              if (orb.connected) {
+                ctx.strokeStyle = "#2ecc71"; // Flashes green
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.arc(orb.endX, orb.endY, orb.radius * 1.5, 0, Math.PI * 2);
+                ctx.stroke();
+              }
+
+              ctx.restore();
+              return;
+            }
+
+            if (orb.type === "perfect_strike") {
+          ctx.save();
+
+          // 1. Draw central core bullseye
+          ctx.fillStyle = "rgba(231, 76, 60, 0.25)"; // Soft red center glow
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = "#e74c3c"; // Crimson core
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, orb.radius * 0.4, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Crosshairs
+          ctx.beginPath();
+          ctx.moveTo(orb.x - orb.radius * 1.5, orb.y);
+          ctx.lineTo(orb.x + orb.radius * 1.5, orb.y);
+          ctx.moveTo(orb.x, orb.y - orb.radius * 1.5);
+          ctx.lineTo(orb.x, orb.y + orb.radius * 1.5);
+          ctx.stroke();
+
+          // 2. Draw outer shrinking alignment ring
+          let progress = orb.timer / orb.maxTimer;
+          let outerR = orb.radius + orb.radius * 2.5 * progress;
+
+          // Check sweet spot window (10-25 frames) to dynamically shift ring color to neon green
+          let isPerfect = orb.timer >= 10 && orb.timer <= 25;
+          ctx.strokeStyle = isPerfect ? "#2ecc71" : "#f1c40f"; // Green for perfect alignment, yellow-orange otherwise
+          ctx.lineWidth = isPerfect ? 2.5 : 1.5;
+
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, outerR, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Center micro dot
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.0;
+          ctx.strokeRect(orb.x - 1, orb.y - 1, 2, 2);
+
+          ctx.restore();
+          return;
+        }
+
+        if (orb.type === "anomalous_shard") {
+          // 1. Draw glowing outer warning base
+          let warningGrad = ctx.createLinearGradient(
+            orb.x - 12,
+            orb.y,
+            orb.x + 12,
+            orb.y,
+          );
+          warningGrad.addColorStop(0, "rgba(255, 34, 0, 0)");
+          warningGrad.addColorStop(0.5, "rgba(255, 34, 0, 0.35)");
+          warningGrad.addColorStop(1, "rgba(255, 34, 0, 0)");
+          ctx.fillStyle = warningGrad;
+          ctx.fillRect(orb.x - 22, orb.y - 4, 44, 6);
+
+          // 2. Draw the Basalt Crystal Cluster
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.8;
+          ctx.lineJoin = "round";
+
+          // Left Shard (Smaller)
+          ctx.fillStyle = "#1e272e"; // Dark slate
+          ctx.beginPath();
+          ctx.moveTo(orb.x - 12, orb.y);
+          ctx.lineTo(orb.x - 14, orb.y - 14);
+          ctx.lineTo(orb.x - 8, orb.y - 18);
+          ctx.lineTo(orb.x - 4, orb.y);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Right Shard (Medium)
+          ctx.fillStyle = "#2c3e50"; // Steel stone
+          ctx.beginPath();
+          ctx.moveTo(orb.x + 4, orb.y);
+          ctx.lineTo(orb.x + 8, orb.y - 18);
+          ctx.lineTo(orb.x + 14, orb.y - 14);
+          ctx.lineTo(orb.x + 12, orb.y);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Center Main Shard (Tallest, glowing crimson core)
+          let stoneGrad = ctx.createLinearGradient(
+            orb.x - 8,
+            orb.y,
+            orb.x + 8,
+            orb.y - 28,
+          );
+          stoneGrad.addColorStop(0, "#1c1c1f");
+          stoneGrad.addColorStop(0.5, "#ff3300"); // Core glow
+          stoneGrad.addColorStop(1, "#111116");
+          ctx.fillStyle = stoneGrad;
+
+          ctx.beginPath();
+          ctx.moveTo(orb.x - 8, orb.y);
+          ctx.lineTo(orb.x - 10, orb.y - 24);
+          ctx.lineTo(orb.x, orb.y - 32); // Tall central point
+          ctx.lineTo(orb.x + 10, orb.y - 24);
+          ctx.lineTo(orb.x + 8, orb.y);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Draw micro light highlights on crystal edges
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(orb.x - 10, orb.y - 24);
+          ctx.lineTo(orb.x, orb.y - 32);
+          ctx.lineTo(orb.x + 10, orb.y - 24);
+          ctx.stroke();
+
+          // 3. Draw mini health bar below the shard (Y-offset 234)
+          let barW = 24;
+          let barH = 3;
+          let barX = orb.x - barW / 2;
+          let barY = orb.y + 4;
+
+          ctx.fillStyle = "#111111";
+          ctx.fillRect(barX, barY, barW, barH);
+
+          let hpPct = orb.hp / orb.maxHp;
+          ctx.fillStyle = "#ff2200"; // Red HP fill
+          ctx.fillRect(barX, barY, barW * hpPct, barH);
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 0.8;
+          ctx.strokeRect(barX, barY, barW, barH);
+
+          ctx.restore();
+          return;
+        }
+
+        ctx.save();
+
+        // 1. Draw glowing outer radial backdrop
+        let glowGrad = ctx.createRadialGradient(
+          orb.x,
+          orb.y,
+          2,
+          orb.x,
+          orb.y,
+          orb.radius * 1.5,
+        );
+        glowGrad.addColorStop(0, "rgba(255, 0, 127, 0.45)");
+        glowGrad.addColorStop(0.6, "rgba(142, 68, 173, 0.15)");
+        glowGrad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, orb.radius * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Draw core ball with radial gradient
+        let coreGrad = ctx.createRadialGradient(
+          orb.x - 3,
+          orb.y - 3,
+          1,
+          orb.x,
+          orb.y,
+          orb.radius,
+        );
+        if (window.isGamePaused) {
+          coreGrad.addColorStop(0, "#7f8c8d");
+          coreGrad.addColorStop(1, "#2c3e50");
+        } else {
+          coreGrad.addColorStop(0, "#ffffff"); // White-hot core
+          coreGrad.addColorStop(0.3, "#ff007f"); // Neon magenta
+          coreGrad.addColorStop(1, "#110521"); // Dark void purple
+        }
+        ctx.fillStyle = coreGrad;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Cel-shaded black outline
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        // 3. Draw shrinking outer countdown boundary
+        let progress = orb.timer / orb.maxTimer;
+        ctx.strokeStyle = "#00ffff"; // Glowing neon cyan
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, orb.radius * 1.6 * progress, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // 4. Draw Orbiting Spark Satellites
+        let rot = Date.now() / 150 + orb.id; // Offset rotation by ID
+        ctx.fillStyle = "#ff007f";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.0;
+        for (let i = 0; i < 2; i++) {
+          let angle = rot + i * Math.PI;
+          let sx = orb.x + Math.cos(angle) * (orb.radius * 1.3);
+          let sy = orb.y + Math.sin(angle) * (orb.radius * 1.3);
+          ctx.beginPath();
+          ctx.arc(sx, sy, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      });
+    }
 
     if (
       window.isGamePaused &&

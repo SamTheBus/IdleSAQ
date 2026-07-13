@@ -81,32 +81,45 @@ class ParticlePoolClass {
     growth = undefined,
   ) {
     let p = null;
-        for (let i = 0; i < this.pool.length; i++) {
-          if (this.pool[i].life <= 0) {
-            p = this.pool[i];
-            break;
-          }
-        }
-        if (!p) {
-          if (this.pool.length < 2000) {
-            p = new PoolParticle();
-            this.pool.push(p);
-          } else {
-            let lowestLife = Infinity;
-            let lowestIdx = 0;
-            for (let i = 0; i < this.pool.length; i++) {
-              if (this.pool[i].life < lowestLife) {
-                lowestLife = this.pool[i].life;
-                lowestIdx = i;
-              }
-            }
-            p = this.pool[lowestIdx];
-            p.life = 0;
-          }
-        }
-        p.init(x, y, vx, vy, radius, color, alpha, life, maxLife, gravity, fade, growth);
-        return p;
+    for (let i = 0; i < this.pool.length; i++) {
+      if (this.pool[i].life <= 0) {
+        p = this.pool[i];
+        break;
       }
+    }
+    if (!p) {
+      if (this.pool.length < 2000) {
+        p = new PoolParticle();
+        this.pool.push(p);
+      } else {
+        let lowestLife = Infinity;
+        let lowestIdx = 0;
+        for (let i = 0; i < this.pool.length; i++) {
+          if (this.pool[i].life < lowestLife) {
+            lowestLife = this.pool[i].life;
+            lowestIdx = i;
+          }
+        }
+        p = this.pool[lowestIdx];
+        p.life = 0;
+      }
+    }
+    p.init(
+      x,
+      y,
+      vx,
+      vy,
+      radius,
+      color,
+      alpha,
+      life,
+      maxLife,
+      gravity,
+      fade,
+      growth,
+    );
+    return p;
+  }
 }
 
 class PoolCombatEffect {
@@ -179,32 +192,46 @@ class CombatEffectPoolClass {
     itemType = "",
   ) {
     let f = null;
-        for (let i = 0; i < this.pool.length; i++) {
-          if (this.pool[i].life <= 0) {
-            f = this.pool[i];
-            break;
-          }
-        }
-        if (!f) {
-          if (this.pool.length < 500) {
-            f = new PoolCombatEffect();
-            this.pool.push(f);
-          } else {
-            let lowestLife = Infinity;
-            let lowestIdx = 0;
-            for (let i = 0; i < this.pool.length; i++) {
-              if (this.pool[i].life < lowestLife) {
-                lowestLife = this.pool[i].life;
-                lowestIdx = i;
-              }
-            }
-            f = this.pool[lowestIdx];
-            f.life = 0;
-          }
-        }
-        f.init(type, x, y, vx, vy, amount, color, life, maxLife, text, isCumulative, iconColor, itemType);
-        return f;
+    for (let i = 0; i < this.pool.length; i++) {
+      if (this.pool[i].life <= 0) {
+        f = this.pool[i];
+        break;
       }
+    }
+    if (!f) {
+      if (this.pool.length < 500) {
+        f = new PoolCombatEffect();
+        this.pool.push(f);
+      } else {
+        let lowestLife = Infinity;
+        let lowestIdx = 0;
+        for (let i = 0; i < this.pool.length; i++) {
+          if (this.pool[i].life < lowestLife) {
+            lowestLife = this.pool[i].life;
+            lowestIdx = i;
+          }
+        }
+        f = this.pool[lowestIdx];
+        f.life = 0;
+      }
+    }
+    f.init(
+      type,
+      x,
+      y,
+      vx,
+      vy,
+      amount,
+      color,
+      life,
+      maxLife,
+      text,
+      isCumulative,
+      iconColor,
+      itemType,
+    );
+    return f;
+  }
 }
 
 window.CombatEffectPool = new CombatEffectPoolClass(150);
@@ -2992,15 +3019,16 @@ window.renderMarketShop = function () {
   let html = "";
 
   // Render Golden Spotlight Awning for Item of the Day
-    if (iotdItem) {
-      let nameColor = window.getTierColor(iotdItem.statsRolled);
-      let costColor =
-        BigNum.from(window.playerStats.coins).gte(iotdItem.cost) ? "#2ecc71" : "#e74c3c";
-      let isSold = iotdItem.purchased;
-                  let btnStyle =
-                    isSold || BigNum.from(window.playerStats.coins).lt(iotdItem.cost)
-                      ? "background: #333; color: #666; cursor: not-allowed; border-color: #444;"
-                      : "background: linear-gradient(180deg, #f1c40f 0%, #d4af37 100%); color: #000; font-weight: 900; border-color: #fff; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);";
+  if (iotdItem) {
+    let nameColor = window.getTierColor(iotdItem.statsRolled);
+    let costColor = BigNum.from(window.playerStats.coins).gte(iotdItem.cost)
+      ? "#2ecc71"
+      : "#e74c3c";
+    let isSold = iotdItem.purchased;
+    let btnStyle =
+      isSold || BigNum.from(window.playerStats.coins).lt(iotdItem.cost)
+        ? "background: #333; color: #666; cursor: not-allowed; border-color: #444;"
+        : "background: linear-gradient(180deg, #f1c40f 0%, #d4af37 100%); color: #000; font-weight: 900; border-color: #fff; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);";
 
     let stampClass = "stamp-base";
     if (iotdItem.justPurchased) {
@@ -3051,25 +3079,26 @@ window.renderMarketShop = function () {
     `;
 
   standardItems.forEach((shopItem) => {
-      let idx = window.playerStats.shopItems.indexOf(shopItem);
-      let nameColor = window.getTierColor(shopItem.statsRolled);
-      let costColor =
-        BigNum.from(window.playerStats.coins).gte(shopItem.cost) ? "#2ecc71" : "#e74c3c";
-      let isSold = shopItem.purchased;
+    let idx = window.playerStats.shopItems.indexOf(shopItem);
+    let nameColor = window.getTierColor(shopItem.statsRolled);
+    let costColor = BigNum.from(window.playerStats.coins).gte(shopItem.cost)
+      ? "#2ecc71"
+      : "#e74c3c";
+    let isSold = shopItem.purchased;
 
-      let stampClass = "stamp-base";
-      if (shopItem.justPurchased) {
-        stampClass += " stamp-slam";
-        delete shopItem.justPurchased;
-      }
-      let soldOverlay = isSold
-        ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter: blur(1.5px); display:flex; justify-content:center; align-items:center; border-radius:8px; z-index:5;"><span class="${stampClass}" style="--final-rot:-8deg; color:#e74c3c; font-size:16px; font-weight:900; border: 2.5px solid #e74c3c; padding: 6px 16px; border-radius:4px; font-family:'Arial Black',Impact,sans-serif; text-shadow: 0 2px 4px #000; letter-spacing:2px; box-shadow: 0 0 15px rgba(231,76,60,0.35);">PURCHASED</span></div>`
-        : "";
+    let stampClass = "stamp-base";
+    if (shopItem.justPurchased) {
+      stampClass += " stamp-slam";
+      delete shopItem.justPurchased;
+    }
+    let soldOverlay = isSold
+      ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter: blur(1.5px); display:flex; justify-content:center; align-items:center; border-radius:8px; z-index:5;"><span class="${stampClass}" style="--final-rot:-8deg; color:#e74c3c; font-size:16px; font-weight:900; border: 2.5px solid #e74c3c; padding: 6px 16px; border-radius:4px; font-family:'Arial Black',Impact,sans-serif; text-shadow: 0 2px 4px #000; letter-spacing:2px; box-shadow: 0 0 15px rgba(231,76,60,0.35);">PURCHASED</span></div>`
+      : "";
 
-      let btnStyle =
-        isSold || BigNum.from(window.playerStats.coins).lt(shopItem.cost)
-          ? "background: #333; color: #666; cursor: not-allowed; border-color: #444;"
-          : `background: transparent; color: #fff; border: 1.5px solid ${nameColor}; box-shadow: 0 0 6px rgba(${window.hexToRgbValues(nameColor)},0.15);`;
+    let btnStyle =
+      isSold || BigNum.from(window.playerStats.coins).lt(shopItem.cost)
+        ? "background: #333; color: #666; cursor: not-allowed; border-color: #444;"
+        : `background: transparent; color: #fff; border: 1.5px solid ${nameColor}; box-shadow: 0 0 6px rgba(${window.hexToRgbValues(nameColor)},0.15);`;
 
     // Apply rarity responsive visual background classes
     let glowClass = "merchant-shelf-row";
@@ -6328,12 +6357,12 @@ window.submitConsoleCommand = function () {
   let mainCmd = args[0].toLowerCase();
 
   if (mainCmd === "/gold") {
-      let amt = parseInt(args[1], 10) || 100000;
-      window.playerStats.coins = BigNum.from(window.playerStats.coins).add(amt);
-      window.playerStats.totalGoldEarned = BigNum.from(
-        window.playerStats.totalGoldEarned || 0,
-      ).add(amt);
-      if (typeof window.pushLog === "function")
+    let amt = parseInt(args[1], 10) || 100000;
+    window.playerStats.coins = BigNum.from(window.playerStats.coins).add(amt);
+    window.playerStats.totalGoldEarned = BigNum.from(
+      window.playerStats.totalGoldEarned || 0,
+    ).add(amt);
+    if (typeof window.pushLog === "function")
       window.pushLog(
         `<span style="color:#2ecc71;">[DEV] Granted ${amt.toLocaleString()} Gold!</span>`,
       );
@@ -6652,20 +6681,26 @@ window.showAchievementTooltip = function (e, achId) {
     })
     .join("");
   let progressValue = window.getAchievementProgress(ach);
-    let targetValue = ach.isSingleTier ? 1 : ach.reqValue;
-    let percentDone = 0;
-    if (progressValue instanceof BigNum) {
-      let ratio = progressValue.div(targetValue);
-      percentDone = Math.min(100, Number(ratio.m * Math.pow(10, Math.min(15, ratio.e))) * 100);
-    } else {
-      percentDone = Math.min(100, (progressValue / targetValue) * 100);
-    }
+  let targetValue = ach.isSingleTier ? 1 : ach.reqValue;
+  let percentDone = 0;
+  if (progressValue instanceof BigNum) {
+    let ratio = progressValue.div(targetValue);
+    percentDone = Math.min(
+      100,
+      Number(ratio.m * Math.pow(10, Math.min(15, ratio.e))) * 100,
+    );
+  } else {
+    percentDone = Math.min(100, (progressValue / targetValue) * 100);
+  }
 
-    let iconHtml = window.getAchievementBadgeHtml(ach, unlocked, 28);
+  let iconHtml = window.getAchievementBadgeHtml(ach, unlocked, 28);
 
-    let displayProgressStr = progressValue instanceof BigNum ? window.formatNumber(progressValue) : progressValue.toLocaleString();
+  let displayProgressStr =
+    progressValue instanceof BigNum
+      ? window.formatNumber(progressValue)
+      : progressValue.toLocaleString();
 
-    let html = `<div style="padding: 10px; width: 230px; box-sizing: border-box;">
+  let html = `<div style="padding: 10px; width: 230px; box-sizing: border-box;">
           <div class="tt-title" style="color:${unlocked ? "#f1c40f" : "#aaa"}; display:flex; align-items:center; gap:8px;">${iconHtml}<span>${ach.name}</span></div>
           <div class="tt-subtitle" style="color:${unlocked ? "#2ecc71" : "#e74c3c"}; font-weight:bold;">${unlocked ? "🔓 UNLOCKED" : "🔒 LOCKED"}</div>
           <div style="color:#ddd; font-size:11px; margin-bottom:6px; white-space:normal; line-height:1.4; margin-bottom:6px;">${ach.desc}</div>
@@ -9131,10 +9166,14 @@ window.claimMissionReward = function (missionId, isWeekly = false) {
   window.justClaimedMissionIds.add(missionId);
 
   if (typeof window.addEtcDrop === "function") {
-      if (m.treat === "Gold") {
-        window.playerStats.coins = BigNum.from(window.playerStats.coins).add(m.treatQty);
-        window.playerStats.totalGoldEarned = BigNum.from(window.playerStats.totalGoldEarned || 0).add(m.treatQty);
-      } else if (m.treat === "Epic Gear Piece") {
+    if (m.treat === "Gold") {
+      window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
+        m.treatQty,
+      );
+      window.playerStats.totalGoldEarned = BigNum.from(
+        window.playerStats.totalGoldEarned || 0,
+      ).add(m.treatQty);
+    } else if (m.treat === "Epic Gear Piece") {
       let activeStage = window.playerStats.stage || 1;
       let scale = Math.floor((activeStage - 1) / 10) + 1;
       let types = [
@@ -11562,12 +11601,12 @@ window.buyBoutiqueCostume = function (costumeKey) {
       canAfford = true;
     }
   } else {
-      let coinsObj = BigNum.from(p.coins);
-      if (coinsObj.gte(skin.cost)) {
-        p.coins = coinsObj.sub(skin.cost);
-        canAfford = true;
-      }
+    let coinsObj = BigNum.from(p.coins);
+    if (coinsObj.gte(skin.cost)) {
+      p.coins = coinsObj.sub(skin.cost);
+      canAfford = true;
     }
+  }
 
   if (!canAfford) {
     window.pushHeaderToast("❌ Cannot afford this costume!", "#e74c3c");
@@ -11629,12 +11668,12 @@ window.buyBoutiqueSkin = function (skinKey) {
       canAfford = true;
     }
   } else {
-      let coinsObj = BigNum.from(p.coins);
-      if (coinsObj.gte(skin.cost)) {
-        p.coins = coinsObj.sub(skin.cost);
-        canAfford = true;
-      }
+    let coinsObj = BigNum.from(p.coins);
+    if (coinsObj.gte(skin.cost)) {
+      p.coins = coinsObj.sub(skin.cost);
+      canAfford = true;
     }
+  }
 
   if (!canAfford) {
     window.pushHeaderToast("❌ Cannot afford this skin!", "#e74c3c");
