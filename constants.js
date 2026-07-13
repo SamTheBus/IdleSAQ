@@ -3159,18 +3159,33 @@ window.CAVERN_BUFFS = [
     desc: "Equipment Drop Quality increased by +25%",
   },
   {
-    id: "echoing_step",
-    name: "Echoing Step",
-    desc: "Parry triggers a 100% Attack damage counter-attack",
-  },
-];
+      id: "echoing_step",
+      name: "Echoing Step",
+      desc: "Parry triggers a 100% Attack damage counter-attack",
+    },
+    {
+      id: "perfect_strike",
+      name: "Perfect Strike",
+      desc: "Concentric reticles appear over monsters. Tapping in alignment deals 5x defense-bypassing damage and inflicts bleed."
+    },
+    {
+      id: "aetheric_conduit",
+      name: "Aetheric Conduit",
+      desc: "Aetheric Conduits appear on the battlefield. Swipe between them to trigger instant triple-elemental spells."
+    },
+    {
+      id: "aetheric_spark",
+      name: "Aetheric Spark",
+      desc: "Pulsing sparks spawn in sequence. Chain tap 5 in a row to trigger Astral Awakening (+100% Damage, +15% Speed)."
+    },
+    {
+      id: "glimmering_pixie",
+      name: "Glimmering Pixie",
+      desc: "Glimmering Pixies dart across the battlefield. Capture them for a +50% duration Elixir or risk a sting!"
+    }
+  ];
 
 window.CAVERN_DEBUFFS = [
-  {
-    id: "withering_decay",
-    name: "Withering Decay",
-    desc: "Lose 1.5% of current HP every second in combat",
-  },
   {
     id: "iron_gaze",
     name: "Iron Gaze",
@@ -3192,24 +3207,9 @@ window.CAVERN_DEBUFFS = [
     desc: "Attack power decreased by -20%",
   },
   {
-    id: "volatile_sparks",
-    name: "Volatile Sparks",
-    desc: "Mobs explode on death dealing 18% player Max HP (Evadable via Block/Parry)",
-  },
-  {
     id: "obsidian_skin",
     name: "Obsidian Skin",
     desc: "Enemies have +35% Defense",
-  },
-  {
-    id: "blood_tax",
-    name: "Blood Tax",
-    desc: "Critical Strikes deal 5% player Max HP as recoil damage to self",
-  },
-  {
-    id: "static_feedback",
-    name: "Static Feedback",
-    desc: "Every active click deals 2% player Max HP as damage to self",
   },
   {
     id: "feeble_mind",
@@ -3232,15 +3232,20 @@ window.CAVERN_DEBUFFS = [
     desc: "Critical Strike Chance decreased by -10%",
   },
   {
-    id: "kinetic_recoil",
-    name: "Kinetic Recoil",
-    desc: "Receive 15% of all damage dealt as reflection damage",
-  },
-  {
     id: "lead_boots",
     name: "Lead Boots",
     desc: "Dodge, Block, and Parry rates decreased by -8%",
   },
+  {
+    id: "anomalous_shards",
+    name: "Anomalous Shards",
+    desc: "Anomalous Shards occasionally erupt from the ground, causing attack speed penalties and health drain unless shattered."
+  },
+  {
+    id: "void_rupture",
+    name: "Void Rupture",
+    desc: "Aetheric ruptures open up. Click all 3 Void Suppression Orbs before they collapse to cleanse yourself and gain Purified Aegis!"
+  }
 ];
 
 window.ASTRAL_SHOP_STOCK = [

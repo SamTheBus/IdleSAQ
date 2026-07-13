@@ -339,17 +339,19 @@
       };
 
       if (isCrit) {
-        hitColor = "#e74c3c";
-        hitText = "💥 " + window.formatNumber(amount);
-      } else {
-        if (type === "lightning") hitColor = "#f1c40f";
-        else if (type === "fire") hitColor = "#e67e22";
-        else if (type === "frost") hitColor = "#3498db";
-        else if (type === "echo") hitColor = "#9b59b6";
-        else if (type === "counter") hitColor = "#f1c40f";
-        else if (type === "bleed") hitColor = "#960018";
-        else if (type === "dagger") hitColor = "#a5b1c2"; // Elegant steel-grey
-      }
+                  hitColor = "#e74c3c";
+                  hitText = "💥 " + window.formatNumber(amount);
+                } else {
+                  if (type === "lightning") hitColor = "#f1c40f";
+                  else if (type === "fire") hitColor = "#e67e22";
+                  else if (type === "frost") hitColor = "#3498db";
+                  else if (type === "echo") hitColor = "#9b59b6";
+                  else if (type === "counter") hitColor = "#f1c40f";
+                  else if (type === "aegis_counter") hitColor = "#9b59b6";
+                  else if (type === "parry_counter") hitColor = "#a855f7";
+                  else if (type === "bleed") hitColor = "#960018";
+                  else if (type === "dagger") hitColor = "#a5b1c2"; // Elegant steel-grey
+                }
 
       if (type !== "slash") hitText = `${icons[type]} ${hitText}`;
 
@@ -11301,41 +11303,121 @@
         ctx.fillStyle = eff.color || "#9b59b6";
         ctx.fillText(hitText, hx + 14, hy + 4);
       } else if (eff.type === "counter") {
-        // 1. Draw Golden Mini Heater Shield (Cel-Shaded)
-        ctx.fillStyle = "#f1c40f"; // Golden counter shield
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 3.5;
-        ctx.lineJoin = "round";
-        ctx.beginPath();
-        ctx.moveTo(hx - 6, hy - 6);
-        ctx.lineTo(hx + 6, hy - 6);
-        ctx.quadraticCurveTo(hx + 6, hy, hx + 5, hy + 3);
-        ctx.quadraticCurveTo(hx, hy + 9, hx, hy + 9);
-        ctx.quadraticCurveTo(hx - 5, hy + 3, hx - 6, hy);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
+                  // 1. Draw Golden Mini Heater Shield (Cel-Shaded)
+                  ctx.fillStyle = "#f1c40f"; // Golden counter shield
+                  ctx.strokeStyle = "#000000";
+                  ctx.lineWidth = 3.5;
+                  ctx.lineJoin = "round";
+                  ctx.beginPath();
+                  ctx.moveTo(hx - 6, hy - 6);
+                  ctx.lineTo(hx + 6, hy - 6);
+                  ctx.quadraticCurveTo(hx + 6, hy, hx + 5, hy + 3);
+                  ctx.quadraticCurveTo(hx, hy + 9, hx, hy + 9);
+                  ctx.quadraticCurveTo(hx - 5, hy + 3, hx - 6, hy);
+                  ctx.closePath();
+                  ctx.fill();
+                  ctx.stroke();
 
-        // Red interior crest
-        ctx.fillStyle = "#e74c3c";
-        ctx.beginPath();
-        ctx.moveTo(hx - 3, hy - 4);
-        ctx.lineTo(hx + 3, hy - 4);
-        ctx.quadraticCurveTo(hx + 3, hy, hx, hy + 5);
-        ctx.quadraticCurveTo(hx - 3, hy, hx - 3, hy - 4);
-        ctx.closePath();
-        ctx.fill();
+                  // Red interior crest
+                  ctx.fillStyle = "#e74c3c";
+                  ctx.beginPath();
+                  ctx.moveTo(hx - 3, hy - 4);
+                  ctx.lineTo(hx + 3, hy - 4);
+                  ctx.quadraticCurveTo(hx + 3, hy, hx, hy + 5);
+                  ctx.quadraticCurveTo(hx - 3, hy, hx - 3, hy - 4);
+                  ctx.closePath();
+                  ctx.fill();
 
-        // 2. Draw Damage Text (Golden Orange)
-        let hitText = window.formatNumber(eff.amount);
-        ctx.font = "bold 15px monospace";
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 3.5;
-        ctx.lineJoin = "round";
-        ctx.strokeText(hitText, hx + 14, hy + 4);
-        ctx.fillStyle = eff.color || "#f1c40f";
-        ctx.fillText(hitText, hx + 14, hy + 4);
-      } else if (eff.type === "bleed") {
+                  // 2. Draw Damage Text (Golden Orange)
+                  let hitText = window.formatNumber(eff.amount);
+                  ctx.font = "bold 15px monospace";
+                  ctx.strokeStyle = "#000000";
+                  ctx.lineWidth = 3.5;
+                  ctx.lineJoin = "round";
+                  ctx.strokeText(hitText, hx + 14, hy + 4);
+                  ctx.fillStyle = eff.color || "#f1c40f";
+                  ctx.fillText(hitText, hx + 14, hy + 4);
+                } else if (eff.type === "aegis_counter") {
+                  // 1. Draw Purple Aegis Shield (Cel-Shaded)
+                  ctx.fillStyle = "#8e44ad"; // Void purple
+                  ctx.strokeStyle = "#000000";
+                  ctx.lineWidth = 3.5;
+                  ctx.lineJoin = "round";
+                  ctx.beginPath();
+                  ctx.moveTo(hx - 6, hy - 6);
+                  ctx.lineTo(hx + 6, hy - 6);
+                  ctx.lineTo(hx + 8, hy + 2);
+                  ctx.lineTo(hx, hy + 10);
+                  ctx.lineTo(hx - 8, hy + 2);
+                  ctx.closePath();
+                  ctx.fill();
+                  ctx.stroke();
+
+                  // Glowing cyan core center cross
+                  ctx.strokeStyle = "#00ffff";
+                  ctx.lineWidth = 1.2;
+                  ctx.beginPath();
+                  ctx.moveTo(hx, hy - 4);
+                  ctx.lineTo(hx, hy + 7);
+                  ctx.moveTo(hx - 4, hy + 1);
+                  ctx.lineTo(hx + 4, hy + 1);
+                  ctx.stroke();
+
+                  // 2. Draw Damage Text (Glowing Purple-Pink)
+                  let hitText = window.formatNumber(eff.amount);
+                  ctx.font = "bold 15px monospace";
+                  ctx.strokeStyle = "#000000";
+                  ctx.lineWidth = 3.5;
+                  ctx.lineJoin = "round";
+                  ctx.strokeText(hitText, hx + 14, hy + 4);
+                  ctx.fillStyle = eff.color || "#8e44ad";
+                  ctx.fillText(hitText, hx + 14, hy + 4);
+                } else if (eff.type === "parry_counter") {
+                  // 1. Draw Crossed Mini Steel Sabers (Cel-Shaded)
+                  ctx.save();
+                  ctx.translate(hx, hy);
+                  ctx.strokeStyle = "#000000";
+                  ctx.lineWidth = 1.5;
+                  ctx.lineJoin = "round";
+
+                  // Saber 1 (bottom-left to top-right)
+                  ctx.save();
+                  ctx.rotate(Math.PI / 4);
+                  ctx.fillStyle = "#ecf0f1";
+                  ctx.beginPath();
+                  ctx.rect(-1.2, -10, 2.4, 12);
+                  ctx.fill();
+                  ctx.stroke();
+                  ctx.fillStyle = "#f1c40f";
+                  ctx.fillRect(-3, 2, 6, 1.5);
+                  ctx.strokeRect(-3, 2, 6, 1.5);
+                  ctx.restore();
+
+                  // Saber 2 (bottom-right to top-left)
+                  ctx.save();
+                  ctx.rotate(-Math.PI / 4);
+                  ctx.fillStyle = "#ecf0f1";
+                  ctx.beginPath();
+                  ctx.rect(-1.2, -10, 2.4, 12);
+                  ctx.fill();
+                  ctx.stroke();
+                  ctx.fillStyle = "#f1c40f";
+                  ctx.fillRect(-3, 2, 6, 1.5);
+                  ctx.strokeRect(-3, 2, 6, 1.5);
+                  ctx.restore();
+
+                  ctx.restore();
+
+                  // 2. Draw Damage Text (Vibrant Parry Purple)
+                  let hitText = window.formatNumber(eff.amount);
+                  ctx.font = "bold 15px monospace";
+                  ctx.strokeStyle = "#000000";
+                  ctx.lineWidth = 3.5;
+                  ctx.lineJoin = "round";
+                  ctx.strokeText(hitText, hx + 14, hy + 4);
+                  ctx.fillStyle = eff.color || "#9b59b6";
+                  ctx.fillText(hitText, hx + 14, hy + 4);
+                } else if (eff.type === "bleed") {
         // 1. Draw Shiny Crimson Blood Droplet (Cel-Shaded)
         ctx.fillStyle = "#c0392b"; // Deep crimson blood
         ctx.strokeStyle = "#000000";

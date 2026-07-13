@@ -3005,23 +3005,16 @@ function update() {
       }
     }
 
-    // Roll for Void Rift Rupture (12% chance per second if debuffed)
-    if (
-      (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) &&
-      !window.isGamePaused
-    ) {
-      let hasActiveDebuff = window.playerStats.isCrucibleMode
-        ? !!window.playerStats.crucibleActiveDebuff
-        : !!window.playerStats.activeDungeonSigil?.debuffs?.length;
-      if (
-        hasActiveDebuff &&
-        window.activeRiftOrbs.length === 0 &&
-        Math.random() < 0.12 &&
-        !(window.playerStats.purifiedAegisTimer > 0)
-      ) {
-        window.spawnVoidSuppressionOrbs();
-      }
-    }
+    // Roll for Void Rift Rupture (12% chance per second if Void Rupture is active)
+        if (
+          window.isCavernEffectActive("void_rupture") &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.12 &&
+          !(window.playerStats.purifiedAegisTimer > 0) &&
+          !window.isGamePaused
+        ) {
+          window.spawnVoidSuppressionOrbs();
+        }
 
     // Stacking Apathy Distortion HP drain (0.5% Max HP per active shard)
     let activeShards = window.activeRiftOrbs.filter(
@@ -3058,9 +3051,9 @@ function update() {
       }
     }
 
-    // Roll for Anomalous Shard spawn (8% chance per second when idle and no active rifts)
+    // Roll for Anomalous Shard spawn (8% chance per second when idle and no active rifts if rolled on Sigil/Crucible)
         if (
-          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) &&
+          window.isCavernEffectActive("anomalous_shards") &&
           window.activeRiftOrbs.length === 0 &&
           Math.random() < 0.08 &&
           !window.isGamePaused
@@ -3068,9 +3061,9 @@ function update() {
           window.spawnAnomalousShard();
         }
 
-        // Roll for Perfect Strike Reticle (5% chance per second when combat is active and no active orbs)
+        // Roll for Perfect Strike Reticle (5% chance per second when combat is active, no active orbs, and rolled on Sigil/Crucible)
         if (
-          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) &&
+          window.isCavernEffectActive("perfect_strike") &&
           window.mob &&
           window.mob.hp.gt(0) &&
           window.activeRiftOrbs.length === 0 &&
@@ -3080,9 +3073,9 @@ function update() {
           window.spawnPerfectStrikeReticle();
         }
 
-        // Roll for Aetheric Conduit spawn (4% chance per second when no active orbs)
+        // Roll for Aetheric Conduit spawn (4% chance per second when no active orbs if rolled on Sigil/Crucible)
         if (
-          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) &&
+          window.isCavernEffectActive("aetheric_conduit") &&
           window.activeRiftOrbs.length === 0 &&
           Math.random() < 0.04 &&
           !window.isGamePaused
@@ -3090,9 +3083,9 @@ function update() {
           window.spawnAethericConduit();
         }
 
-        // Roll for Aetheric Spark (6% chance per second when no active orbs and not awakened)
+        // Roll for Aetheric Spark (6% chance per second when no active orbs and not awakened if rolled on Sigil/Crucible)
         if (
-          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) &&
+          window.isCavernEffectActive("aetheric_spark") &&
           window.activeRiftOrbs.length === 0 &&
           Math.random() < 0.06 &&
           !(window.playerStats.astralAwakeningTimer > 0) &&
@@ -3101,9 +3094,9 @@ function update() {
           window.spawnAethericSpark(0); // Commences the chain at Index 0
         }
 
-        // Roll for Glimmering Pixie (5% chance per second when no active orbs)
+        // Roll for Glimmering Pixie (5% chance per second when no active orbs if rolled on Sigil/Crucible)
         if (
-          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) &&
+          window.isCavernEffectActive("glimmering_pixie") &&
           window.activeRiftOrbs.length === 0 &&
           Math.random() < 0.05 &&
           !window.isGamePaused
@@ -3647,73 +3640,57 @@ function update() {
         let isBlocked = Math.random() < p.block;
 
         if (isBlocked) {
-          window.effects.push({
-            type: "block",
-            x: window.hero.x - 5,
-            y: window.hero.y - 12,
-            color: "#3498db",
-            life: 40,
-          });
-          window.SoundManager.play("block");
+                  window.SoundManager.play("block");
 
-          // High-Powered Shield Bash Counter-Attack for all Shields!
-          if (window.mob && window.mob.hp.gt(0)) {
-            let bashDmg = Math.ceil(p.def * 1.5 * (1.0 + p.str * 0.002));
-            let isAegis =
-              window.equippedSlots.subweapon &&
-              window.equippedSlots.subweapon.isUniqueAegis;
+                  // High-Powered Shield Bash Counter-Attack for all Shields!
+                  if (window.mob && window.mob.hp.gt(0)) {
+                    let bashDmg = Math.ceil(p.def * 1.5 * (1.0 + p.str * 0.002));
+                    let isAegis =
+                      window.equippedSlots.subweapon &&
+                      window.equippedSlots.subweapon.isUniqueAegis;
 
-            if (isAegis) {
-              let shieldLvl = window.equippedSlots.subweapon.stageLevel || 1;
-              bashDmg = Math.ceil(
-                p.def * (2.2 + shieldLvl * 0.05) * (1.0 + p.str * 0.003),
-              );
-            }
+                    if (isAegis) {
+                      let shieldLvl = window.equippedSlots.subweapon.stageLevel || 1;
+                      bashDmg = Math.ceil(
+                        p.def * (2.2 + shieldLvl * 0.05) * (1.0 + p.str * 0.003),
+                      );
+                    }
 
-            if (window.playerStats.singularityState === "storing") {
-              window.playerStats.singularityStoredDmg += bashDmg;
-              window.effects.push({
-                x: window.mob.x + window.mob.w / 2,
-                y: window.mob.y - 10,
-                text: `+${window.formatNumber(bashDmg)} [STORED]`,
-                color: "#8e44ad",
-                life: 45,
-              });
-            } else {
-              window.mob.hp = window.mob.hp.sub(bashDmg);
-              window.mob.flashTimer = 5;
-              window.spawnDamageEffect(bashDmg, "counter", false);
-              window.damageHistory.push({ time: Date.now(), amount: bashDmg });
+                    if (window.playerStats.singularityState === "storing") {
+                      window.playerStats.singularityStoredDmg += bashDmg;
+                      window.effects.push({
+                        x: window.mob.x + window.mob.w / 2,
+                        y: window.mob.y - 10,
+                        text: `+${window.formatNumber(bashDmg)} [STORED]`,
+                        color: "#8e44ad",
+                        life: 45,
+                      });
+                    } else {
+                      window.mob.hp = window.mob.hp.sub(bashDmg);
+                      window.mob.flashTimer = 5;
+                      window.spawnDamageEffect(bashDmg, isAegis ? "aegis_counter" : "counter", false);
+                      window.damageHistory.push({ time: Date.now(), amount: bashDmg });
 
-              // Shield slam visual impact particles
-              for (let i = 0; i < 8; i++) {
-                window.particles.push({
-                  x: window.mob.x + window.mob.w / 2,
-                  y: window.mob.y + window.mob.h / 2,
-                  vx: window.randFloat(-3, 3),
-                  vy: window.randFloat(-3, 3),
-                  radius: window.randFloat(1.5, 3.5),
-                  color: isAegis ? "#8e44ad" : "#3498db",
-                  alpha: 1,
-                  life: window.randInt(15, 25),
-                });
-              }
+                      // Shield slam visual impact particles
+                      for (let i = 0; i < 8; i++) {
+                        window.particles.push({
+                          x: window.mob.x + window.mob.w / 2,
+                          y: window.mob.y + window.mob.h / 2,
+                          vx: window.randFloat(-3, 3),
+                          vy: window.randFloat(-3, 3),
+                          radius: window.randFloat(1.5, 3.5),
+                          color: isAegis ? "#8e44ad" : "#3498db",
+                          alpha: 1,
+                          life: window.randInt(15, 25),
+                        });
+                      }
 
-              // Floating combat banner
-              window.effects.push({
-                x: window.hero.x + 35,
-                y: window.hero.y - 15,
-                text: isAegis ? "🛡️ AEGIS BLAST!" : "🛡️ SHIELD BASH!",
-                color: isAegis ? "#8e44ad" : "#3498db",
-                life: 45,
-              });
-
-              if (window.mob.hp <= 0) {
-                window.handleMobDeath();
-                return;
-              }
-            }
-          }
+                      if (window.mob.hp <= 0) {
+                        window.handleMobDeath();
+                        return;
+                      }
+                    }
+                  }
 
           window.playerStats.totalDeflections =
             (window.playerStats.totalDeflections || 0) + 1;
@@ -3782,62 +3759,55 @@ function update() {
           let isParried = Math.random() < p.parry;
 
           if (isParried) {
-            // Mitigate incoming damage by 60% (takes 40% damage)
-            netDamage = Math.max(1, Math.ceil(netDamage * 0.4));
+                      // Mitigate incoming damage by 60% (takes 40% damage)
+                      netDamage = Math.max(1, Math.ceil(netDamage * 0.4));
+                      window.SoundManager.play("parry");
 
-            window.effects.push({
-              type: "parry",
-              x: window.hero.x - 5,
-              y: window.hero.y - 20,
-              color: "#9b59b6",
-              life: 50,
-            });
-            window.SoundManager.play("parry");
+                      // Instant offensive Riposte counter-attack scaling with DEX & ATK!
+                      let riposteDmg = Math.ceil(p.atk * 1.5 * (1.0 + p.dex * 0.003));
 
-            // Instant offensive Riposte counter-attack scaling with DEX & ATK!
-            let riposteDmg = Math.ceil(p.atk * 1.5 * (1.0 + p.dex * 0.003));
+                      // Active Buff: Echoing Step (Counter strike scaling on parry)
+                      if (
+                        window.playerStats.isCrucibleMode &&
+                        window.playerStats.crucibleActiveBuff?.id === "echoing_step"
+                      ) {
+                        let buffStrength =
+                          window.playerStats.crucibleInfusedType === "buff" ? 1.5 : 1.0;
+                        riposteDmg += Math.ceil(p.atk * (1.0 * buffStrength));
+                      }
 
-            // Active Buff: Echoing Step (Counter strike scaling on parry)
-            if (
-              window.playerStats.isCrucibleMode &&
-              window.playerStats.crucibleActiveBuff?.id === "echoing_step"
-            ) {
-              let buffStrength =
-                window.playerStats.crucibleInfusedType === "buff" ? 1.5 : 1.0;
-              riposteDmg += Math.ceil(p.atk * (1.0 * buffStrength));
-            }
+                      if (window.checkArtifactTrait("parry_strike")) {
+                        let T = window.getArtifactTemperLevel("parry_strike");
+                        let mult = 0.5 + T * 0.15; // 50% base + 15% per level (max 140%)
+                        riposteDmg += Math.ceil(p.atk * mult);
+                      }
 
-            if (window.checkArtifactTrait("parry_strike")) {
-              let T = window.getArtifactTemperLevel("parry_strike");
-              let mult = 0.5 + T * 0.15; // 50% base + 15% per level (max 140%)
-              riposteDmg += Math.ceil(p.atk * mult);
-            }
+                      if (window.playerStats.adrenalineTimer > 0) riposteDmg *= 2;
 
-            if (window.playerStats.adrenalineTimer > 0) riposteDmg *= 2;
+                      // Apply active defense mitigation to offhand dagger strikes
+                      let mobDef = window.mob.def || 0;
+                      riposteDmg = Math.max(
+                        1,
+                        Math.ceil(riposteDmg * (100 / (100 + mobDef))),
+                      );
 
-            // Apply active defense mitigation to offhand dagger strikes
-            let mobDef = window.mob.def || 0;
-            riposteDmg = Math.max(
-              1,
-              Math.ceil(riposteDmg * (100 / (100 + mobDef))),
-            );
-
-            if (window.playerStats.singularityState === "storing") {
-              window.playerStats.singularityStoredDmg += riposteDmg;
-              window.effects.push({
-                x: window.mob.x + window.mob.w / 2,
-                y: window.mob.y - 10,
-                text: `+${window.formatNumber(riposteDmg)} [STORED]`,
-                color: "#8e44ad",
-                life: 45,
-              });
-            } else if (window.mob && window.mob.hp.gt(0)) {
-              window.mob.hp = window.mob.hp.sub(riposteDmg);
-              window.spawnDamageEffect(riposteDmg, "counter", false);
-              window.damageHistory.push({
-                time: Date.now(),
-                amount: riposteDmg,
-              });
+                      if (window.playerStats.singularityState === "storing") {
+                        window.playerStats.singularityStoredDmg += riposteDmg;
+                        window.effects.push({
+                          x: window.mob.x + window.mob.w / 2,
+                          y: window.mob.y - 10,
+                          text: `+${window.formatNumber(riposteDmg)} [STORED]`,
+                          color: "#8e44ad",
+                          life: 45,
+                        });
+                      } else if (window.mob && window.mob.hp.gt(0)) {
+                        window.mob.hp = window.mob.hp.sub(riposteDmg);
+                        window.mob.flashTimer = 5; // Flashes the monster on counter-attack connection!
+                        window.spawnDamageEffect(riposteDmg, "parry_counter", false);
+                        window.damageHistory.push({
+                          time: Date.now(),
+                          amount: riposteDmg,
+                        });
 
               // Apply Poison Tip (Dagger-specific parry card) bleed stacks
               if (p.crucibleDaggerBleed && window.mob && window.mob.hp.gt(0)) {
