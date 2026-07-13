@@ -1767,29 +1767,32 @@ window.executeClanDonate = function (type, amount) {
   }
 
   // Hit network endpoint
-  fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, resType: type, amount }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.success) {
-        let cpGain = 0;
-        if (type === "gold") cpGain = Math.floor(amount / 10000);
-        else if (type === "souls") cpGain = amount;
-        else if (type === "luminous") cpGain = amount * 20;
+    fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, resType: type, amount }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success) {
+          let cpGain = 0;
+          if (type === "gold") cpGain = Math.floor(amount / 10000);
+          else if (type === "souls") cpGain = amount;
+          else if (type === "luminous") cpGain = amount * 20;
 
-        let calculatedRenown =
-          type === "gold"
-            ? Math.floor(amount / costGoldSmall) * 50
-            : type === "souls"
-              ? (amount / 50) * 250
-              : (amount / 5) * 750;
-        window.pushHeaderToast(
-          `🙏 Contribution Recorded! +${amount.toLocaleString()} (+${calculatedRenown.toLocaleString()} Renown)`,
-          "#2ecc71",
-        );
+          let calculatedRenown = 0;
+          if (type === "gold") {
+            calculatedRenown = amount === costGoldLarge ? 300 : 50;
+          } else if (type === "souls") {
+            calculatedRenown = amount === 50 ? 250 : 1250;
+          } else if (type === "luminous") {
+            calculatedRenown = amount === 5 ? 750 : 3750;
+          }
+
+          window.pushHeaderToast(
+            `🙏 Contribution Recorded! +${amount.toLocaleString()} (+${calculatedRenown.toLocaleString()} Renown)`,
+            "#2ecc71",
+          );
         window.fetchClanData();
         window.updateUI();
         window.saveGame();

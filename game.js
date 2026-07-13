@@ -3444,17 +3444,22 @@ function update() {
           );
 
           let armorConstant = Math.max(100, 5.0 * dScale);
-          let netDamageBig = BigNum.from(window.mob.damage).mul(
-            armorConstant / (armorConstant + p.def),
-          );
-          let netDamage = Math.max(
-            1,
-            Math.ceil(
-              Number(
-                netDamageBig.m * Math.pow(10, Math.min(15, netDamageBig.e)),
-              ),
-            ),
-          );
+                    let netDamageBig = BigNum.from(window.mob.damage).mul(
+                      armorConstant / (armorConstant + p.def),
+                    );
+                    let netDamage = 0;
+                    if (netDamageBig.e > 15) {
+                      netDamage = p.maxHp * 2; // Instant death without numeric overflow
+                    } else {
+                      netDamage = Math.max(
+                        1,
+                        Math.ceil(
+                          Number(
+                            netDamageBig.m * Math.pow(10, netDamageBig.e),
+                          ),
+                        ),
+                      );
+                    }
 
           const subType = window.equippedSlots.subweapon
             ? window.equippedSlots.subweapon.subType
@@ -6089,16 +6094,24 @@ window.useItem = function (itemName) {
     return;
 
   // Handle Weekly Clan Supply Crate locally
-  if (itemName === "Weekly Clan Supply Crate") {
-    window.inventory.USE[itemName]--;
-    if (window.inventory.USE[itemName] === 0) {
-      delete window.inventory.USE[itemName];
-    }
+    if (itemName === "Weekly Clan Supply Crate") {
+      let depotLevel =
+        (window.playerStats.clanSkills &&
+          window.playerStats.clanSkills.clan_supply_depot) ||
+        0;
+      let maxBag = window.getMaxBagSlots();
+      if (depotLevel >= 30 && window.inventory.EQUIP.length >= maxBag) {
+        window.pushHeaderToast("❌ Cannot open: Equipment bag is full!", "#e74c3c");
+        return;
+      }
 
-    window.SoundManager.play("revive");
-    window.setPauseState(true);
+      window.inventory.USE[itemName]--;
+      if (window.inventory.USE[itemName] === 0) {
+        delete window.inventory.USE[itemName];
+      }
 
-    let depotLevel =
+      window.SoundManager.play("revive");
+      window.setPauseState(true);
       (window.playerStats.clanSkills &&
         window.playerStats.clanSkills.clan_supply_depot) ||
       0;
@@ -7090,14 +7103,15 @@ window.triggerFairyLoot = function (targetFairy) {
   }
 
   if (Math.random() < 0.2) {
-    let goldYield = Math.floor((100 + window.playerStats.stage * 35) * p.gold);
-    window.playerStats.coins += goldYield;
-    if (window.playerStats.runGold !== undefined)
-      window.playerStats.runGold += goldYield;
-    else window.playerStats.runGold = goldYield;
-    if (typeof window.progressMission === "function")
-      window.progressMission("gold", goldYield);
-    window.effects.push({
+      let goldYield = Math.floor((100 + window.playerStats.stage * 35) * p.gold);
+      window.playerStats.coins = BigNum.from(window.playerStats.coins).add(goldYield);
+      window.playerStats.totalGoldEarned = BigNum.from(window.playerStats.totalGoldEarned || 0).add(goldYield);
+      if (window.playerStats.runGold !== undefined)
+        window.playerStats.runGold += goldYield;
+      else window.playerStats.runGold = goldYield;
+      if (typeof window.progressMission === "function")
+        window.progressMission("gold", goldYield);
+      window.effects.push({
       x: spawnX,
       y: spawnY - 10,
       text: `+${goldYield} Gold!`,

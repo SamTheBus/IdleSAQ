@@ -3006,10 +3006,10 @@ window.renderMarketShop = function () {
       let costColor =
         BigNum.from(window.playerStats.coins).gte(iotdItem.cost) ? "#2ecc71" : "#e74c3c";
       let isSold = iotdItem.purchased;
-      let btnStyle =
-        isSold || BigNum.from(window.playerStats.coins).lt(iotdItem.cost)
-          ? "background: #333; color: #666; cursor: not-allowed; border-color: #444;"
-          : "background: linear-gradient(180deg, #f1c40f 0%, #d4af37 100%); color: #000; font-weight: 900; border-color: #fff; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);";
+                  let btnStyle =
+                    isSold || BigNum.from(window.playerStats.coins).lt(iotdItem.cost)
+                      ? "background: #333; color: #666; cursor: not-allowed; border-color: #444;"
+                      : "background: linear-gradient(180deg, #f1c40f 0%, #d4af37 100%); color: #000; font-weight: 900; border-color: #fff; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);";
 
     let stampClass = "stamp-base";
     if (iotdItem.justPurchased) {
@@ -9140,9 +9140,10 @@ window.claimMissionReward = function (missionId, isWeekly = false) {
   window.justClaimedMissionIds.add(missionId);
 
   if (typeof window.addEtcDrop === "function") {
-    if (m.treat === "Gold") {
-      window.playerStats.coins += m.treatQty;
-    } else if (m.treat === "Epic Gear Piece") {
+      if (m.treat === "Gold") {
+        window.playerStats.coins = BigNum.from(window.playerStats.coins).add(m.treatQty);
+        window.playerStats.totalGoldEarned = BigNum.from(window.playerStats.totalGoldEarned || 0).add(m.treatQty);
+      } else if (m.treat === "Epic Gear Piece") {
       let activeStage = window.playerStats.stage || 1;
       let scale = Math.floor((activeStage - 1) / 10) + 1;
       let types = [
@@ -10575,6 +10576,12 @@ window.openWeeklyRewardSack = function (specificName) {
   let owned = window.inventory.USE[itemToConsume] || 0;
   if (owned <= 0) return;
 
+  let maxBag = window.getMaxBagSlots();
+  if (window.inventory.ARTIFACT.length >= maxBag) {
+    window.pushHeaderToast("❌ Cannot open: Artifact bag is full!", "#e74c3c");
+    return;
+  }
+
   // Consume 1
   window.inventory.USE[itemToConsume]--;
   if (window.inventory.USE[itemToConsume] === 0) {
@@ -11770,10 +11777,12 @@ window.checkUnreadMail = function () {
   const userId = window.getGameUserId ? window.getGameUserId() : null;
   if (!userId) return;
 
+  const claimedMailIds = window.playerStats.claimedMailIds || [];
+
   fetch(`${window.GAME_SERVER_URL}/api/mailbox`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify({ userId, claimedMailIds }),
   })
     .then((response) => response.json())
     .then((data) => {
