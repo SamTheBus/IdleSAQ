@@ -348,27 +348,27 @@ window.GameState = {
     let xpReq = BigNum.from(window.playerStats.xpReq || 100);
 
     // Process potential consecutive level-ups via a loop (important for offline catch-up)
-    while (xp.gte(xpReq)) {
-      xp = xp.sub(xpReq);
-      window.playerStats.level++;
-      window.playerStats.sp += 6; // Award 6 Skill Points per level up
+        while (xp.gte(xpReq)) {
+          xp = xp.sub(xpReq);
+          window.playerStats.level++;
+          window.playerStats.sp += 6; // Award 6 Skill Points per level up
 
-      // Calculate next xpReq safely using BigNum exponential power scaling
-      xpReq = BigNum.from(100).mul(
-        BigNum.from(1.2).pow(window.playerStats.level - 1),
-      );
-      leveledUp = true;
-    }
+          // Keep active UI Attribute Matrix draft allocations in sync with each consecutive level-up
+          if (window.draftAllocations !== null) {
+            window.draftSP += 6;
+          }
 
-    if (leveledUp) {
-      window.playerStats.xp = xp;
-      window.playerStats.xpReq = xpReq;
+          // Calculate next xpReq safely using BigNum exponential power scaling
+          xpReq = BigNum.from(100).mul(
+            BigNum.from(1.2).pow(window.playerStats.level - 1),
+          );
+          leveledUp = true;
+        }
 
-      // Keep active UI Attribute Matrix draft allocations in sync
-      if (window.draftAllocations !== null) {
-        window.draftSP += 6; // Keep draft in sync with the 6 SP per level up
-      }
-    }
+        if (leveledUp) {
+          window.playerStats.xp = xp;
+          window.playerStats.xpReq = xpReq;
+        }
 
     window.triggerLevelUpEffect = function () {
       let heroX = window.hero.x + 12;
@@ -515,10 +515,12 @@ window.getAchievementProgress = function (ach) {
     return maxHeld;
   }
   if (ach.isSingleTier) {
-    if (ach.id === "sing_murphys_law")
-      return window.playerStats.hasTriggeredMurphysLaw ? 1 : 0;
-    if (ach.id === "sing_against_odds")
-      return window.playerStats.hasTriggeredAgainstOdds ? 1 : 0;
+      if (ach.id === "sing_murphys_law") {
+        let slots = Object.values(window.playerStats.slotUpgrades || {});
+        return slots.some(lvl => lvl >= 50) ? 1 : 0;
+      }
+      if (ach.id === "sing_against_odds")
+        return window.playerStats.hasTriggeredAgainstOdds ? 1 : 0;
     if (ach.id === "sing_lucky_seven")
       return window.playerStats.hasTriggeredLuckySeven ? 1 : 0;
     if (ach.id === "sing_back_brink")
@@ -569,10 +571,12 @@ window.getAchievementProgress = function (ach) {
     if (ach.id === "sing_speedrun")
       return window.playerStats.hasTriggeredSpeedrun ? 1 : 0;
     if (ach.id === "sing_exact_change")
-      return window.playerStats.hasTriggeredExactChange ? 1 : 0;
-    if (ach.id === "sing_unfortunate_soul")
-      return window.playerStats.hasTriggeredUnfortunateSoul ? 1 : 0;
-    if (ach.id === "sing_alchemical_synth")
+          return window.playerStats.hasTriggeredExactChange ? 1 : 0;
+        if (ach.id === "sing_unfortunate_soul") {
+          let slots = Object.values(window.playerStats.slotUpgrades || {});
+          return (slots.length >= 10 && slots.every(lvl => lvl >= 15)) ? 1 : 0;
+        }
+        if (ach.id === "sing_alchemical_synth")
       return window.playerStats.hasTriggeredAlchemicalSynthesis ? 1 : 0;
     if (ach.id === "sing_patient_shepherd")
       return window.playerStats.hasTriggeredPatientShepherd ? 1 : 0;
@@ -2257,11 +2261,11 @@ window.QuestSystem = {
         unit: "fairies",
       },
       {
-        type: "tempers",
-        label: "Successfully temper gear",
-        targetBase: 1,
-        unit: "tempers",
-      },
+              type: "tempers",
+              label: "Attune equipment slots",
+              targetBase: 1,
+              unit: "slots",
+            },
       {
         type: "reforges",
         label: "Reforge gear modifiers",
@@ -2351,11 +2355,11 @@ Object.assign(window.QuestSystem, {
         unit: "enemies",
       },
       {
-        type: "tempers",
-        label: "Master blacksmithing",
-        targetBase: 15,
-        unit: "tempers",
-      },
+              type: "tempers",
+              label: "Master slot attunement",
+              targetBase: 15,
+              unit: "slots",
+            },
     ];
 
     pool.sort(() => Math.random() - 0.5);

@@ -4179,9 +4179,9 @@ summary {
     z-index: 10 !important;
   }
 
-  /* Above-Canvas HUD Mobile Optimization (Prevents text wrapping and vertical block stacking) */
+  /* Above-Canvas HUD Mobile Optimization (Asymmetrical grid tracks give wide allocations to HP and Stage) */
   .canvas-top-hud {
-    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-columns: 1.4fr 1.15fr 0.75fr 0.7fr !important;
     padding: 4px 6px !important;
     gap: 4px !important;
     background: linear-gradient(180deg, #10141d 0%, #06080d 100%) !important;
@@ -4189,76 +4189,16 @@ summary {
     height: auto !important;
   }
   .canvas-top-hud .hud-stat-panel {
-    height: 28px !important;
-    padding: 2px 4px !important;
+    height: 34px !important; /* Increased height to comfortably fit dynamic double lines */
+    padding: 2px 5px !important;
     gap: 4px !important;
-    justify-content: center !important;
-    box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
   }
   .canvas-top-hud .chip-icon svg,
   .canvas-top-hud .chip-label-prefix svg {
-    width: 11px !important;
-    height: 11px !important;
+    width: 12px !important;
+    height: 12px !important;
     margin-right: 0 !important;
-  }
-  .canvas-top-hud .chip-label-prefix {
-    font-size: 0 !important; /* Hides text "Stage"/"Wave" while keeping vector icon */
-    line-height: 0 !important;
-  }
-  .canvas-top-hud .chip-sub {
-    display: none !important; /* Hides redundant labels on mobile portrait */
-  }
-  .canvas-top-hud .chip-value {
-    font-size: 9.5px !important;
-    line-height: 1 !important;
-  }
-  .canvas-top-hud .chip-text {
-    align-items: center !important;
-    width: auto !important;
-  }
-}
-
-/* Landscape Mobile Viewports (Compact 4-Column Row) */
-@media (orientation: landscape) and (max-height: 550px) {
-  /* Above-Canvas HUD Mobile Landscape Optimization */
-  .canvas-top-hud {
-    grid-template-columns: repeat(4, 1fr) !important;
-    padding: 3px 4px !important;
-    gap: 3px !important;
-    background: linear-gradient(180deg, #10141d 0%, #06080d 100%) !important;
-    border-bottom-width: 1px !important;
-    height: auto !important;
-  }
-  .canvas-top-hud .hud-stat-panel {
-    height: 24px !important;
-    padding: 1px 4px !important;
-    gap: 3px !important;
-    justify-content: center !important;
-    box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-  }
-  .canvas-top-hud .chip-icon svg,
-  .canvas-top-hud .chip-label-prefix svg {
-    width: 10px !important;
-    height: 10px !important;
-    margin-right: 0 !important;
-  }
-  .canvas-top-hud .chip-label-prefix {
-    font-size: 0 !important;
-    line-height: 0 !important;
-  }
-  .canvas-top-hud .chip-sub {
-    display: none !important;
-  }
-  .canvas-top-hud .chip-value {
-    font-size: 8.5px !important;
-    line-height: 1 !important;
-  }
-  .canvas-top-hud .chip-text {
-    align-items: center !important;
-    width: auto !important;
-  }
-}
