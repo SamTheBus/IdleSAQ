@@ -4098,100 +4098,111 @@ summary {
 }
 
 /* ==========================================================================
-   CONSOLE HEADER HUD DEFINITIONS (ABOVE-CANVAS COCKPIT)
+   CONSOLIDATED CONSOLE HEADER HUD DESIGN (ABOVE-CANVAS COCKPIT)
    ========================================================================= */
 .canvas-top-hud {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  padding: 8px 12px;
-  background: linear-gradient(180deg, #141922 0%, #090c12 100%);
-  border-bottom: 1.5px solid #202632;
-  box-sizing: border-box;
-  width: 100%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 10px !important;
+  padding: 10px 14px !important;
+  background: linear-gradient(180deg, #0e111a 0%, #06080d 100%) !important;
+  border-bottom: 2px solid #1a202c !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.65) !important;
 }
 
 .canvas-top-hud .hud-stat-panel {
-  background: linear-gradient(180deg, #161f2c 0%, #0b111a 100%) !important;
-  border: 1px solid #263345 !important;
-  border-radius: 6px;
-  padding: 4px 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 34px;
-  min-width: 0;
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-  box-sizing: border-box;
-  transition: all 0.15s ease-in-out;
+  background: linear-gradient(135deg, #161a23 0%, #0c0f17 100%) !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: 38px !important; /* Taller and sturdier */
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
-.canvas-top-hud .hud-stat-panel:hover {
-  border-color: #3b82f6 !important;
-  background: linear-gradient(180deg, #1c283a 0%, #0f1724 100%) !important;
-  box-shadow:
-    0 4px 12px rgba(59, 130, 246, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-}
-
-/* Specific Panel Color Accentuations & Glowing Digit Readouts */
+/* Individual Stat Panel Color Accentuations, Borders & box-shadow glows */
 .canvas-top-hud .panel-hp {
-  border-bottom: 2.2px solid #e74c3c !important;
+  border: 1.5px solid #ff4757 !important;
+  border-bottom-width: 3.5px !important;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2), inset 0 0 10px rgba(231, 76, 60, 0.1) !important;
+}
+.canvas-top-hud .panel-hp:hover {
+  transform: translateY(-1.5px) !important;
+  border-color: #ff6b81 !important;
+  box-shadow: 0 6px 16px rgba(231, 76, 60, 0.35), inset 0 0 12px rgba(231, 76, 60, 0.15) !important;
 }
 .canvas-top-hud .panel-hp .chip-value {
   color: #ff6b6b !important;
-  text-shadow: 0 0 6px rgba(231, 76, 60, 0.35) !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  font-family: monospace !important;
+  text-shadow: 0 0 8px rgba(231, 76, 60, 0.45) !important;
 }
 
 .canvas-top-hud .panel-stage {
-  border-bottom: 2.2px solid #3498db !important;
+  border: 1.5px solid #3498db !important;
+  border-bottom-width: 3.5px !important;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2), inset 0 0 10px rgba(52, 152, 219, 0.1) !important;
+}
+.canvas-top-hud .panel-stage:hover {
+  transform: translateY(-1.5px) !important;
+  border-color: #54a0ff !important;
+  box-shadow: 0 6px 16px rgba(52, 152, 219, 0.35), inset 0 0 12px rgba(52, 152, 219, 0.15) !important;
 }
 .canvas-top-hud .panel-stage .chip-value {
   color: #60a5fa !important;
-  text-shadow: 0 0 6px rgba(52, 152, 219, 0.35) !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  font-family: monospace !important;
+  text-shadow: 0 0 8px rgba(52, 152, 219, 0.45) !important;
 }
 
 .canvas-top-hud .panel-gold {
-  border-bottom: 2.2px solid #f1c40f !important;
+  border: 1.5px solid #f1c40f !important;
+  border-bottom-width: 3.5px !important;
+  box-shadow: 0 4px 12px rgba(241, 196, 15, 0.2), inset 0 0 10px rgba(241, 196, 15, 0.1) !important;
+}
+.canvas-top-hud .panel-gold:hover {
+  transform: translateY(-1.5px) !important;
+  border-color: #ffeaa7 !important;
+  box-shadow: 0 6px 16px rgba(241, 196, 15, 0.35), inset 0 0 12px rgba(241, 196, 15, 0.15) !important;
 }
 .canvas-top-hud .panel-gold .chip-value {
   color: #ffd700 !important;
-  text-shadow: 0 0 6px rgba(241, 196, 15, 0.35) !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  font-family: monospace !important;
+  text-shadow: 0 0 8px rgba(241, 196, 15, 0.45) !important;
 }
 
-.canvas-top-hud .panel-dps {
-  border-bottom: 2.2px solid #e67e22 !important;
-}
-.canvas-top-hud .panel-dps .chip-value {
-  color: #ff9f43 !important;
-  text-shadow: 0 0 6px rgba(230, 126, 34, 0.35) !important;
+/* Clean typography for sub-labels */
+.canvas-top-hud .chip-sub {
+  color: #a0aec0 !important;
+  font-family: monospace !important;
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
 }
 
-/* Portrait Mobile Viewports (Aesthetic 4-Column Row) */
+/* Portrait Mobile Viewports (Aesthetic 3-Column Row) */
 @media (max-width: 580px) {
-  /* Release Sticky Camera on Mobile Portrait (Allows scrolling through the bag/forge/market comfortably) */
-  #canvas-container {
-    position: relative !important;
-    top: auto !important;
-    z-index: 10 !important;
-  }
-
-  /* Above-Canvas HUD Mobile Optimization (Asymmetrical grid tracks give wide allocations to HP and Stage) */
   .canvas-top-hud {
-    grid-template-columns: 1.4fr 1.15fr 0.75fr 0.7fr !important;
-    padding: 4px 6px !important;
-    gap: 4px !important;
+    grid-template-columns: 1.4fr 1.15fr 0.75fr !important;
+    padding: 6px 8px !important;
+    gap: 6px !important;
     background: linear-gradient(180deg, #10141d 0%, #06080d 100%) !important;
-    border-bottom-width: 1px !important;
-    height: auto !important;
+    border-bottom-width: 1.5px !important;
   }
   .canvas-top-hud .hud-stat-panel {
-    height: 34px !important; /* Increased height to comfortably fit dynamic double lines */
-    padding: 2px 5px !important;
-    gap: 4px !important;
+    height: 38px !important;
+    padding: 4px 8px !important;
+    gap: 6px !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
@@ -4199,6 +4210,75 @@ summary {
   }
   .canvas-top-hud .chip-icon svg,
   .canvas-top-hud .chip-label-prefix svg {
-    width: 12px !important;
-    height: 12px !important;
+    width: 14px !important;
+    height: 14px !important;
     margin-right: 0 !important;
+  }
+}
+
+/* --- REPOSITIONABLE CANVAS OVERLAY BADGE --- */
+#dps-overlay-badge {
+  position: absolute;
+  z-index: 1000;
+  width: 120px; /* Constant immutable width prevents jitter and text reflows */
+  height: 32px;
+  background: linear-gradient(135deg, #161a23 0%, #0c0f17 100%);
+  border: 1.5px solid var(--accent-orange);
+  border-bottom-width: 3.5px;
+  border-radius: 8px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 0 8px rgba(230, 126, 34, 0.08);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  box-sizing: border-box;
+}
+
+#dps-overlay-badge .dps-drag-handle {
+  color: var(--accent-orange);
+  cursor: grab;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+  padding-right: 4px;
+  border-right: 1.5px solid #2d3748;
+}
+
+#dps-overlay-badge:hover .dps-drag-handle {
+  opacity: 1;
+}
+
+#dps-overlay-badge .dps-drag-handle:active {
+  cursor: grabbing;
+}
+
+#dps-overlay-badge .dps-overlay-content {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+  overflow: hidden;
+}
+
+#dps-overlay-badge #dps-overlay-value {
+  font-size: 12.5px;
+  font-weight: 900;
+  color: #f1c40f;
+  text-shadow: 0 0 8px rgba(241, 196, 15, 0.45);
+  font-family: monospace;
+  letter-spacing: -0.5px;
+}
+
+#dps-overlay-badge .dps-unit {
+  font-size: 7.5px;
+  font-weight: 900;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

@@ -806,9 +806,15 @@ window.SaveManager = {
         window.playerStats.qlyPotionStrength = 0.5;
 
       if (window.playerStats.unlockedAchievements === undefined)
-        window.playerStats.unlockedAchievements = [];
-      if (window.playerStats.unviewedAchievements === undefined)
-        window.playerStats.unviewedAchievements = [];
+              window.playerStats.unlockedAchievements = [];
+            if (window.playerStats.unviewedAchievements === undefined)
+              window.playerStats.unviewedAchievements = [];
+            if (window.playerStats.showDpsOverlay === undefined)
+              window.playerStats.showDpsOverlay = false;
+            if (window.playerStats.dpsOverlayX === undefined)
+              window.playerStats.dpsOverlayX = null;
+            if (window.playerStats.dpsOverlayY === undefined)
+              window.playerStats.dpsOverlayY = null;
       if (window.playerStats.totalGoldEarned === undefined)
         window.playerStats.totalGoldEarned = window.playerStats.coins || 0;
       if (window.playerStats.totalTempers === undefined)
@@ -1781,23 +1787,27 @@ window.loadGameAndSyncCloud = function () {
 };
 
 window.adjustCanvasDimensions = function () {
-  let cvs = window.canvas || document.getElementById("gameCanvas");
-  if (!cvs) return;
-  const isLandscapeMobile =
-    window.innerHeight <= 550 && window.innerWidth > window.innerHeight;
-  const isMobile = window.innerWidth <= 580; // Lowered breakpoint to prevent scrollbar layout toggling
+    let cvs = window.canvas || document.getElementById("gameCanvas");
+    if (!cvs) return;
+    const isLandscapeMobile =
+      window.innerHeight <= 550 && window.innerWidth > window.innerHeight;
+    const isMobile = window.innerWidth <= 580; // Lowered breakpoint to prevent scrollbar layout toggling
 
-  if (isLandscapeMobile) {
-    cvs.width = 480;
-    cvs.height = 280;
-  } else if (isMobile) {
-    cvs.width = 420;
-    cvs.height = 320;
-  } else {
-    cvs.width = 750;
-    cvs.height = 320;
-  }
-};
+    if (isLandscapeMobile) {
+      cvs.width = 480;
+      cvs.height = 280;
+    } else if (isMobile) {
+      cvs.width = 420;
+      cvs.height = 320;
+    } else {
+      cvs.width = 750;
+      cvs.height = 320;
+    }
+
+    if (typeof window.updateDpsOverlayPosition === "function") {
+      window.updateDpsOverlayPosition();
+    }
+  };
 
 window.onload = function () {
   // Intercept and wrap pushToast, addEtcDrop, and addUseDrop for aggregation & swipe gestures
@@ -2049,9 +2059,15 @@ window.onload = function () {
     }
 
     window.updateStickyCanvasStyle();
-    if (typeof window.requestWakeLock === "function") {
-      window.requestWakeLock();
-    }
+        if (typeof window.updateDpsOverlayStyle === "function") {
+          window.updateDpsOverlayStyle();
+        }
+        if (typeof window.initDpsOverlayDrag === "function") {
+          window.initDpsOverlayDrag();
+        }
+        if (typeof window.requestWakeLock === "function") {
+          window.requestWakeLock();
+        }
 
   // Prompt fresh players to register their unique name
   setTimeout(() => {

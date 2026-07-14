@@ -1172,9 +1172,9 @@ window.updateUI = function () {
   setText("hud-stage", activeStageVal);
   setText("hud-coins", window.formatNumber(window.playerStats.coins));
 
-  // Update real-time DPS in bottom HUD bar
-  let actDps = window.calculateActiveDps ? window.calculateActiveDps() : "0.0";
-  setText("hud-dps", actDps);
+  // Update real-time DPS in the draggable overlay
+    let actDps = window.calculateActiveDps ? window.calculateActiveDps() : "0.0";
+    setText("dps-overlay-value", actDps);
 
   // Update player HP in HUD bar
   let maxHp = p.maxHp;
