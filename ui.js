@@ -4497,47 +4497,47 @@ window.renderPaperDoll = function () {
     }
 
     if (item) {
-      let isArt = slot.startsWith("art");
-      el.className = isArt
-        ? "slots-card artifact-slot equipped"
-        : "slots-card equipped";
-      let color = window.getTierColor(item.statsRolled);
-      el.style.borderColor = color;
+          let isArt = slot.startsWith("art");
+          el.className = isArt
+            ? "slots-card artifact-slot equipped"
+            : "slots-card equipped";
+          let color = window.getTierColor(item.statsRolled);
+          el.style.borderColor = color;
 
-      let uniqueStyle = window.getUniqueItemStyle(item);
-      if (uniqueStyle) {
-        el.style.background = uniqueStyle.bg;
-        el.style.borderColor = uniqueStyle.border;
-        el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
-      } else {
-        el.style.background = "";
-        el.style.boxShadow = "";
-      }
+          let uniqueStyle = window.getUniqueItemStyle(item);
+          if (uniqueStyle) {
+            el.style.background = uniqueStyle.bg;
+            el.style.borderColor = uniqueStyle.border;
+            el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
+          } else {
+            el.style.background = "";
+            el.style.boxShadow = "";
+          }
 
-      let tierLabel =
-        item.statsRolled === "UNIQUE"
-          ? "UNIQUE"
-          : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
-      let temperTag =
-        item.temperLevel > 0
-          ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
-          : "";
-      let lockTag = item.locked ? " 🔒" : "";
-      let isUnique =
-        item.isUniqueStaff ||
-        item.isUniqueSword ||
-        item.isUniqueSingularity ||
-        item.isUniqueMaelstrom ||
-        item.isUniqueAegis ||
-        item.isUniqueWatch ||
-        item.isUniqueChronicle ||
-        item.isUniqueWarpCore ||
-        item.isUniqueTempest;
+          let tierLabel =
+            item.statsRolled === "UNIQUE"
+              ? "UNIQUE"
+              : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
+          let temperTag =
+            item.temperLevel > 0
+              ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
+              : "";
+          let lockTag = item.locked ? " 🔒" : "";
+          let isUnique =
+            item.isUniqueStaff ||
+            item.isUniqueSword ||
+            item.isUniqueSingularity ||
+            item.isUniqueMaelstrom ||
+            item.isUniqueAegis ||
+            item.isUniqueWatch ||
+            item.isUniqueChronicle ||
+            item.isUniqueWarpCore ||
+            item.isUniqueTempest;
 
-      let iconBox = `<div style="text-align:center; margin-bottom:4px;">${window.getEquipIconHtml(item, 32)}</div>`;
-      if (isArt) {
-        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
-      } else {
+          let iconBox = `<div style="text-align:center; margin-bottom:4px;">${window.getEquipIconHtml(item, 32)}</div>`;
+          if (isArt) {
+            el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="window.unequipItem('${slot}')">Remove</button>`;
+          } else {
         let s = [];
         let sPlain = [];
         if (item.atk > 0) {
@@ -4627,9 +4627,9 @@ window.renderPaperDoll = function () {
             setLabelHtml = `<div style="font-size:8px; color:#2ecc71; font-weight:bold; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;">✨ ${setName} Set (${displayCount}/3)</div>`;
           }
         }
-        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${sPlain.join(", ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
-      }
-    } else {
+        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${sPlain.join(", ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="window.unequipItem('${slot}')">Remove</button>`;
+              }
+            } else {
       el.className = "slots-card";
       let displaySlotName = slot.toUpperCase();
       if (slot === "art1") displaySlotName = "ARTIFACT 1";

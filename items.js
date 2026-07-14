@@ -736,14 +736,15 @@ window.renderForgeTab = function () {
         let inlineStyle = `style="${finalStyle} display: flex; align-items: center; padding: 6px 10px; margin-bottom: 6px; border-radius: 6px; cursor: pointer; transition: all 0.18s ease-in-out;"`;
 
         let eqBadge = item.isEquippedSlot
-          ? `<span style="background:#c0392b; color:white; padding:1px 3px; border-radius:2px; font-size:8px; font-weight:bold; margin-right:4px;">EQ</span> `
-          : "";
-        let rarityLabel = isArt ? "UNIQUE" : `${item.statsRolled}★`;
-        let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center; flex-shrink:0;">${window.getEquipIconHtml(item, 28)}</div>`;
+                      ? `<span style="background:#c0392b; color:white; padding:1px 3px; border-radius:2px; font-size:8px; font-weight:bold; margin-right:4px;">EQ</span> `
+                      : "";
+                    let rarityLabel = isArt ? "UNIQUE" : `${item.statsRolled}★`;
+                    let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center; flex-shrink:0;">${window.getEquipIconHtml(item, 28)}</div>`;
 
-        return `<div class="bag-item-forge" ${inlineStyle} onclick="window.selectForgeItem(${item.id})" onmouseenter="window.showForgeTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()" ontouchstart="window.showForgeTooltip(event, ${item.id})">
-                ${iconBox}
-                <div style="flex:1; min-width:0; text-align:left;">
+                    // Configured onpointerdown as the primary selector to bypass mobile click-swallows
+                    return `<div class="bag-item-forge" ${inlineStyle} onpointerdown="window.selectForgeItem(${item.id}); window.showForgeTooltip(event, ${item.id});" onmouseenter="window.showForgeTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()" onclick="window.selectForgeItem(${item.id})">
+                            ${iconBox}
+                            <div style="flex:1; min-width:0; text-align:left;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; margin-bottom:1px;">
                         <span style="font-weight:bold; color:${nameColor}; font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${item.name}${temperTag}</span>
                         ${lockTag ? `<span style="font-size:9.5px;">${lockTag}</span>` : ""}

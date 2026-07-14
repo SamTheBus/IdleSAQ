@@ -5554,13 +5554,20 @@ window.CombatEngine = {
       if (typeof window.progressMission === "function")
         window.progressMission("rifts", 1);
     } else if (window.mob.type === "boss") {
-      let activeStage = window.playerStats.stage;
-      let peakLimit = Math.floor(
-        (window.playerStats.lifetimePeakStage || 1) * 0.8,
-      );
+          let activeStage = window.playerStats.stage;
 
-      // Standardized flat drop rates (keeps Sigils/Cores/Shards rare and consistent)
-      if (activeStage >= peakLimit) {
+          // Guaranteed Boss-Scale Monster Soul drop
+          let bossSoulQty = 5 + Math.floor(activeStage / 10);
+          if (typeof window.addEtcDrop === "function") {
+            window.addEtcDrop("Monster Soul", bossSoulQty, true);
+          }
+
+          let peakLimit = Math.floor(
+            (window.playerStats.lifetimePeakStage || 1) * 0.8,
+          );
+
+          // Standardized flat drop rates (keeps Sigils/Cores/Shards rare and consistent)
+          if (activeStage >= peakLimit) {
         if (Math.random() < 0.01) {
           window.addEtcDrop("Ancient Core", 1);
           window.pushToast("Ancient Core", null, "#e74c3c", true, 1);
@@ -5600,13 +5607,22 @@ window.CombatEngine = {
         window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
       }
     } else if (!isBoss && !window.playerStats.isDungeonMode) {
-      if (Math.random() < (window.mob.isRare ? 0.08 : 0.03)) {
-        let etcItemName = window.mob.isRare ? "Luminous Soul" : "Monster Soul";
-        if (typeof window.addEtcDrop === "function")
-          window.addEtcDrop(etcItemName, 1);
-      }
-      // Progression-Locked Campaign Rare Spawn Ancient Core / Sigil / Shard drops (Flat rare)
-      if (window.mob && window.mob.isRare) {
+          // Dynamic scaled drop rates matching player Drop Rate (p.drop) attributes
+          let soulDropChance = window.mob.isRare ? 0.25 : 0.12; // 25% for Rare, 12% for Normal
+          if (Math.random() < (soulDropChance * p.drop)) {
+            let etcItemName = window.mob.isRare ? "Luminous Soul" : "Monster Soul";
+
+            let qty = 1;
+            if (!window.mob.isRare) {
+              // Normal monster drop quantities scale with Stage progression (1 base + 1 per 50 stages)
+              qty += Math.floor((window.playerStats.stage || 1) / 50);
+            }
+
+            if (typeof window.addEtcDrop === "function")
+              window.addEtcDrop(etcItemName, qty);
+          }
+          // Progression-Locked Campaign Rare Spawn Ancient Core / Sigil / Shard drops (Flat rare)
+          if (window.mob && window.mob.isRare) {
         let activeStage = window.playerStats.stage;
         let peakLimit = Math.floor(
           (window.playerStats.lifetimePeakStage || 1) * 0.8,
