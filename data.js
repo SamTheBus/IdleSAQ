@@ -1115,30 +1115,34 @@ window.resolvePlayerStats = function (useDraft = false) {
   });
 
   let setCtx = {
-    atk: 0,
-    maxHp: 0,
-    moveSpeed: 0,
-    idleSpeedPct: 0,
-    activeSpeedPct: 0,
-    critChance: 0,
-    critDamage: 0,
-    block: 0,
-    parry: 0,
-    atkPctBonus: 0,
-    maxHpPctBonus: 0,
-    defPctBonus: 0,
-    flatDefBonus: 0,
-    str: 0,
-    dex: 0,
-    int: 0,
-    gold: 0,
-    drop: 0,
-    qly: 0,
-    rareSpawn: 0,
-    hasCorrosiveSet: false,
-    hasShatterSet: false,
-    hasSingularitySet: false,
-  };
+      atk: 0,
+      maxHp: 0,
+      moveSpeed: 0,
+      idleSpeedPct: 0,
+      activeSpeedPct: 0,
+      critChance: 0,
+      critDamage: 0,
+      block: 0,
+      parry: 0,
+      atkPctBonus: 0,
+      maxHpPctBonus: 0,
+      defPctBonus: 0,
+      flatDefBonus: 0,
+      str: 0,
+      dex: 0,
+      int: 0,
+      strPctBonus: 0,       // Track percent STR bonuses from sets
+      dexPctBonus: 0,       // Track percent DEX bonuses from sets
+      intPctBonus: 0,       // Track percent INT bonuses from sets
+      moveSpeedPctBonus: 0,  // Track percent Move Speed bonuses from sets
+      gold: 0,
+      drop: 0,
+      qly: 0,
+      rareSpawn: 0,
+      hasCorrosiveSet: false,
+      hasShatterSet: false,
+      hasSingularitySet: false,
+    };
   for (let setName in setCounts) {
     let count = setCounts[setName];
     let setDef = window.SET_DEFINITIONS[setName];
@@ -1159,18 +1163,23 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.parry += setCtx.parry;
 
   p.str += setCtx.str;
-  p.dex += setCtx.dex;
-  p.int += setCtx.int;
-  p.gold += setCtx.gold;
-  p.drop += setCtx.drop;
-  p.qly += setCtx.qly;
-  p.rareSpawn += setCtx.rareSpawn;
-  p.hasCorrosiveSet = setCtx.hasCorrosiveSet;
-  p.hasShatterSet = setCtx.hasShatterSet;
-  p.hasSingularitySet = setCtx.hasSingularitySet;
+    p.dex += setCtx.dex;
+    p.int += setCtx.int;
+    p.gold += setCtx.gold;
+    p.drop += setCtx.drop;
+    p.qly += setCtx.qly;
+    p.rareSpawn += setCtx.rareSpawn;
+    p.hasCorrosiveSet = setCtx.hasCorrosiveSet;
+    p.hasShatterSet = setCtx.hasShatterSet;
+    p.hasSingularitySet = setCtx.hasSingularitySet;
 
-  achAtkPct += setCtx.atkPctBonus;
-  achMaxHpPct += setCtx.maxHpPctBonus;
+    // Apply new percentage attribute and defense increases before final resolving
+    achAtkPct += setCtx.atkPctBonus;
+    achMaxHpPct += setCtx.maxHpPctBonus;
+    achDefPct += setCtx.defPctBonus; // Added fix: Bridges silent defense-multiplier bug!
+    achStrPct += setCtx.strPctBonus; // Added fix: Infuses percentage STR set bonuses
+    achDexPct += setCtx.dexPctBonus; // Added fix: Infuses percentage DEX set bonuses
+    achIntPct += setCtx.intPctBonus; // Added fix: Infuses percentage INT set bonuses
 
   // --- BESTIARY Album SYSTEM RESOLUTION ---
   let cardsOwned = window.playerStats.monsterCards || {};
@@ -1358,9 +1367,9 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   p.atk = Math.floor(p.atk * (1.0 + itemAtkPct) * achAtkPct);
-  p.maxHp = Math.floor(p.maxHp * (1.0 + itemHpPct) * achMaxHpPct);
-  p.def = Math.ceil(flatDef * (defMultiplier + itemDefPct) * achDefPct);
-  p.moveSpeed = p.moveSpeed * (achMoveSpeedPct + itemSpdPct);
+    p.maxHp = Math.floor(p.maxHp * (1.0 + itemHpPct) * achMaxHpPct);
+    p.def = Math.ceil(flatDef * (defMultiplier + itemDefPct) * achDefPct);
+    p.moveSpeed = p.moveSpeed * (achMoveSpeedPct + itemSpdPct + (setCtx.moveSpeedPctBonus || 0)); // Factored percent speed
 
   // Apply Cavern Sigil Active Modifiers (Dungeon Mode)
   if (

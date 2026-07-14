@@ -525,10 +525,9 @@ window.SET_DEFINITIONS = {
       },
       {
         count: 3,
-        desc: "+10% Attack Power, +15 Flat Attack",
+        desc: "+15% Attack Power", // Consolidated and scaled to percentage
         apply: (p) => {
-          p.atkPctBonus = (p.atkPctBonus || 0) + 0.1;
-          p.atk += 15;
+          p.atkPctBonus = (p.atkPctBonus || 0) + 0.15;
         },
       },
     ],
@@ -545,10 +544,9 @@ window.SET_DEFINITIONS = {
       },
       {
         count: 3,
-        desc: "+15% Max HP, +50 Flat Max HP",
+        desc: "+22% Max HP", // Consolidated and scaled to percentage
         apply: (p) => {
-          p.maxHpPctBonus = (p.maxHpPctBonus || 0) + 0.15;
-          p.maxHp += 50;
+          p.maxHpPctBonus = (p.maxHpPctBonus || 0) + 0.22;
         },
       },
     ],
@@ -565,10 +563,9 @@ window.SET_DEFINITIONS = {
       },
       {
         count: 3,
-        desc: "+12% Defense, +10 Flat Defense",
+        desc: "+18% Defense", // Consolidated and scaled to percentage
         apply: (p) => {
-          p.defPctBonus = (p.defPctBonus || 0) + 0.12;
-          p.flatDefBonus = (p.flatDefBonus || 0) + 10;
+          p.defPctBonus = (p.defPctBonus || 0) + 0.18;
         },
       },
     ],
@@ -578,16 +575,16 @@ window.SET_DEFINITIONS = {
     bonuses: [
       {
         count: 2,
-        desc: "+5 Move Speed",
+        desc: "+5% Move Speed", // Converted flat Move Speed to percentage
         apply: (p) => {
-          p.moveSpeed += 5;
+          p.moveSpeedPctBonus = (p.moveSpeedPctBonus || 0) + 0.05;
         },
       },
       {
         count: 3,
-        desc: "+15 Move Speed, +15% Idle Attack Speed",
+        desc: "+15% Move Speed, +15% Idle Attack Speed", // Converted flat Move Speed to percentage
         apply: (p) => {
-          p.moveSpeed += 15;
+          p.moveSpeedPctBonus = (p.moveSpeedPctBonus || 0) + 0.15;
           p.idleSpeedPct = (p.idleSpeedPct || 0) + 0.15;
         },
       },
@@ -645,10 +642,10 @@ window.SET_DEFINITIONS = {
       },
       {
         count: 3,
-        desc: "+8% Block Rate, +5 Flat Defense",
+        desc: "+8% Block Rate, +6% Defense", // Converted flat Defense to percentage
         apply: (p) => {
           p.block += 0.08;
-          p.flatDefBonus = (p.flatDefBonus || 0) + 5;
+          p.defPctBonus = (p.defPctBonus || 0) + 0.06;
         },
       },
     ],
@@ -678,16 +675,16 @@ window.SET_DEFINITIONS = {
     bonuses: [
       {
         count: 2,
-        desc: "+5 INT",
+        desc: "+5% Intelligence", // Converted flat INT to percentage
         apply: (p) => {
-          p.int += 5;
+          p.intPctBonus = (p.intPctBonus || 0) + 0.05;
         },
       },
       {
         count: 3,
-        desc: "+15 INT, +10% Active Attack Speed",
+        desc: "+15% Intelligence, +10% Active Attack Speed", // Converted flat INT to percentage
         apply: (p) => {
-          p.int += 15;
+          p.intPctBonus = (p.intPctBonus || 0) + 0.15;
           p.activeSpeedPct = (p.activeSpeedPct || 0) + 0.1;
         },
       },
@@ -698,16 +695,16 @@ window.SET_DEFINITIONS = {
     bonuses: [
       {
         count: 2,
-        desc: "+5 STR",
+        desc: "+5% Strength", // Converted flat STR to percentage
         apply: (p) => {
-          p.str += 5;
+          p.strPctBonus = (p.strPctBonus || 0) + 0.05;
         },
       },
       {
         count: 3,
-        desc: "+15 STR, +10% Idle Attack Speed",
+        desc: "+15% Strength, +10% Idle Attack Speed", // Converted flat STR to percentage
         apply: (p) => {
-          p.str += 15;
+          p.strPctBonus = (p.strPctBonus || 0) + 0.15;
           p.idleSpeedPct = (p.idleSpeedPct || 0) + 0.1;
         },
       },
@@ -718,17 +715,17 @@ window.SET_DEFINITIONS = {
     bonuses: [
       {
         count: 2,
-        desc: "+5 DEX",
+        desc: "+5% Dexterity", // Converted flat DEX to percentage
         apply: (p) => {
-          p.dex += 5;
+          p.dexPctBonus = (p.dexPctBonus || 0) + 0.05;
         },
       },
       {
         count: 3,
-        desc: "+15 DEX, +8 Move Speed",
+        desc: "+15% Dexterity, +8% Move Speed", // Converted flat DEX & flat Speed to percentage
         apply: (p) => {
-          p.dex += 15;
-          p.moveSpeed += 8;
+          p.dexPctBonus = (p.dexPctBonus || 0) + 0.15;
+          p.moveSpeedPctBonus = (p.moveSpeedPctBonus || 0) + 0.08;
         },
       },
     ],
@@ -765,10 +762,10 @@ window.SET_DEFINITIONS = {
       },
       {
         count: 3,
-        desc: "+15% Drop Quality Mod, +5 INT",
+        desc: "+15% Drop Quality Mod, +5% Intelligence", // Converted flat INT to percentage
         apply: (p) => {
           p.qly += 0.15;
-          p.int += 5;
+          p.intPctBonus = (p.intPctBonus || 0) + 0.05;
         },
       },
     ],
