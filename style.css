@@ -634,7 +634,10 @@ canvas {
 
 .stats-hud-inline {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* Rigid 4-column layout prevents layout shifting */
+  grid-template-columns: repeat(
+    4,
+    1fr
+  ); /* Rigid 4-column layout prevents layout shifting */
   gap: 8px;
   flex: 1;
   min-width: 0;
@@ -652,7 +655,9 @@ canvas {
   min-width: 0; /* Vital for nested ellipsis truncation */
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
   box-sizing: border-box;
-  transition: border-color 0.15s, background-color 0.15s;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
 }
 
 .hud-stat-panel:hover {
@@ -661,14 +666,30 @@ canvas {
 }
 
 /* Subtle, cohesive bottom-aligned underline tags */
-.panel-hp { border-bottom: 2px solid #e74c3c !important; }
-.panel-hp .chip-value { color: #ff6b6b; }
-.panel-stage { border-bottom: 2px solid #3498db !important; }
-.panel-stage .chip-value { color: #60a5fa; }
-.panel-gold { border-bottom: 2px solid #f1c40f !important; }
-.panel-gold .chip-value { color: #ffd700; }
-.panel-dps { border-bottom: 2px solid #e67e22 !important; }
-.panel-dps .chip-value { color: #ff9f43; }
+.panel-hp {
+  border-bottom: 2px solid #e74c3c !important;
+}
+.panel-hp .chip-value {
+  color: #ff6b6b;
+}
+.panel-stage {
+  border-bottom: 2px solid #3498db !important;
+}
+.panel-stage .chip-value {
+  color: #60a5fa;
+}
+.panel-gold {
+  border-bottom: 2px solid #f1c40f !important;
+}
+.panel-gold .chip-value {
+  color: #ffd700;
+}
+.panel-dps {
+  border-bottom: 2px solid #e67e22 !important;
+}
+.panel-dps .chip-value {
+  color: #ff9f43;
+}
 
 .chip-icon {
   display: flex;
@@ -1696,22 +1717,22 @@ summary {
     padding: 10px !important;
   }
   #control-bar {
-      height: 38px !important;
-      flex-direction: row !important;
-      align-items: center !important;
-      padding: 4px 10px !important;
-      border-bottom-width: 1px !important;
-      gap: 4px !important;
-    }
-    .control-actions {
-      width: 100% !important;
-      justify-content: space-between !important;
-      height: 30px !important;
-    }
-    .control-actions .btn-toggle {
-      flex: 1 !important;
-      text-align: center !important;
-    }
+    height: 38px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 4px 10px !important;
+    border-bottom-width: 1px !important;
+    gap: 4px !important;
+  }
+  .control-actions {
+    width: 100% !important;
+    justify-content: space-between !important;
+    height: 30px !important;
+  }
+  .control-actions .btn-toggle {
+    flex: 1 !important;
+    text-align: center !important;
+  }
   #sync-indicator {
     flex: 1 !important;
     justify-content: center !important;
@@ -2494,33 +2515,33 @@ summary {
   }
 
   /* --- ULTRA-COMPACT CONTROL BAR (PREVENTS WRAP & CLIPPING) --- */
-      #control-bar {
-        grid-area: ctrlbar !important;
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        gap: 4px !important;
-        padding: 2px 6px !important;
-        height: 32px !important;
-      }
+  #control-bar {
+    grid-area: ctrlbar !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 2px 6px !important;
+    height: 32px !important;
+  }
 
-    .control-actions {
-      height: 100% !important;
-      gap: 3px !important;
-    }
+  .control-actions {
+    height: 100% !important;
+    gap: 3px !important;
+  }
 
-    .btn-toggle {
-      height: 24px !important;
-      padding: 0 6px !important;
-      font-size: 9px !important;
-    }
+  .btn-toggle {
+    height: 24px !important;
+    padding: 0 6px !important;
+    font-size: 9px !important;
+  }
 
-    #sync-indicator {
-      height: 24px !important;
-      padding: 0 4px !important;
-    }
+  #sync-indicator {
+    height: 24px !important;
+    padding: 0 4px !important;
+  }
 
   .tab-btn {
     padding: 6px 1px !important;
@@ -4129,12 +4150,16 @@ summary {
 .canvas-top-hud .panel-hp {
   border: 1.5px solid #ff4757 !important;
   border-bottom-width: 3.5px !important;
-  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2), inset 0 0 10px rgba(231, 76, 60, 0.1) !important;
+  box-shadow:
+    0 4px 12px rgba(231, 76, 60, 0.2),
+    inset 0 0 10px rgba(231, 76, 60, 0.1) !important;
 }
 .canvas-top-hud .panel-hp:hover {
   transform: translateY(-1.5px) !important;
   border-color: #ff6b81 !important;
-  box-shadow: 0 6px 16px rgba(231, 76, 60, 0.35), inset 0 0 12px rgba(231, 76, 60, 0.15) !important;
+  box-shadow:
+    0 6px 16px rgba(231, 76, 60, 0.35),
+    inset 0 0 12px rgba(231, 76, 60, 0.15) !important;
 }
 .canvas-top-hud .panel-hp .chip-value {
   color: #ff6b6b !important;
@@ -4147,12 +4172,16 @@ summary {
 .canvas-top-hud .panel-stage {
   border: 1.5px solid #3498db !important;
   border-bottom-width: 3.5px !important;
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2), inset 0 0 10px rgba(52, 152, 219, 0.1) !important;
+  box-shadow:
+    0 4px 12px rgba(52, 152, 219, 0.2),
+    inset 0 0 10px rgba(52, 152, 219, 0.1) !important;
 }
 .canvas-top-hud .panel-stage:hover {
   transform: translateY(-1.5px) !important;
   border-color: #54a0ff !important;
-  box-shadow: 0 6px 16px rgba(52, 152, 219, 0.35), inset 0 0 12px rgba(52, 152, 219, 0.15) !important;
+  box-shadow:
+    0 6px 16px rgba(52, 152, 219, 0.35),
+    inset 0 0 12px rgba(52, 152, 219, 0.15) !important;
 }
 .canvas-top-hud .panel-stage .chip-value {
   color: #60a5fa !important;
@@ -4165,12 +4194,16 @@ summary {
 .canvas-top-hud .panel-gold {
   border: 1.5px solid #f1c40f !important;
   border-bottom-width: 3.5px !important;
-  box-shadow: 0 4px 12px rgba(241, 196, 15, 0.2), inset 0 0 10px rgba(241, 196, 15, 0.1) !important;
+  box-shadow:
+    0 4px 12px rgba(241, 196, 15, 0.2),
+    inset 0 0 10px rgba(241, 196, 15, 0.1) !important;
 }
 .canvas-top-hud .panel-gold:hover {
   transform: translateY(-1.5px) !important;
   border-color: #ffeaa7 !important;
-  box-shadow: 0 6px 16px rgba(241, 196, 15, 0.35), inset 0 0 12px rgba(241, 196, 15, 0.15) !important;
+  box-shadow:
+    0 6px 16px rgba(241, 196, 15, 0.35),
+    inset 0 0 12px rgba(241, 196, 15, 0.15) !important;
 }
 .canvas-top-hud .panel-gold .chip-value {
   color: #ffd700 !important;
@@ -4230,7 +4263,9 @@ summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 0 8px rgba(230, 126, 34, 0.08);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 0 8px rgba(230, 126, 34, 0.08);
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;

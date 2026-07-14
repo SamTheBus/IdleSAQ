@@ -1426,8 +1426,7 @@ window.executeClaimClanQuestReward = function (questId) {
         if (r.sacks > 0) {
           window.addUseDrop("Clan Reward Sack", r.sacks);
           claimsReport.push(`+${r.sacks}x Clan Sacks`);
-        }
-        if (r.goldBase > 0) {
+        } else if (r.goldBase > 0) {
           let stgScale = Math.max(
             1,
             Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) +
@@ -1437,9 +1436,7 @@ window.executeClaimClanQuestReward = function (questId) {
           let calculatedGold = Math.ceil(
             r.goldBase * (1.0 + Math.pow(stgScale, 1.5) * 1.2),
           );
-          window.playerStats.coins += calculatedGold;
-          window.playerStats.totalGoldEarned =
-            (window.playerStats.totalGoldEarned || 0) + calculatedGold;
+          window.addCoins(calculatedGold);
           claimsReport.push(`+${window.formatNumber(calculatedGold)} Gold`);
         }
 

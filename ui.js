@@ -400,13 +400,15 @@ window.getUseIconHtml = function (key, size = 32) {
   let viewBox = isHighFidelity ? "0 0 64 64" : "0 0 32 32";
 
   // 1. Handle special unique assets
-  if (key === "SP Reset Scroll") {
-    bg = "rgba(155, 89, 182, 0.25)";
-    border = "#9b59b6";
-  } else if (key === "PP Reset Scroll") {
-    bg = "rgba(230, 126, 34, 0.25)";
-    border = "#e67e22";
-  } else if (key === "Cavern Sigil Sack") {
+    if (key === "SP Reset Scroll") {
+      bg = "rgba(155, 89, 182, 0.25)";
+      border = "#9b59b6";
+      innerHtml = window.AssetCatalog.consumables.scroll(uid, "#9b59b6");
+    } else if (key === "PP Reset Scroll") {
+      bg = "rgba(230, 126, 34, 0.25)";
+      border = "#e67e22";
+      innerHtml = window.AssetCatalog.consumables.scroll(uid, "#e67e22");
+    } else if (key === "Cavern Sigil Sack") {
     bg = "rgba(155, 89, 182, 0.25)";
     border = "#9b59b6";
     innerHtml = window.AssetCatalog.consumables.cavern_sigil_sack(uid);
@@ -1173,8 +1175,8 @@ window.updateUI = function () {
   setText("hud-coins", window.formatNumber(window.playerStats.coins));
 
   // Update real-time DPS in the draggable overlay
-    let actDps = window.calculateActiveDps ? window.calculateActiveDps() : "0.0";
-    setText("dps-overlay-value", actDps);
+  let actDps = window.calculateActiveDps ? window.calculateActiveDps() : "0.0";
+  setText("dps-overlay-value", actDps);
 
   // Update player HP in HUD bar
   let maxHp = p.maxHp;
@@ -1193,14 +1195,14 @@ window.updateUI = function () {
   }
 
   // Dynamically toggle Leave Activity button based on state
-    let leaveBtn = document.getElementById("btn-leave-activity");
-    if (leaveBtn) {
-      if (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) {
-        leaveBtn.style.setProperty("display", "inline-flex", "important");
-      } else {
-        leaveBtn.style.setProperty("display", "none", "important");
-      }
+  let leaveBtn = document.getElementById("btn-leave-activity");
+  if (leaveBtn) {
+    if (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) {
+      leaveBtn.style.setProperty("display", "inline-flex", "important");
+    } else {
+      leaveBtn.style.setProperty("display", "none", "important");
     }
+  }
 
   // Update Dungeon Peaks & Checkpoints in Activities Menu
   if (window.playerStats.dungeonPeaks) {
@@ -2053,15 +2055,15 @@ window.pushToast = function (
   toast.style.setProperty("--toast-glow-color", `rgba(${rgb}, 0.2)`);
 
   // Enable pointer-events on all toasts to support swipe-to-dismiss gestures
-            toast.style.pointerEvents = "auto";
-            if (clickAction) {
-              toast.style.cursor = "pointer";
-              toast.onclick = function (e) {
-                e.stopPropagation();
-                clickAction();
-                toast.remove();
-              };
-            }
+  toast.style.pointerEvents = "auto";
+  if (clickAction) {
+    toast.style.cursor = "pointer";
+    toast.onclick = function (e) {
+      e.stopPropagation();
+      clickAction();
+      toast.remove();
+    };
+  }
 
   function guessItemType(n) {
     let lowerName = n.toLowerCase();
@@ -3330,7 +3332,7 @@ window.renderGoldUpgrades = function () {
 
       let btnHtml = "";
       if (canAfford) {
-              btnHtml = `
+        btnHtml = `
                     <button class="btn-action"
                             style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
                             onclick="window.buyGoldUpgrade('${u.id}')">
@@ -5144,30 +5146,30 @@ window.generateItemCardHtml = function (
   let html = "";
 
   let slotMult = 1.0;
-            if (item.isEquippedSlot && window.playerStats.slotUpgrades) {
-              let slotLvl = window.playerStats.slotUpgrades[item.isEquippedSlot] || 0;
-              let runBonus = 0;
-              if (
-                window.playerStats.isCrucibleMode &&
-                window.cachedPlayerStats &&
-                window.cachedPlayerStats.crucibleSlotBonuses
-              ) {
-                runBonus =
-                  window.cachedPlayerStats.crucibleSlotBonuses[item.isEquippedSlot] || 0;
-              }
-              slotMult = 1.0 + slotLvl * 0.01 + runBonus;
-            }
+  if (item.isEquippedSlot && window.playerStats.slotUpgrades) {
+    let slotLvl = window.playerStats.slotUpgrades[item.isEquippedSlot] || 0;
+    let runBonus = 0;
+    if (
+      window.playerStats.isCrucibleMode &&
+      window.cachedPlayerStats &&
+      window.cachedPlayerStats.crucibleSlotBonuses
+    ) {
+      runBonus =
+        window.cachedPlayerStats.crucibleSlotBonuses[item.isEquippedSlot] || 0;
+    }
+    slotMult = 1.0 + slotLvl * 0.01 + runBonus;
+  }
 
-            // Define local variables for the card's title section
-            let temperTag =
-              item.temperLevel > 0
-                ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
-                : "";
-            let lockTag = item.locked ? " 🔒" : "";
+  // Define local variables for the card's title section
+  let temperTag =
+    item.temperLevel > 0
+      ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
+      : "";
+  let lockTag = item.locked ? " 🔒" : "";
 
-            // Render Currently Equipped status as an absolute tab hugging the top-right card border
-    if (isEquipped) {
-      html += `
+  // Render Currently Equipped status as an absolute tab hugging the top-right card border
+  if (isEquipped) {
+    html += `
         <div style="
           position: absolute;
           top: 0;
@@ -5191,26 +5193,26 @@ window.generateItemCardHtml = function (
           Equipped
         </div>
       `;
-    }
+  }
 
   // Custom Cavern Sigil card renderer
-    if (item.type === "sigil") {
-      let color = window.getTierColor(item.statsRolled);
-      let buffDescs = item.buffs
-        .map(
-          (b) =>
-            `<div style="color:#2ecc71; font-size:10px; margin-bottom:2px; line-height:1.35;">• ☀️ <strong>${b.name}</strong>: ${b.desc}</div>`,
-        )
-        .join("");
-      let debuffDescs = item.debuffs
-        .map(
-          (d) =>
-            `<div style="color:#e74c3c; font-size:10px; margin-bottom:2px; line-height:1.35;">• 🌑 <strong>${d.name}</strong>: ${d.desc}</div>`,
-        )
-        .join("");
-      let lockTag = item.locked ? " 🔒" : "";
+  if (item.type === "sigil") {
+    let color = window.getTierColor(item.statsRolled);
+    let buffDescs = item.buffs
+      .map(
+        (b) =>
+          `<div style="color:#2ecc71; font-size:10px; margin-bottom:2px; line-height:1.35;">• ☀️ <strong>${b.name}</strong>: ${b.desc}</div>`,
+      )
+      .join("");
+    let debuffDescs = item.debuffs
+      .map(
+        (d) =>
+          `<div style="color:#e74c3c; font-size:10px; margin-bottom:2px; line-height:1.35;">• 🌑 <strong>${d.name}</strong>: ${d.desc}</div>`,
+      )
+      .join("");
+    let lockTag = item.locked ? " 🔒" : "";
 
-      let sigHtml = `
+    let sigHtml = `
         <div class="tt-title" style="color:${color}; white-space:normal;">${item.name}${lockTag}</div>
         <div style="text-align:center; margin: 10px 0;">${window.getEquipIconHtml(item, 56)}</div>
         <div class="tt-subtitle">CAVERN SIGIL | <span style="color:${color}; font-weight:bold;">${item.statsRolled}★ ${window.getTierName(item.statsRolled)}</span></div>
@@ -5224,8 +5226,8 @@ window.generateItemCardHtml = function (
           </div>
         </div>
       `;
-      return sigHtml;
-    }
+    return sigHtml;
+  }
 
   let isUnique =
     item.isUniqueStaff ||
@@ -5251,30 +5253,30 @@ window.generateItemCardHtml = function (
 
   let tierColor = window.getTierColor(item.statsRolled);
   let titleColor = item.type === "artifact" ? "#1abc9c" : tierColor;
-    let labelDisplay = item.type.toUpperCase();
-    if (item.type === "subweapon" && item.subType) {
-      labelDisplay = `SUBWEAPON (${item.subType.toUpperCase()})`;
-    }
+  let labelDisplay = item.type.toUpperCase();
+  if (item.type === "subweapon" && item.subType) {
+    labelDisplay = `SUBWEAPON (${item.subType.toUpperCase()})`;
+  }
 
-    let subtitle =
-      item.type === "artifact"
-        ? "Unique Artifact"
-        : `${labelDisplay} | <span style="color:${tierColor}; font-weight:bold;">${tierStrDisplay(item)}</span>`;
+  let subtitle =
+    item.type === "artifact"
+      ? "Unique Artifact"
+      : `${labelDisplay} | <span style="color:${tierColor}; font-weight:bold;">${tierStrDisplay(item)}</span>`;
 
-    html += `<div class="tt-title" style="color:${isUnique ? "#1abc9c" : titleColor}; white-space:normal;">${item.name}${temperTag}${lockTag}</div>`;
-    html += runicBadge;
-    html += iconIllustration;
-    html += `<div class="tt-subtitle">${subtitle}</div>`;
+  html += `<div class="tt-title" style="color:${isUnique ? "#1abc9c" : titleColor}; white-space:normal;">${item.name}${temperTag}${lockTag}</div>`;
+  html += runicBadge;
+  html += iconIllustration;
+  html += `<div class="tt-subtitle">${subtitle}</div>`;
 
-    // Render Slot Attunement details inside the metadata section instead of a floating top badge
-    if (slotMult > 1.0) {
-      let pctBonus = Math.round((slotMult - 1.0) * 100);
-      html += `
+  // Render Slot Attunement details inside the metadata section instead of a floating top badge
+  if (slotMult > 1.0) {
+    let pctBonus = Math.round((slotMult - 1.0) * 100);
+    html += `
         <div style="font-size: 10px; color: #2ecc71; font-weight: bold; margin-top: 4px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;">
           ⚡ Slot Attunement: +${pctBonus}% Stats Applied
         </div>
       `;
-    }
+  }
 
   if (item.id !== "dummy" && item.type === "subweapon") {
     if (item.subType === "shield") {
@@ -5629,14 +5631,14 @@ window.generateItemCardHtml = function (
   }
 
   if (uniqueStyle) {
-      if (uniqueStyle.lore) {
-        html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
-      }
-      html = `<div style="position: relative; background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 16px 12px 12px 12px; border-radius: 4px; box-sizing: border-box; width: 100%;">
+    if (uniqueStyle.lore) {
+      html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
+    }
+    html = `<div style="position: relative; background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 16px 12px 12px 12px; border-radius: 4px; box-sizing: border-box; width: 100%;">
                             ${runicBadge}
                             ${html}
                         </div>`;
-    }
+  }
 
   return html;
 };
@@ -9093,48 +9095,48 @@ window.showMissionShopItemTooltip = function (e, itemName) {
   let normalizedName = itemName.replace(/['\\’]/g, "").trim();
 
   if (normalizedName === "Eridium Shard") {
-    desc =
-      "A glowing, alien fragment used in the Forge to Tier Up an item's Star Rarity.";
-    color = "#8e44ad";
-    cost = 25;
-  } else if (normalizedName === "Ancient Core") {
-    desc = "Sacrifice at the Altar to summon a Guardian.";
-    color = "#e74c3c";
-    cost = 15;
-  } else if (normalizedName === "Overlords Sigil") {
-    desc = "Spent at the Forge to lock and re-roll equipment modifiers.";
-    color = "#1abc9c";
-    cost = 45;
-  } else if (normalizedName === "Gacha Key") {
-    desc =
-      "Used at the Vending Machine to dispense a guaranteed random equipment piece.";
-    color = "#f1c40f";
-    cost = 20;
-  } else if (normalizedName === "Catalyst Core") {
-    desc = "Spent at the Forge to temper Unique Artifacts.";
-    color = "#2ecc71";
-    cost = 30;
-  } else if (normalizedName === "Astral Essence") {
-    desc =
-      "A pulsing, cosmic residue extracted by salvaging Unique Artifacts. Spent at the Forge to imbed powerful enchantments.";
-    color = "#9b59b6";
-    cost = 35;
-  } else if (normalizedName === "Double XP Elixir") {
-    desc =
-      "Doubles all acquired experience gains (+100% EXP) for 5 minutes (scales with INT).";
-    color = "#a855f7";
-    cost = 12;
-  } else if (normalizedName === "Double Drop Elixir") {
-    desc =
-      "Doubles current drop rate multiplier (+100%) for 5 minutes (scales with INT).";
-    color = "#22c55e";
-    cost = 18;
-  } else if (normalizedName === "Drop Quality Elixir") {
-    desc =
-      "Boosts item drop quality checks by +50% for 5 minutes (scales with INT).";
-    color = "#3b82f6";
-    cost = 22;
-  }
+      desc =
+        "A glowing, alien fragment used in the Forge to Tier Up an item's Star Rarity.";
+      color = "#8e44ad";
+      cost = 3;
+    } else if (normalizedName === "Ancient Core") {
+      desc = "Sacrifice at the Altar to summon a Guardian.";
+      color = "#e74c3c";
+      cost = 3;
+    } else if (normalizedName === "Overlords Sigil") {
+      desc = "Spent at the Forge to lock and re-roll equipment modifiers.";
+      color = "#1abc9c";
+      cost = 3;
+    } else if (normalizedName === "Gacha Key") {
+      desc =
+        "Used at the Vending Machine to dispense a guaranteed random equipment piece.";
+      color = "#f1c40f";
+      cost = 27;
+    } else if (normalizedName === "Catalyst Core") {
+      desc = "Spent at the Forge to temper Unique Artifacts.";
+      color = "#2ecc71";
+      cost = 3;
+    } else if (normalizedName === "Astral Essence") {
+      desc =
+        "A pulsing, cosmic residue extracted by salvaging Unique Artifacts. Spent at the Forge to imbed powerful enchantments.";
+      color = "#9b59b6";
+      cost = 27;
+    } else if (normalizedName === "Double XP Elixir") {
+      desc =
+        "Doubles all acquired experience gains (+100% EXP) for 5 minutes (scales with INT).";
+      color = "#a855f7";
+      cost = 10;
+    } else if (normalizedName === "Double Drop Elixir") {
+      desc =
+        "Doubles current drop rate multiplier (+100%) for 5 minutes (scales with INT).";
+      color = "#22c55e";
+      cost = 12;
+    } else if (normalizedName === "Drop Quality Elixir") {
+      desc =
+        "Boosts item drop quality checks by +50% for 5 minutes (scales with INT).";
+      color = "#3b82f6";
+      cost = 15;
+    }
 
   // Preserve correct format strings for UI outputs
   let finalName = itemName;
@@ -9667,62 +9669,62 @@ window.renderMissionsWindow = function () {
     let costColorHp = canAffordHp ? "#2ecc71" : "#e74c3c";
 
     let reagents = [
-      {
-        key: "Eridium Shard",
-        cost: 25,
-        color: "#8e44ad",
-        desc: "Awaken equipment star ratings (rarities)",
-      },
-      {
-        key: "Ancient Core",
-        cost: 15,
-        color: "#e74c3c",
-        desc: "Activate the Altar of Rifts",
-      },
-      {
-        key: "Overlord's Sigil",
-        queryKey: "Overlords Sigil",
-        cost: 45,
-        color: "#1abc9c",
-        desc: "Material required for unique artifact tempering",
-      },
-      {
-        key: "Gacha Key",
-        cost: 20,
-        color: "#f1c40f",
-        desc: "Roll standard vending crate",
-      },
-      {
-        key: "Catalyst Core",
-        cost: 30,
-        color: "#2ecc71",
-        desc: "Lock & re-roll item properties",
-      },
-      {
-        key: "Astral Essence",
-        cost: 35,
-        color: "#9b59b6",
-        desc: "Infuse powerful gear enchantments",
-      },
-      {
-        key: "Double XP Elixir",
-        cost: 12,
-        color: "#a855f7",
-        desc: "Doubles monster EXP gains (+100% EXP)",
-      },
-      {
-        key: "Double Drop Elixir",
-        cost: 18,
-        color: "#22c55e",
-        desc: "Doubles global drop rate multiplier (+100%)",
-      },
-      {
-        key: "Drop Quality Elixir",
-        cost: 22,
-        color: "#3b82f6",
-        desc: "Boosts drop quality checks (+50% Qly)",
-      },
-    ];
+          {
+            key: "Eridium Shard",
+            cost: 3,
+            color: "#8e44ad",
+            desc: "Awaken equipment star ratings (rarities)",
+          },
+          {
+            key: "Ancient Core",
+            cost: 3,
+            color: "#e74c3c",
+            desc: "Activate the Altar of Rifts",
+          },
+          {
+            key: "Overlord's Sigil",
+            queryKey: "Overlords Sigil",
+            cost: 3,
+            color: "#1abc9c",
+            desc: "Material required for unique artifact tempering",
+          },
+          {
+            key: "Gacha Key",
+            cost: 27,
+            color: "#f1c40f",
+            desc: "Roll standard vending crate",
+          },
+          {
+            key: "Catalyst Core",
+            cost: 3,
+            color: "#2ecc71",
+            desc: "Lock & re-roll item properties",
+          },
+          {
+            key: "Astral Essence",
+            cost: 27,
+            color: "#9b59b6",
+            desc: "Infuse powerful gear enchantments",
+          },
+          {
+            key: "Double XP Elixir",
+            cost: 10,
+            color: "#a855f7",
+            desc: "Doubles monster EXP gains (+100% EXP)",
+          },
+          {
+            key: "Double Drop Elixir",
+            cost: 12,
+            color: "#22c55e",
+            desc: "Doubles global drop rate multiplier (+100%)",
+          },
+          {
+            key: "Drop Quality Elixir",
+            cost: 15,
+            color: "#3b82f6",
+            desc: "Boosts drop quality checks (+50% Qly)",
+          },
+        ];
 
     let reagentsHtml = reagents
       .map((r) => {
@@ -11201,9 +11203,7 @@ window.claimMailReward = function (mailId) {
 
         // 1. Claim Gold
         if (rewards.coins) {
-          window.playerStats.coins += rewards.coins;
-          window.playerStats.totalGoldEarned =
-            (window.playerStats.totalGoldEarned || 0) + rewards.coins;
+          window.addCoins(rewards.coins);
         }
 
         // 2. Claim Materials
@@ -13446,14 +13446,14 @@ window.executeCavernsDescent = function () {
   );
 
   window.playerStats.isDungeonMode = true;
-  window.playerStats.isCrucibleMode = false;
-  window.playerStats.currentDungeon = mode;
-  window.playerStats.currentDungeonStage[mode] = checkpoint;
-  window.playerStats.dungeonWave = 1;
-  window.playerStats.killCount = 0;
-  window.playerStats.targetsRequired = 5;
-  window.playerStats.isBossMode = false;
-  window.playerStats.isUberBoss = false;
+    window.playerStats.isCrucibleMode = false;
+    window.playerStats.currentDungeon = mode;
+    window.playerStats.currentDungeonStage[mode] = checkpoint;
+    window.playerStats.dungeonWave = 1;
+    window.playerStats.killCount = 0;
+    window.playerStats.targetsRequired = 3; // Reduced from 5 to 3
+    window.playerStats.isBossMode = false;
+    window.playerStats.isUberBoss = false;
   window.mob = null;
 
   let p = window.resolvePlayerStats();
@@ -14788,24 +14788,48 @@ window.executeEquipSpectralResonance = function (key) {
   window.saveGame();
 };
 
-// Onboarding: Stage 20 Choice Portal (Presents Bulwark, Riposte, or Arcane grimoire options)
+// Onboarding: Stage 10 Choice Portal (Presents Bulwark, Riposte, or Arcane grimoire options)
 window.openSubweaponOfChoiceModal = function () {
   window.setPauseState(true);
 
-  // Generate three specialized sub-weapons at level 21 (StageScale 3) rolling their respective stats
+  // Generate three specialized sub-weapons at level 11 (StageScale 2) rolling their respective stats
   let shield = {
     id: window.idCounter++,
-    name: `Kite Shield of Might (Lv. 21)`,
+    name: `Kite Shield of Might (Lv. 11)`,
     type: "subweapon",
     subType: "shield",
     statsRolled: 1, // Rare (1★)
     temperLevel: 0,
-    stageLevel: 21,
-    atk: 0, maxHp: 0, def: 0, moveSpeed: 0, critChance: 0, critDamage: 0, block: 0, parry: 0,
-    baseAtk: 0, baseMaxHp: 0, baseDef: 12, baseMoveSpeed: 0, baseBlock: 0.05, baseParry: 0, baseInt: 0,
-    bonusAtk: 0, bonusMaxHp: 50, bonusDef: 8, bonusMoveSpeed: 0, bonusCritChance: 0, bonusCritDamage: 0,
-    bonusBlock: 0.02, bonusParry: 0, bonusStr: 8, bonusDex: 0, bonusInt: 0,
-    str: 0, dex: 0, int: 0,
+    stageLevel: 2, // Map precisely to StageScale 2 (Levels 11-20)
+    atk: 0,
+    maxHp: 0,
+    def: 0,
+    moveSpeed: 0,
+    critChance: 0,
+    critDamage: 0,
+    block: 0,
+    parry: 0,
+    baseAtk: 0,
+    baseMaxHp: 0,
+    baseDef: 6,
+    baseMoveSpeed: 0,
+    baseBlock: 0.05,
+    baseParry: 0,
+    baseInt: 0,
+    bonusAtk: 0,
+    bonusMaxHp: 25,
+    bonusDef: 4,
+    bonusMoveSpeed: 0,
+    bonusCritChance: 0,
+    bonusCritDamage: 0,
+    bonusBlock: 0.01,
+    bonusParry: 0,
+    bonusStr: 4,
+    bonusDex: 0,
+    bonusInt: 0,
+    str: 0,
+    dex: 0,
+    int: 0,
     noun: "Kite Shield",
     setName: "Vanguard",
   };
@@ -14813,18 +14837,42 @@ window.openSubweaponOfChoiceModal = function () {
   window.frozenItemDb[shield.id] = window.cloneItemForTooltip(shield);
 
   let dagger = {
-    id: window.idCounter++,
-    name: `Kris of Swiftness (Lv. 21)`,
-    type: "subweapon",
-    subType: "dagger",
-    statsRolled: 1, // Rare (1★)
-    temperLevel: 0,
-    stageLevel: 21,
-    atk: 0, maxHp: 0, def: 0, moveSpeed: 0, critChance: 0, critDamage: 0, block: 0, parry: 0,
-    baseAtk: 10, baseMaxHp: 0, baseDef: 0, baseMoveSpeed: 0, baseBlock: 0, baseParry: 0.05, baseInt: 0,
-    bonusAtk: 6, bonusMaxHp: 0, bonusDef: 0, bonusMoveSpeed: 4, bonusCritChance: 0.02, bonusCritDamage: 0,
-    bonusBlock: 0, bonusParry: 0.015, bonusStr: 0, bonusDex: 8, bonusInt: 0,
-    str: 0, dex: 0, int: 0,
+      id: window.idCounter++,
+      name: `Kris of Swiftness (Lv. 11)`,
+      type: "subweapon",
+      subType: "dagger",
+      statsRolled: 1, // Rare (1★)
+      temperLevel: 0,
+      stageLevel: 2, // Map precisely to StageScale 2 (Levels 11-20)
+    atk: 0,
+    maxHp: 0,
+    def: 0,
+    moveSpeed: 0,
+    critChance: 0,
+    critDamage: 0,
+    block: 0,
+    parry: 0,
+    baseAtk: 5,
+    baseMaxHp: 0,
+    baseDef: 0,
+    baseMoveSpeed: 0,
+    baseBlock: 0,
+    baseParry: 0.05,
+    baseInt: 0,
+    bonusAtk: 3,
+    bonusMaxHp: 0,
+    bonusDef: 0,
+    bonusMoveSpeed: 2,
+    bonusCritChance: 0.01,
+    bonusCritDamage: 0,
+    bonusBlock: 0,
+    bonusParry: 0.008,
+    bonusStr: 0,
+    bonusDex: 4,
+    bonusInt: 0,
+    str: 0,
+    dex: 0,
+    int: 0,
     noun: "Kris",
     setName: "Windrunner",
   };
@@ -14832,18 +14880,44 @@ window.openSubweaponOfChoiceModal = function () {
   window.frozenItemDb[dagger.id] = window.cloneItemForTooltip(dagger);
 
   let tome = {
-    id: window.idCounter++,
-    name: `Grimoire of Wisdom (Lv. 21)`,
-    type: "subweapon",
-    subType: "tome",
-    statsRolled: 1, // Rare (1★)
-    temperLevel: 0,
-    stageLevel: 21,
-    atk: 0, maxHp: 0, def: 0, moveSpeed: 0, critChance: 0, critDamage: 0, block: 0, parry: 0,
-    baseAtk: 5, baseMaxHp: 0, baseDef: 0, baseMoveSpeed: 0, baseBlock: 0, baseParry: 0, baseInt: 15,
-    bonusAtk: 0, bonusMaxHp: 0, bonusDef: 0, bonusMoveSpeed: 0, bonusCritChance: 0, bonusCritDamage: 0.08,
-    bonusBlock: 0, bonusParry: 0, bonusActiveSpeed: 0.03, bonusIdleSpeed: 0, bonusStr: 0, bonusDex: 0, bonusInt: 8,
-    str: 0, dex: 0, int: 0,
+      id: window.idCounter++,
+      name: `Grimoire of Wisdom (Lv. 11)`,
+      type: "subweapon",
+      subType: "tome",
+      statsRolled: 1, // Rare (1★)
+      temperLevel: 0,
+      stageLevel: 2, // Map precisely to StageScale 2 (Levels 11-20)
+    atk: 0,
+    maxHp: 0,
+    def: 0,
+    moveSpeed: 0,
+    critChance: 0,
+    critDamage: 0,
+    block: 0,
+    parry: 0,
+    baseAtk: 3,
+    baseMaxHp: 0,
+    baseDef: 0,
+    baseMoveSpeed: 0,
+    baseBlock: 0,
+    baseParry: 0,
+    baseInt: 8,
+    bonusAtk: 0,
+    bonusMaxHp: 0,
+    bonusDef: 0,
+    bonusMoveSpeed: 0,
+    bonusCritChance: 0,
+    bonusCritDamage: 0.04,
+    bonusBlock: 0,
+    bonusParry: 0,
+    bonusActiveSpeed: 0.015,
+    bonusIdleSpeed: 0,
+    bonusStr: 0,
+    bonusDex: 0,
+    bonusInt: 4,
+    str: 0,
+    dex: 0,
+    int: 0,
     noun: "Grimoire",
     setName: "Scholar",
   };
@@ -14938,17 +15012,17 @@ window.openSubweaponOfChoiceModal = function () {
   overlay.innerHTML = `
     <div style="text-align:center; color:white; animation: toastFadeIn 0.3s ease-out; max-width:580px; width:95%;">
       <div style="font-size: 16px; font-weight: 950; color:#f1c40f; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 8px rgba(241,196,15,0.3); margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:6px;">
-        ${medalHeaderSvg} CHOOSE YOUR SUB-WEAPON (STAGE 20 REWARD) ${medalHeaderSvg}
+        ${medalHeaderSvg} CHOOSE YOUR SUB-WEAPON (STAGE 10 REWARD) ${medalHeaderSvg}
       </div>
       <div style="font-size:10.5px; color:#aaa; margin-bottom:20px; white-space:normal; line-height:1.45;">
-        You have beaten the Stage 20 Warden! Select your offhand specialization. Hover or hold any card to inspect its full stats.
+        You have beaten the Stage 10 Warden! Select your offhand specialization. Hover or hold any card to inspect its full stats.
       </div>
       <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
         ${shieldCardHtml}
         ${daggerCardHtml}
         ${tomeCardHtml}
       </div>
-      <div style="font-size:9.5px; color:#888; font-family:monospace;">(Item will scale to Level 21 / StageScale 3 as a milestone bonus)</div>
+      <div style="font-size:9.5px; color:#888; font-family:monospace;">(Item will scale to Level 11 / StageScale 2 as a milestone bonus)</div>
     </div>
   `;
 
@@ -14963,13 +15037,22 @@ window.openSubweaponOfChoiceModal = function () {
     if (!window.equippedSlots.subweapon) {
       window.equippedSlots.subweapon = selectedItem;
       selectedItem.isEquippedSlot = "subweapon";
-      window.pushHeaderToast(`Equipped ${selectedItem.name}!`, window.getTierColor(1));
+      window.pushHeaderToast(
+        `Equipped ${selectedItem.name}!`,
+        window.getTierColor(1),
+      );
     } else {
       window.inventory.EQUIP.push(selectedItem);
-      window.pushHeaderToast(`Stored ${selectedItem.name} in Sack!`, window.getTierColor(1));
+      window.pushHeaderToast(
+        `Stored ${selectedItem.name} in Sack!`,
+        window.getTierColor(1),
+      );
     }
 
-    window.pushLog(`<strong style="color:#f1c40f;">[MILESTONE] Stage 20 Beaten! Claimed Sub-weapon of choice: <span style="color:${window.getTierColor(1)};">${selectedItem.name}</span></strong>`, selectedItem.id);
+    window.pushLog(
+      `<strong style="color:#f1c40f;">[MILESTONE] Stage 10 Beaten! Claimed Sub-weapon of choice: <span style="color:${window.getTierColor(1)};">${selectedItem.name}</span></strong>`,
+      selectedItem.id,
+    );
 
     overlay.remove();
     if (window.SoundManager) window.SoundManager.play("revive");

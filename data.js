@@ -348,27 +348,27 @@ window.GameState = {
     let xpReq = BigNum.from(window.playerStats.xpReq || 100);
 
     // Process potential consecutive level-ups via a loop (important for offline catch-up)
-        while (xp.gte(xpReq)) {
-          xp = xp.sub(xpReq);
-          window.playerStats.level++;
-          window.playerStats.sp += 6; // Award 6 Skill Points per level up
+    while (xp.gte(xpReq)) {
+      xp = xp.sub(xpReq);
+      window.playerStats.level++;
+      window.playerStats.sp += 6; // Award 6 Skill Points per level up
 
-          // Keep active UI Attribute Matrix draft allocations in sync with each consecutive level-up
-          if (window.draftAllocations !== null) {
-            window.draftSP += 6;
-          }
+      // Keep active UI Attribute Matrix draft allocations in sync with each consecutive level-up
+      if (window.draftAllocations !== null) {
+        window.draftSP += 6;
+      }
 
-          // Calculate next xpReq safely using BigNum exponential power scaling
-          xpReq = BigNum.from(100).mul(
-            BigNum.from(1.2).pow(window.playerStats.level - 1),
-          );
-          leveledUp = true;
-        }
+      // Calculate next xpReq safely using BigNum exponential power scaling
+      xpReq = BigNum.from(100).mul(
+        BigNum.from(1.2).pow(window.playerStats.level - 1),
+      );
+      leveledUp = true;
+    }
 
-        if (leveledUp) {
-          window.playerStats.xp = xp;
-          window.playerStats.xpReq = xpReq;
-        }
+    if (leveledUp) {
+      window.playerStats.xp = xp;
+      window.playerStats.xpReq = xpReq;
+    }
 
     window.triggerLevelUpEffect = function () {
       let heroX = window.hero.x + 12;
@@ -515,12 +515,12 @@ window.getAchievementProgress = function (ach) {
     return maxHeld;
   }
   if (ach.isSingleTier) {
-      if (ach.id === "sing_murphys_law") {
-        let slots = Object.values(window.playerStats.slotUpgrades || {});
-        return slots.some(lvl => lvl >= 50) ? 1 : 0;
-      }
-      if (ach.id === "sing_against_odds")
-        return window.playerStats.hasTriggeredAgainstOdds ? 1 : 0;
+    if (ach.id === "sing_murphys_law") {
+      let slots = Object.values(window.playerStats.slotUpgrades || {});
+      return slots.some((lvl) => lvl >= 50) ? 1 : 0;
+    }
+    if (ach.id === "sing_against_odds")
+      return window.playerStats.hasTriggeredAgainstOdds ? 1 : 0;
     if (ach.id === "sing_lucky_seven")
       return window.playerStats.hasTriggeredLuckySeven ? 1 : 0;
     if (ach.id === "sing_back_brink")
@@ -571,12 +571,12 @@ window.getAchievementProgress = function (ach) {
     if (ach.id === "sing_speedrun")
       return window.playerStats.hasTriggeredSpeedrun ? 1 : 0;
     if (ach.id === "sing_exact_change")
-          return window.playerStats.hasTriggeredExactChange ? 1 : 0;
-        if (ach.id === "sing_unfortunate_soul") {
-          let slots = Object.values(window.playerStats.slotUpgrades || {});
-          return (slots.length >= 10 && slots.every(lvl => lvl >= 15)) ? 1 : 0;
-        }
-        if (ach.id === "sing_alchemical_synth")
+      return window.playerStats.hasTriggeredExactChange ? 1 : 0;
+    if (ach.id === "sing_unfortunate_soul") {
+      let slots = Object.values(window.playerStats.slotUpgrades || {});
+      return slots.length >= 10 && slots.every((lvl) => lvl >= 15) ? 1 : 0;
+    }
+    if (ach.id === "sing_alchemical_synth")
       return window.playerStats.hasTriggeredAlchemicalSynthesis ? 1 : 0;
     if (ach.id === "sing_patient_shepherd")
       return window.playerStats.hasTriggeredPatientShepherd ? 1 : 0;
@@ -1549,13 +1549,13 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.rareSpawn = 0.01 + (excessRare * scale) / (excessRare + scale);
 
   // Set default targets required based on current active gameplay mode
-  if (!window.playerStats.isCrucibleMode && !window.playerStats.isDungeonMode) {
-    window.playerStats.targetsRequired = 5;
-  } else if (window.playerStats.isCrucibleMode) {
-    window.playerStats.targetsRequired = 3; // Exactly 3 enemies per wave in the Crucible!
-  } else if (window.playerStats.isDungeonMode) {
-    window.playerStats.targetsRequired = 5; // Standard 5 for Infinite Caverns
-  }
+    if (!window.playerStats.isCrucibleMode && !window.playerStats.isDungeonMode) {
+      window.playerStats.targetsRequired = 3; // Reduced from 5 to 3
+    } else if (window.playerStats.isCrucibleMode) {
+      window.playerStats.targetsRequired = 3; // Exactly 3 enemies per wave in the Crucible!
+    } else if (window.playerStats.isDungeonMode) {
+      window.playerStats.targetsRequired = 3; // Standard 3 for Infinite Caverns (Reduced from 5)
+    }
 
   // UNIQUE: Warp-Core Greaves "Time Dilation" missing health attack speed scaling
   if (
@@ -2052,9 +2052,9 @@ window.playerStats = {
   stage: 1,
   maxStage: 1,
   killCount: 0,
-  totalLifetimeKills: 0,
-  targetsRequired: 5,
-  isBossMode: false,
+    totalLifetimeKills: 0,
+    targetsRequired: 3, // Reduced from 5 to 3 for snappier stage runs
+    isBossMode: false,
   isFarmingLoop: false,
   isUberBoss: false,
   currentUberBoss: "guardian",
@@ -2212,28 +2212,28 @@ window.playerStats = {
   equippedCostume: "knight",
   unlockedCostumes: ["knight"],
   playerName: "Guest",
-    clanId: null,
-    clanName: null,
-    clanEmblem: null,
-    clanLevel: 1,
-    clanSkills: {
-      steel_phalanx: 0,
-      vitality_well: 0,
-      prosperity_accord: 0,
-      voyagers_guidance: 0,
-      aetheric_wisdom: 0,
-      clan_supply_depot: 0,
-    },
-    clanContribution: 0,
-    paragonLevel: 0,
-    spectralCodex: [],
-    activeSpectralResonance: null,
-    projectSpectralCosmetic: true,
-    totalGoldEarned: new BigNum(0, 0),
-    showDpsOverlay: false,
-    dpsOverlayX: null,
-    dpsOverlayY: null,
-  };
+  clanId: null,
+  clanName: null,
+  clanEmblem: null,
+  clanLevel: 1,
+  clanSkills: {
+    steel_phalanx: 0,
+    vitality_well: 0,
+    prosperity_accord: 0,
+    voyagers_guidance: 0,
+    aetheric_wisdom: 0,
+    clan_supply_depot: 0,
+  },
+  clanContribution: 0,
+  paragonLevel: 0,
+  spectralCodex: [],
+  activeSpectralResonance: null,
+  projectSpectralCosmetic: true,
+  totalGoldEarned: new BigNum(0, 0),
+  showDpsOverlay: false,
+  dpsOverlayX: null,
+  dpsOverlayY: null,
+};
 
 // Initialize the QuestSystem namespace and define generateDailyMissions
 window.QuestSystem = {
@@ -2265,11 +2265,11 @@ window.QuestSystem = {
         unit: "fairies",
       },
       {
-              type: "tempers",
-              label: "Attune equipment slots",
-              targetBase: 1,
-              unit: "slots",
-            },
+        type: "tempers",
+        label: "Attune equipment slots",
+        targetBase: 1,
+        unit: "slots",
+      },
       {
         type: "reforges",
         label: "Reforge gear modifiers",
@@ -2359,11 +2359,11 @@ Object.assign(window.QuestSystem, {
         unit: "enemies",
       },
       {
-              type: "tempers",
-              label: "Master slot attunement",
-              targetBase: 15,
-              unit: "slots",
-            },
+        type: "tempers",
+        label: "Master slot attunement",
+        targetBase: 15,
+        unit: "slots",
+      },
     ];
 
     pool.sort(() => Math.random() - 0.5);

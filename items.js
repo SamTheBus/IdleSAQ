@@ -669,8 +669,8 @@ window.renderForgeTab = function () {
 
       <button class="forge-anvil-button" style="width:100%; margin-top:15px; border-color:#9b59b6; background:linear-gradient(135deg, #4a154b, #0c0812);" ${canAfford ? "" : "disabled"} onclick="window.temperItem()" onpointerdown="window.temperItem()">Attune Slot</button>
           `;
-          return;
-        }
+    return;
+  }
 
   // Draw displays for the remaining modes
   let allValidItems = [];
@@ -759,21 +759,21 @@ window.renderForgeTab = function () {
   }
 
   // Context-Aware Instructions Revamp
-    if (
-      !window.forgeSelectedItem ||
-      ((window.forgeMode === "reforge" ||
-        window.forgeMode === "tier" ||
-        window.forgeMode === "enchant" ||
-        window.forgeMode === "reset_enchant" ||
-        window.forgeMode === "set") &&
-        window.forgeSelectedItem.type === "artifact") ||
-      (window.forgeMode === "shatter" &&
-        !window.isItemUnique(window.forgeSelectedItem))
-    ) {
-      let mode = window.forgeMode || "temper";
+  if (
+    !window.forgeSelectedItem ||
+    ((window.forgeMode === "reforge" ||
+      window.forgeMode === "tier" ||
+      window.forgeMode === "enchant" ||
+      window.forgeMode === "reset_enchant" ||
+      window.forgeMode === "set") &&
+      window.forgeSelectedItem.type === "artifact") ||
+    (window.forgeMode === "shatter" &&
+      !window.isItemUnique(window.forgeSelectedItem))
+  ) {
+    let mode = window.forgeMode || "temper";
 
-      // 1. Hand-Drawn Warning Vector Icon (No emojis)
-      let warningIconSvg = `
+    // 1. Hand-Drawn Warning Vector Icon (No emojis)
+    let warningIconSvg = `
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
           <line x1="12" y1="9" x2="12" y2="13" />
@@ -781,181 +781,232 @@ window.renderForgeTab = function () {
         </svg>
       `;
 
-      // 2. Build Ineligible Item Warning Banners
-      let warningHtml = "";
-      if (window.forgeSelectedItem) {
-        if (window.forgeSelectedItem.type === "artifact") {
-          warningHtml = `
+    // 2. Build Ineligible Item Warning Banners
+    let warningHtml = "";
+    if (window.forgeSelectedItem) {
+      if (window.forgeSelectedItem.type === "artifact") {
+        warningHtml = `
             <div style="background:rgba(231,76,60,0.06); border:1.5px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; text-align:center; color:#ff7675; line-height:1.4; white-space:normal; display:flex; align-items:center; justify-content:center; gap:4px;">
               <div>
                 ${warningIconSvg} <b>INELIGIBLE ITEM:</b> Unique Artifacts cannot be modified in <b>${mode.toUpperCase().replace("_", " ")}</b> mode! Select a standard weapon or armor piece.
               </div>
             </div>
           `;
-        } else if (mode === "shatter" && !window.isItemUnique(window.forgeSelectedItem)) {
-          warningHtml = `
+      } else if (
+        mode === "shatter" &&
+        !window.isItemUnique(window.forgeSelectedItem)
+      ) {
+        warningHtml = `
             <div style="background:rgba(231,76,60,0.06); border:1.5px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; text-align:center; color:#ff7675; line-height:1.4; white-space:normal; display:flex; align-items:center; justify-content:center; gap:4px;">
               <div>
                 ${warningIconSvg} <b>INELIGIBLE ITEM:</b> Only Unique equipment can be shattered into the Codex! Select a Unique Weapon, Subweapon, or Armor piece.
               </div>
             </div>
           `;
-        }
       }
+    }
 
-      // 3. Mini Vector Icons for Mode Headers (No emojis)
-      let attunementHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>`;
-      let reforgeHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e44ad" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>`;
-      let tierHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" /></svg>`;
-      let setHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>`;
-      let enchantHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>`;
-      let resetHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><path d="M12 2v20M17 5l-5-5-5 5" /></svg>`;
-      let shatterHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><polygon points="12,2 22,12 12,22 2,12" /></svg>`;
+    // 3. Mini Vector Icons for Mode Headers (No emojis)
+    let attunementHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>`;
+    let reforgeHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e44ad" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>`;
+    let tierHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" /></svg>`;
+    let setHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>`;
+    let enchantHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>`;
+    let resetHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><path d="M12 2v20M17 5l-5-5-5 5" /></svg>`;
+    let shatterHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><polygon points="12,2 22,12 12,22 2,12" /></svg>`;
 
-      // 4. Map Dynamic Tutorial Metadata per active mode
-      let tutorials = {
-        temper: {
-          title: "Slot Attunement",
-          desc: "Attuning a gear slot permanently multiplies the stats of any item equipped in that slot. This multiplier is bound to the slot itself and persists across item swaps and prestige resets!",
-          icon: attunementHeaderSvg,
-          color: "#9b59b6",
-          steps: [
-            "Select a target equipment slot from the list on the right.",
-            "Check the Gold and Material requirements below.",
-            "Click 'Harness Heat' to upgrade the slot level (+1% stats per level)."
-          ],
-          tip: "Highly attuned slots (e.g. Lv. 50+) make even common items extremely powerful!"
-        },
-        reforge: {
-          title: "Attribute Reforger",
-          desc: "Re-roll individual affix modifiers on your equipment to customize your stats. Perfect for tuning Crit, Block, or Speed.",
-          icon: reforgeHeaderSvg,
-          color: "#8e44ad",
-          steps: [
-            "Select a piece of equipment from the list on the right.",
-            "Choose the specific modifier line you wish to re-roll.",
-            "Click 'Execute Reforge' to spin for a new random modifier."
-          ],
-          tip: "Once you reforge a line, all other lines on that item become permanently locked! Reforging requires 1x <b>Overlord's Sigil</b> and Gold."
-        },
-        tier: {
-          title: "Star Quality Awakening",
-          desc: "Ascend the star quality (0★ to 5★) of your weapons and armor. Increasing rarity unlocks new slots for random bonus modifiers.",
-          icon: tierHeaderSvg,
-          color: "#e67e22",
-          steps: [
-            "Select an under-5★ item from the list on the right.",
-            "Gather the required Eridium Shards and tier-matching scraps.",
-            "Click 'Awaken Rarity' to elevate its tier and unlock a new random stat line!"
-          ],
-          tip: "In addition to a new modifier, Tiering Up increases the item's base parameters by +10%!"
-        },
-        set: {
-          title: "Set Resonance Matrix",
-          desc: "Shift the named set affiliation (e.g. Vanguard, Colossus) on your gear to complete matching 2-piece and 3-piece set bonuses.",
-          icon: setHeaderSvg,
-          color: "#2ecc71",
-          steps: [
-            "Select any set-affinity equipment piece from the right.",
-            "Ensure you have enough Monster Souls and Gold.",
-            "Click 'Re-Resonate Set' to roll a different set bonus at random."
-          ],
-          tip: "Equipping matching sets provides massive multipliers to Attack, Health, Defense, and Crit stats!"
-        },
-        enchant: {
-          title: "Celestial Enchantment",
-          desc: "Infuse powerful magical runes into high-tier attuned equipment. Enchanting targets an existing stat line at random and amplifies its value by a whopping +25%!",
-          icon: enchantHeaderSvg,
-          color: "#9b59b6",
-          steps: [
-            "Select a 2★+ item equipped in a slot attuned to at least Level 50.",
-            "Ensure you have 1x <b>Overlord's Sigil</b> available.",
-            "Click 'Infuse Enchantment' to roll a +25% boost on one of its stats."
-          ],
-          tip: "Magic (2★) holds 1, Epic (3★) holds 2, Legendary (4★) holds 3, and Mythic (5★) holds 4 maximum enchantments."
-        },
-        reset_enchant: {
-          title: "Arcane Purge",
-          desc: "Dispel and clear active enchantments from an item, restoring its stats to their original pre-enchanted baseline so you can re-enchant.",
-          icon: resetHeaderSvg,
-          color: "#c0392b",
-          steps: [
-            "Select an enchanted item from the list on the right.",
-            "Review the Gold cost required to purge the magical seals.",
-            "Click 'Purge Enchantments' to safely wipe the runes."
-          ],
-          tip: "Resetting enchantments frees up all slots, but spent materials are non-refundable."
-        },
-        shatter: {
-          title: "Spectral Shatter",
-          desc: "Sacrifice unequipped Unique weapons or armor to permanently unlock their active passive effects inside your Spectral Codex!",
-          icon: shatterHeaderSvg,
-          color: "#e74c3c",
-          steps: [
-            "Select an unequipped Unique item from the list on the right.",
-            "Check the high-end material and Gold costs below.",
-            "Click 'Shatter Unique Essence' to extract its passive into your permanent Codex."
-          ],
-          tip: "Unlocking a passive inside the Codex allows you to activate its unique modifiers without needing to equip the item!"
-        }
-      };
+    // 4. Map Dynamic Tutorial Metadata per active mode
+    let tutorials = {
+      temper: {
+        title: "Slot Attunement",
+        desc: "Attuning a gear slot permanently multiplies the stats of any item equipped in that slot. This multiplier is bound to the slot itself and persists across item swaps and prestige resets!",
+        icon: attunementHeaderSvg,
+        color: "#9b59b6",
+        steps: [
+          "Select a target equipment slot from the list on the right.",
+          "Check the Gold and Material requirements below.",
+          "Click 'Harness Heat' to upgrade the slot level (+1% stats per level).",
+        ],
+        tip: "Highly attuned slots (e.g. Lv. 50+) make even common items extremely powerful!",
+      },
+      reforge: {
+        title: "Attribute Reforger",
+        desc: "Re-roll individual affix modifiers on your equipment to customize your stats. Perfect for tuning Crit, Block, or Speed.",
+        icon: reforgeHeaderSvg,
+        color: "#8e44ad",
+        steps: [
+          "Select a piece of equipment from the list on the right.",
+          "Choose the specific modifier line you wish to re-roll.",
+          "Click 'Execute Reforge' to spin for a new random modifier.",
+        ],
+        tip: "Once you reforge a line, all other lines on that item become permanently locked! Reforging requires 1x <b>Overlord's Sigil</b> and Gold.",
+      },
+      tier: {
+        title: "Star Quality Awakening",
+        desc: "Ascend the star quality (0★ to 5★) of your weapons and armor. Increasing rarity unlocks new slots for random bonus modifiers.",
+        icon: tierHeaderSvg,
+        color: "#e67e22",
+        steps: [
+          "Select an under-5★ item from the list on the right.",
+          "Gather the required Eridium Shards and tier-matching scraps.",
+          "Click 'Awaken Rarity' to elevate its tier and unlock a new random stat line!",
+        ],
+        tip: "In addition to a new modifier, Tiering Up increases the item's base parameters by +10%!",
+      },
+      set: {
+        title: "Set Resonance Matrix",
+        desc: "Shift the named set affiliation (e.g. Vanguard, Colossus) on your gear to complete matching 2-piece and 3-piece set bonuses.",
+        icon: setHeaderSvg,
+        color: "#2ecc71",
+        steps: [
+          "Select any set-affinity equipment piece from the right.",
+          "Ensure you have enough Monster Souls and Gold.",
+          "Click 'Re-Resonate Set' to roll a different set bonus at random.",
+        ],
+        tip: "Equipping matching sets provides massive multipliers to Attack, Health, Defense, and Crit stats!",
+      },
+      enchant: {
+        title: "Celestial Enchantment",
+        desc: "Infuse powerful magical runes into high-tier attuned equipment. Enchanting targets an existing stat line at random and amplifies its value by a whopping +25%!",
+        icon: enchantHeaderSvg,
+        color: "#9b59b6",
+        steps: [
+          "Select a 2★+ item equipped in a slot attuned to at least Level 50.",
+          "Ensure you have 1x <b>Overlord's Sigil</b> available.",
+          "Click 'Infuse Enchantment' to roll a +25% boost on one of its stats.",
+        ],
+        tip: "Magic (2★) holds 1, Epic (3★) holds 2, Legendary (4★) holds 3, and Mythic (5★) holds 4 maximum enchantments.",
+      },
+      reset_enchant: {
+        title: "Arcane Purge",
+        desc: "Dispel and clear active enchantments from an item, restoring its stats to their original pre-enchanted baseline so you can re-enchant.",
+        icon: resetHeaderSvg,
+        color: "#c0392b",
+        steps: [
+          "Select an enchanted item from the list on the right.",
+          "Review the Gold cost required to purge the magical seals.",
+          "Click 'Purge Enchantments' to safely wipe the runes.",
+        ],
+        tip: "Resetting enchantments frees up all slots, but spent materials are non-refundable.",
+      },
+      shatter: {
+        title: "Spectral Shatter",
+        desc: "Sacrifice unequipped Unique weapons or armor to permanently unlock their active passive effects inside your Spectral Codex!",
+        icon: shatterHeaderSvg,
+        color: "#e74c3c",
+        steps: [
+          "Select an unequipped Unique item from the list on the right.",
+          "Check the high-end material and Gold costs below.",
+          "Click 'Shatter Unique Essence' to extract its passive into your permanent Codex.",
+        ],
+        tip: "Unlocking a passive inside the Codex allows you to activate its unique modifiers without needing to equip the item!",
+      },
+    };
 
-      let tut = tutorials[mode] || tutorials.temper;
+    let tut = tutorials[mode] || tutorials.temper;
 
-      // 5. Retrieve Live Crafting Material Balances
-      let goldOwned = window.playerStats.coins || 0;
-      let mSouls = window.inventory.ETC["Monster Soul"] || 0;
-      let lSouls = window.inventory.ETC["Luminous Soul"] || 0;
-      let eridium = window.inventory.ETC["Eridium Shard"] || 0;
-      let essence = window.inventory.ETC["Astral Essence"] || 0;
-      let sigils = window.inventory.ETC["Overlord's Sigil"] || 0;
-      let cores = window.inventory.ETC["Catalyst Core"] || 0;
+    // 5. Retrieve Live Crafting Material Balances
+    let goldOwned = window.playerStats.coins || 0;
+    let mSouls = window.inventory.ETC["Monster Soul"] || 0;
+    let lSouls = window.inventory.ETC["Luminous Soul"] || 0;
+    let eridium = window.inventory.ETC["Eridium Shard"] || 0;
+    let essence = window.inventory.ETC["Astral Essence"] || 0;
+    let sigils = window.inventory.ETC["Overlord's Sigil"] || 0;
+    let cores = window.inventory.ETC["Catalyst Core"] || 0;
 
-      let rareScrap = window.inventory.ETC["Rare Scrap"] || 0;
-      let magicScrap = window.inventory.ETC["Magic Scrap"] || 0;
-      let epicScrap = window.inventory.ETC["Epic Scrap"] || 0;
-      let legendaryScrap = window.inventory.ETC["Legendary Scrap"] || 0;
-      let mythicScrap = window.inventory.ETC["Mythic Scrap"] || 0;
+    let rareScrap = window.inventory.ETC["Rare Scrap"] || 0;
+    let magicScrap = window.inventory.ETC["Magic Scrap"] || 0;
+    let epicScrap = window.inventory.ETC["Epic Scrap"] || 0;
+    let legendaryScrap = window.inventory.ETC["Legendary Scrap"] || 0;
+    let mythicScrap = window.inventory.ETC["Mythic Scrap"] || 0;
 
-      // 6. Draw Crisp 12px Miniature Vector Icons for Materials Grid (No emojis)
-      let goldSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><circle cx="6" cy="6" r="5" fill="#f1c40f" stroke="#000" stroke-width="0.8"/><circle cx="6" cy="6" r="2.5" fill="none" stroke="#b7950b" stroke-width="0.6"/></svg>`;
-      let mSoulsSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><path d="M6 1.5 C6 1.5, 2 6, 2 9 C2 11, 3.8 11.5, 6 11.5 C8.2 11.5, 10 11, 10 9 C10 6, 6 1.5, 6 1.5 Z" fill="#a0aec0" stroke="#000" stroke-width="0.8"/></svg>`;
-      let lSoulsSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><path d="M6 1.5 C6 1.5, 2 6, 2 9 C2 11, 3.8 11.5, 6 11.5 C8.2 11.5, 10 11, 10 9 C10 6, 6 1.5, 6 1.5 Z" fill="#ffb6c1" stroke="#000" stroke-width="0.8"/></svg>`;
-      let eridiumSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="6,1 11,6 6,11 1,6" fill="#8e44ad" stroke="#000" stroke-width="0.8"/></svg>`;
-      let essenceSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="6,1 8,4.5 11,5 8.5,7.5 9,11 6,9.5 3,11 3.5,7.5 1,5 4,4.5" fill="#9b59b6" stroke="#000" stroke-width="0.8"/></svg>`;
-      let sigilsSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><path d="M6 1.5 L9.5 5 L8 9 L6 11.5 L4 9 L2.5 5 Z" fill="#1abc9c" stroke="#000" stroke-width="0.8"/></svg>`;
-      let coresSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><rect x="2.2" y="2.2" width="7.6" height="7.6" rx="1" fill="#2ecc71" stroke="#000" stroke-width="0.8"/><rect x="4.5" y="4.5" width="3" height="3" fill="#fff" stroke="#111" stroke-width="0.5"/></svg>`;
-      let rareScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#3498db" stroke="#000" stroke-width="0.8"/></svg>`;
-      let magicScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#9b59b6" stroke="#000" stroke-width="0.8"/></svg>`;
-      let epicScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#e67e22" stroke="#000" stroke-width="0.8"/></svg>`;
-      let legendaryScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#f1c40f" stroke="#000" stroke-width="0.8"/></svg>`;
-      let mythicScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#e74c3c" stroke="#000" stroke-width="0.8"/></svg>`;
+    // 6. Draw Crisp 12px Miniature Vector Icons for Materials Grid (No emojis)
+    let goldSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><circle cx="6" cy="6" r="5" fill="#f1c40f" stroke="#000" stroke-width="0.8"/><circle cx="6" cy="6" r="2.5" fill="none" stroke="#b7950b" stroke-width="0.6"/></svg>`;
+    let mSoulsSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><path d="M6 1.5 C6 1.5, 2 6, 2 9 C2 11, 3.8 11.5, 6 11.5 C8.2 11.5, 10 11, 10 9 C10 6, 6 1.5, 6 1.5 Z" fill="#a0aec0" stroke="#000" stroke-width="0.8"/></svg>`;
+    let lSoulsSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><path d="M6 1.5 C6 1.5, 2 6, 2 9 C2 11, 3.8 11.5, 6 11.5 C8.2 11.5, 10 11, 10 9 C10 6, 6 1.5, 6 1.5 Z" fill="#ffb6c1" stroke="#000" stroke-width="0.8"/></svg>`;
+    let eridiumSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="6,1 11,6 6,11 1,6" fill="#8e44ad" stroke="#000" stroke-width="0.8"/></svg>`;
+    let essenceSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="6,1 8,4.5 11,5 8.5,7.5 9,11 6,9.5 3,11 3.5,7.5 1,5 4,4.5" fill="#9b59b6" stroke="#000" stroke-width="0.8"/></svg>`;
+    let sigilsSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><path d="M6 1.5 L9.5 5 L8 9 L6 11.5 L4 9 L2.5 5 Z" fill="#1abc9c" stroke="#000" stroke-width="0.8"/></svg>`;
+    let coresSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><rect x="2.2" y="2.2" width="7.6" height="7.6" rx="1" fill="#2ecc71" stroke="#000" stroke-width="0.8"/><rect x="4.5" y="4.5" width="3" height="3" fill="#fff" stroke="#111" stroke-width="0.5"/></svg>`;
+    let rareScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#3498db" stroke="#000" stroke-width="0.8"/></svg>`;
+    let magicScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#9b59b6" stroke="#000" stroke-width="0.8"/></svg>`;
+    let epicScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#e67e22" stroke="#000" stroke-width="0.8"/></svg>`;
+    let legendaryScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#f1c40f" stroke="#000" stroke-width="0.8"/></svg>`;
+    let mythicScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#e74c3c" stroke="#000" stroke-width="0.8"/></svg>`;
 
-      let materialsList = [
-        { name: "Gold Coins", qty: goldOwned, color: "#f1c40f", isBigNum: true, svg: goldSvg },
-        { name: "Monster Souls", qty: mSouls, color: "#a0aec0", svg: mSoulsSvg },
-        { name: "Luminous Souls", qty: lSouls, color: "#ffb6c1", svg: lSoulsSvg },
-        { name: "Eridium Shards", qty: eridium, color: "#8e44ad", svg: eridiumSvg },
-        { name: "Astral Essence", qty: essence, color: "#9b59b6", svg: essenceSvg },
-        { name: "Overlord Sigils", qty: sigils, color: "#1abc9c", svg: sigilsSvg },
-        { name: "Catalyst Cores", qty: cores, color: "#2ecc71", svg: coresSvg },
-        { name: "Rare Scraps", qty: rareScrap, color: "#3498db", svg: rareScrapSvg },
-        { name: "Magic Scraps", qty: magicScrap, color: "#9b59b6", svg: magicScrapSvg },
-        { name: "Epic Scraps", qty: epicScrap, color: "#e67e22", svg: epicScrapSvg },
-        { name: "Legendary Scraps", qty: legendaryScrap, color: "#f1c40f", svg: legendaryScrapSvg },
-        { name: "Mythic Scraps", qty: mythicScrap, color: "#e74c3c", svg: mythicScrapSvg }
-      ];
+    let materialsList = [
+      {
+        name: "Gold Coins",
+        qty: goldOwned,
+        color: "#f1c40f",
+        isBigNum: true,
+        svg: goldSvg,
+      },
+      { name: "Monster Souls", qty: mSouls, color: "#a0aec0", svg: mSoulsSvg },
+      { name: "Luminous Souls", qty: lSouls, color: "#ffb6c1", svg: lSoulsSvg },
+      {
+        name: "Eridium Shards",
+        qty: eridium,
+        color: "#8e44ad",
+        svg: eridiumSvg,
+      },
+      {
+        name: "Astral Essence",
+        qty: essence,
+        color: "#9b59b6",
+        svg: essenceSvg,
+      },
+      {
+        name: "Overlord Sigils",
+        qty: sigils,
+        color: "#1abc9c",
+        svg: sigilsSvg,
+      },
+      { name: "Catalyst Cores", qty: cores, color: "#2ecc71", svg: coresSvg },
+      {
+        name: "Rare Scraps",
+        qty: rareScrap,
+        color: "#3498db",
+        svg: rareScrapSvg,
+      },
+      {
+        name: "Magic Scraps",
+        qty: magicScrap,
+        color: "#9b59b6",
+        svg: magicScrapSvg,
+      },
+      {
+        name: "Epic Scraps",
+        qty: epicScrap,
+        color: "#e67e22",
+        svg: epicScrapSvg,
+      },
+      {
+        name: "Legendary Scraps",
+        qty: legendaryScrap,
+        color: "#f1c40f",
+        svg: legendaryScrapSvg,
+      },
+      {
+        name: "Mythic Scraps",
+        qty: mythicScrap,
+        color: "#e74c3c",
+        svg: mythicScrapSvg,
+      },
+    ];
 
-      // Build the non-wrapping responsive inventory grid (fading unowned slots to opacity 0.35)
-      let matGridHtml = `<div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:6px; font-family:monospace; font-size:10px; text-align:left;">`;
-      materialsList.forEach(m => {
-        let countText = m.isBigNum ? window.formatNumber(m.qty) : m.qty.toLocaleString();
-        let hasItem = m.isBigNum ? BigNum.from(m.qty).gt(0) : m.qty > 0;
-        let textColor = hasItem ? "#f1f5f9" : "#444";
-        let qtyColor = hasItem ? m.color : "#444";
-        let opacity = hasItem ? "1.0" : "0.35";
+    // Build the non-wrapping responsive inventory grid (fading unowned slots to opacity 0.35)
+    let matGridHtml = `<div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:6px; font-family:monospace; font-size:10px; text-align:left;">`;
+    materialsList.forEach((m) => {
+      let countText = m.isBigNum
+        ? window.formatNumber(m.qty)
+        : m.qty.toLocaleString();
+      let hasItem = m.isBigNum ? BigNum.from(m.qty).gt(0) : m.qty > 0;
+      let textColor = hasItem ? "#f1f5f9" : "#444";
+      let qtyColor = hasItem ? m.color : "#444";
+      let opacity = hasItem ? "1.0" : "0.35";
 
-        matGridHtml += `
+      matGridHtml += `
           <div style="background:rgba(0,0,0,0.45); border:1px solid #222; border-radius:4px; padding:3px 6px; display:flex; justify-content:space-between; align-items:center; opacity:${opacity}; min-width:0; box-sizing:border-box;">
             <div style="display:flex; align-items:center; gap:4px; min-width:0; flex:1;">
               ${m.svg}
@@ -964,19 +1015,19 @@ window.renderForgeTab = function () {
             <strong style="color:${qtyColor}; font-size:9px; font-family:monospace; margin-left:4px; flex-shrink:0;">${countText}</strong>
           </div>
         `;
-      });
-      matGridHtml += `</div>`;
+    });
+    matGridHtml += `</div>`;
 
-      // Mini Tag / Label Vector for the Materials Header (No emojis)
-      let headerIconSvg = `
+    // Mini Tag / Label Vector for the Materials Header (No emojis)
+    let headerIconSvg = `
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffd700" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);">
           <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
           <line x1="7" y1="7" x2="7.01" y2="7" />
         </svg>
       `;
 
-      // 7. Assemble the Revamped Left Info Panel
-      detailEl.innerHTML = `
+    // 7. Assemble the Revamped Left Info Panel
+    detailEl.innerHTML = `
         <div style="display:flex; flex-direction:column; text-align:left; gap:10px; animation: toastFadeIn 0.25s ease-out;">
             ${warningHtml}
 
@@ -1009,8 +1060,8 @@ window.renderForgeTab = function () {
             </div>
         </div>
       `;
-      return;
-    }
+    return;
+  }
 
   let item = window.forgeSelectedItem;
   let titleColor = window.getTierColor(item.statsRolled);
@@ -2611,22 +2662,37 @@ window.recalculateItemStats = function (item) {
   }
 
   if (
-    item.type === "subweapon" &&
-    item.subType === "tome" &&
-    !item.isUniqueWatch &&
-    !item.isUniqueChronicle
-  ) {
-    let stars = item.statsRolled || 0;
-    let baseRarityMult = 1.0 + stars * 0.3;
-    let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
-    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-    let repScale = Math.pow(repGrowth, repStage);
-    let expScale = repScale;
-    let prestigeMult = 1.0;
+          item.type === "subweapon" &&
+          !item.isUniqueAegis &&
+          !item.isUniqueWatch &&
+          !item.isUniqueChronicle
+        ) {
+          let stars = item.statsRolled || 0;
+          let baseRarityMult = 1.0 + stars * 0.3;
+          let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
+          let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+          let repScale = Math.pow(repGrowth, repStage);
+          let expScale = repScale;
+          let hpDefExpScale = repScale;
+          let prestigeMult = 1.0;
 
-    item.rawBaseInt = Math.ceil(1.5 * expScale * prestigeMult * baseRarityMult);
-    item.rawBaseAtk = Math.ceil(0.4 * expScale * prestigeMult * baseRarityMult);
-  }
+          if (item.subType === "shield") {
+            item.rawBaseDef = Math.ceil(
+              1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+            );
+          } else if (item.subType === "dagger") {
+            item.rawBaseAtk = Math.ceil(
+              0.8 * expScale * prestigeMult * baseRarityMult,
+            );
+          } else if (item.subType === "tome") {
+            item.rawBaseInt = Math.ceil(
+              1.5 * expScale * prestigeMult * baseRarityMult,
+            );
+            item.rawBaseAtk = Math.ceil(
+              0.4 * expScale * prestigeMult * baseRarityMult,
+            );
+          }
+        }
 
   // Restore pristine unmutated baseline stats to ensure clean idempotency
   item.baseAtk = item.rawBaseAtk;

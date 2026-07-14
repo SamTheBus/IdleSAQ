@@ -12185,131 +12185,133 @@
   };
 
   window.toggleEcoMode = function () {
-      window.playerStats.ecoMode = !window.playerStats.ecoMode;
-      window.updateEcoModeStyle();
-      window.invalidatePlayerStats();
-      if (typeof window.updateUI === "function") window.updateUI();
-      if (typeof window.saveGame === "function") window.saveGame();
-    };
+    window.playerStats.ecoMode = !window.playerStats.ecoMode;
+    window.updateEcoModeStyle();
+    window.invalidatePlayerStats();
+    if (typeof window.updateUI === "function") window.updateUI();
+    if (typeof window.saveGame === "function") window.saveGame();
+  };
 
-    window.updateEcoModeStyle = function () {
-      let active = window.playerStats.ecoMode === true;
-      let btn = document.getElementById("settings-toggle-eco");
-      if (btn) {
-        btn.innerText = active ? "Saver: ON" : "Saver: OFF";
-        btn.className = active ? "btn-action" : "btn-action un";
-      }
-    };
+  window.updateEcoModeStyle = function () {
+    let active = window.playerStats.ecoMode === true;
+    let btn = document.getElementById("settings-toggle-eco");
+    if (btn) {
+      btn.innerText = active ? "Saver: ON" : "Saver: OFF";
+      btn.className = active ? "btn-action" : "btn-action un";
+    }
+  };
 
-    window.toggleDpsOverlay = function () {
-      window.playerStats.showDpsOverlay = !window.playerStats.showDpsOverlay;
-      window.updateDpsOverlayStyle();
-      window.invalidatePlayerStats();
-      if (typeof window.updateUI === "function") window.updateUI();
-      if (typeof window.saveGame === "function") window.saveGame();
-    };
+  window.toggleDpsOverlay = function () {
+    window.playerStats.showDpsOverlay = !window.playerStats.showDpsOverlay;
+    window.updateDpsOverlayStyle();
+    window.invalidatePlayerStats();
+    if (typeof window.updateUI === "function") window.updateUI();
+    if (typeof window.saveGame === "function") window.saveGame();
+  };
 
-    window.updateDpsOverlayStyle = function () {
-        let showOverlay = window.playerStats.showDpsOverlay === true;
-        let toggleBtn = document.getElementById("settings-toggle-dps-overlay");
+  window.updateDpsOverlayStyle = function () {
+    let showOverlay = window.playerStats.showDpsOverlay === true;
+    let toggleBtn = document.getElementById("settings-toggle-dps-overlay");
 
-        if (toggleBtn) {
-          toggleBtn.innerText = showOverlay ? "Overlay: ON" : "Overlay: OFF";
-          toggleBtn.className = showOverlay ? "btn-action" : "btn-action un";
-        }
+    if (toggleBtn) {
+      toggleBtn.innerText = showOverlay ? "Overlay: ON" : "Overlay: OFF";
+      toggleBtn.className = showOverlay ? "btn-action" : "btn-action un";
+    }
 
-        window.updateDpsOverlayPosition();
-      };
+    window.updateDpsOverlayPosition();
+  };
 
-    window.updateDpsOverlayPosition = function () {
-      let badge = document.getElementById("dps-overlay-badge");
-      let canvasContainer = document.getElementById("canvas-container");
-      if (!badge || !canvasContainer) return;
+  window.updateDpsOverlayPosition = function () {
+    let badge = document.getElementById("dps-overlay-badge");
+    let canvasContainer = document.getElementById("canvas-container");
+    if (!badge || !canvasContainer) return;
 
-      if (!window.playerStats.showDpsOverlay) {
-        badge.style.display = "none";
-        return;
-      }
+    if (!window.playerStats.showDpsOverlay) {
+      badge.style.display = "none";
+      return;
+    }
 
-      badge.style.display = "flex";
+    badge.style.display = "flex";
+
+    let containerWidth = canvasContainer.clientWidth;
+    let containerHeight = canvasContainer.clientHeight;
+    let badgeWidth = badge.offsetWidth || 100;
+    let badgeHeight = badge.offsetHeight || 32;
+
+    let x = window.playerStats.dpsOverlayX;
+    let y = window.playerStats.dpsOverlayY;
+
+    if (x === null || y === null) {
+      x = containerWidth - badgeWidth - 10;
+      y = containerHeight - badgeHeight - 10;
+      window.playerStats.dpsOverlayX = x;
+      window.playerStats.dpsOverlayY = y;
+    }
+
+    x = Math.max(0, Math.min(containerWidth - badgeWidth, x));
+    y = Math.max(0, Math.min(containerHeight - badgeHeight, y));
+
+    badge.style.left = x + "px";
+    badge.style.top = y + "px";
+  };
+
+  window.initDpsOverlayDrag = function () {
+    let badge = document.getElementById("dps-overlay-badge");
+    let canvasContainer = document.getElementById("canvas-container");
+    if (!badge || !canvasContainer) return;
+
+    let isDragging = false;
+    let startX = 0,
+      startY = 0;
+    let initialLeft = 0,
+      initialTop = 0;
+
+    badge.addEventListener("pointerdown", function (e) {
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      initialLeft = window.playerStats.dpsOverlayX || 0;
+      initialTop = window.playerStats.dpsOverlayY || 0;
+      badge.setPointerCapture(e.pointerId);
+      e.stopPropagation();
+    });
+
+    badge.addEventListener("pointermove", function (e) {
+      if (!isDragging) return;
+      let dx = e.clientX - startX;
+      let dy = e.clientY - startY;
+
+      let x = initialLeft + dx;
+      let y = initialTop + dy;
 
       let containerWidth = canvasContainer.clientWidth;
       let containerHeight = canvasContainer.clientHeight;
-      let badgeWidth = badge.offsetWidth || 100;
-      let badgeHeight = badge.offsetHeight || 32;
-
-      let x = window.playerStats.dpsOverlayX;
-      let y = window.playerStats.dpsOverlayY;
-
-      if (x === null || y === null) {
-        x = containerWidth - badgeWidth - 10;
-        y = containerHeight - badgeHeight - 10;
-        window.playerStats.dpsOverlayX = x;
-        window.playerStats.dpsOverlayY = y;
-      }
+      let badgeWidth = badge.offsetWidth;
+      let badgeHeight = badge.offsetHeight;
 
       x = Math.max(0, Math.min(containerWidth - badgeWidth, x));
       y = Math.max(0, Math.min(containerHeight - badgeHeight, y));
 
+      window.playerStats.dpsOverlayX = x;
+      window.playerStats.dpsOverlayY = y;
+
       badge.style.left = x + "px";
       badge.style.top = y + "px";
+      e.stopPropagation();
+    });
+
+    const stopDrag = function (e) {
+      if (isDragging) {
+        isDragging = false;
+        badge.releasePointerCapture(e.pointerId);
+        if (typeof window.saveGame === "function") window.saveGame();
+        e.stopPropagation();
+      }
     };
 
-    window.initDpsOverlayDrag = function () {
-      let badge = document.getElementById("dps-overlay-badge");
-      let canvasContainer = document.getElementById("canvas-container");
-      if (!badge || !canvasContainer) return;
-
-      let isDragging = false;
-      let startX = 0, startY = 0;
-      let initialLeft = 0, initialTop = 0;
-
-      badge.addEventListener("pointerdown", function (e) {
-        isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        initialLeft = window.playerStats.dpsOverlayX || 0;
-        initialTop = window.playerStats.dpsOverlayY || 0;
-        badge.setPointerCapture(e.pointerId);
-        e.stopPropagation();
-      });
-
-      badge.addEventListener("pointermove", function (e) {
-        if (!isDragging) return;
-        let dx = e.clientX - startX;
-        let dy = e.clientY - startY;
-
-        let x = initialLeft + dx;
-        let y = initialTop + dy;
-
-        let containerWidth = canvasContainer.clientWidth;
-        let containerHeight = canvasContainer.clientHeight;
-        let badgeWidth = badge.offsetWidth;
-        let badgeHeight = badge.offsetHeight;
-
-        x = Math.max(0, Math.min(containerWidth - badgeWidth, x));
-        y = Math.max(0, Math.min(containerHeight - badgeHeight, y));
-
-        window.playerStats.dpsOverlayX = x;
-        window.playerStats.dpsOverlayY = y;
-
-        badge.style.left = x + "px";
-        badge.style.top = y + "px";
-        e.stopPropagation();
-      });
-
-      const stopDrag = function (e) {
-        if (isDragging) {
-          isDragging = false;
-          badge.releasePointerCapture(e.pointerId);
-          if (typeof window.saveGame === "function") window.saveGame();
-          e.stopPropagation();
-        }
-      };
-
-      badge.addEventListener("pointerup", stopDrag);
-      badge.addEventListener("pointercancel", stopDrag);
-    };
+    badge.addEventListener("pointerup", stopDrag);
+    badge.addEventListener("pointercancel", stopDrag);
+  };
 
   window.updateTitleSelector = function () {
     let selector = document.getElementById("title-selector");

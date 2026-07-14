@@ -806,15 +806,15 @@ window.SaveManager = {
         window.playerStats.qlyPotionStrength = 0.5;
 
       if (window.playerStats.unlockedAchievements === undefined)
-              window.playerStats.unlockedAchievements = [];
-            if (window.playerStats.unviewedAchievements === undefined)
-              window.playerStats.unviewedAchievements = [];
-            if (window.playerStats.showDpsOverlay === undefined)
-              window.playerStats.showDpsOverlay = false;
-            if (window.playerStats.dpsOverlayX === undefined)
-              window.playerStats.dpsOverlayX = null;
-            if (window.playerStats.dpsOverlayY === undefined)
-              window.playerStats.dpsOverlayY = null;
+        window.playerStats.unlockedAchievements = [];
+      if (window.playerStats.unviewedAchievements === undefined)
+        window.playerStats.unviewedAchievements = [];
+      if (window.playerStats.showDpsOverlay === undefined)
+        window.playerStats.showDpsOverlay = false;
+      if (window.playerStats.dpsOverlayX === undefined)
+        window.playerStats.dpsOverlayX = null;
+      if (window.playerStats.dpsOverlayY === undefined)
+        window.playerStats.dpsOverlayY = null;
       if (window.playerStats.totalGoldEarned === undefined)
         window.playerStats.totalGoldEarned = window.playerStats.coins || 0;
       if (window.playerStats.totalTempers === undefined)
@@ -1787,27 +1787,27 @@ window.loadGameAndSyncCloud = function () {
 };
 
 window.adjustCanvasDimensions = function () {
-    let cvs = window.canvas || document.getElementById("gameCanvas");
-    if (!cvs) return;
-    const isLandscapeMobile =
-      window.innerHeight <= 550 && window.innerWidth > window.innerHeight;
-    const isMobile = window.innerWidth <= 580; // Lowered breakpoint to prevent scrollbar layout toggling
+  let cvs = window.canvas || document.getElementById("gameCanvas");
+  if (!cvs) return;
+  const isLandscapeMobile =
+    window.innerHeight <= 550 && window.innerWidth > window.innerHeight;
+  const isMobile = window.innerWidth <= 580; // Lowered breakpoint to prevent scrollbar layout toggling
 
-    if (isLandscapeMobile) {
-      cvs.width = 480;
-      cvs.height = 280;
-    } else if (isMobile) {
-      cvs.width = 420;
-      cvs.height = 320;
-    } else {
-      cvs.width = 750;
-      cvs.height = 320;
-    }
+  if (isLandscapeMobile) {
+    cvs.width = 480;
+    cvs.height = 280;
+  } else if (isMobile) {
+    cvs.width = 420;
+    cvs.height = 320;
+  } else {
+    cvs.width = 750;
+    cvs.height = 320;
+  }
 
-    if (typeof window.updateDpsOverlayPosition === "function") {
-      window.updateDpsOverlayPosition();
-    }
-  };
+  if (typeof window.updateDpsOverlayPosition === "function") {
+    window.updateDpsOverlayPosition();
+  }
+};
 
 window.onload = function () {
   // Intercept and wrap pushToast, addEtcDrop, and addUseDrop for aggregation & swipe gestures
@@ -1905,72 +1905,80 @@ window.onload = function () {
           }
 
           let activeTouchId = null;
-                    let startX = 0;
-                    let currentX = 0;
-                    let isSwiping = false;
+          let startX = 0;
+          let currentX = 0;
+          let isSwiping = false;
 
-                    newToast.addEventListener(
-                      "touchstart",
-                      (e) => {
-                        if (isSwiping) return;
-                        // Capture the specific touch instance that initiated on this toast element
-                        let touch = e.changedTouches ? e.changedTouches[0] : null;
-                        if (touch) {
-                          activeTouchId = touch.identifier;
-                          startX = touch.clientX;
-                          currentX = startX;
-                          isSwiping = true;
-                          newToast.style.transition = "none";
-                        }
-                      },
-                      { passive: true },
-                    );
+          newToast.addEventListener(
+            "touchstart",
+            (e) => {
+              if (isSwiping) return;
+              // Capture the specific touch instance that initiated on this toast element
+              let touch = e.changedTouches ? e.changedTouches[0] : null;
+              if (touch) {
+                activeTouchId = touch.identifier;
+                startX = touch.clientX;
+                currentX = startX;
+                isSwiping = true;
+                newToast.style.transition = "none";
+              }
+            },
+            { passive: true },
+          );
 
-                    newToast.addEventListener(
-                      "touchmove",
-                      (e) => {
-                        if (!isSwiping || activeTouchId === null) return;
-                        // Map the movement calculations specifically to our active swiping finger
-                        let touch = Array.from(e.touches).find((t) => t.identifier === activeTouchId);
-                        if (!touch) return;
-                        currentX = touch.clientX;
-                        let diffX = currentX - startX;
-                        let absDiffX = Math.abs(diffX);
-                        newToast.style.transform = `translateX(${diffX}px)`;
-                        newToast.style.opacity = Math.max(0, 1 - absDiffX / 180);
-                      },
-                      { passive: true },
-                    );
+          newToast.addEventListener(
+            "touchmove",
+            (e) => {
+              if (!isSwiping || activeTouchId === null) return;
+              // Map the movement calculations specifically to our active swiping finger
+              let touch = Array.from(e.touches).find(
+                (t) => t.identifier === activeTouchId,
+              );
+              if (!touch) return;
+              currentX = touch.clientX;
+              let diffX = currentX - startX;
+              let absDiffX = Math.abs(diffX);
+              newToast.style.transform = `translateX(${diffX}px)`;
+              newToast.style.opacity = Math.max(0, 1 - absDiffX / 180);
+            },
+            { passive: true },
+          );
 
-                    const handleSwipeEnd = (e) => {
-                      if (!isSwiping || activeTouchId === null) return;
-                      // Verify that the finger leaving the screen matches our swiping finger
-                      let touch = Array.from(e.changedTouches).find((t) => t.identifier === activeTouchId);
-                      if (!touch) return;
+          const handleSwipeEnd = (e) => {
+            if (!isSwiping || activeTouchId === null) return;
+            // Verify that the finger leaving the screen matches our swiping finger
+            let touch = Array.from(e.changedTouches).find(
+              (t) => t.identifier === activeTouchId,
+            );
+            if (!touch) return;
 
-                      isSwiping = false;
-                      activeTouchId = null;
+            isSwiping = false;
+            activeTouchId = null;
 
-                      let diffX = currentX - startX;
-                      let absDiffX = Math.abs(diffX);
-                      if (absDiffX > 80) {
-                        newToast.style.transition =
-                          "transform 0.2s ease-out, opacity 0.2s ease-out";
-                        newToast.style.transform = `translateX(${diffX > 0 ? 120 : -120}%)`;
-                        newToast.style.opacity = "0";
-                        if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
-                        if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
-                        setTimeout(() => newToast.remove(), 200);
-                      } else {
-                        newToast.style.transition =
-                          "transform 0.2s ease, opacity 0.2s ease";
-                        newToast.style.transform = "translateX(0)";
-                        newToast.style.opacity = "1";
-                      }
-                    };
+            let diffX = currentX - startX;
+            let absDiffX = Math.abs(diffX);
+            if (absDiffX > 80) {
+              newToast.style.transition =
+                "transform 0.2s ease-out, opacity 0.2s ease-out";
+              newToast.style.transform = `translateX(${diffX > 0 ? 120 : -120}%)`;
+              newToast.style.opacity = "0";
+              if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
+              if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
+              setTimeout(() => newToast.remove(), 200);
+            } else {
+              newToast.style.transition =
+                "transform 0.2s ease, opacity 0.2s ease";
+              newToast.style.transform = "translateX(0)";
+              newToast.style.opacity = "1";
+            }
+          };
 
-                    newToast.addEventListener("touchend", handleSwipeEnd, { passive: true });
-                    newToast.addEventListener("touchcancel", handleSwipeEnd, { passive: true });
+          newToast.addEventListener("touchend", handleSwipeEnd, {
+            passive: true,
+          });
+          newToast.addEventListener("touchcancel", handleSwipeEnd, {
+            passive: true,
+          });
 
           if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
           if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
@@ -2050,24 +2058,31 @@ window.onload = function () {
 
   window.loadGame();
 
-    // Onboarding: Grants a 0★ Common Level 1 Weapon to fresh Level 1 players to quick-start early combat pacing
-    if (window.playerStats.level === 1 && !window.equippedSlots.weapon && window.inventory.EQUIP.length === 0) {
-      let startingWeapon = window.createItemObject("weapon", 0, 1, 0); // 0★ Common, StageScale 1
-      window.equippedSlots.weapon = startingWeapon;
-      window.recalculateItemStats(startingWeapon);
-      window.invalidatePlayerStats();
-    }
+  // Onboarding: Grants a full set of 0★ Common Level 1 starting gear (except subweapon) to fresh Level 1 players to smooth the early campaign pacing
+  if (
+    window.playerStats.level === 1 &&
+    !window.equippedSlots.weapon &&
+    window.inventory.EQUIP.length === 0
+  ) {
+    const startingSlots = ["weapon", "helmet", "chest", "leggings", "boots"];
+    startingSlots.forEach((slot) => {
+      let item = window.createItemObject(slot, 0, 1, 0);
+      window.equippedSlots[slot] = item;
+      window.recalculateItemStats(item);
+    });
+    window.invalidatePlayerStats();
+  }
 
-    window.updateStickyCanvasStyle();
-        if (typeof window.updateDpsOverlayStyle === "function") {
-          window.updateDpsOverlayStyle();
-        }
-        if (typeof window.initDpsOverlayDrag === "function") {
-          window.initDpsOverlayDrag();
-        }
-        if (typeof window.requestWakeLock === "function") {
-          window.requestWakeLock();
-        }
+  window.updateStickyCanvasStyle();
+  if (typeof window.updateDpsOverlayStyle === "function") {
+    window.updateDpsOverlayStyle();
+  }
+  if (typeof window.initDpsOverlayDrag === "function") {
+    window.initDpsOverlayDrag();
+  }
+  if (typeof window.requestWakeLock === "function") {
+    window.requestWakeLock();
+  }
 
   // Prompt fresh players to register their unique name
   setTimeout(() => {
@@ -2249,17 +2264,21 @@ window.onload = function () {
     }
   });
   window.addEventListener("keyup", function (e) {
-      if (e.code === "Space") {
-        window.spacePressed = false;
-      }
-    });
+    if (e.code === "Space") {
+      window.spacePressed = false;
+    }
+  });
 
-    // Prevent viewport scrolling when dragging/holding on the canvas without blocking multi-touch inputs
-    canvas.addEventListener("touchmove", function (e) {
+  // Prevent viewport scrolling when dragging/holding on the canvas without blocking multi-touch inputs
+  canvas.addEventListener(
+    "touchmove",
+    function (e) {
       if (e.cancelable) e.preventDefault();
-    }, { passive: false });
+    },
+    { passive: false },
+  );
 
-    // Lock Tooltip Listeners (Star Quality locks)
+  // Lock Tooltip Listeners (Star Quality locks)
   const attachRatesListeners = (id, lockType) => {
     let el = document.getElementById(id);
     if (el) {
@@ -2397,65 +2416,69 @@ window.onload = function () {
   });
 
   // Track active swiping/dragging along the Conduit path
-  canvas.addEventListener("pointermove", function (e) {
-    if (!window.activeConduitDrag) return;
+  canvas.addEventListener(
+    "pointermove",
+    function (e) {
+      if (!window.activeConduitDrag) return;
 
-    let orb = window.activeRiftOrbs.find(
-      (o) => o.id === window.activeConduitDrag.orbId,
-    );
-    if (!orb) {
-      window.activeConduitDrag = null;
-      return;
-    }
+      let orb = window.activeRiftOrbs.find(
+        (o) => o.id === window.activeConduitDrag.orbId,
+      );
+      if (!orb) {
+        window.activeConduitDrag = null;
+        return;
+      }
 
-    if (e.cancelable) e.preventDefault();
+      if (e.cancelable) e.preventDefault();
 
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    let clientX = e.clientX;
-    let clientY = e.clientY;
-    if (e.touches && e.touches.length > 0) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else if (e.changedTouches && e.changedTouches.length > 0) {
-      clientX = e.changedTouches[0].clientX;
-      clientY = e.changedTouches[0].clientY;
-    }
-    const px = clientX !== undefined ? (clientX - rect.left) * scaleX : 0;
-    const py = clientY !== undefined ? (clientY - rect.top) * scaleY : 0;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      let clientX = e.clientX;
+      let clientY = e.clientY;
+      if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else if (e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+      }
+      const px = clientX !== undefined ? (clientX - rect.left) * scaleX : 0;
+      const py = clientY !== undefined ? (clientY - rect.top) * scaleY : 0;
 
-    // Calculate distance to segment vector
-    let dx = orb.endX - orb.x;
-    let dy = orb.endY - orb.y;
-    let segLenSq = dx * dx + dy * dy;
-    if (segLenSq === 0) return;
+      // Calculate distance to segment vector
+      let dx = orb.endX - orb.x;
+      let dy = orb.endY - orb.y;
+      let segLenSq = dx * dx + dy * dy;
+      if (segLenSq === 0) return;
 
-    // Project player coordinates on the path
-    let t = ((px - orb.x) * dx + (py - orb.y) * dy) / segLenSq;
-    t = Math.max(0, Math.min(1, t));
+      // Project player coordinates on the path
+      let t = ((px - orb.x) * dx + (py - orb.y) * dy) / segLenSq;
+      t = Math.max(0, Math.min(1, t));
 
-    let projX = orb.x + t * dx;
-    let projY = orb.y + t * dy;
+      let projX = orb.x + t * dx;
+      let projY = orb.y + t * dy;
 
-    let dist = Math.hypot(px - projX, py - projY);
+      let dist = Math.hypot(px - projX, py - projY);
 
-    if (dist > 45) {
-      // Highly generous 45px corridor threshold for mobile players
-      // Connection broke
-      window.activeConduitDrag = null;
-      orb.progress = 0;
-      orb.connected = false;
-      window.SoundManager.play("block");
-      return;
-    }
+      if (dist > 45) {
+        // Highly generous 45px corridor threshold for mobile players
+        // Connection broke
+        window.activeConduitDrag = null;
+        orb.progress = 0;
+        orb.connected = false;
+        window.SoundManager.play("block");
+        return;
+      }
 
-    // Lock progression forward to prevent sliding backwards
-    orb.progress = Math.max(orb.progress, t);
-    if (orb.progress > 0.9) {
-      orb.connected = true;
-    }
-  }, { passive: false });
+      // Lock progression forward to prevent sliding backwards
+      orb.progress = Math.max(orb.progress, t);
+      if (orb.progress > 0.9) {
+        orb.connected = true;
+      }
+    },
+    { passive: false },
+  );
 
   window.addEventListener("pointerup", (e) => {
     try {
@@ -5755,42 +5778,79 @@ window.CombatEngine = {
           window.playerStats.maxStage,
         );
         if (typeof window.pushLog === "function")
-          window.pushLog(
-            `<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${window.playerStats.stage}.</span>`,
-          );
+                      window.pushLog(
+                        `<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${window.playerStats.stage}.</span>`,
+                      );
 
-        // First-time milestone clear reward (Stage 10, 20, 30...)
-                        // Enforce peak checking to prevent players from farming milestone drops repeatedly after prestiging
-                        if (
-                          window.playerStats.maxStage > oldMax &&
-                          oldMax % 10 === 0 &&
-                          window.playerStats.maxStage > oldPeak
-                        ) {
-                          if (oldMax === 10) {
-                                              // Onboarding: Guaranteed Rare (1★) Weapon dropped at Stage 10
-                                              let newItem = window.createItemObject("weapon", 1, 1, 1);
-                                              window.inventory.EQUIP.push(newItem);
-                                              window.frozenItemDb[newItem.id] = window.cloneItemForTooltip(newItem);
-                                              window.pushToast(newItem.name, newItem.statsRolled, window.getTierColor(newItem.statsRolled), false, 1, null, null, true, newItem);
-                                              window.pushLog(`<strong style="color:#f1c40f;">[MILESTONE] Stage 10 Beaten! Guaranteed Weapon dropped: <span style="color:${window.getTierColor(1)};">${newItem.name}</span></strong>`, newItem.id);
-                                              window.renderInventory();
-                                              window.updateUI();
-                                            } else if (oldMax === 20) {
-                            // Onboarding: Trigger Sub-weapon of Choice Modal at Stage 20
-                            setTimeout(() => {
-                              if (typeof window.openSubweaponOfChoiceModal === "function") {
-                                window.openSubweaponOfChoiceModal();
-                              }
-                            }, 500);
-                          } else {
-                            if (typeof window.pushLog === "function")
-                              window.pushLog(
-                                `<strong style="color:#f1c40f;">🏆 [MILESTONE] Stage ${oldMax} Beaten! Guaranteed random equip dropped!</strong>`,
-                              );
-                            if (typeof window.rollEquipmentDrop === "function")
-                              window.rollEquipmentDrop(true, false, 0, false, true); // IS MILESTONE = true
-                          }
-                        }
+                    // First-Time 25-Stage Milestone Key Allocation
+                    let currentMax = window.playerStats.maxStage;
+                    let old25s = Math.floor(oldMax / 25);
+                    let new25s = Math.floor(currentMax / 25);
+                    if (new25s > old25s && currentMax > oldPeak) {
+                      let keysEarned = new25s - old25s;
+                      window.addEtcDrop("Gacha Key", keysEarned);
+                      if (typeof window.pushLog === "function") {
+                        window.pushLog(
+                          `<strong style="color:#f1c40f;">🏆 [MILESTONE] Reached Stage ${currentMax}! Awarded ${keysEarned}x Gacha Key(s)!</strong>`
+                        );
+                      }
+                      if (typeof window.pushHeaderToast === "function") {
+                        window.pushHeaderToast(
+                          `🏆 Milestone! Reached Stage ${currentMax}! (+${keysEarned} Gacha Key)`,
+                          "#f1c40f"
+                        );
+                      }
+                      if (typeof window.spawnPurchaseCelebration === "function") {
+                        window.spawnPurchaseCelebration("gacha", "#f1c40f", 4);
+                      }
+                    }
+
+                    // First-time milestone clear reward (Stage 10, 20, 30...)
+                    // Enforce peak checking to prevent players from farming milestone drops repeatedly after prestiging
+                    if (
+                      window.playerStats.maxStage > oldMax &&
+                      oldMax % 10 === 0 &&
+                      window.playerStats.maxStage > oldPeak
+                    ) {
+          if (oldMax === 10) {
+            // Onboarding: Trigger Sub-weapon of Choice Modal at Stage 10
+            setTimeout(() => {
+              if (typeof window.openSubweaponOfChoiceModal === "function") {
+                window.openSubweaponOfChoiceModal();
+              }
+            }, 500);
+          } else if (oldMax === 20) {
+            // Onboarding: Guaranteed Rare (1★) Weapon dropped at Stage 20
+            let newItem = window.createItemObject("weapon", 1, 2, 1); // Level 11-20 (StageScale 2)
+            window.inventory.EQUIP.push(newItem);
+            window.frozenItemDb[newItem.id] =
+              window.cloneItemForTooltip(newItem);
+            window.pushToast(
+              newItem.name,
+              newItem.statsRolled,
+              window.getTierColor(newItem.statsRolled),
+              false,
+              1,
+              null,
+              null,
+              true,
+              newItem,
+            );
+            window.pushLog(
+              `<strong style="color:#f1c40f;">[MILESTONE] Stage 20 Beaten! Guaranteed Weapon dropped: <span style="color:${window.getTierColor(1)};">${newItem.name}</span></strong>`,
+              newItem.id,
+            );
+            window.renderInventory();
+            window.updateUI();
+          } else {
+            if (typeof window.pushLog === "function")
+              window.pushLog(
+                `<strong style="color:#f1c40f;">🏆 [MILESTONE] Stage ${oldMax} Beaten! Guaranteed random equip dropped!</strong>`,
+              );
+            if (typeof window.rollEquipmentDrop === "function")
+              window.rollEquipmentDrop(true, false, 0, false, true); // IS MILESTONE = true
+          }
+        }
       }
       window.playerStats.killCount = 0;
       window.playerStats.isBossMode = false;
@@ -5813,6 +5873,7 @@ window.CombatEngine = {
 
   processEnemySpawn() {
     let p = window.resolvePlayerStats();
+    let spawnX = canvas ? canvas.width + 15 : 750; // Dynamic mobile-responsive offscreen anchor
 
     // Define activeStage at the top of the function so all sub-blocks can access it
     let activeStage = window.playerStats.stage;
@@ -7652,30 +7713,29 @@ window.enterDungeon = function (type) {
         window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
 
       window.playerStats.isDungeonMode = true;
+            // Consume and Lock Slotted Cavern Sigil
+            if (window.state.slottedCavernSigil) {
+              let activeSig = window.state.slottedCavernSigil;
+              window.playerStats.activeDungeonSigil = activeSig;
+              window.state.slottedCavernSigil = null;
 
-      // Consume and Lock Slotted Cavern Sigil
-      if (window.state.slottedCavernSigil) {
-        let activeSig = window.state.slottedCavernSigil;
-        window.playerStats.activeDungeonSigil = activeSig;
-        window.state.slottedCavernSigil = null;
-
-        // Remove sigil from EQUIP bag
-        let sIdx = window.inventory.EQUIP.findIndex(
-          (i) => i.id === activeSig.id,
-        );
-        if (sIdx !== -1) {
-          window.inventory.EQUIP.splice(sIdx, 1);
-        }
-      } else {
-        window.playerStats.activeDungeonSigil = null;
-      }
-      window.playerStats.isCrucibleMode = false;
-      window.playerStats.currentDungeon = type;
-      window.playerStats.currentDungeonStage[type] = checkpoint;
-      window.playerStats.dungeonWave = 1;
-      window.playerStats.killCount = 0;
-      window.playerStats.targetsRequired = 5;
-      window.playerStats.isBossMode = false;
+              // Remove sigil from EQUIP bag
+              let sIdx = window.inventory.EQUIP.findIndex(
+                (i) => i.id === activeSig.id,
+              );
+              if (sIdx !== -1) {
+                window.inventory.EQUIP.splice(sIdx, 1);
+              }
+            } else {
+              window.playerStats.activeDungeonSigil = null;
+            }
+            window.playerStats.isCrucibleMode = false;
+            window.playerStats.currentDungeon = type;
+            window.playerStats.currentDungeonStage[type] = checkpoint;
+            window.playerStats.dungeonWave = 1;
+            window.playerStats.killCount = 0;
+            window.playerStats.targetsRequired = 3; // Reduced from 5 to 3
+            window.playerStats.isBossMode = false;
       window.playerStats.isUberBoss = false;
       window.mob = null;
 
