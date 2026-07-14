@@ -2204,12 +2204,17 @@ window.onload = function () {
     }
   });
   window.addEventListener("keyup", function (e) {
-    if (e.code === "Space") {
-      window.spacePressed = false;
-    }
-  });
+      if (e.code === "Space") {
+        window.spacePressed = false;
+      }
+    });
 
-  // Lock Tooltip Listeners (Star Quality locks)
+    // Prevent viewport scrolling when dragging/holding on the canvas without blocking multi-touch inputs
+    canvas.addEventListener("touchmove", function (e) {
+      if (e.cancelable) e.preventDefault();
+    }, { passive: false });
+
+    // Lock Tooltip Listeners (Star Quality locks)
   const attachRatesListeners = (id, lockType) => {
     let el = document.getElementById(id);
     if (el) {
@@ -2347,85 +2352,30 @@ window.onload = function () {
   });
 
   // Track active swiping/dragging along the Conduit path
-    canvas.addEventListener("pointermove", function (e) {
-      if (!window.activeConduitDrag) return;
+  canvas.addEventListener("pointermove", function (e) {
+    if (!window.activeConduitDrag) return;
 
-      let orb = window.activeRiftOrbs.find(
-        (o) => o.id === window.activeConduitDrag.orbId,
-      );
-      if (!orb) {
-        window.activeConduitDrag = null;
-        return;
-      }
+    let orb = window.activeRiftOrbs.find(
+      (o) => o.id === window.activeConduitDrag.orbId,
+    );
+    if (!orb) {
+      window.activeConduitDrag = null;
+      return;
+    }
 
-      if (e.cancelable) e.preventDefault();
+    if (e.cancelable) e.preventDefault();
 
-      // Track active swiping/dragging along the Conduit path
-        canvas.addEventListener("pointermove", function (e) {
-          if (!window.activeConduitDrag) return;
-
-          let orb = window.activeRiftOrbs.find(
-            (o) => o.id === window.activeConduitDrag.orbId,
-          );
-          if (!orb) {
-            window.activeConduitDrag = null;
-            return;
-          }
-
-          if (e.cancelable) e.preventDefault();
-
-          const rect = canvas.getBoundingClientRect();
-          const scaleX = canvas.width / rect.width;
-          const scaleY = canvas.height / rect.height;
-          let clientX = e.clientX;
-          let clientY = e.clientY;
-          if (e.touches && e.touches.length > 0) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-          } else if (e.changedTouches && e.changedTouches.length > 0) {
-            clientX = e.changedTouches[0].clientX;
-            clientY = e.changedTouches[0].clientY;
-          }
-          const px = clientX !== undefined ? (clientX - rect.left) * scaleX : 0;
-          const py = clientY !== undefined ? (clientY - rect.top) * scaleY : 0;
-
-          // Calculate distance to segment vector
-          let dx = orb.endX - orb.x;
-          let dy = orb.endY - orb.y;
-          let segLenSq = dx * dx + dy * dy;
-          if (segLenSq === 0) return;
-
-          // Project player coordinates on the path
-          let t = ((px - orb.x) * dx + (py - orb.y) * dy) / segLenSq;
-          t = Math.max(0, Math.min(1, t));
-
-          let projX = orb.x + t * dx;
-          let projY = orb.y + t * dy;
-
-          let dist = Math.hypot(px - projX, py - projY);
-
-          if (dist > 45) {
-            // Highly generous 45px corridor threshold for mobile players
-            // Connection broke
-            window.activeConduitDrag = null;
-            orb.progress = 0;
-            orb.connected = false;
-            window.SoundManager.play("block");
-            return;
-          }
-
-          // Lock progression forward to prevent sliding backwards
-          orb.progress = Math.max(orb.progress, t);
-          if (orb.progress > 0.9) {
-            orb.connected = true;
-          }
-        }, { passive: false });
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     let clientX = e.clientX;
     let clientY = e.clientY;
     if (e.touches && e.touches.length > 0) {
       clientX = e.touches[0].clientX;
       clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
     }
     const px = clientX !== undefined ? (clientX - rect.left) * scaleX : 0;
     const py = clientY !== undefined ? (clientY - rect.top) * scaleY : 0;
@@ -2460,7 +2410,7 @@ window.onload = function () {
     if (orb.progress > 0.9) {
       orb.connected = true;
     }
-  });
+  }, { passive: false });
 
   window.addEventListener("pointerup", (e) => {
     try {

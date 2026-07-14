@@ -190,7 +190,7 @@ body.scroll-lock {
   background: #0c0f12;
   width: 100%;
   height: auto;
-  touch-action: none;
+  touch-action: manipulation;
 }
 
 /* --- TOP NAVIGATION BAR --- */
@@ -239,7 +239,7 @@ canvas {
   border-bottom: 2px solid #1f242d;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
-  touch-action: none; /* Disables double-tap zoom delay and blocks accidental viewport scrolls */
+  touch-action: manipulation; /* Removes double-tap delay while maintaining multi-touch inputs */
 }
 
 /* --- STATS HUD OVERLAY --- */
@@ -749,7 +749,7 @@ canvas {
   border-radius: 6px !important;
   font-size: 10px !important;
   font-weight: bold !important;
-  display: inline-flex !important;
+  display: inline-flex; /* Removed !important to allow dynamic JS hiding controls */
   align-items: center !important;
   justify-content: center !important;
   white-space: nowrap !important;
@@ -1696,34 +1696,22 @@ summary {
     padding: 10px !important;
   }
   #control-bar {
-    height: auto !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    padding: 6px !important;
-    gap: 6px !important;
-    border-bottom-width: 1px !important;
-  }
-  .stats-hud-inline {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 6px !important;
-    width: 100% !important;
-    order: 0 !important;
-  }
-  .hud-stat-panel {
-    width: 100% !important;
-    height: 36px !important; /* Proper padding on mobile */
-    justify-content: flex-start !important;
-  }
-  .control-actions {
-    width: 100% !important;
-    justify-content: space-between !important;
-    height: 28px !important;
-  }
-  .control-actions .btn-toggle {
-    flex: 1 !important;
-    text-align: center !important;
-  }
+      height: 38px !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      padding: 4px 10px !important;
+      border-bottom-width: 1px !important;
+      gap: 4px !important;
+    }
+    .control-actions {
+      width: 100% !important;
+      justify-content: space-between !important;
+      height: 30px !important;
+    }
+    .control-actions .btn-toggle {
+      flex: 1 !important;
+      text-align: center !important;
+    }
   #sync-indicator {
     flex: 1 !important;
     justify-content: center !important;
@@ -2506,39 +2494,17 @@ summary {
   }
 
   /* --- ULTRA-COMPACT CONTROL BAR (PREVENTS WRAP & CLIPPING) --- */
-    #control-bar {
-      grid-area: ctrlbar !important;
-      display: flex !important;
-      flex-direction: row !important;
-      flex-wrap: nowrap !important;
-      justify-content: space-between !important;
-      align-items: center !important;
-      gap: 4px !important;
-      padding: 2px 6px !important;
-      height: 32px !important;
-    }
-
-    .stats-hud-inline {
-      display: grid !important;
-      grid-template-columns: repeat(4, 1fr) !important;
-      gap: 3px !important;
-      flex: 1 !important;
-      height: 100% !important;
-    }
-
-    .hud-stat-panel {
-      height: 28px !important; /* Comfortably holds stacked 2-lines on landscape mobile */
-      padding: 2px 6px !important;
-    }
-
-    .hud-stat-panel .chip-value {
-      font-size: 9.5px !important;
-    }
-
-    .hud-stat-panel .chip-sub,
-    .hud-stat-panel .chip-label-prefix {
-      font-size: 7.5px !important;
-    }
+      #control-bar {
+        grid-area: ctrlbar !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 4px !important;
+        padding: 2px 6px !important;
+        height: 32px !important;
+      }
 
     .control-actions {
       height: 100% !important;
@@ -3268,35 +3234,6 @@ summary {
 }
 
 /* --- SACK TAB UNBUCKLE & LOOT REVEAL ANIMATION --- */
-/* The Top Flap slides upward and fades away when active */
-.tab-btn .rucksack-flap {
-  transform: translateY(0);
-  opacity: 1;
-  transition:
-    transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15),
-    opacity 0.3s;
-}
-
-.tab-btn.active .rucksack-flap {
-  transform: translateY(-8px) scaleY(0.3);
-  opacity: 0;
-}
-
-/* Loose Unbuckled Straps drop down and dangle when active */
-.tab-btn .rucksack-straps-open {
-  opacity: 0;
-  transform: translateY(-4px);
-  transition:
-    transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1.2),
-    opacity 0.25s;
-}
-
-.tab-btn.active .rucksack-straps-open {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* --- SACK TAB UNBUCKLE & LOOT REVEAL ANIMATION --- */
 .tab-btn .rucksack-flap {
   transform: translateY(0);
   opacity: 1;
@@ -3323,31 +3260,61 @@ summary {
 }
 
 /* --- FORGE TAB BUTTON DOUBLE STRIKE --- */
-==== EQUALS ====
-/* --- SACK TAB UNBUCKLE & LOOT REVEAL ANIMATION --- */
-.tab-btn .rucksack-flap {
-  transform: translateY(0);
-  opacity: 1;
-  transition:
-    transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.15),
-    opacity 0.3s;
+.tab-btn .tab-anvil-hammer {
+  transform: rotate(-35deg);
+  transition: transform 0.25s ease-out;
 }
 
-.tab-btn.active .rucksack-flap {
-  transform: translateY(-8px) scaleY(0.3);
-  opacity: 0;
+/* Double strike triggers on active transition */
+.tab-btn.active .tab-anvil-hammer {
+  animation: tabHammerDoubleStrike 1.2s cubic-bezier(0.25, 0.8, 0.25, 1.15)
+    forwards;
 }
 
-/* Loose Unbuckled Straps drop down and dangle when active */
-.tab-btn .rucksack-straps-open {
-  opacity: 0;
-  transform: translateY(-4px);
-  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+@keyframes tabHammerDoubleStrike {
+  0% {
+    transform: rotate(-35deg);
+  }
+  22% {
+    transform: rotate(7deg); /* Strike 1! */
+  }
+  38% {
+    transform: rotate(-18deg); /* Rebound 1 */
+  }
+  60% {
+    transform: rotate(7deg); /* Strike 2! */
+  }
+  75% {
+    transform: rotate(-8deg); /* Rebound 2 */
+  }
+  100% {
+    transform: rotate(-35deg); /* Return to resting pose */
+  }
 }
 
-.tab-btn.active .rucksack-straps-open {
-  opacity: 1;
-  transform: translateY(0);
+/* Hot ember flash sync */
+.tab-btn .tab-anvil-ember {
+  fill: #ff5500;
+  filter: drop-shadow(0 0 2px #ff3300);
+}
+
+.tab-btn.active .tab-anvil-ember {
+  animation: tabEmberFlash 1.2s ease-out forwards;
+}
+
+@keyframes tabEmberFlash {
+  0%,
+  38%,
+  75%,
+  100% {
+    fill: #ff5500;
+    filter: drop-shadow(0 0 2px #ff3300);
+  }
+  22%,
+  60% {
+    fill: #ffffff;
+    filter: drop-shadow(0 0 6px #ffd700);
+  }
 }
 
 /* --- RUNS TAB INTERDIMENSIONAL PORTAL ANIMATION --- */
@@ -3969,9 +3936,9 @@ summary {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   max-width: 100%;
-  pointer-events: none;
-  position: relative;
-  overflow: hidden;
+    pointer-events: auto; /* Allow clicks and swipe gestures on individual toasts */
+    position: relative;
+    overflow: hidden;
   box-sizing: border-box;
   transform-origin: top center;
   animation: premiumToastIn 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.15)
@@ -4127,4 +4094,128 @@ summary {
   left: 75%;
   animation: particleDrift 3.2s infinite linear;
   animation-delay: 1.2s;
+}
+
+/* ==========================================================================
+   CONSOLE HEADER HUD DEFINITIONS (ABOVE-CANVAS COCKPIT)
+   ========================================================================= */
+.canvas-top-hud {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, #141922 0%, #090c12 100%);
+  border-bottom: 1.5px solid #202632;
+  box-sizing: border-box;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.canvas-top-hud .hud-stat-panel {
+  background: linear-gradient(180deg, #161f2c 0%, #0b111a 100%) !important;
+  border: 1px solid #263345 !important;
+  border-radius: 6px;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  min-width: 0;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  box-sizing: border-box;
+  transition: all 0.15s ease-in-out;
+}
+
+.canvas-top-hud .hud-stat-panel:hover {
+  border-color: #3b82f6 !important;
+  background: linear-gradient(180deg, #1c283a 0%, #0f1724 100%) !important;
+  box-shadow:
+    0 4px 12px rgba(59, 130, 246, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Specific Panel Color Accentuations & Glowing Digit Readouts */
+.canvas-top-hud .panel-hp {
+  border-bottom: 2.2px solid #e74c3c !important;
+}
+.canvas-top-hud .panel-hp .chip-value {
+  color: #ff6b6b !important;
+  text-shadow: 0 0 6px rgba(231, 76, 60, 0.35) !important;
+}
+
+.canvas-top-hud .panel-stage {
+  border-bottom: 2.2px solid #3498db !important;
+}
+.canvas-top-hud .panel-stage .chip-value {
+  color: #60a5fa !important;
+  text-shadow: 0 0 6px rgba(52, 152, 219, 0.35) !important;
+}
+
+.canvas-top-hud .panel-gold {
+  border-bottom: 2.2px solid #f1c40f !important;
+}
+.canvas-top-hud .panel-gold .chip-value {
+  color: #ffd700 !important;
+  text-shadow: 0 0 6px rgba(241, 196, 15, 0.35) !important;
+}
+
+.canvas-top-hud .panel-dps {
+  border-bottom: 2.2px solid #e67e22 !important;
+}
+.canvas-top-hud .panel-dps .chip-value {
+  color: #ff9f43 !important;
+  text-shadow: 0 0 6px rgba(230, 126, 34, 0.35) !important;
+}
+
+/* Portrait Mobile Viewports (Aesthetic 4-Column Row) */
+@media (max-width: 580px) {
+  .canvas-top-hud {
+    grid-template-columns: repeat(4, 1fr) !important;
+    padding: 4px 6px !important;
+    gap: 4px !important;
+    background: linear-gradient(180deg, #10141d 0%, #06080d 100%) !important;
+    border-bottom-width: 1px !important;
+  }
+  .canvas-top-hud .hud-stat-panel {
+    height: 30px !important;
+    padding: 2px 4px !important;
+    gap: 3px !important;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  }
+  .canvas-top-hud .hud-stat-panel .chip-value {
+    font-size: 9px !important;
+  }
+  .canvas-top-hud .hud-stat-panel .chip-sub,
+  .canvas-top-hud .hud-stat-panel .chip-label-prefix {
+    font-size: 7px !important;
+  }
+}
+
+/* Landscape Mobile Viewports (Compact 4-Column Row) */
+@media (orientation: landscape) and (max-height: 550px) {
+  .canvas-top-hud {
+    grid-template-columns: repeat(4, 1fr) !important;
+    padding: 2px 4px !important;
+    gap: 3px !important;
+    background: linear-gradient(180deg, #10141d 0%, #06080d 100%) !important;
+    border-bottom-width: 1px !important;
+  }
+  .canvas-top-hud .hud-stat-panel {
+    height: 26px !important;
+    padding: 1px 4px !important;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  }
+  .canvas-top-hud .hud-stat-panel .chip-value {
+    font-size: 8.5px !important;
+  }
+  .canvas-top-hud .hud-stat-panel .chip-sub,
+  .canvas-top-hud .hud-stat-panel .chip-label-prefix {
+    font-size: 6.5px !important;
+  }
 }

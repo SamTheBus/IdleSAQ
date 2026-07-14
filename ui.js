@@ -1193,14 +1193,14 @@ window.updateUI = function () {
   }
 
   // Dynamically toggle Leave Activity button based on state
-  let leaveBtn = document.getElementById("btn-leave-activity");
-  if (leaveBtn) {
-    if (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) {
-      leaveBtn.style.display = "inline-block";
-    } else {
-      leaveBtn.style.display = "none";
+    let leaveBtn = document.getElementById("btn-leave-activity");
+    if (leaveBtn) {
+      if (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode) {
+        leaveBtn.style.setProperty("display", "inline-flex", "important");
+      } else {
+        leaveBtn.style.setProperty("display", "none", "important");
+      }
     }
-  }
 
   // Update Dungeon Peaks & Checkpoints in Activities Menu
   if (window.playerStats.dungeonPeaks) {
@@ -2052,17 +2052,16 @@ window.pushToast = function (
   }
   toast.style.setProperty("--toast-glow-color", `rgba(${rgb}, 0.2)`);
 
-  if (clickAction) {
-    toast.style.pointerEvents = "auto";
-    toast.style.cursor = "pointer";
-    toast.onclick = function (e) {
-      e.stopPropagation();
-      clickAction();
-      toast.remove();
-    };
-  } else {
-    toast.style.pointerEvents = "none";
-  }
+  // Enable pointer-events on all toasts to support swipe-to-dismiss gestures
+            toast.style.pointerEvents = "auto";
+            if (clickAction) {
+              toast.style.cursor = "pointer";
+              toast.onclick = function (e) {
+                e.stopPropagation();
+                clickAction();
+                toast.remove();
+              };
+            }
 
   function guessItemType(n) {
     let lowerName = n.toLowerCase();
