@@ -5145,21 +5145,28 @@ window.generateItemCardHtml = function (
   let html = "";
 
   let slotMult = 1.0;
-  if (item.isEquippedSlot && window.playerStats.slotUpgrades) {
-    let slotLvl = window.playerStats.slotUpgrades[item.isEquippedSlot] || 0;
-    let runBonus = 0;
-    if (
-      window.playerStats.isCrucibleMode &&
-      window.cachedPlayerStats &&
-      window.cachedPlayerStats.crucibleSlotBonuses
-    ) {
-      runBonus =
-        window.cachedPlayerStats.crucibleSlotBonuses[item.isEquippedSlot] || 0;
-    }
-    slotMult = 1.0 + slotLvl * 0.01 + runBonus;
-  }
+            if (item.isEquippedSlot && window.playerStats.slotUpgrades) {
+              let slotLvl = window.playerStats.slotUpgrades[item.isEquippedSlot] || 0;
+              let runBonus = 0;
+              if (
+                window.playerStats.isCrucibleMode &&
+                window.cachedPlayerStats &&
+                window.cachedPlayerStats.crucibleSlotBonuses
+              ) {
+                runBonus =
+                  window.cachedPlayerStats.crucibleSlotBonuses[item.isEquippedSlot] || 0;
+              }
+              slotMult = 1.0 + slotLvl * 0.01 + runBonus;
+            }
 
-  // Render Currently Equipped status as an absolute tab hugging the top-right card border
+            // Define local variables for the card's title section
+            let temperTag =
+              item.temperLevel > 0
+                ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
+                : "";
+            let lockTag = item.locked ? " 🔒" : "";
+
+            // Render Currently Equipped status as an absolute tab hugging the top-right card border
     if (isEquipped) {
       html += `
         <div style="
