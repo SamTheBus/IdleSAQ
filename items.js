@@ -1592,23 +1592,25 @@ Object.assign(window.ItemFactory, {
         );
         item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
       } else if (chosenType === "subweapon") {
-        if (item.subType === "shield") {
-          item.baseDef = Math.ceil(
-            1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-          );
-        } else if (item.subType === "dagger") {
-          item.baseAtk = Math.ceil(
-            0.8 * expScale * prestigeMult * baseRarityMult,
-          );
-        } else if (item.subType === "tome") {
-          item.baseInt = Math.ceil(
-            1.5 * expScale * prestigeMult * baseRarityMult,
-          );
-          item.baseAtk = Math.ceil(
-            0.4 * expScale * prestigeMult * baseRarityMult,
-          );
-        }
-      }
+              if (item.subType === "shield") {
+                item.baseDef = Math.ceil(
+                  1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+                );
+                item.baseBlock = 0.05; // Standard base 5% Block Rate on ALL shields
+              } else if (item.subType === "dagger") {
+                item.baseAtk = Math.ceil(
+                  0.8 * expScale * prestigeMult * baseRarityMult,
+                );
+                item.baseParry = 0.05; // Standard base 5% Parry Rate on ALL daggers
+              } else if (item.subType === "tome") {
+                item.baseInt = Math.ceil(
+                  1.5 * expScale * prestigeMult * baseRarityMult,
+                );
+                item.baseAtk = Math.ceil(
+                  0.4 * expScale * prestigeMult * baseRarityMult,
+                );
+              }
+            }
     }
 
     if (chosenType === "artifact") {
@@ -2427,14 +2429,16 @@ Object.assign(window.ItemFactory, {
         !item.isUniqueChronicle
       ) {
         if (item.subType === "shield") {
-          item.baseDef = Math.ceil(
-            1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-          );
-        } else if (item.subType === "dagger") {
-          item.baseAtk = Math.ceil(
-            0.8 * expScale * prestigeMult * baseRarityMult,
-          );
-        } else if (item.subType === "tome") {
+                      item.baseDef = Math.ceil(
+                        1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+                      );
+                      item.baseBlock = 0.05; // Force base Block Rate on recalculation
+                    } else if (item.subType === "dagger") {
+                      item.baseAtk = Math.ceil(
+                        0.8 * expScale * prestigeMult * baseRarityMult,
+                      );
+                      item.baseParry = 0.05; // Force base Parry Rate on recalculation
+                    } else if (item.subType === "tome") {
           item.baseInt = Math.ceil(
             1.5 * expScale * prestigeMult * baseRarityMult,
           );
@@ -2680,10 +2684,12 @@ window.recalculateItemStats = function (item) {
             item.rawBaseDef = Math.ceil(
               1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
             );
+            item.rawBaseBlock = 0.05; // Self-heal & lock base Block Rate for all shields
           } else if (item.subType === "dagger") {
             item.rawBaseAtk = Math.ceil(
               0.8 * expScale * prestigeMult * baseRarityMult,
             );
+            item.rawBaseParry = 0.05; // Self-heal & lock base Parry Rate for all daggers
           } else if (item.subType === "tome") {
             item.rawBaseInt = Math.ceil(
               1.5 * expScale * prestigeMult * baseRarityMult,

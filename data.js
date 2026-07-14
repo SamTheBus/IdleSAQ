@@ -1324,35 +1324,35 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   if (hasSubweapon) {
-    if (subType === "shield") {
-      let shield = window.equippedSlots.subweapon;
-      let shieldStars =
-        shield.statsRolled === "UNIQUE" ? 5 : shield.statsRolled || 0;
-      let subLvl =
-        (window.playerStats.slotUpgrades &&
-          window.playerStats.slotUpgrades.subweapon) ||
-        0;
-      defMultiplier += 0.12 + shieldStars * 0.02 + subLvl * 0.01;
-      maxBlockCap = window.checkArtifactTrait("titan_grip") ? 0.25 : 0.2;
-      if (p.crucibleCapBonus) maxBlockCap += p.crucibleCapBonus;
-      p.block += 0.05; // Base 5% block rate for equipping a Shield
-      p.parry = 0.0; // STRICT: Can't parry with a shield
-    } else if (subType === "tome") {
-      let intScale = Math.max(0, p.int - 5);
-      let logIntScale = Math.log10(intScale + 1);
-      // Caps the Arcane Barrier at 25% max (20% base + 5% scaling limit)
-      p.arcaneBarrier = parseFloat(
-        (0.2 + 0.05 * (1 - 1 / (1 + 0.15 * logIntScale))).toFixed(4),
-      );
-      p.block = 0.0; // STRICT: Can't block with a tome
-      p.parry = 0.0; // STRICT: Can't parry with a tome
-    } else if (subType === "dagger") {
-      maxParryCap = window.checkArtifactTrait("titan_grip") ? 0.3 : 0.25;
-      if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
-      p.parry += 0.05; // Base 5% parry rate for equipping a Dagger
-      p.block = 0.0; // STRICT: Can't block with a dagger
-    }
-  } else {
+      if (subType === "shield") {
+        let shield = window.equippedSlots.subweapon;
+        let shieldStars =
+          shield.statsRolled === "UNIQUE" ? 5 : shield.statsRolled || 0;
+        let subLvl =
+          (window.playerStats.slotUpgrades &&
+            window.playerStats.slotUpgrades.subweapon) ||
+          0;
+        defMultiplier += 0.12 + shieldStars * 0.02 + subLvl * 0.01;
+        maxBlockCap = window.checkArtifactTrait("titan_grip") ? 0.25 : 0.2;
+        if (p.crucibleCapBonus) maxBlockCap += p.crucibleCapBonus;
+        // Removed duplicate p.block flat add; Block is now read directly from Shield Item base stats!
+        p.parry = 0.0; // STRICT: Can't parry with a shield
+      } else if (subType === "tome") {
+        let intScale = Math.max(0, p.int - 5);
+        let logIntScale = Math.log10(intScale + 1);
+        // Caps the Arcane Barrier at 25% max (20% base + 5% scaling limit)
+        p.arcaneBarrier = parseFloat(
+          (0.2 + 0.05 * (1 - 1 / (1 + 0.15 * logIntScale))).toFixed(4),
+        );
+        p.block = 0.0; // STRICT: Can't block with a tome
+        p.parry = 0.0; // STRICT: Can't parry with a tome
+      } else if (subType === "dagger") {
+        maxParryCap = window.checkArtifactTrait("titan_grip") ? 0.3 : 0.25;
+        if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
+        // Removed duplicate p.parry flat add; Parry is now read directly from Dagger Item base stats!
+        p.block = 0.0; // STRICT: Can't block with a dagger
+      }
+    } else {
     p.block = 0.0; // STRICT: Can't block without subweapon
     p.parry = 0.0; // STRICT: Can't parry without subweapon
   }

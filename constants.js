@@ -514,6 +514,7 @@ window.ARTIFACT_POOL = [
 
 window.SET_DEFINITIONS = {
   Vanguard: {
+    name: "Vanguard",
     bonuses: [
       {
         count: 2,
