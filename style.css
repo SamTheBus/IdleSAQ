@@ -190,7 +190,7 @@ body.scroll-lock {
   background: #0c0f12;
   width: 100%;
   height: auto;
-  touch-action: pan-y;
+  touch-action: none;
 }
 
 /* --- TOP NAVIGATION BAR --- */
@@ -239,7 +239,7 @@ canvas {
   border-bottom: 2px solid #1f242d;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
-  touch-action: pan-y; /* Prevents canvas touch drag gestures from locking the viewport scroll */
+  touch-action: none; /* Disables double-tap zoom delay and blocks accidental viewport scrolls */
 }
 
 /* --- STATS HUD OVERLAY --- */
