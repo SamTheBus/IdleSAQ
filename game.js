@@ -1038,6 +1038,12 @@ window.SaveManager = {
         window.playerStats.deathCount = 0;
       if (window.playerStats.stickyCanvas === undefined)
         window.playerStats.stickyCanvas = true;
+      if (window.playerStats.spectralCodex === undefined)
+        window.playerStats.spectralCodex = [];
+      if (window.playerStats.activeSpectralResonance === undefined)
+        window.playerStats.activeSpectralResonance = null;
+      if (window.playerStats.projectSpectralCosmetic === undefined)
+        window.playerStats.projectSpectralCosmetic = true;
 
       if (window.playerStats.peakSingleHit === undefined)
         window.playerStats.peakSingleHit = 0;
@@ -2252,42 +2258,45 @@ window.onload = function () {
     const clickX = clientX !== undefined ? (clientX - rect.left) * scaleX : 0;
     const clickY = clientY !== undefined ? (clientY - rect.top) * scaleY : 0;
 
-    let clickedOrbIndex = window.activeRiftOrbs.findIndex(orb => {
-          return Math.hypot(clickX - orb.x, clickY - orb.y) < orb.hitRadius;
-        });
+    let clickedOrbIndex = window.activeRiftOrbs.findIndex((orb) => {
+      return Math.hypot(clickX - orb.x, clickY - orb.y) < orb.hitRadius;
+    });
 
-        if (clickedOrbIndex !== -1) {
-          let clickedOrb = window.activeRiftOrbs[clickedOrbIndex];
+    if (clickedOrbIndex !== -1) {
+      let clickedOrb = window.activeRiftOrbs[clickedOrbIndex];
 
-          // Shield against starting swipe gestures unless clicking on the START crystal
-          if (clickedOrb.type === "aetheric_conduit") {
-            let distToStart = Math.hypot(clickX - clickedOrb.x, clickY - clickedOrb.y);
-            if (distToStart < clickedOrb.hitRadius) {
-              window.activeConduitDrag = { orbId: clickedOrb.id, started: true };
-              window.SoundManager.play("spell");
-            }
-            return; // Intercept click
-          }
-
-          window.handleOrbClick(clickedOrb, clickedOrbIndex);
-          return; // Intercept click to process popping mechanics
+      // Shield against starting swipe gestures unless clicking on the START crystal
+      if (clickedOrb.type === "aetheric_conduit") {
+        let distToStart = Math.hypot(
+          clickX - clickedOrb.x,
+          clickY - clickedOrb.y,
+        );
+        if (distToStart < clickedOrb.hitRadius) {
+          window.activeConduitDrag = { orbId: clickedOrb.id, started: true };
+          window.SoundManager.play("spell");
         }
+        return; // Intercept click
+      }
+
+      window.handleOrbClick(clickedOrb, clickedOrbIndex);
+      return; // Intercept click to process popping mechanics
+    }
 
     window.playerStats.canvasClicksWindow =
-          window.playerStats.canvasClicksWindow || [];
-        let clickNow = Date.now();
-        window.playerStats.canvasClicksWindow.push(clickNow);
-        window.playerStats.canvasClicksWindow =
-          window.playerStats.canvasClicksWindow.filter(
-            (t) => clickNow - t <= 10000,
-          );
-        window.playerStats.maxCanvasClicksInWindow = Math.max(
-          window.playerStats.maxCanvasClicksInWindow || 0,
-          window.playerStats.canvasClicksWindow.length,
-        );
+      window.playerStats.canvasClicksWindow || [];
+    let clickNow = Date.now();
+    window.playerStats.canvasClicksWindow.push(clickNow);
+    window.playerStats.canvasClicksWindow =
+      window.playerStats.canvasClicksWindow.filter(
+        (t) => clickNow - t <= 10000,
+      );
+    window.playerStats.maxCanvasClicksInWindow = Math.max(
+      window.playerStats.maxCanvasClicksInWindow || 0,
+      window.playerStats.canvasClicksWindow.length,
+    );
 
-        if (
-          window.equippedSlots.weapon &&
+    if (
+      window.equippedSlots.weapon &&
       window.equippedSlots.weapon.isUniqueSingularity &&
       window.playerStats.singularityState === "pulsing"
     ) {
@@ -2329,93 +2338,156 @@ window.onload = function () {
     }
 
     window.activeCanvasPointers.add(e.pointerId);
-        window.isCanvasPressed = true;
-        window.registerMaelstromTap();
-        window.triggerPlayerSlash();
-        if (typeof window.progressMission === "function") {
-          window.progressMission("active_clicks", 1);
-        }
-      });
+    window.isCanvasPressed = true;
+    window.registerMaelstromTap();
+    window.triggerPlayerSlash();
+    if (typeof window.progressMission === "function") {
+      window.progressMission("active_clicks", 1);
+    }
+  });
+
+  // Track active swiping/dragging along the Conduit path
+    canvas.addEventListener("pointermove", function (e) {
+      if (!window.activeConduitDrag) return;
+
+      let orb = window.activeRiftOrbs.find(
+        (o) => o.id === window.activeConduitDrag.orbId,
+      );
+      if (!orb) {
+        window.activeConduitDrag = null;
+        return;
+      }
+
+      if (e.cancelable) e.preventDefault();
 
       // Track active swiping/dragging along the Conduit path
-      canvas.addEventListener("pointermove", function(e) {
-        if (!window.activeConduitDrag) return;
+        canvas.addEventListener("pointermove", function (e) {
+          if (!window.activeConduitDrag) return;
 
-        let orb = window.activeRiftOrbs.find(o => o.id === window.activeConduitDrag.orbId);
-        if (!orb) {
-          window.activeConduitDrag = null;
-          return;
-        }
+          let orb = window.activeRiftOrbs.find(
+            (o) => o.id === window.activeConduitDrag.orbId,
+          );
+          if (!orb) {
+            window.activeConduitDrag = null;
+            return;
+          }
 
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        let clientX = e.clientX;
-        let clientY = e.clientY;
-        if (e.touches && e.touches.length > 0) {
-          clientX = e.touches[0].clientX;
-          clientY = e.touches[0].clientY;
-        }
-        const px = clientX !== undefined ? (clientX - rect.left) * scaleX : 0;
-        const py = clientY !== undefined ? (clientY - rect.top) * scaleY : 0;
+          if (e.cancelable) e.preventDefault();
 
-        // Calculate distance to segment vector
-        let dx = orb.endX - orb.x;
-        let dy = orb.endY - orb.y;
-        let segLenSq = dx * dx + dy * dy;
-        if (segLenSq === 0) return;
+          const rect = canvas.getBoundingClientRect();
+          const scaleX = canvas.width / rect.width;
+          const scaleY = canvas.height / rect.height;
+          let clientX = e.clientX;
+          let clientY = e.clientY;
+          if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+          } else if (e.changedTouches && e.changedTouches.length > 0) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+          }
+          const px = clientX !== undefined ? (clientX - rect.left) * scaleX : 0;
+          const py = clientY !== undefined ? (clientY - rect.top) * scaleY : 0;
 
-        // Project player coordinates on the path
-        let t = ((px - orb.x) * dx + (py - orb.y) * dy) / segLenSq;
-        t = Math.max(0, Math.min(1, t));
+          // Calculate distance to segment vector
+          let dx = orb.endX - orb.x;
+          let dy = orb.endY - orb.y;
+          let segLenSq = dx * dx + dy * dy;
+          if (segLenSq === 0) return;
 
-        let projX = orb.x + t * dx;
-        let projY = orb.y + t * dy;
+          // Project player coordinates on the path
+          let t = ((px - orb.x) * dx + (py - orb.y) * dy) / segLenSq;
+          t = Math.max(0, Math.min(1, t));
 
-        let dist = Math.hypot(px - projX, py - projY);
+          let projX = orb.x + t * dx;
+          let projY = orb.y + t * dy;
 
-        if (dist > 45) { // Highly generous 45px corridor threshold for mobile players
-          // Connection broke
-          window.activeConduitDrag = null;
+          let dist = Math.hypot(px - projX, py - projY);
+
+          if (dist > 45) {
+            // Highly generous 45px corridor threshold for mobile players
+            // Connection broke
+            window.activeConduitDrag = null;
+            orb.progress = 0;
+            orb.connected = false;
+            window.SoundManager.play("block");
+            return;
+          }
+
+          // Lock progression forward to prevent sliding backwards
+          orb.progress = Math.max(orb.progress, t);
+          if (orb.progress > 0.9) {
+            orb.connected = true;
+          }
+        }, { passive: false });
+    const scaleY = canvas.height / rect.height;
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    }
+    const px = clientX !== undefined ? (clientX - rect.left) * scaleX : 0;
+    const py = clientY !== undefined ? (clientY - rect.top) * scaleY : 0;
+
+    // Calculate distance to segment vector
+    let dx = orb.endX - orb.x;
+    let dy = orb.endY - orb.y;
+    let segLenSq = dx * dx + dy * dy;
+    if (segLenSq === 0) return;
+
+    // Project player coordinates on the path
+    let t = ((px - orb.x) * dx + (py - orb.y) * dy) / segLenSq;
+    t = Math.max(0, Math.min(1, t));
+
+    let projX = orb.x + t * dx;
+    let projY = orb.y + t * dy;
+
+    let dist = Math.hypot(px - projX, py - projY);
+
+    if (dist > 45) {
+      // Highly generous 45px corridor threshold for mobile players
+      // Connection broke
+      window.activeConduitDrag = null;
+      orb.progress = 0;
+      orb.connected = false;
+      window.SoundManager.play("block");
+      return;
+    }
+
+    // Lock progression forward to prevent sliding backwards
+    orb.progress = Math.max(orb.progress, t);
+    if (orb.progress > 0.9) {
+      orb.connected = true;
+    }
+  });
+
+  window.addEventListener("pointerup", (e) => {
+    try {
+      canvas.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    window.activeCanvasPointers.delete(e.pointerId);
+    if (window.activeCanvasPointers.size === 0) {
+      window.isCanvasPressed = false;
+    }
+
+    // Complete active Conduit connection on release
+    if (window.activeConduitDrag) {
+      let drag = window.activeConduitDrag;
+      window.activeConduitDrag = null;
+      let orbIdx = window.activeRiftOrbs.findIndex((o) => o.id === drag.orbId);
+      if (orbIdx !== -1) {
+        let orb = window.activeRiftOrbs[orbIdx];
+        if (orb.connected) {
+          window.executeConduitDischarge(orb, orbIdx);
+        } else {
           orb.progress = 0;
           orb.connected = false;
-          window.SoundManager.play("block");
-          return;
+          window.SoundManager.play("swing");
         }
-
-        // Lock progression forward to prevent sliding backwards
-        orb.progress = Math.max(orb.progress, t);
-        if (orb.progress > 0.90) {
-          orb.connected = true;
-        }
-      });
-
-      window.addEventListener("pointerup", (e) => {
-        try {
-          canvas.releasePointerCapture(e.pointerId);
-        } catch (err) {}
-        window.activeCanvasPointers.delete(e.pointerId);
-        if (window.activeCanvasPointers.size === 0) {
-          window.isCanvasPressed = false;
-        }
-
-        // Complete active Conduit connection on release
-        if (window.activeConduitDrag) {
-          let drag = window.activeConduitDrag;
-          window.activeConduitDrag = null;
-          let orbIdx = window.activeRiftOrbs.findIndex(o => o.id === drag.orbId);
-          if (orbIdx !== -1) {
-            let orb = window.activeRiftOrbs[orbIdx];
-            if (orb.connected) {
-              window.executeConduitDischarge(orb, orbIdx);
-            } else {
-              orb.progress = 0;
-              orb.connected = false;
-              window.SoundManager.play("swing");
-            }
-          }
-        }
-      });
+      }
+    }
+  });
   window.addEventListener("pointercancel", (e) => {
     try {
       canvas.releasePointerCapture(e.pointerId);
@@ -2593,11 +2665,7 @@ function update() {
     ((window.playerStats.dropPotionTimer > 0) << 7) |
     ((window.playerStats.qlyPotionTimer > 0) << 8);
 
-  if (
-    window.equippedSlots.subweapon &&
-    window.equippedSlots.subweapon.isUniqueWatch &&
-    !window.isGamePaused
-  ) {
+  if (window.hasUniquePassive("tome_watch") && !window.isGamePaused) {
     window.playerStats.watchTick = (window.playerStats.watchTick || 0) + 1;
     if (window.playerStats.watchActiveTimer > 0) {
       window.playerStats.watchActiveTimer--;
@@ -2845,10 +2913,7 @@ function update() {
         window.damageHistory.push({ time: Date.now(), amount: bleedDmg });
 
         // Sanguine Reaver: Ticks lifesteal with the active bleed damage instead of granting instant flat burst heals!
-        if (
-          window.equippedSlots.weapon &&
-          window.equippedSlots.weapon.isUniqueSword
-        ) {
+        if (window.hasUniquePassive("weapon_sword")) {
           let bleedHeal = Math.max(1, Math.ceil(bleedDmg * 0.15));
           window.playerStats.currentHp = Math.min(
             p.maxHp,
@@ -3006,15 +3071,15 @@ function update() {
     }
 
     // Roll for Void Rift Rupture (12% chance per second if Void Rupture is active)
-        if (
-          window.isCavernEffectActive("void_rupture") &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.12 &&
-          !(window.playerStats.purifiedAegisTimer > 0) &&
-          !window.isGamePaused
-        ) {
-          window.spawnVoidSuppressionOrbs();
-        }
+    if (
+      window.isCavernEffectActive("void_rupture") &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.12 &&
+      !(window.playerStats.purifiedAegisTimer > 0) &&
+      !window.isGamePaused
+    ) {
+      window.spawnVoidSuppressionOrbs();
+    }
 
     // Stacking Apathy Distortion HP drain (0.5% Max HP per active shard)
     let activeShards = window.activeRiftOrbs.filter(
@@ -3052,57 +3117,57 @@ function update() {
     }
 
     // Roll for Anomalous Shard spawn (8% chance per second when idle and no active rifts if rolled on Sigil/Crucible)
-        if (
-          window.isCavernEffectActive("anomalous_shards") &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.08 &&
-          !window.isGamePaused
-        ) {
-          window.spawnAnomalousShard();
-        }
+    if (
+      window.isCavernEffectActive("anomalous_shards") &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.08 &&
+      !window.isGamePaused
+    ) {
+      window.spawnAnomalousShard();
+    }
 
-        // Roll for Perfect Strike Reticle (5% chance per second when combat is active, no active orbs, and rolled on Sigil/Crucible)
-        if (
-          window.isCavernEffectActive("perfect_strike") &&
-          window.mob &&
-          window.mob.hp.gt(0) &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.05 &&
-          !window.isGamePaused
-        ) {
-          window.spawnPerfectStrikeReticle();
-        }
+    // Roll for Perfect Strike Reticle (5% chance per second when combat is active, no active orbs, and rolled on Sigil/Crucible)
+    if (
+      window.isCavernEffectActive("perfect_strike") &&
+      window.mob &&
+      window.mob.hp.gt(0) &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.05 &&
+      !window.isGamePaused
+    ) {
+      window.spawnPerfectStrikeReticle();
+    }
 
-        // Roll for Aetheric Conduit spawn (4% chance per second when no active orbs if rolled on Sigil/Crucible)
-        if (
-          window.isCavernEffectActive("aetheric_conduit") &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.04 &&
-          !window.isGamePaused
-        ) {
-          window.spawnAethericConduit();
-        }
+    // Roll for Aetheric Conduit spawn (4% chance per second when no active orbs if rolled on Sigil/Crucible)
+    if (
+      window.isCavernEffectActive("aetheric_conduit") &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.04 &&
+      !window.isGamePaused
+    ) {
+      window.spawnAethericConduit();
+    }
 
-        // Roll for Aetheric Spark (6% chance per second when no active orbs and not awakened if rolled on Sigil/Crucible)
-        if (
-          window.isCavernEffectActive("aetheric_spark") &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.06 &&
-          !(window.playerStats.astralAwakeningTimer > 0) &&
-          !window.isGamePaused
-        ) {
-          window.spawnAethericSpark(0); // Commences the chain at Index 0
-        }
+    // Roll for Aetheric Spark (6% chance per second when no active orbs and not awakened if rolled on Sigil/Crucible)
+    if (
+      window.isCavernEffectActive("aetheric_spark") &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.06 &&
+      !(window.playerStats.astralAwakeningTimer > 0) &&
+      !window.isGamePaused
+    ) {
+      window.spawnAethericSpark(0); // Commences the chain at Index 0
+    }
 
-        // Roll for Glimmering Pixie (5% chance per second when no active orbs if rolled on Sigil/Crucible)
-        if (
-          window.isCavernEffectActive("glimmering_pixie") &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.05 &&
-          !window.isGamePaused
-        ) {
-          window.spawnGlimmeringPixie();
-        }
+    // Roll for Glimmering Pixie (5% chance per second when no active orbs if rolled on Sigil/Crucible)
+    if (
+      window.isCavernEffectActive("glimmering_pixie") &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.05 &&
+      !window.isGamePaused
+    ) {
+      window.spawnGlimmeringPixie();
+    }
 
     // Active Debuff: Withering Decay (Periodic combat damage drain)
     if (
@@ -3135,10 +3200,7 @@ function update() {
     }
   }
 
-  if (
-    window.equippedSlots.weapon &&
-    window.equippedSlots.weapon.isUniqueSingularity
-  ) {
+  if (window.hasUniquePassive("weapon_singularity")) {
     if (window.playerStats.singularityTimer === undefined)
       window.playerStats.singularityTimer = 1800;
     if (window.playerStats.singularityState === undefined)
@@ -3183,7 +3245,9 @@ function update() {
         window.playerStats.singularityTimer = 1800;
         if (window.mob) {
           let finalStored = window.playerStats.singularityStoredDmg || 0;
-          let shieldLvl = window.equippedSlots.weapon.stageLevel || 1;
+          let shieldLvl = window.equippedSlots.weapon
+            ? window.equippedSlots.weapon.stageLevel || 1
+            : 1;
           let mult = 1.4 + shieldLvl * 0.015 + p.str * 0.0001;
           if (mult > 2.5) mult = 2.5;
 
@@ -3246,10 +3310,7 @@ function update() {
     window.playerStats.singularityTimer = 1800;
   }
 
-  if (
-    window.equippedSlots.weapon &&
-    window.equippedSlots.weapon.isUniqueStaff
-  ) {
+  if (window.hasUniquePassive("weapon_staff")) {
     if (window.playerStats.fireballCooldown === undefined)
       window.playerStats.fireballCooldown = 0;
     if (window.playerStats.fireballCooldown > 0)
@@ -3441,38 +3502,38 @@ function update() {
     if (!window.isGamePaused) orb.timer--;
 
     // Dynamic target-tracking to anchor the reticle over the active mob's center
-        if (orb.type === "perfect_strike" && window.mob) {
-          orb.x = window.mob.x + window.mob.w / 2;
-          orb.y = window.mob.y + window.mob.h / 2;
-        }
+    if (orb.type === "perfect_strike" && window.mob) {
+      orb.x = window.mob.x + window.mob.w / 2;
+      orb.y = window.mob.y + window.mob.h / 2;
+    }
 
-        // Zig-zag motion math for the Glimmering Pixie flight paths
-        if (orb.type === "glimmering_pixie") {
-          if (!window.isGamePaused) {
-            if (orb.pauseTimer > 0) {
-              orb.pauseTimer--;
-            } else {
-              let dx = orb.targetX - orb.x;
-              let dy = orb.targetY - orb.y;
-              let dist = Math.hypot(dx, dy);
+    // Zig-zag motion math for the Glimmering Pixie flight paths
+    if (orb.type === "glimmering_pixie") {
+      if (!window.isGamePaused) {
+        if (orb.pauseTimer > 0) {
+          orb.pauseTimer--;
+        } else {
+          let dx = orb.targetX - orb.x;
+          let dy = orb.targetY - orb.y;
+          let dist = Math.hypot(dx, dy);
 
-              if (dist < 8) {
-                // Reached turning point, pause briefly to give mobile players a clean shot!
-                orb.pauseTimer = 18;
-                let padX = 60;
-                let padY = 60;
-                let cvs = document.getElementById("gameCanvas");
-                let w = cvs ? cvs.width : 750;
-                let h = cvs ? cvs.height : 320;
-                orb.targetX = window.randFloat(padX, w - padX);
-                orb.targetY = window.randFloat(padY, h - padY - 90);
-              } else {
-                orb.x += (dx / dist) * orb.speed;
-                orb.y += (dy / dist) * orb.speed;
-              }
-            }
+          if (dist < 8) {
+            // Reached turning point, pause briefly to give mobile players a clean shot!
+            orb.pauseTimer = 18;
+            let padX = 60;
+            let padY = 60;
+            let cvs = document.getElementById("gameCanvas");
+            let w = cvs ? cvs.width : 750;
+            let h = cvs ? cvs.height : 320;
+            orb.targetX = window.randFloat(padX, w - padX);
+            orb.targetY = window.randFloat(padY, h - padY - 90);
+          } else {
+            orb.x += (dx / dist) * orb.speed;
+            orb.y += (dy / dist) * orb.speed;
           }
         }
+      }
+    }
 
     if (orb.timer > 0) {
       window.activeRiftOrbs[activeOrbsCount++] = orb;
@@ -3488,28 +3549,32 @@ function update() {
   });
 
   // Tick down debuff immunity Purified Aegis
-    if (window.playerStats.purifiedAegisTimer > 0) {
-      if (!window.isGamePaused) window.playerStats.purifiedAegisTimer--;
-      if (window.playerStats.purifiedAegisTimer === 0) {
-        window.invalidatePlayerStats();
-        if (typeof window.pushLog === "function") {
-          window.pushLog("<span style='color:#7f8c8d;'>[SYSTEM] Purified Aegis has expired.</span>");
-        }
-        window.updateUI();
+  if (window.playerStats.purifiedAegisTimer > 0) {
+    if (!window.isGamePaused) window.playerStats.purifiedAegisTimer--;
+    if (window.playerStats.purifiedAegisTimer === 0) {
+      window.invalidatePlayerStats();
+      if (typeof window.pushLog === "function") {
+        window.pushLog(
+          "<span style='color:#7f8c8d;'>[SYSTEM] Purified Aegis has expired.</span>",
+        );
       }
+      window.updateUI();
     }
+  }
 
-    // Tick down combat surge Astral Awakening
-    if (window.playerStats.astralAwakeningTimer > 0) {
-      if (!window.isGamePaused) window.playerStats.astralAwakeningTimer--;
-      if (window.playerStats.astralAwakeningTimer === 0) {
-        window.invalidatePlayerStats();
-        if (typeof window.pushLog === "function") {
-          window.pushLog("<span style='color:#7f8c8d;'>[SYSTEM] Astral Awakening has faded. Cooldowns normalized.</span>");
-        }
-        window.updateUI();
+  // Tick down combat surge Astral Awakening
+  if (window.playerStats.astralAwakeningTimer > 0) {
+    if (!window.isGamePaused) window.playerStats.astralAwakeningTimer--;
+    if (window.playerStats.astralAwakeningTimer === 0) {
+      window.invalidatePlayerStats();
+      if (typeof window.pushLog === "function") {
+        window.pushLog(
+          "<span style='color:#7f8c8d;'>[SYSTEM] Astral Awakening has faded. Cooldowns normalized.</span>",
+        );
       }
+      window.updateUI();
     }
+  }
 
   if (
     window.playerStats.isPrestigeBossMode &&
@@ -3640,57 +3705,59 @@ function update() {
         let isBlocked = Math.random() < p.block;
 
         if (isBlocked) {
-                  window.SoundManager.play("block");
+          window.SoundManager.play("block");
 
-                  // High-Powered Shield Bash Counter-Attack for all Shields!
-                  if (window.mob && window.mob.hp.gt(0)) {
-                    let bashDmg = Math.ceil(p.def * 1.5 * (1.0 + p.str * 0.002));
-                    let isAegis =
-                      window.equippedSlots.subweapon &&
-                      window.equippedSlots.subweapon.isUniqueAegis;
+          // High-Powered Shield Bash Counter-Attack for all Shields!
+          if (window.mob && window.mob.hp.gt(0)) {
+            let bashDmg = Math.ceil(p.def * 1.5 * (1.0 + p.str * 0.002));
+            let isAegis = window.hasUniquePassive("shield_aegis");
 
-                    if (isAegis) {
-                      let shieldLvl = window.equippedSlots.subweapon.stageLevel || 1;
-                      bashDmg = Math.ceil(
-                        p.def * (2.2 + shieldLvl * 0.05) * (1.0 + p.str * 0.003),
-                      );
-                    }
+            if (isAegis) {
+              let shieldLvl = window.equippedSlots.subweapon.stageLevel || 1;
+              bashDmg = Math.ceil(
+                p.def * (2.2 + shieldLvl * 0.05) * (1.0 + p.str * 0.003),
+              );
+            }
 
-                    if (window.playerStats.singularityState === "storing") {
-                      window.playerStats.singularityStoredDmg += bashDmg;
-                      window.effects.push({
-                        x: window.mob.x + window.mob.w / 2,
-                        y: window.mob.y - 10,
-                        text: `+${window.formatNumber(bashDmg)} [STORED]`,
-                        color: "#8e44ad",
-                        life: 45,
-                      });
-                    } else {
-                      window.mob.hp = window.mob.hp.sub(bashDmg);
-                      window.mob.flashTimer = 5;
-                      window.spawnDamageEffect(bashDmg, isAegis ? "aegis_counter" : "counter", false);
-                      window.damageHistory.push({ time: Date.now(), amount: bashDmg });
+            if (window.playerStats.singularityState === "storing") {
+              window.playerStats.singularityStoredDmg += bashDmg;
+              window.effects.push({
+                x: window.mob.x + window.mob.w / 2,
+                y: window.mob.y - 10,
+                text: `+${window.formatNumber(bashDmg)} [STORED]`,
+                color: "#8e44ad",
+                life: 45,
+              });
+            } else {
+              window.mob.hp = window.mob.hp.sub(bashDmg);
+              window.mob.flashTimer = 5;
+              window.spawnDamageEffect(
+                bashDmg,
+                isAegis ? "aegis_counter" : "counter",
+                false,
+              );
+              window.damageHistory.push({ time: Date.now(), amount: bashDmg });
 
-                      // Shield slam visual impact particles
-                      for (let i = 0; i < 8; i++) {
-                        window.particles.push({
-                          x: window.mob.x + window.mob.w / 2,
-                          y: window.mob.y + window.mob.h / 2,
-                          vx: window.randFloat(-3, 3),
-                          vy: window.randFloat(-3, 3),
-                          radius: window.randFloat(1.5, 3.5),
-                          color: isAegis ? "#8e44ad" : "#3498db",
-                          alpha: 1,
-                          life: window.randInt(15, 25),
-                        });
-                      }
+              // Shield slam visual impact particles
+              for (let i = 0; i < 8; i++) {
+                window.particles.push({
+                  x: window.mob.x + window.mob.w / 2,
+                  y: window.mob.y + window.mob.h / 2,
+                  vx: window.randFloat(-3, 3),
+                  vy: window.randFloat(-3, 3),
+                  radius: window.randFloat(1.5, 3.5),
+                  color: isAegis ? "#8e44ad" : "#3498db",
+                  alpha: 1,
+                  life: window.randInt(15, 25),
+                });
+              }
 
-                      if (window.mob.hp <= 0) {
-                        window.handleMobDeath();
-                        return;
-                      }
-                    }
-                  }
+              if (window.mob.hp <= 0) {
+                window.handleMobDeath();
+                return;
+              }
+            }
+          }
 
           window.playerStats.totalDeflections =
             (window.playerStats.totalDeflections || 0) + 1;
@@ -3759,55 +3826,55 @@ function update() {
           let isParried = Math.random() < p.parry;
 
           if (isParried) {
-                      // Mitigate incoming damage by 60% (takes 40% damage)
-                      netDamage = Math.max(1, Math.ceil(netDamage * 0.4));
-                      window.SoundManager.play("parry");
+            // Mitigate incoming damage by 60% (takes 40% damage)
+            netDamage = Math.max(1, Math.ceil(netDamage * 0.4));
+            window.SoundManager.play("parry");
 
-                      // Instant offensive Riposte counter-attack scaling with DEX & ATK!
-                      let riposteDmg = Math.ceil(p.atk * 1.5 * (1.0 + p.dex * 0.003));
+            // Instant offensive Riposte counter-attack scaling with DEX & ATK!
+            let riposteDmg = Math.ceil(p.atk * 1.5 * (1.0 + p.dex * 0.003));
 
-                      // Active Buff: Echoing Step (Counter strike scaling on parry)
-                      if (
-                        window.playerStats.isCrucibleMode &&
-                        window.playerStats.crucibleActiveBuff?.id === "echoing_step"
-                      ) {
-                        let buffStrength =
-                          window.playerStats.crucibleInfusedType === "buff" ? 1.5 : 1.0;
-                        riposteDmg += Math.ceil(p.atk * (1.0 * buffStrength));
-                      }
+            // Active Buff: Echoing Step (Counter strike scaling on parry)
+            if (
+              window.playerStats.isCrucibleMode &&
+              window.playerStats.crucibleActiveBuff?.id === "echoing_step"
+            ) {
+              let buffStrength =
+                window.playerStats.crucibleInfusedType === "buff" ? 1.5 : 1.0;
+              riposteDmg += Math.ceil(p.atk * (1.0 * buffStrength));
+            }
 
-                      if (window.checkArtifactTrait("parry_strike")) {
-                        let T = window.getArtifactTemperLevel("parry_strike");
-                        let mult = 0.5 + T * 0.15; // 50% base + 15% per level (max 140%)
-                        riposteDmg += Math.ceil(p.atk * mult);
-                      }
+            if (window.checkArtifactTrait("parry_strike")) {
+              let T = window.getArtifactTemperLevel("parry_strike");
+              let mult = 0.5 + T * 0.15; // 50% base + 15% per level (max 140%)
+              riposteDmg += Math.ceil(p.atk * mult);
+            }
 
-                      if (window.playerStats.adrenalineTimer > 0) riposteDmg *= 2;
+            if (window.playerStats.adrenalineTimer > 0) riposteDmg *= 2;
 
-                      // Apply active defense mitigation to offhand dagger strikes
-                      let mobDef = window.mob.def || 0;
-                      riposteDmg = Math.max(
-                        1,
-                        Math.ceil(riposteDmg * (100 / (100 + mobDef))),
-                      );
+            // Apply active defense mitigation to offhand dagger strikes
+            let mobDef = window.mob.def || 0;
+            riposteDmg = Math.max(
+              1,
+              Math.ceil(riposteDmg * (100 / (100 + mobDef))),
+            );
 
-                      if (window.playerStats.singularityState === "storing") {
-                        window.playerStats.singularityStoredDmg += riposteDmg;
-                        window.effects.push({
-                          x: window.mob.x + window.mob.w / 2,
-                          y: window.mob.y - 10,
-                          text: `+${window.formatNumber(riposteDmg)} [STORED]`,
-                          color: "#8e44ad",
-                          life: 45,
-                        });
-                      } else if (window.mob && window.mob.hp.gt(0)) {
-                        window.mob.hp = window.mob.hp.sub(riposteDmg);
-                        window.mob.flashTimer = 5; // Flashes the monster on counter-attack connection!
-                        window.spawnDamageEffect(riposteDmg, "parry_counter", false);
-                        window.damageHistory.push({
-                          time: Date.now(),
-                          amount: riposteDmg,
-                        });
+            if (window.playerStats.singularityState === "storing") {
+              window.playerStats.singularityStoredDmg += riposteDmg;
+              window.effects.push({
+                x: window.mob.x + window.mob.w / 2,
+                y: window.mob.y - 10,
+                text: `+${window.formatNumber(riposteDmg)} [STORED]`,
+                color: "#8e44ad",
+                life: 45,
+              });
+            } else if (window.mob && window.mob.hp.gt(0)) {
+              window.mob.hp = window.mob.hp.sub(riposteDmg);
+              window.mob.flashTimer = 5; // Flashes the monster on counter-attack connection!
+              window.spawnDamageEffect(riposteDmg, "parry_counter", false);
+              window.damageHistory.push({
+                time: Date.now(),
+                amount: riposteDmg,
+              });
 
               // Apply Poison Tip (Dagger-specific parry card) bleed stacks
               if (p.crucibleDaggerBleed && window.mob && window.mob.hp.gt(0)) {
@@ -3887,8 +3954,7 @@ function update() {
           });
 
           if (
-            window.equippedSlots.helmet &&
-            window.equippedSlots.helmet.isUniqueTempest &&
+            window.hasUniquePassive("helmet_tempest") &&
             window.mob &&
             window.mob.hp.gt(0)
           ) {
@@ -4024,8 +4090,7 @@ function update() {
 
 window.registerMaelstromTap = function () {
   if (
-    window.equippedSlots.weapon &&
-    window.equippedSlots.weapon.isUniqueMaelstrom &&
+    window.hasUniquePassive("weapon_maelstrom") &&
     window.playerStats.galeResonanceTimer > 0
   ) {
     let now = Date.now();
@@ -4182,10 +4247,7 @@ window.CombatEngine = {
     window.SoundManager.play("swing");
     window.hero.attackTimer = cooldownCap;
 
-    if (
-      window.equippedSlots.weapon &&
-      window.equippedSlots.weapon.isUniqueStaff
-    ) {
+    if (window.hasUniquePassive("weapon_staff")) {
       window.projectiles.push({
         x: window.hero.x + 35,
         y: window.hero.y + 10,
@@ -4381,8 +4443,7 @@ window.CombatEngine = {
 
       // UNIQUE: Maelstrom Glaive Wind Crescent projectile on critical hit and Resonance trigger
       if (
-        window.equippedSlots.weapon &&
-        window.equippedSlots.weapon.isUniqueMaelstrom &&
+        window.hasUniquePassive("weapon_maelstrom") &&
         isCrit &&
         window.mob &&
         window.mob.hp.gt(0)
@@ -4418,10 +4479,7 @@ window.CombatEngine = {
       }
 
       // Stacking Bleed & Sanguine Rupture on hit
-      if (
-        window.equippedSlots.weapon &&
-        window.equippedSlots.weapon.isUniqueSword
-      ) {
+      if (window.hasUniquePassive("weapon_sword")) {
         window.mob.bleedStacks = (window.mob.bleedStacks || 0) + 1;
         window.mob.bleedTimer = 300; // 5-second hold
         window.mob.bleedDmgPerSecond = Math.max(1, Math.ceil(p.atk * 0.15)); // 15% weapon scaling per stack
@@ -4808,11 +4866,10 @@ window.CombatEngine = {
       window.playerStats.hasTriggeredPhoenixRising = true;
     }
 
-    // UNIQUE: Warp-Core Greaves "Time Dilation" Boss Kill Haste trigger
+    // UNIQUE: Warp-Core Greaves "Time Dilation" Boss Kill Max Haste trigger
     if (
       isBoss &&
-      window.equippedSlots.boots &&
-      window.equippedSlots.boots.isUniqueWarpCore &&
+      window.hasUniquePassive("boots_warpcore") &&
       !window.playerStats.isDungeonMode &&
       !window.playerStats.isCrucibleMode
     ) {
@@ -5146,35 +5203,35 @@ window.CombatEngine = {
           (window.playerStats.crucibleAccumulatedCores || 0) + finalCores;
 
         let oldWave = window.playerStats.crucibleWave || 1;
-                window.playerStats.crucibleWave++;
+        window.playerStats.crucibleWave++;
 
-                // Dynamically roll a debuff on every 10th wave; normal waves have no active cavern buff
-                let nextWave = window.playerStats.crucibleWave;
-                let isDebuff = nextWave % 10 === 0;
+        // Dynamically roll a debuff on every 10th wave; normal waves have no active cavern buff
+        let nextWave = window.playerStats.crucibleWave;
+        let isDebuff = nextWave % 10 === 0;
 
-                if (isDebuff) {
-                  window.playerStats.crucibleActiveDebuff =
-                    window.CAVERN_DEBUFFS[
-                      Math.floor(Math.random() * window.CAVERN_DEBUFFS.length)
-                    ];
-                  window.playerStats.crucibleActiveBuff = null;
-                  let debuff = window.playerStats.crucibleActiveDebuff;
-                  let titleText = debuff ? debuff.name : "Anomaly";
-                  let descText = debuff ? debuff.desc : "";
+        if (isDebuff) {
+          window.playerStats.crucibleActiveDebuff =
+            window.CAVERN_DEBUFFS[
+              Math.floor(Math.random() * window.CAVERN_DEBUFFS.length)
+            ];
+          window.playerStats.crucibleActiveBuff = null;
+          let debuff = window.playerStats.crucibleActiveDebuff;
+          let titleText = debuff ? debuff.name : "Anomaly";
+          let descText = debuff ? debuff.desc : "";
 
-                  // Trigger Elegant On-Screen Cinematic Wave Splash ONLY on debuff waves
-                  window.crucibleTransitionSplash = {
-                    title: `WAVE ${nextWave}: ${titleText.toUpperCase()}`,
-                    sub: descText,
-                    color: "#e74c3c",
-                    timer: 150,
-                    maxTimer: 150,
-                  };
-                } else {
-                  window.playerStats.crucibleActiveBuff = null;
-                  window.playerStats.crucibleActiveDebuff = null;
-                  window.crucibleTransitionSplash = null;
-                }
+          // Trigger Elegant On-Screen Cinematic Wave Splash ONLY on debuff waves
+          window.crucibleTransitionSplash = {
+            title: `WAVE ${nextWave}: ${titleText.toUpperCase()}`,
+            sub: descText,
+            color: "#e74c3c",
+            timer: 150,
+            maxTimer: 150,
+          };
+        } else {
+          window.playerStats.crucibleActiveBuff = null;
+          window.playerStats.crucibleActiveDebuff = null;
+          window.crucibleTransitionSplash = null;
+        }
 
         window.playerStats.crucibleWavesClearedThisRun =
           (window.playerStats.crucibleWavesClearedThisRun || 0) + 1;
@@ -7675,18 +7732,18 @@ window.enterCrucible = function () {
       };
 
       window.playerStats.isCrucibleMode = true;
-            window.playerStats.isDungeonMode = false;
-            window.playerStats.crucibleWave = 1;
-            window.playerStats.crucibleStartWave = 1;
-            window.playerStats.killCount = 0;
-            window.playerStats.targetsRequired = 5;
-            window.playerStats.isBossMode = false;
-            window.playerStats.isUberBoss = false;
-            window.mob = null;
+      window.playerStats.isDungeonMode = false;
+      window.playerStats.crucibleWave = 1;
+      window.playerStats.crucibleStartWave = 1;
+      window.playerStats.killCount = 0;
+      window.playerStats.targetsRequired = 5;
+      window.playerStats.isBossMode = false;
+      window.playerStats.isUberBoss = false;
+      window.mob = null;
 
-            window.playerStats.crucibleActiveBuff = null;
-            window.playerStats.crucibleActiveDebuff = null;
-            window.playerStats.crucibleInfusedType = "none";
+      window.playerStats.crucibleActiveBuff = null;
+      window.playerStats.crucibleActiveDebuff = null;
+      window.playerStats.crucibleInfusedType = "none";
       window.playerStats.crucibleLootMult = 1.0;
 
       window.playerStats.crucibleRunActive = true;
@@ -8665,265 +8722,302 @@ window.handleOrbClick = function (orb, index) {
   }
 
   if (orb.type === "perfect_strike") {
-      window.activeRiftOrbs.splice(index, 1);
-      let p = window.resolvePlayerStats();
-      let mobDef = window.mob ? window.mob.def || 0 : 0;
+    window.activeRiftOrbs.splice(index, 1);
+    let p = window.resolvePlayerStats();
+    let mobDef = window.mob ? window.mob.def || 0 : 0;
 
-      // Rhythm Timing Sweet-Spot Assessment (10-25 frames remaining)
-      let isPerfect = orb.timer >= 10 && orb.timer <= 25;
-      let finalDmg = p.atk;
+    // Rhythm Timing Sweet-Spot Assessment (10-25 frames remaining)
+    let isPerfect = orb.timer >= 10 && orb.timer <= 25;
+    let finalDmg = p.atk;
 
-      if (isPerfect && window.mob) {
-        // 1. Perfect Strike: Deals 5.0x raw damage, entirely bypassing defense (Armor Pierce)
-        finalDmg = Math.ceil(finalDmg * 5.0);
+    if (isPerfect && window.mob) {
+      // 1. Perfect Strike: Deals 5.0x raw damage, entirely bypassing defense (Armor Pierce)
+      finalDmg = Math.ceil(finalDmg * 5.0);
 
-        // Inflict 5 Sanguine Bleed stacks
-        window.mob.bleedStacks = 5;
-        window.mob.bleedTimer = 300;
-        window.mob.bleedDmgPerSecond = Math.max(1, Math.ceil(p.atk * 0.15));
+      // Inflict 5 Sanguine Bleed stacks
+      window.mob.bleedStacks = 5;
+      window.mob.bleedTimer = 300;
+      window.mob.bleedDmgPerSecond = Math.max(1, Math.ceil(p.atk * 0.15));
 
-        // Spawn massive golden spark fireworks
-        let colors = ["#ffd700", "#f1c40f", "#ffffff"];
-        for (let i = 0; i < 25; i++) {
-          let angle = Math.random() * Math.PI * 2;
-          let vel = window.randFloat(3, 8);
-          window.particles.push(
-            window.ParticlePool.get(
-              orb.x,
-              orb.y,
-              Math.cos(angle) * vel,
-              Math.sin(angle) * vel - 1,
-              window.randFloat(2, 4.5),
-              colors[Math.floor(Math.random() * colors.length)],
-              1,
-              window.randInt(25, 45)
-            )
-          );
-        }
-
-        window.effects.push({
-          x: orb.x - 20,
-          y: orb.y - 25,
-          text: "⚡ PERFECT STRIKE!",
-          color: "#ffd700",
-          life: 60
-        });
-        window.SoundManager.play("parry");
-
-        if (window.playerStats.singularityState === "storing") {
-          window.playerStats.singularityStoredDmg += finalDmg;
-        } else {
-          window.mob.hp = window.mob.hp.sub(finalDmg);
-          window.mob.flashTimer = 8;
-          window.spawnDamageEffect(finalDmg, "slash", true);
-          window.damageHistory.push({ time: Date.now(), amount: finalDmg });
-        }
-      } else if (window.mob) {
-        // 2. Early/Late Hit: Normal 1.0x damage, mitigated by armor
-        finalDmg = Math.max(1, Math.ceil(finalDmg * (100 / (100 + mobDef))));
-
-        // Standard sparks
-        let colors = ["#bdc3c7", "#7f8c8d"];
-        for (let i = 0; i < 8; i++) {
-          let angle = Math.random() * Math.PI * 2;
-          let vel = window.randFloat(1.5, 3.5);
-          window.particles.push(
-            window.ParticlePool.get(
-              orb.x,
-              orb.y,
-              Math.cos(angle) * vel,
-              Math.sin(angle) * vel - 1,
-              window.randFloat(1, 2.5),
-              colors[Math.floor(Math.random() * colors.length)],
-              1,
-              window.randInt(15, 25)
-            )
-          );
-        }
-
-        window.effects.push({
-          x: orb.x - 15,
-          y: orb.y - 25,
-          text: "GOOD HIT!",
-          color: "#cbd5e1",
-          life: 45
-        });
-        window.SoundManager.play("swing");
-
-        if (window.playerStats.singularityState === "storing") {
-          window.playerStats.singularityStoredDmg += finalDmg;
-        } else {
-          window.mob.hp = window.mob.hp.sub(finalDmg);
-          window.mob.flashTimer = 4;
-          window.spawnDamageEffect(finalDmg, "slash", false);
-          window.damageHistory.push({ time: Date.now(), amount: finalDmg });
-        }
-      }
-
-      if (window.mob && window.mob.hp.lte(0)) window.handleMobDeath();
-      window.invalidatePlayerStats();
-      window.updateUI();
-      return;
-    }
-
-    if (orb.type === "aetheric_spark") {
-      let colors = ["#ffd700", "#ffffff", "#ffeaa7"];
-      for (let i = 0; i < 10; i++) {
+      // Spawn massive golden spark fireworks
+      let colors = ["#ffd700", "#f1c40f", "#ffffff"];
+      for (let i = 0; i < 25; i++) {
         let angle = Math.random() * Math.PI * 2;
-        let vel = window.randFloat(1.5, 4);
+        let vel = window.randFloat(3, 8);
         window.particles.push(
           window.ParticlePool.get(
             orb.x,
             orb.y,
             Math.cos(angle) * vel,
-            Math.sin(angle) * vel,
-            window.randFloat(1, 2.5),
+            Math.sin(angle) * vel - 1,
+            window.randFloat(2, 4.5),
             colors[Math.floor(Math.random() * colors.length)],
             1,
-            window.randInt(15, 25)
-          )
+            window.randInt(25, 45),
+          ),
         );
       }
 
-      let curChain = orb.chainIndex;
-      if (curChain < 4) {
-        // Spawn next sequential combo link in the teleport chain
-        window.spawnAethericSpark(curChain + 1);
-        window.effects.push({
-          x: orb.x,
-          y: orb.y - 15,
-          text: `✨ COMBO ${curChain + 1}!`,
-          color: "#ffd700",
-          life: 40
-        });
+      window.effects.push({
+        x: orb.x - 20,
+        y: orb.y - 25,
+        text: "⚡ PERFECT STRIKE!",
+        color: "#ffd700",
+        life: 60,
+      });
+      window.SoundManager.play("parry");
+
+      if (window.playerStats.singularityState === "storing") {
+        window.playerStats.singularityStoredDmg += finalDmg;
       } else {
-        // 5th Spark popped! Trigger full Astral Awakening
-        window.activeRiftOrbs = [];
-        window.playerStats.sparkChainCount = 0;
-        window.playerStats.astralAwakeningTimer = 900; // 15 seconds at 60 FPS
+        window.mob.hp = window.mob.hp.sub(finalDmg);
+        window.mob.flashTimer = 8;
+        window.spawnDamageEffect(finalDmg, "slash", true);
+        window.damageHistory.push({ time: Date.now(), amount: finalDmg });
+      }
+    } else if (window.mob) {
+      // 2. Early/Late Hit: Normal 1.0x damage, mitigated by armor
+      finalDmg = Math.max(1, Math.ceil(finalDmg * (100 / (100 + mobDef))));
 
-        // Explode huge golden rings
-        for (let i = 0; i < 35; i++) {
-          let angle = Math.random() * Math.PI * 2;
-          let vel = window.randFloat(4, 9);
-          window.particles.push(
-            window.ParticlePool.get(
-              orb.x,
-              orb.y,
-              Math.cos(angle) * vel,
-              Math.sin(angle) * vel - 1,
-              window.randFloat(2, 4.5),
-              "#ffd700",
-              1,
-              window.randInt(30, 55)
-            )
-          );
-        }
+      // Standard sparks
+      let colors = ["#bdc3c7", "#7f8c8d"];
+      for (let i = 0; i < 8; i++) {
+        let angle = Math.random() * Math.PI * 2;
+        let vel = window.randFloat(1.5, 3.5);
+        window.particles.push(
+          window.ParticlePool.get(
+            orb.x,
+            orb.y,
+            Math.cos(angle) * vel,
+            Math.sin(angle) * vel - 1,
+            window.randFloat(1, 2.5),
+            colors[Math.floor(Math.random() * colors.length)],
+            1,
+            window.randInt(15, 25),
+          ),
+        );
+      }
 
-        window.effects.push({
-                         x: window.hero.x + 12,
-                         y: window.hero.y - 20,
-                         text: "☀️ ASTRAL AWAKENING!",
-                         color: "#f1c40f",
-                         life: 75
-                       });
+      window.effects.push({
+        x: orb.x - 15,
+        y: orb.y - 25,
+        text: "GOOD HIT!",
+        color: "#cbd5e1",
+        life: 45,
+      });
+      window.SoundManager.play("swing");
 
-                       if (typeof window.pushLog === "function") {
-                         window.pushLog("<span style='color:#f1c40f; font-weight:bold;'>☀️ [ASTRAL AWAKENING] You completed the Spark Chain! Grants +100% Total Damage and +15% Speed for 15 seconds!</span>");
-                       }
-                       if (typeof window.pushHeaderToast === "function") {
-                         window.pushHeaderToast("☀️ Astral Awakening: Pure Power!", "#f1c40f");
-                       }
-                       window.SoundManager.play("revive");
-                       window.invalidatePlayerStats();
-                       window.updateUI();
-                     }
-                     return;
-                   }
+      if (window.playerStats.singularityState === "storing") {
+        window.playerStats.singularityStoredDmg += finalDmg;
+      } else {
+        window.mob.hp = window.mob.hp.sub(finalDmg);
+        window.mob.flashTimer = 4;
+        window.spawnDamageEffect(finalDmg, "slash", false);
+        window.damageHistory.push({ time: Date.now(), amount: finalDmg });
+      }
+    }
 
-          if (orb.type === "glimmering_pixie") {
-            window.activeRiftOrbs.splice(index, 1);
+    if (window.mob && window.mob.hp.lte(0)) window.handleMobDeath();
+    window.invalidatePlayerStats();
+    window.updateUI();
+    return;
+  }
 
-            // Nature green forest burst sparkles on capture
-            let colors = ["#2ecc71", "#a3fd83", "#ffffff", "#55efc4"];
-            for (let i = 0; i < 20; i++) {
-              let angle = Math.random() * Math.PI * 2;
-              let vel = window.randFloat(2, 6);
-              window.particles.push(
-                window.ParticlePool.get(
-                  orb.x,
-                  orb.y,
-                  Math.cos(angle) * vel,
-                  Math.sin(angle) * vel - 1,
-                  window.randFloat(1.5, 3.5),
-                  colors[Math.floor(Math.random() * colors.length)],
-                  1,
-                  window.randInt(25, 45)
-                )
-              );
-            }
+  if (orb.type === "aetheric_spark") {
+    let colors = ["#ffd700", "#ffffff", "#ffeaa7"];
+    for (let i = 0; i < 10; i++) {
+      let angle = Math.random() * Math.PI * 2;
+      let vel = window.randFloat(1.5, 4);
+      window.particles.push(
+        window.ParticlePool.get(
+          orb.x,
+          orb.y,
+          Math.cos(angle) * vel,
+          Math.sin(angle) * vel,
+          window.randFloat(1, 2.5),
+          colors[Math.floor(Math.random() * colors.length)],
+          1,
+          window.randInt(15, 25),
+        ),
+      );
+    }
 
-            window.SoundManager.play("fairy");
+    let curChain = orb.chainIndex;
+    if (curChain < 4) {
+      // Spawn next sequential combo link in the teleport chain
+      window.spawnAethericSpark(curChain + 1);
+      window.effects.push({
+        x: orb.x,
+        y: orb.y - 15,
+        text: `✨ COMBO ${curChain + 1}!`,
+        color: "#ffd700",
+        life: 40,
+      });
+    } else {
+      // 5th Spark popped! Trigger full Astral Awakening
+      window.activeRiftOrbs = [];
+      window.playerStats.sparkChainCount = 0;
+      window.playerStats.astralAwakeningTimer = 900; // 15 seconds at 60 FPS
 
-            // Dual-Reward Matrix: 40% chance of random +50% duration Elixir, 60% chance of progressive materials
-            let rRoll = Math.random();
-            if (rRoll < 0.40) {
-              let pList = ["Attack Elixir", "Vitality Elixir", "Armored Elixir", "Haste Elixir"];
-              let chosenPot = pList[Math.floor(Math.random() * pList.length)];
+      // Explode huge golden rings
+      for (let i = 0; i < 35; i++) {
+        let angle = Math.random() * Math.PI * 2;
+        let vel = window.randFloat(4, 9);
+        window.particles.push(
+          window.ParticlePool.get(
+            orb.x,
+            orb.y,
+            Math.cos(angle) * vel,
+            Math.sin(angle) * vel - 1,
+            window.randFloat(2, 4.5),
+            "#ffd700",
+            1,
+            window.randInt(30, 55),
+          ),
+        );
+      }
 
-              let p = window.resolvePlayerStats();
-              let baseDuration = 18000; // 5 minutes base
-              let extBonus = window.checkArtifactTrait("extend_buffs") ? 180 + window.getArtifactTemperLevel("extend_buffs") * 30 : 0;
-              let finalDuration = Math.floor((baseDuration + extBonus) * 1.5); // +50% duration bonus!
+      window.effects.push({
+        x: window.hero.x + 12,
+        y: window.hero.y - 20,
+        text: "☀️ ASTRAL AWAKENING!",
+        color: "#f1c40f",
+        life: 75,
+      });
 
-              if (chosenPot === "Attack Elixir") {
-                window.playerStats.atkPotionTimer = Math.max(window.playerStats.atkPotionTimer || 0, finalDuration);
-                window.playerStats.atkPotionStrength = Math.max(window.playerStats.atkPotionStrength || 0, 0.1);
-              } else if (chosenPot === "Vitality Elixir") {
-                window.playerStats.hpPotionTimer = Math.max(window.playerStats.hpPotionTimer || 0, finalDuration);
-                window.playerStats.hpPotionStrength = Math.max(window.playerStats.hpPotionStrength || 0, 0.1);
-              } else if (chosenPot === "Armored Elixir") {
-                window.playerStats.defPotionTimer = Math.max(window.playerStats.defPotionTimer || 0, finalDuration);
-                window.playerStats.defPotionStrength = Math.max(window.playerStats.defPotionStrength || 0, 0.1);
-              } else {
-                window.playerStats.hastePotionTimer = Math.max(window.playerStats.hastePotionTimer || 0, finalDuration);
-                window.playerStats.hastePotionStrength = Math.max(window.playerStats.hastePotionStrength || 0, 1);
-              }
+      if (typeof window.pushLog === "function") {
+        window.pushLog(
+          "<span style='color:#f1c40f; font-weight:bold;'>☀️ [ASTRAL AWAKENING] You completed the Spark Chain! Grants +100% Total Damage and +15% Speed for 15 seconds!</span>",
+        );
+      }
+      if (typeof window.pushHeaderToast === "function") {
+        window.pushHeaderToast("☀️ Astral Awakening: Pure Power!", "#f1c40f");
+      }
+      window.SoundManager.play("revive");
+      window.invalidatePlayerStats();
+      window.updateUI();
+    }
+    return;
+  }
 
-              window.effects.push({
-                x: orb.x - 15,
-                y: orb.y - 20,
-                text: `🧪 ${chosenPot.toUpperCase()} INFUSED (+50% Duration)!`,
-                color: "#2ecc71",
-                life: 65
-              });
-              if (typeof window.pushLog === "function") {
-                window.pushLog(`<span style='color:#2ecc71; font-weight:bold;'>🧚 [PIXIE] You caught the Glimmering Pixie! She infused you with a ${chosenPot} (+50% duration bonus)!</span>`);
-              }
-            } else {
-              let activeStage = window.playerStats.stage || 1;
-              let scale = Math.max(1, Math.floor((activeStage - 1) / 10) + 1);
-              let scrapName = window.getScrapYieldName(window.randInt(1, 4)); // Rolls Magic, Epic, or Legendary scrap
-              let qty = window.randInt(1, 3);
-              window.addEtcDrop(scrapName, qty);
+  if (orb.type === "glimmering_pixie") {
+    window.activeRiftOrbs.splice(index, 1);
 
-              window.effects.push({
-                x: orb.x - 10,
-                y: orb.y - 20,
-                text: `+${qty}x ${scrapName}!`,
-                color: "#f1c40f",
-                life: 55
-              });
-              if (typeof window.pushLog === "function") {
-                window.pushLog(`<span style='color:#2ecc71;'>🧚 [PIXIE] You caught the Glimmering Pixie! She gifted you ${qty}x ${scrapName}!</span>`);
-              }
-            }
-            window.invalidatePlayerStats();
-            window.updateUI();
-            return;
-          }
+    // Nature green forest burst sparkles on capture
+    let colors = ["#2ecc71", "#a3fd83", "#ffffff", "#55efc4"];
+    for (let i = 0; i < 20; i++) {
+      let angle = Math.random() * Math.PI * 2;
+      let vel = window.randFloat(2, 6);
+      window.particles.push(
+        window.ParticlePool.get(
+          orb.x,
+          orb.y,
+          Math.cos(angle) * vel,
+          Math.sin(angle) * vel - 1,
+          window.randFloat(1.5, 3.5),
+          colors[Math.floor(Math.random() * colors.length)],
+          1,
+          window.randInt(25, 45),
+        ),
+      );
+    }
 
-          window.activeRiftOrbs.splice(index, 1);
+    window.SoundManager.play("fairy");
+
+    // Dual-Reward Matrix: 40% chance of random +50% duration Elixir, 60% chance of progressive materials
+    let rRoll = Math.random();
+    if (rRoll < 0.4) {
+      let pList = [
+        "Attack Elixir",
+        "Vitality Elixir",
+        "Armored Elixir",
+        "Haste Elixir",
+      ];
+      let chosenPot = pList[Math.floor(Math.random() * pList.length)];
+
+      let p = window.resolvePlayerStats();
+      let baseDuration = 18000; // 5 minutes base
+      let extBonus = window.checkArtifactTrait("extend_buffs")
+        ? 180 + window.getArtifactTemperLevel("extend_buffs") * 30
+        : 0;
+      let finalDuration = Math.floor((baseDuration + extBonus) * 1.5); // +50% duration bonus!
+
+      if (chosenPot === "Attack Elixir") {
+        window.playerStats.atkPotionTimer = Math.max(
+          window.playerStats.atkPotionTimer || 0,
+          finalDuration,
+        );
+        window.playerStats.atkPotionStrength = Math.max(
+          window.playerStats.atkPotionStrength || 0,
+          0.1,
+        );
+      } else if (chosenPot === "Vitality Elixir") {
+        window.playerStats.hpPotionTimer = Math.max(
+          window.playerStats.hpPotionTimer || 0,
+          finalDuration,
+        );
+        window.playerStats.hpPotionStrength = Math.max(
+          window.playerStats.hpPotionStrength || 0,
+          0.1,
+        );
+      } else if (chosenPot === "Armored Elixir") {
+        window.playerStats.defPotionTimer = Math.max(
+          window.playerStats.defPotionTimer || 0,
+          finalDuration,
+        );
+        window.playerStats.defPotionStrength = Math.max(
+          window.playerStats.defPotionStrength || 0,
+          0.1,
+        );
+      } else {
+        window.playerStats.hastePotionTimer = Math.max(
+          window.playerStats.hastePotionTimer || 0,
+          finalDuration,
+        );
+        window.playerStats.hastePotionStrength = Math.max(
+          window.playerStats.hastePotionStrength || 0,
+          1,
+        );
+      }
+
+      window.effects.push({
+        x: orb.x - 15,
+        y: orb.y - 20,
+        text: `🧪 ${chosenPot.toUpperCase()} INFUSED (+50% Duration)!`,
+        color: "#2ecc71",
+        life: 65,
+      });
+      if (typeof window.pushLog === "function") {
+        window.pushLog(
+          `<span style='color:#2ecc71; font-weight:bold;'>🧚 [PIXIE] You caught the Glimmering Pixie! She infused you with a ${chosenPot} (+50% duration bonus)!</span>`,
+        );
+      }
+    } else {
+      let activeStage = window.playerStats.stage || 1;
+      let scale = Math.max(1, Math.floor((activeStage - 1) / 10) + 1);
+      let scrapName = window.getScrapYieldName(window.randInt(1, 4)); // Rolls Magic, Epic, or Legendary scrap
+      let qty = window.randInt(1, 3);
+      window.addEtcDrop(scrapName, qty);
+
+      window.effects.push({
+        x: orb.x - 10,
+        y: orb.y - 20,
+        text: `+${qty}x ${scrapName}!`,
+        color: "#f1c40f",
+        life: 55,
+      });
+      if (typeof window.pushLog === "function") {
+        window.pushLog(
+          `<span style='color:#2ecc71;'>🧚 [PIXIE] You caught the Glimmering Pixie! She gifted you ${qty}x ${scrapName}!</span>`,
+        );
+      }
+    }
+    window.invalidatePlayerStats();
+    window.updateUI();
+    return;
+  }
+
+  window.activeRiftOrbs.splice(index, 1);
 
   // Spawn visual burst particles
   let colors = ["#ff007f", "#8e44ad", "#e84393", "#ffffff"];
@@ -8978,18 +9072,21 @@ window.handleOrbClick = function (orb, index) {
   }
 };
 
-window.handleOrbExpiry = function(orb) {
+window.handleOrbExpiry = function (orb) {
   if (orb.type === "anomalous_shard") {
     let p = window.resolvePlayerStats();
-    let dmg = Math.ceil(p.maxHp * 0.10); // 10% Max HP feedback penalty
-    window.playerStats.currentHp = Math.max(1, window.playerStats.currentHp - dmg);
+    let dmg = Math.ceil(p.maxHp * 0.1); // 10% Max HP feedback penalty
+    window.playerStats.currentHp = Math.max(
+      1,
+      window.playerStats.currentHp - dmg,
+    );
 
     window.effects.push({
       x: orb.x,
       y: orb.y - 20,
       text: `-${dmg} [SHARD COLLAPSE]`,
       color: "#e74c3c",
-      life: 45
+      life: 45,
     });
 
     if (window.playerStats.currentHp <= 1) {
@@ -8998,7 +9095,9 @@ window.handleOrbExpiry = function(orb) {
     }
 
     if (typeof window.pushLog === "function") {
-      window.pushLog(`<span style='color:#e74c3c;'>🌌 [COLLAPSE] An Anomalous Shard collapsed, triggering an energy backfire of ${dmg} damage!</span>`);
+      window.pushLog(
+        `<span style='color:#e74c3c;'>🌌 [COLLAPSE] An Anomalous Shard collapsed, triggering an energy backfire of ${dmg} damage!</span>`,
+      );
     }
     window.SoundManager.play("defeat");
     window.invalidatePlayerStats();
@@ -9007,43 +9106,50 @@ window.handleOrbExpiry = function(orb) {
   }
 
   if (orb.type === "aetheric_spark") {
-      window.playerStats.sparkChainCount = 0;
-      if (typeof window.pushLog === "function") {
-        window.pushLog("<span style='color:#7f8c8d;'>[SPARK] The Aetheric Spark decayed. Combo chain broken!</span>");
-      }
-      window.SoundManager.play("swing");
-      window.invalidatePlayerStats();
-      window.updateUI();
-      return;
+    window.playerStats.sparkChainCount = 0;
+    if (typeof window.pushLog === "function") {
+      window.pushLog(
+        "<span style='color:#7f8c8d;'>[SPARK] The Aetheric Spark decayed. Combo chain broken!</span>",
+      );
     }
+    window.SoundManager.play("swing");
+    window.invalidatePlayerStats();
+    window.updateUI();
+    return;
+  }
 
-    if (orb.type === "glimmering_pixie") {
-      let p = window.resolvePlayerStats();
-      let stingDmg = Math.ceil(window.playerStats.currentHp * 0.10); // Drains 10% current HP
-      window.playerStats.currentHp = Math.max(1, window.playerStats.currentHp - stingDmg);
-
-      window.effects.push({
-        x: window.hero.x,
-        y: window.hero.y - 20,
-        text: `-${stingDmg} [AETHERIC WASP STING]`,
-        color: "#e74c3c",
-        life: 55
-      });
-
-      if (window.playerStats.currentHp <= 1) {
-        window.playerStats.currentHp = 0;
-        window.deathAnimationTimer = window.deathMaxFrames;
-      }
-
-      if (typeof window.pushLog === "function") {
-        window.pushLog(`<span style='color:#e74c3c;'>🐝 [STUNG] The Glimmering Pixie morphed and stung you, draining ${stingDmg} HP!</span>`);
-      }
-      window.SoundManager.play("death");
-      window.updateUI();
-      return;
-    }
-
+  if (orb.type === "glimmering_pixie") {
     let p = window.resolvePlayerStats();
+    let stingDmg = Math.ceil(window.playerStats.currentHp * 0.1); // Drains 10% current HP
+    window.playerStats.currentHp = Math.max(
+      1,
+      window.playerStats.currentHp - stingDmg,
+    );
+
+    window.effects.push({
+      x: window.hero.x,
+      y: window.hero.y - 20,
+      text: `-${stingDmg} [AETHERIC WASP STING]`,
+      color: "#e74c3c",
+      life: 55,
+    });
+
+    if (window.playerStats.currentHp <= 1) {
+      window.playerStats.currentHp = 0;
+      window.deathAnimationTimer = window.deathMaxFrames;
+    }
+
+    if (typeof window.pushLog === "function") {
+      window.pushLog(
+        `<span style='color:#e74c3c;'>🐝 [STUNG] The Glimmering Pixie morphed and stung you, draining ${stingDmg} HP!</span>`,
+      );
+    }
+    window.SoundManager.play("death");
+    window.updateUI();
+    return;
+  }
+
+  let p = window.resolvePlayerStats();
   let dmg = Math.ceil(p.maxHp * 0.06); // 6% Max HP damage
   window.playerStats.currentHp = Math.max(
     1,
@@ -9116,7 +9222,7 @@ window.spawnAnomalousShard = function () {
   window.updateUI();
 };
 
-window.spawnPerfectStrikeReticle = function() {
+window.spawnPerfectStrikeReticle = function () {
   if (!window.mob || window.mob.hp.lte(0)) return;
 
   let mx = window.mob.x + window.mob.w / 2;
@@ -9130,13 +9236,13 @@ window.spawnPerfectStrikeReticle = function() {
     radius: 12,
     hitRadius: 36, // Generous mobile touch zone padding
     timer: 120, // 2 seconds
-    maxTimer: 120
+    maxTimer: 120,
   });
 
   window.SoundManager.play("swing");
 };
 
-window.spawnAethericConduit = function() {
+window.spawnAethericConduit = function () {
   let padX = 100;
   let padY = 60;
   let cvs = document.getElementById("gameCanvas");
@@ -9145,8 +9251,12 @@ window.spawnAethericConduit = function() {
 
   // Generate start/end vectors on opposite sides of canvas play space
   let side = Math.random() > 0.5;
-  let startX = side ? window.randFloat(padX, w/2 - 60) : window.randFloat(w/2 + 60, w - padX);
-  let endX = !side ? window.randFloat(padX, w/2 - 60) : window.randFloat(w/2 + 60, w - padX);
+  let startX = side
+    ? window.randFloat(padX, w / 2 - 60)
+    : window.randFloat(w / 2 + 60, w - padX);
+  let endX = !side
+    ? window.randFloat(padX, w / 2 - 60)
+    : window.randFloat(w / 2 + 60, w - padX);
 
   let startY = window.randFloat(padY, h - padY - 90);
   let endY = window.randFloat(padY, h - padY - 90);
@@ -9163,16 +9273,18 @@ window.spawnAethericConduit = function() {
     timer: 300, // 5 seconds
     maxTimer: 300,
     progress: 0,
-    connected: false
+    connected: false,
   });
 
   if (typeof window.pushLog === "function") {
-    window.pushLog("<span style='color:#00d2ff; font-weight:bold;'>⚡ [CONDUIT] An Aetheric Conduit has emerged! Swipe from the start crystal to the end crystal to discharge it!</span>");
+    window.pushLog(
+      "<span style='color:#00d2ff; font-weight:bold;'>⚡ [CONDUIT] An Aetheric Conduit has emerged! Swipe from the start crystal to the end crystal to discharge it!</span>",
+    );
   }
   window.SoundManager.play("fairy");
 };
 
-window.spawnAethericSpark = function(chainIndex) {
+window.spawnAethericSpark = function (chainIndex) {
   let padX = 60;
   let padY = 60;
   let cvs = document.getElementById("gameCanvas");
@@ -9182,21 +9294,25 @@ window.spawnAethericSpark = function(chainIndex) {
   window.playerStats.sparkChainCount = chainIndex;
 
   // We replace active orbs list for sparks since it represents a sequential teleport chain
-  window.activeRiftOrbs = [{
-    id: window.idCounter++,
-    type: "aetheric_spark",
-    x: window.randFloat(padX, w - padX),
-    y: window.randFloat(padY, h - padY - 90),
-    radius: 12,
-    hitRadius: 36, // Generous hitbox zone for mobile players
-    timer: 180, // 3 seconds per chain link
-    maxTimer: 180,
-    chainIndex: chainIndex
-  }];
+  window.activeRiftOrbs = [
+    {
+      id: window.idCounter++,
+      type: "aetheric_spark",
+      x: window.randFloat(padX, w - padX),
+      y: window.randFloat(padY, h - padY - 90),
+      radius: 12,
+      hitRadius: 36, // Generous hitbox zone for mobile players
+      timer: 180, // 3 seconds per chain link
+      maxTimer: 180,
+      chainIndex: chainIndex,
+    },
+  ];
 
   if (chainIndex === 0) {
     if (typeof window.pushLog === "function") {
-      window.pushLog("<span style='color:#ffd700; font-weight:bold;'>✨ [SPARK] An Aetheric Spark has appeared! Tap it to start a combo chain!</span>");
+      window.pushLog(
+        "<span style='color:#ffd700; font-weight:bold;'>✨ [SPARK] An Aetheric Spark has appeared! Tap it to start a combo chain!</span>",
+      );
     }
     window.SoundManager.play("fairy");
   } else {
@@ -9206,7 +9322,7 @@ window.spawnAethericSpark = function(chainIndex) {
   window.updateUI();
 };
 
-window.spawnGlimmeringPixie = function() {
+window.spawnGlimmeringPixie = function () {
   let padX = 60;
   let padY = 60;
   let cvs = document.getElementById("gameCanvas");
@@ -9228,17 +9344,19 @@ window.spawnGlimmeringPixie = function() {
     radius: 10,
     hitRadius: 36, // Expanded touch target
     timer: 240, // 4 seconds
-    maxTimer: 240
+    maxTimer: 240,
   });
 
   if (typeof window.pushLog === "function") {
-    window.pushLog("<span style='color:#2ecc71; font-weight:bold;'>🧚 [PIXIE] A mischievous Glimmering Pixie is darting across the screen! Catch her before she stings you!</span>");
+    window.pushLog(
+      "<span style='color:#2ecc71; font-weight:bold;'>🧚 [PIXIE] A mischievous Glimmering Pixie is darting across the screen! Catch her before she stings you!</span>",
+    );
   }
   window.SoundManager.play("fairy");
   window.updateUI();
 };
 
-window.executeConduitDischarge = function(orb, index) {
+window.executeConduitDischarge = function (orb, index) {
   window.activeRiftOrbs.splice(index, 1);
 
   let p = window.resolvePlayerStats();
@@ -9248,7 +9366,10 @@ window.executeConduitDischarge = function(orb, index) {
 
   if (window.mob && window.mob.hp.gt(0)) {
     let mobDef = window.mob.def || 0;
-    let finalSpellDmg = Math.max(1, Math.ceil(spellDmg * (100 / (100 + mobDef))));
+    let finalSpellDmg = Math.max(
+      1,
+      Math.ceil(spellDmg * (100 / (100 + mobDef))),
+    );
 
     // 1. Detonate FIRE Tome Spell
     window.mob.hp = window.mob.hp.sub(finalSpellDmg);
@@ -9279,8 +9400,8 @@ window.executeConduitDischarge = function(orb, index) {
           window.randFloat(2, 4.5),
           colors[Math.floor(Math.random() * colors.length)],
           1,
-          window.randInt(25, 45)
-        )
+          window.randInt(25, 45),
+        ),
       );
     }
 
@@ -9295,11 +9416,13 @@ window.executeConduitDischarge = function(orb, index) {
       y: orb.endY - 20,
       text: "⚡ CONDUIT DISCHARGE!",
       color: "#00d2ff",
-      life: 65
+      life: 65,
     });
 
     if (typeof window.pushLog === "function") {
-      window.pushLog("<span style='color:#00d2ff; font-weight:bold;'>⚡ [CONDUIT] Pathway connected! Discharged Aetheric energy, launching triple spells and resetting active cooldowns!</span>");
+      window.pushLog(
+        "<span style='color:#00d2ff; font-weight:bold;'>⚡ [CONDUIT] Pathway connected! Discharged Aetheric energy, launching triple spells and resetting active cooldowns!</span>",
+      );
     }
     window.SoundManager.play("revive");
     if (window.mob.hp.lte(0)) window.handleMobDeath();

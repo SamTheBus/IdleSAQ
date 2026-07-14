@@ -1694,6 +1694,9 @@ window.updateUI = function () {
   if (typeof window.updateMedalBanner === "function") {
     window.updateMedalBanner();
   }
+  if (typeof window.updateSpectralReliquaryBanner === "function") {
+    window.updateSpectralReliquaryBanner();
+  }
 };
 
 // --- ATTRIBUTES MATRIX CONTROLS ---
@@ -3060,14 +3063,14 @@ window.renderMarketShop = function () {
                 </div>
             </div>
             <div style="position:relative; z-index:4; display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(255,255,255,0.08); padding-top:10px; padding-left:4px; padding-right:4px;">
-                            <div>
-                                <span style="font-size:9.5px; color:#888; display:block; text-align:left;">MERCHANT COST</span>
-                                <strong style="color:${costColor}; font-size:14px; font-family:monospace;">${window.formatNumber(iotdItem.cost)} Gold</strong>
-                            </div>
-                            <button class="btn-action" style="${btnStyle} padding:8px 16px; font-size:11px;" onclick="window.buyShopItem(${window.playerStats.shopItems.indexOf(iotdItem)})" onpointerdown="window.buyShopItem(${window.playerStats.shopItems.indexOf(iotdItem)})">
-                                ${isSold ? "SOLD" : "ACQUIRE"}
-                            </button>
-                        </div>
+                                        <div>
+                                            <span style="font-size:9.5px; color:#888; display:block; text-align:left;">MERCHANT COST</span>
+                                            <strong style="color:${costColor}; font-size:14px; font-family:monospace;">${window.formatNumber(iotdItem.cost)} Gold</strong>
+                                        </div>
+                                        <button class="btn-action" style="${btnStyle} padding:8px 16px; font-size:11px;" onclick="window.buyShopItem(${window.playerStats.shopItems.indexOf(iotdItem)})">
+                                            ${isSold ? "SOLD" : "ACQUIRE"}
+                                        </button>
+                                    </div>
         </div>
       `;
   }
@@ -3122,11 +3125,11 @@ window.renderMarketShop = function () {
                 </div>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:4; border-top:1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:2px;">
-                            <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(shopItem.cost)} Gold</span>
-                            <button class="btn-action" style="${btnStyle} font-size:10px; padding:4px 8px; border-radius:4px;" onclick="window.buyShopItem(${idx})" onpointerdown="window.buyShopItem(${idx})">
-                                ${isSold ? "SOLD" : "BUY"}
-                            </button>
-                        </div>
+                                        <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(shopItem.cost)} Gold</span>
+                                        <button class="btn-action" style="${btnStyle} font-size:10px; padding:4px 8px; border-radius:4px;" onclick="window.buyShopItem(${idx})">
+                                            ${isSold ? "SOLD" : "BUY"}
+                                        </button>
+                                    </div>
         </div>
       `;
   });
@@ -3328,14 +3331,13 @@ window.renderGoldUpgrades = function () {
 
       let btnHtml = "";
       if (canAfford) {
-        btnHtml = `
-              <button class="btn-action"
-                      style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
-                      onclick="window.buyGoldUpgrade('${u.id}')"
-                      onpointerdown="window.buyGoldUpgrade('${u.id}')">
-                  Upgrade Sink
-              </button>
-            `;
+              btnHtml = `
+                    <button class="btn-action"
+                            style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
+                            onclick="window.buyGoldUpgrade('${u.id}')">
+                        Upgrade Sink
+                    </button>
+                  `;
       } else {
         btnHtml = `
         <button class="btn-action"
@@ -3465,17 +3467,17 @@ window.renderMysticalShop = function () {
       <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(180deg, #161921 0%, #0d0f14 100%); box-shadow: 0 4px 15px rgba(0,0,0,0.85), inset 0 0 10px rgba(${window.hexToRgbValues ? window.hexToRgbValues(item.color) : "255,255,255"}, 0.05); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;" onmouseenter="window.showMysticalShopTooltip(event, ${index})" ontouchstart="window.showMysticalShopTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
           <div>
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                  <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                      ${iconHtml}
-                      <strong style="color:${item.color}; font-size:12.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px ${item.color}35;">${item.name}</strong>
-                  </div>
-              </div>
-              <div style="font-size:10px; color:#94a3b8; margin-bottom:10px; line-height:1.4; white-space:normal;">${item.desc}</div>
-          </div>
-          <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
-                       <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(displayCost)} ${currencyLabel}</span>
-                       <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px; box-shadow:0 0 6px ${item.color}33;" onclick="window.buyMysticalItem(${index})" onpointerdown="window.buyMysticalItem(${index})">Purchase</button>
-                   </div>
+                                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                                    ${iconHtml}
+                                    <strong style="color:${item.color}; font-size:12.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px ${item.color}35;">${item.name}</strong>
+                                </div>
+                            </div>
+                            <div style="font-size:10px; color:#94a3b8; margin-bottom:10px; line-height:1.4; white-space:normal;">${item.desc}</div>
+                        </div>
+                        <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+                                     <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(displayCost)} ${currencyLabel}</span>
+                                     <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px; box-shadow:0 0 6px ${item.color}33;" onclick="window.buyMysticalItem(${index})">Purchase</button>
+                                 </div>
       </div>
     `;
     }).join("") +
@@ -3527,9 +3529,9 @@ window.renderMysticalShop = function () {
            </div>
 
            <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-                          <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${recipe.amount}x Ingredients</span>
-                          <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.transmutePotion(${index})" onpointerdown="window.transmutePotion(${index})">Transmute</button>
-                      </div>
+                                     <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${recipe.amount}x Ingredients</span>
+                                     <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.transmutePotion(${index})">Transmute</button>
+                                 </div>
        </div>
      `;
     }).join("") +
@@ -3575,8 +3577,8 @@ window.renderAstralShop = function () {
           </div>
 
           <div style="position:relative; z-index:2; border-top: 1px dashed rgba(255,255,255,0.08); padding-top:8px; margin-top:6px;">
-                        <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.buyAstralShopItem(${index})" onpointerdown="window.buyAstralShopItem(${index})">Infuse Shards</button>
-                    </div>
+                                  <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.buyAstralShopItem(${index})">Infuse Shards</button>
+                              </div>
       </div>
     `;
   });
@@ -4533,7 +4535,7 @@ window.renderPaperDoll = function () {
 
       let iconBox = `<div style="text-align:center; margin-bottom:4px;">${window.getEquipIconHtml(item, 32)}</div>`;
       if (isArt) {
-        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')" onpointerdown="window.unequipItem('${slot}')">Remove</button>`;
+        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
       } else {
         let s = [];
         let sPlain = [];
@@ -4624,7 +4626,7 @@ window.renderPaperDoll = function () {
             setLabelHtml = `<div style="font-size:8px; color:#2ecc71; font-weight:bold; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;">✨ ${setName} Set (${displayCount}/3)</div>`;
           }
         }
-        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${sPlain.join(", ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')" onpointerdown="window.unequipItem('${slot}')">Remove</button>`;
+        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${sPlain.join(", ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onclick="window.unequipItem('${slot}')">Remove</button>`;
       }
     } else {
       el.className = "slots-card";
@@ -4682,22 +4684,22 @@ window.renderInventory = function () {
           let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center; flex-shrink:0;">${window.getEquipIconHtml(item, 28)}</div>`;
 
           return `<div class="bag-item" style="display:flex; align-items:center; ${itemStyleStr}">
-                                                            <div style="flex:1; min-width:0; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
-                                                                ${iconBox}
-                                                                <div style="flex:1; min-width:0;">
-                                                                    <div style="display:flex; align-items:center; gap:4px; margin-bottom:1px; flex-wrap:wrap;">
-                                                                        <strong style="color:${nameColor}; font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${item.name}${temperTag}${lockTag}</strong>
-                                                                        ${comparisonBadge}
-                                                                    </div>
-                                                                    ${details}
-                                                                </div>
-                                                            </div>
-                                            <div class="bag-item-actions" style="position:relative; z-index:10; display:inline-flex; gap:3px; margin-left: 8px; flex-shrink:0;">
-                                                                                          <button class="btn-action" style="padding:4px 8px; font-size:10px;" onclick="window.equipItem(${item.id})" onpointerdown="window.equipItem(${item.id})">Equip</button>
-                                                                                          <button class="btn-action" style="background:${lockBg}; padding:4px 6px; font-size:10px;" onclick="window.toggleLock(${item.id})" onpointerdown="window.toggleLock(${item.id})">${lockIcon}</button>
-                                                                                          <button class="btn-action un" style="padding:4px 8px; font-size:10px;" onclick="window.salvageItem(${item.id})" onpointerdown="window.salvageItem(${item.id})">Salvage</button>
-                                                                                      </div>
-                                        </div>`;
+                                                                      <div style="flex:1; min-width:0; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
+                                                                          ${iconBox}
+                                                                          <div style="flex:1; min-width:0;">
+                                                                              <div style="display:flex; align-items:center; gap:4px; margin-bottom:1px; flex-wrap:wrap;">
+                                                                                  <strong style="color:${nameColor}; font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${item.name}${temperTag}${lockTag}</strong>
+                                                                                  ${comparisonBadge}
+                                                                              </div>
+                                                                              ${details}
+                                                                          </div>
+                                                                      </div>
+                                                      <div class="bag-item-actions" style="position:relative; z-index:10; display:inline-flex; gap:3px; margin-left: 8px; flex-shrink:0;">
+                                                                                                    <button class="btn-action" style="padding:4px 8px; font-size:10px;" onclick="window.equipItem(${item.id})">Equip</button>
+                                                                                                    <button class="btn-action" style="background:${lockBg}; padding:4px 6px; font-size:10px;" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
+                                                                                                    <button class="btn-action un" style="padding:4px 8px; font-size:10px;" onclick="window.salvageItem(${item.id})">Salvage</button>
+                                                                                                </div>
+                                                  </div>`;
         }).join("");
       }
     }
@@ -4723,18 +4725,18 @@ window.renderInventory = function () {
           let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center;">${window.getArtifactIconHtml(item.trait, 28)}</div>`;
 
           return `<div class="bag-item">
-                                            <div style="flex:1; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
-                                                ${iconBox}
-                                                <div style="flex:1;">
-                                                    <strong style="color:${nameColor};">${item.name}${lockTag}</strong><br>${details}
-                                                </div>
-                                            </div>
-                                <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
-                                                                  <button class="btn-action" onclick="window.equipItem(${item.id})" onpointerdown="window.equipItem(${item.id})">Equip</button>
-                                                                  <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="window.toggleLock(${item.id})" onpointerdown="window.toggleLock(${item.id})">${lockIcon}</button>
-                                                                  <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})" onpointerdown="window.salvageItem(${item.id})">Salvage</button>
-                                                                </div>
-                            </div>`;
+                                                      <div style="flex:1; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
+                                                          ${iconBox}
+                                                          <div style="flex:1;">
+                                                              <strong style="color:${nameColor};">${item.name}${lockTag}</strong><br>${details}
+                                                          </div>
+                                                      </div>
+                                          <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
+                                                                            <button class="btn-action" onclick="window.equipItem(${item.id})">Equip</button>
+                                                                            <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
+                                                                            <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})">Salvage</button>
+                                                                          </div>
+                                      </div>`;
         }).join("");
       }
     }
@@ -4765,17 +4767,17 @@ window.renderInventory = function () {
           let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center;">${window.getEquipIconHtml(item, 28)}</div>`;
 
           return `<div class="bag-item" style="border-left: 4.5px solid ${nameColor} !important;">
-                      <div style="flex:1; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
-                          ${iconBox}
-                          <div style="flex:1;">
-                              <strong style="color:${nameColor};">${item.name}${lockTag}</strong><br>${details}
-                          </div>
-                      </div>
-                      <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
-                                                                    <button class="btn-action" style="background:${lockBg};" onclick="window.toggleLock(${item.id})" onpointerdown="window.toggleLock(${item.id})">${lockIcon}</button>
-                                                                    <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})" onpointerdown="window.salvageItem(${item.id})">Salvage</button>
-                                                                </div>
-                  </div>`;
+                                <div style="flex:1; cursor:help; text-align:left; display:flex; align-items:center;" onmouseenter="window.showInventoryTooltip(event, ${item.id})" ontouchstart="window.showInventoryTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()">
+                                    ${iconBox}
+                                    <div style="flex:1;">
+                                        <strong style="color:${nameColor};">${item.name}${lockTag}</strong><br>${details}
+                                    </div>
+                                </div>
+                                <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
+                                                                              <button class="btn-action" style="background:${lockBg};" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
+                                                                              <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})">Salvage</button>
+                                                                          </div>
+                            </div>`;
         }).join("");
       }
     }
@@ -4894,7 +4896,7 @@ window.renderInventory = function () {
                                       <span style="font-size:10px; color:#94a3b8;">Qty: ${count}</span>
                                   </div>
                               </div>
-                              <button class="btn-action" style="background:#2ecc71; width:100%; padding:4px 0; font-size:10.5px; font-weight:bold; border-radius:4px; margin-top:2px;" onclick="window.useItem('${key}')" onpointerdown="window.useItem('${key}')">Consume</button>
+                              <button class="btn-action" style="background:#2ecc71; width:100%; padding:4px 0; font-size:10.5px; font-weight:bold; border-radius:4px; margin-top:2px;" onclick="window.useItem('${key}')">Consume</button>
                           </div>
                       `;
             })
@@ -5157,72 +5159,67 @@ window.generateItemCardHtml = function (
     slotMult = 1.0 + slotLvl * 0.01 + runBonus;
   }
 
-  if (slotMult > 1.0) {
-    let pctBonus = Math.round((slotMult - 1.0) * 100);
-    html += `
-      <div style="background: rgba(46, 204, 113, 0.1); border: 1px solid #2ecc71; border-radius: 4px; padding: 4px 8px; font-size: 9px; font-weight: 800; color: #2ecc71; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; margin-bottom: 8px; line-height: 1;">
-        ⚡ Slot Attunement Active: +${pctBonus}% Stats!
-      </div>
-    `;
-  }
+  // Render Currently Equipped status as an absolute tab hugging the top-right card border
+    if (isEquipped) {
+      html += `
+        <div style="
+          position: absolute;
+          top: 0;
+          right: 12px;
+          background: linear-gradient(180deg, #e74c3c, #c0392b);
+          border: 1px solid #ff4d4d;
+          border-top: none;
+          border-radius: 0 0 4px 4px;
+          color: #fff;
+          font-size: 8px;
+          font-weight: 800;
+          padding: 2px 6px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+          text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+          z-index: 10;
+          white-space: nowrap;
+          line-height: 1;
+        ">
+          Equipped
+        </div>
+      `;
+    }
 
   // Custom Cavern Sigil card renderer
-  if (item.type === "sigil") {
-    let color = window.getTierColor(item.statsRolled);
-    let buffDescs = item.buffs
-      .map(
-        (b) =>
-          `<div style="color:#2ecc71; font-size:10px; margin-bottom:2px; line-height:1.35;">• ☀️ <strong>${b.name}</strong>: ${b.desc}</div>`,
-      )
-      .join("");
-    let debuffDescs = item.debuffs
-      .map(
-        (d) =>
-          `<div style="color:#e74c3c; font-size:10px; margin-bottom:2px; line-height:1.35;">• 🌑 <strong>${d.name}</strong>: ${d.desc}</div>`,
-      )
-      .join("");
-    let lockTag = item.locked ? " 🔒" : "";
+    if (item.type === "sigil") {
+      let color = window.getTierColor(item.statsRolled);
+      let buffDescs = item.buffs
+        .map(
+          (b) =>
+            `<div style="color:#2ecc71; font-size:10px; margin-bottom:2px; line-height:1.35;">• ☀️ <strong>${b.name}</strong>: ${b.desc}</div>`,
+        )
+        .join("");
+      let debuffDescs = item.debuffs
+        .map(
+          (d) =>
+            `<div style="color:#e74c3c; font-size:10px; margin-bottom:2px; line-height:1.35;">• 🌑 <strong>${d.name}</strong>: ${d.desc}</div>`,
+        )
+        .join("");
+      let lockTag = item.locked ? " 🔒" : "";
 
-    let sigHtml = `
-      <div class="tt-title" style="color:${color}; white-space:normal;">${item.name}${lockTag}</div>
-      <div style="text-align:center; margin: 10px 0;">${window.getEquipIconHtml(item, 56)}</div>
-      <div class="tt-subtitle">CAVERN SIGIL | <span style="color:${color}; font-weight:bold;">${item.statsRolled}★ ${window.getTierName(item.statsRolled)}</span></div>
-      <div style="background:#090b0e; border:1px solid #222; border-radius:6px; padding:8px 10px; margin-top:8px;">
-        <strong style="color:#f1c40f; font-family:monospace; display:block; margin-bottom:4px; text-transform:uppercase; font-size:9.5px; letter-spacing:0.5px;">⚡ SIGIL MODIFIERS:</strong>
-        ${buffDescs}
-        ${debuffDescs}
-        <div style="border-top:1px dashed #222; margin-top:6px; padding-top:6px; display:flex; flex-direction:column; gap:2px; font-family:monospace; font-size:9.5px;">
-          <span style="color:#3498db; font-weight:bold;">💎 Focus Rewards: +${(item.rewardMultiplier * 100).toFixed(0)}% Loot Multiplier</span>
-          ${item.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold; font-size:9.5px;">✨ Quality Boost: +${(item.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
+      let sigHtml = `
+        <div class="tt-title" style="color:${color}; white-space:normal;">${item.name}${lockTag}</div>
+        <div style="text-align:center; margin: 10px 0;">${window.getEquipIconHtml(item, 56)}</div>
+        <div class="tt-subtitle">CAVERN SIGIL | <span style="color:${color}; font-weight:bold;">${item.statsRolled}★ ${window.getTierName(item.statsRolled)}</span></div>
+        <div style="background:#090b0e; border:1px solid #222; border-radius:6px; padding:8px 10px; margin-top:8px;">
+          <strong style="color:#f1c40f; font-family:monospace; display:block; margin-bottom:4px; text-transform:uppercase; font-size:9.5px; letter-spacing:0.5px;">⚡ SIGIL MODIFIERS:</strong>
+          ${buffDescs}
+          ${debuffDescs}
+          <div style="border-top:1px dashed #222; margin-top:6px; padding-top:6px; display:flex; flex-direction:column; gap:2px; font-family:monospace; font-size:9.5px;">
+            <span style="color:#3498db; font-weight:bold;">💎 Focus Rewards: +${(item.rewardMultiplier * 100).toFixed(0)}% Loot Multiplier</span>
+            ${item.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold; font-size:9.5px;">✨ Quality Boost: +${(item.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
+          </div>
         </div>
-      </div>
-    `;
-    return sigHtml;
-  }
-
-  let badge = isEquipped
-    ? `
-        <div style="
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: #fff;
-            font-size: 9px;
-            font-weight: 800;
-            padding: 4px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
-            border: 1px solid #ff4d4d;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-            text-align: center;
-            margin-bottom: 8px;
-            white-space: nowrap;
-        ">
-            Currently Equipped
-        </div>
-    `
-    : ``;
-  html += badge;
+      `;
+      return sigHtml;
+    }
 
   let isUnique =
     item.isUniqueStaff ||
@@ -5248,26 +5245,30 @@ window.generateItemCardHtml = function (
 
   let tierColor = window.getTierColor(item.statsRolled);
   let titleColor = item.type === "artifact" ? "#1abc9c" : tierColor;
-  let labelDisplay = item.type.toUpperCase();
-  if (item.type === "subweapon" && item.subType) {
-    labelDisplay = `SUBWEAPON (${item.subType.toUpperCase()})`;
-  }
+    let labelDisplay = item.type.toUpperCase();
+    if (item.type === "subweapon" && item.subType) {
+      labelDisplay = `SUBWEAPON (${item.subType.toUpperCase()})`;
+    }
 
-  let subtitle =
-    item.type === "artifact"
-      ? "Unique Artifact"
-      : `${labelDisplay} | <span style="color:${tierColor}; font-weight:bold;">${tierStrDisplay(item)}</span>`;
+    let subtitle =
+      item.type === "artifact"
+        ? "Unique Artifact"
+        : `${labelDisplay} | <span style="color:${tierColor}; font-weight:bold;">${tierStrDisplay(item)}</span>`;
 
-  let temperTag =
-    item.temperLevel > 0
-      ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
-      : "";
-  let lockTag = item.locked ? " 🔒" : "";
+    html += `<div class="tt-title" style="color:${isUnique ? "#1abc9c" : titleColor}; white-space:normal;">${item.name}${temperTag}${lockTag}</div>`;
+    html += runicBadge;
+    html += iconIllustration;
+    html += `<div class="tt-subtitle">${subtitle}</div>`;
 
-  html += `<div class="tt-title" style="color:${isUnique ? "#1abc9c" : titleColor}; white-space:normal;">${item.name}${temperTag}${lockTag}</div>`;
-  html += runicBadge;
-  html += iconIllustration;
-  html += `<div class="tt-subtitle">${subtitle}</div>`;
+    // Render Slot Attunement details inside the metadata section instead of a floating top badge
+    if (slotMult > 1.0) {
+      let pctBonus = Math.round((slotMult - 1.0) * 100);
+      html += `
+        <div style="font-size: 10px; color: #2ecc71; font-weight: bold; margin-top: 4px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;">
+          ⚡ Slot Attunement: +${pctBonus}% Stats Applied
+        </div>
+      `;
+    }
 
   if (item.id !== "dummy" && item.type === "subweapon") {
     if (item.subType === "shield") {
@@ -5622,14 +5623,14 @@ window.generateItemCardHtml = function (
   }
 
   if (uniqueStyle) {
-    if (uniqueStyle.lore) {
-      html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
+      if (uniqueStyle.lore) {
+        html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
+      }
+      html = `<div style="position: relative; background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 16px 12px 12px 12px; border-radius: 4px; box-sizing: border-box; width: 100%;">
+                            ${runicBadge}
+                            ${html}
+                        </div>`;
     }
-    html = `<div style="background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 12px; border-radius: 4px; box-sizing: border-box; width: 100%;">
-                          ${runicBadge}
-                          ${html}
-                      </div>`;
-  }
 
   return html;
 };
@@ -11297,7 +11298,7 @@ window.selectCustomForgeStation = function (val) {
     if (textSpan) {
       textSpan.innerText =
         val === "blacksmith"
-          ? "🛡️ Blacksmith Station (Temper / Level / Tier)"
+          ? "🛡️ Blacksmith Station (Attune / Level / Tier)"
           : "🔮 Mystical Enchanter (Infuse / Purge)";
     }
     select.querySelectorAll(".custom-select-option").forEach((opt) => {
@@ -12326,17 +12327,33 @@ window.startSlotLongPress = function (e, slotKey) {
   target.style.transition = "transform 0.1s";
 
   // Capture position coordinates safely
-  let clientX = e.clientX;
-  let clientY = e.clientY;
+  let startX = e.clientX;
+  let startY = e.clientY;
+
+  // Handle move cancellation for scrolling
+  const cancelOnMove = (moveEvent) => {
+    let diffX = Math.abs(moveEvent.clientX - startX);
+    let diffY = Math.abs(moveEvent.clientY - startY);
+    if (diffX > 8 || diffY > 8) {
+      if (window.slotLongPressTimeout) {
+        clearTimeout(window.slotLongPressTimeout);
+        window.slotLongPressTimeout = null;
+      }
+      target.style.transform = "none";
+      target.removeEventListener("pointermove", cancelOnMove);
+    }
+  };
+  target.addEventListener("pointermove", cancelOnMove);
 
   window.slotLongPressTimeout = setTimeout(() => {
     window.isSlotLongPressActive = true;
     target.style.transform = "none";
+    target.removeEventListener("pointermove", cancelOnMove);
 
     // Build mock event to drive the aligned centering calculations
     let mockEvent = {
-      clientX: clientX,
-      clientY: clientY,
+      clientX: startX,
+      clientY: startY,
       stopPropagation: () => {},
       preventDefault: () => {},
     };
@@ -13743,7 +13760,7 @@ window.renderBestiaryAlbum = function () {
     if (isMaxed) {
       upgradeBtnHtml = `<span style="color:#2ecc71; font-weight:bold; font-size:8px; font-family:monospace;">MAX</span>`;
     } else if (canUpgrade) {
-      upgradeBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:2px 6px; font-size:8px; font-weight:bold; height:18px; line-height:1;" onclick="window.upgradeBestiaryCard('${cKey}')" onpointerdown="window.upgradeBestiaryCard('${cKey}')">UP</button>`;
+      upgradeBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:2px 6px; font-size:8px; font-weight:bold; height:18px; line-height:1;" onclick="window.upgradeBestiaryCard('${cKey}')">UP</button>`;
     } else if (canAffordDuplicates) {
       let mColor = soulsOwned >= costs.mSouls ? "#2ecc71" : "#e74c3c";
       upgradeBtnHtml = `<span style="font-size:8px; color:#888; font-family:monospace; line-height:1; display:block;">Req: <span style="color:${mColor}">${costs.mSouls}</span></span>`;
@@ -14472,4 +14489,295 @@ window.animateBoosterCards = function () {
   });
 
   window.boosterAnimFrameId = requestAnimationFrame(window.animateBoosterCards);
+};
+
+window.SPECTRAL_METADATA = {
+  weapon_staff: {
+    name: "Phoenix Ignition Staff",
+    desc: "Launches fireballs dealing 25% Atk damage (3s Cooldown).",
+    color: "#e67e22",
+    icon: "✦",
+    type: "weapon",
+  },
+  weapon_sword: {
+    name: "Sanguine Reaver",
+    desc: "Strikes apply Bleed. Hits at 5 stacks trigger Rupture dealing 300% Dmg and lifesteals.",
+    color: "#e74c3c",
+    icon: "✦",
+    type: "weapon",
+  },
+  weapon_singularity: {
+    name: "Void-Sovereign Greatsword",
+    desc: "Allows entering a Storing state that detonates a massive Void Explosion.",
+    color: "#8e44ad",
+    icon: "✦",
+    type: "weapon",
+  },
+  weapon_maelstrom: {
+    name: "Maelstrom Gale-Glaive",
+    desc: "Critical strikes project wind gales, stacking up to +30% Attack Speed.",
+    color: "#2ecc71",
+    icon: "✦",
+    type: "weapon",
+  },
+  shield_aegis: {
+    name: "Void-Warped Bulwark",
+    desc: "Blocks trigger gravity blasts scaling with Defense.",
+    color: "#3498db",
+    icon: "✦",
+    type: "subweapon",
+    subType: "shield",
+  },
+  tome_watch: {
+    name: "Chronos Dial-Watch",
+    desc: "Allows entering a Temporal Fracture state that dilates local speed.",
+    color: "#f1c40f",
+    icon: "✦",
+    type: "subweapon",
+    subType: "tome",
+  },
+  tome_chronicle: {
+    name: "Chronicle of past Lives",
+    desc: "Boosts XP gain by +200% while below 75% peak level.",
+    color: "#f39c12",
+    icon: "✦",
+    type: "subweapon",
+    subType: "tome",
+  },
+  boots_warpcore: {
+    name: "Warp-Core Greaves",
+    desc: "Attacks speed up by target missing health. Boss kills grant Max Haste.",
+    color: "#1abc9c",
+    icon: "✦",
+    type: "boots",
+  },
+  helmet_tempest: {
+    name: "Crown of Tempests",
+    desc: "Taking damage has a 15% chance to trigger static lightning strikes.",
+    color: "#00d2ff",
+    icon: "✦",
+    type: "helmet",
+  },
+};
+
+window.updateSpectralReliquaryBanner = function () {
+  let banner = document.getElementById("spectral-reliquary-banner");
+  if (!banner) return;
+
+  let activeKey = window.playerStats.activeSpectralResonance;
+  let isProjecting = window.playerStats.projectSpectralCosmetic;
+
+  if (activeKey && window.SPECTRAL_METADATA[activeKey]) {
+    let meta = window.SPECTRAL_METADATA[activeKey];
+    let color = meta.color || "#9b59b6";
+    banner.style.display = "flex";
+    banner.style.borderColor = color;
+    banner.style.background = window.hexToRgba
+      ? window.hexToRgba(color, 0.05)
+      : "rgba(155, 89, 182, 0.05)";
+    banner.style.boxShadow = `inset 0 0 10px ${window.hexToRgba ? window.hexToRgba(color, 0.08) : "rgba(0,0,0,0.5)"}, 0 0 6px ${window.hexToRgba ? window.hexToRgba(color, 0.15) : "rgba(155,89,182,0.1)"}`;
+
+    let mockItem = {
+      type: meta.type,
+      subType: meta.subType,
+      statsRolled: 5,
+      name: meta.name,
+    };
+    if (activeKey === "weapon_staff") mockItem.isUniqueStaff = true;
+    if (activeKey === "weapon_sword") mockItem.isUniqueSword = true;
+    if (activeKey === "weapon_singularity") mockItem.isUniqueSingularity = true;
+    if (activeKey === "weapon_maelstrom") mockItem.isUniqueMaelstrom = true;
+    if (activeKey === "shield_aegis") mockItem.isUniqueAegis = true;
+    if (activeKey === "tome_watch") mockItem.isUniqueWatch = true;
+    if (activeKey === "tome_chronicle") mockItem.isUniqueChronicle = true;
+    if (activeKey === "boots_warpcore") mockItem.isUniqueWarpCore = true;
+    if (activeKey === "helmet_tempest") mockItem.isUniqueTempest = true;
+
+    let iconHtml = window.getEquipIconHtml(mockItem, 28);
+
+    banner.innerHTML = `
+        <div style="flex-shrink:0; display: flex; align-items: center; justify-content: center;">
+          ${iconHtml}
+        </div>
+        <div style="flex:1; min-width:0; text-align:left; margin-left: 8px;">
+          <span style="font-size:9px; color:#888; text-transform:uppercase; letter-spacing:1px; display:block; line-height:1;">Resonating Passive</span>
+          <strong style="color:${color}; font-size:11.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px ${window.hexToRgba ? window.hexToRgba(color, 0.25) : "rgba(155,89,182,0.2)"}; margin-top:2px;">${meta.name}</strong>
+        </div>
+        <div style="flex-shrink:0; display:flex; gap:6px; align-items:center;" onclick="window.toggleSpectralCosmeticInline(event)">
+          <span style="font-size:9.5px; color:${isProjecting ? "#2ecc71" : "#7f8c8d"}; background:rgba(0,0,0,0.45); border:1px solid ${isProjecting ? "#2ecc71" : "#444"}; padding:2px 6px; border-radius:3px; font-family:monospace; font-weight:bold;">
+            ${isProjecting ? "PROJECT: ON" : "PROJECT: OFF"}
+          </span>
+        </div>
+      `;
+  } else {
+    banner.style.display = "flex";
+    banner.style.borderColor = "#444";
+    banner.style.background = "#151515";
+    banner.style.boxShadow = "";
+    banner.innerHTML = `
+        <div style="flex-shrink:0; font-size: 16px; display: flex; align-items: center; justify-content: center; width:28px; height:28px; background:#111; border:1px dashed #444; border-radius:4px; font-family:monospace; color:#666;">
+          ✦
+        </div>
+        <div style="flex:1; min-width:0; text-align:left; margin-left: 8px;">
+          <span style="font-size:9px; color:#666; text-transform:uppercase; letter-spacing:1px; display:block;">Resonating Passive</span>
+          <strong style="color:#7f8c8d; font-size:11.5px; display:block; font-style:italic;">[Dormant Reliquary]</strong>
+        </div>
+        <div style="flex-shrink:0;">
+          <span style="font-size:9.5px; color:#888; background:rgba(255,255,255,0.02); border:1px dashed #444; padding:2px 6px; border-radius:3px; font-family:monospace; font-weight:bold;">RESONATE</span>
+        </div>
+      `;
+  }
+};
+
+window.toggleSpectralCosmeticInline = function (e) {
+  if (e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+  window.playerStats.projectSpectralCosmetic =
+    !window.playerStats.projectSpectralCosmetic;
+  if (window.SoundManager) window.SoundManager.play("swing");
+  window.updateUI();
+  window.saveGame();
+};
+
+window.openSpectralReliquaryWindow = function (e) {
+  if (e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  let existingWin = document.getElementById("spectral-reliquary-window");
+  let savedLeft = null;
+  let savedTop = null;
+  if (existingWin) {
+    savedLeft = existingWin.style.left;
+    savedTop = existingWin.style.top;
+    existingWin.remove();
+  }
+
+  let win = document.createElement("div");
+  win.id = "spectral-reliquary-window";
+  win.className = "draggable-window";
+
+  if (savedLeft !== null && savedTop !== null) {
+    win.style.left = savedLeft;
+    win.style.top = savedTop;
+  } else {
+    let container = document
+      .getElementById("game-container")
+      .getBoundingClientRect();
+    let winWidth = 290;
+    let leftOffset = (window.innerWidth - winWidth) / 2 - container.left;
+    let topOffset =
+      window.scrollY + window.innerHeight / 2 - 150 - container.top;
+    if (leftOffset < 5) leftOffset = 5;
+    if (topOffset < 5) topOffset = 5;
+    win.style.left = leftOffset + "px";
+    win.style.top = topOffset + "px";
+  }
+
+  let unlocked = window.playerStats.spectralCodex || [];
+  let contentHtml = "";
+
+  // Add Dormant option
+  contentHtml += `
+      <div class="bag-item" style="padding:6px; margin-bottom:5px; background:#181c22; border:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
+        <div style="text-align:left;">
+          <strong style="color:#aaa; font-size:11px;">Dormant State</strong><br>
+          <span style="font-size:9.5px; color:#666;">Clear active passive effect</span>
+        </div>
+        <button class="btn-action" style="padding:3px 8px; font-size:10px; font-weight:bold; background:#e74c3c;" onclick="window.executeEquipSpectralResonance('')">Clear</button>
+      </div>
+    `;
+
+  if (unlocked.length > 0) {
+    contentHtml += unlocked
+      .map((tKey) => {
+        let meta = window.SPECTRAL_METADATA[tKey];
+        if (!meta) return "";
+        let color = meta.color || "#ff007f";
+        let activeLabel =
+          window.playerStats.activeSpectralResonance === tKey
+            ? " <span style='color:#2ecc71;'>(Resonating)</span>"
+            : "";
+
+        let mockItem = {
+          type: meta.type,
+          subType: meta.subType,
+          statsRolled: 5,
+          name: meta.name,
+        };
+        if (tKey === "weapon_staff") mockItem.isUniqueStaff = true;
+        if (tKey === "weapon_sword") mockItem.isUniqueSword = true;
+        if (tKey === "weapon_singularity") mockItem.isUniqueSingularity = true;
+        if (tKey === "weapon_maelstrom") mockItem.isUniqueMaelstrom = true;
+        if (tKey === "shield_aegis") mockItem.isUniqueAegis = true;
+        if (tKey === "tome_watch") mockItem.isUniqueWatch = true;
+        if (tKey === "tome_chronicle") mockItem.isUniqueChronicle = true;
+        if (tKey === "boots_warpcore") mockItem.isUniqueWarpCore = true;
+        if (tKey === "helmet_tempest") mockItem.isUniqueTempest = true;
+
+        let iconHtml = window.getEquipIconHtml(mockItem, 24);
+
+        return `
+            <div class="bag-item" style="padding:6px; margin-bottom:5px; background:#181c22; border:1px solid #333; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div style="text-align:left; flex:1; min-width:0; display:flex; align-items:center; gap:6px;">
+                <div style="flex-shrink:0;">${iconHtml}</div>
+                <div style="min-width:0; flex:1;">
+                  <strong style="color:${color}; font-size:11px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${meta.name}${activeLabel}</strong>
+                  <span style="font-size:9.5px; color:#aaa; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${meta.desc}</span>
+                </div>
+              </div>
+              <button class="btn-action" style="padding:3px 8px; font-size:10px; font-weight:bold; background:var(--accent-green); flex-shrink:0;" onclick="window.executeEquipSpectralResonance('${tKey}')">Resonate</button>
+            </div>
+          `;
+      })
+      .join("");
+  } else {
+    contentHtml += `
+        <div style="color:#666; font-style:italic; font-size:11px; text-align:center; padding: 20px 0;">
+          Spectral Codex is empty.<br>Shatter Unique Weapons or Armor in the Forge to register them!
+        </div>
+      `;
+  }
+
+  win.innerHTML = `
+      <div class="draggable-header" id="spectral-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
+        <span>✦ Soul Reliquary Codex</span>
+        <button onclick="document.getElementById('spectral-reliquary-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
+      </div>
+      <div class="draggable-content">
+        ${contentHtml}
+      </div>
+    `;
+
+  document.getElementById("game-container").appendChild(win);
+  window.makeWindowDraggable(
+    win,
+    document.getElementById("spectral-win-handle"),
+  );
+};
+
+window.executeEquipSpectralResonance = function (key) {
+  if (key === "") {
+    window.playerStats.activeSpectralResonance = null;
+    if (typeof window.pushHeaderToast === "function") {
+      window.pushHeaderToast("Resonance Deactivated", "#7f8c8d");
+    }
+  } else {
+    window.playerStats.activeSpectralResonance = key;
+    let meta = window.SPECTRAL_METADATA[key];
+    if (typeof window.pushHeaderToast === "function") {
+      window.pushHeaderToast(
+        `Resonating Passive: [${meta.name}]`,
+        meta.color || "#9b59b6",
+      );
+    }
+  }
+  let win = document.getElementById("spectral-reliquary-window");
+  if (win) win.remove();
+  window.hideTooltip();
+  window.updateUI();
+  window.saveGame();
 };

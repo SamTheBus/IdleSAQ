@@ -2,6 +2,138 @@
    PRIMARY PURPOSE: Procedural Item Generation, Unique Styling,
    Sack Management, Forge/Crafting, and Shop Transaction Logic.
    ========================================================================= */
+window.isItemUnique = function (item) {
+  if (!item) return false;
+  return !!(
+    item.isUniqueStaff ||
+    item.isUniqueSword ||
+    item.isUniqueSingularity ||
+    item.isUniqueMaelstrom ||
+    item.isUniqueAegis ||
+    item.isUniqueWatch ||
+    item.isUniqueChronicle ||
+    item.isUniqueWarpCore ||
+    item.isUniqueTempest ||
+    item.type === "artifact" ||
+    item.statsRolled === "UNIQUE"
+  );
+};
+
+window.getUniqueKey = function (item) {
+  if (!item) return null;
+  if (item.type === "artifact" || item.statsRolled === "UNIQUE") {
+    return "art_" + item.trait;
+  }
+  if (item.isUniqueStaff) return "weapon_staff";
+  if (item.isUniqueSword) return "weapon_sword";
+  if (item.isUniqueSingularity) return "weapon_singularity";
+  if (item.isUniqueMaelstrom) return "weapon_maelstrom";
+  if (item.isUniqueAegis) return "shield_aegis";
+  if (item.isUniqueWatch) return "tome_watch";
+  if (item.isUniqueChronicle) return "tome_chronicle";
+  if (item.isUniqueWarpCore) return "boots_warpcore";
+  if (item.isUniqueTempest) return "helmet_tempest";
+  return null;
+};
+
+window.executeSpectralShatter = function (id) {
+  if (typeof window.hideTooltip === "function") window.hideTooltip();
+  let item =
+    window.inventory.EQUIP.find((i) => i.id === id) ||
+    (window.inventory.ARTIFACT &&
+      window.inventory.ARTIFACT.find((i) => i.id === id));
+  if (!item) return;
+
+  let uniqueKey = window.getUniqueKey(item);
+  if (!uniqueKey) return;
+
+  let isUnlocked = window.playerStats.spectralCodex.includes(uniqueKey);
+  if (isUnlocked) return;
+
+  let costGold = 1000000000; // 1 Billion Gold
+  let costShards = 250;
+  let costCores = 5;
+  let costEridium = 5;
+
+  let playerShards = window.playerStats.astralShards || 0;
+  let playerCores = window.inventory.ETC["Catalyst Core"] || 0;
+  let playerEridium = window.inventory.ETC["Eridium Shard"] || 0;
+  let playerGold = BigNum.from(window.playerStats.coins);
+
+  if (
+    playerGold.lt(costGold) ||
+    playerShards < costShards ||
+    playerCores < costCores ||
+    playerEridium < costEridium
+  ) {
+    window.pushHeaderToast(
+      "❌ Insufficient resources for Spectral Shatter!",
+      "#e74c3c",
+    );
+    return;
+  }
+
+  window.showCustomConfirm(
+    "Spectral Shatter",
+    `Are you sure you want to sacrifice <strong>1,000,000,000 Gold</strong> and your premium materials to shatter <strong>${item.name}</strong> and permanently secure its passive into your Codex?`,
+    "Shatter Essence",
+    "Cancel",
+    "#e74c3c",
+    function () {
+      // Deduct gold
+      window.playerStats.coins = playerGold.sub(costGold);
+      if (window.playerStats.coins.eq(0)) {
+        window.playerStats.hasTriggeredExactChange = true;
+      }
+
+      // Deduct materials
+      window.playerStats.astralShards -= costShards;
+
+      window.inventory.ETC["Catalyst Core"] -= costCores;
+      if (window.inventory.ETC["Catalyst Core"] === 0)
+        delete window.inventory.ETC["Catalyst Core"];
+
+      window.inventory.ETC["Eridium Shard"] -= costEridium;
+      if (window.inventory.ETC["Eridium Shard"] === 0)
+        delete window.inventory.ETC["Eridium Shard"];
+
+      // Perform standard salvage yield of 1 to 2x Astral Essence
+      let yieldAmount = Math.floor(Math.random() * 2) + 1;
+      window.addEtcDrop("Astral Essence", yieldAmount);
+
+      // Add to codex
+      window.playerStats.spectralCodex.push(uniqueKey);
+
+      // Remove the item from inventory
+      let eqIndex = window.inventory.EQUIP.findIndex((i) => i.id === id);
+      if (eqIndex !== -1) {
+        window.inventory.EQUIP.splice(eqIndex, 1);
+      } else {
+        let artIndex = window.inventory.ARTIFACT.findIndex((i) => i.id === id);
+        if (artIndex !== -1) {
+          window.inventory.ARTIFACT.splice(artIndex, 1);
+        }
+      }
+
+      // Clear selected item
+      window.forgeSelectedItem = null;
+
+      // Play audio and show animations
+      if (window.SoundManager) window.SoundManager.play("death");
+      if (window.spawnTemperParticles) window.spawnTemperParticles(true);
+
+      window.pushHeaderToast(`✦ Codex Unlocked: ${item.name}!`, "#e74c3c");
+      window.pushLog(
+        `<strong style='color:#e74c3c;'>[CODEX]</strong> Shattered <span style='color:${window.getTierColor(item.statsRolled)};'>${item.name}</span>! Passive unlocked permanently. Gained +${yieldAmount}x Astral Essence as salvage.`,
+      );
+
+      window.updateUI();
+      window.renderInventory();
+      window.renderForgeTab();
+      window.saveGame();
+    },
+  );
+};
 
 window.PitySystem = {
   increment() {
@@ -535,16 +667,27 @@ window.renderForgeTab = function () {
 
       ${liveComparisonHtml}
 
-      <button class="forge-anvil-button" style="width:100%; margin-top:15px; border-color:#9b59b6; background:linear-gradient(135deg, #4a154b, #0c0812);" ${canAfford ? "" : "disabled"} onclick="window.temperItem()" onpointerdown="window.temperItem()">Harness Heat</button>
-    `;
-    return;
-  }
+      <button class="forge-anvil-button" style="width:100%; margin-top:15px; border-color:#9b59b6; background:linear-gradient(135deg, #4a154b, #0c0812);" ${canAfford ? "" : "disabled"} onclick="window.temperItem()" onpointerdown="window.temperItem()">Attune Slot</button>
+          `;
+          return;
+        }
 
-  // Draw standard item explorers for the remaining modes
-  let allValidItems = [
-    ...window.inventory.EQUIP.filter((item) => item.type !== "sigil"),
-    ...(window.inventory.ARTIFACT || []),
-  ];
+  // Draw displays for the remaining modes
+  let allValidItems = [];
+  if (window.forgeMode === "shatter") {
+    // Filter: Only show unequipped items that are uniques
+    allValidItems = [
+      ...window.inventory.EQUIP.filter(
+        (item) => item.type !== "sigil" && window.isItemUnique(item),
+      ),
+      ...(window.inventory.ARTIFACT || []).filter(window.isItemUnique),
+    ];
+  } else {
+    allValidItems = [
+      ...window.inventory.EQUIP.filter((item) => item.type !== "sigil"),
+      ...(window.inventory.ARTIFACT || []),
+    ];
+  }
   for (let key in window.equippedSlots) {
     if (window.equippedSlots[key]) {
       let eqClone = { ...window.equippedSlots[key], isEquippedSlot: key };
@@ -615,28 +758,259 @@ window.renderForgeTab = function () {
       .join("");
   }
 
-  if (
-    !window.forgeSelectedItem ||
-    ((window.forgeMode === "reforge" ||
-      window.forgeMode === "tier" ||
-      window.forgeMode === "enchant" ||
-      window.forgeMode === "reset_enchant" ||
-      window.forgeMode === "set") &&
-      window.forgeSelectedItem.type === "artifact")
-  ) {
-    detailEl.innerHTML = `<div style='color:#aaa; text-align:center; padding-top:10px;'>
-                  <div style='color:#e67e22; font-weight:bold; font-size:14px; margin-bottom:10px;'>🔨 Mystical Anvil</div>
-                  <div style='font-size:11px; line-height:1.8; background:#111; padding:10px; border-radius:4px; border:1px solid #333; text-align:left;'>
-                      Select an eligible item from your list.<br><br>
-                      <b>TEMPER:</b> Refines stats with tier-appropriate material scraps. Failure consumes raw items.<br><br>
-                      <b>REFORGE STAT:</b> Spend <strong style="color:#1abc9c;">Overlord's Sigils</strong> to lock and roll a modifier line of your choice. All other slots lock permanently once selection is active!<br><br>
-                                            <b>TIER UP:</b> Infuses Eridium Shards to permanently elevate stars and unlock 1 additional random stat modifier!<br><br>
-                                            <b>ENCHANT:</b> Infuse powerful magic using salvaged <b>Astral Essences</b>. Boosts 1 random stat line by 25%. Slots scale with rarity.<br><br>
-                      <b>RE-ROLL SET:</b> Infuse <strong style="color:#bdc3c7;">Monster Souls</strong> and gold to alter set resonances. Handy for completing Vanguard/Colossus layout chains!
-                  </div>
-              </div>`;
-    return;
-  }
+  // Context-Aware Instructions Revamp
+    if (
+      !window.forgeSelectedItem ||
+      ((window.forgeMode === "reforge" ||
+        window.forgeMode === "tier" ||
+        window.forgeMode === "enchant" ||
+        window.forgeMode === "reset_enchant" ||
+        window.forgeMode === "set") &&
+        window.forgeSelectedItem.type === "artifact") ||
+      (window.forgeMode === "shatter" &&
+        !window.isItemUnique(window.forgeSelectedItem))
+    ) {
+      let mode = window.forgeMode || "temper";
+
+      // 1. Hand-Drawn Warning Vector Icon (No emojis)
+      let warningIconSvg = `
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      `;
+
+      // 2. Build Ineligible Item Warning Banners
+      let warningHtml = "";
+      if (window.forgeSelectedItem) {
+        if (window.forgeSelectedItem.type === "artifact") {
+          warningHtml = `
+            <div style="background:rgba(231,76,60,0.06); border:1.5px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; text-align:center; color:#ff7675; line-height:1.4; white-space:normal; display:flex; align-items:center; justify-content:center; gap:4px;">
+              <div>
+                ${warningIconSvg} <b>INELIGIBLE ITEM:</b> Unique Artifacts cannot be modified in <b>${mode.toUpperCase().replace("_", " ")}</b> mode! Select a standard weapon or armor piece.
+              </div>
+            </div>
+          `;
+        } else if (mode === "shatter" && !window.isItemUnique(window.forgeSelectedItem)) {
+          warningHtml = `
+            <div style="background:rgba(231,76,60,0.06); border:1.5px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; text-align:center; color:#ff7675; line-height:1.4; white-space:normal; display:flex; align-items:center; justify-content:center; gap:4px;">
+              <div>
+                ${warningIconSvg} <b>INELIGIBLE ITEM:</b> Only Unique equipment can be shattered into the Codex! Select a Unique Weapon, Subweapon, or Armor piece.
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      // 3. Mini Vector Icons for Mode Headers (No emojis)
+      let attunementHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>`;
+      let reforgeHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e44ad" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>`;
+      let tierHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" /></svg>`;
+      let setHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>`;
+      let enchantHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>`;
+      let resetHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><path d="M12 2v20M17 5l-5-5-5 5" /></svg>`;
+      let shatterHeaderSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);"><polygon points="12,2 22,12 12,22 2,12" /></svg>`;
+
+      // 4. Map Dynamic Tutorial Metadata per active mode
+      let tutorials = {
+        temper: {
+          title: "Slot Attunement",
+          desc: "Attuning a gear slot permanently multiplies the stats of any item equipped in that slot. This multiplier is bound to the slot itself and persists across item swaps and prestige resets!",
+          icon: attunementHeaderSvg,
+          color: "#9b59b6",
+          steps: [
+            "Select a target equipment slot from the list on the right.",
+            "Check the Gold and Material requirements below.",
+            "Click 'Harness Heat' to upgrade the slot level (+1% stats per level)."
+          ],
+          tip: "Highly attuned slots (e.g. Lv. 50+) make even common items extremely powerful!"
+        },
+        reforge: {
+          title: "Attribute Reforger",
+          desc: "Re-roll individual affix modifiers on your equipment to customize your stats. Perfect for tuning Crit, Block, or Speed.",
+          icon: reforgeHeaderSvg,
+          color: "#8e44ad",
+          steps: [
+            "Select a piece of equipment from the list on the right.",
+            "Choose the specific modifier line you wish to re-roll.",
+            "Click 'Execute Reforge' to spin for a new random modifier."
+          ],
+          tip: "Once you reforge a line, all other lines on that item become permanently locked! Reforging requires 1x <b>Overlord's Sigil</b> and Gold."
+        },
+        tier: {
+          title: "Star Quality Awakening",
+          desc: "Ascend the star quality (0★ to 5★) of your weapons and armor. Increasing rarity unlocks new slots for random bonus modifiers.",
+          icon: tierHeaderSvg,
+          color: "#e67e22",
+          steps: [
+            "Select an under-5★ item from the list on the right.",
+            "Gather the required Eridium Shards and tier-matching scraps.",
+            "Click 'Awaken Rarity' to elevate its tier and unlock a new random stat line!"
+          ],
+          tip: "In addition to a new modifier, Tiering Up increases the item's base parameters by +10%!"
+        },
+        set: {
+          title: "Set Resonance Matrix",
+          desc: "Shift the named set affiliation (e.g. Vanguard, Colossus) on your gear to complete matching 2-piece and 3-piece set bonuses.",
+          icon: setHeaderSvg,
+          color: "#2ecc71",
+          steps: [
+            "Select any set-affinity equipment piece from the right.",
+            "Ensure you have enough Monster Souls and Gold.",
+            "Click 'Re-Resonate Set' to roll a different set bonus at random."
+          ],
+          tip: "Equipping matching sets provides massive multipliers to Attack, Health, Defense, and Crit stats!"
+        },
+        enchant: {
+          title: "Celestial Enchantment",
+          desc: "Infuse powerful magical runes into high-tier attuned equipment. Enchanting targets an existing stat line at random and amplifies its value by a whopping +25%!",
+          icon: enchantHeaderSvg,
+          color: "#9b59b6",
+          steps: [
+            "Select a 2★+ item equipped in a slot attuned to at least Level 50.",
+            "Ensure you have 1x <b>Overlord's Sigil</b> available.",
+            "Click 'Infuse Enchantment' to roll a +25% boost on one of its stats."
+          ],
+          tip: "Magic (2★) holds 1, Epic (3★) holds 2, Legendary (4★) holds 3, and Mythic (5★) holds 4 maximum enchantments."
+        },
+        reset_enchant: {
+          title: "Arcane Purge",
+          desc: "Dispel and clear active enchantments from an item, restoring its stats to their original pre-enchanted baseline so you can re-enchant.",
+          icon: resetHeaderSvg,
+          color: "#c0392b",
+          steps: [
+            "Select an enchanted item from the list on the right.",
+            "Review the Gold cost required to purge the magical seals.",
+            "Click 'Purge Enchantments' to safely wipe the runes."
+          ],
+          tip: "Resetting enchantments frees up all slots, but spent materials are non-refundable."
+        },
+        shatter: {
+          title: "Spectral Shatter",
+          desc: "Sacrifice unequipped Unique weapons or armor to permanently unlock their active passive effects inside your Spectral Codex!",
+          icon: shatterHeaderSvg,
+          color: "#e74c3c",
+          steps: [
+            "Select an unequipped Unique item from the list on the right.",
+            "Check the high-end material and Gold costs below.",
+            "Click 'Shatter Unique Essence' to extract its passive into your permanent Codex."
+          ],
+          tip: "Unlocking a passive inside the Codex allows you to activate its unique modifiers without needing to equip the item!"
+        }
+      };
+
+      let tut = tutorials[mode] || tutorials.temper;
+
+      // 5. Retrieve Live Crafting Material Balances
+      let goldOwned = window.playerStats.coins || 0;
+      let mSouls = window.inventory.ETC["Monster Soul"] || 0;
+      let lSouls = window.inventory.ETC["Luminous Soul"] || 0;
+      let eridium = window.inventory.ETC["Eridium Shard"] || 0;
+      let essence = window.inventory.ETC["Astral Essence"] || 0;
+      let sigils = window.inventory.ETC["Overlord's Sigil"] || 0;
+      let cores = window.inventory.ETC["Catalyst Core"] || 0;
+
+      let rareScrap = window.inventory.ETC["Rare Scrap"] || 0;
+      let magicScrap = window.inventory.ETC["Magic Scrap"] || 0;
+      let epicScrap = window.inventory.ETC["Epic Scrap"] || 0;
+      let legendaryScrap = window.inventory.ETC["Legendary Scrap"] || 0;
+      let mythicScrap = window.inventory.ETC["Mythic Scrap"] || 0;
+
+      // 6. Draw Crisp 12px Miniature Vector Icons for Materials Grid (No emojis)
+      let goldSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><circle cx="6" cy="6" r="5" fill="#f1c40f" stroke="#000" stroke-width="0.8"/><circle cx="6" cy="6" r="2.5" fill="none" stroke="#b7950b" stroke-width="0.6"/></svg>`;
+      let mSoulsSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><path d="M6 1.5 C6 1.5, 2 6, 2 9 C2 11, 3.8 11.5, 6 11.5 C8.2 11.5, 10 11, 10 9 C10 6, 6 1.5, 6 1.5 Z" fill="#a0aec0" stroke="#000" stroke-width="0.8"/></svg>`;
+      let lSoulsSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><path d="M6 1.5 C6 1.5, 2 6, 2 9 C2 11, 3.8 11.5, 6 11.5 C8.2 11.5, 10 11, 10 9 C10 6, 6 1.5, 6 1.5 Z" fill="#ffb6c1" stroke="#000" stroke-width="0.8"/></svg>`;
+      let eridiumSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="6,1 11,6 6,11 1,6" fill="#8e44ad" stroke="#000" stroke-width="0.8"/></svg>`;
+      let essenceSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="6,1 8,4.5 11,5 8.5,7.5 9,11 6,9.5 3,11 3.5,7.5 1,5 4,4.5" fill="#9b59b6" stroke="#000" stroke-width="0.8"/></svg>`;
+      let sigilsSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><path d="M6 1.5 L9.5 5 L8 9 L6 11.5 L4 9 L2.5 5 Z" fill="#1abc9c" stroke="#000" stroke-width="0.8"/></svg>`;
+      let coresSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><rect x="2.2" y="2.2" width="7.6" height="7.6" rx="1" fill="#2ecc71" stroke="#000" stroke-width="0.8"/><rect x="4.5" y="4.5" width="3" height="3" fill="#fff" stroke="#111" stroke-width="0.5"/></svg>`;
+      let rareScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#3498db" stroke="#000" stroke-width="0.8"/></svg>`;
+      let magicScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#9b59b6" stroke="#000" stroke-width="0.8"/></svg>`;
+      let epicScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#e67e22" stroke="#000" stroke-width="0.8"/></svg>`;
+      let legendaryScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#f1c40f" stroke="#000" stroke-width="0.8"/></svg>`;
+      let mythicScrapSvg = `<svg width="12" height="12" viewBox="0 0 12 12" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><polygon points="2,5 5,1 10,3 8,10 3,9" fill="#e74c3c" stroke="#000" stroke-width="0.8"/></svg>`;
+
+      let materialsList = [
+        { name: "Gold Coins", qty: goldOwned, color: "#f1c40f", isBigNum: true, svg: goldSvg },
+        { name: "Monster Souls", qty: mSouls, color: "#a0aec0", svg: mSoulsSvg },
+        { name: "Luminous Souls", qty: lSouls, color: "#ffb6c1", svg: lSoulsSvg },
+        { name: "Eridium Shards", qty: eridium, color: "#8e44ad", svg: eridiumSvg },
+        { name: "Astral Essence", qty: essence, color: "#9b59b6", svg: essenceSvg },
+        { name: "Overlord Sigils", qty: sigils, color: "#1abc9c", svg: sigilsSvg },
+        { name: "Catalyst Cores", qty: cores, color: "#2ecc71", svg: coresSvg },
+        { name: "Rare Scraps", qty: rareScrap, color: "#3498db", svg: rareScrapSvg },
+        { name: "Magic Scraps", qty: magicScrap, color: "#9b59b6", svg: magicScrapSvg },
+        { name: "Epic Scraps", qty: epicScrap, color: "#e67e22", svg: epicScrapSvg },
+        { name: "Legendary Scraps", qty: legendaryScrap, color: "#f1c40f", svg: legendaryScrapSvg },
+        { name: "Mythic Scraps", qty: mythicScrap, color: "#e74c3c", svg: mythicScrapSvg }
+      ];
+
+      // Build the non-wrapping responsive inventory grid (fading unowned slots to opacity 0.35)
+      let matGridHtml = `<div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:6px; font-family:monospace; font-size:10px; text-align:left;">`;
+      materialsList.forEach(m => {
+        let countText = m.isBigNum ? window.formatNumber(m.qty) : m.qty.toLocaleString();
+        let hasItem = m.isBigNum ? BigNum.from(m.qty).gt(0) : m.qty > 0;
+        let textColor = hasItem ? "#f1f5f9" : "#444";
+        let qtyColor = hasItem ? m.color : "#444";
+        let opacity = hasItem ? "1.0" : "0.35";
+
+        matGridHtml += `
+          <div style="background:rgba(0,0,0,0.45); border:1px solid #222; border-radius:4px; padding:3px 6px; display:flex; justify-content:space-between; align-items:center; opacity:${opacity}; min-width:0; box-sizing:border-box;">
+            <div style="display:flex; align-items:center; gap:4px; min-width:0; flex:1;">
+              ${m.svg}
+              <span style="color:${textColor}; font-size:8.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:1;">${m.name}</span>
+            </div>
+            <strong style="color:${qtyColor}; font-size:9px; font-family:monospace; margin-left:4px; flex-shrink:0;">${countText}</strong>
+          </div>
+        `;
+      });
+      matGridHtml += `</div>`;
+
+      // Mini Tag / Label Vector for the Materials Header (No emojis)
+      let headerIconSvg = `
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffd700" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; transform:translateY(-1px);">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+          <line x1="7" y1="7" x2="7.01" y2="7" />
+        </svg>
+      `;
+
+      // 7. Assemble the Revamped Left Info Panel
+      detailEl.innerHTML = `
+        <div style="display:flex; flex-direction:column; text-align:left; gap:10px; animation: toastFadeIn 0.25s ease-out;">
+            ${warningHtml}
+
+            <div>
+                <div style="font-weight:bold; font-size:14px; color:${tut.color}; border-bottom:1.5px solid #222; padding-bottom:6px; margin-bottom:8px; display:flex; align-items:center; gap:6px; text-transform:uppercase; letter-spacing:0.5px;">
+                    <span>${tut.icon} ${tut.title}</span>
+                </div>
+                <p style="font-size:11px; color:#cbd5e1; line-height:1.45; margin:0 0 10px 0; white-space:normal;">
+                    ${tut.desc}
+                </p>
+            </div>
+
+            <!-- Dynamic Step-by-Step Instructions -->
+            <div style="background:rgba(0,0,0,0.22); border:1px solid #222; border-radius:6px; padding:10px;">
+                <strong style="color:#df9ffb; font-size:9.5px; display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">📋 Forging Instructions:</strong>
+                <div style="display:flex; flex-direction:column; gap:4px; font-size:10.5px; color:#aaa; line-height:1.35;">
+                    ${tut.steps.map((step, idx) => `<div>${idx + 1}. ${step}</div>`).join("")}
+                </div>
+            </div>
+
+            <!-- Mode Highlight Tip -->
+            <div style="border-left:3px solid ${tut.color}; background:rgba(255,255,255,0.01); padding:6px 10px; border-radius:0 4px 4px 0; font-size:10.5px; color:#e2e8f0; line-height:1.4; white-space:normal; margin-bottom:4px;">
+                <b>TIP:</b> ${tut.tip}
+            </div>
+
+            <!-- Materials Inventory -->
+            <div style="border-top:1px dashed #333; padding-top:10px; margin-top:4px;">
+                <strong style="color:#ffd700; font-size:9.5px; display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">${headerIconSvg} MATERIALS INVENTORY:</strong>
+                ${matGridHtml}
+            </div>
+        </div>
+      `;
+      return;
+    }
 
   let item = window.forgeSelectedItem;
   let titleColor = window.getTierColor(item.statsRolled);
@@ -649,7 +1023,52 @@ window.renderForgeTab = function () {
   let previewHtml = "";
   let previewItem = JSON.parse(JSON.stringify(item));
 
-  if (window.forgeMode === "temper") {
+  if (window.forgeMode === "shatter") {
+    let uniqueKey = window.getUniqueKey(item);
+    let isUnlocked = window.playerStats.spectralCodex.includes(uniqueKey);
+
+    let costGold = 1000000000; // 1 Billion Gold
+    let costShards = 250;
+    let costCores = 5;
+    let costEridium = 5;
+
+    let playerShards = window.playerStats.astralShards || 0;
+    let playerCores = window.inventory.ETC["Catalyst Core"] || 0;
+    let playerEridium = window.inventory.ETC["Eridium Shard"] || 0;
+    let playerGold = BigNum.from(window.playerStats.coins);
+
+    let goldColor = playerGold.gte(costGold) ? "#2ecc71" : "#e74c3c";
+    let shardsColor = playerShards >= costShards ? "#9b59b6" : "#e74c3c";
+    let coresColor = playerCores >= costCores ? "#2ecc71" : "#e74c3c";
+    let eridiumColor = playerEridium >= costEridium ? "#8e44ad" : "#e74c3c";
+
+    let canAfford =
+      playerGold.gte(costGold) &&
+      playerShards >= costShards &&
+      playerCores >= costCores &&
+      playerEridium >= costEridium;
+
+    html += `<div style="font-size:11px; margin-bottom:10px; color:#aaa; text-align:left;">Codex Status: ${isUnlocked ? `<span style="color:#2ecc71; font-weight:bold;">UNLOCKED ✓</span>` : `<span style="color:#e74c3c; font-weight:bold;">LOCKED 🔒</span>`}</div>`;
+
+    html += `<div style="margin-top:10px; text-align:left; background:rgba(0,0,0,0.3); border:1px solid #222; padding:8px; border-radius:6px; font-size:11px; line-height:1.45; margin-bottom:12px;">
+        <strong style="color:#f1c40f; font-family:monospace; display:block; margin-bottom:4px; text-transform:uppercase; font-size:9.5px;">⚡ SPECTRAL SHATTER RECIPE:</strong>
+        <div style="color:${goldColor};">• ${window.formatNumber(costGold)} Gold (Owned: ${window.formatNumber(playerGold)})</div>
+        <div style="color:${shardsColor};">• ${costShards}x Astral Shards (Owned: ${playerShards})</div>
+        <div style="color:${coresColor};">• ${costCores}x Catalyst Core (Owned: ${playerCores})</div>
+        <div style="color:${eridiumColor};">• ${costEridium}x Eridium Shard (Owned: ${playerEridium})</div>
+      </div>`;
+
+    if (isUnlocked) {
+      html += `<div style="color:#2ecc71; font-weight:bold; text-align:center; padding:10px; font-size:11px; border:1px dashed #2ecc71; background:rgba(46,204,113,0.05); border-radius:4px; margin-bottom:12px;">✓ This Unique's passive effect is already active inside your permanent Spectral Codex!</div>`;
+      html += `<button class="forge-anvil-button" style="width:100%; border-color:#222; background:#333; color:#666;" disabled>Already Unlocked</button>`;
+    } else {
+      html += `<div style="color:#f1c40f; font-size:10px; line-height:1.4; text-align:left; background:rgba(241,196,15,0.05); border:1px dashed #f1c40f; padding:8px; border-radius:4px; margin-bottom:12px;">
+          💡 <strong>ASTRAL EXTRACTION ACTIVE:</strong><br>
+          This process permanently shatters and destroys the physical item to unlock its passive. You will receive its standard salvage payload of <b>1 to 2x Astral Essences</b> as a bonus!
+        </div>`;
+      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e74c3c; background:linear-gradient(135deg, #c0392b, #4a154b);" ${canAfford ? "" : "disabled"} onclick="window.executeSpectralShatter(${item.id})">✦ Shatter Unique Essence</button>`;
+    }
+  } else if (window.forgeMode === "temper") {
     let maxT = window.getMaxTemper(
       window.forgeSelectedItem.statsRolled,
       window.forgeSelectedItem.type,
@@ -742,7 +1161,7 @@ window.renderForgeTab = function () {
 
           html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
           html += `<div style="font-size:11px; color:${sigilColor}; margin-bottom:12px;">• 1x Overlord's Sigil (Owned: ${ownedSigils.toLocaleString()})</div>`;
-          html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()" onpointerdown="window.reforgeItemStat()">Execute Reforge</button>`;
+          html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Execute Reforge</button>`;
         }
       } else {
         let rProp = item.reforgedProperty;
@@ -756,7 +1175,7 @@ window.renderForgeTab = function () {
 
         html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
         html += `<div style="font-size:11px; color:${sigilColor}; margin-bottom:12px;">• 1x Overlord's Sigil (Owned: ${ownedSigils.toLocaleString()})</div>`;
-        html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()" onpointerdown="window.reforgeItemStat()">Re-Roll Locked Modifier</button>`;
+        html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Re-Roll Locked Modifier</button>`;
       }
     }
   } else if (window.forgeMode === "tier") {
@@ -794,7 +1213,7 @@ window.renderForgeTab = function () {
       html += `<div style="font-size:11px; color:${shardColor}; margin-bottom:3px;">• ${shardReq}x Eridium Shard (Owned: ${playerShards})</div>`;
       html += `<div style="font-size:11px; color:${scrapColor}; margin-bottom:10px;">• ${scrapReqAmount}x ${targetScrapName} (Owned: ${playerScraps})</div>`;
       html += `<div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:15px;">✨ 100% Awakening Guaranteed</div>`;
-      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e67e22;" ${window.playerStats.coins >= costGold && playerShards >= shardReq && playerScraps >= scrapReqAmount ? "" : "disabled"} onclick="window.temperItem()" onpointerdown="window.temperItem()">Awaken Rarity</button>`;
+      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e67e22;" ${window.playerStats.coins >= costGold && playerShards >= shardReq && playerScraps >= scrapReqAmount ? "" : "disabled"} onclick="window.temperItem()">Awaken Rarity</button>`;
 
       previewHtml = `
                     <div style="margin-top:15px; padding:12px; background:#111; border:1px solid #e67e22; border-radius:6px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
@@ -834,7 +1253,7 @@ window.renderForgeTab = function () {
       html += `<div class="forge-progress-bg"><div class="forge-progress-fill" style="width:${pct}%; background: linear-gradient(90deg, #9b59b6, #e84393);"></div></div>`;
       html += `<div style="font-size:11px; color:${sigilColor}; margin-bottom:15px;">• 1x Overlord's Sigil Required (Owned: ${playerSigil})</div>`;
       html += `<div style="font-size:11px; color:#9b59b6; font-weight:bold; margin-bottom:15px;">🔮 Randomly boosts one active parameter by +25%!</div>`;
-      html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #1a0221);" ${playerSigil >= 1 ? "" : "disabled"} onclick="window.enchantItem()" onpointerdown="window.enchantItem()">Infuse Enchantment</button>`;
+      html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #1a0221);" ${playerSigil >= 1 ? "" : "disabled"} onclick="window.enchantItem()">Infuse Enchantment</button>`;
     }
   } else if (window.forgeMode === "reset_enchant") {
     let currentEnchants = item.totalEnchants || 0;
@@ -848,7 +1267,7 @@ window.renderForgeTab = function () {
       html += `<div style="font-size:11px; margin-bottom:10px; color:#aaa;">Active Enchantments to Purge: <span style="color:#9b59b6; font-weight:bold;">${currentEnchants}</span></div>`;
       html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:15px;">• ${resetGoldCost.toLocaleString()} Gold Required (Owned: ${Math.floor(window.playerStats.coins).toLocaleString()})</div>`;
       html += `<div style="font-size:11px; color:#e74c3c; font-weight:bold; margin-bottom:15px;">⚠️ Restores all enchanted parameters to their original pre-enchanted values. Material scraps are non-refundable.</div>`;
-      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e74c3c; background: linear-gradient(135deg, #c0392b, #111);" ${window.playerStats.coins >= resetGoldCost ? "" : "disabled"} onclick="window.resetItemEnchants()" onpointerdown="window.resetItemEnchants()">Purge Enchantments</button>`;
+      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e74c3c; background: linear-gradient(135deg, #c0392b, #111);" ${window.playerStats.coins >= resetGoldCost ? "" : "disabled"} onclick="window.resetItemEnchants()">Purge Enchantments</button>`;
     }
   } else if (window.forgeMode === "set") {
     let costGold = window.getSetRerollGoldCost(item);
@@ -863,7 +1282,7 @@ window.renderForgeTab = function () {
     html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
     html += `<div style="font-size:11px; color:${soulsColor}; margin-bottom:10px;">• ${soulCost}x Monster Soul (Owned: ${ownedSouls.toLocaleString()})</div>`;
     html += `<div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:15px;">✨ Randomly rolls a different Set bonus!</div>`;
-    html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedSouls >= soulCost ? "" : "disabled"} onclick="window.rerollItemSet()" onpointerdown="window.rerollItemSet()">Re-Resonate Set</button>`;
+    html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedSouls >= soulCost ? "" : "disabled"} onclick="window.rerollItemSet()">Re-Resonate Set</button>`;
 
     previewHtml = `
                     <div style="margin-top:15px; padding:12px; background:#111; border:1px dashed #2ecc71; border-radius:6px;">
@@ -3093,6 +3512,7 @@ Object.assign(window.ForgeManager, {
       "enchant",
       "reset_enchant",
       "set",
+      "shatter",
     ];
     modes.forEach((m) => {
       let el = document.getElementById(
@@ -3115,6 +3535,7 @@ Object.assign(window.ForgeManager, {
       if (mode === "enchant") activeEl.style.background = "#9b59b6";
       if (mode === "reset_enchant") activeEl.style.background = "#c0392b";
       if (mode === "set") activeEl.style.background = "#2ecc71";
+      if (mode === "shatter") activeEl.style.background = "#c0392b";
     }
     if (typeof window.renderForgeTab === "function") window.renderForgeTab();
   },

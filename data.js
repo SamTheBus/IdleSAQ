@@ -750,14 +750,25 @@ window.checkAchievements = function () {
 };
 
 window.isCavernEffectActive = function (id) {
-  if (window.playerStats.isDungeonMode && window.playerStats.activeDungeonSigil) {
+  if (
+    window.playerStats.isDungeonMode &&
+    window.playerStats.activeDungeonSigil
+  ) {
     let sig = window.playerStats.activeDungeonSigil;
-    if (sig.buffs && sig.buffs.some(b => b.id === id)) return true;
-    if (sig.debuffs && sig.debuffs.some(d => d.id === id)) return true;
+    if (sig.buffs && sig.buffs.some((b) => b.id === id)) return true;
+    if (sig.debuffs && sig.debuffs.some((d) => d.id === id)) return true;
   }
   if (window.playerStats.isCrucibleMode) {
-    if (window.playerStats.crucibleActiveBuff && window.playerStats.crucibleActiveBuff.id === id) return true;
-    if (window.playerStats.crucibleActiveDebuff && window.playerStats.crucibleActiveDebuff.id === id) return true;
+    if (
+      window.playerStats.crucibleActiveBuff &&
+      window.playerStats.crucibleActiveBuff.id === id
+    )
+      return true;
+    if (
+      window.playerStats.crucibleActiveDebuff &&
+      window.playerStats.crucibleActiveDebuff.id === id
+    )
+      return true;
   }
   return false;
 };
@@ -769,6 +780,63 @@ window.checkArtifactTrait = function (trait) {
     (window.equippedSlots.art2 && window.equippedSlots.art2.trait === trait) ||
     (window.equippedSlots.art3 && window.equippedSlots.art3.trait === trait)
   );
+};
+
+window.hasUniquePassive = function (uniqueKey) {
+  if (
+    window.playerStats &&
+    window.playerStats.activeSpectralResonance === uniqueKey
+  )
+    return true;
+  if (!window.equippedSlots) return false;
+
+  switch (uniqueKey) {
+    case "weapon_staff":
+      return !!(
+        window.equippedSlots.weapon && window.equippedSlots.weapon.isUniqueStaff
+      );
+    case "weapon_sword":
+      return !!(
+        window.equippedSlots.weapon && window.equippedSlots.weapon.isUniqueSword
+      );
+    case "weapon_singularity":
+      return !!(
+        window.equippedSlots.weapon &&
+        window.equippedSlots.weapon.isUniqueSingularity
+      );
+    case "weapon_maelstrom":
+      return !!(
+        window.equippedSlots.weapon &&
+        window.equippedSlots.weapon.isUniqueMaelstrom
+      );
+    case "shield_aegis":
+      return !!(
+        window.equippedSlots.subweapon &&
+        window.equippedSlots.subweapon.isUniqueAegis
+      );
+    case "tome_watch":
+      return !!(
+        window.equippedSlots.subweapon &&
+        window.equippedSlots.subweapon.isUniqueWatch
+      );
+    case "tome_chronicle":
+      return !!(
+        window.equippedSlots.subweapon &&
+        window.equippedSlots.subweapon.isUniqueChronicle
+      );
+    case "boots_warpcore":
+      return !!(
+        window.equippedSlots.boots &&
+        window.equippedSlots.boots.isUniqueWarpCore
+      );
+    case "helmet_tempest":
+      return !!(
+        window.equippedSlots.helmet &&
+        window.equippedSlots.helmet.isUniqueTempest
+      );
+    default:
+      return false;
+  }
 };
 
 window.getArtifactTemperLevel = function (trait) {
@@ -817,7 +885,7 @@ window.getTierColor = function (stars) {
 };
 
 window.getScrapYieldName = function (stars) {
-  if (stars === "UNIQUE") return "Ancient Core";
+  if (stars === "UNIQUE") return "Astral Essence";
   const scraps = [
     "Monster Soul",
     "Rare Scrap",
@@ -1252,35 +1320,35 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   if (hasSubweapon) {
-          if (subType === "shield") {
-            let shield = window.equippedSlots.subweapon;
-            let shieldStars =
-              shield.statsRolled === "UNIQUE" ? 5 : shield.statsRolled || 0;
-            let subLvl =
-              (window.playerStats.slotUpgrades &&
-                window.playerStats.slotUpgrades.subweapon) ||
-              0;
-            defMultiplier += 0.12 + shieldStars * 0.02 + subLvl * 0.01;
-            maxBlockCap = window.checkArtifactTrait("titan_grip") ? 0.25 : 0.2;
-            if (p.crucibleCapBonus) maxBlockCap += p.crucibleCapBonus;
-            p.block += 0.05; // Base 5% block rate for equipping a Shield
-            p.parry = 0.0; // STRICT: Can't parry with a shield
-          } else if (subType === "tome") {
-            let intScale = Math.max(0, p.int - 5);
-            let logIntScale = Math.log10(intScale + 1);
-            // Caps the Arcane Barrier at 25% max (20% base + 5% scaling limit)
-            p.arcaneBarrier = parseFloat(
-              (0.2 + 0.05 * (1 - 1 / (1 + 0.15 * logIntScale))).toFixed(4),
-            );
-            p.block = 0.0; // STRICT: Can't block with a tome
-            p.parry = 0.0; // STRICT: Can't parry with a tome
-          } else if (subType === "dagger") {
-            maxParryCap = window.checkArtifactTrait("titan_grip") ? 0.3 : 0.25;
-            if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
-            p.parry += 0.05; // Base 5% parry rate for equipping a Dagger
-            p.block = 0.0; // STRICT: Can't block with a dagger
-          }
-        } else {
+    if (subType === "shield") {
+      let shield = window.equippedSlots.subweapon;
+      let shieldStars =
+        shield.statsRolled === "UNIQUE" ? 5 : shield.statsRolled || 0;
+      let subLvl =
+        (window.playerStats.slotUpgrades &&
+          window.playerStats.slotUpgrades.subweapon) ||
+        0;
+      defMultiplier += 0.12 + shieldStars * 0.02 + subLvl * 0.01;
+      maxBlockCap = window.checkArtifactTrait("titan_grip") ? 0.25 : 0.2;
+      if (p.crucibleCapBonus) maxBlockCap += p.crucibleCapBonus;
+      p.block += 0.05; // Base 5% block rate for equipping a Shield
+      p.parry = 0.0; // STRICT: Can't parry with a shield
+    } else if (subType === "tome") {
+      let intScale = Math.max(0, p.int - 5);
+      let logIntScale = Math.log10(intScale + 1);
+      // Caps the Arcane Barrier at 25% max (20% base + 5% scaling limit)
+      p.arcaneBarrier = parseFloat(
+        (0.2 + 0.05 * (1 - 1 / (1 + 0.15 * logIntScale))).toFixed(4),
+      );
+      p.block = 0.0; // STRICT: Can't block with a tome
+      p.parry = 0.0; // STRICT: Can't parry with a tome
+    } else if (subType === "dagger") {
+      maxParryCap = window.checkArtifactTrait("titan_grip") ? 0.3 : 0.25;
+      if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
+      p.parry += 0.05; // Base 5% parry rate for equipping a Dagger
+      p.block = 0.0; // STRICT: Can't block with a dagger
+    }
+  } else {
     p.block = 0.0; // STRICT: Can't block without subweapon
     p.parry = 0.0; // STRICT: Can't parry without subweapon
   }
@@ -1374,21 +1442,23 @@ window.resolvePlayerStats = function (useDraft = false) {
     potStrengthMultiplier += 0.3;
 
   // Apply compounding Aetheric Spark modifiers / Astral Awakening state multiplier
-    if (window.playerStats.astralAwakeningTimer > 0) {
-      p.atk = Math.floor(p.atk * 2.0); // +100% Total Damage
-      activeSpeedPct += 0.15; // +15% Active Atk Spd
-      idleSpeedPct += 0.15; // +15% Idle Atk Spd
-    } else if (window.playerStats.sparkChainCount > 0) {
-      p.atk = Math.floor(p.atk * (1.0 + window.playerStats.sparkChainCount * 0.10)); // +10% damage per chain link
-    }
+  if (window.playerStats.astralAwakeningTimer > 0) {
+    p.atk = Math.floor(p.atk * 2.0); // +100% Total Damage
+    activeSpeedPct += 0.15; // +15% Active Atk Spd
+    idleSpeedPct += 0.15; // +15% Idle Atk Spd
+  } else if (window.playerStats.sparkChainCount > 0) {
+    p.atk = Math.floor(
+      p.atk * (1.0 + window.playerStats.sparkChainCount * 0.1),
+    ); // +10% damage per chain link
+  }
 
-    if (window.playerStats.atkPotionTimer > 0)
-      p.atk = Math.ceil(
-        p.atk *
-          (1 +
-            (window.playerStats.atkPotionStrength || 0.1) *
-              potStrengthMultiplier),
-      );
+  if (window.playerStats.atkPotionTimer > 0)
+    p.atk = Math.ceil(
+      p.atk *
+        (1 +
+          (window.playerStats.atkPotionStrength || 0.1) *
+            potStrengthMultiplier),
+    );
   if (window.playerStats.hpPotionTimer > 0)
     p.maxHp = Math.ceil(
       p.maxHp *
@@ -1424,8 +1494,7 @@ window.resolvePlayerStats = function (useDraft = false) {
   if (window.checkArtifactTrait("active_spd")) activeSpeedPct += 0.25;
 
   if (
-    window.equippedSlots.subweapon &&
-    window.equippedSlots.subweapon.isUniqueWatch &&
+    window.hasUniquePassive("tome_watch") &&
     window.playerStats.watchActiveTimer > 0
   ) {
     idleSpeedPct += 0.15;
@@ -1448,8 +1517,7 @@ window.resolvePlayerStats = function (useDraft = false) {
 
   // UNIQUE: Warp-Core Greaves "Time Dilation" Boss Kill Max Haste trigger
   if (
-    window.equippedSlots.boots &&
-    window.equippedSlots.boots.isUniqueWarpCore &&
+    window.hasUniquePassive("boots_warpcore") &&
     window.playerStats.warpCoreSprintTimer > 0
   ) {
     p.idleAttackSpeed = 10;
@@ -1487,8 +1555,7 @@ window.resolvePlayerStats = function (useDraft = false) {
 
   // UNIQUE: Warp-Core Greaves "Time Dilation" missing health attack speed scaling
   if (
-    window.equippedSlots.boots &&
-    window.equippedSlots.boots.isUniqueWarpCore &&
+    window.hasUniquePassive("boots_warpcore") &&
     window.mob &&
     window.mob.hp > 0
   ) {
@@ -1520,8 +1587,7 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   if (
-    window.equippedSlots.subweapon &&
-    window.equippedSlots.subweapon.isUniqueChronicle &&
+    window.hasUniquePassive("tome_chronicle") &&
     !window.playerStats.isDungeonMode &&
     !window.playerStats.isCrucibleMode
   ) {
@@ -1568,8 +1634,7 @@ window.resolvePlayerStats = function (useDraft = false) {
   expBonusMult += wisdom * 0.01;
 
   if (
-    window.equippedSlots.subweapon &&
-    window.equippedSlots.subweapon.isUniqueChronicle &&
+    window.hasUniquePassive("tome_chronicle") &&
     !window.playerStats.isDungeonMode &&
     !window.playerStats.isCrucibleMode
   ) {
@@ -2120,12 +2185,12 @@ window.playerStats = {
   damageTakenThisBattle: 0,
   ankhTriggeredThisBattle: false,
   purifiedAegisTimer: 0,
-              apathyDecayStacks: 0,
-              apathyDecayTimer: 0,
-              astralAwakeningTimer: 0,
-              sparkChainCount: 0,
-              dailyMissions: [],
-              weeklyMissions: [],
+  apathyDecayStacks: 0,
+  apathyDecayTimer: 0,
+  astralAwakeningTimer: 0,
+  sparkChainCount: 0,
+  dailyMissions: [],
+  weeklyMissions: [],
   monsterCards: {},
   astralDust: 0,
   dailyRerollsDone: 0, // Reset daily at 12:00 AM PST/PDT
@@ -2156,6 +2221,9 @@ window.playerStats = {
   },
   clanContribution: 0,
   paragonLevel: 0,
+  spectralCodex: [],
+  activeSpectralResonance: null,
+  projectSpectralCosmetic: true,
   totalGoldEarned: new BigNum(0, 0),
 };
 

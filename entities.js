@@ -339,19 +339,19 @@
       };
 
       if (isCrit) {
-                  hitColor = "#e74c3c";
-                  hitText = "💥 " + window.formatNumber(amount);
-                } else {
-                  if (type === "lightning") hitColor = "#f1c40f";
-                  else if (type === "fire") hitColor = "#e67e22";
-                  else if (type === "frost") hitColor = "#3498db";
-                  else if (type === "echo") hitColor = "#9b59b6";
-                  else if (type === "counter") hitColor = "#f1c40f";
-                  else if (type === "aegis_counter") hitColor = "#9b59b6";
-                  else if (type === "parry_counter") hitColor = "#a855f7";
-                  else if (type === "bleed") hitColor = "#960018";
-                  else if (type === "dagger") hitColor = "#a5b1c2"; // Elegant steel-grey
-                }
+        hitColor = "#e74c3c";
+        hitText = "💥 " + window.formatNumber(amount);
+      } else {
+        if (type === "lightning") hitColor = "#f1c40f";
+        else if (type === "fire") hitColor = "#e67e22";
+        else if (type === "frost") hitColor = "#3498db";
+        else if (type === "echo") hitColor = "#9b59b6";
+        else if (type === "counter") hitColor = "#f1c40f";
+        else if (type === "aegis_counter") hitColor = "#9b59b6";
+        else if (type === "parry_counter") hitColor = "#a855f7";
+        else if (type === "bleed") hitColor = "#960018";
+        else if (type === "dagger") hitColor = "#a5b1c2"; // Elegant steel-grey
+      }
 
       if (type !== "slash") hitText = `${icons[type]} ${hitText}`;
 
@@ -4092,8 +4092,71 @@
     ctx.lineWidth = penHero;
     ctx.lineJoin = "round";
 
-    let equipped = equippedSlots || {};
+    let equipped = equippedSlots ? { ...equippedSlots } : {};
     let stats = playerStats || {};
+
+    // Phase 4: Spectral Cosmetic Projection Interceptor
+    if (stats.projectSpectralCosmetic && stats.activeSpectralResonance) {
+      let resonance = stats.activeSpectralResonance;
+      if (resonance === "weapon_staff") {
+        equipped.weapon = {
+          isUniqueStaff: true,
+          type: "weapon",
+          name: "Phoenix Ignition Staff",
+        };
+      } else if (resonance === "weapon_sword") {
+        equipped.weapon = {
+          isUniqueSword: true,
+          type: "weapon",
+          name: "Sanguine Reaver",
+        };
+      } else if (resonance === "weapon_singularity") {
+        equipped.weapon = {
+          isUniqueSingularity: true,
+          type: "weapon",
+          name: "Void-Sovereign Greatsword",
+        };
+      } else if (resonance === "weapon_maelstrom") {
+        equipped.weapon = {
+          isUniqueMaelstrom: true,
+          type: "weapon",
+          name: "Maelstrom Gale-Glaive",
+        };
+      } else if (resonance === "shield_aegis") {
+        equipped.subweapon = {
+          isUniqueAegis: true,
+          type: "subweapon",
+          subType: "shield",
+          name: "Void-Warped Bulwark",
+        };
+      } else if (resonance === "tome_watch") {
+        equipped.subweapon = {
+          isUniqueWatch: true,
+          type: "subweapon",
+          subType: "tome",
+          name: "Chronos Pocket-Watch",
+        };
+      } else if (resonance === "tome_chronicle") {
+        equipped.subweapon = {
+          isUniqueChronicle: true,
+          type: "subweapon",
+          subType: "tome",
+          name: "Chronicle of past Lives",
+        };
+      } else if (resonance === "boots_warpcore") {
+        equipped.boots = {
+          isUniqueWarpCore: true,
+          type: "boots",
+          name: "Warp-Core Greaves",
+        };
+      } else if (resonance === "helmet_tempest") {
+        equipped.helmet = {
+          isUniqueTempest: true,
+          type: "helmet",
+          name: "Crown of Tempests",
+        };
+      }
+    }
 
     // Custom visual skin color profiles for future cosmetic extensibility
     let skin = stats.cosmeticSkin || "default";
@@ -11303,121 +11366,121 @@
         ctx.fillStyle = eff.color || "#9b59b6";
         ctx.fillText(hitText, hx + 14, hy + 4);
       } else if (eff.type === "counter") {
-                  // 1. Draw Golden Mini Heater Shield (Cel-Shaded)
-                  ctx.fillStyle = "#f1c40f"; // Golden counter shield
-                  ctx.strokeStyle = "#000000";
-                  ctx.lineWidth = 3.5;
-                  ctx.lineJoin = "round";
-                  ctx.beginPath();
-                  ctx.moveTo(hx - 6, hy - 6);
-                  ctx.lineTo(hx + 6, hy - 6);
-                  ctx.quadraticCurveTo(hx + 6, hy, hx + 5, hy + 3);
-                  ctx.quadraticCurveTo(hx, hy + 9, hx, hy + 9);
-                  ctx.quadraticCurveTo(hx - 5, hy + 3, hx - 6, hy);
-                  ctx.closePath();
-                  ctx.fill();
-                  ctx.stroke();
+        // 1. Draw Golden Mini Heater Shield (Cel-Shaded)
+        ctx.fillStyle = "#f1c40f"; // Golden counter shield
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(hx - 6, hy - 6);
+        ctx.lineTo(hx + 6, hy - 6);
+        ctx.quadraticCurveTo(hx + 6, hy, hx + 5, hy + 3);
+        ctx.quadraticCurveTo(hx, hy + 9, hx, hy + 9);
+        ctx.quadraticCurveTo(hx - 5, hy + 3, hx - 6, hy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
 
-                  // Red interior crest
-                  ctx.fillStyle = "#e74c3c";
-                  ctx.beginPath();
-                  ctx.moveTo(hx - 3, hy - 4);
-                  ctx.lineTo(hx + 3, hy - 4);
-                  ctx.quadraticCurveTo(hx + 3, hy, hx, hy + 5);
-                  ctx.quadraticCurveTo(hx - 3, hy, hx - 3, hy - 4);
-                  ctx.closePath();
-                  ctx.fill();
+        // Red interior crest
+        ctx.fillStyle = "#e74c3c";
+        ctx.beginPath();
+        ctx.moveTo(hx - 3, hy - 4);
+        ctx.lineTo(hx + 3, hy - 4);
+        ctx.quadraticCurveTo(hx + 3, hy, hx, hy + 5);
+        ctx.quadraticCurveTo(hx - 3, hy, hx - 3, hy - 4);
+        ctx.closePath();
+        ctx.fill();
 
-                  // 2. Draw Damage Text (Golden Orange)
-                  let hitText = window.formatNumber(eff.amount);
-                  ctx.font = "bold 15px monospace";
-                  ctx.strokeStyle = "#000000";
-                  ctx.lineWidth = 3.5;
-                  ctx.lineJoin = "round";
-                  ctx.strokeText(hitText, hx + 14, hy + 4);
-                  ctx.fillStyle = eff.color || "#f1c40f";
-                  ctx.fillText(hitText, hx + 14, hy + 4);
-                } else if (eff.type === "aegis_counter") {
-                  // 1. Draw Purple Aegis Shield (Cel-Shaded)
-                  ctx.fillStyle = "#8e44ad"; // Void purple
-                  ctx.strokeStyle = "#000000";
-                  ctx.lineWidth = 3.5;
-                  ctx.lineJoin = "round";
-                  ctx.beginPath();
-                  ctx.moveTo(hx - 6, hy - 6);
-                  ctx.lineTo(hx + 6, hy - 6);
-                  ctx.lineTo(hx + 8, hy + 2);
-                  ctx.lineTo(hx, hy + 10);
-                  ctx.lineTo(hx - 8, hy + 2);
-                  ctx.closePath();
-                  ctx.fill();
-                  ctx.stroke();
+        // 2. Draw Damage Text (Golden Orange)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#f1c40f";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "aegis_counter") {
+        // 1. Draw Purple Aegis Shield (Cel-Shaded)
+        ctx.fillStyle = "#8e44ad"; // Void purple
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(hx - 6, hy - 6);
+        ctx.lineTo(hx + 6, hy - 6);
+        ctx.lineTo(hx + 8, hy + 2);
+        ctx.lineTo(hx, hy + 10);
+        ctx.lineTo(hx - 8, hy + 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
 
-                  // Glowing cyan core center cross
-                  ctx.strokeStyle = "#00ffff";
-                  ctx.lineWidth = 1.2;
-                  ctx.beginPath();
-                  ctx.moveTo(hx, hy - 4);
-                  ctx.lineTo(hx, hy + 7);
-                  ctx.moveTo(hx - 4, hy + 1);
-                  ctx.lineTo(hx + 4, hy + 1);
-                  ctx.stroke();
+        // Glowing cyan core center cross
+        ctx.strokeStyle = "#00ffff";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(hx, hy - 4);
+        ctx.lineTo(hx, hy + 7);
+        ctx.moveTo(hx - 4, hy + 1);
+        ctx.lineTo(hx + 4, hy + 1);
+        ctx.stroke();
 
-                  // 2. Draw Damage Text (Glowing Purple-Pink)
-                  let hitText = window.formatNumber(eff.amount);
-                  ctx.font = "bold 15px monospace";
-                  ctx.strokeStyle = "#000000";
-                  ctx.lineWidth = 3.5;
-                  ctx.lineJoin = "round";
-                  ctx.strokeText(hitText, hx + 14, hy + 4);
-                  ctx.fillStyle = eff.color || "#8e44ad";
-                  ctx.fillText(hitText, hx + 14, hy + 4);
-                } else if (eff.type === "parry_counter") {
-                  // 1. Draw Crossed Mini Steel Sabers (Cel-Shaded)
-                  ctx.save();
-                  ctx.translate(hx, hy);
-                  ctx.strokeStyle = "#000000";
-                  ctx.lineWidth = 1.5;
-                  ctx.lineJoin = "round";
+        // 2. Draw Damage Text (Glowing Purple-Pink)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#8e44ad";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "parry_counter") {
+        // 1. Draw Crossed Mini Steel Sabers (Cel-Shaded)
+        ctx.save();
+        ctx.translate(hx, hy);
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.5;
+        ctx.lineJoin = "round";
 
-                  // Saber 1 (bottom-left to top-right)
-                  ctx.save();
-                  ctx.rotate(Math.PI / 4);
-                  ctx.fillStyle = "#ecf0f1";
-                  ctx.beginPath();
-                  ctx.rect(-1.2, -10, 2.4, 12);
-                  ctx.fill();
-                  ctx.stroke();
-                  ctx.fillStyle = "#f1c40f";
-                  ctx.fillRect(-3, 2, 6, 1.5);
-                  ctx.strokeRect(-3, 2, 6, 1.5);
-                  ctx.restore();
+        // Saber 1 (bottom-left to top-right)
+        ctx.save();
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = "#ecf0f1";
+        ctx.beginPath();
+        ctx.rect(-1.2, -10, 2.4, 12);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#f1c40f";
+        ctx.fillRect(-3, 2, 6, 1.5);
+        ctx.strokeRect(-3, 2, 6, 1.5);
+        ctx.restore();
 
-                  // Saber 2 (bottom-right to top-left)
-                  ctx.save();
-                  ctx.rotate(-Math.PI / 4);
-                  ctx.fillStyle = "#ecf0f1";
-                  ctx.beginPath();
-                  ctx.rect(-1.2, -10, 2.4, 12);
-                  ctx.fill();
-                  ctx.stroke();
-                  ctx.fillStyle = "#f1c40f";
-                  ctx.fillRect(-3, 2, 6, 1.5);
-                  ctx.strokeRect(-3, 2, 6, 1.5);
-                  ctx.restore();
+        // Saber 2 (bottom-right to top-left)
+        ctx.save();
+        ctx.rotate(-Math.PI / 4);
+        ctx.fillStyle = "#ecf0f1";
+        ctx.beginPath();
+        ctx.rect(-1.2, -10, 2.4, 12);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#f1c40f";
+        ctx.fillRect(-3, 2, 6, 1.5);
+        ctx.strokeRect(-3, 2, 6, 1.5);
+        ctx.restore();
 
-                  ctx.restore();
+        ctx.restore();
 
-                  // 2. Draw Damage Text (Vibrant Parry Purple)
-                  let hitText = window.formatNumber(eff.amount);
-                  ctx.font = "bold 15px monospace";
-                  ctx.strokeStyle = "#000000";
-                  ctx.lineWidth = 3.5;
-                  ctx.lineJoin = "round";
-                  ctx.strokeText(hitText, hx + 14, hy + 4);
-                  ctx.fillStyle = eff.color || "#9b59b6";
-                  ctx.fillText(hitText, hx + 14, hy + 4);
-                } else if (eff.type === "bleed") {
+        // 2. Draw Damage Text (Vibrant Parry Purple)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#9b59b6";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "bleed") {
         // 1. Draw Shiny Crimson Blood Droplet (Cel-Shaded)
         ctx.fillStyle = "#c0392b"; // Deep crimson blood
         ctx.strokeStyle = "#000000";
@@ -11587,207 +11650,249 @@
     }
 
     // Render Void Suppression Orbs on canvas
-        if (window.activeRiftOrbs && window.activeRiftOrbs.length > 0) {
-          window.activeRiftOrbs.forEach(orb => {
-            if (orb.type === "glimmering_pixie") {
-              ctx.save();
+    if (window.activeRiftOrbs && window.activeRiftOrbs.length > 0) {
+      window.activeRiftOrbs.forEach((orb) => {
+        if (orb.type === "glimmering_pixie") {
+          ctx.save();
 
-              let flap = Math.abs(Math.sin(Date.now() / 80 + orb.id)) * 6 + 2;
-              let hover = orb.pauseTimer > 0 ? Math.sin(Date.now() / 100) * 1.5 : 0;
-              let ox = orb.x;
-              let oy = orb.y + hover;
+          let flap = Math.abs(Math.sin(Date.now() / 80 + orb.id)) * 6 + 2;
+          let hover = orb.pauseTimer > 0 ? Math.sin(Date.now() / 100) * 1.5 : 0;
+          let ox = orb.x;
+          let oy = orb.y + hover;
 
-              // 1. Draw glowing outer radial backdrop
-              let glowGrad = ctx.createRadialGradient(ox, oy, 1, ox, oy, orb.radius * 2);
-              glowGrad.addColorStop(0, "rgba(46, 204, 113, 0.45)");
-              glowGrad.addColorStop(0.6, "rgba(85, 239, 196, 0.15)");
-              glowGrad.addColorStop(1, "rgba(0,0,0,0)");
-              ctx.fillStyle = glowGrad;
+          // 1. Draw glowing outer radial backdrop
+          let glowGrad = ctx.createRadialGradient(
+            ox,
+            oy,
+            1,
+            ox,
+            oy,
+            orb.radius * 2,
+          );
+          glowGrad.addColorStop(0, "rgba(46, 204, 113, 0.45)");
+          glowGrad.addColorStop(0.6, "rgba(85, 239, 196, 0.15)");
+          glowGrad.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = glowGrad;
+          ctx.beginPath();
+          ctx.arc(ox, oy, orb.radius * 2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 2. Draw flapping wings
+          ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.ellipse(ox - 4, oy - 2, 5, flap, Math.PI / 6, 0, Math.PI * 2);
+          ctx.ellipse(ox + 4, oy - 2, 5, flap, -Math.PI / 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // 3. Draw central sprite core ball
+          let coreGrad = ctx.createRadialGradient(
+            ox - 2,
+            oy - 2,
+            1,
+            ox,
+            oy,
+            orb.radius,
+          );
+          if (window.isGamePaused) {
+            coreGrad.addColorStop(0, "#cbd5e1");
+            coreGrad.addColorStop(1, "#475569");
+          } else {
+            coreGrad.addColorStop(0, "#ffffff"); // White-hot center
+            coreGrad.addColorStop(0.3, "#2ecc71"); // Emerald
+            coreGrad.addColorStop(1, "#145a32"); // Deep forest green
+          }
+          ctx.fillStyle = coreGrad;
+          ctx.beginPath();
+          ctx.arc(ox, oy, orb.radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          // 4. Draw outer shrinking timer ring
+          let progress = orb.timer / orb.maxTimer;
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.arc(ox, oy, orb.radius * 1.5 * progress, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.restore();
+          return;
+        }
+
+        if (orb.type === "aetheric_spark") {
+          ctx.save();
+
+          // 1. Draw glowing outer radial backdrop
+          let glowGrad = ctx.createRadialGradient(
+            orb.x,
+            orb.y,
+            2,
+            orb.x,
+            orb.y,
+            orb.radius * 2,
+          );
+          glowGrad.addColorStop(0, "rgba(255, 215, 0, 0.4)");
+          glowGrad.addColorStop(0.6, "rgba(241, 196, 15, 0.15)");
+          glowGrad.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = glowGrad;
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, orb.radius * 2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 2. Draw central core with bright yellow radial gradient
+          let coreGrad = ctx.createRadialGradient(
+            orb.x - 2,
+            orb.y - 2,
+            1,
+            orb.x,
+            orb.y,
+            orb.radius,
+          );
+          if (window.isGamePaused) {
+            coreGrad.addColorStop(0, "#cbd5e1");
+            coreGrad.addColorStop(1, "#64748b");
+          } else {
+            coreGrad.addColorStop(0, "#ffffff"); // White-hot center
+            coreGrad.addColorStop(0.5, "#ffd700"); // Rich gold
+            coreGrad.addColorStop(1, "#b58700"); // Dark bronze/gold
+          }
+          ctx.fillStyle = coreGrad;
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Cel-shaded outline
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.8;
+          ctx.stroke();
+
+          // 3. Draw Orbiting Star Rays
+          if (!window.isGamePaused) {
+            ctx.strokeStyle = "#ffd700";
+            ctx.lineWidth = 1.5;
+            let rot = Date.now() / 100 + orb.id;
+            ctx.save();
+            ctx.translate(orb.x, orb.y);
+            ctx.rotate(rot);
+            for (let j = 0; j < 4; j++) {
+              ctx.rotate(Math.PI / 2);
               ctx.beginPath();
-              ctx.arc(ox, oy, orb.radius * 2, 0, Math.PI * 2);
-              ctx.fill();
-
-              // 2. Draw flapping wings
-              ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 1.2;
-              ctx.beginPath();
-              ctx.ellipse(ox - 4, oy - 2, 5, flap, Math.PI / 6, 0, Math.PI * 2);
-              ctx.ellipse(ox + 4, oy - 2, 5, flap, -Math.PI / 6, 0, Math.PI * 2);
-              ctx.fill();
+              ctx.moveTo(0, -orb.radius * 1.1);
+              ctx.lineTo(0, -orb.radius * 1.5);
               ctx.stroke();
-
-              // 3. Draw central sprite core ball
-              let coreGrad = ctx.createRadialGradient(ox - 2, oy - 2, 1, ox, oy, orb.radius);
-              if (window.isGamePaused) {
-                coreGrad.addColorStop(0, "#cbd5e1");
-                coreGrad.addColorStop(1, "#475569");
-              } else {
-                coreGrad.addColorStop(0, "#ffffff"); // White-hot center
-                coreGrad.addColorStop(0.3, "#2ecc71"); // Emerald
-                coreGrad.addColorStop(1, "#145a32"); // Deep forest green
-              }
-              ctx.fillStyle = coreGrad;
-              ctx.beginPath();
-              ctx.arc(ox, oy, orb.radius, 0, Math.PI * 2);
-              ctx.fill();
-
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 1.5;
-              ctx.stroke();
-
-              // 4. Draw outer shrinking timer ring
-              let progress = orb.timer / orb.maxTimer;
-              ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
-              ctx.lineWidth = 1.0;
-              ctx.beginPath();
-              ctx.arc(ox, oy, orb.radius * 1.5 * progress, 0, Math.PI * 2);
-              ctx.stroke();
-
-              ctx.restore();
-              return;
             }
+            ctx.restore();
+          }
 
-            if (orb.type === "aetheric_spark") {
-              ctx.save();
+          // 4. Draw shrinking outer countdown ring
+          let progress = orb.timer / orb.maxTimer;
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, orb.radius * 1.5 * progress, 0, Math.PI * 2);
+          ctx.stroke();
 
-              // 1. Draw glowing outer radial backdrop
-              let glowGrad = ctx.createRadialGradient(orb.x, orb.y, 2, orb.x, orb.y, orb.radius * 2);
-              glowGrad.addColorStop(0, "rgba(255, 215, 0, 0.4)");
-              glowGrad.addColorStop(0.6, "rgba(241, 196, 15, 0.15)");
-              glowGrad.addColorStop(1, "rgba(0,0,0,0)");
-              ctx.fillStyle = glowGrad;
-              ctx.beginPath();
-              ctx.arc(orb.x, orb.y, orb.radius * 2, 0, Math.PI * 2);
-              ctx.fill();
+          ctx.restore();
+          return;
+        }
 
-              // 2. Draw central core with bright yellow radial gradient
-              let coreGrad = ctx.createRadialGradient(orb.x - 2, orb.y - 2, 1, orb.x, orb.y, orb.radius);
-              if (window.isGamePaused) {
-                coreGrad.addColorStop(0, "#cbd5e1");
-                coreGrad.addColorStop(1, "#64748b");
-              } else {
-                coreGrad.addColorStop(0, "#ffffff"); // White-hot center
-                coreGrad.addColorStop(0.5, "#ffd700"); // Rich gold
-                coreGrad.addColorStop(1, "#b58700"); // Dark bronze/gold
-              }
-              ctx.fillStyle = coreGrad;
-              ctx.beginPath();
-              ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
-              ctx.fill();
+        if (orb.type === "aetheric_conduit") {
+          ctx.save();
 
-              // Cel-shaded outline
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 1.8;
-              ctx.stroke();
+          // 1. Draw Dotted Connecting Path
+          ctx.strokeStyle = "rgba(0, 210, 255, 0.22)";
+          ctx.lineWidth = 1.8;
+          ctx.setLineDash([4, 6]);
+          ctx.beginPath();
+          ctx.moveTo(orb.x, orb.y);
+          ctx.lineTo(orb.endX, orb.endY);
+          ctx.stroke();
+          ctx.setLineDash([]); // Reset
 
-              // 3. Draw Orbiting Star Rays
-              if (!window.isGamePaused) {
-                ctx.strokeStyle = "#ffd700";
-                ctx.lineWidth = 1.5;
-                let rot = Date.now() / 100 + orb.id;
-                ctx.save();
-                ctx.translate(orb.x, orb.y);
-                ctx.rotate(rot);
-                for (let j = 0; j < 4; j++) {
-                  ctx.rotate(Math.PI / 2);
-                  ctx.beginPath();
-                  ctx.moveTo(0, -orb.radius * 1.1);
-                  ctx.lineTo(0, -orb.radius * 1.5);
-                  ctx.stroke();
-                }
-                ctx.restore();
-              }
+          // 2. Draw Solid Glowing Active Traced Path
+          if (orb.progress > 0) {
+            let px = orb.x + orb.progress * (orb.endX - orb.x);
+            let py = orb.y + orb.progress * (orb.endY - orb.y);
 
-              // 4. Draw shrinking outer countdown ring
-              let progress = orb.timer / orb.maxTimer;
-              ctx.strokeStyle = "#ffffff";
-              ctx.lineWidth = 1.2;
-              ctx.beginPath();
-              ctx.arc(orb.x, orb.y, orb.radius * 1.5 * progress, 0, Math.PI * 2);
-              ctx.stroke();
+            ctx.strokeStyle = "#00d2ff"; // Neon Cyan
+            ctx.lineWidth = 3.0;
+            ctx.beginPath();
+            ctx.moveTo(orb.x, orb.y);
+            ctx.lineTo(px, py);
+            ctx.stroke();
 
-              ctx.restore();
-              return;
-            }
+            // Draw spark following their finger
+            let pulse = 2.5 + Math.sin(Date.now() / 80) * 1.5;
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(px, py, pulse, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#00ffff";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
 
-            if (orb.type === "aetheric_conduit") {
-              ctx.save();
+          // 3. Draw Start Crystal (A)
+          let startGrad = ctx.createRadialGradient(
+            orb.x - 2,
+            orb.y - 2,
+            1,
+            orb.x,
+            orb.y,
+            orb.radius,
+          );
+          startGrad.addColorStop(0, "#ffffff");
+          startGrad.addColorStop(0.4, "#00d2ff");
+          startGrad.addColorStop(1, "#031d0d");
+          ctx.fillStyle = startGrad;
 
-              // 1. Draw Dotted Connecting Path
-              ctx.strokeStyle = "rgba(0, 210, 255, 0.22)";
-              ctx.lineWidth = 1.8;
-              ctx.setLineDash([4, 6]);
-              ctx.beginPath();
-              ctx.moveTo(orb.x, orb.y);
-              ctx.lineTo(orb.endX, orb.endY);
-              ctx.stroke();
-              ctx.setLineDash([]); // Reset
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+          ctx.fill();
 
-              // 2. Draw Solid Glowing Active Traced Path
-              if (orb.progress > 0) {
-                let px = orb.x + orb.progress * (orb.endX - orb.x);
-                let py = orb.y + orb.progress * (orb.endY - orb.y);
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.8;
+          ctx.stroke();
 
-                ctx.strokeStyle = "#00d2ff"; // Neon Cyan
-                ctx.lineWidth = 3.0;
-                ctx.beginPath();
-                ctx.moveTo(orb.x, orb.y);
-                ctx.lineTo(px, py);
-                ctx.stroke();
+          // 4. Draw End Crystal (B)
+          let endGrad = ctx.createRadialGradient(
+            orb.endX - 2,
+            orb.endY - 2,
+            1,
+            orb.endX,
+            orb.endY,
+            orb.radius,
+          );
+          endGrad.addColorStop(0, "#ffffff");
+          endGrad.addColorStop(0.4, "#ff007f"); // Contrasting hot pink target
+          endGrad.addColorStop(1, "#110521");
+          ctx.fillStyle = endGrad;
 
-                // Draw spark following their finger
-                let pulse = 2.5 + Math.sin(Date.now() / 80) * 1.5;
-                ctx.fillStyle = "#ffffff";
-                ctx.beginPath();
-                ctx.arc(px, py, pulse, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = "#00ffff";
-                ctx.lineWidth = 1;
-                ctx.stroke();
-              }
+          ctx.beginPath();
+          ctx.arc(orb.endX, orb.endY, orb.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
 
-              // 3. Draw Start Crystal (A)
-              let startGrad = ctx.createRadialGradient(orb.x - 2, orb.y - 2, 1, orb.x, orb.y, orb.radius);
-              startGrad.addColorStop(0, "#ffffff");
-              startGrad.addColorStop(0.4, "#00d2ff");
-              startGrad.addColorStop(1, "#031d0d");
-              ctx.fillStyle = startGrad;
+          // Glowing receiver ring if fully charged
+          if (orb.connected) {
+            ctx.strokeStyle = "#2ecc71"; // Flashes green
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(orb.endX, orb.endY, orb.radius * 1.5, 0, Math.PI * 2);
+            ctx.stroke();
+          }
 
-              ctx.beginPath();
-              ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
-              ctx.fill();
+          ctx.restore();
+          return;
+        }
 
-              ctx.strokeStyle = "#000000";
-              ctx.lineWidth = 1.8;
-              ctx.stroke();
-
-              // 4. Draw End Crystal (B)
-              let endGrad = ctx.createRadialGradient(orb.endX - 2, orb.endY - 2, 1, orb.endX, orb.endY, orb.radius);
-              endGrad.addColorStop(0, "#ffffff");
-              endGrad.addColorStop(0.4, "#ff007f"); // Contrasting hot pink target
-              endGrad.addColorStop(1, "#110521");
-              ctx.fillStyle = endGrad;
-
-              ctx.beginPath();
-              ctx.arc(orb.endX, orb.endY, orb.radius, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.stroke();
-
-              // Glowing receiver ring if fully charged
-              if (orb.connected) {
-                ctx.strokeStyle = "#2ecc71"; // Flashes green
-                ctx.lineWidth = 2.5;
-                ctx.beginPath();
-                ctx.arc(orb.endX, orb.endY, orb.radius * 1.5, 0, Math.PI * 2);
-                ctx.stroke();
-              }
-
-              ctx.restore();
-              return;
-            }
-
-            if (orb.type === "perfect_strike") {
+        if (orb.type === "perfect_strike") {
           ctx.save();
 
           // 1. Draw central core bullseye

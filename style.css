@@ -190,7 +190,7 @@ body.scroll-lock {
   background: #0c0f12;
   width: 100%;
   height: auto;
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 /* --- TOP NAVIGATION BAR --- */
@@ -239,7 +239,7 @@ canvas {
   border-bottom: 2px solid #1f242d;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
-  touch-action: none; /* Prevents canvas touch drag gestures from locking the viewport scroll */
+  touch-action: pan-y; /* Prevents canvas touch drag gestures from locking the viewport scroll */
 }
 
 /* --- STATS HUD OVERLAY --- */
@@ -327,12 +327,13 @@ canvas {
 }
 
 .tab-btn.active {
-  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
-  color: #f8fafc;
-  border-color: var(--accent-orange);
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  color: #ffffff;
+  border-color: #00d2ff;
   box-shadow:
-    inset 0 -3px 0 var(--accent-orange),
-    0 4px 12px rgba(230, 126, 34, 0.15); /* Tactile bottom border accent */
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 0 8px rgba(0, 210, 255, 0.25); /* Sleek cyber-cyan neon glow */
+  text-shadow: 0 0 6px rgba(0, 210, 255, 0.45);
 }
 
 /* --- PANEL DISPLAY --- */
@@ -615,15 +616,182 @@ canvas {
   border-color: #444444;
 }
 
-/* --- ACTION CONTROLS DRAWER --- */
+/* --- CHISELED RETRO COCKPIT HUD --- */
 #control-bar {
-  background: linear-gradient(180deg, #111827 0%, #070a0f 100%);
-  border-bottom: 2px solid #1f2937;
-  padding: 10px 14px;
+  background: #0c0e13;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 2px solid #11141b;
+  padding: 6px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11.5px;
+  gap: 12px;
+  width: 100%;
+  height: 44px;
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+.stats-hud-inline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Rigid 4-column layout prevents layout shifting */
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.hud-stat-panel {
+  background: rgba(10, 14, 22, 0.55);
+  border: 1.2px solid #1e293b;
+  border-radius: 6px;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  min-width: 0; /* Vital for nested ellipsis truncation */
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.hud-stat-panel:hover {
+  background: rgba(20, 27, 41, 0.7);
+  border-color: #334155;
+}
+
+/* Subtle, cohesive bottom-aligned underline tags */
+.panel-hp { border-bottom: 2px solid #e74c3c !important; }
+.panel-hp .chip-value { color: #ff6b6b; }
+.panel-stage { border-bottom: 2px solid #3498db !important; }
+.panel-stage .chip-value { color: #60a5fa; }
+.panel-gold { border-bottom: 2px solid #f1c40f !important; }
+.panel-gold .chip-value { color: #ffd700; }
+.panel-dps { border-bottom: 2px solid #e67e22 !important; }
+.panel-dps .chip-value { color: #ff9f43; }
+
+.chip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chip-text {
+  display: flex;
+  flex-direction: column; /* Stack vertically to prevent horizontal pushing */
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 0;
+  width: 100%;
+  line-height: 1.1;
+}
+
+.chip-value-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+
+.chip-value {
+  font-weight: 800;
+  font-size: 11px;
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1; /* Gracefully truncate when numbers inflate */
+}
+
+.chip-sub {
+  color: #94a3b8;
+  font-size: 8px;
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  display: block;
+  text-align: left;
+}
+
+.chip-label-prefix {
+  color: #94a3b8;
+  font-size: 8.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-right: 2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* Ensure the SVG icon injected by JS inside #hud-stage-label centers perfectly on Line 1 */
+#hud-stage-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 1;
+}
+
+.control-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-toggle {
+  height: 28px !important;
+  padding: 0 10px !important;
+  border-radius: 6px !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+  cursor: pointer;
+}
+
+.btn-toggle.btn-leave {
+  background: #c0392b !important;
+  border: 1px solid #e74c3c !important;
+  color: #fff !important;
+}
+.btn-toggle.btn-leave:hover {
+  background: #e74c3c !important;
+}
+
+/* Restored High-Fidelity Monospace Sync Console */
+#sync-indicator {
+  font-size: 10px !important;
+  font-weight: bold !important;
+  color: #7f8c8d !important;
+  font-family: monospace !important;
+  background: #11141b !important;
+  border: 1px solid #2d3748 !important;
+  padding: 0 10px !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  height: 28px !important;
+  box-sizing: border-box !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+}
+
+#sync-dot {
+  display: inline-block !important;
+  width: 6px !important;
+  height: 6px !important;
+  background: #7f8c8d;
+  border-radius: 50% !important;
+  box-shadow: 0 0 4px currentColor !important;
+  flex-shrink: 0 !important;
 }
 
 .btn-toggle {
@@ -1528,11 +1696,37 @@ summary {
     padding: 10px !important;
   }
   #control-bar {
-    grid-template-columns: 1fr !important;
-    gap: 8px !important;
+    height: auto !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 6px !important;
+    gap: 6px !important;
+    border-bottom-width: 1px !important;
   }
   .stats-hud-inline {
-    order: 2; /* Automatically places stats underneath the command row on mobile */
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    width: 100% !important;
+    order: 0 !important;
+  }
+  .hud-stat-panel {
+    width: 100% !important;
+    height: 36px !important; /* Proper padding on mobile */
+    justify-content: flex-start !important;
+  }
+  .control-actions {
+    width: 100% !important;
+    justify-content: space-between !important;
+    height: 28px !important;
+  }
+  .control-actions .btn-toggle {
+    flex: 1 !important;
+    text-align: center !important;
+  }
+  #sync-indicator {
+    flex: 1 !important;
+    justify-content: center !important;
   }
   .brand-title {
     display: none !important; /* Hides the logo title completely on mobile to maximize button space */
@@ -2312,55 +2506,55 @@ summary {
   }
 
   /* --- ULTRA-COMPACT CONTROL BAR (PREVENTS WRAP & CLIPPING) --- */
-  #control-bar {
-    grid-area: ctrlbar !important;
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    gap: 6px !important;
-    padding: 3px 8px !important;
-  }
+    #control-bar {
+      grid-area: ctrlbar !important;
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      gap: 4px !important;
+      padding: 2px 6px !important;
+      height: 32px !important;
+    }
 
-  .stats-hud-inline {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 4px !important;
-    flex: 1 !important;
-  }
+    .stats-hud-inline {
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 3px !important;
+      flex: 1 !important;
+      height: 100% !important;
+    }
 
-  .hud-stat-card {
-    flex: 1 !important;
-    padding: 2px 4px !important;
-    min-width: 0 !important;
-    border-radius: 4px !important;
-  }
+    .hud-stat-panel {
+      height: 28px !important; /* Comfortably holds stacked 2-lines on landscape mobile */
+      padding: 2px 6px !important;
+    }
 
-  .hud-stat-card span {
-    font-size: 8px !important;
-    line-height: 1 !important;
-  }
+    .hud-stat-panel .chip-value {
+      font-size: 9.5px !important;
+    }
 
-  .hud-stat-card strong {
-    font-size: 10px !important;
-    margin-top: 1px !important;
-  }
+    .hud-stat-panel .chip-sub,
+    .hud-stat-panel .chip-label-prefix {
+      font-size: 7.5px !important;
+    }
 
-  #control-bar > div:last-child {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 3px !important;
-    align-items: center !important;
-  }
+    .control-actions {
+      height: 100% !important;
+      gap: 3px !important;
+    }
 
-  #control-bar .btn-toggle {
-    padding: 4px 6px !important;
-    font-size: 9px !important;
-    white-space: nowrap !important;
-    height: auto !important;
-  }
+    .btn-toggle {
+      height: 24px !important;
+      padding: 0 6px !important;
+      font-size: 9px !important;
+    }
+
+    #sync-indicator {
+      height: 24px !important;
+      padding: 0 4px !important;
+    }
 
   .tab-btn {
     padding: 6px 1px !important;

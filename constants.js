@@ -3159,31 +3159,31 @@ window.CAVERN_BUFFS = [
     desc: "Equipment Drop Quality increased by +25%",
   },
   {
-      id: "echoing_step",
-      name: "Echoing Step",
-      desc: "Parry triggers a 100% Attack damage counter-attack",
-    },
-    {
-      id: "perfect_strike",
-      name: "Perfect Strike",
-      desc: "Concentric reticles appear over monsters. Tapping in alignment deals 5x defense-bypassing damage and inflicts bleed."
-    },
-    {
-      id: "aetheric_conduit",
-      name: "Aetheric Conduit",
-      desc: "Aetheric Conduits appear on the battlefield. Swipe between them to trigger instant triple-elemental spells."
-    },
-    {
-      id: "aetheric_spark",
-      name: "Aetheric Spark",
-      desc: "Pulsing sparks spawn in sequence. Chain tap 5 in a row to trigger Astral Awakening (+100% Damage, +15% Speed)."
-    },
-    {
-      id: "glimmering_pixie",
-      name: "Glimmering Pixie",
-      desc: "Glimmering Pixies dart across the battlefield. Capture them for a +50% duration Elixir or risk a sting!"
-    }
-  ];
+    id: "echoing_step",
+    name: "Echoing Step",
+    desc: "Parry triggers a 100% Attack damage counter-attack",
+  },
+  {
+    id: "perfect_strike",
+    name: "Perfect Strike",
+    desc: "Concentric reticles appear over monsters. Tapping in alignment deals 5x defense-bypassing damage and inflicts bleed.",
+  },
+  {
+    id: "aetheric_conduit",
+    name: "Aetheric Conduit",
+    desc: "Aetheric Conduits appear on the battlefield. Swipe between them to trigger instant triple-elemental spells.",
+  },
+  {
+    id: "aetheric_spark",
+    name: "Aetheric Spark",
+    desc: "Pulsing sparks spawn in sequence. Chain tap 5 in a row to trigger Astral Awakening (+100% Damage, +15% Speed).",
+  },
+  {
+    id: "glimmering_pixie",
+    name: "Glimmering Pixie",
+    desc: "Glimmering Pixies dart across the battlefield. Capture them for a +50% duration Elixir or risk a sting!",
+  },
+];
 
 window.CAVERN_DEBUFFS = [
   {
@@ -3239,13 +3239,13 @@ window.CAVERN_DEBUFFS = [
   {
     id: "anomalous_shards",
     name: "Anomalous Shards",
-    desc: "Anomalous Shards occasionally erupt from the ground, causing attack speed penalties and health drain unless shattered."
+    desc: "Anomalous Shards occasionally erupt from the ground, causing attack speed penalties and health drain unless shattered.",
   },
   {
     id: "void_rupture",
     name: "Void Rupture",
-    desc: "Aetheric ruptures open up. Click all 3 Void Suppression Orbs before they collapse to cleanse yourself and gain Purified Aegis!"
-  }
+    desc: "Aetheric ruptures open up. Click all 3 Void Suppression Orbs before they collapse to cleanse yourself and gain Purified Aegis!",
+  },
 ];
 
 window.ASTRAL_SHOP_STOCK = [
