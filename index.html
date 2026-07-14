@@ -6163,20 +6163,55 @@
                 </button>
             </div>
 
-            <!-- Dynamic Bulk Salvage & Active Auto-Salvage Controls -->
+            <div
+                    id="bag-equip"
+                    class="bag-container"
+                    onscroll="window.hideTooltip()"
+                    ontouchmove="window.hideTooltip()"
+            ></div>
+            <div
+                    id="bag-art"
+                    class="bag-container"
+                    style="display: none"
+                    onscroll="window.hideTooltip()"
+                    ontouchmove="window.hideTooltip()"
+            ></div>
+            <div
+                    id="bag-sigil"
+                    class="bag-container"
+                    style="display: none"
+                    onscroll="window.hideTooltip()"
+                    ontouchmove="window.hideTooltip()"
+            ></div>
+            <div
+                    id="bag-etc"
+                    class="bag-container"
+                    style="display: none"
+                    onscroll="window.hideTooltip()"
+                    ontouchmove="window.hideTooltip()"
+            ></div>
+            <div
+                    id="bag-use"
+                    class="bag-container"
+                    style="display: none"
+                    onscroll="window.hideTooltip()"
+                    ontouchmove="window.hideTooltip()"
+            ></div>
+
+            <!-- Dynamic Bulk Salvage & Active Auto-Salvage Controls (Relocated Below Items) -->
             <div
                     id="bulk-salvage-bar"
                     style="
-              display: flex;
-              flex-direction: column;
-              gap: 12px;
-              margin-bottom: 12px;
-              background: #0f1115;
-              padding: 12px;
-              border-radius: 8px;
-              border: 1px solid #2d3748;
-              box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-            "
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-top: 12px;
+          background: #0f1115;
+          padding: 12px;
+          border-radius: 8px;
+          border: 1px solid #2d3748;
+          box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        "
             >
                 <!-- Auto-Salvage Section -->
                 <div
@@ -6376,40 +6411,6 @@
                     </div>
                 </div>
             </div>
-            <div
-                    id="bag-equip"
-                    class="bag-container"
-                    onscroll="window.hideTooltip()"
-                    ontouchmove="window.hideTooltip()"
-            ></div>
-            <div
-                    id="bag-art"
-                    class="bag-container"
-                    style="display: none"
-                    onscroll="window.hideTooltip()"
-                    ontouchmove="window.hideTooltip()"
-            ></div>
-            <div
-                    id="bag-sigil"
-                    class="bag-container"
-                    style="display: none"
-                    onscroll="window.hideTooltip()"
-                    ontouchmove="window.hideTooltip()"
-            ></div>
-            <div
-                    id="bag-etc"
-                    class="bag-container"
-                    style="display: none"
-                    onscroll="window.hideTooltip()"
-                    ontouchmove="window.hideTooltip()"
-            ></div>
-            <div
-                    id="bag-use"
-                    class="bag-container"
-                    style="display: none"
-                    onscroll="window.hideTooltip()"
-                    ontouchmove="window.hideTooltip()"
-            ></div>
         </div>
 
         <!-- Forge / Crafting Tab -->
