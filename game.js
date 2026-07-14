@@ -1894,53 +1894,73 @@ window.onload = function () {
             }
           }
 
-          let startX = 0;
-          let currentX = 0;
-          let isSwiping = false;
+          let activeTouchId = null;
+                    let startX = 0;
+                    let currentX = 0;
+                    let isSwiping = false;
 
-          newToast.addEventListener(
-            "touchstart",
-            (e) => {
-              startX = e.touches[0].clientX;
-              isSwiping = true;
-              newToast.style.transition = "none";
-            },
-            { passive: true },
-          );
+                    newToast.addEventListener(
+                      "touchstart",
+                      (e) => {
+                        if (isSwiping) return;
+                        // Capture the specific touch instance that initiated on this toast element
+                        let touch = e.changedTouches ? e.changedTouches[0] : null;
+                        if (touch) {
+                          activeTouchId = touch.identifier;
+                          startX = touch.clientX;
+                          currentX = startX;
+                          isSwiping = true;
+                          newToast.style.transition = "none";
+                        }
+                      },
+                      { passive: true },
+                    );
 
-          newToast.addEventListener(
-            "touchmove",
-            (e) => {
-              if (!isSwiping) return;
-              currentX = e.touches[0].clientX;
-              let diffX = currentX - startX;
-              if (diffX > 0) {
-                newToast.style.transform = `translateX(${diffX}px)`;
-                newToast.style.opacity = Math.max(0, 1 - diffX / 150);
-              }
-            },
-            { passive: true },
-          );
+                    newToast.addEventListener(
+                      "touchmove",
+                      (e) => {
+                        if (!isSwiping || activeTouchId === null) return;
+                        // Map the movement calculations specifically to our active swiping finger
+                        let touch = Array.from(e.touches).find((t) => t.identifier === activeTouchId);
+                        if (!touch) return;
+                        currentX = touch.clientX;
+                        let diffX = currentX - startX;
+                        let absDiffX = Math.abs(diffX);
+                        newToast.style.transform = `translateX(${diffX}px)`;
+                        newToast.style.opacity = Math.max(0, 1 - absDiffX / 180);
+                      },
+                      { passive: true },
+                    );
 
-          newToast.addEventListener("touchend", (e) => {
-            if (!isSwiping) return;
-            isSwiping = false;
-            let diffX = currentX - startX;
-            if (diffX > 80) {
-              newToast.style.transition =
-                "transform 0.2s ease-out, opacity 0.2s ease-out";
-              newToast.style.transform = "translateX(120%)";
-              newToast.style.opacity = "0";
-              if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
-              if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
-              setTimeout(() => newToast.remove(), 200);
-            } else {
-              newToast.style.transition =
-                "transform 0.2s ease, opacity 0.2s ease";
-              newToast.style.transform = "translateX(0)";
-              newToast.style.opacity = "1";
-            }
-          });
+                    const handleSwipeEnd = (e) => {
+                      if (!isSwiping || activeTouchId === null) return;
+                      // Verify that the finger leaving the screen matches our swiping finger
+                      let touch = Array.from(e.changedTouches).find((t) => t.identifier === activeTouchId);
+                      if (!touch) return;
+
+                      isSwiping = false;
+                      activeTouchId = null;
+
+                      let diffX = currentX - startX;
+                      let absDiffX = Math.abs(diffX);
+                      if (absDiffX > 80) {
+                        newToast.style.transition =
+                          "transform 0.2s ease-out, opacity 0.2s ease-out";
+                        newToast.style.transform = `translateX(${diffX > 0 ? 120 : -120}%)`;
+                        newToast.style.opacity = "0";
+                        if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
+                        if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
+                        setTimeout(() => newToast.remove(), 200);
+                      } else {
+                        newToast.style.transition =
+                          "transform 0.2s ease, opacity 0.2s ease";
+                        newToast.style.transform = "translateX(0)";
+                        newToast.style.opacity = "1";
+                      }
+                    };
+
+                    newToast.addEventListener("touchend", handleSwipeEnd, { passive: true });
+                    newToast.addEventListener("touchcancel", handleSwipeEnd, { passive: true });
 
           if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
           if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
