@@ -2039,10 +2039,19 @@ window.onload = function () {
   });
 
   window.loadGame();
-  window.updateStickyCanvasStyle();
-  if (typeof window.requestWakeLock === "function") {
-    window.requestWakeLock();
-  }
+
+    // Onboarding: Grants a 0★ Common Level 1 Weapon to fresh Level 1 players to quick-start early combat pacing
+    if (window.playerStats.level === 1 && !window.equippedSlots.weapon && window.inventory.EQUIP.length === 0) {
+      let startingWeapon = window.createItemObject("weapon", 0, 1, 0); // 0★ Common, StageScale 1
+      window.equippedSlots.weapon = startingWeapon;
+      window.recalculateItemStats(startingWeapon);
+      window.invalidatePlayerStats();
+    }
+
+    window.updateStickyCanvasStyle();
+    if (typeof window.requestWakeLock === "function") {
+      window.requestWakeLock();
+    }
 
   // Prompt fresh players to register their unique name
   setTimeout(() => {
@@ -5735,19 +5744,37 @@ window.CombatEngine = {
           );
 
         // First-time milestone clear reward (Stage 10, 20, 30...)
-        // Enforce peak checking to prevent players from farming milestone drops repeatedly after prestiging
-        if (
-          window.playerStats.maxStage > oldMax &&
-          oldMax % 10 === 0 &&
-          window.playerStats.maxStage > oldPeak
-        ) {
-          if (typeof window.pushLog === "function")
-            window.pushLog(
-              `<strong style="color:#f1c40f;">🏆 [MILESTONE] Stage ${oldMax} Beaten! Guaranteed random equip dropped!</strong>`,
-            );
-          if (typeof window.rollEquipmentDrop === "function")
-            window.rollEquipmentDrop(true, false, 0, false, true); // IS MILESTONE = true
-        }
+                        // Enforce peak checking to prevent players from farming milestone drops repeatedly after prestiging
+                        if (
+                          window.playerStats.maxStage > oldMax &&
+                          oldMax % 10 === 0 &&
+                          window.playerStats.maxStage > oldPeak
+                        ) {
+                          if (oldMax === 10) {
+                                              // Onboarding: Guaranteed Rare (1★) Weapon dropped at Stage 10
+                                              let newItem = window.createItemObject("weapon", 1, 1, 1);
+                                              window.inventory.EQUIP.push(newItem);
+                                              window.frozenItemDb[newItem.id] = window.cloneItemForTooltip(newItem);
+                                              window.pushToast(newItem.name, newItem.statsRolled, window.getTierColor(newItem.statsRolled), false, 1, null, null, true, newItem);
+                                              window.pushLog(`<strong style="color:#f1c40f;">[MILESTONE] Stage 10 Beaten! Guaranteed Weapon dropped: <span style="color:${window.getTierColor(1)};">${newItem.name}</span></strong>`, newItem.id);
+                                              window.renderInventory();
+                                              window.updateUI();
+                                            } else if (oldMax === 20) {
+                            // Onboarding: Trigger Sub-weapon of Choice Modal at Stage 20
+                            setTimeout(() => {
+                              if (typeof window.openSubweaponOfChoiceModal === "function") {
+                                window.openSubweaponOfChoiceModal();
+                              }
+                            }, 500);
+                          } else {
+                            if (typeof window.pushLog === "function")
+                              window.pushLog(
+                                `<strong style="color:#f1c40f;">🏆 [MILESTONE] Stage ${oldMax} Beaten! Guaranteed random equip dropped!</strong>`,
+                              );
+                            if (typeof window.rollEquipmentDrop === "function")
+                              window.rollEquipmentDrop(true, false, 0, false, true); // IS MILESTONE = true
+                          }
+                        }
       }
       window.playerStats.killCount = 0;
       window.playerStats.isBossMode = false;

@@ -14787,3 +14787,196 @@ window.executeEquipSpectralResonance = function (key) {
   window.updateUI();
   window.saveGame();
 };
+
+// Onboarding: Stage 20 Choice Portal (Presents Bulwark, Riposte, or Arcane grimoire options)
+window.openSubweaponOfChoiceModal = function () {
+  window.setPauseState(true);
+
+  // Generate three specialized sub-weapons at level 21 (StageScale 3) rolling their respective stats
+  let shield = {
+    id: window.idCounter++,
+    name: `Kite Shield of Might (Lv. 21)`,
+    type: "subweapon",
+    subType: "shield",
+    statsRolled: 1, // Rare (1★)
+    temperLevel: 0,
+    stageLevel: 21,
+    atk: 0, maxHp: 0, def: 0, moveSpeed: 0, critChance: 0, critDamage: 0, block: 0, parry: 0,
+    baseAtk: 0, baseMaxHp: 0, baseDef: 12, baseMoveSpeed: 0, baseBlock: 0.05, baseParry: 0, baseInt: 0,
+    bonusAtk: 0, bonusMaxHp: 50, bonusDef: 8, bonusMoveSpeed: 0, bonusCritChance: 0, bonusCritDamage: 0,
+    bonusBlock: 0.02, bonusParry: 0, bonusStr: 8, bonusDex: 0, bonusInt: 0,
+    str: 0, dex: 0, int: 0,
+    noun: "Kite Shield",
+    setName: "Vanguard",
+  };
+  window.recalculateItemStats(shield);
+  window.frozenItemDb[shield.id] = window.cloneItemForTooltip(shield);
+
+  let dagger = {
+    id: window.idCounter++,
+    name: `Kris of Swiftness (Lv. 21)`,
+    type: "subweapon",
+    subType: "dagger",
+    statsRolled: 1, // Rare (1★)
+    temperLevel: 0,
+    stageLevel: 21,
+    atk: 0, maxHp: 0, def: 0, moveSpeed: 0, critChance: 0, critDamage: 0, block: 0, parry: 0,
+    baseAtk: 10, baseMaxHp: 0, baseDef: 0, baseMoveSpeed: 0, baseBlock: 0, baseParry: 0.05, baseInt: 0,
+    bonusAtk: 6, bonusMaxHp: 0, bonusDef: 0, bonusMoveSpeed: 4, bonusCritChance: 0.02, bonusCritDamage: 0,
+    bonusBlock: 0, bonusParry: 0.015, bonusStr: 0, bonusDex: 8, bonusInt: 0,
+    str: 0, dex: 0, int: 0,
+    noun: "Kris",
+    setName: "Windrunner",
+  };
+  window.recalculateItemStats(dagger);
+  window.frozenItemDb[dagger.id] = window.cloneItemForTooltip(dagger);
+
+  let tome = {
+    id: window.idCounter++,
+    name: `Grimoire of Wisdom (Lv. 21)`,
+    type: "subweapon",
+    subType: "tome",
+    statsRolled: 1, // Rare (1★)
+    temperLevel: 0,
+    stageLevel: 21,
+    atk: 0, maxHp: 0, def: 0, moveSpeed: 0, critChance: 0, critDamage: 0, block: 0, parry: 0,
+    baseAtk: 5, baseMaxHp: 0, baseDef: 0, baseMoveSpeed: 0, baseBlock: 0, baseParry: 0, baseInt: 15,
+    bonusAtk: 0, bonusMaxHp: 0, bonusDef: 0, bonusMoveSpeed: 0, bonusCritChance: 0, bonusCritDamage: 0.08,
+    bonusBlock: 0, bonusParry: 0, bonusActiveSpeed: 0.03, bonusIdleSpeed: 0, bonusStr: 0, bonusDex: 0, bonusInt: 8,
+    str: 0, dex: 0, int: 0,
+    noun: "Grimoire",
+    setName: "Scholar",
+  };
+  window.recalculateItemStats(tome);
+  window.frozenItemDb[tome.id] = window.cloneItemForTooltip(tome);
+
+  let overlay = document.createElement("div");
+  overlay.id = "subweapon-choice-overlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundColor = "rgba(0,0,0,0.92)";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = "45000";
+  overlay.style.backdropFilter = "blur(10px)";
+  document.body.appendChild(overlay);
+
+  let cardStyles = `
+    background: linear-gradient(135deg, #13111c 0%, #06040a 100%);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 130px;
+    height: 235px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.65);
+    transition: transform 0.15s, border-color 0.15s;
+    cursor: pointer;
+  `;
+
+  let shieldCardHtml = `
+    <div id="choice-card-shield" class="market-card" style="${cardStyles} border: 2px solid #3498db;"
+         onclick="window.selectChoiceSubweapon('shield')"
+         onmouseenter="window.showInventoryTooltip(event, ${shield.id})"
+         ontouchstart="window.showInventoryTooltip(event, ${shield.id})"
+         onmouseleave="window.hideTooltip()">
+      <div style="text-align:center; width:100%;">
+        <strong style="color:#3498db; font-size:12px; display:block; margin-bottom:2px;">Bulwark</strong>
+        <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Kite Shield</span>
+      </div>
+      <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #3498db;">${window.getEquipIconHtml(shield, 32)}</div>
+      <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
+        Focuses on <strong>STR & Defense</strong>. Unlocks Block Rate and Shield Bash counters.
+      </div>
+      <button class="btn-action" style="width:100%; font-size:10px; background:#3498db;" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(shield).replace(/"/g, "&quot;")})">CLAIM SHIELD</button>
+    </div>
+  `;
+
+  let daggerCardHtml = `
+    <div id="choice-card-dagger" class="market-card" style="${cardStyles} border: 2px solid #e74c3c;"
+         onclick="window.selectChoiceSubweapon('dagger')"
+         onmouseenter="window.showInventoryTooltip(event, ${dagger.id})"
+         ontouchstart="window.showInventoryTooltip(event, ${dagger.id})"
+         onmouseleave="window.hideTooltip()">
+      <div style="text-align:center; width:100%;">
+        <strong style="color:#e74c3c; font-size:12px; display:block; margin-bottom:2px;">Riposte</strong>
+        <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Kris Dagger</span>
+      </div>
+      <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #e74c3c;">${window.getEquipIconHtml(dagger, 32)}</div>
+      <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
+        Focuses on <strong>DEX & Speed</strong>. Unlocks Parry Rate and Riposte counter strikes.
+      </div>
+      <button class="btn-action" style="width:100%; font-size:10px; background:#e74c3c;" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(dagger).replace(/"/g, "&quot;")})">CLAIM DAGGER</button>
+    </div>
+  `;
+
+  let tomeCardHtml = `
+    <div id="choice-card-tome" class="market-card" style="${cardStyles} border: 2px solid #9b59b6;"
+         onclick="window.selectChoiceSubweapon('tome')"
+         onmouseenter="window.showInventoryTooltip(event, ${tome.id})"
+         ontouchstart="window.showInventoryTooltip(event, ${tome.id})"
+         onmouseleave="window.hideTooltip()">
+      <div style="text-align:center; width:100%;">
+        <strong style="color:#9b59b6; font-size:12px; display:block; margin-bottom:2px;">Arcane</strong>
+        <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Grimoire</span>
+      </div>
+      <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #9b59b6;">${window.getEquipIconHtml(tome, 32)}</div>
+      <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
+        Focuses on <strong>INT & Spells</strong>. Unlocks Arcane Barrier and Tome Spell triggers.
+      </div>
+      <button class="btn-action" style="width:100%; font-size:10px; background:#9b59b6;" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(tome).replace(/"/g, "&quot;")})">CLAIM TOME</button>
+    </div>
+  `;
+
+  let medalHeaderSvg = window.getUiIconSvg("rareSpawn", 14);
+  overlay.innerHTML = `
+    <div style="text-align:center; color:white; animation: toastFadeIn 0.3s ease-out; max-width:580px; width:95%;">
+      <div style="font-size: 16px; font-weight: 950; color:#f1c40f; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 8px rgba(241,196,15,0.3); margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:6px;">
+        ${medalHeaderSvg} CHOOSE YOUR SUB-WEAPON (STAGE 20 REWARD) ${medalHeaderSvg}
+      </div>
+      <div style="font-size:10.5px; color:#aaa; margin-bottom:20px; white-space:normal; line-height:1.45;">
+        You have beaten the Stage 20 Warden! Select your offhand specialization. Hover or hold any card to inspect its full stats.
+      </div>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
+        ${shieldCardHtml}
+        ${daggerCardHtml}
+        ${tomeCardHtml}
+      </div>
+      <div style="font-size:9.5px; color:#888; font-family:monospace;">(Item will scale to Level 21 / StageScale 3 as a milestone bonus)</div>
+    </div>
+  `;
+
+  window.selectChoiceSubweapon = function (type) {
+    if (window.SoundManager) window.SoundManager.play("swing");
+  };
+
+  window.claimChoiceSubweapon = function (selectedItem) {
+    let maxBag = window.getMaxBagSlots();
+
+    // Auto-equips if the slot is currently empty, otherwise stores in Sack
+    if (!window.equippedSlots.subweapon) {
+      window.equippedSlots.subweapon = selectedItem;
+      selectedItem.isEquippedSlot = "subweapon";
+      window.pushHeaderToast(`Equipped ${selectedItem.name}!`, window.getTierColor(1));
+    } else {
+      window.inventory.EQUIP.push(selectedItem);
+      window.pushHeaderToast(`Stored ${selectedItem.name} in Sack!`, window.getTierColor(1));
+    }
+
+    window.pushLog(`<strong style="color:#f1c40f;">[MILESTONE] Stage 20 Beaten! Claimed Sub-weapon of choice: <span style="color:${window.getTierColor(1)};">${selectedItem.name}</span></strong>`, selectedItem.id);
+
+    overlay.remove();
+    if (window.SoundManager) window.SoundManager.play("revive");
+
+    window.setPauseState(false);
+    window.updateUI();
+    window.renderInventory();
+    window.saveGame();
+  };
+};
