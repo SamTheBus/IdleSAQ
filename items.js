@@ -736,13 +736,13 @@ window.renderForgeTab = function () {
         let inlineStyle = `style="${finalStyle} display: flex; align-items: center; padding: 6px 10px; margin-bottom: 6px; border-radius: 6px; cursor: pointer; transition: all 0.18s ease-in-out;"`;
 
         let eqBadge = item.isEquippedSlot
-                      ? `<span style="background:#c0392b; color:white; padding:1px 3px; border-radius:2px; font-size:8px; font-weight:bold; margin-right:4px;">EQ</span> `
-                      : "";
-                    let rarityLabel = isArt ? "UNIQUE" : `${item.statsRolled}★`;
-                    let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center; flex-shrink:0;">${window.getEquipIconHtml(item, 28)}</div>`;
+          ? `<span style="background:#c0392b; color:white; padding:1px 3px; border-radius:2px; font-size:8px; font-weight:bold; margin-right:4px;">EQ</span> `
+          : "";
+        let rarityLabel = isArt ? "UNIQUE" : `${item.statsRolled}★`;
+        let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center; flex-shrink:0;">${window.getEquipIconHtml(item, 28)}</div>`;
 
-                    // Configured onpointerdown as the primary selector to bypass mobile click-swallows
-                    return `<div class="bag-item-forge" ${inlineStyle} onpointerdown="window.selectForgeItem(${item.id}); window.showForgeTooltip(event, ${item.id});" onmouseenter="window.showForgeTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()" onclick="window.selectForgeItem(${item.id})">
+        // Configured onpointerdown as the primary selector to bypass mobile click-swallows
+        return `<div class="bag-item-forge" ${inlineStyle} onpointerdown="window.selectForgeItem(${item.id}); window.showForgeTooltip(event, ${item.id});" onmouseenter="window.showForgeTooltip(event, ${item.id})" onmouseleave="window.hideTooltip()" onclick="window.selectForgeItem(${item.id})">
                             ${iconBox}
                             <div style="flex:1; min-width:0; text-align:left;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; margin-bottom:1px;">
@@ -1186,8 +1186,9 @@ window.renderForgeTab = function () {
       );
       let ownedSigils = window.inventory.ETC["Overlord's Sigil"] || 0;
 
-      let goldColor =
-        window.playerStats.coins >= costGold ? "#f1c40f" : "#e74c3c";
+      let goldColor = BigNum.from(window.playerStats.coins).gte(costGold)
+        ? "#f1c40f"
+        : "#e74c3c";
       let sigilColor = ownedSigils >= 1 ? "#2ecc71" : "#e74c3c";
 
       if (!item.reforgedProperty) {
@@ -1206,28 +1207,28 @@ window.renderForgeTab = function () {
           let rProp = item.tempReforgeProp;
           let valText = item[rProp] > 0 ? `+${item[rProp]}` : `${item[rProp]}`;
           html += `<div style="margin-top:10px; background:#111; padding:8px; border-radius:4px; border:1px dashed #2ecc71; font-size:11px; margin-bottom:12px; text-align:center;">
-                              <span style="color:#2ecc71; font-weight:bold;">SELECTED TO RE-ROLL:</span><br>
-                              <strong>${window.getStatLabel(rProp)} (${valText})</strong><br>
-                              <span style="font-size:9px; color:#aaa;">(Clicking Execute Reforge will lock this as the only reforgible line!)</span>
-                          </div>`;
+                                      <span style="color:#2ecc71; font-weight:bold;">SELECTED TO RE-ROLL:</span><br>
+                                      <strong>${window.getStatLabel(rProp)} (${valText})</strong><br>
+                                      <span style="font-size:9px; color:#aaa;">(Clicking Execute Reforge will lock this as the only reforgible line!)</span>
+                                  </div>`;
 
           html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
           html += `<div style="font-size:11px; color:${sigilColor}; margin-bottom:12px;">• 1x Overlord's Sigil (Owned: ${ownedSigils.toLocaleString()})</div>`;
-          html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Execute Reforge</button>`;
+          html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${BigNum.from(window.playerStats.coins).gte(costGold) && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Execute Reforge</button>`;
         }
       } else {
         let rProp = item.reforgedProperty;
         let valText = item[rProp] > 0 ? `+${item[rProp]}` : `${item[rProp]}`;
 
         html += `<div style="background:#111; padding:8px; border-radius:4px; border:1px solid #9b59b6; font-size:11px; margin-bottom:12px; text-align:center;">
-                                    <span style="color:#9b59b6; font-weight:bold;">REFORGIBLE SLOT (LOCKED):</span><br>
-                                    <strong style="color:#2ecc71; font-size:12px;">${window.getStatLabel(rProp)} (${valText})</strong><br>
-                                    <span style="font-size:9px; color:#aaa;">(All other stat lines on this item are permanently locked!)</span>
-                                </div>`;
+                                            <span style="color:#9b59b6; font-weight:bold;">REFORGIBLE SLOT (LOCKED):</span><br>
+                                            <strong style="color:#2ecc71; font-size:12px;">${window.getStatLabel(rProp)} (${valText})</strong><br>
+                                            <span style="font-size:9px; color:#aaa;">(All other stat lines on this item are permanently locked!)</span>
+                                        </div>`;
 
         html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
         html += `<div style="font-size:11px; color:${sigilColor}; margin-bottom:12px;">• 1x Overlord's Sigil (Owned: ${ownedSigils.toLocaleString()})</div>`;
-        html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #111);" ${window.playerStats.coins >= costGold && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Re-Roll Locked Modifier</button>`;
+        html += `<button class="forge-anvil-button" style="width:100%; border-color:#9b59b6; background: linear-gradient(135deg, #4a154b, #111);" ${BigNum.from(window.playerStats.coins).gte(costGold) && ownedSigils >= 1 ? "" : "disabled"} onclick="window.reforgeItemStat()">Re-Roll Locked Modifier</button>`;
       }
     }
   } else if (window.forgeMode === "tier") {
@@ -1244,8 +1245,9 @@ window.renderForgeTab = function () {
       let playerShards = window.inventory.ETC["Eridium Shard"] || 0;
       let playerScraps = window.inventory.ETC[targetScrapName] || 0;
 
-      let goldColor =
-        window.playerStats.coins >= costGold ? "#f1c40f" : "#e74c3c";
+      let goldColor = BigNum.from(window.playerStats.coins).gte(costGold)
+        ? "#f1c40f"
+        : "#e74c3c";
       let shardColor = playerShards >= shardReq ? "#8e44ad" : "#e74c3c";
       let scrapColor = playerScraps >= scrapReqAmount ? "#3498db" : "#e74c3c";
 
@@ -1265,7 +1267,7 @@ window.renderForgeTab = function () {
       html += `<div style="font-size:11px; color:${shardColor}; margin-bottom:3px;">• ${shardReq}x Eridium Shard (Owned: ${playerShards})</div>`;
       html += `<div style="font-size:11px; color:${scrapColor}; margin-bottom:10px;">• ${scrapReqAmount}x ${targetScrapName} (Owned: ${playerScraps})</div>`;
       html += `<div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:15px;">✨ 100% Awakening Guaranteed</div>`;
-      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e67e22;" ${window.playerStats.coins >= costGold && playerShards >= shardReq && playerScraps >= scrapReqAmount ? "" : "disabled"} onclick="window.temperItem()">Awaken Rarity</button>`;
+      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e67e22;" ${BigNum.from(window.playerStats.coins).gte(costGold) && playerShards >= shardReq && playerScraps >= scrapReqAmount ? "" : "disabled"} onclick="window.temperItem()">Awaken Rarity</button>`;
 
       previewHtml = `
                     <div style="margin-top:15px; padding:12px; background:#111; border:1px solid #e67e22; border-radius:6px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
@@ -1313,57 +1315,59 @@ window.renderForgeTab = function () {
       html += `<div style="color:#7f8c8d; font-weight:bold; text-align:center; padding: 20px 0; font-size:11px;">THIS ITEM HAS NO ACTIVE ENCHANTMENTS</div>`;
     } else {
       let resetGoldCost = 1000 * item.stageLevel * (item.statsRolled || 1);
-      let goldColor =
-        window.playerStats.coins >= resetGoldCost ? "#f1c40f" : "#e74c3c";
+      let goldColor = BigNum.from(window.playerStats.coins).gte(resetGoldCost)
+        ? "#f1c40f"
+        : "#e74c3c";
 
       html += `<div style="font-size:11px; margin-bottom:10px; color:#aaa;">Active Enchantments to Purge: <span style="color:#9b59b6; font-weight:bold;">${currentEnchants}</span></div>`;
-      html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:15px;">• ${resetGoldCost.toLocaleString()} Gold Required (Owned: ${Math.floor(window.playerStats.coins).toLocaleString()})</div>`;
+      html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:15px;">• ${resetGoldCost.toLocaleString()} Gold Required (Owned: ${window.formatNumber(window.playerStats.coins)})</div>`;
       html += `<div style="font-size:11px; color:#e74c3c; font-weight:bold; margin-bottom:15px;">⚠️ Restores all enchanted parameters to their original pre-enchanted values. Material scraps are non-refundable.</div>`;
-      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e74c3c; background: linear-gradient(135deg, #c0392b, #111);" ${window.playerStats.coins >= resetGoldCost ? "" : "disabled"} onclick="window.resetItemEnchants()">Purge Enchantments</button>`;
+      html += `<button class="forge-anvil-button" style="width:100%; border-color:#e74c3c; background: linear-gradient(135deg, #c0392b, #111);" ${BigNum.from(window.playerStats.coins).gte(resetGoldCost) ? "" : "disabled"} onclick="window.resetItemEnchants()">Purge Enchantments</button>`;
     }
   } else if (window.forgeMode === "set") {
     let costGold = window.getSetRerollGoldCost(item);
     let soulCost = 25 + item.statsRolled * 25;
     let ownedSouls = window.inventory.ETC["Monster Soul"] || 0;
 
-    let goldColor =
-      window.playerStats.coins >= costGold ? "#f1c40f" : "#e74c3c";
+    let goldColor = BigNum.from(window.playerStats.coins).gte(costGold)
+      ? "#f1c40f"
+      : "#e74c3c";
     let soulsColor = ownedSouls >= soulCost ? "#bdc3c7" : "#e74c3c";
 
     html += `<div style="font-size:11px; margin-bottom:10px; color:#aaa;">Current Set Resonance: <span style="color:#2ecc71; font-weight:bold;">${item.setName || "None"}</span></div>`;
     html += `<div style="font-size:11px; color:${goldColor}; margin-bottom:3px;">• ${window.formatNumber(costGold)} Gold Required</div>`;
     html += `<div style="font-size:11px; color:${soulsColor}; margin-bottom:10px;">• ${soulCost}x Monster Soul (Owned: ${ownedSouls.toLocaleString()})</div>`;
     html += `<div style="font-size:11px; color:#2ecc71; font-weight:bold; margin-bottom:15px;">✨ Randomly rolls a different Set bonus!</div>`;
-    html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${window.playerStats.coins >= costGold && ownedSouls >= soulCost ? "" : "disabled"} onclick="window.rerollItemSet()">Re-Resonate Set</button>`;
+    html += `<button class="forge-anvil-button" style="width:100%; border-color:#2ecc71; background: linear-gradient(135deg, #1b2a1e, #111);" ${BigNum.from(window.playerStats.coins).gte(costGold) && ownedSouls >= soulCost ? "" : "disabled"} onclick="window.rerollItemSet()">Re-Resonate Set</button>`;
 
     previewHtml = `
-                    <div style="margin-top:15px; padding:12px; background:#111; border:1px dashed #2ecc71; border-radius:6px;">
-                        <div style="color:#2ecc71; font-weight:bold; font-size:11px; margin-bottom:6px; text-transform:uppercase;">✨ Set re-resonance Pool:</div>
-                        <p style="font-size:10px; color:#aaa; margin-bottom:8px; line-height:1.4;">
-                            Your item will abandon its current set affiliation and attune to one of these legendary set matrices at random:
-                        </p>
-                        <div style="font-size:9.5px; color:#fff; display:grid; grid-template-columns: 1fr 1fr; gap:4px; font-family:monospace; background:rgba(0,0,0,0.3); padding:8px; border-radius:4px;">
-                            <div>🛡️ Vanguard (+Atk)</div>
-                            <div>💖 Colossus (+HP)</div>
-                            <div>🛡️ Bastion (+Def)</div>
-                            <div>👟 Windrunner (+Spd)</div>
-                            <div>✨ Wraith (+Crit%)</div>
-                            <div>💥 Reaver (+CritDmg)</div>
-                            <div>🧱 Dreadnought (+Block)</div>
-                            <div>⚡ Duellist (+Parry)</div>
-                            <div>🧠 Scholar (+INT)</div>
-                            <div>💪 Berserker (+STR)</div>
-                            <div>🎯 Scout (+DEX)</div>
-                            <div>🍀 Fortune (+Gold/Drop)</div>
-                            <div>🔮 Mystic (+Qly/INT)</div>
-                            <div>🧪 Alchemist (+HP/Atk)</div>
-                            <div>👑 Midas' Legacy (+Gold)</div>
-                            <div>🧪 Biohazard (Poison)</div>
-                            <div>⚔️ Warlord (Shatter)</div>
-                            <div>🌌 Void-Touched (Frenzy)</div>
+                        <div style="margin-top:15px; padding:12px; background:#111; border:1px dashed #2ecc71; border-radius:6px;">
+                            <div style="color:#2ecc71; font-weight:bold; font-size:11px; margin-bottom:6px; text-transform:uppercase;">✨ Set re-resonance Pool:</div>
+                            <p style="font-size:10px; color:#aaa; margin-bottom:8px; line-height:1.4;">
+                                Your item will abandon its current set affiliation and attune to one of these legendary set matrices at random:
+                            </p>
+                            <div style="font-size:9.5px; color:#fff; display:grid; grid-template-columns: 1fr 1fr; gap:4px; font-family:monospace; background:rgba(0,0,0,0.3); padding:8px; border-radius:4px; max-height:110px; overflow-y:auto;">
+                                <div>🛡️ Vanguard (+Atk)</div>
+                                <div>💖 Colossus (+HP)</div>
+                                <div>🛡️ Bastion (+Def)</div>
+                                <div>👟 Windrunner (+Spd)</div>
+                                <div>✨ Wraith (+Crit%)</div>
+                                <div>💥 Reaver (+CritDmg)</div>
+                                <div>🧱 Dreadnought (+Block)</div>
+                                <div>⚡ Duellist (+Parry)</div>
+                                <div>🧠 Scholar (+INT)</div>
+                                <div>💪 Berserker (+STR)</div>
+                                <div>🎯 Scout (+DEX)</div>
+                                <div>🍀 Fortune (+Gold/Drop)</div>
+                                <div>🔮 Mystic (+Qly/INT)</div>
+                                <div>🧪 Alchemist (+HP/Atk)</div>
+                                <div>👑 Midas' Legacy (+Gold)</div>
+                                <div>🧪 Biohazard (Poison)</div>
+                                <div>⚔️ Warlord (Shatter)</div>
+                                <div>🌌 Void-Touched (Frenzy)</div>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
   }
 
   if (
@@ -1593,25 +1597,25 @@ Object.assign(window.ItemFactory, {
         );
         item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
       } else if (chosenType === "subweapon") {
-              if (item.subType === "shield") {
-                item.baseDef = Math.ceil(
-                  1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-                );
-                item.baseBlock = 0.05; // Standard base 5% Block Rate on ALL shields
-              } else if (item.subType === "dagger") {
-                item.baseAtk = Math.ceil(
-                  0.8 * expScale * prestigeMult * baseRarityMult,
-                );
-                item.baseParry = 0.05; // Standard base 5% Parry Rate on ALL daggers
-              } else if (item.subType === "tome") {
-                item.baseInt = Math.ceil(
-                  1.5 * expScale * prestigeMult * baseRarityMult,
-                );
-                item.baseAtk = Math.ceil(
-                  0.4 * expScale * prestigeMult * baseRarityMult,
-                );
-              }
-            }
+        if (item.subType === "shield") {
+          item.baseDef = Math.ceil(
+            1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+          );
+          item.baseBlock = 0.05; // Standard base 5% Block Rate on ALL shields
+        } else if (item.subType === "dagger") {
+          item.baseAtk = Math.ceil(
+            0.8 * expScale * prestigeMult * baseRarityMult,
+          );
+          item.baseParry = 0.05; // Standard base 5% Parry Rate on ALL daggers
+        } else if (item.subType === "tome") {
+          item.baseInt = Math.ceil(
+            1.5 * expScale * prestigeMult * baseRarityMult,
+          );
+          item.baseAtk = Math.ceil(
+            0.4 * expScale * prestigeMult * baseRarityMult,
+          );
+        }
+      }
     }
 
     if (chosenType === "artifact") {
@@ -1992,17 +1996,17 @@ Object.assign(window.ItemFactory, {
 
     if (!item.setName && stars > 0) {
       const nomenclature = {
-        bonusAtk: "Vanguard",
-        bonusMaxHp: "Colossus",
-        bonusDef: "Bastion",
-        bonusMoveSpeed: "Windrunner",
-        bonusCritChance: "Wraith",
-        bonusCritDamage: "Reaver",
-        bonusBlock: "Dreadnought",
-        bonusParry: "Duellist",
-        bonusStr: "Berserker",
-        bonusDex: "Scout",
-        bonusInt: "Scholar",
+        bonusAtk: "Fierce",
+        bonusMaxHp: "Grizzled",
+        bonusDef: "Hardened",
+        bonusMoveSpeed: "Fleet",
+        bonusCritChance: "Precise",
+        bonusCritDamage: "Savage",
+        bonusBlock: "Stalwart",
+        bonusParry: "Nimble",
+        bonusStr: "Heavy",
+        bonusDex: "Swift",
+        bonusInt: "Erudite",
       };
 
       let highestKey = null;
@@ -2038,7 +2042,6 @@ window.createItemObject = (
 window.buildProceduralName = (item) =>
   window.ItemFactory.buildProceduralName(item);
 
-// --- STAT RANGES & PREVIEWS ---
 // --- STAT RANGES & PREVIEWS ---
 
 // Encapsulate getStatBaseRange directly inside window.ItemFactory
@@ -2430,16 +2433,16 @@ Object.assign(window.ItemFactory, {
         !item.isUniqueChronicle
       ) {
         if (item.subType === "shield") {
-                      item.baseDef = Math.ceil(
-                        1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-                      );
-                      item.baseBlock = 0.05; // Force base Block Rate on recalculation
-                    } else if (item.subType === "dagger") {
-                      item.baseAtk = Math.ceil(
-                        0.8 * expScale * prestigeMult * baseRarityMult,
-                      );
-                      item.baseParry = 0.05; // Force base Parry Rate on recalculation
-                    } else if (item.subType === "tome") {
+          item.baseDef = Math.ceil(
+            1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+          );
+          item.baseBlock = 0.05; // Force base Block Rate on recalculation
+        } else if (item.subType === "dagger") {
+          item.baseAtk = Math.ceil(
+            0.8 * expScale * prestigeMult * baseRarityMult,
+          );
+          item.baseParry = 0.05; // Force base Parry Rate on recalculation
+        } else if (item.subType === "tome") {
           item.baseInt = Math.ceil(
             1.5 * expScale * prestigeMult * baseRarityMult,
           );
@@ -2667,39 +2670,39 @@ window.recalculateItemStats = function (item) {
   }
 
   if (
-          item.type === "subweapon" &&
-          !item.isUniqueAegis &&
-          !item.isUniqueWatch &&
-          !item.isUniqueChronicle
-        ) {
-          let stars = item.statsRolled || 0;
-          let baseRarityMult = 1.0 + stars * 0.3;
-          let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
-          let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-          let repScale = Math.pow(repGrowth, repStage);
-          let expScale = repScale;
-          let hpDefExpScale = repScale;
-          let prestigeMult = 1.0;
+    item.type === "subweapon" &&
+    !item.isUniqueAegis &&
+    !item.isUniqueWatch &&
+    !item.isUniqueChronicle
+  ) {
+    let stars = item.statsRolled || 0;
+    let baseRarityMult = 1.0 + stars * 0.3;
+    let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
+    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+    let repScale = Math.pow(repGrowth, repStage);
+    let expScale = repScale;
+    let hpDefExpScale = repScale;
+    let prestigeMult = 1.0;
 
-          if (item.subType === "shield") {
-            item.rawBaseDef = Math.ceil(
-              1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-            );
-            item.rawBaseBlock = 0.05; // Self-heal & lock base Block Rate for all shields
-          } else if (item.subType === "dagger") {
-            item.rawBaseAtk = Math.ceil(
-              0.8 * expScale * prestigeMult * baseRarityMult,
-            );
-            item.rawBaseParry = 0.05; // Self-heal & lock base Parry Rate for all daggers
-          } else if (item.subType === "tome") {
-            item.rawBaseInt = Math.ceil(
-              1.5 * expScale * prestigeMult * baseRarityMult,
-            );
-            item.rawBaseAtk = Math.ceil(
-              0.4 * expScale * prestigeMult * baseRarityMult,
-            );
-          }
-        }
+    if (item.subType === "shield") {
+      item.rawBaseDef = Math.ceil(
+        1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+      );
+      item.rawBaseBlock = 0.05; // Self-heal & lock base Block Rate for all shields
+    } else if (item.subType === "dagger") {
+      item.rawBaseAtk = Math.ceil(
+        0.8 * expScale * prestigeMult * baseRarityMult,
+      );
+      item.rawBaseParry = 0.05; // Self-heal & lock base Parry Rate for all daggers
+    } else if (item.subType === "tome") {
+      item.rawBaseInt = Math.ceil(
+        1.5 * expScale * prestigeMult * baseRarityMult,
+      );
+      item.rawBaseAtk = Math.ceil(
+        0.4 * expScale * prestigeMult * baseRarityMult,
+      );
+    }
+  }
 
   // Restore pristine unmutated baseline stats to ensure clean idempotency
   item.baseAtk = item.rawBaseAtk;

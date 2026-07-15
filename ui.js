@@ -400,15 +400,15 @@ window.getUseIconHtml = function (key, size = 32) {
   let viewBox = isHighFidelity ? "0 0 64 64" : "0 0 32 32";
 
   // 1. Handle special unique assets
-    if (key === "SP Reset Scroll") {
-      bg = "rgba(155, 89, 182, 0.25)";
-      border = "#9b59b6";
-      innerHtml = window.AssetCatalog.consumables.scroll(uid, "#9b59b6");
-    } else if (key === "PP Reset Scroll") {
-      bg = "rgba(230, 126, 34, 0.25)";
-      border = "#e67e22";
-      innerHtml = window.AssetCatalog.consumables.scroll(uid, "#e67e22");
-    } else if (key === "Cavern Sigil Sack") {
+  if (key === "SP Reset Scroll") {
+    bg = "rgba(155, 89, 182, 0.25)";
+    border = "#9b59b6";
+    innerHtml = window.AssetCatalog.consumables.scroll(uid, "#9b59b6");
+  } else if (key === "PP Reset Scroll") {
+    bg = "rgba(230, 126, 34, 0.25)";
+    border = "#e67e22";
+    innerHtml = window.AssetCatalog.consumables.scroll(uid, "#e67e22");
+  } else if (key === "Cavern Sigil Sack") {
     bg = "rgba(155, 89, 182, 0.25)";
     border = "#9b59b6";
     innerHtml = window.AssetCatalog.consumables.cavern_sigil_sack(uid);
@@ -3327,18 +3327,20 @@ window.renderGoldUpgrades = function () {
 
   el.innerHTML = upgrades
     .map((u) => {
-      let canAfford = p.coins >= u.cost;
+      let canAfford = BigNum.from(p.coins).gte(u.cost);
       let costColor = canAfford ? "#2ecc71" : "#e74c3c";
 
       let btnHtml = "";
       if (canAfford) {
         btnHtml = `
-                    <button class="btn-action"
-                            style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
-                            onclick="window.buyGoldUpgrade('${u.id}')">
-                        Upgrade Sink
-                    </button>
-                  `;
+                      <button class="btn-action"
+                              style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
+                              onpointerdown="event.stopPropagation();"
+                              ontouchstart="event.stopPropagation();"
+                              onclick="event.stopPropagation(); window.buyGoldUpgrade('${u.id}')">
+                          Upgrade Sink
+                      </button>
+                    `;
       } else {
         btnHtml = `
         <button class="btn-action"
@@ -3450,8 +3452,9 @@ window.renderMysticalShop = function () {
         displayCost = Math.ceil(
           item.cost * Math.pow(1.08, window.playerStats.stage),
         );
-        costColor =
-          window.playerStats.coins >= displayCost ? "#f1c40f" : "#e74c3c";
+        costColor = BigNum.from(window.playerStats.coins).gte(displayCost)
+          ? "#f1c40f"
+          : "#e74c3c";
       }
 
       let iconHtml =
@@ -3465,22 +3468,22 @@ window.renderMysticalShop = function () {
       let btnStyle = `background: ${item.color}; color: ${item.color === "#f1c40f" ? "#111" : "#fff"}; font-weight: bold;`;
 
       return `
-      <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(180deg, #161921 0%, #0d0f14 100%); box-shadow: 0 4px 15px rgba(0,0,0,0.85), inset 0 0 10px rgba(${window.hexToRgbValues ? window.hexToRgbValues(item.color) : "255,255,255"}, 0.05); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;" onmouseenter="window.showMysticalShopTooltip(event, ${index})" ontouchstart="window.showMysticalShopTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
-          <div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                                    ${iconHtml}
-                                    <strong style="color:${item.color}; font-size:12.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px ${item.color}35;">${item.name}</strong>
+          <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(180deg, #161921 0%, #0d0f14 100%); box-shadow: 0 4px 15px rgba(0,0,0,0.85), inset 0 0 10px rgba(${window.hexToRgbValues ? window.hexToRgbValues(item.color) : "255,255,255"}, 0.05); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;" onmouseenter="window.showMysticalShopTooltip(event, ${index})" ontouchstart="window.showMysticalShopTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
+              <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                    <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                                        ${iconHtml}
+                                        <strong style="color:${item.color}; font-size:12.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px ${item.color}35;">${item.name}</strong>
+                                    </div>
                                 </div>
+                                <div style="font-size:10px; color:#94a3b8; margin-bottom:10px; line-height:1.4; white-space:normal;">${item.desc}</div>
                             </div>
-                            <div style="font-size:10px; color:#94a3b8; margin-bottom:10px; line-height:1.4; white-space:normal;">${item.desc}</div>
-                        </div>
-                        <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
-                                     <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(displayCost)} ${currencyLabel}</span>
-                                     <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px; box-shadow:0 0 6px ${item.color}33;" onclick="window.buyMysticalItem(${index})">Purchase</button>
-                                 </div>
-      </div>
-    `;
+                            <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+                                         <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(displayCost)} ${currencyLabel}</span>
+                                         <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px; box-shadow:0 0 6px ${item.color}33;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMysticalItem(${index})">Purchase</button>
+                                     </div>
+          </div>
+        `;
     }).join("") +
     `</div></div>`;
 
@@ -3530,9 +3533,9 @@ window.renderMysticalShop = function () {
            </div>
 
            <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-                                     <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${recipe.amount}x Ingredients</span>
-                                     <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.transmutePotion(${index})">Transmute</button>
-                                 </div>
+                                                <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${recipe.amount}x Ingredients</span>
+                                                <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px;" ${canAfford ? "" : "disabled"} onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.transmutePotion(${index})">Transmute</button>
+                                            </div>
        </div>
      `;
     }).join("") +
@@ -3578,8 +3581,8 @@ window.renderAstralShop = function () {
           </div>
 
           <div style="position:relative; z-index:2; border-top: 1px dashed rgba(255,255,255,0.08); padding-top:8px; margin-top:6px;">
-                                  <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.buyAstralShopItem(${index})">Infuse Shards</button>
-                              </div>
+                                            <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyAstralShopItem(${index})">Infuse Shards</button>
+                                        </div>
       </div>
     `;
   });
@@ -4269,7 +4272,7 @@ window.showGoldUpgradeTooltip = function (e, upId) {
 
   let goldStr = window.formatNumber(p.coins);
   let costStr = window.formatNumber(up.cost);
-  let goldColor = p.coins >= up.cost ? "#2ecc71" : "#e74c3c";
+  let goldColor = BigNum.from(p.coins).gte(up.cost) ? "#2ecc71" : "#e74c3c";
 
   let tt = document.getElementById("game-tooltip");
   tt.innerHTML = `<div style="padding: 10px; width: 230px; box-sizing: border-box;">
@@ -4497,47 +4500,47 @@ window.renderPaperDoll = function () {
     }
 
     if (item) {
-          let isArt = slot.startsWith("art");
-          el.className = isArt
-            ? "slots-card artifact-slot equipped"
-            : "slots-card equipped";
-          let color = window.getTierColor(item.statsRolled);
-          el.style.borderColor = color;
+      let isArt = slot.startsWith("art");
+      el.className = isArt
+        ? "slots-card artifact-slot equipped"
+        : "slots-card equipped";
+      let color = window.getTierColor(item.statsRolled);
+      el.style.borderColor = color;
 
-          let uniqueStyle = window.getUniqueItemStyle(item);
-          if (uniqueStyle) {
-            el.style.background = uniqueStyle.bg;
-            el.style.borderColor = uniqueStyle.border;
-            el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
-          } else {
-            el.style.background = "";
-            el.style.boxShadow = "";
-          }
+      let uniqueStyle = window.getUniqueItemStyle(item);
+      if (uniqueStyle) {
+        el.style.background = uniqueStyle.bg;
+        el.style.borderColor = uniqueStyle.border;
+        el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
+      } else {
+        el.style.background = "";
+        el.style.boxShadow = "";
+      }
 
-          let tierLabel =
-            item.statsRolled === "UNIQUE"
-              ? "UNIQUE"
-              : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
-          let temperTag =
-            item.temperLevel > 0
-              ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
-              : "";
-          let lockTag = item.locked ? " 🔒" : "";
-          let isUnique =
-            item.isUniqueStaff ||
-            item.isUniqueSword ||
-            item.isUniqueSingularity ||
-            item.isUniqueMaelstrom ||
-            item.isUniqueAegis ||
-            item.isUniqueWatch ||
-            item.isUniqueChronicle ||
-            item.isUniqueWarpCore ||
-            item.isUniqueTempest;
+      let tierLabel =
+        item.statsRolled === "UNIQUE"
+          ? "UNIQUE"
+          : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
+      let temperTag =
+        item.temperLevel > 0
+          ? ` <span style="color:#2ecc71;">[+${item.temperLevel}]</span>`
+          : "";
+      let lockTag = item.locked ? " 🔒" : "";
+      let isUnique =
+        item.isUniqueStaff ||
+        item.isUniqueSword ||
+        item.isUniqueSingularity ||
+        item.isUniqueMaelstrom ||
+        item.isUniqueAegis ||
+        item.isUniqueWatch ||
+        item.isUniqueChronicle ||
+        item.isUniqueWarpCore ||
+        item.isUniqueTempest;
 
-          let iconBox = `<div style="text-align:center; margin-bottom:4px;">${window.getEquipIconHtml(item, 32)}</div>`;
-          if (isArt) {
-            el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="window.unequipItem('${slot}')">Remove</button>`;
-          } else {
+      let iconBox = `<div style="text-align:center; margin-bottom:4px;">${window.getEquipIconHtml(item, 32)}</div>`;
+      if (isArt) {
+        el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px; color:#1abc9c;">${item.name}${lockTag}</strong><br><span style="font-size:8px;color:#aaa;line-height:1;">${item.desc}</span><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="window.unequipItem('${slot}')">Remove</button>`;
+      } else {
         let s = [];
         let sPlain = [];
         if (item.atk > 0) {
@@ -4628,8 +4631,8 @@ window.renderPaperDoll = function () {
           }
         }
         el.innerHTML = `${lvlBadge}${iconBox}<strong style="font-size:10px;">${item.name}${temperTag}${lockTag}</strong><div style="font-size:8px; color:${color}; font-weight:bold; margin:2px 0;">${tierLabel}</div>${setLabelHtml}<div style="font-size:9px;color:#bbb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${sPlain.join(", ")}">${s.join(" ")}</div><button class="btn-action un" style="margin-top:2px;padding:1px 3px;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="window.unequipItem('${slot}')">Remove</button>`;
-              }
-            } else {
+      }
+    } else {
       el.className = "slots-card";
       let displaySlotName = slot.toUpperCase();
       if (slot === "art1") displaySlotName = "ARTIFACT 1";
@@ -9095,48 +9098,48 @@ window.showMissionShopItemTooltip = function (e, itemName) {
   let normalizedName = itemName.replace(/['\\’]/g, "").trim();
 
   if (normalizedName === "Eridium Shard") {
-      desc =
-        "A glowing, alien fragment used in the Forge to Tier Up an item's Star Rarity.";
-      color = "#8e44ad";
-      cost = 3;
-    } else if (normalizedName === "Ancient Core") {
-      desc = "Sacrifice at the Altar to summon a Guardian.";
-      color = "#e74c3c";
-      cost = 3;
-    } else if (normalizedName === "Overlords Sigil") {
-      desc = "Spent at the Forge to lock and re-roll equipment modifiers.";
-      color = "#1abc9c";
-      cost = 3;
-    } else if (normalizedName === "Gacha Key") {
-      desc =
-        "Used at the Vending Machine to dispense a guaranteed random equipment piece.";
-      color = "#f1c40f";
-      cost = 27;
-    } else if (normalizedName === "Catalyst Core") {
-      desc = "Spent at the Forge to temper Unique Artifacts.";
-      color = "#2ecc71";
-      cost = 3;
-    } else if (normalizedName === "Astral Essence") {
-      desc =
-        "A pulsing, cosmic residue extracted by salvaging Unique Artifacts. Spent at the Forge to imbed powerful enchantments.";
-      color = "#9b59b6";
-      cost = 27;
-    } else if (normalizedName === "Double XP Elixir") {
-      desc =
-        "Doubles all acquired experience gains (+100% EXP) for 5 minutes (scales with INT).";
-      color = "#a855f7";
-      cost = 10;
-    } else if (normalizedName === "Double Drop Elixir") {
-      desc =
-        "Doubles current drop rate multiplier (+100%) for 5 minutes (scales with INT).";
-      color = "#22c55e";
-      cost = 12;
-    } else if (normalizedName === "Drop Quality Elixir") {
-      desc =
-        "Boosts item drop quality checks by +50% for 5 minutes (scales with INT).";
-      color = "#3b82f6";
-      cost = 15;
-    }
+    desc =
+      "A glowing, alien fragment used in the Forge to Tier Up an item's Star Rarity.";
+    color = "#8e44ad";
+    cost = 3;
+  } else if (normalizedName === "Ancient Core") {
+    desc = "Sacrifice at the Altar to summon a Guardian.";
+    color = "#e74c3c";
+    cost = 3;
+  } else if (normalizedName === "Overlords Sigil") {
+    desc = "Spent at the Forge to lock and re-roll equipment modifiers.";
+    color = "#1abc9c";
+    cost = 3;
+  } else if (normalizedName === "Gacha Key") {
+    desc =
+      "Used at the Vending Machine to dispense a guaranteed random equipment piece.";
+    color = "#f1c40f";
+    cost = 27;
+  } else if (normalizedName === "Catalyst Core") {
+    desc = "Spent at the Forge to temper Unique Artifacts.";
+    color = "#2ecc71";
+    cost = 3;
+  } else if (normalizedName === "Astral Essence") {
+    desc =
+      "A pulsing, cosmic residue extracted by salvaging Unique Artifacts. Spent at the Forge to imbed powerful enchantments.";
+    color = "#9b59b6";
+    cost = 27;
+  } else if (normalizedName === "Double XP Elixir") {
+    desc =
+      "Doubles all acquired experience gains (+100% EXP) for 5 minutes (scales with INT).";
+    color = "#a855f7";
+    cost = 10;
+  } else if (normalizedName === "Double Drop Elixir") {
+    desc =
+      "Doubles current drop rate multiplier (+100%) for 5 minutes (scales with INT).";
+    color = "#22c55e";
+    cost = 12;
+  } else if (normalizedName === "Drop Quality Elixir") {
+    desc =
+      "Boosts item drop quality checks by +50% for 5 minutes (scales with INT).";
+    color = "#3b82f6";
+    cost = 15;
+  }
 
   // Preserve correct format strings for UI outputs
   let finalName = itemName;
@@ -9648,19 +9651,19 @@ window.renderMissionsWindow = function () {
     let constitutionSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
 
     let bagBtnHtml = canAffordBag
-      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('bag')">Upgrade (${costBag} QP)</button>`
+      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('bag')">Upgrade (${costBag} QP)</button>`
       : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (${costBag})</button>`;
 
     let goldBtnHtml = canAffordGold
-      ? `<button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('gold')">Upgrade (5 QP)</button>`
+      ? `<button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('gold')">Upgrade (5 QP)</button>`
       : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
 
     let atkBtnHtml = canAffordAtk
-      ? `<button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('atk')">Upgrade (5 QP)</button>`
+      ? `<button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('atk')">Upgrade (5 QP)</button>`
       : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
 
     let hpBtnHtml = canAffordHp
-      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onclick="window.buyMissionUpgrade('hp')">Upgrade (5 QP)</button>`
+      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('hp')">Upgrade (5 QP)</button>`
       : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
 
     let costColorBag = canAffordBag ? "#2ecc71" : "#e74c3c";
@@ -9669,62 +9672,62 @@ window.renderMissionsWindow = function () {
     let costColorHp = canAffordHp ? "#2ecc71" : "#e74c3c";
 
     let reagents = [
-          {
-            key: "Eridium Shard",
-            cost: 3,
-            color: "#8e44ad",
-            desc: "Awaken equipment star ratings (rarities)",
-          },
-          {
-            key: "Ancient Core",
-            cost: 3,
-            color: "#e74c3c",
-            desc: "Activate the Altar of Rifts",
-          },
-          {
-            key: "Overlord's Sigil",
-            queryKey: "Overlords Sigil",
-            cost: 3,
-            color: "#1abc9c",
-            desc: "Material required for unique artifact tempering",
-          },
-          {
-            key: "Gacha Key",
-            cost: 27,
-            color: "#f1c40f",
-            desc: "Roll standard vending crate",
-          },
-          {
-            key: "Catalyst Core",
-            cost: 3,
-            color: "#2ecc71",
-            desc: "Lock & re-roll item properties",
-          },
-          {
-            key: "Astral Essence",
-            cost: 27,
-            color: "#9b59b6",
-            desc: "Infuse powerful gear enchantments",
-          },
-          {
-            key: "Double XP Elixir",
-            cost: 10,
-            color: "#a855f7",
-            desc: "Doubles monster EXP gains (+100% EXP)",
-          },
-          {
-            key: "Double Drop Elixir",
-            cost: 12,
-            color: "#22c55e",
-            desc: "Doubles global drop rate multiplier (+100%)",
-          },
-          {
-            key: "Drop Quality Elixir",
-            cost: 15,
-            color: "#3b82f6",
-            desc: "Boosts drop quality checks (+50% Qly)",
-          },
-        ];
+      {
+        key: "Eridium Shard",
+        cost: 3,
+        color: "#8e44ad",
+        desc: "Awaken equipment star ratings (rarities)",
+      },
+      {
+        key: "Ancient Core",
+        cost: 3,
+        color: "#e74c3c",
+        desc: "Activate the Altar of Rifts",
+      },
+      {
+        key: "Overlord's Sigil",
+        queryKey: "Overlords Sigil",
+        cost: 3,
+        color: "#1abc9c",
+        desc: "Material required for unique artifact tempering",
+      },
+      {
+        key: "Gacha Key",
+        cost: 27,
+        color: "#f1c40f",
+        desc: "Roll standard vending crate",
+      },
+      {
+        key: "Catalyst Core",
+        cost: 3,
+        color: "#2ecc71",
+        desc: "Lock & re-roll item properties",
+      },
+      {
+        key: "Astral Essence",
+        cost: 27,
+        color: "#9b59b6",
+        desc: "Infuse powerful gear enchantments",
+      },
+      {
+        key: "Double XP Elixir",
+        cost: 10,
+        color: "#a855f7",
+        desc: "Doubles monster EXP gains (+100% EXP)",
+      },
+      {
+        key: "Double Drop Elixir",
+        cost: 12,
+        color: "#22c55e",
+        desc: "Doubles global drop rate multiplier (+100%)",
+      },
+      {
+        key: "Drop Quality Elixir",
+        cost: 15,
+        color: "#3b82f6",
+        desc: "Boosts drop quality checks (+50% Qly)",
+      },
+    ];
 
     let reagentsHtml = reagents
       .map((r) => {
@@ -9744,25 +9747,28 @@ window.renderMissionsWindow = function () {
           window.inventory.ETC[r.key] || window.inventory.USE[r.key] || 0;
 
         return `
-        <div class="merchant-shelf-row" style="display:flex; flex-direction:column; justify-content:space-between; border-radius:6px; padding:10px; gap:8px;"
-             onmouseenter="window.showMissionShopItemTooltip(event, '${finalKey}')"
-             ontouchstart="window.showMissionShopItemTooltip(event, '${finalKey}')"
-             onmouseleave="window.hideTooltip()">
-            <div style="display:flex; align-items:center; gap:8px; text-align:left; position:relative; z-index:2;">
-                <div style="flex-shrink:0;">${iconHtml}</div>
-                <div style="min-width:0; flex:1;">
-                    <strong style="color:${r.color}; font-size:11.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px ${r.color}35;">${r.key}</strong>
-                    <span style="font-size:9px; color:#aaa; font-family:monospace;">Owned: ${ownedCount}</span>
+            <div class="merchant-shelf-row" style="display:flex; flex-direction:column; justify-content:space-between; border-radius:6px; padding:10px; gap:8px;"
+                 onmouseenter="window.showMissionShopItemTooltip(event, '${finalKey}')"
+                 ontouchstart="window.showMissionShopItemTooltip(event, '${finalKey}')"
+                 onmouseleave="window.hideTooltip()">
+                <div style="display:flex; align-items:center; gap:8px; text-align:left; position:relative; z-index:2;">
+                    <div style="flex-shrink:0;">${iconHtml}</div>
+                    <div style="min-width:0; flex:1;">
+                        <strong style="color:${r.color}; font-size:11.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px ${r.color}35;">${r.key}</strong>
+                        <span style="font-size:9px; color:#aaa; font-family:monospace;">Owned: ${ownedCount}</span>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:4; border-top:1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:2px;">
+                                <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${r.cost} QP</span>
+                    <button class="btn-action" style="font-size:9.5px; padding:4px 8px; border-radius:4px; ${isAfford ? "background:" + r.color + "; color:" + (r.color === "#f1c40f" ? "#111" : "#fff") + "; border: 1px solid #fff;" : "background:#222; color:#555; border:1px solid #333; cursor:not-allowed;"}" ${isAfford ? "" : "disabled"}
+                            onpointerdown="event.stopPropagation();"
+                            ontouchstart="event.stopPropagation();"
+                            onclick="event.stopPropagation(); window.buyMissionItem('${finalKey}', ${r.cost})">
+                        Buy
+                    </button>
                 </div>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:4; border-top:1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:2px;">
-                            <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${r.cost} QP</span>
-                <button class="btn-action" style="font-size:9.5px; padding:4px 8px; border-radius:4px; ${isAfford ? "background:" + r.color + "; color:" + (r.color === "#f1c40f" ? "#111" : "#fff") + "; border: 1px solid #fff;" : "background:#222; color:#555; border:1px solid #333; cursor:not-allowed;"}" ${isAfford ? "" : "disabled"} onclick="window.buyMissionItem('${finalKey}', ${r.cost})">
-                    Buy
-                </button>
-            </div>
-        </div>
-      `;
+          `;
       })
       .join("");
 
@@ -11464,7 +11470,13 @@ window.renderBoutiqueSkins = function () {
       selItem.currency === "Luminous Soul"
         ? window.inventory.ETC["Luminous Soul"] || 0
         : p.coins;
-    let canAfford = owned >= selItem.cost;
+
+    let canAfford = false;
+    if (selItem.currency === "Luminous Soul") {
+      canAfford = owned >= selItem.cost;
+    } else {
+      canAfford = BigNum.from(owned).gte(selItem.cost);
+    }
 
     showcasePrice.innerText = `${selItem.cost} ${currencyLabel}`;
     showcasePrice.style.color = canAfford ? "#f1c40f" : "#e74c3c";
@@ -13446,14 +13458,14 @@ window.executeCavernsDescent = function () {
   );
 
   window.playerStats.isDungeonMode = true;
-    window.playerStats.isCrucibleMode = false;
-    window.playerStats.currentDungeon = mode;
-    window.playerStats.currentDungeonStage[mode] = checkpoint;
-    window.playerStats.dungeonWave = 1;
-    window.playerStats.killCount = 0;
-    window.playerStats.targetsRequired = 3; // Reduced from 5 to 3
-    window.playerStats.isBossMode = false;
-    window.playerStats.isUberBoss = false;
+  window.playerStats.isCrucibleMode = false;
+  window.playerStats.currentDungeon = mode;
+  window.playerStats.currentDungeonStage[mode] = checkpoint;
+  window.playerStats.dungeonWave = 1;
+  window.playerStats.killCount = 0;
+  window.playerStats.targetsRequired = 3; // Reduced from 5 to 3
+  window.playerStats.isBossMode = false;
+  window.playerStats.isUberBoss = false;
   window.mob = null;
 
   let p = window.resolvePlayerStats();
@@ -14794,128 +14806,128 @@ window.openSubweaponOfChoiceModal = function () {
 
   // Generate three specialized sub-weapons at level 11 (StageScale 2) rolling their respective stats
   let shield = {
-      id: window.idCounter++,
-      name: `Kite Shield of Might (Lv. 11)`,
-      type: "subweapon",
-      subType: "shield",
-      statsRolled: 1, // Rare (1★)
-      temperLevel: 0,
-      stageLevel: 2, // Map precisely to StageScale 2 (Levels 11-20)
-      atk: 0,
-      maxHp: 0,
-      def: 0,
-      moveSpeed: 0,
-      critChance: 0,
-      critDamage: 0,
-      block: 0,
-      parry: 0,
-      baseAtk: 0,
-      baseMaxHp: 0,
-      baseDef: 6,
-      baseMoveSpeed: 0,
-      baseBlock: 0.05,
-      baseParry: 0,
-      baseInt: 0,
-      bonusAtk: 0,
-      bonusMaxHp: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
-      bonusDef: 4,   // Affix 1
-      bonusMoveSpeed: 0,
-      bonusCritChance: 0,
-      bonusCritDamage: 0,
-      bonusBlock: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
-      bonusParry: 0,
-      bonusActiveSpeed: 0,
-      bonusIdleSpeed: 0,
-      bonusStr: 4,   // Affix 2
-      bonusDex: 0,
-      bonusInt: 0,
-      noun: "Kite Shield",
-      setName: "Vanguard",
-    };
+    id: window.idCounter++,
+    name: `Kite Shield of Might (Lv. 11)`,
+    type: "subweapon",
+    subType: "shield",
+    statsRolled: 1, // Rare (1★)
+    temperLevel: 0,
+    stageLevel: 2, // Map precisely to StageScale 2 (Levels 11-20)
+    atk: 0,
+    maxHp: 0,
+    def: 0,
+    moveSpeed: 0,
+    critChance: 0,
+    critDamage: 0,
+    block: 0,
+    parry: 0,
+    baseAtk: 0,
+    baseMaxHp: 0,
+    baseDef: 6,
+    baseMoveSpeed: 0,
+    baseBlock: 0.05,
+    baseParry: 0,
+    baseInt: 0,
+    bonusAtk: 0,
+    bonusMaxHp: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
+    bonusDef: 4, // Affix 1
+    bonusMoveSpeed: 0,
+    bonusCritChance: 0,
+    bonusCritDamage: 0,
+    bonusBlock: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
+    bonusParry: 0,
+    bonusActiveSpeed: 0,
+    bonusIdleSpeed: 0,
+    bonusStr: 4, // Affix 2
+    bonusDex: 0,
+    bonusInt: 0,
+    noun: "Kite Shield",
+    setName: "Vanguard",
+  };
   window.recalculateItemStats(shield);
   window.frozenItemDb[shield.id] = window.cloneItemForTooltip(shield);
 
   let dagger = {
-      id: window.idCounter++,
-      name: `Kris of Swiftness (Lv. 11)`,
-      type: "subweapon",
-      subType: "dagger",
-      statsRolled: 1, // Rare (1★)
-      temperLevel: 0,
-      stageLevel: 2, // Map precisely to StageScale 2 (Levels 11-20)
-      atk: 0,
-      maxHp: 0,
-      def: 0,
-      moveSpeed: 0,
-      critChance: 0,
-      critDamage: 0,
-      block: 0,
-      parry: 0,
-      baseAtk: 5,
-      baseMaxHp: 0,
-      baseDef: 0,
-      baseMoveSpeed: 0,
-      baseBlock: 0,
-      baseParry: 0.05,
-      baseInt: 0,
-      bonusAtk: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
-      bonusMaxHp: 0,
-      bonusDef: 0,
-      bonusMoveSpeed: 2, // Affix 1
-      bonusCritChance: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
-      bonusCritDamage: 0,
-      bonusBlock: 0,
-      bonusParry: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
-      bonusActiveSpeed: 0,
-      bonusIdleSpeed: 0,
-      bonusStr: 0,
-      bonusDex: 4, // Affix 2
-      bonusInt: 0,
-      noun: "Kris",
-      setName: "Windrunner",
-    };
+    id: window.idCounter++,
+    name: `Kris of Swiftness (Lv. 11)`,
+    type: "subweapon",
+    subType: "dagger",
+    statsRolled: 1, // Rare (1★)
+    temperLevel: 0,
+    stageLevel: 2, // Map precisely to StageScale 2 (Levels 11-20)
+    atk: 0,
+    maxHp: 0,
+    def: 0,
+    moveSpeed: 0,
+    critChance: 0,
+    critDamage: 0,
+    block: 0,
+    parry: 0,
+    baseAtk: 5,
+    baseMaxHp: 0,
+    baseDef: 0,
+    baseMoveSpeed: 0,
+    baseBlock: 0,
+    baseParry: 0.05,
+    baseInt: 0,
+    bonusAtk: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
+    bonusMaxHp: 0,
+    bonusDef: 0,
+    bonusMoveSpeed: 2, // Affix 1
+    bonusCritChance: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
+    bonusCritDamage: 0,
+    bonusBlock: 0,
+    bonusParry: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
+    bonusActiveSpeed: 0,
+    bonusIdleSpeed: 0,
+    bonusStr: 0,
+    bonusDex: 4, // Affix 2
+    bonusInt: 0,
+    noun: "Kris",
+    setName: "Windrunner",
+  };
   window.recalculateItemStats(dagger);
   window.frozenItemDb[dagger.id] = window.cloneItemForTooltip(dagger);
 
   let tome = {
-      id: window.idCounter++,
-      name: `Grimoire of Wisdom (Lv. 11)`,
-      type: "subweapon",
-      subType: "tome",
-      statsRolled: 1, // Rare (1★)
-      temperLevel: 0,
-      stageLevel: 2, // Map precisely to StageScale 2 (Levels 11-20)
-      atk: 0,
-      maxHp: 0,
-      def: 0,
-      moveSpeed: 0,
-      critChance: 0,
-      critDamage: 0,
-      block: 0,
-      parry: 0,
-      baseAtk: 3,
-      baseMaxHp: 0,
-      baseDef: 0,
-      baseMoveSpeed: 0,
-      baseBlock: 0,
-      baseParry: 0,
-      baseInt: 8,
-      bonusAtk: 0,
-      bonusMaxHp: 0,
-      bonusDef: 0,
-      bonusMoveSpeed: 0,
-      bonusCritChance: 0,
-      bonusCritDamage: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
-      bonusBlock: 0,
-      bonusParry: 0,
-      bonusActiveSpeed: 0.015, // Affix 1
-      bonusIdleSpeed: 0,
-      bonusStr: 0,
-      bonusDex: 0,
-      bonusInt: 4, // Affix 2
-      noun: "Grimoire",
-      setName: "Scholar",
-    };
+    id: window.idCounter++,
+    name: `Grimoire of Wisdom (Lv. 11)`,
+    type: "subweapon",
+    subType: "tome",
+    statsRolled: 1, // Rare (1★)
+    temperLevel: 0,
+    stageLevel: 2, // Map precisely to StageScale 2 (Levels 11-20)
+    atk: 0,
+    maxHp: 0,
+    def: 0,
+    moveSpeed: 0,
+    critChance: 0,
+    critDamage: 0,
+    block: 0,
+    parry: 0,
+    baseAtk: 3,
+    baseMaxHp: 0,
+    baseDef: 0,
+    baseMoveSpeed: 0,
+    baseBlock: 0,
+    baseParry: 0,
+    baseInt: 8,
+    bonusAtk: 0,
+    bonusMaxHp: 0,
+    bonusDef: 0,
+    bonusMoveSpeed: 0,
+    bonusCritChance: 0,
+    bonusCritDamage: 0, // Cleared to adhere to standard 1★ Rare 2-affix limit
+    bonusBlock: 0,
+    bonusParry: 0,
+    bonusActiveSpeed: 0.015, // Affix 1
+    bonusIdleSpeed: 0,
+    bonusStr: 0,
+    bonusDex: 0,
+    bonusInt: 4, // Affix 2
+    noun: "Grimoire",
+    setName: "Scholar",
+  };
   window.recalculateItemStats(tome);
   window.frozenItemDb[tome.id] = window.cloneItemForTooltip(tome);
 

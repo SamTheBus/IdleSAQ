@@ -1192,6 +1192,7 @@ window.SaveManager = {
     let deathStage = 0;
     let itemsDropped = [];
     let scrapsGainedMap = {};
+    let farmKills = 0;
 
     function recordScrapGained(name, amount) {
       if (!scrapsGainedMap[name]) scrapsGainedMap[name] = 0;
@@ -1494,7 +1495,7 @@ window.SaveManager = {
         ratioMob.m * Math.pow(10, Math.min(15, ratioMob.e)),
       );
       let farmCycleTime = Math.max(0.5, ttkMob + swingTime);
-      let farmKills = Math.floor(remainingSeconds / farmCycleTime);
+      farmKills = Math.floor(remainingSeconds / farmCycleTime);
 
       totalKills += farmKills;
       let goldFarmed = BigNum.from(2)
@@ -1523,6 +1524,52 @@ window.SaveManager = {
 
       elapsedSeconds += remainingSeconds;
       remainingSeconds = 0;
+    }
+
+    // Calculate offline soul gains to match online campaign rates
+    let offlineMonsterSouls = 0;
+    let offlineLuminousSouls = 0;
+
+    // 1. Expected Souls from cleared progression stages
+              if (stagesGained > 0) {
+                for (let stg = originalStage; stg < currentStage; stg++) {
+                  // Simulated Boss-Scale Monster Soul drop (30% chance per progression stage cleared)
+                  if (Math.random() < 0.30) {
+                    let baseQty = window.randInt(2, 6);
+                    let scaleMultiplier = 1 + Math.log10(stg);
+                    let finalQty = Math.round(baseQty * scaleMultiplier * Math.sqrt(p.qly || 1.0));
+                    offlineMonsterSouls += finalQty;
+                  }
+
+                  // Normal mobs: targetsRequired * 12% drop chance * (1 + Math.floor(stg / 50))
+                  let progNormalSoulExpected = targetsRequired * (0.12 * p.drop);
+                  let progNormalSoulQty = 1 + Math.floor(stg / 50);
+                  offlineMonsterSouls += Math.round(progNormalSoulExpected * progNormalSoulQty);
+                }
+              }
+
+    // 2. Expected Souls from idle farming kills on the final stage
+    if (farmKills > 0) {
+      let rareSpawnChance = p.rareSpawn || 0.01;
+      let expectedRares = farmKills * rareSpawnChance;
+      let expectedNormals = farmKills - expectedRares;
+
+      // Normal mob Monster Souls: 12% chance * (1 + Math.floor(currentStage / 50))
+      let normalSoulExpected = expectedNormals * (0.12 * p.drop);
+      let normalSoulQty = 1 + Math.floor(currentStage / 50);
+      offlineMonsterSouls += Math.round(normalSoulExpected * normalSoulQty);
+
+      // Rare mob Luminous Souls: 25% chance
+      let expectedLuminous = expectedRares * (0.25 * p.drop);
+      offlineLuminousSouls += Math.round(expectedLuminous);
+    }
+
+    // Apply and record to the summary card
+    if (offlineMonsterSouls > 0) {
+      recordScrapGained("Monster Soul", offlineMonsterSouls);
+    }
+    if (offlineLuminousSouls > 0) {
+      recordScrapGained("Luminous Soul", offlineLuminousSouls);
     }
 
     // Update active player statistics on return
@@ -1632,14 +1679,70 @@ window.SaveManager.init();
 window.detectGameServer = () => window.SaveManager.detectServer();
 window.getGameUserId = () => window.SaveManager.getUserId();
 window.saveGame = () => window.SaveManager.save();
-window.loadGame = () => window.SaveManager.load();
+window.loadGame = () => window.loadGameAndSyncCloud();
 window.applyOfflineGains = (ms) => window.SaveManager.applyOfflineGains(ms);
 window.applySaveStatePayload = (parsed, skip) =>
   window.SaveManager.applyPayload(parsed, skip);
 window.hardResetGame = () => window.SaveManager.hardReset();
 
+// Global Abort Controller references for manual play offline bypass
+window.cloudSyncAbortController = null;
+window.offlineGraceTimeoutId = null;
+
+window.hideLoadingScreen = function () {
+  let screen = document.getElementById("loading-screen");
+  if (screen) {
+    screen.style.opacity = "0";
+    setTimeout(() => {
+      screen.style.display = "none";
+      window.updateScrollLock();
+    }, 500);
+  }
+};
+
+window.abortCloudSyncAndPlayOffline = function () {
+  if (window.cloudSyncAbortController) {
+    window.cloudSyncAbortController.abort();
+    window.cloudSyncAbortController = null;
+  }
+  if (window.offlineGraceTimeoutId) {
+    clearTimeout(window.offlineGraceTimeoutId);
+    window.offlineGraceTimeoutId = null;
+  }
+
+  console.log("📱 User opted to bypass cloud sync. Resolving local save...");
+  let localDataRaw = localStorage.getItem("idle_saq_save");
+  let localParsed = null;
+  let offlineMsToApply = 0;
+  let now = Date.now();
+
+  if (localDataRaw) {
+    try {
+      localParsed = JSON.parse(localDataRaw);
+      window.applySaveStatePayload(localParsed, true);
+      window.recalculateXpRequirement();
+      if (localParsed.lastSaveTime) {
+        offlineMsToApply = now - localParsed.lastSaveTime;
+      }
+    } catch (e) {
+      console.error("Local save load failed", e);
+    }
+  }
+
+  window.hideLoadingScreen();
+
+  if (offlineMsToApply > 60000) {
+    window.applyOfflineGains(offlineMsToApply);
+  } else {
+    window.setPauseState(false);
+    window.updateUI();
+    window.renderInventory();
+  }
+};
+
 window.loadGameAndSyncCloud = function () {
   window.isCloudSynced = false;
+  window.isGamePaused = true; // Keep loop paused during gateway negotiation
 
   // 1. Resolve unified save key or run safe self-healing migration
   let migrationDone = localStorage.getItem("idle_saq_migrated_v11_to_v96");
@@ -1648,14 +1751,12 @@ window.loadGameAndSyncCloud = function () {
     if (legacyDataRaw) {
       try {
         let legacyParsed = JSON.parse(legacyDataRaw);
-        // Guarantee copy is valid and populated before overwriting
         if (legacyParsed && legacyParsed.playerStats) {
           console.log(
             "🚀 Migrating legacy save to unified idle_saq_save baseline.",
           );
           localStorage.setItem("idle_saq_save", legacyDataRaw);
           localStorage.setItem("idle_saq_migrated_v11_to_v96", "true");
-          // Keep old save under backup key for complete safety
           localStorage.setItem("idle_game_v11_backup", legacyDataRaw);
           localStorage.removeItem("idle_game_v11");
         }
@@ -1676,7 +1777,7 @@ window.loadGameAndSyncCloud = function () {
     try {
       localParsed = JSON.parse(localDataRaw);
       window.applySaveStatePayload(localParsed, true);
-      window.recalculateXpRequirement(); // FORCE the new formula on every load
+      window.recalculateXpRequirement();
       if (localParsed.lastSaveTime) {
         offlineMsToApply = now - localParsed.lastSaveTime;
       }
@@ -1685,10 +1786,30 @@ window.loadGameAndSyncCloud = function () {
     }
   }
 
+  // Fade in the manual bypass button if the server takes longer than 4.5 seconds to wake up
+  let btnOffline = document.getElementById("btn-play-offline");
+  let statusText = document.getElementById("loading-status-text");
+  let subText = document.getElementById("loading-sub-text");
+
+  if (window.offlineGraceTimeoutId) clearTimeout(window.offlineGraceTimeoutId);
+  window.offlineGraceTimeoutId = setTimeout(() => {
+    if (btnOffline) btnOffline.style.display = "block";
+    if (statusText) statusText.innerText = "Cloud Sanctum is Sleeping...";
+    if (subText)
+      subText.innerText =
+        "Server is waking up (Render free spin-up takes ~30s). You may wait or play offline.";
+  }, 4500);
+
   if (!window.GAME_SERVER_URL) {
-    // Offline / GitHub Pages local-only mode
-    if (offlineMsToApply > 0) {
+    if (window.offlineGraceTimeoutId)
+      clearTimeout(window.offlineGraceTimeoutId);
+    window.hideLoadingScreen();
+    if (offlineMsToApply > 60000) {
       window.applyOfflineGains(offlineMsToApply);
+    } else {
+      window.setPauseState(false);
+      window.updateUI();
+      window.renderInventory();
     }
     return;
   }
@@ -1697,13 +1818,21 @@ window.loadGameAndSyncCloud = function () {
   if (typeof window.updateSyncStatus === "function") {
     window.updateSyncStatus("syncing");
   }
+
+  window.cloudSyncAbortController = new AbortController();
+
   fetch(`${window.GAME_SERVER_URL}/api/load`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userId }),
+    signal: window.cloudSyncAbortController.signal,
   })
     .then((response) => response.json())
     .then((data) => {
+      if (window.offlineGraceTimeoutId)
+        clearTimeout(window.offlineGraceTimeoutId);
+      window.cloudSyncAbortController = null;
+
       let resolvedOfflineMs = offlineMsToApply;
 
       if (data.success && data.saveData) {
@@ -1719,7 +1848,6 @@ window.loadGameAndSyncCloud = function () {
           console.log("📱 Local progress is up to date.");
         }
 
-        // Sync and cache current Guild attributes
         if (data.clan) {
           window.playerStats.clanId = data.clan.id;
           window.playerStats.clanName = data.clan.name;
@@ -1732,6 +1860,7 @@ window.loadGameAndSyncCloud = function () {
             prosperity_accord: data.clan.skill_prosperity_accord,
             voyagers_guidance: data.clan.skill_voyagers_guidance,
             aetheric_wisdom: data.clan.skill_aetheric_wisdom || 0,
+            clan_supply_depot: data.clan.skill_clan_supply_depot || 0,
           };
         } else {
           window.playerStats.clanId = null;
@@ -1749,28 +1878,40 @@ window.loadGameAndSyncCloud = function () {
         }
       }
 
-      // Apply offline progress EXACTLY once after final source resolution
-      if (resolvedOfflineMs > 0) {
+      window.hideLoadingScreen();
+
+      if (resolvedOfflineMs > 60000) {
         window.applyOfflineGains(resolvedOfflineMs);
-      }
-      if (typeof window.updateUI === "function") window.updateUI();
-      if (typeof window.renderInventory === "function")
+      } else {
+        window.setPauseState(false);
+        window.updateUI();
         window.renderInventory();
+      }
     })
     .catch((err) => {
+      // Ignore abort errors from manual play-offline clicks
+      if (err.name === "AbortError") return;
+
+      if (window.offlineGraceTimeoutId)
+        clearTimeout(window.offlineGraceTimeoutId);
+      window.cloudSyncAbortController = null;
+
       console.log(
         "📡 Could not reach Cloud server for sync check. Running off local cache.",
       );
       if (typeof window.updateSyncStatus === "function") {
         window.updateSyncStatus("offline");
       }
-      // Apply offline gains using local cache if server is unreachable
-      if (offlineMsToApply > 0) {
+
+      window.hideLoadingScreen();
+
+      if (offlineMsToApply > 60000) {
         window.applyOfflineGains(offlineMsToApply);
-      }
-      if (typeof window.updateUI === "function") window.updateUI();
-      if (typeof window.renderInventory === "function")
+      } else {
+        window.setPauseState(false);
+        window.updateUI();
         window.renderInventory();
+      }
     });
 
   let autoSalvageSelect = document.getElementById("auto-salvage-setting");
@@ -1782,7 +1923,6 @@ window.loadGameAndSyncCloud = function () {
   }
   if (typeof window.refreshMarketShopIfNeeded === "function")
     window.refreshMarketShopIfNeeded();
-
   if (typeof window.checkUnreadMail === "function") window.checkUnreadMail();
 };
 
@@ -5553,21 +5693,26 @@ window.CombatEngine = {
         (window.playerStats.riftGuardiansSlain || 0) + 1;
       if (typeof window.progressMission === "function")
         window.progressMission("rifts", 1);
-    } else if (window.mob.type === "boss") {
+    } else if (isBoss) {
           let activeStage = window.playerStats.stage;
 
-          // Guaranteed Boss-Scale Monster Soul drop
-          let bossSoulQty = 5 + Math.floor(activeStage / 10);
-          if (typeof window.addEtcDrop === "function") {
-            window.addEtcDrop("Monster Soul", bossSoulQty, true);
+          // Overhauled Boss-Scale Monster Soul drop: 30% chance with sub-linear logarithmic & Drop Quality scaling
+          if (Math.random() < 0.30) {
+            let baseQty = window.randInt(2, 6);
+            let scaleMultiplier = 1 + Math.log10(activeStage);
+            let finalQty = Math.round(baseQty * scaleMultiplier * Math.sqrt(p.qly || 1.0));
+
+            if (typeof window.addEtcDrop === "function") {
+              window.addEtcDrop("Monster Soul", finalQty, false); // False triggers the active popup toast
+            }
           }
 
-          let peakLimit = Math.floor(
-            (window.playerStats.lifetimePeakStage || 1) * 0.8,
-          );
+      let peakLimit = Math.floor(
+        (window.playerStats.lifetimePeakStage || 1) * 0.8,
+      );
 
-          // Standardized flat drop rates (keeps Sigils/Cores/Shards rare and consistent)
-          if (activeStage >= peakLimit) {
+      // Standardized flat drop rates (keeps Sigils/Cores/Shards rare and consistent)
+      if (activeStage >= peakLimit) {
         if (Math.random() < 0.01) {
           window.addEtcDrop("Ancient Core", 1);
           window.pushToast("Ancient Core", null, "#e74c3c", true, 1);
@@ -5607,22 +5752,22 @@ window.CombatEngine = {
         window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
       }
     } else if (!isBoss && !window.playerStats.isDungeonMode) {
-          // Dynamic scaled drop rates matching player Drop Rate (p.drop) attributes
-          let soulDropChance = window.mob.isRare ? 0.25 : 0.12; // 25% for Rare, 12% for Normal
-          if (Math.random() < (soulDropChance * p.drop)) {
-            let etcItemName = window.mob.isRare ? "Luminous Soul" : "Monster Soul";
+      // Dynamic scaled drop rates matching player Drop Rate (p.drop) attributes
+      let soulDropChance = window.mob.isRare ? 0.25 : 0.12; // 25% for Rare, 12% for Normal
+      if (Math.random() < soulDropChance * p.drop) {
+        let etcItemName = window.mob.isRare ? "Luminous Soul" : "Monster Soul";
 
-            let qty = 1;
-            if (!window.mob.isRare) {
-              // Normal monster drop quantities scale with Stage progression (1 base + 1 per 50 stages)
-              qty += Math.floor((window.playerStats.stage || 1) / 50);
-            }
+        let qty = 1;
+        if (!window.mob.isRare) {
+          // Normal monster drop quantities scale with Stage progression (1 base + 1 per 50 stages)
+          qty += Math.floor((window.playerStats.stage || 1) / 50);
+        }
 
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop(etcItemName, qty);
-          }
-          // Progression-Locked Campaign Rare Spawn Ancient Core / Sigil / Shard drops (Flat rare)
-          if (window.mob && window.mob.isRare) {
+        if (typeof window.addEtcDrop === "function")
+          window.addEtcDrop(etcItemName, qty);
+      }
+      // Progression-Locked Campaign Rare Spawn Ancient Core / Sigil / Shard drops (Flat rare)
+      if (window.mob && window.mob.isRare) {
         let activeStage = window.playerStats.stage;
         let peakLimit = Math.floor(
           (window.playerStats.lifetimePeakStage || 1) * 0.8,
@@ -5794,40 +5939,40 @@ window.CombatEngine = {
           window.playerStats.maxStage,
         );
         if (typeof window.pushLog === "function")
-                      window.pushLog(
-                        `<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${window.playerStats.stage}.</span>`,
-                      );
+          window.pushLog(
+            `<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${window.playerStats.stage}.</span>`,
+          );
 
-                    // First-Time 25-Stage Milestone Key Allocation
-                    let currentMax = window.playerStats.maxStage;
-                    let old25s = Math.floor(oldMax / 25);
-                    let new25s = Math.floor(currentMax / 25);
-                    if (new25s > old25s && currentMax > oldPeak) {
-                      let keysEarned = new25s - old25s;
-                      window.addEtcDrop("Gacha Key", keysEarned);
-                      if (typeof window.pushLog === "function") {
-                        window.pushLog(
-                          `<strong style="color:#f1c40f;">🏆 [MILESTONE] Reached Stage ${currentMax}! Awarded ${keysEarned}x Gacha Key(s)!</strong>`
-                        );
-                      }
-                      if (typeof window.pushHeaderToast === "function") {
-                        window.pushHeaderToast(
-                          `🏆 Milestone! Reached Stage ${currentMax}! (+${keysEarned} Gacha Key)`,
-                          "#f1c40f"
-                        );
-                      }
-                      if (typeof window.spawnPurchaseCelebration === "function") {
-                        window.spawnPurchaseCelebration("gacha", "#f1c40f", 4);
-                      }
-                    }
+        // First-Time 25-Stage Milestone Key Allocation
+        let currentMax = window.playerStats.maxStage;
+        let old25s = Math.floor(oldMax / 25);
+        let new25s = Math.floor(currentMax / 25);
+        if (new25s > old25s && currentMax > oldPeak) {
+          let keysEarned = new25s - old25s;
+          window.addEtcDrop("Gacha Key", keysEarned);
+          if (typeof window.pushLog === "function") {
+            window.pushLog(
+              `<strong style="color:#f1c40f;">🏆 [MILESTONE] Reached Stage ${currentMax}! Awarded ${keysEarned}x Gacha Key(s)!</strong>`,
+            );
+          }
+          if (typeof window.pushHeaderToast === "function") {
+            window.pushHeaderToast(
+              `🏆 Milestone! Reached Stage ${currentMax}! (+${keysEarned} Gacha Key)`,
+              "#f1c40f",
+            );
+          }
+          if (typeof window.spawnPurchaseCelebration === "function") {
+            window.spawnPurchaseCelebration("gacha", "#f1c40f", 4);
+          }
+        }
 
-                    // First-time milestone clear reward (Stage 10, 20, 30...)
-                    // Enforce peak checking to prevent players from farming milestone drops repeatedly after prestiging
-                    if (
-                      window.playerStats.maxStage > oldMax &&
-                      oldMax % 10 === 0 &&
-                      window.playerStats.maxStage > oldPeak
-                    ) {
+        // First-time milestone clear reward (Stage 10, 20, 30...)
+        // Enforce peak checking to prevent players from farming milestone drops repeatedly after prestiging
+        if (
+          window.playerStats.maxStage > oldMax &&
+          oldMax % 10 === 0 &&
+          window.playerStats.maxStage > oldPeak
+        ) {
           if (oldMax === 10) {
             // Onboarding: Trigger Sub-weapon of Choice Modal at Stage 10
             setTimeout(() => {
@@ -7729,29 +7874,29 @@ window.enterDungeon = function (type) {
         window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
 
       window.playerStats.isDungeonMode = true;
-            // Consume and Lock Slotted Cavern Sigil
-            if (window.state.slottedCavernSigil) {
-              let activeSig = window.state.slottedCavernSigil;
-              window.playerStats.activeDungeonSigil = activeSig;
-              window.state.slottedCavernSigil = null;
+      // Consume and Lock Slotted Cavern Sigil
+      if (window.state.slottedCavernSigil) {
+        let activeSig = window.state.slottedCavernSigil;
+        window.playerStats.activeDungeonSigil = activeSig;
+        window.state.slottedCavernSigil = null;
 
-              // Remove sigil from EQUIP bag
-              let sIdx = window.inventory.EQUIP.findIndex(
-                (i) => i.id === activeSig.id,
-              );
-              if (sIdx !== -1) {
-                window.inventory.EQUIP.splice(sIdx, 1);
-              }
-            } else {
-              window.playerStats.activeDungeonSigil = null;
-            }
-            window.playerStats.isCrucibleMode = false;
-            window.playerStats.currentDungeon = type;
-            window.playerStats.currentDungeonStage[type] = checkpoint;
-            window.playerStats.dungeonWave = 1;
-            window.playerStats.killCount = 0;
-            window.playerStats.targetsRequired = 3; // Reduced from 5 to 3
-            window.playerStats.isBossMode = false;
+        // Remove sigil from EQUIP bag
+        let sIdx = window.inventory.EQUIP.findIndex(
+          (i) => i.id === activeSig.id,
+        );
+        if (sIdx !== -1) {
+          window.inventory.EQUIP.splice(sIdx, 1);
+        }
+      } else {
+        window.playerStats.activeDungeonSigil = null;
+      }
+      window.playerStats.isCrucibleMode = false;
+      window.playerStats.currentDungeon = type;
+      window.playerStats.currentDungeonStage[type] = checkpoint;
+      window.playerStats.dungeonWave = 1;
+      window.playerStats.killCount = 0;
+      window.playerStats.targetsRequired = 3; // Reduced from 5 to 3
+      window.playerStats.isBossMode = false;
       window.playerStats.isUberBoss = false;
       window.mob = null;
 

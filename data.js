@@ -1115,34 +1115,34 @@ window.resolvePlayerStats = function (useDraft = false) {
   });
 
   let setCtx = {
-      atk: 0,
-      maxHp: 0,
-      moveSpeed: 0,
-      idleSpeedPct: 0,
-      activeSpeedPct: 0,
-      critChance: 0,
-      critDamage: 0,
-      block: 0,
-      parry: 0,
-      atkPctBonus: 0,
-      maxHpPctBonus: 0,
-      defPctBonus: 0,
-      flatDefBonus: 0,
-      str: 0,
-      dex: 0,
-      int: 0,
-      strPctBonus: 0,       // Track percent STR bonuses from sets
-      dexPctBonus: 0,       // Track percent DEX bonuses from sets
-      intPctBonus: 0,       // Track percent INT bonuses from sets
-      moveSpeedPctBonus: 0,  // Track percent Move Speed bonuses from sets
-      gold: 0,
-      drop: 0,
-      qly: 0,
-      rareSpawn: 0,
-      hasCorrosiveSet: false,
-      hasShatterSet: false,
-      hasSingularitySet: false,
-    };
+    atk: 0,
+    maxHp: 0,
+    moveSpeed: 0,
+    idleSpeedPct: 0,
+    activeSpeedPct: 0,
+    critChance: 0,
+    critDamage: 0,
+    block: 0,
+    parry: 0,
+    atkPctBonus: 0,
+    maxHpPctBonus: 0,
+    defPctBonus: 0,
+    flatDefBonus: 0,
+    str: 0,
+    dex: 0,
+    int: 0,
+    strPctBonus: 0, // Track percent STR bonuses from sets
+    dexPctBonus: 0, // Track percent DEX bonuses from sets
+    intPctBonus: 0, // Track percent INT bonuses from sets
+    moveSpeedPctBonus: 0, // Track percent Move Speed bonuses from sets
+    gold: 0,
+    drop: 0,
+    qly: 0,
+    rareSpawn: 0,
+    hasCorrosiveSet: false,
+    hasShatterSet: false,
+    hasSingularitySet: false,
+  };
   for (let setName in setCounts) {
     let count = setCounts[setName];
     let setDef = window.SET_DEFINITIONS[setName];
@@ -1163,23 +1163,23 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.parry += setCtx.parry;
 
   p.str += setCtx.str;
-    p.dex += setCtx.dex;
-    p.int += setCtx.int;
-    p.gold += setCtx.gold;
-    p.drop += setCtx.drop;
-    p.qly += setCtx.qly;
-    p.rareSpawn += setCtx.rareSpawn;
-    p.hasCorrosiveSet = setCtx.hasCorrosiveSet;
-    p.hasShatterSet = setCtx.hasShatterSet;
-    p.hasSingularitySet = setCtx.hasSingularitySet;
+  p.dex += setCtx.dex;
+  p.int += setCtx.int;
+  p.gold += setCtx.gold;
+  p.drop += setCtx.drop;
+  p.qly += setCtx.qly;
+  p.rareSpawn += setCtx.rareSpawn;
+  p.hasCorrosiveSet = setCtx.hasCorrosiveSet;
+  p.hasShatterSet = setCtx.hasShatterSet;
+  p.hasSingularitySet = setCtx.hasSingularitySet;
 
-    // Apply new percentage attribute and defense increases before final resolving
-    achAtkPct += setCtx.atkPctBonus;
-    achMaxHpPct += setCtx.maxHpPctBonus;
-    achDefPct += setCtx.defPctBonus; // Added fix: Bridges silent defense-multiplier bug!
-    achStrPct += setCtx.strPctBonus; // Added fix: Infuses percentage STR set bonuses
-    achDexPct += setCtx.dexPctBonus; // Added fix: Infuses percentage DEX set bonuses
-    achIntPct += setCtx.intPctBonus; // Added fix: Infuses percentage INT set bonuses
+  // Apply new percentage attribute and defense increases before final resolving
+  achAtkPct += setCtx.atkPctBonus;
+  achMaxHpPct += setCtx.maxHpPctBonus;
+  achDefPct += setCtx.defPctBonus; // Added fix: Bridges silent defense-multiplier bug!
+  achStrPct += setCtx.strPctBonus; // Added fix: Infuses percentage STR set bonuses
+  achDexPct += setCtx.dexPctBonus; // Added fix: Infuses percentage DEX set bonuses
+  achIntPct += setCtx.intPctBonus; // Added fix: Infuses percentage INT set bonuses
 
   // --- BESTIARY Album SYSTEM RESOLUTION ---
   let cardsOwned = window.playerStats.monsterCards || {};
@@ -1333,43 +1333,45 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   if (hasSubweapon) {
-      if (subType === "shield") {
-        let shield = window.equippedSlots.subweapon;
-        let shieldStars =
-          shield.statsRolled === "UNIQUE" ? 5 : shield.statsRolled || 0;
-        let subLvl =
-          (window.playerStats.slotUpgrades &&
-            window.playerStats.slotUpgrades.subweapon) ||
-          0;
-        defMultiplier += 0.12 + shieldStars * 0.02 + subLvl * 0.01;
-        maxBlockCap = window.checkArtifactTrait("titan_grip") ? 0.25 : 0.2;
-        if (p.crucibleCapBonus) maxBlockCap += p.crucibleCapBonus;
-        // Removed duplicate p.block flat add; Block is now read directly from Shield Item base stats!
-        p.parry = 0.0; // STRICT: Can't parry with a shield
-      } else if (subType === "tome") {
-        let intScale = Math.max(0, p.int - 5);
-        let logIntScale = Math.log10(intScale + 1);
-        // Caps the Arcane Barrier at 25% max (20% base + 5% scaling limit)
-        p.arcaneBarrier = parseFloat(
-          (0.2 + 0.05 * (1 - 1 / (1 + 0.15 * logIntScale))).toFixed(4),
-        );
-        p.block = 0.0; // STRICT: Can't block with a tome
-        p.parry = 0.0; // STRICT: Can't parry with a tome
-      } else if (subType === "dagger") {
-        maxParryCap = window.checkArtifactTrait("titan_grip") ? 0.3 : 0.25;
-        if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
-        // Removed duplicate p.parry flat add; Parry is now read directly from Dagger Item base stats!
-        p.block = 0.0; // STRICT: Can't block with a dagger
-      }
-    } else {
+    if (subType === "shield") {
+      let shield = window.equippedSlots.subweapon;
+      let shieldStars =
+        shield.statsRolled === "UNIQUE" ? 5 : shield.statsRolled || 0;
+      let subLvl =
+        (window.playerStats.slotUpgrades &&
+          window.playerStats.slotUpgrades.subweapon) ||
+        0;
+      defMultiplier += 0.12 + shieldStars * 0.02 + subLvl * 0.01;
+      maxBlockCap = window.checkArtifactTrait("titan_grip") ? 0.25 : 0.2;
+      if (p.crucibleCapBonus) maxBlockCap += p.crucibleCapBonus;
+      // Removed duplicate p.block flat add; Block is now read directly from Shield Item base stats!
+      p.parry = 0.0; // STRICT: Can't parry with a shield
+    } else if (subType === "tome") {
+      let intScale = Math.max(0, p.int - 5);
+      let logIntScale = Math.log10(intScale + 1);
+      // Caps the Arcane Barrier at 25% max (20% base + 5% scaling limit)
+      p.arcaneBarrier = parseFloat(
+        (0.2 + 0.05 * (1 - 1 / (1 + 0.15 * logIntScale))).toFixed(4),
+      );
+      p.block = 0.0; // STRICT: Can't block with a tome
+      p.parry = 0.0; // STRICT: Can't parry with a tome
+    } else if (subType === "dagger") {
+      maxParryCap = window.checkArtifactTrait("titan_grip") ? 0.3 : 0.25;
+      if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
+      // Removed duplicate p.parry flat add; Parry is now read directly from Dagger Item base stats!
+      p.block = 0.0; // STRICT: Can't block with a dagger
+    }
+  } else {
     p.block = 0.0; // STRICT: Can't block without subweapon
     p.parry = 0.0; // STRICT: Can't parry without subweapon
   }
 
   p.atk = Math.floor(p.atk * (1.0 + itemAtkPct) * achAtkPct);
-    p.maxHp = Math.floor(p.maxHp * (1.0 + itemHpPct) * achMaxHpPct);
-    p.def = Math.ceil(flatDef * (defMultiplier + itemDefPct) * achDefPct);
-    p.moveSpeed = p.moveSpeed * (achMoveSpeedPct + itemSpdPct + (setCtx.moveSpeedPctBonus || 0)); // Factored percent speed
+  p.maxHp = Math.floor(p.maxHp * (1.0 + itemHpPct) * achMaxHpPct);
+  p.def = Math.ceil(flatDef * (defMultiplier + itemDefPct) * achDefPct);
+  p.moveSpeed =
+    p.moveSpeed *
+    (achMoveSpeedPct + itemSpdPct + (setCtx.moveSpeedPctBonus || 0)); // Factored percent speed
 
   // Apply Cavern Sigil Active Modifiers (Dungeon Mode)
   if (
@@ -1558,13 +1560,13 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.rareSpawn = 0.01 + (excessRare * scale) / (excessRare + scale);
 
   // Set default targets required based on current active gameplay mode
-    if (!window.playerStats.isCrucibleMode && !window.playerStats.isDungeonMode) {
-      window.playerStats.targetsRequired = 3; // Reduced from 5 to 3
-    } else if (window.playerStats.isCrucibleMode) {
-      window.playerStats.targetsRequired = 3; // Exactly 3 enemies per wave in the Crucible!
-    } else if (window.playerStats.isDungeonMode) {
-      window.playerStats.targetsRequired = 3; // Standard 3 for Infinite Caverns (Reduced from 5)
-    }
+  if (!window.playerStats.isCrucibleMode && !window.playerStats.isDungeonMode) {
+    window.playerStats.targetsRequired = 3; // Reduced from 5 to 3
+  } else if (window.playerStats.isCrucibleMode) {
+    window.playerStats.targetsRequired = 3; // Exactly 3 enemies per wave in the Crucible!
+  } else if (window.playerStats.isDungeonMode) {
+    window.playerStats.targetsRequired = 3; // Standard 3 for Infinite Caverns (Reduced from 5)
+  }
 
   // UNIQUE: Warp-Core Greaves "Time Dilation" missing health attack speed scaling
   if (
@@ -2061,9 +2063,9 @@ window.playerStats = {
   stage: 1,
   maxStage: 1,
   killCount: 0,
-    totalLifetimeKills: 0,
-    targetsRequired: 3, // Reduced from 5 to 3 for snappier stage runs
-    isBossMode: false,
+  totalLifetimeKills: 0,
+  targetsRequired: 3, // Reduced from 5 to 3 for snappier stage runs
+  isBossMode: false,
   isFarmingLoop: false,
   isUberBoss: false,
   currentUberBoss: "guardian",
