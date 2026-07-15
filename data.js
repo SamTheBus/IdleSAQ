@@ -252,31 +252,31 @@ window.formatNumber = function (val) {
   ];
 
   let i = Math.floor(b.e / 3);
-  let rem = b.e % 3;
-  let displayVal = b.m * Math.pow(10, rem);
+    let rem = b.e % 3;
+    let displayVal = b.m * Math.pow(10, rem);
 
-  if (i < standardSuffixes.length) {
-    return `${displayVal.toFixed(2)} ${standardSuffixes[i]}`;
-  }
+    if (i < standardSuffixes.length) {
+      return `${displayVal.toFixed(2)}${standardSuffixes[i]}`;
+    }
 
-  // Alphabetical suffix generator (aa - zz, then aaa - zzz)
-  let baseAlpha = i - standardSuffixes.length;
-  let suffix = "";
-  if (baseAlpha < 676) {
-    let char1 = String.fromCharCode(97 + Math.floor(baseAlpha / 26));
-    let char2 = String.fromCharCode(97 + (baseAlpha % 26));
-    suffix = char1 + char2;
-  } else {
-    let temp = baseAlpha - 676;
-    let char1 = String.fromCharCode(97 + Math.floor(temp / 676));
-    let char2 = String.fromCharCode(97 + Math.floor((temp % 676) / 26));
-    let char3 = String.fromCharCode(97 + (temp % 26));
-    suffix = char1 + char2 + char3;
-  }
-  suffix = suffix.toUpperCase();
+    // Alphabetical suffix generator (aa - zz, then aaa - zzz)
+    let baseAlpha = i - standardSuffixes.length;
+    let suffix = "";
+    if (baseAlpha < 676) {
+      let char1 = String.fromCharCode(97 + Math.floor(baseAlpha / 26));
+      let char2 = String.fromCharCode(97 + (baseAlpha % 26));
+      suffix = char1 + char2;
+    } else {
+      let temp = baseAlpha - 676;
+      let char1 = String.fromCharCode(97 + Math.floor(temp / 676));
+      let char2 = String.fromCharCode(97 + Math.floor((temp % 676) / 26));
+      let char3 = String.fromCharCode(97 + (temp % 26));
+      suffix = char1 + char2 + char3;
+    }
+    suffix = suffix.toUpperCase();
 
-  return `${displayVal.toFixed(2)} ${suffix}`;
-};
+    return `${displayVal.toFixed(2)}${suffix}`;
+  };
 
 window.randInt = (min, max) =>
   Math.floor(Math.random() * (max - min + 1)) + min;

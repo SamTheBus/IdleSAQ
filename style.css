@@ -4226,9 +4226,8 @@ summary {
 /* Portrait Mobile Viewports (Aesthetic 3-Column Row) */
 @media (max-width: 580px) {
   .canvas-top-hud {
-    grid-template-columns: 1.4fr 1.15fr 0.75fr !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     padding: 6px 8px !important;
-    gap: 6px !important;
     background: linear-gradient(180deg, #10141d 0%, #06080d 100%) !important;
     border-bottom-width: 1.5px !important;
   }
