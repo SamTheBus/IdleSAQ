@@ -1585,19 +1585,19 @@ Object.assign(window.ItemFactory, {
           6.0 * hpDefExpScale * prestigeMult * baseRarityMult * overallMult,
         );
       } else if (chosenType === "helmet" || chosenType === "leggings") {
-        item.baseDef = Math.ceil(
-          0.7 * hpDefExpScale * prestigeMult * baseRarityMult,
-        );
-        item.baseMaxHp = Math.ceil(
-          3.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-        );
-      } else if (item.subType === "boots") {
               item.baseDef = Math.ceil(
-                0.35 * hpDefExpScale * prestigeMult * baseRarityMult,
+                0.7 * hpDefExpScale * prestigeMult * baseRarityMult,
               );
-              item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
-            } else if (item.subType === "subweapon") {
-              if (item.subType === "shield") {
+              item.baseMaxHp = Math.ceil(
+                3.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+              );
+            } else if (item.type === "boots") {
+                item.baseDef = Math.ceil(
+                  0.35 * hpDefExpScale * prestigeMult * baseRarityMult,
+                );
+                item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
+              } else if (item.type === "subweapon") {
+                if (item.subType === "shield") {
                 item.baseDef = Math.ceil(
                   1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
                 );

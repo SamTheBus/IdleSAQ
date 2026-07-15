@@ -5156,6 +5156,7 @@ window.generateItemCardHtml = function (
 ) {
   if (!item) return "";
   let html = "";
+  let specialtyHtml = ""; // Captured to move inside the collapsible advanced drawer at the bottom
 
   let slotMult = 1.0;
   if (item.isEquippedSlot && window.playerStats.slotUpgrades) {
@@ -5290,96 +5291,72 @@ window.generateItemCardHtml = function (
       `;
   }
 
-  if (item.id !== "dummy" && item.type === "subweapon") {
-      if (item.subType === "shield") {
-        let noun = item.noun ? item.noun.toLowerCase() : "";
-        let specialtyTitle = "Standard Shield";
-        let specialtyDesc = "Successful Blocks trigger a Shield Bash dealing <strong style='color:#3498db;'>160% Defense</strong> damage (+0.2% per Strength point).";
-        let baseBlockPercent = "5%";
-        if (noun.includes("buckler")) {
-          specialtyTitle = "Buckler Specialty";
-          specialtyDesc = "Grants <strong style='color:#2ecc71;'>+12% base Block Rate</strong>. Shield Bash is lightweight, dealing <strong style='color:#3498db;'>100% Defense</strong> damage (+0.2% per Strength point).";
-          baseBlockPercent = "12%";
-        } else if (noun.includes("tower")) {
-          specialtyTitle = "Tower Shield Specialty";
-          specialtyDesc = "Grants <strong style='color:#e74c3c;'>+2% base Block Rate</strong> but triggers a crushing Shield Bash dealing <strong style='color:#3498db;'>250% Defense</strong> damage (+0.2% per Strength point).";
-          baseBlockPercent = "2%";
+  if (item.type === "subweapon") {
+          let rgbVals = "127, 140, 141";
+          let color = window.getTierColor(item.statsRolled);
+          if (color && color.charAt(0) === '#') rgbVals = window.hexToRgbValues(color);
+
+          if (item.subType === "shield") {
+            let noun = item.noun ? item.noun.toLowerCase() : "";
+            let descText = "Blocks completely negate damage (Cap: 20% / 25% with Titan's Grip). Every Block triggers a Shield Bash scaling with Defense.";
+            if (noun.includes("buckler")) {
+              descText = "Grants +12% base Block Rate. Shield Bash is lightweight, dealing 100% Defense damage (+0.2% per Strength point).";
+            } else if (noun.includes("tower")) {
+              descText = "Grants +2% base Block Rate. Triggers a massive Shield Bash dealing 250% Defense damage (+0.2% per Strength point).";
+            }
+
+            specialtyHtml = `
+                <div style="border: 1px solid ${color}44; border-radius:6px; background: rgba(${rgbVals}, 0.04); padding: 6px 10px; font-size: 10px; line-height: 1.4; text-align: left; white-space: normal;">
+                  <div style="color:${color}; font-weight: 900; letter-spacing: 0.5px; font-size: 9.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                    🛡️ <span>BULWARK SPECIALTY</span>
+                  </div>
+                  <div style="color: #cbd5e1;">
+                    ${descText}
+                  </div>
+                </div>
+              `;
+          } else if (item.subType === "dagger") {
+            let noun = item.noun ? item.noun.toLowerCase() : "";
+            let descText = "Parries mitigate 60% of incoming damage (Cap: 25% / 30% with Titan's Grip). Parries trigger an automatic Riposte counter strike.";
+            if (noun.includes("kris") || noun.includes("dirk")) {
+              descText = "Low Multi-Strike chance (25% base) but deals a massive 55% Attack. Riposte parry counters deal 130% Attack.";
+            } else if (noun.includes("stiletto") || noun.includes("baselard")) {
+              descText = "High Multi-Strike chance (60% base) but deals a lighter 25% Attack. Riposte parry counters deal 80% Attack.";
+            } else if (noun.includes("main-gauche")) {
+              descText = "Natively grants +10% base Parry Rate. Cap increased to 30% (35% with Titan's Grip). Multi-Strike triggers at 40% base.";
+            }
+
+            specialtyHtml = `
+                <div style="border: 1px solid ${color}44; border-radius:6px; background: rgba(${rgbVals}, 0.04); padding: 6px 10px; font-size: 10px; line-height: 1.4; text-align: left; white-space: normal;">
+                  <div style="color:${color}; font-weight: 900; letter-spacing: 0.5px; font-size: 9.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                    🗡️ <span>RIPOSTE SPECIALTY</span>
+                  </div>
+                  <div style="color: #cbd5e1;">
+                    ${descText}
+                  </div>
+                </div>
+              `;
+          } else if (item.subType === "tome") {
+            let noun = item.noun ? item.noun.toLowerCase() : "";
+            let descText = "Absorbs 20% to 35% of damage (scales with INT) before Defense checks. Slashes trigger random elemental spells.";
+            if (noun.includes("grimoire") || noun.includes("chronicle")) {
+              descText = "Low spell trigger chance (10% base) but spells deal a cataclysmic 180% damage. Absorbs up to 35% of damage.";
+            } else if (noun.includes("lexicon")) {
+              descText = "High spell trigger chance (26% base) but spells deal a lighter 60% damage. Absorbs up to 35% of damage.";
+            }
+
+            specialtyHtml = `
+                <div style="border: 1px solid ${color}44; border-radius:6px; background: rgba(${rgbVals}, 0.04); padding: 6px 10px; font-size: 10px; line-height: 1.4; text-align: left; white-space: normal;">
+                  <div style="color:${color}; font-weight: 900; letter-spacing: 0.5px; font-size: 9.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                    🔮 <span>ARCANE BARRIER SPECIALTY</span>
+                  </div>
+                  <div style="color: #cbd5e1;">
+                    ${descText}
+                  </div>
+                </div>
+              `;
+          }
         }
-
-        html += `
-            <details style="margin-bottom:8px; border: 1px dashed #3498db; border-radius:4px; background: rgba(52, 152, 219, 0.05); pointer-events: auto;">
-              <summary style="color:#3498db; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
-                <span>🛡️ BULWARK PASSIVE [${specialtyTitle.toUpperCase()}]</span>
-                <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
-              </summary>
-              <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(52, 152, 219, 0.2); margin-top: 3px;">
-                • Grants <strong style="color:#fff;">+12% Defense</strong> multiplier.<br>
-                • Enables <strong>Block Rate</strong> (Base Block: <strong style="color:#fff;">${baseBlockPercent}</strong>, Capped at 20% / 25% with Titan's Grip).<br>
-                • Successful Blocks completely negate incoming damage.<br>
-                • <strong>Shield Bash:</strong> ${specialtyDesc}
-              </div>
-            </details>
-          `;
-      } else if (item.subType === "dagger") {
-        let noun = item.noun ? item.noun.toLowerCase() : "";
-        let specialtyTitle = "Standard Dagger";
-        let specialtyDesc = "Offhand strikes have a <strong style='color:#fff;'>40% base chance</strong> to trigger dealing <strong style='color:#e74c3c;'>35% Attack</strong>. Riposte parry counters deal <strong style='color:#e74c3c;'>100% Attack</strong> damage (+0.3% per Dexterity point).";
-        let baseParryPercent = "5%";
-        let baseParryCap = "25% (30% with Titan's Grip)";
-
-        if (noun.includes("kris") || noun.includes("dirk")) {
-          specialtyTitle = "Kris/Dirk Specialty";
-          specialtyDesc = "Low offhand strike chance (<strong style='color:#fff;'>25% base</strong>) but deals a massive <strong style='color:#e74c3c;'>55% Attack</strong>. Riposte parry counters deal <strong style='color:#e74c3c;'>130% Attack</strong> damage.";
-        } else if (noun.includes("stiletto") || noun.includes("baselard")) {
-          specialtyTitle = "Stiletto/Baselard Specialty";
-          specialtyDesc = "High offhand strike chance (<strong style='color:#fff;'>60% base</strong>) but deals a lighter <strong style='color:#e74c3c;'>25% Attack</strong>. Riposte parry counters deal <strong style='color:#e74c3c;'>80% Attack</strong> damage.";
-        } else if (noun.includes("main-gauche")) {
-          specialtyTitle = "Main-Gauche Specialty";
-          specialtyDesc = "Moderate offhand strike chance (<strong style='color:#fff;'>40% base</strong>) dealing <strong style='color:#e74c3c;'>35% Attack</strong>. Natively grants <strong style='color:#2ecc71;'>+10% base Parry Rate</strong>.";
-          baseParryPercent = "10%";
-          baseParryCap = "30% (35% with Titan's Grip)";
-        }
-
-        html += `
-            <details style="margin-bottom:8px; border: 1px dashed #e74c3c; border-radius:4px; background: rgba(231, 76, 60, 0.05); pointer-events: auto;">
-              <summary style="color:#e74c3c; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
-                <span>🗡️ RIPOSTE PASSIVE [${specialtyTitle.toUpperCase()}]</span>
-                <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
-              </summary>
-              <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(231, 76, 60, 0.2); margin-top: 3px;">
-                • Enables <strong>Parry Rate</strong> (Base Parry: <strong style="color:#fff;">${baseParryPercent}</strong>, Capped at ${baseParryCap}).<br>
-                • Successful Parries mitigate <strong style="color:#fff;">60% of damage</strong>.<br>
-                • <strong>Riposte & Multi-Strike:</strong> ${specialtyDesc}
-              </div>
-            </details>
-          `;
-      } else if (item.subType === "tome") {
-        let noun = item.noun ? item.noun.toLowerCase() : "";
-        let specialtyTitle = "Standard Grimoire";
-        let specialtyDesc = "Spells have an <strong style='color:#fff;'>18% base chance</strong> to trigger per swing, dealing <strong style='color:#9b59b6;'>100% spell damage</strong> (scales with INT).";
-        if (noun.includes("grimoire") || noun.includes("chronicle")) {
-          specialtyTitle = "Grimoire Specialty";
-          specialtyDesc = "Low spell trigger chance (<strong style='color:#fff;'>10% base</strong>) but spells deal a cataclysmic <strong style='color:#9b59b6;'>180% spell damage</strong>.";
-        } else if (noun.includes("lexicon")) {
-          specialtyTitle = "Lexicon Specialty";
-          specialtyDesc = "High spell trigger chance (<strong style='color:#fff;'>26% base</strong>) but spells deal a lighter <strong style='color:#9b59b6;'>60% spell damage</strong>.";
-        }
-
-        html += `
-            <details style="margin-bottom:8px; border: 1px dashed #9b59b6; border-radius:4px; background: rgba(155, 89, 182, 0.05); pointer-events: auto;">
-              <summary style="color:#9b59b6; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
-                <span>🔮 ARCANE BARRIER [${specialtyTitle.toUpperCase()}]</span>
-                <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
-              </summary>
-              <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(155, 89, 182, 0.2); margin-top: 3px;">
-                • Absorbs a base <strong style="color:#fff;">20% of damage</strong> before Defense checks, scaling with Intelligence (INT) up to a 35% cap.<br>
-                • <strong>Tome Spells:</strong> Slashes trigger random Fire, Frost, and Lightning spells (Base Spell: 25% Attack, scaled by INT).<br>
-                • <strong>Spell Pattern:</strong> ${specialtyDesc}
-              </div>
-            </details>
-          `;
-      }
-    }
 
   // --- BASE STATS SECTION ---
   if (item.id !== "dummy" && item.type !== "artifact") {
@@ -5547,13 +5524,36 @@ window.generateItemCardHtml = function (
           }
 
         if (baseStats.length > 0) {
-          html += `<div style="background: rgba(255, 255, 255, 0.02); border: 1px solid #222; border-radius: 4px; padding: 6px; margin: 8px 0; text-align: center;">`;
-      html += `<div style="font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; font-weight: bold;">Base Stats</div>`;
-      baseStats.forEach((b) => {
-        html += `<div style="font-size: 13px; font-weight: bold; color: #f5f6fa; margin: 1px 0; display: flex; align-items: center; justify-content: center; gap: 4px;">${b.icon}<span>${b.val} ${b.label}</span></div>`;
-      });
-      html += `</div>`;
-    }
+                  html += `<div style="background: rgba(255, 255, 255, 0.015); border: 1px solid #222; border-radius: 6px; padding: 8px 6px; margin: 8px 0; display: flex; justify-content: space-around; align-items: center; gap: 4px;">`;
+                  baseStats.forEach((b, idx) => {
+                    if (idx > 0) {
+                      html += `<div style="width: 1px; height: 18px; background: rgba(255, 255, 255, 0.085);"></div>`;
+                    }
+                    // Shorten labels on the fly for horizontal layout fit
+                    let shortLabel = b.label;
+                    if (shortLabel === "Weapon Damage") shortLabel = "Damage";
+                    if (shortLabel === "Block Rate") shortLabel = "Block";
+                    if (shortLabel === "Parry Rate") shortLabel = "Parry";
+                    if (shortLabel === "Shield Bash Dmg") shortLabel = "Bash Dmg";
+                    if (shortLabel === "Multi-Strike Rate") shortLabel = "Multi %";
+                    if (shortLabel === "Multi-Strike Dmg") shortLabel = "Multi Dmg";
+                    if (shortLabel === "Riposte Dmg") shortLabel = "Riposte";
+                    if (shortLabel === "Spell Chance") shortLabel = "Spell %";
+                    if (shortLabel === "Spell Dmg") shortLabel = "Spell Dmg";
+                    if (shortLabel === "Max Life") shortLabel = "Max HP";
+                    if (shortLabel === "Intelligence") shortLabel = "INT";
+
+                    html += `
+                      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; min-width: 0;">
+                        <span style="font-size: 7.5px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${shortLabel}</span>
+                        <div style="font-size: 11.5px; font-weight: bold; color: #f5f6fa; display: flex; align-items: center; gap: 3px; line-height: 1;">
+                          ${b.icon}<span style="white-space: nowrap;">${b.val}</span>
+                        </div>
+                      </div>
+                    `;
+                  });
+                  html += `</div>`;
+                }
   }
 
   if (item.type === "artifact") {
@@ -5578,99 +5578,110 @@ window.generateItemCardHtml = function (
   }
 
   // --- EXPLICIT AFFIXES SECTION ---
-  if (item.id !== "dummy") {
-    let affixes = [];
+    if (item.id !== "dummy") {
+      let affixes = [];
+      let rangeLines = [];
 
-    const statsKeys = [
-      { key: "atk", label: "Attack", baseKey: "baseAtk" },
-      { key: "maxHp", label: "Max HP", baseKey: "baseMaxHp" },
-      { key: "def", label: "Defense", baseKey: "baseDef" },
-      {
-        key: "moveSpeed",
-        label: "Move Speed",
-        baseKey: "baseMoveSpeed",
-      },
-      { key: "str", label: "STR", baseKey: "baseStr" },
-      { key: "dex", label: "DEX", baseKey: "baseDex" },
-      { key: "int", label: "INT", baseKey: "baseInt" },
-      { key: "critChance", label: "Crit Chance", isPct: true },
-      { key: "critDamage", label: "Crit Multi", isPct: true },
-      {
-        key: "block",
-        label: "Block Rate",
-        isPct: true,
-        baseKey: "baseBlock",
-      },
-      {
-        key: "parry",
-        label: "Parry Rate",
-        isPct: true,
-        baseKey: "baseParry",
-      },
-      {
-        key: "activeAttackSpeed",
-        label: "Active Atk Spd",
-        isPct: true,
-        baseKey: "baseActiveSpeed",
-      },
-      {
-        key: "idleAttackSpeed",
-        label: "Idle Atk Spd",
-        isPct: true,
-        baseKey: "baseIdleSpeed",
-      },
-      { key: "dropRate", label: "Drop Rate", isPct: true },
-      { key: "quality", label: "Drop Quality", isPct: true },
-      { key: "goldMulti", label: "Gold Multi", isPct: true },
-      {
-        key: "rareSpawn",
-        label: "Rare Spawn",
-        isPct: true,
-        isDoublePct: true,
-      },
-      { key: "fairySpawn", label: "Fairy Spawn", isPct: true },
-    ];
+      const statsKeys = [
+        { key: "atk", label: "Attack", baseKey: "baseAtk" },
+        { key: "maxHp", label: "Max HP", baseKey: "baseMaxHp" },
+        { key: "def", label: "Defense", baseKey: "baseDef" },
+        {
+          key: "moveSpeed",
+          label: "Move Speed",
+          baseKey: "baseMoveSpeed",
+        },
+        { key: "str", label: "STR", baseKey: "baseStr" },
+        { key: "dex", label: "DEX", baseKey: "baseDex" },
+        { key: "int", label: "INT", baseKey: "baseInt" },
+        { key: "critChance", label: "Crit Chance", isPct: true },
+        { key: "critDamage", label: "Crit Multi", isPct: true },
+        {
+          key: "block",
+          label: "Block Rate",
+          isPct: true,
+          baseKey: "baseBlock",
+        },
+        {
+          key: "parry",
+          label: "Parry Rate",
+          isPct: true,
+          baseKey: "baseParry",
+        },
+        {
+          key: "activeAttackSpeed",
+          label: "Active Atk Spd",
+          isPct: true,
+          baseKey: "baseActiveSpeed",
+        },
+        {
+          key: "idleAttackSpeed",
+          label: "Idle Atk Spd",
+          isPct: true,
+          baseKey: "baseIdleSpeed",
+        },
+        { key: "dropRate", label: "Drop Rate", isPct: true },
+        { key: "quality", label: "Drop Quality", isPct: true },
+        { key: "goldMulti", label: "Gold Multi", isPct: true },
+        {
+          key: "rareSpawn",
+          label: "Rare Spawn",
+          isPct: true,
+          isDoublePct: true,
+        },
+        { key: "fairySpawn", label: "Fairy Spawn", isPct: true },
+      ];
 
-    statsKeys.forEach((s) => {
-      let totalVal = item[s.key] || 0;
-      let baseVal =
-        item.type !== "artifact" && s.baseKey ? item[s.baseKey] || 0 : 0;
-      let affixVal = totalVal - baseVal;
+      statsKeys.forEach((s) => {
+        let totalVal = item[s.key] || 0;
+        let baseVal =
+          item.type !== "artifact" && s.baseKey ? item[s.baseKey] || 0 : 0;
+        let affixVal = totalVal - baseVal;
 
-      if (
-        affixVal > 0.0001 ||
-        ((s.key === "activeAttackSpeed" || s.key === "idleAttackSpeed") &&
-          affixVal > 0)
-      ) {
-        let displayVal = "";
-        if (slotMult > 1.0) {
-          let scaledVal = affixVal * slotMult;
-          if (s.isDoublePct) {
-            displayVal = `+${(affixVal * 100).toFixed(2)}% <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${(scaledVal * 100).toFixed(2)}%)</span>`;
-          } else if (s.isPct) {
-            displayVal = `+${Math.floor(affixVal * 100)}% <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${Math.floor(scaledVal * 100)}%)</span>`;
+        if (
+          affixVal > 0.0001 ||
+          ((s.key === "activeAttackSpeed" || s.key === "idleAttackSpeed") &&
+            affixVal > 0)
+        ) {
+          let displayVal = "";
+          if (slotMult > 1.0) {
+            let scaledVal = affixVal * slotMult;
+            if (s.isDoublePct) {
+              displayVal = `+${(affixVal * 100).toFixed(2)}% <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${(scaledVal * 100).toFixed(2)}%)</span>`;
+            } else if (s.isPct) {
+              displayVal = `+${Math.floor(affixVal * 100)}% <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${Math.floor(scaledVal * 100)}%)</span>`;
+            } else {
+              displayVal = `+${window.formatNumber(affixVal)} <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${window.formatNumber(scaledVal)})</span>`;
+            }
           } else {
-            displayVal = `+${window.formatNumber(affixVal)} <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${window.formatNumber(scaledVal)})</span>`;
+            if (s.isDoublePct) {
+              displayVal = `+${(affixVal * 100).toFixed(2)}%`;
+            } else if (s.isPct) {
+              displayVal = `+${Math.floor(affixVal * 100)}%`;
+            } else {
+              displayVal = `+${window.formatNumber(affixVal)}`;
+            }
           }
-        } else {
-          if (s.isDoublePct) {
-            displayVal = `+${(affixVal * 100).toFixed(2)}%`;
-          } else if (s.isPct) {
-            displayVal = `+${Math.floor(affixVal * 100)}%`;
-          } else {
-            displayVal = `+${window.formatNumber(affixVal)}`;
+
+          let iconSvg = window.getUiIconSvg(s.key, 11);
+          let rangeStr = window.formatStatRangeStr
+            ? window.formatStatRangeStr(item, s.key, s.isPct || s.isDoublePct)
+            : "";
+
+          if (rangeStr) {
+            rangeLines.push(`
+              <div style="font-size: 9.5px; color: #aaa; display: flex; justify-content: space-between; align-items: center; font-family: monospace; background: rgba(0,0,0,0.22); padding: 4px 6px; border-radius: 4px; border: 1.5px solid #111;">
+                <span style="color: #94a3b8; font-weight: bold; display: flex; align-items: center; gap: 4px;">${iconSvg} ${s.label} Range:</span>
+                <span>${rangeStr}</span>
+              </div>
+            `);
           }
+
+          affixes.push(
+            `<div class="tt-stat-line" style="color:${s.key === "critChance" || s.key === "critDamage" ? "#e67e22" : "#ecf0f1"}; font-weight: bold;">• ${iconSvg} ${s.label}: ${displayVal}${window.getStatEnchantSuffix ? window.getStatEnchantSuffix(item, s.key) : ""}</div>`,
+          );
         }
-
-        let iconSvg = window.getUiIconSvg(s.key, 11);
-        let rangeStr = window.formatStatRangeStr
-          ? window.formatStatRangeStr(item, s.key, s.isPct || s.isDoublePct)
-          : "";
-        affixes.push(
-          `<div class="tt-stat-line" style="color:${s.key === "critChance" || s.key === "critDamage" ? "#e67e22" : "#ecf0f1"};">• ${iconSvg} ${s.label}: ${displayVal}${window.getStatEnchantSuffix ? window.getStatEnchantSuffix(item, s.key) : ""}${rangeStr}</div>`,
-        );
-      }
-    });
+      });
 
     if (affixes.length > 0) {
       if (item.type === "artifact") {
@@ -5721,49 +5732,85 @@ window.generateItemCardHtml = function (
 
   // --- COMPARISON PANEL NET CHANGE RESOLUTION ---
   if (compareItem) {
-    html += `<div style="font-weight:bold; color:#3498db; margin-top:8px; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Net Change:</div>`;
-    let hasDiffs = false;
-    let statsList = [
-      { key: "atk", icon: "⚔️" },
-      { key: "maxHp", icon: "❤️" },
-      { key: "def", icon: "🛡️" },
-      { key: "moveSpeed", icon: "👟" },
-      { key: "str", icon: "💪" },
-      { key: "dex", icon: "🎯" },
-      { key: "int", icon: "🧠" },
-      { key: "critChance", isPct: true, icon: "✨" },
-      { key: "critDamage", isPct: true, icon: "💥" },
-      { key: "block", isPct: true, icon: "🛡️" },
-      { key: "parry", isPct: true, icon: "⚡" },
-      { key: "activeAttackSpeed", icon: "⚡", isPct: true },
-      { key: "idleAttackSpeed", icon: "⏱️", isPct: true },
-    ];
+      html += `<div style="font-weight:bold; color:#3498db; margin-top:8px; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Net Change:</div>`;
+      let hasDiffs = false;
+      let statsList = [
+        { key: "atk", icon: "⚔️" },
+        { key: "maxHp", icon: "❤️" },
+        { key: "def", icon: "🛡️" },
+        { key: "moveSpeed", icon: "👟" },
+        { key: "str", icon: "💪" },
+        { key: "dex", icon: "🎯" },
+        { key: "int", icon: "🧠" },
+        { key: "critChance", isPct: true, icon: "✨" },
+        { key: "critDamage", isPct: true, icon: "💥" },
+        { key: "block", isPct: true, icon: "🛡️" },
+        { key: "parry", isPct: true, icon: "⚡" },
+        { key: "activeAttackSpeed", icon: "⚡", isPct: true },
+        { key: "idleAttackSpeed", icon: "⏱️", isPct: true },
+      ];
 
-    statsList.forEach((s) => {
-      let val = item[s.key] || 0;
-      let eqVal = compareItem[s.key] || 0;
-      let diff = val - eqVal;
-      if (Math.abs(diff) > 0.001) {
-        hasDiffs = true;
-        let isPct =
-          s.isPct || ["activeAttackSpeed", "idleAttackSpeed"].includes(s.key);
-        let isPositive = s.inverseGood ? diff < 0 : diff > 0;
-        let color = isPositive ? "#2ecc71" : "#e74c3c";
-        let sign = diff > 0 ? "+" : "";
-        let diffStr = isPct
-          ? sign + Math.round(diff * 100) + "%"
-          : sign + window.formatNumber(diff);
-        let emoji = s.icon ? s.icon + " " : "";
-        let sLabel = window.getStatLabel(s.key);
+      statsList.forEach((s) => {
+        let val = item[s.key] || 0;
+        let eqVal = compareItem[s.key] || 0;
+        let diff = val - eqVal;
+        if (Math.abs(diff) > 0.001) {
+          hasDiffs = true;
+          let isPct =
+            s.isPct || ["activeAttackSpeed", "idleAttackSpeed"].includes(s.key);
+          let isPositive = s.inverseGood ? diff < 0 : diff > 0;
+          let color = isPositive ? "#2ecc71" : "#e74c3c";
+          let sign = diff > 0 ? "+" : "";
+          let diffStr = isPct
+            ? sign + Math.round(diff * 100) + "%"
+            : sign + window.formatNumber(diff);
+          let emoji = s.icon ? s.icon + " " : "";
+          let sLabel = window.getStatLabel(s.key);
 
-        html += `<div class="tt-stat-line" style="color:${color}; font-weight:bold; white-space:nowrap;">• ${emoji}${sLabel}: ${diffStr}</div>`;
-      }
-    });
-    if (!hasDiffs)
-      html += `<div class="tt-stat-line" style="color:#7f8c8d; font-style:italic;">No net difference.</div>`;
-  }
+          html += `<div class="tt-stat-line" style="color:${color}; font-weight:bold; white-space:nowrap;">• ${emoji}${sLabel}: ${diffStr}</div>`;
+        }
+      });
+      if (!hasDiffs)
+        html += `<div class="tt-stat-line" style="color:#7f8c8d; font-style:italic;">No net difference.</div>`;
+    }
 
-  if (uniqueStyle) {
+    // Build Collapsible Advanced Details Block (Ranges & Subweapon Specialty)
+    if (specialtyHtml || (typeof rangeLines !== "undefined" && rangeLines.length > 0)) {
+      let specialtySecHtml = specialtyHtml
+        ? `<div style="margin-bottom: 8px;">
+             ${specialtyHtml}
+           </div>`
+        : "";
+
+      let rangeSecHtml = (typeof rangeLines !== "undefined" && rangeLines.length > 0)
+        ? `<div>
+             <strong style="color: #a855f7; display: block; font-size: 9.5px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">🎲 Affix Roll Ranges:</strong>
+             <div style="display: flex; flex-direction: column; gap: 4px;">
+               ${rangeLines.join("")}
+             </div>
+           </div>`
+        : "";
+
+      html += `
+        <style>
+          .tooltip-advanced-details summary::-webkit-details-marker { display: none; }
+          .tooltip-advanced-details summary { list-style: none; }
+          .tooltip-advanced-details[open] summary { color: #df9ffb !important; }
+        </style>
+        <details class="tooltip-advanced-details" style="margin-top: 10px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px;" onclick="event.stopPropagation();">
+          <summary style="font-size: 9.5px; color: #a855f7; cursor: pointer; user-select: none; font-weight: bold; text-align: center; list-style: none; display: flex; align-items: center; justify-content: center; gap: 4px; outline: none; transition: color 0.15s;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transform:translateY(1px);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Show Specialty & Roll Ranges
+          </summary>
+          <div style="margin-top: 8px; animation: toastFadeIn 0.2s ease-out; display: flex; flex-direction: column; gap: 8px;">
+            ${specialtySecHtml}
+            ${rangeSecHtml}
+          </div>
+        </details>
+      `;
+    }
+
+    if (uniqueStyle) {
     if (uniqueStyle.lore) {
       html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
     }
