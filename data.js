@@ -1356,11 +1356,15 @@ window.resolvePlayerStats = function (useDraft = false) {
       p.block = 0.0; // STRICT: Can't block with a tome
       p.parry = 0.0; // STRICT: Can't parry with a tome
     } else if (subType === "dagger") {
-      maxParryCap = window.checkArtifactTrait("titan_grip") ? 0.3 : 0.25;
-      if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
-      // Removed duplicate p.parry flat add; Parry is now read directly from Dagger Item base stats!
-      p.block = 0.0; // STRICT: Can't block with a dagger
-    }
+        let sub = window.equippedSlots.subweapon;
+        let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+        let baseCap = noun.includes("main-gauche") ? 0.30 : 0.25;
+
+        maxParryCap = window.checkArtifactTrait("titan_grip") ? (baseCap + 0.05) : baseCap;
+        if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
+        // Removed duplicate p.parry flat add; Parry is now read directly from Dagger Item base stats!
+        p.block = 0.0; // STRICT: Can't block with a dagger
+      }
   } else {
     p.block = 0.0; // STRICT: Can't block without subweapon
     p.parry = 0.0; // STRICT: Can't parry without subweapon

@@ -1591,23 +1591,35 @@ Object.assign(window.ItemFactory, {
         item.baseMaxHp = Math.ceil(
           3.0 * hpDefExpScale * prestigeMult * baseRarityMult,
         );
-      } else if (chosenType === "boots") {
-        item.baseDef = Math.ceil(
-          0.35 * hpDefExpScale * prestigeMult * baseRarityMult,
-        );
-        item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
-      } else if (chosenType === "subweapon") {
-        if (item.subType === "shield") {
-          item.baseDef = Math.ceil(
-            1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-          );
-          item.baseBlock = 0.05; // Standard base 5% Block Rate on ALL shields
-        } else if (item.subType === "dagger") {
-          item.baseAtk = Math.ceil(
-            0.8 * expScale * prestigeMult * baseRarityMult,
-          );
-          item.baseParry = 0.05; // Standard base 5% Parry Rate on ALL daggers
-        } else if (item.subType === "tome") {
+      } else if (item.subType === "boots") {
+              item.baseDef = Math.ceil(
+                0.35 * hpDefExpScale * prestigeMult * baseRarityMult,
+              );
+              item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
+            } else if (item.subType === "subweapon") {
+              if (item.subType === "shield") {
+                item.baseDef = Math.ceil(
+                  1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+                );
+                let noun = item.noun ? item.noun.toLowerCase() : "";
+                if (noun.includes("buckler")) {
+                  item.baseBlock = 0.12;
+                } else if (noun.includes("tower")) {
+                  item.baseBlock = 0.02;
+                } else {
+                  item.baseBlock = 0.05;
+                }
+              } else if (item.subType === "dagger") {
+                item.baseAtk = Math.ceil(
+                  0.8 * expScale * prestigeMult * baseRarityMult,
+                );
+                let noun = item.noun ? item.noun.toLowerCase() : "";
+                if (noun.includes("main-gauche")) {
+                  item.baseParry = 0.10;
+                } else {
+                  item.baseParry = 0.05;
+                }
+              } else if (item.subType === "tome") {
           item.baseInt = Math.ceil(
             1.5 * expScale * prestigeMult * baseRarityMult,
           );
@@ -2670,31 +2682,43 @@ window.recalculateItemStats = function (item) {
   }
 
   if (
-    item.type === "subweapon" &&
-    !item.isUniqueAegis &&
-    !item.isUniqueWatch &&
-    !item.isUniqueChronicle
-  ) {
-    let stars = item.statsRolled || 0;
-    let baseRarityMult = 1.0 + stars * 0.3;
-    let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
-    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-    let repScale = Math.pow(repGrowth, repStage);
-    let expScale = repScale;
-    let hpDefExpScale = repScale;
-    let prestigeMult = 1.0;
+      item.type === "subweapon" &&
+      !item.isUniqueAegis &&
+      !item.isUniqueWatch &&
+      !item.isUniqueChronicle
+    ) {
+      let stars = item.statsRolled || 0;
+      let baseRarityMult = 1.0 + stars * 0.3;
+      let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
+      let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+      let repScale = Math.pow(repGrowth, repStage);
+      let expScale = repScale;
+      let hpDefExpScale = repScale;
+      let prestigeMult = 1.0;
 
-    if (item.subType === "shield") {
-      item.rawBaseDef = Math.ceil(
-        1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-      );
-      item.rawBaseBlock = 0.05; // Self-heal & lock base Block Rate for all shields
-    } else if (item.subType === "dagger") {
-      item.rawBaseAtk = Math.ceil(
-        0.8 * expScale * prestigeMult * baseRarityMult,
-      );
-      item.rawBaseParry = 0.05; // Self-heal & lock base Parry Rate for all daggers
-    } else if (item.subType === "tome") {
+      if (item.subType === "shield") {
+        item.rawBaseDef = Math.ceil(
+          1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+        let noun = item.noun ? item.noun.toLowerCase() : "";
+        if (noun.includes("buckler")) {
+          item.rawBaseBlock = 0.12;
+        } else if (noun.includes("tower")) {
+          item.rawBaseBlock = 0.02;
+        } else {
+          item.rawBaseBlock = 0.05;
+        }
+      } else if (item.subType === "dagger") {
+        item.rawBaseAtk = Math.ceil(
+          0.8 * expScale * prestigeMult * baseRarityMult,
+        );
+        let noun = item.noun ? item.noun.toLowerCase() : "";
+        if (noun.includes("main-gauche")) {
+          item.rawBaseParry = 0.10;
+        } else {
+          item.rawBaseParry = 0.05;
+        }
+      } else if (item.subType === "tome") {
       item.rawBaseInt = Math.ceil(
         1.5 * expScale * prestigeMult * baseRarityMult,
       );

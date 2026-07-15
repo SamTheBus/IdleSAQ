@@ -5282,50 +5282,95 @@ window.generateItemCardHtml = function (
   }
 
   if (item.id !== "dummy" && item.type === "subweapon") {
-    if (item.subType === "shield") {
-      html += `
-          <details style="margin-bottom:8px; border: 1px dashed #3498db; border-radius:4px; background: rgba(52, 152, 219, 0.05); pointer-events: auto;">
-            <summary style="color:#3498db; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
-              <span>🛡️ BULWARK PASSIVE</span>
-              <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
-            </summary>
-            <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(52, 152, 219, 0.2); margin-top: 3px;">
-              • Grants <strong style="color:#fff;">+12% Defense</strong> multiplier.<br>
-              • Enables <strong>Block Rate</strong> (Capped at 20% Base / 25% with Titan's Grip).<br>
-              • Successful Blocks completely negate incoming damage.<br>
-              • <strong>Shield Bash:</strong> Blocks trigger instant counters dealing <strong style="color:#3498db;">150% Defense</strong> damage (+0.2% scaling per Strength point).
-            </div>
-          </details>
-        `;
-    } else if (item.subType === "dagger") {
-      html += `
-          <details style="margin-bottom:8px; border: 1px dashed #e74c3c; border-radius:4px; background: rgba(231, 76, 60, 0.05); pointer-events: auto;">
-            <summary style="color:#e74c3c; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
-              <span>🗡️ RIPOSTE PASSIVE</span>
-              <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
-            </summary>
-            <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(231, 76, 60, 0.2); margin-top: 3px;">
-              • Enables <strong>Parry Rate</strong> (Capped at 25% Base / 30% with Titan's Grip).<br>
-              • Successful Parries mitigate <strong style="color:#fff;">60% of damage</strong>.<br>
-              • <strong>Riposte:</strong> Parries trigger instant counters dealing <strong style="color:#e74c3c;">150% Attack</strong> damage (+0.3% scaling per Dexterity point).
-            </div>
-          </details>
-        `;
-    } else if (item.subType === "tome") {
-      html += `
-          <details style="margin-bottom:8px; border: 1px dashed #9b59b6; border-radius:4px; background: rgba(155, 89, 182, 0.05); pointer-events: auto;">
-            <summary style="color:#9b59b6; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
-              <span>🔮 ARCANE BARRIER</span>
-              <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
-            </summary>
-            <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(155, 89, 182, 0.2); margin-top: 3px;">
-              • Absorbs a base <strong style="color:#fff;">20% of damage</strong> before Defense checks, scaling with Intelligence (INT) up to a 35% cap.<br>
-              • <strong>Tome Spells:</strong> Slashes trigger random elemental spells dealing <strong style="color:#9b59b6;">25% Attack</strong> damage (+1.0% scaling per Intelligence point).
-            </div>
-          </details>
-        `;
+      if (item.subType === "shield") {
+        let noun = item.noun ? item.noun.toLowerCase() : "";
+        let specialtyTitle = "Standard Shield";
+        let specialtyDesc = "Successful Blocks trigger a Shield Bash dealing <strong style='color:#3498db;'>160% Defense</strong> damage (+0.2% per Strength point).";
+        let baseBlockPercent = "5%";
+        if (noun.includes("buckler")) {
+          specialtyTitle = "Buckler Specialty";
+          specialtyDesc = "Grants <strong style='color:#2ecc71;'>+12% base Block Rate</strong>. Shield Bash is lightweight, dealing <strong style='color:#3498db;'>100% Defense</strong> damage (+0.2% per Strength point).";
+          baseBlockPercent = "12%";
+        } else if (noun.includes("tower")) {
+          specialtyTitle = "Tower Shield Specialty";
+          specialtyDesc = "Grants <strong style='color:#e74c3c;'>+2% base Block Rate</strong> but triggers a crushing Shield Bash dealing <strong style='color:#3498db;'>250% Defense</strong> damage (+0.2% per Strength point).";
+          baseBlockPercent = "2%";
+        }
+
+        html += `
+            <details style="margin-bottom:8px; border: 1px dashed #3498db; border-radius:4px; background: rgba(52, 152, 219, 0.05); pointer-events: auto;">
+              <summary style="color:#3498db; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
+                <span>🛡️ BULWARK PASSIVE [${specialtyTitle.toUpperCase()}]</span>
+                <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
+              </summary>
+              <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(52, 152, 219, 0.2); margin-top: 3px;">
+                • Grants <strong style="color:#fff;">+12% Defense</strong> multiplier.<br>
+                • Enables <strong>Block Rate</strong> (Base Block: <strong style="color:#fff;">${baseBlockPercent}</strong>, Capped at 20% / 25% with Titan's Grip).<br>
+                • Successful Blocks completely negate incoming damage.<br>
+                • <strong>Shield Bash:</strong> ${specialtyDesc}
+              </div>
+            </details>
+          `;
+      } else if (item.subType === "dagger") {
+        let noun = item.noun ? item.noun.toLowerCase() : "";
+        let specialtyTitle = "Standard Dagger";
+        let specialtyDesc = "Offhand strikes have a <strong style='color:#fff;'>40% base chance</strong> to trigger dealing <strong style='color:#e74c3c;'>35% Attack</strong>. Riposte parry counters deal <strong style='color:#e74c3c;'>100% Attack</strong> damage (+0.3% per Dexterity point).";
+        let baseParryPercent = "5%";
+        let baseParryCap = "25% (30% with Titan's Grip)";
+
+        if (noun.includes("kris") || noun.includes("dirk")) {
+          specialtyTitle = "Kris/Dirk Specialty";
+          specialtyDesc = "Low offhand strike chance (<strong style='color:#fff;'>25% base</strong>) but deals a massive <strong style='color:#e74c3c;'>55% Attack</strong>. Riposte parry counters deal <strong style='color:#e74c3c;'>130% Attack</strong> damage.";
+        } else if (noun.includes("stiletto") || noun.includes("baselard")) {
+          specialtyTitle = "Stiletto/Baselard Specialty";
+          specialtyDesc = "High offhand strike chance (<strong style='color:#fff;'>60% base</strong>) but deals a lighter <strong style='color:#e74c3c;'>25% Attack</strong>. Riposte parry counters deal <strong style='color:#e74c3c;'>80% Attack</strong> damage.";
+        } else if (noun.includes("main-gauche")) {
+          specialtyTitle = "Main-Gauche Specialty";
+          specialtyDesc = "Moderate offhand strike chance (<strong style='color:#fff;'>40% base</strong>) dealing <strong style='color:#e74c3c;'>35% Attack</strong>. Natively grants <strong style='color:#2ecc71;'>+10% base Parry Rate</strong>.";
+          baseParryPercent = "10%";
+          baseParryCap = "30% (35% with Titan's Grip)";
+        }
+
+        html += `
+            <details style="margin-bottom:8px; border: 1px dashed #e74c3c; border-radius:4px; background: rgba(231, 76, 60, 0.05); pointer-events: auto;">
+              <summary style="color:#e74c3c; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
+                <span>🗡️ RIPOSTE PASSIVE [${specialtyTitle.toUpperCase()}]</span>
+                <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
+              </summary>
+              <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(231, 76, 60, 0.2); margin-top: 3px;">
+                • Enables <strong>Parry Rate</strong> (Base Parry: <strong style="color:#fff;">${baseParryPercent}</strong>, Capped at ${baseParryCap}).<br>
+                • Successful Parries mitigate <strong style="color:#fff;">60% of damage</strong>.<br>
+                • <strong>Riposte & Multi-Strike:</strong> ${specialtyDesc}
+              </div>
+            </details>
+          `;
+      } else if (item.subType === "tome") {
+        let noun = item.noun ? item.noun.toLowerCase() : "";
+        let specialtyTitle = "Standard Grimoire";
+        let specialtyDesc = "Spells have an <strong style='color:#fff;'>18% base chance</strong> to trigger per swing, dealing <strong style='color:#9b59b6;'>100% spell damage</strong> (scales with INT).";
+        if (noun.includes("grimoire") || noun.includes("chronicle")) {
+          specialtyTitle = "Grimoire Specialty";
+          specialtyDesc = "Low spell trigger chance (<strong style='color:#fff;'>10% base</strong>) but spells deal a cataclysmic <strong style='color:#9b59b6;'>180% spell damage</strong>.";
+        } else if (noun.includes("lexicon")) {
+          specialtyTitle = "Lexicon Specialty";
+          specialtyDesc = "High spell trigger chance (<strong style='color:#fff;'>26% base</strong>) but spells deal a lighter <strong style='color:#9b59b6;'>60% spell damage</strong>.";
+        }
+
+        html += `
+            <details style="margin-bottom:8px; border: 1px dashed #9b59b6; border-radius:4px; background: rgba(155, 89, 182, 0.05); pointer-events: auto;">
+              <summary style="color:#9b59b6; font-size:10px; font-weight:bold; padding: 5px 8px; text-align: center; cursor: pointer; list-style: none; outline: none; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;">
+                <span>🔮 ARCANE BARRIER [${specialtyTitle.toUpperCase()}]</span>
+                <span style="font-size:8px; color:#888; font-weight:normal;">(Tap to Reveal Mechanics)</span>
+              </summary>
+              <div style="color:#aaa; font-size:9.5px; padding: 0 8px 8px 8px; text-align: left; white-space:normal; line-height:1.35; border-top: 1px dashed rgba(155, 89, 182, 0.2); margin-top: 3px;">
+                • Absorbs a base <strong style="color:#fff;">20% of damage</strong> before Defense checks, scaling with Intelligence (INT) up to a 35% cap.<br>
+                • <strong>Tome Spells:</strong> Slashes trigger random Fire, Frost, and Lightning spells (Base Spell: 25% Attack, scaled by INT).<br>
+                • <strong>Spell Pattern:</strong> ${specialtyDesc}
+              </div>
+            </details>
+          `;
+      }
     }
-  }
 
   // --- BASE STATS SECTION ---
   if (item.id !== "dummy" && item.type !== "artifact") {

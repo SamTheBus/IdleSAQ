@@ -3863,14 +3863,26 @@ function update() {
         let isBlocked = Math.random() < p.block;
 
         if (isBlocked) {
-          window.SoundManager.play("block");
+                    window.SoundManager.play("block");
 
-          // High-Powered Shield Bash Counter-Attack for all Shields!
-          if (window.mob && window.mob.hp.gt(0)) {
-            let bashDmg = Math.ceil(p.def * 1.5 * (1.0 + p.str * 0.002));
-            let isAegis = window.hasUniquePassive("shield_aegis");
+                    // High-Powered Shield Bash Counter-Attack for all Shields!
+                    if (window.mob && window.mob.hp.gt(0)) {
+                      let sub = window.equippedSlots.subweapon;
+                      let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+                      let bashMult = 1.5;
 
-            if (isAegis) {
+                      if (noun.includes("buckler")) {
+                        bashMult = 1.0;
+                      } else if (noun.includes("tower")) {
+                        bashMult = 2.5;
+                      } else {
+                        bashMult = 1.6;
+                      }
+
+                      let bashDmg = Math.ceil(p.def * bashMult * (1.0 + p.str * 0.002));
+                      let isAegis = window.hasUniquePassive("shield_aegis");
+
+                      if (isAegis) {
               let shieldLvl = window.equippedSlots.subweapon.stageLevel || 1;
               bashDmg = Math.ceil(
                 p.def * (2.2 + shieldLvl * 0.05) * (1.0 + p.str * 0.003),
@@ -3984,14 +3996,26 @@ function update() {
           let isParried = Math.random() < p.parry;
 
           if (isParried) {
-            // Mitigate incoming damage by 60% (takes 40% damage)
-            netDamage = Math.max(1, Math.ceil(netDamage * 0.4));
-            window.SoundManager.play("parry");
+                      // Mitigate incoming damage by 60% (takes 40% damage)
+                      netDamage = Math.max(1, Math.ceil(netDamage * 0.4));
+                      window.SoundManager.play("parry");
 
-            // Instant offensive Riposte counter-attack scaling with DEX & ATK!
-            let riposteDmg = Math.ceil(p.atk * 1.5 * (1.0 + p.dex * 0.003));
+                      // Instant offensive Riposte counter-attack scaling with DEX & ATK!
+                      let sub = window.equippedSlots.subweapon;
+                      let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+                      let riposteMult = 1.0;
 
-            // Active Buff: Echoing Step (Counter strike scaling on parry)
+                      if (noun.includes("kris") || noun.includes("dirk")) {
+                        riposteMult = 1.3;
+                      } else if (noun.includes("stiletto") || noun.includes("baselard")) {
+                        riposteMult = 0.8;
+                      } else {
+                        riposteMult = 1.0;
+                      }
+
+                      let riposteDmg = Math.ceil(p.atk * riposteMult * (1.0 + p.dex * 0.003));
+
+                      // Active Buff: Echoing Step (Counter strike scaling on parry)
             if (
               window.playerStats.isCrucibleMode &&
               window.playerStats.crucibleActiveBuff?.id === "echoing_step"
@@ -4706,52 +4730,99 @@ window.CombatEngine = {
         }
       }
 
-      // Offhand Dagger Multi-Strike (Deals 35% of total Attack scaled multiplicatively by DEX)
-      const hasDagger =
-        window.equippedSlots.subweapon &&
-        window.equippedSlots.subweapon.subType === "dagger";
-      if (hasDagger) {
-        let baseDagger = p.atk * 0.35 * (1.0 + p.dex * 0.002);
-        if (window.playerStats.adrenalineTimer > 0) baseDagger *= 2;
-        let daggerDmg = Math.max(1, Math.ceil(baseDagger));
+      // Offhand Dagger Multi-Strike (Noun-varying trigger chance and damage scale)
+            const hasDagger =
+              window.equippedSlots.subweapon &&
+              window.equippedSlots.subweapon.subType === "dagger";
+            if (hasDagger) {
+              let sub = window.equippedSlots.subweapon;
+              let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+              let offhandChance = 1.0;
+              let offhandDmgMult = 0.35;
 
-        let isDaggerCrit = Math.random() < p.critChance;
-        if (isDaggerCrit) daggerDmg = Math.ceil(daggerDmg * p.critDamage);
+              if (noun.includes("kris") || noun.includes("dirk")) {
+                offhandChance = 0.25 + p.dex * 0.0005; // 25% base + 0.05% per DEX
+                offhandChance = Math.min(0.75, offhandChance);
+                offhandDmgMult = 0.55;
+              } else if (noun.includes("stiletto") || noun.includes("baselard")) {
+                offhandChance = 0.60 + p.dex * 0.0005; // 60% base + 0.05% per DEX
+                offhandChance = Math.min(0.95, offhandChance);
+                offhandDmgMult = 0.25;
+              } else {
+                offhandChance = 0.40 + p.dex * 0.0005; // 40% base + 0.05% per DEX
+                offhandChance = Math.min(0.85, offhandChance);
+                offhandDmgMult = 0.35;
+              }
 
-        // Apply active defense mitigation to offhand dagger strikes
-        daggerDmg = Math.max(1, Math.ceil(daggerDmg * (100 / (100 + mobDef))));
+              if (Math.random() < offhandChance) {
+                let baseDagger = p.atk * offhandDmgMult * (1.0 + p.dex * 0.002);
+                if (window.playerStats.adrenalineTimer > 0) baseDagger *= 2;
+                let daggerDmg = Math.max(1, Math.ceil(baseDagger));
 
-        if (window.playerStats.singularityState === "storing") {
-          window.playerStats.singularityStoredDmg += daggerDmg;
-          window.effects.push({
-            x: window.mob.x + window.mob.w / 2,
-            y: window.mob.y - 10,
-            text: `+${window.formatNumber(daggerDmg)} [STORED]`,
-            color: "#8e44ad",
-            life: 45,
-          });
-        } else {
-          window.mob.hp = window.mob.hp.sub(daggerDmg);
-          window.spawnDamageEffect(daggerDmg, "dagger", isDaggerCrit);
-          window.damageHistory.push({ time: Date.now(), amount: daggerDmg });
-        }
-      }
+                let isDaggerCrit = Math.random() < p.critChance;
+                if (isDaggerCrit) daggerDmg = Math.ceil(daggerDmg * p.critDamage);
 
-      // Elemental Tome Spells (Balanced 15% independent chance with INT scaling)
-      const hasTome =
-        window.equippedSlots.subweapon &&
-        window.equippedSlots.subweapon.subType === "tome";
-      if (hasTome) {
-        let baseSpell = p.atk * 0.25 * (1.0 + p.int * 0.01);
-        if (window.playerStats.adrenalineTimer > 0) baseSpell *= 2;
-        let spellDmgBase = Math.max(1, Math.ceil(baseSpell));
+                // Apply active defense mitigation to offhand dagger strikes
+                let mobDef = window.mob.def || 0;
+                daggerDmg = Math.max(1, Math.ceil(daggerDmg * (100 / (100 + mobDef))));
 
-        let triggeredSpell = false;
-        let lightProc = false,
-          fireProc = false,
-          frostProc = false;
+                if (window.playerStats.singularityState === "storing") {
+                  window.playerStats.singularityStoredDmg += daggerDmg;
+                  window.effects.push({
+                    x: window.mob.x + window.mob.w / 2,
+                    y: window.mob.y - 10,
+                    text: `+${window.formatNumber(daggerDmg)} [STORED]`,
+                    color: "#8e44ad",
+                    life: 45,
+                  });
+                } else {
+                  window.mob.hp = window.mob.hp.sub(daggerDmg);
+                  window.spawnDamageEffect(daggerDmg, "dagger", isDaggerCrit);
+                  window.damageHistory.push({ time: Date.now(), amount: daggerDmg });
+                }
+              }
+            }
 
-        let spellChance = 0.15 + (p.crucibleSpellChanceBonus || 0.0);
+            // Elemental Tome Spells (Noun-varying trigger chance and damage scale)
+            const hasTome =
+              window.equippedSlots.subweapon &&
+              window.equippedSlots.subweapon.subType === "tome";
+            if (hasTome) {
+              let sub = window.equippedSlots.subweapon;
+              let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+              let spellChance = 0.15;
+              let spellDmgMult = 1.0;
+
+              if (sub.isUniqueWatch) {
+                spellChance = 0.20;
+                spellDmgMult = 1.0;
+              } else if (sub.isUniqueChronicle) {
+                spellChance = 0.15;
+                spellDmgMult = 1.2;
+              } else if (noun.includes("grimoire") || noun.includes("chronicle")) {
+                spellChance = 0.10 + p.int * 0.00015; // 10% base + 0.015% per INT
+                spellChance = Math.min(0.30, spellChance);
+                spellDmgMult = 1.8;
+              } else if (noun.includes("spellbook") || noun.includes("codex")) {
+                spellChance = 0.18 + p.int * 0.00015; // 18% base + 0.015% per INT
+                spellChance = Math.min(0.35, spellChance);
+                spellDmgMult = 1.0;
+              } else if (noun.includes("lexicon")) {
+                spellChance = 0.26 + p.int * 0.00015; // 26% base + 0.015% per INT
+                spellChance = Math.min(0.45, spellChance);
+                spellDmgMult = 0.6;
+              }
+
+              spellChance += (p.crucibleSpellChanceBonus || 0.0);
+
+              let baseSpell = p.atk * 0.25 * (1.0 + p.int * 0.01) * spellDmgMult;
+              if (window.playerStats.adrenalineTimer > 0) baseSpell *= 2;
+              let spellDmgBase = Math.max(1, Math.ceil(baseSpell));
+
+              let triggeredSpell = false;
+              let lightProc = false,
+                fireProc = false,
+                frostProc = false;
 
         // 1. Lightning Spell Roll
         if (Math.random() < spellChance) {
