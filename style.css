@@ -1018,7 +1018,7 @@ canvas {
   line-height: 1.4;
   z-index: 50000;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.85);
-  pointer-events: none; /* Prevents cursor collisions and flickering spasms */
+  pointer-events: auto; /* Allow mouse interaction for expanding subweapon details on desktop */
   overflow: hidden; /* Prevent child backgrounds from bleeding out of rounded corners */
 }
 

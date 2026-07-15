@@ -2242,15 +2242,26 @@ window.onload = function () {
   }, 4000);
 
   // Block pointer event leaks and click-through propagation on tooltips (Gesture-Detecting Redesign)
-  const preventTooltipLeaks = (id) => {
-    let el = document.getElementById(id);
-    if (!el) return;
+    const preventTooltipLeaks = (id) => {
+      let el = document.getElementById(id);
+      if (!el) return;
 
-    let startY = 0;
-    let startX = 0;
-    let isScrolling = false;
+      let startY = 0;
+      let startX = 0;
+      let isScrolling = false;
 
-    const handleStart = (clientX, clientY) => {
+      // Desktop Keep-Alive Hover Listeners
+      el.addEventListener("mouseenter", () => {
+        if (window.tooltipHideTimeoutId) {
+          clearTimeout(window.tooltipHideTimeoutId);
+          window.tooltipHideTimeoutId = null;
+        }
+      });
+      el.addEventListener("mouseleave", () => {
+        window.hideTooltip();
+      });
+
+      const handleStart = (clientX, clientY) => {
       startY = clientY;
       startX = clientX;
       isScrolling = false;

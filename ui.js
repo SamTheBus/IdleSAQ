@@ -4911,16 +4911,21 @@ window.renderInventory = function () {
   }
 };
 
+window.tooltipHideTimeoutId = null;
+
 // Append hideTooltip inside window.UIManager
 Object.assign(window.UIManager, {
   hideTooltip() {
-    ["game-tooltip", "etc-tooltip", "stat-tooltip", "log-item-tooltip"].forEach(
-      (id) => {
-        let el = window.getCachedEl(id);
-        if (el) el.style.display = "none";
-      },
-    );
-    window.activeStatTooltip = null;
+    if (window.tooltipHideTimeoutId) clearTimeout(window.tooltipHideTimeoutId);
+    window.tooltipHideTimeoutId = setTimeout(() => {
+      ["game-tooltip", "etc-tooltip", "stat-tooltip", "log-item-tooltip"].forEach(
+        (id) => {
+          let el = window.getCachedEl(id);
+          if (el) el.style.display = "none";
+        },
+      );
+      window.activeStatTooltip = null;
+    }, 150); // 150ms grace period to move mouse into tooltip on desktop
   },
 });
 
@@ -4931,6 +4936,10 @@ window.hideTooltip = () => window.UIManager.hideTooltip();
 // Append positionTooltip inside window.UIManager
 Object.assign(window.UIManager, {
   positionTooltip(e, tt) {
+    if (window.tooltipHideTimeoutId) {
+      clearTimeout(window.tooltipHideTimeoutId);
+      window.tooltipHideTimeoutId = null;
+    }
     let container = document
       .getElementById("game-container")
       .getBoundingClientRect();
