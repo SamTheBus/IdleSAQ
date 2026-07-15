@@ -1527,50 +1527,42 @@ window.SaveManager = {
     }
 
     // Calculate offline soul gains to match online campaign rates
-    let offlineMonsterSouls = 0;
-    let offlineLuminousSouls = 0;
+        let offlineMonsterSouls = 0;
 
-    // 1. Expected Souls from cleared progression stages
-              if (stagesGained > 0) {
-                for (let stg = originalStage; stg < currentStage; stg++) {
-                  // Simulated Boss-Scale Monster Soul drop (30% chance per progression stage cleared)
-                  if (Math.random() < 0.30) {
-                    let baseQty = window.randInt(2, 6);
-                    let scaleMultiplier = 1 + Math.log10(stg);
-                    let finalQty = Math.round(baseQty * scaleMultiplier * Math.sqrt(p.qly || 1.0));
-                    offlineMonsterSouls += finalQty;
+        // 1. Expected Souls from cleared progression stages
+                  if (stagesGained > 0) {
+                    for (let stg = originalStage; stg < currentStage; stg++) {
+                      // Simulated Boss-Scale Monster Soul drop (30% chance per progression stage cleared)
+                      if (Math.random() < 0.30) {
+                        let baseQty = window.randInt(2, 6);
+                        let scaleMultiplier = 1 + Math.log10(stg);
+                        let finalQty = Math.round(baseQty * scaleMultiplier * Math.sqrt(p.qly || 1.0));
+                        offlineMonsterSouls += finalQty;
+                      }
+
+                      // Normal mobs: targetsRequired * 12% drop chance * (1 + Math.floor(stg / 50))
+                      let progNormalSoulExpected = targetsRequired * (0.12 * p.drop);
+                      let progNormalSoulQty = 1 + Math.floor(stg / 50);
+                      offlineMonsterSouls += Math.round(progNormalSoulExpected * progNormalSoulQty);
+                    }
                   }
 
-                  // Normal mobs: targetsRequired * 12% drop chance * (1 + Math.floor(stg / 50))
-                  let progNormalSoulExpected = targetsRequired * (0.12 * p.drop);
-                  let progNormalSoulQty = 1 + Math.floor(stg / 50);
-                  offlineMonsterSouls += Math.round(progNormalSoulExpected * progNormalSoulQty);
-                }
-              }
+        // 2. Expected Souls from idle farming kills on the final stage
+        if (farmKills > 0) {
+          let rareSpawnChance = p.rareSpawn || 0.01;
+          let expectedRares = farmKills * rareSpawnChance;
+          let expectedNormals = farmKills - expectedRares;
 
-    // 2. Expected Souls from idle farming kills on the final stage
-    if (farmKills > 0) {
-      let rareSpawnChance = p.rareSpawn || 0.01;
-      let expectedRares = farmKills * rareSpawnChance;
-      let expectedNormals = farmKills - expectedRares;
+          // Normal mob Monster Souls: 12% chance * (1 + Math.floor(currentStage / 50))
+          let normalSoulExpected = expectedNormals * (0.12 * p.drop);
+          let normalSoulQty = 1 + Math.floor(currentStage / 50);
+          offlineMonsterSouls += Math.round(normalSoulExpected * normalSoulQty);
+        }
 
-      // Normal mob Monster Souls: 12% chance * (1 + Math.floor(currentStage / 50))
-      let normalSoulExpected = expectedNormals * (0.12 * p.drop);
-      let normalSoulQty = 1 + Math.floor(currentStage / 50);
-      offlineMonsterSouls += Math.round(normalSoulExpected * normalSoulQty);
-
-      // Rare mob Luminous Souls: 25% chance
-      let expectedLuminous = expectedRares * (0.25 * p.drop);
-      offlineLuminousSouls += Math.round(expectedLuminous);
-    }
-
-    // Apply and record to the summary card
-    if (offlineMonsterSouls > 0) {
-      recordScrapGained("Monster Soul", offlineMonsterSouls);
-    }
-    if (offlineLuminousSouls > 0) {
-      recordScrapGained("Luminous Soul", offlineLuminousSouls);
-    }
+        // Apply and record to the summary card
+        if (offlineMonsterSouls > 0) {
+          recordScrapGained("Monster Soul", offlineMonsterSouls);
+        }
 
     // Update active player statistics on return
     window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
@@ -5173,17 +5165,17 @@ window.CombatEngine = {
     }
 
     // Highly restricted Monster Card Sack drop rolls
-    let cardSackChance = 0;
-    if (
-      window.playerStats.isDungeonMode &&
-      window.mob.type === "dungeon_boss"
-    ) {
-      cardSackChance = 0.03; // Reduced from 15% to 3% to preserve premium feel
-    } else if (window.playerStats.isUberBoss) {
-      cardSackChance = 0.08; // Reduced from 25% to 8% to preserve premium feel
-    } else if (window.mob.type === "boss") {
-      cardSackChance = 0.005; // Reduced from 2% to 0.5% to preserve premium feel
-    }
+        let cardSackChance = 0;
+        if (
+          window.playerStats.isDungeonMode &&
+          window.mob.type === "dungeon_boss"
+        ) {
+          cardSackChance = 0.03;
+        } else if (window.playerStats.isUberBoss) {
+          cardSackChance = 0.08;
+        } else if (window.mob.type === "boss") {
+          cardSackChance = 0.01; // Increased to 1.0% to match player pacing expectations
+        }
 
     if (cardSackChance > 0 && Math.random() < cardSackChance) {
       window.addUseDrop("Monster Card Sack", 1);

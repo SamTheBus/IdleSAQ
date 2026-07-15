@@ -5458,20 +5458,96 @@ window.generateItemCardHtml = function (
       });
     }
     if (item.baseInt > 0) {
-      let displayVal = window.formatNumber(item.baseInt);
-      if (slotMult > 1.0) {
-        let scaled = Math.ceil(item.baseInt * slotMult);
-        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
-      }
-      baseStats.push({
-        label: "Intelligence",
-        val: displayVal,
-        icon: window.getUiIconSvg("int", 14),
-      });
-    }
+            let displayVal = window.formatNumber(item.baseInt);
+            if (slotMult > 1.0) {
+              let scaled = Math.ceil(item.baseInt * slotMult);
+              displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
+            }
+            baseStats.push({
+              label: "Intelligence",
+              val: displayVal,
+              icon: window.getUiIconSvg("int", 14),
+            });
+          }
 
-    if (baseStats.length > 0) {
-      html += `<div style="background: rgba(255, 255, 255, 0.02); border: 1px solid #222; border-radius: 4px; padding: 6px; margin: 8px 0; text-align: center;">`;
+          // --- SUBWEAPON COMPASS STATS ---
+          if (item.type === "subweapon") {
+            let noun = item.noun ? item.noun.toLowerCase() : "";
+            if (item.subType === "shield") {
+              // Shield Bash Base Multiplier
+              let bashMult = 160;
+              if (item.isUniqueAegis) bashMult = 220;
+              else if (noun.includes("buckler")) bashMult = 100;
+              else if (noun.includes("tower")) bashMult = 250;
+
+              baseStats.push({
+                label: "Shield Bash Dmg",
+                val: `${bashMult}% Def`,
+                icon: window.getUiIconSvg("block", 14),
+              });
+            } else if (item.subType === "dagger") {
+              // Offhand Multi-Strike Chance
+              let offhandChance = 40;
+              if (noun.includes("kris") || noun.includes("dirk")) offhandChance = 25;
+              else if (noun.includes("stiletto") || noun.includes("baselard")) offhandChance = 60;
+
+              // Offhand Multi-Strike Damage Multiplier
+              let offhandDmg = 35;
+              if (noun.includes("kris") || noun.includes("dirk")) offhandDmg = 55;
+              else if (noun.includes("stiletto") || noun.includes("baselard")) offhandDmg = 25;
+
+              // Riposte Parry Counter Damage Multiplier
+              let riposteDmg = 100;
+              if (noun.includes("kris") || noun.includes("dirk")) riposteDmg = 130;
+              else if (noun.includes("stiletto") || noun.includes("baselard")) riposteDmg = 80;
+
+              baseStats.push({
+                label: "Multi-Strike Rate",
+                val: `${offhandChance}%`,
+                icon: window.getUiIconSvg("dex", 14),
+              });
+              baseStats.push({
+                label: "Multi-Strike Dmg",
+                val: `${offhandDmg}% Atk`,
+                icon: window.getUiIconSvg("atk", 14),
+              });
+              baseStats.push({
+                label: "Riposte Dmg",
+                val: `${riposteDmg}% Atk`,
+                icon: window.getUiIconSvg("parry", 14),
+              });
+            } else if (item.subType === "tome") {
+              // Spell Trigger Chance
+              let spellChance = 15;
+              if (item.isUniqueWatch) spellChance = 20;
+              else if (item.isUniqueChronicle) spellChance = 15;
+              else if (noun.includes("grimoire") || noun.includes("chronicle")) spellChance = 10;
+              else if (noun.includes("spellbook") || noun.includes("codex")) spellChance = 18;
+              else if (noun.includes("lexicon")) spellChance = 26;
+
+              // Spell Damage Multiplier
+              let spellDmg = 100;
+              if (item.isUniqueWatch) spellDmg = 100;
+              else if (item.isUniqueChronicle) spellDmg = 120;
+              else if (noun.includes("grimoire") || noun.includes("chronicle")) spellDmg = 180;
+              else if (noun.includes("spellbook") || noun.includes("codex")) spellDmg = 100;
+              else if (noun.includes("lexicon")) spellDmg = 60;
+
+              baseStats.push({
+                label: "Spell Chance",
+                val: `${spellChance}%`,
+                icon: window.getUiIconSvg("int", 14),
+              });
+              baseStats.push({
+                label: "Spell Dmg",
+                val: `${spellDmg}% Atk`,
+                icon: window.getUiIconSvg("atk", 14),
+              });
+            }
+          }
+
+        if (baseStats.length > 0) {
+          html += `<div style="background: rgba(255, 255, 255, 0.02); border: 1px solid #222; border-radius: 4px; padding: 6px; margin: 8px 0; text-align: center;">`;
       html += `<div style="font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; font-weight: bold;">Base Stats</div>`;
       baseStats.forEach((b) => {
         html += `<div style="font-size: 13px; font-weight: bold; color: #f5f6fa; margin: 1px 0; display: flex; align-items: center; justify-content: center; gap: 4px;">${b.icon}<span>${b.val} ${b.label}</span></div>`;
@@ -9348,26 +9424,24 @@ window.claimMasterMissionReward = function (isWeekly = false) {
         `<strong style="color:#f1c40f;">🏆 [QUEST BOARD] Beaten Weekly Board! Earned +${scalingPP} PP, 1x Card Sack, Gacha Keys, 10x Quest Points, and ${grandItem.name}!</strong>`,
       );
   } else {
-    window.playerStats.dailyRewardClaimed = true;
+        window.playerStats.dailyRewardClaimed = true;
 
-    // Award 3 Mission Tokens for Daily Board completion
-    window.playerStats.missionTokens =
-      (window.playerStats.missionTokens || 0) + 3;
+        // Award 3 Mission Tokens for Daily Board completion
+        window.playerStats.missionTokens =
+          (window.playerStats.missionTokens || 0) + 3;
 
-    window.addEtcDrop("Gacha Key", 1);
-    window.addEtcDrop("Catalyst Core", 1);
-    window.addEtcDrop("Eridium Shard", 2);
+        window.addEtcDrop("Gacha Key", 1);
+        window.addEtcDrop("Catalyst Core", 1);
+        window.addEtcDrop("Eridium Shard", 2);
 
-    // Award 5% chance of 1x Card Sack for completing the Daily Board
-    if (Math.random() < 0.05) {
-      window.addUseDrop("Monster Card Sack", 1);
-      if (typeof window.pushLog === "function") {
-        window.pushLog(
-          "<span style='color:#a855f7;'>[MISSION BOARD] Lucky roll! Awarded 1x Monster Card Sack from Daily Board!</span>",
-        );
+        // Guaranteed 1x Card Sack for completing the Daily Board
+        window.addUseDrop("Monster Card Sack", 1);
+        if (typeof window.pushLog === "function") {
+          window.pushLog(
+            "<span style='color:#a855f7;'>[MISSION BOARD] Awarded 1x Monster Card Sack for completing the Daily Board!</span>",
+          );
+        }
       }
-    }
-  }
 
   if (window.SoundManager) window.SoundManager.play("revive");
 
@@ -9669,9 +9743,9 @@ window.renderMissionsWindow = function () {
               ${dailies.map((m) => getMissionRowHtml(m, false)).join("")}
           </div>
           <div style="margin-top:12px;">
-              ${dailyMasterBtnHtml}
-              ${dailyMasterClaimed ? "" : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:5px; line-height:1.35; white-space:normal;">Grand treat: 1x Gacha Key, 1x Catalyst Core, 2x Eridium Shards (Only requires 5/6 completed!)</div>`}
-          </div>
+                        ${dailyMasterBtnHtml}
+                        ${dailyMasterClaimed ? "" : `<div style="font-size:9px; color:#aaa; text-align:center; margin-top:5px; line-height:1.35; white-space:normal;">Grand treat: 1x Gacha Key, 1x Catalyst Core, 1x Monster Card Sack, 2x Eridium Shards (Only requires 5/6 completed!)</div>`}
+                    </div>
       </div>
 
       <!-- WEEKLY MISSIONS PANEL -->
@@ -10430,16 +10504,16 @@ window.openDailyRewardSack = function (specificName) {
   let reward1 = rollFromPool();
   receivedRewards.push(reward1);
 
-  // 1% rare chance to find a Monster Card Sack in any Daily/Guild Reward Sack
-  if (Math.random() < 0.01) {
-    window.addUseDrop("Monster Card Sack", 1);
-    receivedRewards.push({
-      name: "Monster Card Sack",
-      qty: 1,
-      color: "#a855f7",
-      type: "use",
-    });
-  }
+  // 5% chance to find a Monster Card Sack in any Daily/Guild Reward Sack
+    if (Math.random() < 0.05) {
+      window.addUseDrop("Monster Card Sack", 1);
+      receivedRewards.push({
+        name: "Monster Card Sack",
+        qty: 1,
+        color: "#a855f7",
+        type: "use",
+      });
+    }
 
   // Roll 2: 20% chance
   let hasRoll2 = Math.random() < 0.2;
