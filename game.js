@@ -6609,9 +6609,9 @@ window.CombatEngine = {
           window.playerStats.dungeonAccumulatedLoot = [];
 
           // Trigger the gorgeous summary modal!
-                      if (typeof window.showDungeonSummaryModal === "function") {
-                        window.showDungeonSummaryModal(dType, dStage, gold, xp, loot, false);
-                      }
+                                if (typeof window.showDungeonSummaryModal === "function") {
+                                  window.showDungeonSummaryModal(activeDungeon, dungeonFloor, gold, xp, loot, false);
+                                }
 
           window.playerStats.runKills = 0;
           window.playerStats.runGold = 0;
