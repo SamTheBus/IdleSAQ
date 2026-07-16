@@ -229,42 +229,60 @@
             >SAQ</span
             >
         </div>
-        <button
-                id="btn-menu-hub"
-                onclick="window.toggleMenuHub()"
-                class="nav-btn"
-                style="
-            position: relative;
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-            border-color: #3b82f6;
-            padding: 8px 16px;
-            font-size: 11.5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: bold;
-            color: #f1f5f9;
-            border-radius: 8px;
-            box-shadow: 0 3px 8px rgba(59, 130, 246, 0.15);
-          "
-        >
-            Menu ☰
-            <span
-                    id="hub-menu-alert-dot"
+
+        <!-- Header Controls Container next to Menu button -->
+        <div class="header-controls">
+            <!-- Auto-Attack & Connection Status Up Top -->
+            <button
+                    id="toggle-auto"
+                    class="btn-toggle active"
+                    onclick="window.toggleAuto()"
+                    style="height: 32px; font-size: 10px; padding: 0 10px;"
+            >
+                Auto: ON
+            </button>
+            <div id="sync-indicator"
+                 style="height: 32px; font-size: 10px; padding: 0 10px; display: inline-flex; align-items: center; gap: 6px;">
+                <span id="sync-dot"></span>
+                <span id="sync-status-text">OFFLINE</span>
+            </div>
+            <button
+                    id="btn-menu-hub"
+                    onclick="window.toggleMenuHub()"
+                    class="nav-btn"
                     style="
-              display: none;
-              position: absolute;
-              top: -3px;
-              right: -3px;
-              width: 10px;
-              height: 10px;
-              background: #e74c3c;
-              border: 2px solid #0f172a;
-              border-radius: 50%;
-              box-shadow: 0 0 8px #e74c3c;
-              animation: pulseGlow 1.2s infinite;
+              position: relative;
+              background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+              border-color: #3b82f6;
+              padding: 8px 16px;
+              font-size: 11.5px;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              font-weight: bold;
+              color: #f1f5f9;
+              border-radius: 8px;
+              box-shadow: 0 3px 8px rgba(59, 130, 246, 0.15);
             "
-            ></span>
-        </button>
+            >
+                Menu ☰
+                <span
+                        id="hub-menu-alert-dot"
+                        style="
+                display: none;
+                position: absolute;
+                top: -3px;
+                right: -3px;
+                width: 10px;
+                height: 10px;
+                background: #e74c3c;
+                border: 2px solid #0f172a;
+                border-radius: 50%;
+                box-shadow: 0 0 8px #e74c3c;
+                animation: pulseGlow 1.2s infinite;
+              "
+                ></span>
+            </button>
+        </div>
     </div>
 
     <!-- Adventurer's Hub Overlay (No blur, no scroll!) -->
@@ -2641,10 +2659,11 @@
 
     <!-- Relative Game Canvas Container -->
     <div id="canvas-container">
-        <!-- Above-Canvas Console Header HUD -->
-        <div class="canvas-top-hud" id="canvas-top-hud">
+        <!-- Above-Canvas Console Header HUD (50%/50% Split) -->
+        <div class="canvas-top-hud" id="canvas-top-hud"
+             style="grid-template-columns: 1fr 1fr !important;">
             <!-- HP Panel -->
-            <div class="hud-stat-panel panel-hp">
+            <div class="hud-stat-panel panel-hp" style="width: 100%;">
             <span class="chip-icon">
               <svg
                       width="12"
@@ -2669,21 +2688,8 @@
                 </div>
             </div>
 
-            <!-- Stage Panel -->
-            <div class="hud-stat-panel panel-stage">
-                <div class="chip-text">
-                    <div class="chip-value-row">
-                <span id="hud-stage-label" class="chip-label-prefix"
-                >Stage</span
-                >
-                        <span id="hud-stage" class="chip-value">1</span>
-                    </div>
-                    <span id="hud-stage-sub" class="chip-sub">(0/5)</span>
-                </div>
-            </div>
-
             <!-- Gold Panel -->
-            <div class="hud-stat-panel panel-gold">
+            <div class="hud-stat-panel panel-gold" style="width: 100%;">
             <span class="chip-icon">
               <svg
                       width="12"
@@ -2715,20 +2721,22 @@
 
         <canvas id="gameCanvas" width="750" height="320"></canvas>
 
-        <!-- Draggable DPS Overlay -->
+        <!-- Draggable DPS Overlay (Clean Minimalist Badge) -->
         <div id="dps-overlay-badge" style="display: none">
             <div class="dps-drag-handle">
                 <svg
                         width="10"
                         height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="3.5"
-                        stroke-linecap="round"
+                        viewBox="0 0 20 24"
+                        fill="currentColor"
+                        opacity="0.6"
                 >
-                    <line x1="8" y1="5" x2="8" y2="19"/>
-                    <line x1="14" y1="5" x2="14" y2="19"/>
+                    <circle cx="6" cy="4" r="2"/>
+                    <circle cx="14" cy="4" r="2"/>
+                    <circle cx="6" cy="12" r="2"/>
+                    <circle cx="14" cy="12" r="2"/>
+                    <circle cx="6" cy="20" r="2"/>
+                    <circle cx="14" cy="20" r="2"/>
                 </svg>
             </div>
             <div class="dps-overlay-content">
@@ -2737,22 +2745,22 @@
             </div>
         </div>
 
-        <!-- Consolidated Console Panel (Combines Actions and Sync Stripe) -->
+        <!-- Consolidated Console Panel (Combines Actions and Stage Tracker) -->
         <div id="control-bar">
             <div
                     class="control-actions"
                     style="
               width: 100%;
-              justify-content: space-between;
               display: flex;
               align-items: center;
+              gap: 12px;
             "
             >
                 <button
                         id="btn-leave-activity"
                         class="btn-toggle btn-leave"
                         onclick="window.leaveActivity()"
-                        style="display: none !important"
+                        style="display: none !important; flex-shrink: 0;"
                 >
                     <svg
                             width="11"
@@ -2775,17 +2783,20 @@
                     </svg>
                     Leave
                 </button>
-                <button
-                        id="toggle-auto"
-                        class="btn-toggle active"
-                        onclick="window.toggleAuto()"
-                >
-                    Auto: ON
-                </button>
-                <!-- Cloud Sync Indicator -->
-                <div id="sync-indicator">
-                    <span id="sync-dot"></span>
-                    <span id="sync-status-text">OFFLINE</span>
+
+                <!-- Stage Panel at the bottom for maximum room -->
+                <div class="hud-stat-panel panel-stage"
+                     style="flex: 1; justify-content: center; min-width: 0; width: 100%;">
+                    <div class="chip-text" style="align-items: center; text-align: center;">
+                        <div class="chip-value-row" style="justify-content: center;">
+                  <span id="hud-stage-label" class="chip-label-prefix"
+                  >Stage</span
+                  >
+                            <span id="hud-stage" class="chip-value">1</span>
+                        </div>
+                        <span id="hud-stage-sub" class="chip-sub"
+                              style="text-align: center;">(0/5)</span>
+                    </div>
                 </div>
             </div>
         </div>

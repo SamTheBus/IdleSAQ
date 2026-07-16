@@ -2443,28 +2443,10 @@ window.addUseDrop = function (itemName, amount = 1) {
 
 window.setPauseState = function (paused) {
   window.isGamePaused = paused;
-  let btn = document.getElementById("btn-pause");
-  if (btn) {
-    if (window.isGamePaused) {
-      btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:4px;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> PAUSED`;
-      btn.classList.add("active");
-      btn.style.background = "#e74c3c";
-    } else {
-      btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:4px;"><polygon points="5 3 19 12 5 21 5 3"/></svg> Pause`;
-      btn.classList.remove("active");
-      btn.style.background = "#34495e";
-    }
-  }
 };
 
 window.togglePause = function () {
-  // Manual pausing has been deprecated to prevent exploit cooldown stalling and mid-fight gear swapping.
-  if (typeof window.pushHeaderToast === "function") {
-    window.pushHeaderToast(
-      "⚖️ Manual pausing is disabled! Real-time battle is enforced.",
-      "#e67e22",
-    );
-  }
+  // Deprecated and fully disabled
 };
 
 window.toggleAuto = function () {
@@ -2605,20 +2587,32 @@ window.leaveActivity = function () {
             false,
           );
       } else if (window.playerStats.isDungeonMode) {
-        let dType = window.playerStats.currentDungeon;
-        let dStage = window.playerStats.currentDungeonStage[dType] || 1;
-        window.playerStats.dungeonPeaks[dType] = Math.max(
-          window.playerStats.dungeonPeaks[dType] || 1,
-          dStage,
-        );
+              let dType = window.playerStats.currentDungeon;
+              let dStage = window.playerStats.currentDungeonStage[dType] || 1;
+              window.playerStats.dungeonPeaks[dType] = Math.max(
+                window.playerStats.dungeonPeaks[dType] || 1,
+                dStage,
+              );
 
-        if (typeof window.pushLog === "function")
-          window.pushLog(
-            `<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON RETREAT] Safely retreated from ${dType.toUpperCase()} Dungeon at Stage ${dStage}.</span>`,
-          );
-        if (typeof window.pushHeaderToast === "function")
-          window.pushHeaderToast(`🏃 Retreated! Stage ${dStage}`, "#8e44ad");
-      }
+              let gold = window.playerStats.dungeonAccumulatedGold || 0;
+              let xp = window.playerStats.dungeonAccumulatedXp || 0;
+              let loot = window.playerStats.dungeonAccumulatedLoot || [];
+
+              if (typeof window.pushLog === "function")
+                window.pushLog(
+                  `<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON RETREAT] Safely retreated from ${dType.toUpperCase()} Dungeon at Stage ${dStage}.</span>`,
+                );
+              if (typeof window.pushHeaderToast === "function")
+                window.pushHeaderToast(`🏃 Retreated! Stage ${dStage}`, "#8e44ad");
+
+              window.playerStats.dungeonAccumulatedGold = 0;
+              window.playerStats.dungeonAccumulatedXp = 0;
+              window.playerStats.dungeonAccumulatedLoot = [];
+
+              if (typeof window.showDungeonSummaryModal === "function") {
+                window.showDungeonSummaryModal(dType, dStage, gold, xp, loot, false);
+              }
+            }
 
       window.playerStats.isDungeonMode = false;
       window.playerStats.isCrucibleMode = false;
@@ -13615,57 +13609,60 @@ window.unslotCavernSigilInline = function (event) {
   window.renderCavernsPrepUI();
 };
 
-window.executeCavernsDescent = function () {
-  if (
-    window.playerStats.isDungeonMode ||
-    window.playerStats.isCrucibleMode ||
-    window.playerStats.isPrestigeBossMode ||
-    window.playerStats.isUberBoss
-  ) {
-    window.pushHeaderToast(
-      "Cannot enter: already in another activity!",
-      "#e74c3c",
-    );
-    return;
-  }
-  let mode = window.state.selectedCavernsMode || "equip";
-  let keys = window.playerStats.dungeonKeys || 0;
+    window.executeCavernsDescent = function () {
+        if (
+          window.playerStats.isDungeonMode ||
+          window.playerStats.isCrucibleMode ||
+          window.playerStats.isPrestigeBossMode ||
+          window.playerStats.isUberBoss
+        ) {
+          window.pushHeaderToast(
+            "Cannot enter: already in another activity!",
+            "#e74c3c",
+          );
+          return;
+        }
+        let mode = window.state.selectedCavernsMode || "equip";
+        let keys = window.playerStats.dungeonKeys || 0;
 
-  if (keys < 1) {
-    window.pushHeaderToast("❌ Insufficient Dungeon Keys!", "#e74c3c");
-    return;
-  }
+        if (keys < 1) {
+          window.pushHeaderToast("❌ Insufficient Dungeon Keys!", "#e74c3c");
+          return;
+        }
 
-  // Consume key and launch!
-  window.playerStats.dungeonKeys--;
-  if (window.playerStats.dungeonKeys === 4) {
-    window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
-  }
+        // Consume key and launch!
+        window.playerStats.dungeonKeys--;
+        if (window.playerStats.dungeonKeys === 4) {
+          window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
+        }
 
-  // Consume and Lock Slotted Cavern Sigil if applied
-  if (window.state.slottedCavernSigil) {
-    let activeSig = window.state.slottedCavernSigil;
-    window.playerStats.activeDungeonSigil = activeSig;
-    window.state.slottedCavernSigil = null;
+        // Consume and Lock Slotted Cavern Sigil if applied
+        if (window.state.slottedCavernSigil) {
+          let activeSig = window.state.slottedCavernSigil;
+          window.playerStats.activeDungeonSigil = activeSig;
+          window.state.slottedCavernSigil = null;
 
-    // Properly remove sigil from the SIGIL pouch
-    let sIdx = window.inventory.SIGIL.findIndex((i) => i.id === activeSig.id);
-    if (sIdx !== -1) {
-      window.inventory.SIGIL.splice(sIdx, 1);
-    }
-  } else {
-    window.playerStats.activeDungeonSigil = null;
-  }
+          // Properly remove sigil from the SIGIL pouch
+          let sIdx = window.inventory.SIGIL.findIndex((i) => i.id === activeSig.id);
+          if (sIdx !== -1) {
+            window.inventory.SIGIL.splice(sIdx, 1);
+          }
+        } else {
+          window.playerStats.activeDungeonSigil = null;
+        }
 
-  let peak = window.playerStats.dungeonPeaks[mode] || 1;
-  let campaignStage = window.playerStats.stage || 1;
-  let checkpoint = Math.max(
-    1,
-    Math.floor(peak * 0.8),
-    Math.floor(campaignStage * 0.7),
-  );
+        let peak = window.playerStats.dungeonPeaks[mode] || 1;
+        let campaignStage = window.playerStats.stage || 1;
+        let checkpoint = Math.max(
+          1,
+          Math.floor(peak * 0.8),
+          Math.floor(campaignStage * 0.7),
+        );
 
-  window.playerStats.isDungeonMode = true;
+        window.playerStats.isDungeonMode = true;
+        window.playerStats.dungeonAccumulatedGold = 0;
+        window.playerStats.dungeonAccumulatedXp = 0;
+        window.playerStats.dungeonAccumulatedLoot = [];
   window.playerStats.isCrucibleMode = false;
   window.playerStats.currentDungeon = mode;
   window.playerStats.currentDungeonStage[mode] = checkpoint;

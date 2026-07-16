@@ -554,6 +554,16 @@ canvas {
     width: 28px !important;
     height: 28px !important;
   }
+  /* Compact styling for buttons nested inside equipment cards and grids */
+  .bag-item .btn-action,
+  .slots-card .btn-action,
+  .consumable-badge .btn-action,
+  .material-badge .btn-action,
+  .bag-item-actions .btn-action {
+    min-height: 26px !important;
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+  }
 }
 
 .btn-action.un {
@@ -662,51 +672,95 @@ canvas {
 }
 
 .hud-stat-panel {
-  background: rgba(10, 14, 22, 0.55);
-  border: 1.2px solid #1e293b;
-  border-radius: 6px;
-  padding: 4px 10px;
+  position: relative; /* Essential for glass highlight overlay */
+  background: linear-gradient(135deg, rgba(16, 22, 34, 0.85) 0%, rgba(8, 12, 18, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 34px;
+  gap: 10px;
+  height: 38px;
   min-width: 0; /* Vital for nested ellipsis truncation */
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.7);
   box-sizing: border-box;
-  transition:
-    border-color 0.15s,
-    background-color 0.15s;
+  transition: all 0.22s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+}
+
+/* Semi-gloss glass highlights on the top half of each panel */
+.hud-stat-panel::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  border-radius: 8px 8px 0 0;
 }
 
 .hud-stat-panel:hover {
-  background: rgba(20, 27, 41, 0.7);
-  border-color: #334155;
+  background: linear-gradient(135deg, rgba(24, 32, 48, 0.9) 0%, rgba(12, 18, 26, 0.95) 100%);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.7);
 }
 
-/* Subtle, cohesive bottom-aligned underline tags */
+/* Circular, Translucent Icon Chambers inside HUD panels */
+.chip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* --- THEMED PANEL OVERLAYS, GLOWS & ICON CHAMBERS --- */
 .panel-hp {
   border-bottom: 2px solid #e74c3c !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.55), 0 0 10px rgba(231, 76, 60, 0.15) !important;
+}
+.panel-hp .chip-icon {
+  background: rgba(231, 76, 60, 0.12) !important;
+  border-color: rgba(231, 76, 60, 0.3) !important;
 }
 .panel-hp .chip-value {
-  color: #ff6b6b;
+  color: #ff7675;
+  text-shadow: 0 0 8px rgba(231, 76, 60, 0.45);
 }
-.panel-stage {
-  border-bottom: 2px solid #3498db !important;
-}
-.panel-stage .chip-value {
-  color: #60a5fa;
-}
+
 .panel-gold {
   border-bottom: 2px solid #f1c40f !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.55), 0 0 10px rgba(241, 196, 15, 0.15) !important;
+}
+.panel-gold .chip-icon {
+  background: rgba(241, 196, 15, 0.12) !important;
+  border-color: rgba(241, 196, 15, 0.3) !important;
 }
 .panel-gold .chip-value {
   color: #ffd700;
+  text-shadow: 0 0 8px rgba(241, 196, 15, 0.45);
 }
-.panel-dps {
-  border-bottom: 2px solid #e67e22 !important;
+
+.panel-stage {
+  border-bottom: 2px solid #3498db !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.55), 0 0 10px rgba(52, 152, 219, 0.15) !important;
 }
-.panel-dps .chip-value {
-  color: #ff9f43;
+.panel-stage .chip-icon {
+  background: rgba(52, 152, 219, 0.12) !important;
+  border-color: rgba(52, 152, 219, 0.3) !important;
+}
+.panel-stage .chip-value {
+  color: #60a5fa;
+  text-shadow: 0 0 8px rgba(52, 152, 219, 0.45);
 }
 
 .chip-icon {
@@ -1690,9 +1744,9 @@ summary {
   .bag-item .bag-item-actions button {
     flex: 1 !important;
     text-align: center !important;
-    font-size: 10.5px !important;
-    padding: 8px 4px !important;
-    min-height: 44px !important; /* Mobile Touch Target Normalization */
+    font-size: 10px !important;
+    padding: 4px 6px !important;
+    min-height: 28px !important; /* Compact tactile button size on mobile */
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1735,26 +1789,23 @@ summary {
     padding: 10px !important;
   }
   #control-bar {
-    height: 38px !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    padding: 4px 10px !important;
-    border-bottom-width: 1px !important;
-    gap: 4px !important;
-  }
-  .control-actions {
-    width: 100% !important;
-    justify-content: space-between !important;
-    height: 30px !important;
-  }
-  .control-actions .btn-toggle {
-    flex: 1 !important;
-    text-align: center !important;
-  }
-  #sync-indicator {
-    flex: 1 !important;
-    justify-content: center !important;
-  }
+      height: 38px !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      padding: 4px 10px !important;
+      border-bottom-width: 1px !important;
+      gap: 4px !important;
+    }
+    .control-actions {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      height: 30px !important;
+      gap: 8px !important;
+    }
+    .control-actions .btn-toggle {
+      text-align: center !important;
+    }
   .brand-title {
     display: none !important; /* Hides the logo title completely on mobile to maximize button space */
   }
@@ -2487,9 +2538,10 @@ summary {
   }
 
   .slots-card button {
-    padding: 2px 4px !important;
-    font-size: 8px !important;
-  }
+      padding: 4px 6px !important;
+      font-size: 9px !important;
+      min-height: 24px !important;
+    }
 
   /* --- COMPACT HIGH-YIELD TOOLTIPS --- */
   .tooltip-base {
@@ -4136,12 +4188,10 @@ summary {
   animation-delay: 1.2s;
 }
 
-/* ==========================================================================
-   CONSOLIDATED CONSOLE HEADER HUD DESIGN (ABOVE-CANVAS COCKPIT)
-   ========================================================================= */
+/* --- CONSOLIDATED CHISELED RETRO COCKPIT HUD DESIGN (ABOVE-CANVAS COCKPIT) --- */
 .canvas-top-hud {
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: 1fr 1fr !important; /* 50%/50% split */
   gap: 10px !important;
   padding: 10px 14px !important;
   background: linear-gradient(180deg, #0e111a 0%, #06080d 100%) !important;
@@ -4165,70 +4215,62 @@ summary {
 }
 
 /* Individual Stat Panel Color Accentuations, Borders & box-shadow glows */
+/* --- TOP HUD PANEL SPECIFIC ACCENTS --- */
 .canvas-top-hud .panel-hp {
-  border: 1.5px solid #ff4757 !important;
-  border-bottom-width: 3.5px !important;
-  box-shadow:
-    0 4px 12px rgba(231, 76, 60, 0.2),
-    inset 0 0 10px rgba(231, 76, 60, 0.1) !important;
+  background: linear-gradient(135deg, rgba(30, 16, 16, 0.85) 0%, rgba(12, 6, 6, 0.9) 100%) !important;
+  border: 1.5px solid rgba(231, 76, 60, 0.2) !important;
+  border-bottom: 3.5px solid #e74c3c !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65), 0 0 8px rgba(231, 76, 60, 0.12) !important;
 }
 .canvas-top-hud .panel-hp:hover {
-  transform: translateY(-1.5px) !important;
-  border-color: #ff6b81 !important;
-  box-shadow:
-    0 6px 16px rgba(231, 76, 60, 0.35),
-    inset 0 0 12px rgba(231, 76, 60, 0.15) !important;
-}
-.canvas-top-hud .panel-hp .chip-value {
-  color: #ff6b6b !important;
-  font-size: 11.5px !important;
-  font-weight: 900 !important;
-  font-family: monospace !important;
-  text-shadow: 0 0 8px rgba(231, 76, 60, 0.45) !important;
-}
-
-.canvas-top-hud .panel-stage {
-  border: 1.5px solid #3498db !important;
-  border-bottom-width: 3.5px !important;
-  box-shadow:
-    0 4px 12px rgba(52, 152, 219, 0.2),
-    inset 0 0 10px rgba(52, 152, 219, 0.1) !important;
-}
-.canvas-top-hud .panel-stage:hover {
-  transform: translateY(-1.5px) !important;
-  border-color: #54a0ff !important;
-  box-shadow:
-    0 6px 16px rgba(52, 152, 219, 0.35),
-    inset 0 0 12px rgba(52, 152, 219, 0.15) !important;
-}
-.canvas-top-hud .panel-stage .chip-value {
-  color: #60a5fa !important;
-  font-size: 11.5px !important;
-  font-weight: 900 !important;
-  font-family: monospace !important;
-  text-shadow: 0 0 8px rgba(52, 152, 219, 0.45) !important;
+  transform: translateY(-1px) !important;
+  border-color: rgba(231, 76, 60, 0.4) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.75), 0 0 12px rgba(231, 76, 60, 0.2) !important;
 }
 
 .canvas-top-hud .panel-gold {
-  border: 1.5px solid #f1c40f !important;
-  border-bottom-width: 3.5px !important;
-  box-shadow:
-    0 4px 12px rgba(241, 196, 15, 0.2),
-    inset 0 0 10px rgba(241, 196, 15, 0.1) !important;
+  background: linear-gradient(135deg, rgba(30, 26, 12, 0.85) 0%, rgba(12, 10, 5, 0.9) 100%) !important;
+  border: 1.5px solid rgba(241, 196, 15, 0.2) !important;
+  border-bottom: 3.5px solid #f1c40f !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65), 0 0 8px rgba(241, 196, 15, 0.12) !important;
 }
 .canvas-top-hud .panel-gold:hover {
-  transform: translateY(-1.5px) !important;
-  border-color: #ffeaa7 !important;
-  box-shadow:
-    0 6px 16px rgba(241, 196, 15, 0.35),
-    inset 0 0 12px rgba(241, 196, 15, 0.15) !important;
+  transform: translateY(-1px) !important;
+  border-color: rgba(241, 196, 15, 0.4) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.75), 0 0 12px rgba(241, 196, 15, 0.2) !important;
 }
-.canvas-top-hud .panel-gold .chip-value {
-  color: #ffd700 !important;
-  font-size: 11.5px !important;
+
+/* --- BOTTOM CONSOLE STAGE PANEL COCKPIT REDESIGN --- */
+#control-bar .panel-stage {
+  height: 40px !important;
+  background: linear-gradient(135deg, rgba(18, 24, 34, 0.9) 0%, rgba(8, 11, 16, 0.95) 100%) !important;
+  border: 1.5px solid rgba(52, 152, 219, 0.18) !important;
+  border-bottom: 3.5px solid #3498db !important;
+  border-radius: 8px !important;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.7),
+    0 0 12px rgba(52, 152, 219, 0.1) !important;
+}
+
+#control-bar .panel-stage .chip-value {
+  font-size: 13.5px !important;
   font-weight: 900 !important;
-  font-family: monospace !important;
-  text-shadow: 0 0 8px rgba(241, 196, 15, 0.45) !important;
+  letter-spacing: 0.5px !important;
+}
+
+#control-bar .panel-stage .chip-label-prefix {
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+}
+
+#control-bar .panel-stage .chip-sub {
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  color: #94a3b8 !important;
+  letter-spacing: 0.5px !important;
 }
 
 /* Clean typography for sub-labels */
@@ -4241,10 +4283,10 @@ summary {
   letter-spacing: 0.5px !important;
 }
 
-/* Portrait Mobile Viewports (Aesthetic 3-Column Row) */
+/* Portrait Mobile Viewports (Aesthetic 50%/50% Split Row) */
 @media (max-width: 580px) {
   .canvas-top-hud {
-    grid-template-columns: 1.2fr 0.9fr 0.9fr !important;
+    grid-template-columns: 1fr 1fr !important;
     padding: 6px 8px !important;
     background: linear-gradient(180deg, #10141d 0%, #06080d 100%) !important;
     border-bottom-width: 1.5px !important;
@@ -4263,6 +4305,19 @@ summary {
     width: 14px !important;
     height: 14px !important;
     margin-right: 0 !important;
+  }
+
+  /* Responsive Header Controls next to Menu */
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .header-controls button,
+  .header-controls div {
+    font-size: 9px !important;
+    padding: 0 6px !important;
   }
 }
 
@@ -4333,4 +4388,11 @@ summary {
   color: #a0aec0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* --- CUSTOM HEADER CONTROLS CONTAINER --- */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }

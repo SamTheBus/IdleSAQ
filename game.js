@@ -630,12 +630,17 @@ window.SaveManager = {
       }
 
       if (window.playerStats.dungeonPeaks === undefined) {
-        window.playerStats.dungeonPeaks = {
-          equip: 1,
-          gold: 1,
-          mat: 1,
-        };
-      }
+              window.playerStats.dungeonPeaks = {
+                equip: 1,
+                gold: 1,
+                mat: 1,
+              };
+            }
+
+            if (window.playerStats.dungeonAccumulatedGold === undefined) window.playerStats.dungeonAccumulatedGold = 0;
+            if (window.playerStats.dungeonAccumulatedXp === undefined) window.playerStats.dungeonAccumulatedXp = 0;
+            if (window.playerStats.dungeonAccumulatedLoot === undefined) window.playerStats.dungeonAccumulatedLoot = [];
+                          if (window.playerStats.crucibleAccumulatedLoot === undefined) window.playerStats.crucibleAccumulatedLoot = [];
 
       if (window.playerStats.currentDungeonStage === undefined) {
         window.playerStats.currentDungeonStage = {
@@ -1591,10 +1596,10 @@ window.SaveManager = {
                         offlineMonsterSouls += finalQty;
                       }
 
-                      // Normal mobs: targetsRequired * 12% drop chance * (1 + Math.floor(stg / 50))
-                      let progNormalSoulExpected = targetsRequired * (0.12 * p.drop);
-                      let progNormalSoulQty = 1 + Math.floor(stg / 50);
-                      offlineMonsterSouls += Math.round(progNormalSoulExpected * progNormalSoulQty);
+                      // Normal mobs: targetsRequired * 12% drop chance * (1 + Math.floor(Math.sqrt(stg / 10)))
+                                            let progNormalSoulExpected = targetsRequired * (0.12 * p.drop);
+                                            let progNormalSoulQty = 1 + Math.floor(Math.sqrt(stg / 10));
+                                            offlineMonsterSouls += Math.round(progNormalSoulExpected * progNormalSoulQty);
                     }
                   }
 
@@ -1604,10 +1609,10 @@ window.SaveManager = {
           let expectedRares = farmKills * rareSpawnChance;
           let expectedNormals = farmKills - expectedRares;
 
-          // Normal mob Monster Souls: 12% chance * (1 + Math.floor(currentStage / 50))
-          let normalSoulExpected = expectedNormals * (0.12 * p.drop);
-          let normalSoulQty = 1 + Math.floor(currentStage / 50);
-          offlineMonsterSouls += Math.round(normalSoulExpected * normalSoulQty);
+          // Normal mob Monster Souls: 12% chance * (1 + Math.floor(Math.sqrt(currentStage / 10)))
+                    let normalSoulExpected = expectedNormals * (0.12 * p.drop);
+                    let normalSoulQty = 1 + Math.floor(Math.sqrt(currentStage / 10));
+                    offlineMonsterSouls += Math.round(normalSoulExpected * normalSoulQty);
         }
 
         // Apply and record to the summary card
@@ -2177,10 +2182,13 @@ window.onload = function () {
   })();
 
   if (typeof window.addEtcDrop === "function") {
-    const originalAddEtcDrop = window.addEtcDrop;
-    window.addEtcDrop = function (itemName, amount = 1, silent = false) {
-      originalAddEtcDrop(itemName, amount);
-      if (!silent) {
+      const originalAddEtcDrop = window.addEtcDrop;
+      window.addEtcDrop = function (itemName, amount = 1, silent = false) {
+        originalAddEtcDrop(itemName, amount);
+        if (!silent && typeof window.recordRunLoot === "function") {
+                    window.recordRunLoot(itemName, amount, "etc");
+                  }
+        if (!silent) {
         let color = "#bdc3c7";
         if (itemName === "Eridium Shard") color = "#8e44ad";
         else if (itemName === "Gacha Key") color = "#f1c40f";
@@ -2202,10 +2210,13 @@ window.onload = function () {
   }
 
   if (typeof window.addUseDrop === "function") {
-    const originalAddUseDrop = window.addUseDrop;
-    window.addUseDrop = function (itemName, amount = 1, silent = false) {
-      originalAddUseDrop(itemName, amount);
-      if (!silent) {
+      const originalAddUseDrop = window.addUseDrop;
+      window.addUseDrop = function (itemName, amount = 1, silent = false) {
+        originalAddUseDrop(itemName, amount);
+        if (!silent && typeof window.recordRunLoot === "function") {
+                    window.recordRunLoot(itemName, amount, "use");
+                  }
+        if (!silent) {
         let color = "#bdc3c7";
         if (window.useDex && window.useDex[itemName]) {
           color = window.useDex[itemName].color || "#2ecc71";
@@ -5368,23 +5379,29 @@ window.CombatEngine = {
     }
 
     // REDIRECT AND ACCUMULATE INSIDE CRUCIBLE POOLS
-    if (window.playerStats.isCrucibleMode) {
-      window.playerStats.crucibleAccumulatedGold =
-        (window.playerStats.crucibleAccumulatedGold || 0) + coinYield;
-      window.playerStats.crucibleAccumulatedXp =
-        (window.playerStats.crucibleAccumulatedXp || 0) + xpYield;
-    } else {
-      // Normal campaign / dungeon additions
-      window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
-        coinYield,
-      );
-      window.playerStats.totalGoldEarned = BigNum.from(
-        window.playerStats.totalGoldEarned || 0,
-      ).add(coinYield);
-      if (typeof window.progressMission === "function")
-        window.progressMission("gold", coinYield);
-      if (typeof window.gainXp === "function") window.gainXp(xpYield);
-    }
+        if (window.playerStats.isCrucibleMode) {
+          window.playerStats.crucibleAccumulatedGold =
+            (window.playerStats.crucibleAccumulatedGold || 0) + coinYield;
+          window.playerStats.crucibleAccumulatedXp =
+            (window.playerStats.crucibleAccumulatedXp || 0) + xpYield;
+        } else {
+          // Normal campaign / dungeon additions
+          window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
+            coinYield,
+          );
+          window.playerStats.totalGoldEarned = BigNum.from(
+            window.playerStats.totalGoldEarned || 0,
+          ).add(coinYield);
+          if (window.playerStats.isDungeonMode) {
+            window.playerStats.dungeonAccumulatedGold =
+              (window.playerStats.dungeonAccumulatedGold || 0) + coinYield;
+            window.playerStats.dungeonAccumulatedXp =
+              (window.playerStats.dungeonAccumulatedXp || 0) + xpYield;
+          }
+          if (typeof window.progressMission === "function")
+            window.progressMission("gold", coinYield);
+          if (typeof window.gainXp === "function") window.gainXp(xpYield);
+        }
 
     // Peak single gold drop check
     window.playerStats.peakSingleGoldDrop = Math.max(
@@ -5607,15 +5624,20 @@ window.CombatEngine = {
           }
 
           // Gated progression scrap drops for Material Cavern Bosses
-          let sigMult = 1.0;
-          if (
-            window.playerStats.isDungeonMode &&
-            window.playerStats.activeDungeonSigil
-          ) {
-            sigMult +=
-              window.playerStats.activeDungeonSigil.rewardMultiplier || 0;
-          }
-          if (dStage < 150) {
+                          let sigMult = 1.0;
+                          if (
+                            window.playerStats.isDungeonMode &&
+                            window.playerStats.activeDungeonSigil
+                          ) {
+                            sigMult +=
+                              window.playerStats.activeDungeonSigil.rewardMultiplier || 0;
+                          }
+
+                          // Active Dungeon Boss Soul Jackpot scaling with depth, drop rate, and sigils
+                          let bossSoulAmt = Math.round((50 + dStage * 5) * p.drop * sigMult);
+                          window.addEtcDrop("Monster Soul", bossSoulAmt);
+
+                          if (dStage < 150) {
             if (typeof window.addEtcDrop === "function") {
               let scrapAmt = Math.ceil(window.randInt(1, 3) * sigMult);
               window.addEtcDrop("Rare Scrap", scrapAmt);
@@ -5673,13 +5695,15 @@ window.CombatEngine = {
             }
           }
         } else {
-          // Normal minion drops inside the Material Pit (Additive Redesign)
-          if (typeof window.addEtcDrop === "function") {
-            // 1. Every minion kill guarantees scaled Monster Souls
-            let soulAmt = 1 + Math.floor(Math.sqrt(dStage / 40));
-            window.addEtcDrop("Monster Soul", soulAmt);
-
-            // 2. Independent, non-exclusive rolls for material scraps
+                        // Normal minion drops inside the Material Pit (Additive Redesign)
+                        // 1. Every minion kill guarantees scaled Monster Souls multiplying with Magic Find and active Sigils
+                        let sigMult = 1.0;
+                        if (window.playerStats.isDungeonMode && window.playerStats.activeDungeonSigil) {
+                          sigMult += window.playerStats.activeDungeonSigil.rewardMultiplier || 0;
+                        }
+                        let soulAmt = Math.round((2 + Math.floor(dStage / 20)) * p.drop * sigMult);
+                        window.addEtcDrop("Monster Soul", soulAmt);
+                        // 2. Independent, non-exclusive rolls for material scraps
             let r = Math.random();
             if (dStage < 150) {
               // 15% bonus chance for an early-game Rare Scrap
@@ -5883,10 +5907,10 @@ window.CombatEngine = {
         let etcItemName = window.mob.isRare ? "Luminous Soul" : "Monster Soul";
 
         let qty = 1;
-        if (!window.mob.isRare) {
-          // Normal monster drop quantities scale with Stage progression (1 base + 1 per 50 stages)
-          qty += Math.floor((window.playerStats.stage || 1) / 50);
-        }
+                  if (!window.mob.isRare) {
+                    // Normal monster drop quantities scale with a square-root curve to prevent late-game hyper-inflation
+                    qty += Math.floor(Math.sqrt((window.playerStats.stage || 1) / 10));
+                  }
 
         if (typeof window.addEtcDrop === "function")
           window.addEtcDrop(etcItemName, qty);
@@ -6532,49 +6556,75 @@ window.CombatEngine = {
 
     window.SoundManager.play("defeat");
 
-    if (wasCrucible) {
-      let shards = window.playerStats.crucibleAccumulatedShards || 0;
-      let cores = window.playerStats.crucibleAccumulatedCores || 0;
-      let gold = window.playerStats.crucibleAccumulatedGold || 0;
-      let xp = window.playerStats.crucibleAccumulatedXp || 0;
+        if (wasCrucible) {
+          let shards = window.playerStats.crucibleAccumulatedShards || 0;
+          let cores = window.playerStats.crucibleAccumulatedCores || 0;
+          let gold = window.playerStats.crucibleAccumulatedGold || 0;
+          let xp = window.playerStats.crucibleAccumulatedXp || 0;
 
-      // No defeat penalty; full rewards are preserved!
-      let keptShards = shards;
-      let keptCores = cores;
+          // No defeat penalty; full rewards are preserved!
+          let keptShards = shards;
+          let keptCores = cores;
 
-      // Gold & XP are always kept at 100% since those targets were successfully slayed!
-      window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
-        gold,
-      );
-      window.playerStats.totalGoldEarned = BigNum.from(
-        window.playerStats.totalGoldEarned || 0,
-      ).add(gold);
-      window.gainXp(xp, true);
+          // Gold & XP are always kept at 100% since those targets were successfully slayed!
+          window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
+            gold,
+          );
+          window.playerStats.totalGoldEarned = BigNum.from(
+            window.playerStats.totalGoldEarned || 0,
+          ).add(gold);
+          window.gainXp(xp, true);
 
-      window.playerStats.astralShards =
-        (window.playerStats.astralShards || 0) + keptShards;
-      if (keptCores > 0) {
-        window.addEtcDrop("Catalyst Core", keptCores);
-      }
+          window.playerStats.astralShards =
+            (window.playerStats.astralShards || 0) + keptShards;
+          if (keptCores > 0) {
+            window.addEtcDrop("Catalyst Core", keptCores);
+          }
 
-      // Reset temporary run fields
-      window.playerStats.crucibleAccumulatedShards = 0;
-      window.playerStats.crucibleAccumulatedCores = 0;
-      window.playerStats.crucibleAccumulatedGold = 0;
-      window.playerStats.crucibleAccumulatedXp = 0;
-      window.playerStats.crucibleDraftDeck = [];
-      window.playerStats.crucibleRunActive = false;
+          // Reset temporary run fields
+                     window.playerStats.crucibleAccumulatedShards = 0;
+                     window.playerStats.crucibleAccumulatedCores = 0;
+                     window.playerStats.crucibleAccumulatedGold = 0;
+                     window.playerStats.crucibleAccumulatedXp = 0;
+                     window.playerStats.crucibleDraftDeck = [];
+                     window.playerStats.crucibleRunActive = false;
 
-      window.showCrucibleSummaryModal(
-        finalWave,
-        keptShards,
-        keptCores,
-        gold,
-        xp,
-        true,
-      ); // Died
-      return;
-    }
+                     window.showCrucibleSummaryModal(
+                       finalWave,
+                       keptShards,
+                       keptCores,
+                       gold,
+                       xp,
+                       true,
+                     ); // Died
+          return;
+        }
+
+        if (wasDungeon) {
+          let gold = window.playerStats.dungeonAccumulatedGold || 0;
+          let xp = window.playerStats.dungeonAccumulatedXp || 0;
+          let loot = window.playerStats.dungeonAccumulatedLoot || [];
+
+          window.playerStats.dungeonAccumulatedGold = 0;
+          window.playerStats.dungeonAccumulatedXp = 0;
+          window.playerStats.dungeonAccumulatedLoot = [];
+
+          // Trigger the gorgeous summary modal!
+                      if (typeof window.showDungeonSummaryModal === "function") {
+                        window.showDungeonSummaryModal(dType, dStage, gold, xp, loot, false);
+                      }
+
+          window.playerStats.runKills = 0;
+          window.playerStats.runGold = 0;
+          window.playerStats.runXp = 0;
+          window.playerStats.killedBy = "Unknown Foe";
+          window.playerStats.killedByMob = null;
+
+          if (typeof window.updateUI === "function") window.updateUI();
+          if (typeof window.renderInventory === "function") window.renderInventory();
+          if (typeof window.saveGame === "function") window.saveGame();
+          return;
+        }
 
     let prestigeCount = window.playerStats.prestigeCount || 0;
     let rollbackPercent = 0.8;
@@ -7987,18 +8037,21 @@ window.enterDungeon = function (type) {
   );
 
   window.showCustomConfirm(
-    "Enter Infinite Dungeon",
-    `Spend 1 Key to enter the Infinite ${dNames[type]}? Starting checkpoint: Stage ${checkpoint}`,
-    "Enter Dungeon",
-    "Cancel",
-    "#8e44ad",
-    function () {
-      window.saveCurrentActivityPeak();
-      window.playerStats.dungeonKeys--;
-      if (window.playerStats.dungeonKeys === 4)
-        window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
+      "Enter Infinite Dungeon",
+      `Spend 1 Key to enter the Infinite ${dNames[type]}? Starting checkpoint: Stage ${checkpoint}`,
+      "Enter Dungeon",
+      "Cancel",
+      "#8e44ad",
+      function () {
+        window.saveCurrentActivityPeak();
+        window.playerStats.dungeonKeys--;
+        if (window.playerStats.dungeonKeys === 4)
+          window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
 
-      window.playerStats.isDungeonMode = true;
+        window.playerStats.isDungeonMode = true;
+        window.playerStats.dungeonAccumulatedGold = 0;
+        window.playerStats.dungeonAccumulatedXp = 0;
+        window.playerStats.dungeonAccumulatedLoot = [];
       // Consume and Lock Slotted Cavern Sigil
       if (window.state.slottedCavernSigil) {
         let activeSig = window.state.slottedCavernSigil;
@@ -8106,10 +8159,11 @@ window.enterCrucible = function () {
       window.playerStats.crucibleLootMult = 1.0;
 
       window.playerStats.crucibleRunActive = true;
-      window.playerStats.crucibleAccumulatedShards = 0;
-      window.playerStats.crucibleAccumulatedCores = 0;
+                window.playerStats.crucibleAccumulatedShards = 0;
+                window.playerStats.crucibleAccumulatedCores = 0;
+                window.playerStats.crucibleAccumulatedLoot = [];
 
-      window.invalidatePlayerStats();
+                window.invalidatePlayerStats();
       let p = window.resolvePlayerStats();
       window.playerStats.currentHp = p.maxHp;
 
@@ -8342,19 +8396,28 @@ window.rollEquipmentDrop = function (
   }
 
   if (!silent)
-    window.pushToast(
-      newItem.name,
-      newItem.statsRolled,
-      color,
-      false,
-      1,
-      null,
-      null,
-      isMilestone && !window.playerStats.isDungeonMode,
-      newItem,
-    );
-  if (newItem.type === "artifact") window.inventory.ARTIFACT.push(newItem);
-  else window.inventory.EQUIP.push(newItem);
+          window.pushToast(
+            newItem.name,
+            newItem.statsRolled,
+            color,
+            false,
+            1,
+            null,
+            null,
+            isMilestone && !window.playerStats.isDungeonMode,
+            newItem,
+          );
+        if (newItem.type === "artifact") {
+                    window.inventory.ARTIFACT.push(newItem);
+                    if (typeof window.recordRunLoot === "function") {
+                      window.recordRunLoot(newItem.name, 1, "artifact", newItem);
+                    }
+                  } else {
+                    window.inventory.EQUIP.push(newItem);
+                    if (typeof window.recordRunLoot === "function") {
+                      window.recordRunLoot(newItem.name, 1, "equip", newItem);
+                    }
+                  }
 
   if (
     sourceName === "Gacha" &&
@@ -8414,13 +8477,22 @@ window.generateEquipment = function (
   }
 
   if (!silent)
-    window.pushToast(
-      item.name,
-      item.statsRolled,
-      window.getTierColor(item.statsRolled),
-    );
-  if (item.type === "artifact") window.inventory.ARTIFACT.push(item);
-  else window.inventory.EQUIP.push(item);
+          window.pushToast(
+            item.name,
+            item.statsRolled,
+            window.getTierColor(item.statsRolled),
+          );
+        if (item.type === "artifact") {
+                    window.inventory.ARTIFACT.push(item);
+                    if (typeof window.recordRunLoot === "function") {
+                      window.recordRunLoot(item.name, 1, "artifact", item);
+                    }
+                  } else {
+                    window.inventory.EQUIP.push(item);
+                    if (typeof window.recordRunLoot === "function") {
+                      window.recordRunLoot(item.name, 1, "equip", item);
+                    }
+                  }
 
   if (
     sourceName === "Gacha" &&
@@ -8676,61 +8748,195 @@ window.showCrucibleSummaryModal = function (
   died = false,
 ) {
   let modal = document.createElement("div");
+  modal.id = "crucible-summary-modal";
   modal.style.position = "fixed";
   modal.style.top = "0";
   modal.style.left = "0";
   modal.style.width = "100%";
   modal.style.height = "100%";
-  modal.style.backgroundColor = "rgba(0,0,0,0.88)";
+  modal.style.backgroundColor = "rgba(0,0,0,0.92)";
   modal.style.display = "flex";
   modal.style.justifyContent = "center";
   modal.style.alignItems = "center";
-  modal.style.zIndex = "30000";
+  modal.style.zIndex = "35000";
   modal.style.padding = "15px";
 
-  let headerText = died
-    ? "💀 CRUCIBLE DEFEAT (100% Claim)"
-    : "🔮 CRUCIBLE RETREAT (100% Claim)";
+  let headerText = died ? "💀 CRUCIBLE OVERWHELMED" : "🔮 CRUCIBLE RECOVERY";
   let colorText = died ? "#e74c3c" : "#9b59b6";
   let footerTip = died
-    ? "You fell! But, you have have escaped with all accumulated Shards, Cores, Gold, and XP!"
-    : "Safely retreated! You retreated with all accumulated Shards, Cores, Gold, and XP.";
+    ? "The onslaught overwhelmed your barriers, but your soul's anchor held! You escaped back to the mortal realm with all accumulated rewards."
+    : "You chose to close the breach and step back into sanity! All accumulated dimensional artifacts have been safely claimed.";
+
+  // Group and count duplicate card draft picks
+  let deck = window.playerStats.crucibleDraftDeck || [];
+  let groupedDeck = {};
+  deck.forEach((cardId) => {
+    groupedDeck[cardId] = (groupedDeck[cardId] || 0) + 1;
+  });
+  let groupedKeys = Object.keys(groupedDeck);
+
+  let deckHtml = "";
+  if (groupedKeys.length > 0) {
+    deckHtml = groupedKeys.map(cardId => {
+      let card = window.CRUCIBLE_DRAFT_POOL.find((c) => c.id === cardId);
+      if (!card) return "";
+      let count = groupedDeck[cardId];
+      let countBadge = count > 1 ? ` <span style="color:#ffd700; font-family:monospace; font-weight:900;">x${count}</span>` : "";
+
+      let descText = card.desc;
+      if (count > 1) {
+        if (cardId === "overcharge") {
+          descText = `+${20 * count}% Crit Multiplier, +${2.5 * count}% Crit Chance`;
+        } else if (cardId === "sanguine_tide") {
+          descText = `Heal ${(1.5 * count).toFixed(1)}% Max HP on every Critical Strike hit`;
+        } else if (cardId === "phantom_echo") {
+          descText = `+${15 * count}% chance to trigger secondary Phantom Strike (deals 35% damage)`;
+        } else if (cardId === "titans_wall") {
+          descText = `+${3 * count}% base armor and +${3 * count}% Block/Parry cap limits`;
+        } else if (cardId === "temporal_accel") {
+          descText = `+${15 * count}% Active & Idle Attack Speed multipliers`;
+        } else if (cardId === "astral_attune") {
+          descText = `Earn +${25 * count}% Astral Shards from this run`;
+        } else if (cardId.startsWith("slot_")) {
+          descText = `+${15 * count}% to all stats of the equipped slot for this run`;
+        }
+      }
+
+      return `
+        <div style="background:#090610; border:1px solid #9b59b660; border-radius:6px; padding:6px 10px; font-size:10.5px; text-align:left; font-family:sans-serif;">
+          <strong style="color:#df9ffb; display:block;">🛠️ ${card.name}${countBadge}</strong>
+          <span style="font-size:9.5px; color:#aaa; display:block; margin-top:1px;">${descText}</span>
+        </div>
+      `;
+    }).join("");
+  } else {
+    deckHtml = `<div style="color:#666; font-style:italic; font-size:11px; padding: 15px 0; text-align:center; width:100%;">No infusions drafted during this run.</div>`;
+  }
+
+  // Retrieve any extra items accumulated during the Crucible run (e.g. Card Sacks, etc.)
+  let extraLoot = window.playerStats.crucibleAccumulatedLoot || [];
+  let extraLootHtml = "";
+  if (extraLoot.length > 0) {
+    extraLootHtml = `
+      <h4 style="margin:12px 0 8px 0; font-size:10.5px; color:#fff; text-align:left; text-transform:uppercase; letter-spacing:1px; border-bottom: 1px solid #3d1c5a; padding-bottom:5px; font-weight:bold; display:flex; align-items:center; gap:4px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Extra Loot Found:
+      </h4>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; text-align:left; margin-bottom:12px;">
+        ${extraLoot.map(l => {
+          let color = l.name.includes("Scrap") ? "#3498db" : l.name.includes("Soul") ? "#ffb6c1" : "#9b59b6";
+          if (l.name === "Eridium Shard") color = "#8e44ad";
+          if (l.name.includes("Elixir")) color = "#2ecc71";
+
+          let iconHtml = l.type === "use" ? window.getUseIconHtml(l.name, 28) : window.getEtcIconHtml(l.name, 28);
+          iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 4px;");
+
+          let escapedName = l.name.replace(/'/g, "\\'");
+          let hoverEvents = l.type === "use"
+            ? `onmouseenter="window.showUseTooltip(event, '${escapedName}')" ontouchstart="window.showUseTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`
+            : `onmouseenter="window.showEtcTooltip(event, '${escapedName}')" ontouchstart="window.showEtcTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`;
+
+          return `
+            <div style="background:#090a0f; border: 1px solid #222; border-left: 3.5px solid ${color} !important; padding: 6px 10px; border-radius: 4px; font-size: 11px; display:flex; align-items:center; justify-content:space-between; gap:6px; cursor:help; font-family:monospace;" ${hoverEvents}>
+              <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
+                <div style="flex-shrink:0;">${iconHtml}</div>
+                <span style="color:#aaa; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">${l.name}</span>
+              </div>
+              <strong style="color:${color}; font-size:11px; flex-shrink:0; margin-left:4px;">+${l.qty}</strong>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
 
   modal.innerHTML = `
-        <div style="background:#161616; border: 2.5px solid ${colorText}; border-radius: 12px; width:100%; max-width:440px; display:flex; flex-direction:column; box-shadow: 0 15px 45px rgba(0,0,0,0.95); animation: toastFadeIn 0.3s; overflow:hidden;">
-            <div style="background:#0b0f12; border-bottom: 1px solid #333; padding:15px; text-align:center;">
-                <h3 style="margin:0; color:${colorText}; font-size:15px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">${headerText}</h3>
-            </div>
-            <div style="padding:20px; text-align:center; color:#fff;">
-                <div style="font-size:11px; color:#aaa; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px;">WAVES CLEARED:</div>
-                <div style="font-size:24px; color:#f1c40f; font-weight:bold; margin-bottom:15px; font-family:monospace;">${waves} Floors</div>
+    <style>
+      @keyframes rotateSummaryConstellation {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .summary-constellation-track {
+        position: absolute;
+        top: -50%; left: -50%; width: 200%; height: 200%;
+        background: radial-gradient(circle at center, transparent 30%, rgba(155, 89, 182, 0.05) 70%),
+                    radial-gradient(1.5px 1.5px at 20px 40px, #fff, rgba(0, 0, 0, 0)),
+                    radial-gradient(1.5px 1.5px at 120px 180px, #df9ffb, rgba(0, 0, 0, 0)),
+                    radial-gradient(1px 1.2px at 240px 90px, #fff, rgba(0, 0, 0, 0));
+        background-repeat: repeat;
+        background-size: 200px 200px;
+        opacity: 0.15;
+        animation: rotateSummaryConstellation 150s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+      }
+    </style>
+    <div style="background:#130d1e; border: 2.5px solid ${colorText}; border-radius: 12px; width:100%; max-width:440px; max-height: 88vh; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 15px 45px rgba(0,0,0,0.95); animation: toastFadeIn 0.3s; border-bottom-width: 5px; position:relative; z-index:1;">
+        <div class="summary-constellation-track"></div>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:15px;">
-                    <div style="background:#111; padding:8px; border-radius:6px; border:1px solid #222;">
-                        <div style="font-size:9px; color:#aaa; margin-bottom:2px;">ASTRAL SHARDS</div>
-                        <div style="font-size:14px; color:#9b59b6; font-weight:bold; font-family:monospace;">+${shards}</div>
-                    </div>
-                    <div style="background:#111; padding:8px; border-radius:6px; border:1px solid #222;">
-                        <div style="font-size:9px; color:#aaa; margin-bottom:2px;">CATALYST CORES</div>
-                        <div style="font-size:14px; color:#2ecc71; font-weight:bold; font-family:monospace;">+${cores}</div>
-                    </div>
-                    <div style="background:#111; padding:8px; border-radius:6px; border:1px solid #222;">
-                        <div style="font-size:9px; color:#aaa; margin-bottom:2px;">GOLD EARNED</div>
-                        <div style="font-size:14px; color:#f1c40f; font-weight:bold; font-family:monospace;">+${gold.toLocaleString()}</div>
-                    </div>
-                    <div style="background:#111; padding:8px; border-radius:6px; border:1px solid #222;">
-                        <div style="font-size:9px; color:#aaa; margin-bottom:2px;">EXP HARVESTED</div>
-                        <div style="font-size:14px; color:#e67e22; font-weight:bold; font-family:monospace;">+${xp.toLocaleString()}</div>
-                    </div>
+        <div style="background:#090510; border-bottom: 1px solid #3d1c5a; padding:15px; text-align:center; position:relative; z-index:2;">
+            <h3 style="margin:0; color:${colorText}; font-size:15px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase; text-shadow:0 0 10px rgba(155,89,182,0.45);">${headerText}</h3>
+        </div>
+
+        <div style="padding:20px; overflow-y:auto; flex:1; color:#fff; overscroll-behavior: contain; position:relative; z-index:2;">
+            <div style="font-size:11px; color:#aaa; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px; text-align:center;">MAX WAVE COMPLETED:</div>
+            <div style="font-size:24px; color:#ffd700; font-weight:bold; margin-bottom:15px; font-family:monospace; text-align:center; text-shadow:0 0 8px rgba(255,215,0,0.35);">Wave ${waves}</div>
+
+            <!-- Rewards Grid with custom SVGs -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:15px;">
+                <div style="background:#08040d; padding:10px; border-radius:6px; border:1px solid #9b59b660; text-align:center; box-shadow: inset 0 0 8px #000;">
+                    <span style="font-size:9px; color:#aaa; display:flex; align-items:center; justify-content:center; gap:4px; text-transform:uppercase; letter-spacing:0.5px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5" style="transform:translateY(-0.5px);"><polygon points="12 2 22 12 12 22 2 12"/></svg>
+                        Astral Shards
+                    </span>
+                    <strong style="color:#df9ffb; font-size:16px; font-family:monospace;">+${shards}</strong>
                 </div>
-                <p style="font-size:11px; color:#7f8c8d; line-height:1.45; white-space:normal; margin-bottom:5px;">${footerTip}</p>
+                <div style="background:#08040d; padding:10px; border-radius:6px; border:1px solid #2ecc7160; text-align:center; box-shadow: inset 0 0 8px #000;">
+                    <span style="font-size:9px; color:#aaa; display:flex; align-items:center; justify-content:center; gap:4px; text-transform:uppercase; letter-spacing:0.5px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5" style="transform:translateY(-0.5px);"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="12" cy="12" r="4"/></svg>
+                        Catalyst Cores
+                    </span>
+                    <strong style="color:#2ecc71; font-size:16px; font-family:monospace;">+${cores}</strong>
+                </div>
+                <div style="background:#08040d; padding:10px; border-radius:6px; border:1px solid #f1c40f60; text-align:center; box-shadow: inset 0 0 8px #000;">
+                    <span style="font-size:9px; color:#aaa; display:flex; align-items:center; justify-content:center; gap:4px; text-transform:uppercase; letter-spacing:0.5px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5" style="transform:translateY(-0.5px);"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6"/></svg>
+                        Gold Claimed
+                    </span>
+                    <strong style="color:#f1c40f; font-size:16px; font-family:monospace;">+${window.formatNumber(gold)}</strong>
+                </div>
+                <div style="background:#08040d; padding:10px; border-radius:6px; border:1px solid #e67e2260; text-align:center; box-shadow: inset 0 0 8px #000;">
+                    <span style="font-size:9px; color:#aaa; display:flex; align-items:center; justify-content:center; gap:4px; text-transform:uppercase; letter-spacing:0.5px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2.5" style="transform:translateY(-0.5px);"><circle cx="12" cy="12" r="10"/><path d="M17 13l-5-5-5 5"/></svg>
+                        XP Harvested
+                    </span>
+                    <strong style="color:#e67e22; font-size:16px; font-family:monospace;">+${window.formatNumber(xp)}</strong>
+                </div>
             </div>
-            <div style="background:#0b0f12; border-top: 1px solid #333; padding:12px; display:flex; justify-content:center;">
-                <button id="close-crucible-summary" style="background:${colorText}; color:white; border:none; padding:12px; font-weight:bold; font-size:12px; border-radius:6px; cursor:pointer; width:100%; text-transform:uppercase; letter-spacing:0.5px;">Claim Loot & Surface</button>
+
+            <!-- Extra Loot found during run -->
+            ${extraLootHtml}
+
+            <!-- Deck build list from run -->
+            <h4 style="margin:12px 0 8px 0; font-size:10.5px; color:#fff; text-align:left; text-transform:uppercase; letter-spacing:1px; border-bottom: 1px solid #3d1c5a; padding-bottom:5px; font-weight:bold; display:flex; align-items:center; gap:4px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+                Run Infusion Deck:
+            </h4>
+            <div style="max-height:130px; overflow-y:auto; margin-bottom:15px; padding-right:4px; display:flex; flex-direction:column; gap:6px;">
+                ${deckHtml}
+            </div>
+
+            <div style="background:rgba(231,76,60,0.03); border:1px dashed rgba(155, 89, 182, 0.45); border-radius:8px; padding:10px 12px; font-size:10.5px; line-height:1.45; color:#e2e8f0; text-align:left; white-space:normal;">
+                ${footerTip}
             </div>
         </div>
-    `;
+        <div style="background:#090510; border-top:1px solid #3d1c5a; padding:12px; display:flex; justify-content:center; position:relative; z-index:2;">
+            <button id="close-crucible-summary" style="background:${colorText}; color:#fff; border:none; padding:12px; font-weight:bold; font-size:12px; border-radius:6px; cursor:pointer; width:100%; text-transform:uppercase; letter-spacing:1px; text-shadow:0 1px 2px rgba(0,0,0,0.5);">Claim Loot & Surface</button>
+        </div>
+    </div>
+  `;
   document.body.appendChild(modal);
+
   document.getElementById("close-crucible-summary").onclick = function () {
     modal.remove();
     window.isGamePaused = false;
@@ -8740,6 +8946,181 @@ window.showCrucibleSummaryModal = function (
     window.renderInventory();
   };
 };
+
+  window.recordRunLoot = function (name, qty, type, itemObj = null) {
+            let isDungeon = window.playerStats.isDungeonMode;
+            let isCrucible = window.playerStats.isCrucibleMode;
+            if (!isDungeon && !isCrucible) return;
+
+            let targetArray = isDungeon
+              ? window.playerStats.dungeonAccumulatedLoot
+              : window.playerStats.crucibleAccumulatedLoot;
+
+            if (!targetArray) return;
+
+            if (type === "etc" || type === "use") {
+              let existing = targetArray.find(
+                (l) => l.name === name && l.type === type
+              );
+              if (existing) {
+                existing.qty += qty;
+              } else {
+                targetArray.push({
+                  name: name,
+                  qty: qty,
+                  type: type
+                });
+              }
+            } else {
+              targetArray.push({
+                name: name,
+                qty: qty,
+                type: type,
+                item: itemObj
+              });
+            }
+          };
+
+          window.showDungeonSummaryModal = function (
+            dungeonType,
+            floorReached,
+            gold,
+            xp,
+            loot,
+            died = false
+          ) {
+            let modal = document.createElement("div");
+            modal.id = "dungeon-summary-modal";
+            modal.style.position = "fixed";
+            modal.style.top = "0";
+            modal.style.left = "0";
+            modal.style.width = "100%";
+            modal.style.height = "100%";
+            modal.style.backgroundColor = "rgba(0,0,0,0.92)";
+            modal.style.display = "flex";
+            modal.style.justifyContent = "center";
+            modal.style.alignItems = "center";
+            modal.style.zIndex = "35000";
+            modal.style.padding = "15px";
+
+            let dNames = {
+              equip: "Equipment Vault",
+              gold: "Gold Mine Caverns",
+              mat: "Toxic Material Pit"
+            };
+            let dColors = {
+              equip: "#3498db",
+              gold: "#f1c40f",
+              mat: "#2ecc71"
+            };
+            let dName = dNames[dungeonType] || "Infinite Dungeon";
+            let accentColor = dColors[dungeonType] || "#9b59b6";
+
+            let headerText = died ? `💀 ${dName.toUpperCase()} DEFEAT` : `🏰 ${dName.toUpperCase()} SUMMARY`;
+
+            let equipLoot = loot.filter(l => l.type === "equip" || l.type === "artifact" || l.type === "sigil");
+            let matLoot = loot.filter(l => l.type === "etc" || l.type === "use");
+
+            let equipListHtml = "";
+            if (equipLoot.length > 0) {
+              equipListHtml = equipLoot.map(l => {
+                let item = l.item;
+                if (!item) return "";
+                let color = window.getTierColor(item.statsRolled);
+                let stars = item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★`;
+                return `
+                  <div style="background:#13151c; border:1px solid #232833; border-left: 4px solid ${color} !important; padding: 8px 12px; border-radius: 6px; font-size: 11px; margin-bottom: 6px; text-align:left; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor:help;"
+                       onmouseenter="window.showInventoryTooltip(event, ${item.id})"
+                       ontouchstart="window.showInventoryTooltip(event, ${item.id}); event.stopPropagation();"
+                       onmouseleave="window.hideTooltip()">
+                    <span style="color:${color}; font-weight:bold; display:flex; align-items:center; gap:8px;">
+                      ${window.getEquipIconHtml(item, 28)} ${item.name}
+                    </span>
+                    <span style="color:#888; font-size: 10px; font-family:monospace; font-weight:bold;">${stars}</span>
+                  </div>
+                `;
+              }).join("");
+            } else {
+              equipListHtml = `<div style="color:#666; font-style:italic; font-size:11px; padding: 15px 0; text-align:center;">No equipment found in these depths.</div>`;
+            }
+
+            let matsListHtml = "";
+            if (matLoot.length > 0) {
+              matsListHtml = matLoot.map(l => {
+                let color = l.name.includes("Scrap") ? "#3498db" : l.name.includes("Soul") ? "#ffb6c1" : "#9b59b6";
+                if (l.name === "Eridium Shard") color = "#8e44ad";
+                if (l.name.includes("Elixir")) color = "#2ecc71";
+
+                let iconHtml = l.type === "use" ? window.getUseIconHtml(l.name, 28) : window.getEtcIconHtml(l.name, 28);
+                iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 4px;");
+
+                let escapedName = l.name.replace(/'/g, "\\'");
+                let hoverEvents = l.type === "use"
+                  ? `onmouseenter="window.showUseTooltip(event, '${escapedName}')" ontouchstart="window.showUseTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`
+                  : `onmouseenter="window.showEtcTooltip(event, '${escapedName}')" ontouchstart="window.showEtcTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`;
+
+                return `
+                  <div style="background:#090a0f; border: 1.5px solid #222; border-left: 3.5px solid ${color} !important; padding: 6px 10px; border-radius: 6px; font-size: 11px; display:flex; align-items:center; justify-content:space-between; gap:6px; cursor:help; font-family:monospace;" ${hoverEvents}>
+                    <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
+                      <div style="flex-shrink:0;">${iconHtml}</div>
+                      <span style="color:#aaa; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">${l.name}</span>
+                    </div>
+                    <strong style="color:${color}; font-size:11px; flex-shrink:0; margin-left:4px;">+${l.qty}</strong>
+                  </div>
+                `;
+              }).join("");
+            } else {
+              matsListHtml = `<div style="color:#666; font-style:italic; font-size:11px; padding: 5px 0; text-align:center; width:100%;">No materials recovered.</div>`;
+            }
+
+            modal.innerHTML = `
+              <div style="background:#1a1a1a; border: 2.5px solid ${accentColor}; border-radius: 12px; width:100%; max-width:440px; max-height: 88vh; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 15px 45px rgba(0,0,0,0.95); animation: toastFadeIn 0.3s; border-bottom-width: 5px;">
+                  <div style="background:#0b0f12; border-bottom: 1px solid #333; padding:15px; text-align:center;">
+                      <h3 style="margin:0; color:${accentColor}; font-size:15px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">${headerText}</h3>
+                  </div>
+                  <div style="padding:20px; overflow-y:auto; flex:1; color:#fff; overscroll-behavior: contain;">
+                      <div style="font-size:11px; color:#aaa; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px; text-align:center;">DEEPEST FLOOR CLEARED:</div>
+                      <div style="font-size:24px; color:${accentColor}; font-weight:bold; margin-bottom:15px; font-family:monospace; text-align:center;">Floor ${floorReached}</div>
+
+                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:15px;">
+                          <div style="background:#111; padding:10px; border-radius:6px; border:1px solid #222; text-align:center; box-shadow: inset 0 0 8px #000;">
+                              <span style="font-size:9px; color:#aaa; display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">🟡 Gold Earned</span>
+                              <strong style="color:#f1c40f; font-size:16px; font-family:monospace;">+${window.formatNumber(gold)}</strong>
+                          </div>
+                          <div style="background:#111; padding:10px; border-radius:6px; border:1px solid #222; text-align:center; box-shadow: inset 0 0 8px #000;">
+                              <span style="font-size:9px; color:#aaa; display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">🧠 XP Harvested</span>
+                              <strong style="color:#9b59b6; font-size:16px; font-family:monospace;">+${window.formatNumber(xp)}</strong>
+                          </div>
+                      </div>
+
+                      <h4 style="margin:0 0 8px 0; font-size:10.5px; color:#fff; text-align:left; text-transform:uppercase; letter-spacing:1px; border-bottom: 1px solid #333; padding-bottom:5px; font-weight:bold; display:flex; align-items:center; gap:4px;">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                          Equipment Found
+                      </h4>
+                      <div style="max-height:140px; overflow-y:auto; margin-bottom:15px; padding-right:4px;">${equipListHtml}</div>
+
+                      <h4 style="margin:0 0 8px 0; font-size:10.5px; color:#fff; text-align:left; text-transform:uppercase; letter-spacing:1px; border-bottom: 1px solid #333; padding-bottom:5px; font-weight:bold; display:flex; align-items:center; gap:4px;">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                          Materials & Consumables
+                      </h4>
+                      <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:6px; text-align:left; margin-bottom:10px; max-height:120px; overflow-y:auto; padding-right:4px;">${matsListHtml}</div>
+                  </div>
+                  <div style="background:#0b0f12; border-top:1px solid #333; padding:12px; display:flex; justify-content:center;">
+                      <button id="close-dungeon-summary" style="background:${accentColor}; color:#fff; border:none; padding:12px; font-weight:bold; font-size:12px; border-radius:6px; cursor:pointer; width:100%; text-transform:uppercase; letter-spacing:1px; text-shadow:0 1px 2px rgba(0,0,0,0.5);">Claim Loot & Surface</button>
+                  </div>
+              </div>
+            `;
+            document.body.appendChild(modal);
+
+            document.getElementById("close-dungeon-summary").onclick = function () {
+              modal.remove();
+              window.isGamePaused = false;
+              let p = window.resolvePlayerStats();
+              window.playerStats.currentHp = p.maxHp;
+              window.updateUI();
+              window.renderInventory();
+            };
+          };
 
 // 5-Wave Mid-Run draft Choice portal overlay generator
 window.openCrucibleMidRunDraftModal = function () {
