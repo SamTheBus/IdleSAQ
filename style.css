@@ -538,6 +538,24 @@ canvas {
   transform: scale(0.92);
 }
 
+/* --- MOBILE TOUCH TARGET OPTIMIZATION --- */
+@media (max-width: 580px) {
+  .btn-action {
+    padding: 8px 14px !important; /* Larger comfortable tap target */
+    min-height: 36px !important;   /* Touch safety cushion */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  /* Protect tiny utility SP matrix allocations */
+  .btn-action.sp {
+    padding: 0 !important;
+    min-height: 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
 .btn-action.un {
   background: #e74c3c;
 }

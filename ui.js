@@ -3044,36 +3044,36 @@ window.renderMarketShop = function () {
       : "";
 
     html += `
-        <div class="merchant-shelf-hero"
-             style="display:flex; flex-direction:column; justify-content:space-between; padding:15px; margin-bottom:14px;"
-             onmouseenter="window.showMarketTooltip(event, ${window.playerStats.shopItems.indexOf(iotdItem)})"
-             onmouseleave="window.hideTooltip()"
-             ontouchstart="window.showMarketTooltip(event, ${window.playerStats.shopItems.indexOf(iotdItem)})">
-            ${soldOverlay}
-            <div style="position:relative; z-index:2; display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; padding:0 4px;">
-                <div style="background: linear-gradient(90deg, #f1c40f, #e67e22); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size:9.5px; font-weight:900; letter-spacing:2px; text-transform:uppercase; text-shadow: 0 0 8px rgba(241, 196, 15, 0.2);">★ Item of the Day ★</div>
-                <div style="font-family:monospace; font-size:9.5px; color:#f1c40f; background:rgba(241, 196, 15, 0.08); padding:2px 6px; border-radius:3px; border:1px solid rgba(241, 196, 15, 0.3);">SPECIAL VALUE</div>
-            </div>
-            <div style="position:relative; z-index:2; display:flex; align-items:center; gap:12px; margin-bottom:12px; padding:0 4px;">
-                <div style="flex-shrink:0;">
-                    ${window.getEquipIconHtml(iotdItem, 40)}
-                </div>
-                <div style="flex:1; min-width:0; text-align:left;">
-                    <strong style="color:${nameColor}; font-size:14px; text-shadow:0 0 8px rgba(${window.hexToRgbValues(nameColor)},0.25); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px;">${iotdItem.name}</strong>
-                    <span style="font-size:10px; color:#94a3b8; font-family:monospace;">${iotdItem.statsRolled === "UNIQUE" ? "UNIQUE" : iotdItem.statsRolled + "★"} Quality</span>
-                </div>
-            </div>
-            <div style="position:relative; z-index:4; display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(255,255,255,0.08); padding-top:10px; padding-left:4px; padding-right:4px;">
-                                        <div>
-                                            <span style="font-size:9.5px; color:#888; display:block; text-align:left;">MERCHANT COST</span>
-                                            <strong style="color:${costColor}; font-size:14px; font-family:monospace;">${window.formatNumber(iotdItem.cost)} Gold</strong>
-                                        </div>
-                                        <button class="btn-action" style="${btnStyle} padding:8px 16px; font-size:11px;" onclick="window.buyShopItem(${window.playerStats.shopItems.indexOf(iotdItem)})">
-                                            ${isSold ? "SOLD" : "ACQUIRE"}
-                                        </button>
-                                    </div>
-        </div>
-      `;
+                    <div class="merchant-shelf-hero"
+                         style="display:flex; flex-direction:column; justify-content:space-between; padding:15px; margin-bottom:14px;"
+                         onmouseenter="window.showMarketTooltip(event, ${window.playerStats.shopItems.indexOf(iotdItem)})"
+                         onmouseleave="window.hideTooltip()">
+                        ${soldOverlay}
+                        <div style="position:relative; z-index:2; display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; padding:0 4px;">
+                            <div style="background: linear-gradient(90deg, #f1c40f, #e67e22); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size:9.5px; font-weight:900; letter-spacing:2px; text-transform:uppercase; text-shadow: 0 0 8px rgba(241, 196, 15, 0.2);">★ Item of the Day ★</div>
+                            <div style="font-family:monospace; font-size:9.5px; color:#f1c40f; background:rgba(241, 196, 15, 0.08); padding:2px 6px; border-radius:3px; border:1px solid rgba(241, 196, 15, 0.3);">SPECIAL VALUE</div>
+                        </div>
+                        <div style="position:relative; z-index:2; display:flex; align-items:center; gap:12px; margin-bottom:12px; padding:0 4px; cursor:help;"
+                             ontouchstart="window.showMarketTooltip(event, ${window.playerStats.shopItems.indexOf(iotdItem)}); event.stopPropagation();">
+                            <div style="flex-shrink:0;">
+                                ${window.getEquipIconHtml(iotdItem, 40)}
+                            </div>
+                            <div style="flex:1; min-width:0; text-align:left;">
+                                <strong style="color:${nameColor}; font-size:14px; text-shadow:0 0 8px rgba(${window.hexToRgbValues(nameColor)},0.25); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px;">${iotdItem.name}</strong>
+                                <span style="font-size:10px; color:#94a3b8; font-family:monospace;">${iotdItem.statsRolled === "UNIQUE" ? "UNIQUE" : iotdItem.statsRolled + "★"} Quality</span>
+                            </div>
+                        </div>
+                        <div style="position:relative; z-index:4; display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(255,255,255,0.08); padding-top:10px; padding-left:4px; padding-right:4px;">
+                                                    <div>
+                                                        <span style="font-size:9.5px; color:#888; display:block; text-align:left;">MERCHANT COST</span>
+                                                        <strong style="color:${costColor}; font-size:14px; font-family:monospace;">${window.formatNumber(iotdItem.cost)} Gold</strong>
+                                                    </div>
+                                                    <button class="btn-action" style="${btnStyle} padding:8px 16px; font-size:11px;" ontouchstart="event.stopPropagation();" onclick="window.buyShopItem(${window.playerStats.shopItems.indexOf(iotdItem)})">
+                                                        ${isSold ? "SOLD" : "ACQUIRE"}
+                                                    </button>
+                                                </div>
+                    </div>
+                  `;
   }
 
   // Render Standard Items in a divided columns grid (The "Shelf")
@@ -3110,29 +3110,29 @@ window.renderMarketShop = function () {
     if (shopItem.statsRolled === 5) glowClass += " rarity-glow-5";
 
     html += `
-        <div class="${glowClass}"
-             style="display:flex; flex-direction:column; justify-content:space-between; border-radius:6px; padding:10px; gap:8px;"
-             onmouseenter="window.showMarketTooltip(event, ${idx})"
-             onmouseleave="window.hideTooltip()"
-             ontouchstart="window.showMarketTooltip(event, ${idx})">
-            ${soldOverlay}
-            <div style="display:flex; align-items:center; gap:10px; text-align:left; position:relative; z-index:2;">
-                <div style="flex-shrink:0;">
-                    ${window.getEquipIconHtml(shopItem, 32)}
+            <div class="${glowClass}"
+                 style="display:flex; flex-direction:column; justify-content:space-between; border-radius:6px; padding:10px; gap:8px;"
+                 onmouseenter="window.showMarketTooltip(event, ${idx})"
+                 onmouseleave="window.hideTooltip()">
+                ${soldOverlay}
+                <div style="display:flex; align-items:center; gap:10px; text-align:left; position:relative; z-index:2; cursor:help;"
+                     ontouchstart="window.showMarketTooltip(event, ${idx}); event.stopPropagation();">
+                    <div style="flex-shrink:0;">
+                        ${window.getEquipIconHtml(shopItem, 32)}
+                    </div>
+                    <div style="flex:1; min-width:0;">
+                        <strong style="color:${nameColor}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px;">${shopItem.name}</strong>
+                        <span style="font-size:9.5px; color:#94a3b8; font-family:monospace;">${shopItem.statsRolled === "UNIQUE" ? "UNIQUE" : shopItem.statsRolled + "★"} Quality</span>
+                    </div>
                 </div>
-                <div style="flex:1; min-width:0;">
-                    <strong style="color:${nameColor}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px;">${shopItem.name}</strong>
-                    <span style="font-size:9.5px; color:#94a3b8; font-family:monospace;">${shopItem.statsRolled === "UNIQUE" ? "UNIQUE" : shopItem.statsRolled + "★"} Quality</span>
-                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:4; border-top:1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:2px;">
+                                            <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(shopItem.cost)} Gold</span>
+                                            <button class="btn-action" style="${btnStyle} font-size:10px; padding:4px 8px; border-radius:4px;" ontouchstart="event.stopPropagation();" onclick="window.buyShopItem(${idx})">
+                                                ${isSold ? "SOLD" : "BUY"}
+                                            </button>
+                                        </div>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:4; border-top:1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:2px;">
-                                        <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(shopItem.cost)} Gold</span>
-                                        <button class="btn-action" style="${btnStyle} font-size:10px; padding:4px 8px; border-radius:4px;" onclick="window.buyShopItem(${idx})">
-                                            ${isSold ? "SOLD" : "BUY"}
-                                        </button>
-                                    </div>
-        </div>
-      `;
+          `;
   });
 
   html += `</div>`;
@@ -3468,22 +3468,23 @@ window.renderMysticalShop = function () {
       let btnStyle = `background: ${item.color}; color: ${item.color === "#f1c40f" ? "#111" : "#fff"}; font-weight: bold;`;
 
       return `
-          <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(180deg, #161921 0%, #0d0f14 100%); box-shadow: 0 4px 15px rgba(0,0,0,0.85), inset 0 0 10px rgba(${window.hexToRgbValues ? window.hexToRgbValues(item.color) : "255,255,255"}, 0.05); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;" onmouseenter="window.showMysticalShopTooltip(event, ${index})" ontouchstart="window.showMysticalShopTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
-              <div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                    <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                                        ${iconHtml}
-                                        <strong style="color:${item.color}; font-size:12.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px ${item.color}35;">${item.name}</strong>
-                                    </div>
-                                </div>
-                                <div style="font-size:10px; color:#94a3b8; margin-bottom:10px; line-height:1.4; white-space:normal;">${item.desc}</div>
-                            </div>
-                            <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
-                                         <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(displayCost)} ${currencyLabel}</span>
-                                         <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px; box-shadow:0 0 6px ${item.color}33;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMysticalItem(${index})">Purchase</button>
-                                     </div>
-          </div>
-        `;
+                <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(180deg, #161921 0%, #0d0f14 100%); box-shadow: 0 4px 15px rgba(0,0,0,0.85), inset 0 0 10px rgba(${window.hexToRgbValues ? window.hexToRgbValues(item.color) : "255,255,255"}, 0.05); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; height:100%; display:flex; justify-content:space-between; margin-bottom:0; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;" onmouseenter="window.showMysticalShopTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                          <div style="display:flex; align-items:center; gap:8px; min-width:0; cursor:help;"
+                                               ontouchstart="window.showMysticalShopTooltip(event, ${index}); event.stopPropagation();">
+                                              ${iconHtml}
+                                              <strong style="color:${item.color}; font-size:12.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px ${item.color}35;">${item.name}</strong>
+                                          </div>
+                                      </div>
+                                      <div style="font-size:10px; color:#94a3b8; margin-bottom:10px; line-height:1.4; white-space:normal;">${item.desc}</div>
+                                  </div>
+                                  <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+                                               <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(displayCost)} ${currencyLabel}</span>
+                                               <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px; box-shadow:0 0 6px ${item.color}33;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMysticalItem(${index})">Purchase</button>
+                                           </div>
+                </div>
+              `;
     }).join("") +
     `</div></div>`;
 
@@ -3510,34 +3511,35 @@ window.renderMysticalShop = function () {
         : "reagent-indicator missing";
 
       return `
-      <div class="shop-row" style="border-color: ${recipe.color}; background: rgba(0,0,0,0.5); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;" onmouseenter="window.showTransmuteTooltip(event, ${index})" ontouchstart="window.showTransmuteTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
-           <div>
-               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                   <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
-                       ${iconHtml}
-                       <strong style="color:${recipe.color}; font-size:12.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; text-shadow:0 0 8px ${recipe.color}35;">Brew: ${recipe.result}</strong>
-                   </div>
-               </div>
-               <div style="font-size:10px; color:#94a3b8; margin-bottom:6px; line-height:1.4; white-space:normal;">${recipe.desc} (Owned: ${ownedCount})</div>
-           </div>
+                <div class="shop-row" style="border-color: ${recipe.color}; background: rgba(0,0,0,0.5); flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; height:100%; display:flex; justify-content:space-between; margin-bottom:0; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;" onmouseenter="window.showTransmuteTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
+                     <div>
+                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                             <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; cursor:help;"
+                                  ontouchstart="window.showTransmuteTooltip(event, ${index}); event.stopPropagation();">
+                                 ${iconHtml}
+                                 <strong style="color:${recipe.color}; font-size:12.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; text-shadow:0 0 8px ${recipe.color}35;">Brew: ${recipe.result}</strong>
+                             </div>
+                         </div>
+                         <div style="font-size:10px; color:#94a3b8; margin-bottom:6px; line-height:1.4; white-space:normal;">${recipe.desc} (Owned: ${ownedCount})</div>
+                     </div>
 
-           <!-- Reagent Split Card Layout with Active Status indicators -->
-           <div class="split-reagent-card" style="border-color:${canAfford ? "rgba(46,204,113,0.3)" : "rgba(231,76,60,0.3)"};">
-               <div style="display:flex; align-items:center; gap:6px;">
-                   <span class="${indicatorClass}"></span>
-                   <span style="color:#888;">Need:</span>
-                   <span style="color:${costColor}; font-weight:bold;">${recipe.amount}x ${recipe.req.replace(" Elixir", "")}</span>
-               </div>
-               <span style="color:#555;">➔</span>
-               <span style="color:#fff; font-weight:bold;">1x ${recipe.result.replace(" Elixir", "")}</span>
-           </div>
+                     <!-- Reagent Split Card Layout with Active Status indicators -->
+                     <div class="split-reagent-card" style="border-color:${canAfford ? "rgba(46,204,113,0.3)" : "rgba(231,76,60,0.3)"};">
+                         <div style="display:flex; align-items:center; gap:6px;">
+                             <span class="${indicatorClass}"></span>
+                             <span style="color:#888;">Need:</span>
+                             <span style="color:${costColor}; font-weight:bold;">${recipe.amount}x ${recipe.req.replace(" Elixir", "")}</span>
+                         </div>
+                         <span style="color:#555;">➔</span>
+                         <span style="color:#fff; font-weight:bold;">1x ${recipe.result.replace(" Elixir", "")}</span>
+                     </div>
 
-           <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-                                                <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${recipe.amount}x Ingredients</span>
-                                                <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px;" ${canAfford ? "" : "disabled"} onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.transmutePotion(${index})">Transmute</button>
-                                            </div>
-       </div>
-     `;
+                     <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                                                          <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${recipe.amount}x Ingredients</span>
+                                                          <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px;" ${canAfford ? "" : "disabled"} onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.transmutePotion(${index})">Transmute</button>
+                                                      </div>
+                 </div>
+               `;
     }).join("") +
     `</div></div>`;
 
@@ -3552,40 +3554,41 @@ window.renderAstralShop = function () {
   let html = "";
 
   window.ASTRAL_SHOP_STOCK.forEach((item, index) => {
-    let canAfford = ownedShards >= item.cost;
-    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-    let iconHtml = window
-      .getEtcIconHtml(item.name)
-      .replace("margin-right: 12px;", "margin-right: 6px;");
+      let canAfford = ownedShards >= item.cost;
+      let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+      let iconHtml = window
+        .getEtcIconHtml(item.name)
+        .replace("margin-right: 12px;", "margin-right: 6px;");
 
-    let btnStyle = canAfford
-      ? `background: ${item.color}; color: ${item.color === "#f1c40f" ? "#111" : "#fff"}; font-weight: bold;`
-      : "";
+      let btnStyle = canAfford
+        ? `background: ${item.color}; color: ${item.color === "#f1c40f" || item.color === "#ffb6c1" ? "#111" : "#fff"}; font-weight: bold;`
+        : "";
 
-    html += `
-      <div class="runic-altar-card" style="flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; cursor: help; height:100%; display:flex; justify-content:space-between; margin-bottom:0;" onmouseenter="window.showAstralShopItemTooltip(event, ${index})" onmouseleave="window.hideTooltip()" ontouchstart="window.showAstralShopItemTooltip(event, ${index})">
-          <!-- Animated rotating stars background -->
-          <div class="starry-bg"></div>
+      html += `
+        <div class="runic-altar-card" style="flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; height:100%; display:flex; justify-content:space-between; margin-bottom:0;" onmouseenter="window.showAstralShopItemTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
+            <!-- Animated rotating stars background -->
+            <div class="starry-bg"></div>
 
-          <!-- Floating glowing rune price tag -->
-          <span class="rune-price-badge" style="color:${costColor};">${item.cost} Shards</span>
+            <!-- Floating glowing rune price tag -->
+            <span class="rune-price-badge" style="color:${costColor};">${item.cost} Shards</span>
 
-          <div style="position:relative; z-index:2;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                  <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
-                      ${iconHtml}
-                      <strong style="font-size:11.5px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</strong>
-                  </div>
-              </div>
-              <p style="font-size:10px; color:#94a3b8; margin-bottom:8px; line-height:1.35; white-space:normal;">${item.desc}</p>
-          </div>
+            <div style="position:relative; z-index:2;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1; cursor:help;"
+                         ontouchstart="window.showAstralShopItemTooltip(event, ${index}); event.stopPropagation();">
+                        ${iconHtml}
+                        <strong style="font-size:11.5px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</strong>
+                    </div>
+                </div>
+                <p style="font-size:10px; color:#94a3b8; margin-bottom:8px; line-height:1.35; white-space:normal;">${item.desc}</p>
+            </div>
 
-          <div style="position:relative; z-index:2; border-top: 1px dashed rgba(255,255,255,0.08); padding-top:8px; margin-top:6px;">
-                                            <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyAstralShopItem(${index})">Infuse Shards</button>
-                                        </div>
-      </div>
-    `;
-  });
+            <div style="position:relative; z-index:2; border-top: 1px dashed rgba(255,255,255,0.08); padding-top:8px; margin-top:6px;">
+                                              <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyAstralShopItem(${index})">Infuse Shards</button>
+                                          </div>
+        </div>
+      `;
+    });
 
   el.innerHTML = html;
 };
@@ -5155,7 +5158,28 @@ window.generateItemCardHtml = function (
   isEquipped = false,
 ) {
   if (!item) return "";
-  let html = "";
+  let toggleId = `${item.id}_${isEquipped ? 'eq' : 'bag'}_${Math.floor(Math.random() * 100000)}`;
+  let html = `
+    <style>
+      #attune-toggle-${toggleId}:checked ~ .base-stats-grid .attuned-val {
+        display: none !important;
+      }
+      #attune-toggle-${toggleId}:checked ~ .base-stats-grid .raw-val {
+        display: inline !important;
+      }
+      #attune-toggle-${toggleId}:checked ~ .attune-label {
+        color: #7f8c8d !important;
+        border-color: #334155 !important;
+        background: rgba(255,255,255,0.02) !important;
+      }
+      #attune-toggle-${toggleId}:not(:checked) ~ .attune-label {
+        color: #2ecc71 !important;
+        border-color: #2ecc71 !important;
+        background: rgba(46, 204, 113, 0.1) !important;
+      }
+    </style>
+    <input type="checkbox" id="attune-toggle-${toggleId}" style="display:none;" />
+  `;
   let specialtyHtml = ""; // Captured to move inside the collapsible advanced drawer at the bottom
 
   let slotMult = 1.0;
@@ -5282,14 +5306,14 @@ window.generateItemCardHtml = function (
   html += `<div class="tt-subtitle">${subtitle}</div>`;
 
   // Render Slot Attunement details inside the metadata section instead of a floating top badge
-  if (slotMult > 1.0) {
-    let pctBonus = Math.round((slotMult - 1.0) * 100);
-    html += `
-        <div style="font-size: 10px; color: #2ecc71; font-weight: bold; margin-top: 4px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;">
-          ⚡ Slot Attunement: +${pctBonus}% Stats Applied
-        </div>
-      `;
-  }
+    if (slotMult > 1.0) {
+      let pctBonus = Math.round((slotMult - 1.0) * 100);
+      html += `
+          <label for="attune-toggle-${toggleId}" class="attune-label" style="font-size: 10px; font-weight: bold; margin-top: 4px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #2ecc71; border-radius: 4px; padding: 2px 6px; cursor: pointer; user-select: none; width: fit-content; margin-left: auto; margin-right: auto; text-transform: uppercase;">
+            ⚡ Slot Attunement: +${pctBonus}% Stats Applied (Tap to view Raw)
+          </label>
+        `;
+    }
 
   if (item.type === "subweapon") {
           let rgbVals = "127, 140, 141";
@@ -5359,204 +5383,200 @@ window.generateItemCardHtml = function (
         }
 
   // --- BASE STATS SECTION ---
-  if (item.id !== "dummy" && item.type !== "artifact") {
-    let baseStats = [];
+    if (item.id !== "dummy" && item.type !== "artifact") {
+      let baseStats = [];
 
-    if (item.baseAtk > 0) {
-      let displayVal = window.formatNumber(item.baseAtk);
-      if (slotMult > 1.0) {
-        let scaled = Math.ceil(item.baseAtk * slotMult);
-        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
+      if (item.baseAtk > 0) {
+        let rawVal = window.formatNumber(item.baseAtk);
+        let attunedVal = slotMult > 1.0 ? window.formatNumber(Math.ceil(item.baseAtk * slotMult)) : rawVal;
+        baseStats.push({
+          label: "Weapon Damage",
+          raw: rawVal,
+          attuned: attunedVal,
+          icon: window.getUiIconSvg("atk", 14),
+        });
       }
-      baseStats.push({
-        label: "Weapon Damage",
-        val: displayVal,
-        icon: window.getUiIconSvg("atk", 14),
-      });
-    }
-    if (item.baseDef > 0) {
-      let displayVal = window.formatNumber(item.baseDef);
-      if (slotMult > 1.0) {
-        let scaled = Math.ceil(item.baseDef * slotMult);
-        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
+      if (item.baseDef > 0) {
+        let rawVal = window.formatNumber(item.baseDef);
+        let attunedVal = slotMult > 1.0 ? window.formatNumber(Math.ceil(item.baseDef * slotMult)) : rawVal;
+        baseStats.push({
+          label: "Armor",
+          raw: rawVal,
+          attuned: attunedVal,
+          icon: window.getUiIconSvg("def", 14),
+        });
       }
-      baseStats.push({
-        label: "Armor",
-        val: displayVal,
-        icon: window.getUiIconSvg("def", 14),
-      });
-    }
-    if (item.baseMaxHp > 0) {
-      let displayVal = window.formatNumber(item.baseMaxHp);
-      if (slotMult > 1.0) {
-        let scaled = Math.ceil(item.baseMaxHp * slotMult);
-        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
+      if (item.baseMaxHp > 0) {
+        let rawVal = window.formatNumber(item.baseMaxHp);
+        let attunedVal = slotMult > 1.0 ? window.formatNumber(Math.ceil(item.baseMaxHp * slotMult)) : rawVal;
+        baseStats.push({
+          label: "Max Life",
+          raw: rawVal,
+          attuned: attunedVal,
+          icon: window.getUiIconSvg("maxHp", 14),
+        });
       }
-      baseStats.push({
-        label: "Max Life",
-        val: displayVal,
-        icon: window.getUiIconSvg("maxHp", 14),
-      });
-    }
-    if (item.baseMoveSpeed > 0) {
-      let displayVal = window.formatNumber(item.baseMoveSpeed);
-      if (slotMult > 1.0) {
-        let scaled = Math.ceil(item.baseMoveSpeed * slotMult);
-        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
+      if (item.baseMoveSpeed > 0) {
+        let rawVal = window.formatNumber(item.baseMoveSpeed);
+        let attunedVal = slotMult > 1.0 ? window.formatNumber(Math.ceil(item.baseMoveSpeed * slotMult)) : rawVal;
+        baseStats.push({
+          label: "Speed",
+          raw: rawVal,
+          attuned: attunedVal,
+          icon: window.getUiIconSvg("moveSpeed", 14),
+        });
       }
-      baseStats.push({
-        label: "Speed",
-        val: displayVal,
-        icon: window.getUiIconSvg("moveSpeed", 14),
-      });
-    }
-    if (item.baseBlock > 0) {
-      let displayVal = Math.round(item.baseBlock * 100) + "%";
-      if (slotMult > 1.0) {
-        let scaled = Math.round(item.baseBlock * slotMult * 100) + "%";
-        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${scaled})</span>`;
+      if (item.baseBlock > 0) {
+        let rawVal = Math.round(item.baseBlock * 100) + "%";
+        let attunedVal = slotMult > 1.0 ? Math.round(item.baseBlock * slotMult * 100) + "%" : rawVal;
+        baseStats.push({
+          label: "Block Rate",
+          raw: rawVal,
+          attuned: attunedVal,
+          icon: window.getUiIconSvg("block", 14),
+        });
       }
-      baseStats.push({
-        label: "Block Rate",
-        val: displayVal,
-        icon: window.getUiIconSvg("block", 14),
-      });
-    }
-    if (item.baseParry > 0) {
-      let displayVal = Math.round(item.baseParry * 100) + "%";
-      if (slotMult > 1.0) {
-        let scaled = Math.round(item.baseParry * slotMult * 100) + "%";
-        displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${scaled})</span>`;
+      if (item.baseParry > 0) {
+        let rawVal = Math.round(item.baseParry * 100) + "%";
+        let attunedVal = slotMult > 1.0 ? Math.round(item.baseParry * slotMult * 100) + "%" : rawVal;
+        baseStats.push({
+          label: "Parry Rate",
+          raw: rawVal,
+          attuned: attunedVal,
+          icon: window.getUiIconSvg("parry", 14),
+        });
       }
-      baseStats.push({
-        label: "Parry Rate",
-        val: displayVal,
-        icon: window.getUiIconSvg("parry", 14),
-      });
-    }
-    if (item.baseInt > 0) {
-            let displayVal = window.formatNumber(item.baseInt);
-            if (slotMult > 1.0) {
-              let scaled = Math.ceil(item.baseInt * slotMult);
-              displayVal += ` <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ ${window.formatNumber(scaled)})</span>`;
-            }
-            baseStats.push({
-              label: "Intelligence",
-              val: displayVal,
-              icon: window.getUiIconSvg("int", 14),
-            });
+      if (item.baseInt > 0) {
+        let rawVal = window.formatNumber(item.baseInt);
+        let attunedVal = slotMult > 1.0 ? window.formatNumber(Math.ceil(item.baseInt * slotMult)) : rawVal;
+        baseStats.push({
+          label: "Intelligence",
+          raw: rawVal,
+          attuned: attunedVal,
+          icon: window.getUiIconSvg("int", 14),
+        });
+      }
+
+      // --- SUBWEAPON COMPASS STATS ---
+      if (item.type === "subweapon") {
+        let noun = item.noun ? item.noun.toLowerCase() : "";
+        if (item.subType === "shield") {
+          // Shield Bash Base Multiplier
+          let bashMult = 160;
+          if (item.isUniqueAegis) bashMult = 220;
+          else if (noun.includes("buckler")) bashMult = 100;
+          else if (noun.includes("tower")) bashMult = 250;
+
+          baseStats.push({
+            label: "Shield Bash Dmg",
+            raw: `${bashMult}% Def`,
+            attuned: `${bashMult}% Def`,
+            icon: window.getUiIconSvg("block", 14),
+          });
+        } else if (item.subType === "dagger") {
+          // Offhand Multi-Strike Chance
+          let offhandChance = 40;
+          if (noun.includes("kris") || noun.includes("dirk")) offhandChance = 25;
+          else if (noun.includes("stiletto") || noun.includes("baselard")) offhandChance = 60;
+
+          // Offhand Multi-Strike Damage Multiplier
+          let offhandDmg = 35;
+          if (noun.includes("kris") || noun.includes("dirk")) offhandDmg = 55;
+          else if (noun.includes("stiletto") || noun.includes("baselard")) offhandDmg = 25;
+
+          // Riposte Parry Counter Damage Multiplier
+          let riposteDmg = 100;
+          if (noun.includes("kris") || noun.includes("dirk")) riposteDmg = 130;
+          else if (noun.includes("stiletto") || noun.includes("baselard")) riposteDmg = 80;
+
+          baseStats.push({
+            label: "Multi-Strike Rate",
+            raw: `${offhandChance}%`,
+            attuned: `${offhandChance}%`,
+            icon: window.getUiIconSvg("dex", 14),
+          });
+          baseStats.push({
+            label: "Multi-Strike Dmg",
+            raw: `${offhandDmg}% Atk`,
+            attuned: `${offhandDmg}% Atk`,
+            icon: window.getUiIconSvg("atk", 14),
+          });
+          baseStats.push({
+            label: "Riposte Dmg",
+            raw: `${riposteDmg}% Atk`,
+            attuned: `${riposteDmg}% Atk`,
+            icon: window.getUiIconSvg("parry", 14),
+          });
+        } else if (item.subType === "tome") {
+          // Spell Trigger Chance
+          let spellChance = 15;
+          if (item.isUniqueWatch) spellChance = 20;
+          else if (item.isUniqueChronicle) spellChance = 15;
+          else if (noun.includes("grimoire") || noun.includes("chronicle")) spellChance = 10;
+          else if (noun.includes("spellbook") || noun.includes("codex")) spellChance = 18;
+          else if (noun.includes("lexicon")) spellChance = 26;
+
+          // Spell Damage Multiplier
+          let spellDmg = 100;
+          if (item.isUniqueWatch) spellDmg = 100;
+          else if (item.isUniqueChronicle) spellDmg = 120;
+          else if (noun.includes("grimoire") || noun.includes("chronicle")) spellDmg = 180;
+          else if (noun.includes("spellbook") || noun.includes("codex")) spellDmg = 100;
+          else if (noun.includes("lexicon")) spellDmg = 60;
+
+          baseStats.push({
+            label: "Spell Chance",
+            raw: `${spellChance}%`,
+            attuned: `${spellChance}%`,
+            icon: window.getUiIconSvg("int", 14),
+          });
+          baseStats.push({
+            label: "Spell Dmg",
+            raw: `${spellDmg}% Atk`,
+            attuned: `${spellDmg}% Atk`,
+            icon: window.getUiIconSvg("atk", 14),
+          });
+        }
+      }
+
+      if (baseStats.length > 0) {
+        html += `<div class="base-stats-grid" style="background: rgba(255, 255, 255, 0.015); border: 1px solid #222; border-radius: 6px; padding: 8px 6px; margin: 8px 0; display: flex; justify-content: space-around; align-items: center; gap: 4px;">`;
+        baseStats.forEach((b, idx) => {
+          if (idx > 0) {
+            html += `<div style="width: 1px; height: 18px; background: rgba(255, 255, 255, 0.085);"></div>`;
           }
+          // Shorten labels on the fly for horizontal layout fit
+          let shortLabel = b.label;
+          if (shortLabel === "Weapon Damage") shortLabel = "Damage";
+          if (shortLabel === "Block Rate") shortLabel = "Block";
+          if (shortLabel === "Parry Rate") shortLabel = "Parry";
+          if (shortLabel === "Shield Bash Dmg") shortLabel = "Bash Dmg";
+          if (shortLabel === "Multi-Strike Rate") shortLabel = "Multi %";
+          if (shortLabel === "Multi-Strike Dmg") shortLabel = "Multi Dmg";
+          if (shortLabel === "Riposte Dmg") shortLabel = "Riposte";
+          if (shortLabel === "Spell Chance") shortLabel = "Spell %";
+          if (shortLabel === "Spell Dmg") shortLabel = "Spell Dmg";
+          if (shortLabel === "Max Life") shortLabel = "Max HP";
+          if (shortLabel === "Intelligence") shortLabel = "INT";
 
-          // --- SUBWEAPON COMPASS STATS ---
-          if (item.type === "subweapon") {
-            let noun = item.noun ? item.noun.toLowerCase() : "";
-            if (item.subType === "shield") {
-              // Shield Bash Base Multiplier
-              let bashMult = 160;
-              if (item.isUniqueAegis) bashMult = 220;
-              else if (noun.includes("buckler")) bashMult = 100;
-              else if (noun.includes("tower")) bashMult = 250;
+          let attunedColor = (b.raw !== b.attuned) ? "#2ecc71" : "#f5f6fa";
 
-              baseStats.push({
-                label: "Shield Bash Dmg",
-                val: `${bashMult}% Def`,
-                icon: window.getUiIconSvg("block", 14),
-              });
-            } else if (item.subType === "dagger") {
-              // Offhand Multi-Strike Chance
-              let offhandChance = 40;
-              if (noun.includes("kris") || noun.includes("dirk")) offhandChance = 25;
-              else if (noun.includes("stiletto") || noun.includes("baselard")) offhandChance = 60;
-
-              // Offhand Multi-Strike Damage Multiplier
-              let offhandDmg = 35;
-              if (noun.includes("kris") || noun.includes("dirk")) offhandDmg = 55;
-              else if (noun.includes("stiletto") || noun.includes("baselard")) offhandDmg = 25;
-
-              // Riposte Parry Counter Damage Multiplier
-              let riposteDmg = 100;
-              if (noun.includes("kris") || noun.includes("dirk")) riposteDmg = 130;
-              else if (noun.includes("stiletto") || noun.includes("baselard")) riposteDmg = 80;
-
-              baseStats.push({
-                label: "Multi-Strike Rate",
-                val: `${offhandChance}%`,
-                icon: window.getUiIconSvg("dex", 14),
-              });
-              baseStats.push({
-                label: "Multi-Strike Dmg",
-                val: `${offhandDmg}% Atk`,
-                icon: window.getUiIconSvg("atk", 14),
-              });
-              baseStats.push({
-                label: "Riposte Dmg",
-                val: `${riposteDmg}% Atk`,
-                icon: window.getUiIconSvg("parry", 14),
-              });
-            } else if (item.subType === "tome") {
-              // Spell Trigger Chance
-              let spellChance = 15;
-              if (item.isUniqueWatch) spellChance = 20;
-              else if (item.isUniqueChronicle) spellChance = 15;
-              else if (noun.includes("grimoire") || noun.includes("chronicle")) spellChance = 10;
-              else if (noun.includes("spellbook") || noun.includes("codex")) spellChance = 18;
-              else if (noun.includes("lexicon")) spellChance = 26;
-
-              // Spell Damage Multiplier
-              let spellDmg = 100;
-              if (item.isUniqueWatch) spellDmg = 100;
-              else if (item.isUniqueChronicle) spellDmg = 120;
-              else if (noun.includes("grimoire") || noun.includes("chronicle")) spellDmg = 180;
-              else if (noun.includes("spellbook") || noun.includes("codex")) spellDmg = 100;
-              else if (noun.includes("lexicon")) spellDmg = 60;
-
-              baseStats.push({
-                label: "Spell Chance",
-                val: `${spellChance}%`,
-                icon: window.getUiIconSvg("int", 14),
-              });
-              baseStats.push({
-                label: "Spell Dmg",
-                val: `${spellDmg}% Atk`,
-                icon: window.getUiIconSvg("atk", 14),
-              });
-            }
-          }
-
-        if (baseStats.length > 0) {
-                  html += `<div style="background: rgba(255, 255, 255, 0.015); border: 1px solid #222; border-radius: 6px; padding: 8px 6px; margin: 8px 0; display: flex; justify-content: space-around; align-items: center; gap: 4px;">`;
-                  baseStats.forEach((b, idx) => {
-                    if (idx > 0) {
-                      html += `<div style="width: 1px; height: 18px; background: rgba(255, 255, 255, 0.085);"></div>`;
-                    }
-                    // Shorten labels on the fly for horizontal layout fit
-                    let shortLabel = b.label;
-                    if (shortLabel === "Weapon Damage") shortLabel = "Damage";
-                    if (shortLabel === "Block Rate") shortLabel = "Block";
-                    if (shortLabel === "Parry Rate") shortLabel = "Parry";
-                    if (shortLabel === "Shield Bash Dmg") shortLabel = "Bash Dmg";
-                    if (shortLabel === "Multi-Strike Rate") shortLabel = "Multi %";
-                    if (shortLabel === "Multi-Strike Dmg") shortLabel = "Multi Dmg";
-                    if (shortLabel === "Riposte Dmg") shortLabel = "Riposte";
-                    if (shortLabel === "Spell Chance") shortLabel = "Spell %";
-                    if (shortLabel === "Spell Dmg") shortLabel = "Spell Dmg";
-                    if (shortLabel === "Max Life") shortLabel = "Max HP";
-                    if (shortLabel === "Intelligence") shortLabel = "INT";
-
-                    html += `
+          html += `
                       <div style="display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; min-width: 0;">
                         <span style="font-size: 7.5px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${shortLabel}</span>
-                        <div style="font-size: 11.5px; font-weight: bold; color: #f5f6fa; display: flex; align-items: center; gap: 3px; line-height: 1;">
-                          ${b.icon}<span style="white-space: nowrap;">${b.val}</span>
+                        <div style="font-size: 11.5px; font-weight: bold; display: flex; align-items: center; gap: 3px; line-height: 1;">
+                          ${b.icon}
+                          <span class="attuned-val" style="color:${attunedColor}; white-space: nowrap;">${b.attuned}</span>
+                          <span class="raw-val" style="color:#f5f6fa; white-space: nowrap; display:none;">${b.raw}</span>
                         </div>
                       </div>
                     `;
                   });
                   html += `</div>`;
                 }
-  }
+              }
 
-  if (item.type === "artifact") {
+            if (item.type === "artifact") {
     html += `<div class="tt-trait">${item.breakdown}</div>`;
 
     // Only display potential extra rolls on preview (dummy) items to prevent clutter on equipped items
@@ -13173,25 +13193,30 @@ window.openCavernSigilSelectorModal = function (e) {
   );
 
   let contentHtml = sigils
-    .map((item) => {
-      let col = window.getTierColor(item.statsRolled);
-      let bNames = item.buffs.map((b) => b.name).join(", ");
-      let dNames = item.debuffs.map((d) => d.name).join(", ");
+      .map((item) => {
+        let col = window.getTierColor(item.statsRolled);
+        let bNames = item.buffs.map((b) => b.name).join(", ");
+        let dNames = item.debuffs.map((d) => d.name).join(", ");
 
-      return `
-      <div class="bag-item" style="padding:6px; margin-bottom:5px; background:#181c22; border:1px solid #333; display:flex; justify-content:space-between; align-items:center;"
-           onmouseenter="window.showInventoryTooltip(event, ${item.id})"
-           ontouchstart="window.showInventoryTooltip(event, ${item.id})"
-           onmouseleave="window.hideTooltip()">
-          <div style="text-align:left; max-width: 170px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
-              <strong style="color:${col}; font-size:11px;">${item.name}</strong><br>
-              <span style="font-size:9.5px; color:#2ecc71;">☀️ ${bNames}</span> • <span style="font-size:9.5px; color:#e74c3c;">🌑 ${dNames}</span>
-          </div>
-          <button class="btn-action" style="padding:3px 8px; font-size:10px; font-weight:bold; background:var(--accent-green); flex-shrink:0; margin-left:6px;" onclick="window.executeSlotCavernSigil(${item.id})">Slot</button>
-      </div>
-    `;
-    })
-    .join("");
+        return `
+        <div class="bag-item" style="padding:6px; margin-bottom:5px; background:#181c22; border:1px solid #333; display:flex; justify-content:space-between; align-items:center; gap:6px;">
+            <!-- Left side details: Tap safe for mobile tooltip (no auto-slotting) -->
+            <div style="text-align:left; max-width: 170px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; cursor:help; display:flex; align-items:center;"
+                 onmouseenter="window.showInventoryTooltip(event, ${item.id})"
+                 ontouchstart="window.showInventoryTooltip(event, ${item.id}); event.stopPropagation();"
+                 onmouseleave="window.hideTooltip()">
+                <div style="flex-shrink:0; margin-right:6px;">${window.getEquipIconHtml(item, 24)}</div>
+                <div style="min-width:0; flex:1;">
+                    <strong style="color:${col}; font-size:11px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</strong>
+                    <span style="font-size:9.5px; color:#2ecc71; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">☀️ ${bNames}</span>
+                </div>
+            </div>
+            <!-- Right side: Explicit target button -->
+            <button class="btn-action" style="padding:3px 8px; font-size:10px; font-weight:bold; background:var(--accent-green); flex-shrink:0;" ontouchstart="event.stopPropagation();" onclick="window.executeSlotCavernSigil(${item.id})">Slot</button>
+        </div>
+      `;
+      })
+      .join("");
 
   win.innerHTML = `
       <div class="draggable-header" id="sigil-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
@@ -13477,25 +13502,33 @@ window.renderCavernsPrepUI = function () {
         `;
     } else {
       // Build an elegant grid for direct, one-click slotting
-      let gridHtml = ownedSigils
-        .map((sig) => {
-          let col = window.getTierColor(sig.statsRolled);
-          let shortName = sig.name.split(" (")[0];
-          return `
-              <div style="background:#111; border: 1.5px solid ${col}44; border-radius:6px; padding:6px; cursor:pointer; display:flex; align-items:center; gap:8px; transition: all 0.15s ease;"
-                   onclick="window.slotCavernSigilInline('${sig.id}')"
-                   onmouseenter="window.showInventoryTooltip(event, ${sig.id})"
-                   ontouchstart="window.showInventoryTooltip(event, ${sig.id})"
-                   onmouseleave="window.hideTooltip()">
-                <div style="flex-shrink:0;">${window.getEquipIconHtml(sig, 24)}</div>
-                <div style="min-width:0; flex:1; text-align:left;">
-                  <strong style="color:${col}; font-size:10px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:115px;">${shortName}</strong>
-                  <span style="font-size:8.5px; color:#888; display:block; font-family:monospace; margin-top:1px;">Loot: +${(sig.rewardMultiplier * 100).toFixed(0)}%</span>
-                </div>
-              </div>
-            `;
-        })
-        .join("");
+            let gridHtml = ownedSigils
+              .map((sig) => {
+                let col = window.getTierColor(sig.statsRolled);
+                let shortName = sig.name.split(" (")[0];
+                return `
+                    <div style="background:#111; border: 1.5px solid ${col}44; border-radius:6px; padding:6px; display:flex; align-items:center; justify-content:space-between; gap:6px; transition: all 0.15s ease; position:relative;">
+                      <!-- Left Details Area: Tap-safe for mobile tooltip (does not auto-slot) -->
+                      <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; cursor:help;"
+                           onmouseenter="window.showInventoryTooltip(event, ${sig.id})"
+                           ontouchstart="window.showInventoryTooltip(event, ${sig.id}); event.stopPropagation();"
+                           onmouseleave="window.hideTooltip()">
+                        <div style="flex-shrink:0;">${window.getEquipIconHtml(sig, 24)}</div>
+                        <div style="min-width:0; flex:1; text-align:left;">
+                          <strong style="color:${col}; font-size:10px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:115px;">${shortName}</strong>
+                          <span style="font-size:8.5px; color:#888; display:block; font-family:monospace; margin-top:1px;">Loot: +${(sig.rewardMultiplier * 100).toFixed(0)}%</span>
+                        </div>
+                      </div>
+                      <!-- Right Action Area: Explicit Target Button -->
+                      <button class="btn-action" style="background:#2ecc71; color:#fff; font-size:9px; padding:4px 8px; border-radius:4px; font-weight:bold; height:24px; line-height:1; flex-shrink:0;"
+                              ontouchstart="event.stopPropagation();"
+                              onclick="window.slotCavernSigilInline('${sig.id}')">
+                        Slot
+                      </button>
+                    </div>
+                  `;
+              })
+              .join("");
 
       sigilSlotHtml = `
           <div style="margin-bottom: 12px; text-align:left;">
@@ -13950,16 +13983,16 @@ window.renderBestiaryAlbum = function () {
         : `background:linear-gradient(90deg, #ffd700, #ff007f);`;
 
     let upgradeBtnHtml = "";
-    if (isMaxed) {
-      upgradeBtnHtml = `<span style="color:#2ecc71; font-weight:bold; font-size:8px; font-family:monospace;">MAX</span>`;
-    } else if (canUpgrade) {
-      upgradeBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:2px 6px; font-size:8px; font-weight:bold; height:18px; line-height:1;" onclick="window.upgradeBestiaryCard('${cKey}')">UP</button>`;
-    } else if (canAffordDuplicates) {
-      let mColor = soulsOwned >= costs.mSouls ? "#2ecc71" : "#e74c3c";
-      upgradeBtnHtml = `<span style="font-size:8px; color:#888; font-family:monospace; line-height:1; display:block;">Req: <span style="color:${mColor}">${costs.mSouls}</span></span>`;
-    } else {
-      upgradeBtnHtml = `<span style="font-size:8px; color:#666; font-family:monospace;">Locked</span>`;
-    }
+        if (isMaxed) {
+          upgradeBtnHtml = `<span style="color:#2ecc71; font-weight:bold; font-size:8px; font-family:monospace;">MAX</span>`;
+        } else if (canUpgrade) {
+          upgradeBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:2px 6px; font-size:8px; font-weight:bold; height:18px; line-height:1;" ontouchstart="event.stopPropagation();" onclick="window.upgradeBestiaryCard('${cKey}')">UP</button>`;
+        } else if (canAffordDuplicates) {
+          let mColor = soulsOwned >= costs.mSouls ? "#2ecc71" : "#e74c3c";
+          upgradeBtnHtml = `<span style="font-size:8px; color:#888; font-family:monospace; line-height:1; display:block;">Req: <span style="color:${mColor}">${costs.mSouls}</span></span>`;
+        } else {
+          upgradeBtnHtml = `<span style="font-size:8px; color:#666; font-family:monospace;">Locked</span>`;
+        }
 
     let statsDisplayLabelShort = "";
     if (isLocked) {
@@ -14117,37 +14150,37 @@ window.renderAstralRecyclingShop = function (dustOwned) {
   ];
 
   let itemsHtml = items
-    .map((item) => {
-      let canAfford = dustOwned >= item.cost;
-      let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-      let btnStyle = canAfford
-        ? `background: ${item.color}; color: ${item.color === "#f1c40f" || item.color === "#ffb6c1" ? "#111" : "#fff"}; font-weight: bold; cursor: pointer; border: 1px solid #fff; box-shadow: 0 0 8px ${item.color}44;`
-        : `background: #222; color: #555; border: 1px solid #333; cursor: not-allowed;`;
+      .map((item) => {
+        let canAfford = dustOwned >= item.cost;
+        let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+        let btnStyle = canAfford
+          ? `background: ${item.color}; color: ${item.color === "#f1c40f" || item.color === "#ffb6c1" ? "#111" : "#fff"}; font-weight: bold; cursor: pointer; border: 1px solid #fff; box-shadow: 0 0 8px ${item.color}44;`
+          : `background: #222; color: #555; border: 1px solid #333; cursor: not-allowed;`;
 
-      let cleanIcon = item.icon
-        .replace("margin-right: 12px;", "margin-right: 4px;")
-        .replace("margin-right: 8px;", "margin-right: 4px;");
+        let cleanIcon = item.icon
+          .replace("margin-right: 12px;", "margin-right: 4px;")
+          .replace("margin-right: 8px;", "margin-right: 4px;");
 
-      return `
-        <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(180deg, #13111c 0%, #08060c 100%); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; transition: transform 0.15s, border-color 0.15s; margin-bottom: 0;"
-             onmouseenter="window.showAstralDustShopTooltip(event, '${item.key}')"
-             onmouseleave="window.hideTooltip()"
-             ontouchstart="window.showAstralDustShopTooltip(event, '${item.key}')">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <div style="flex-shrink:0;">${cleanIcon}</div>
-            <div style="min-width:0; flex:1; text-align:left;">
-              <strong style="color:${item.color}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.label || item.key}</strong>
-              <span style="font-size:9.5px; color:#aaa; display:block; margin-top:2px; white-space:normal; line-height:1.3;">${item.desc}</span>
+        return `
+          <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(135deg, #13111c 0%, #08060c 100%); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; transition: transform 0.15s, border-color 0.15s; margin-bottom: 0;"
+               onmouseenter="window.showAstralDustShopTooltip(event, '${item.key}')"
+               onmouseleave="window.hideTooltip()">
+            <div style="display:flex; align-items:center; gap:8px; cursor:help;"
+                 ontouchstart="window.showAstralDustShopTooltip(event, '${item.key}'); event.stopPropagation();">
+              <div style="flex-shrink:0;">${cleanIcon}</div>
+              <div style="min-width:0; flex:1; text-align:left;">
+                <strong style="color:${item.color}; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.label || item.key}</strong>
+                <span style="font-size:9.5px; color:#aaa; display:block; margin-top:2px; white-space:normal; line-height:1.3;">${item.desc}</span>
+              </div>
             </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:4px;">
+                        <span style="color:${costColor}; font-family:monospace; font-size:10.5px; font-weight:bold;">${item.cost} Dust</span>
+                        <button class="btn-action" style="${btnStyle} font-size:9.5px; padding:4px 10px; border-radius:4px;" ${canAfford ? "" : "disabled"} ontouchstart="event.stopPropagation();" onclick="window.buyBestiaryExchangeItem('${item.key}')" onpointerdown="window.buyBestiaryExchangeItem('${item.key}')">Recycle</button>
+                      </div>
           </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:4px;">
-                      <span style="color:${costColor}; font-family:monospace; font-size:10.5px; font-weight:bold;">${item.cost} Dust</span>
-                      <button class="btn-action" style="${btnStyle} font-size:9.5px; padding:4px 10px; border-radius:4px;" ${canAfford ? "" : "disabled"} onclick="window.buyBestiaryExchangeItem('${item.key}')" onpointerdown="window.buyBestiaryExchangeItem('${item.key}')">Recycle</button>
-                    </div>
-        </div>
-      `;
-    })
-    .join("");
+        `;
+      })
+      .join("");
 
   return `
       <!-- Astral Dust Recycling Shop lower section -->

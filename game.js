@@ -386,18 +386,22 @@ window.SaveManager = {
         item && typeof item === "object" && !Array.isArray(item);
 
       const deepSanitize = (defaultObj, savedObj) => {
-        if (savedObj === undefined || savedObj === null) {
-          return JSON.parse(JSON.stringify(defaultObj));
-        }
-        if (!isObject(defaultObj)) {
-          if (typeof defaultObj === "number") {
-            let parsedNum = Number(savedObj);
-            return isNaN(parsedNum) || savedObj === null
-              ? defaultObj
-              : parsedNum;
-          }
-          return savedObj;
-        }
+              if (savedObj === undefined || savedObj === null) {
+                return JSON.parse(JSON.stringify(defaultObj));
+              }
+              // Protect BigNum objects (m & e) from getting wiped by primitive default values
+              if (savedObj && typeof savedObj === "object" && savedObj.m !== undefined && savedObj.e !== undefined) {
+                return savedObj;
+              }
+              if (!isObject(defaultObj)) {
+                if (typeof defaultObj === "number") {
+                  let parsedNum = Number(savedObj);
+                  return isNaN(parsedNum) || savedObj === null
+                    ? defaultObj
+                    : parsedNum;
+                }
+                return savedObj;
+              }
         let result = {};
         for (let key in defaultObj) {
           if (Object.prototype.hasOwnProperty.call(defaultObj, key)) {
@@ -1185,14 +1189,15 @@ window.SaveManager = {
     let elapsedSeconds = 0;
 
     let totalGold = 0;
-    let totalXp = 0;
-    let totalKills = 0;
-    let stagesGained = 0;
-    let diedOffline = false;
-    let deathStage = 0;
-    let itemsDropped = [];
-    let scrapsGainedMap = {};
-    let farmKills = 0;
+        let totalXp = 0;
+        let totalKills = 0;
+        let stagesGained = 0;
+        let diedOffline = false;
+        let deathStage = 0;
+        let itemsDropped = [];
+        let scrapsGainedMap = {};
+        let farmKills = 0;
+        let cardSacksGained = 0;
 
     function recordScrapGained(name, amount) {
       if (!scrapsGainedMap[name]) scrapsGainedMap[name] = 0;
@@ -1212,6 +1217,7 @@ window.SaveManager = {
         "Supernal Haste Elixir",
         "SP Reset Scroll",
         "PP Reset Scroll",
+        "Monster Card Sack",
       ];
       if (useItems.includes(name)) {
         if (!window.inventory.USE[name]) window.inventory.USE[name] = 0;
@@ -1458,22 +1464,32 @@ window.SaveManager = {
         stagesGained++;
 
         // Award resources for clear
-        totalKills += targetsRequired + 1;
-        let stageGoldReward = BigNum.from(2)
-          .mul(b_expScale)
-          .mul(targetsRequired + 5)
-          .mul(p.gold);
-        b_totalGold = b_totalGold.add(stageGoldReward);
-        let stageXpReward = BigNum.from(5)
-          .mul(b_expScale)
-          .mul(targetsRequired + 5);
-        b_totalXp = b_totalXp.add(stageXpReward);
+                totalKills += targetsRequired + 1;
+                let stageGoldReward = BigNum.from(2)
+                  .mul(b_expScale)
+                  .mul(targetsRequired + 5)
+                  .mul(p.gold);
+                b_totalGold = b_totalGold.add(stageGoldReward);
+                let stageXpReward = BigNum.from(5)
+                  .mul(b_expScale)
+                  .mul(targetsRequired + 5);
+                b_totalXp = b_totalXp.add(stageXpReward);
 
-        // Roll item drops for stage completion (Offline: Manual Play Bonus disabled)
-        let dropR = 0.0015;
-        if (Math.random() < dropR * p.drop * 1.0) {
-          rollOfflineItem(true, currentStage, false);
-        }
+                // Roll item drops for stage completion (Offline: Manual Play Bonus disabled)
+                let dropR = 0.0015;
+                if (Math.random() < dropR * p.drop * 1.0) {
+                  rollOfflineItem(true, currentStage, false);
+                }
+
+                // Roll for Monster Card Sack from stage boss clears
+                if (cardSacksGained < 2) {
+                  let stageFactor = Math.min(1.0, Math.pow((window.playerStats.lifetimePeakStage || 1) / 100000, 0.5));
+                  let cardChance = 0.01 * p.drop * stageFactor;
+                  if (Math.random() < cardChance) {
+                    recordScrapGained("Monster Card Sack", 1);
+                    cardSacksGained++;
+                  }
+                }
       } else {
         break; // Time ran out for this stage advancement
       }
@@ -1507,20 +1523,55 @@ window.SaveManager = {
       b_totalXp = b_totalXp.add(xpFarmed);
 
       // Roll item and potion drops for farmed kills (Offline: Manual Play Bonus disabled)
-      let dropR = 0.001;
-      for (let k = 0; k < farmKills; k++) {
-        if (Math.random() < dropR * p.drop * 1.0) {
-          rollOfflineItem(false, currentStage, false);
-        }
-      }
-      // Potion drop rolls
-      if (typeof window.rollPotionDrop === "function" && farmKills > 0) {
-        let maxPotions = Math.min(5, Math.floor(farmKills / 100)); // Capped to prevent potion flooding
-        for (let k = 0; k < maxPotions; k++) {
-          let rolledPot = window.rollPotionDrop(false, false, true);
-          if (rolledPot) recordScrapGained(rolledPot, 1);
-        }
-      }
+            let dropR = 0.001;
+            for (let k = 0; k < farmKills; k++) {
+              if (Math.random() < dropR * p.drop * 1.0) {
+                rollOfflineItem(false, currentStage, false);
+              }
+            }
+
+            // Potion and Card Sack drop rolls
+            if (farmKills > 0) {
+              let stageFactor = Math.min(1.0, Math.pow((window.playerStats.lifetimePeakStage || 1) / 100000, 0.5));
+              let pCurrent = window.resolvePlayerStats();
+
+              // 1. Potion Roll Engine
+              let rollChance = 0.0004 * pCurrent.drop * stageFactor;
+              let maxPotionsLimit = Math.min(40, Math.max(5, Math.floor(40 * (offlineSeconds / 28800) * stageFactor)));
+
+              let potionsGained = 0;
+              const types = [
+                "Attack Elixir",
+                "Vitality Elixir",
+                "Armored Elixir",
+                "Haste Elixir",
+              ];
+
+              for (let k = 0; k < farmKills; k++) {
+                if (potionsGained >= maxPotionsLimit) break;
+                if (Math.random() < rollChance) {
+                  let rolledPot = types[Math.floor(Math.random() * types.length)];
+                  recordScrapGained(rolledPot, 1);
+                  potionsGained++;
+                }
+              }
+
+              // 2. Card Sack Roll Engine from Farming
+              if (cardSacksGained < 3) { // Combined cap (2 from pushing + 1 from farming = max 3)
+                let maxFarmSacksLimit = cardSacksGained < 2 ? 1 : 0; // Can only get max 1 from farming itself
+                let farmSacksGained = 0;
+                let cardChance = 0.00002 * pCurrent.drop * stageFactor;
+
+                for (let k = 0; k < farmKills; k++) {
+                  if (farmSacksGained >= maxFarmSacksLimit || cardSacksGained >= 3) break;
+                  if (Math.random() < cardChance) {
+                    recordScrapGained("Monster Card Sack", 1);
+                    cardSacksGained++;
+                    farmSacksGained++;
+                  }
+                }
+              }
+            }
 
       elapsedSeconds += remainingSeconds;
       remainingSeconds = 0;
