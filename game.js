@@ -5744,15 +5744,14 @@ window.CombatEngine = {
                 let epicAmt = 1 + Math.floor(Math.sqrt((dStage - 600) / 150));
                 window.addEtcDrop("Epic Scrap", epicAmt);
               } else {
-                let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
-                window.addEtcDrop("Magic Scrap", magicAmt);
-              }
-            }
-          }
-        }
-      }
-    } else {
-      // Let the single-roll loot function evaluate rates and progress pity natively
+                              let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
+                              window.addEtcDrop("Magic Scrap", magicAmt);
+                            }
+                          }
+                        }
+                      }
+                  } else {
+                    // Let the single-roll loot function evaluate rates and progress pity natively
       if (
         typeof window.rollEquipmentDrop === "function" &&
         !window.playerStats.isCrucibleMode
