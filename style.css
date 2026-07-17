@@ -1566,31 +1566,36 @@ summary {
   }
 
   #top-nav {
-    padding: 6px 8px !important;
-  }
-  #top-nav > div {
-    width: 100% !important;
-    justify-content: space-between !important;
-    display: flex !important;
-    gap: 4px !important;
-    flex-wrap: wrap !important;
-  }
-  #top-nav > div > div,
-  #top-nav > div > button {
-    flex: 1 1 calc(33.333% - 4px) !important;
-    min-width: 0 !important;
-  }
-  #top-nav > div > div > .nav-btn {
-    width: 100% !important;
-  }
-  .nav-btn {
-    padding: 8px 6px !important;
-    font-size: 10px !important;
-    gap: 2px !important;
-    justify-content: center !important;
-    min-height: 44px;
-    align-items: center;
-  }
+          padding: 6px 8px !important;
+          display: flex !important;
+          width: 100% !important;
+        }
+        .header-controls {
+          display: flex !important;
+          width: 100% !important;
+          justify-content: space-between !important;
+          gap: 4px !important;
+        }
+        .header-controls > button,
+        .header-controls > div {
+          flex: 1 1 0px !important; /* perfectly equal 33.3% shares */
+          min-width: 0 !important;
+          height: 32px !important;
+          font-size: 9px !important;
+          padding: 0 4px !important;
+          margin: 0 !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        .nav-btn {
+          padding: 4px 6px !important;
+          font-size: 10px !important;
+          gap: 2px !important;
+          justify-content: center !important;
+          min-height: 32px !important;
+          align-items: center;
+        }
   .nav-btn svg {
     width: 11px !important;
     height: 11px !important;
@@ -1712,16 +1717,37 @@ summary {
   }
 
   #forge-station-container {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 6px !important;
-  }
+          flex-direction: column !important;
+          align-items: stretch !important;
+          gap: 6px !important;
+        }
 
-  #forge-station-select {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-}
+        #forge-station-select {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        /* Forge mode sub-tabs wrap to 2-column grid to prevent horizontal bleed */
+        #blacksmith-modes,
+        #enchanter-modes {
+          display: grid !important;
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 4px !important;
+          width: 100% !important;
+        }
+        #blacksmith-modes .btn-toggle,
+        #enchanter-modes .btn-toggle {
+          width: 100% !important;
+          margin: 0 !important;
+          font-size: 9.5px !important;
+          padding: 6px 2px !important;
+          height: auto !important;
+          min-height: 32px !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+      }
 
 @media (max-width: 480px) {
   .bag-item,
@@ -2482,9 +2508,30 @@ summary {
   }
 
   #forge-list {
-    height: auto !important;
-    min-height: 160px !important;
-  }
+      height: auto !important;
+      min-height: 160px !important;
+    }
+
+    /* Landscape forge mode layout */
+    #blacksmith-modes,
+    #enchanter-modes {
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 4px !important;
+      width: 100% !important;
+    }
+    #blacksmith-modes .btn-toggle,
+    #enchanter-modes .btn-toggle {
+      width: 100% !important;
+      margin: 0 !important;
+      font-size: 9px !important;
+      padding: 4px 2px !important;
+      height: auto !important;
+      min-height: 28px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
 
   /* --- COMPACT ELEGANT SACK ITEMS --- */
   #menu-panel .bag-item {
@@ -2668,6 +2715,48 @@ summary {
 
 #inspect-content {
   color: #f5f6fa;
+}
+
+/* --- ACTIVE EFFECTS HUD OVERLAY SYSTEM --- */
+#active-effects-hud-bar {
+  transition: top 0.2s ease-in-out;
+}
+
+.active-effect-badge {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  background: rgba(10, 14, 23, 0.95);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  pointer-events: auto;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+  transition: transform 0.15s cubic-bezier(0.25, 0.8, 0.25, 1.1), box-shadow 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.active-effect-badge:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.active-effect-badge:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 580px) {
+  #active-effects-hud-bar {
+    top: 54px !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 550px) {
+  #active-effects-hud-bar {
+    top: 50px !important;
+  }
 }
 
 @media (max-width: 580px) {

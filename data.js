@@ -1378,14 +1378,16 @@ window.resolvePlayerStats = function (useDraft = false) {
     (achMoveSpeedPct + itemSpdPct + (setCtx.moveSpeedPctBonus || 0)); // Factored percent speed
 
   // Apply Cavern Sigil Active Modifiers (Dungeon Mode)
-  if (
-    window.playerStats.isDungeonMode &&
-    window.playerStats.activeDungeonSigil
-  ) {
-    let activeSig = window.playerStats.activeDungeonSigil;
-    p.qly += activeSig.qualityBoost || 0;
+    if (
+      window.playerStats.isDungeonMode &&
+      window.playerStats.activeDungeonSigil
+    ) {
+      let activeSig = window.playerStats.activeDungeonSigil;
+      p.qly += activeSig.qualityBoost || 0;
+      p.gold += activeSig.rewardMultiplier || 0; // Sigil also increases Gold natively
+      p.drop += activeSig.rewardMultiplier || 0; // Sigil also increases Drop Rate natively
 
-    // Loop and apply the sigil's buffs and debuffs
+      // Loop and apply the sigil's buffs and debuffs
     activeSig.buffs.forEach((b) => {
       if (b.id === "swift_strikes") {
         p.idleAttackSpeed = Math.max(10, Math.round(p.idleAttackSpeed / 1.25));

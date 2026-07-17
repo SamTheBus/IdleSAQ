@@ -975,65 +975,35 @@ window.SaveManager = {
         window.playerStats.slotUpgrades.art3 = 0;
       }
 
-      if (window.playerStats.crucibleRunActive) {
-        let penalizeRewards = () => {
-          let shards = window.playerStats.crucibleAccumulatedShards || 0;
-          let cores = window.playerStats.crucibleAccumulatedCores || 0;
+      // --- ACCUMULATIVE INSTANCED RESUME SYSTEM ---
+            // Allows players to seamlessly return to active runs after browser tab suspensions
+            if (window.playerStats.isCrucibleMode || window.playerStats.isDungeonMode) {
+              window.mob = null; // Clear active monster to spawn a fresh, scaled threat
+              window.hero.x = 40; // Reset hero to starting coordinate
+              window.setPauseState(true); // Soft-pause so the player can prepare before the battle resumes
 
-          let keptShards = Math.floor(shards * 0.2);
-          let keptCores = Math.floor(cores * 0.2);
-
-          window.playerStats.astralShards =
-            (window.playerStats.astralShards || 0) + keptShards;
-          if (keptCores > 0) window.addEtcDrop("Catalyst Core", keptCores);
-
-          setTimeout(() => {
-            if (typeof window.showCustomConfirm === "function") {
-              window.showCustomConfirm(
-                "🚨 Aetheric Desynchronization Detected",
-                `Your previous Crucible run was terminated abruptly. Anti-cheat measures have been enforced:<br><br>• Initial Shards: <strong>${shards}</strong> ➔ Kept: <strong>${keptShards}</strong> (20%)<br>• Initial Cores: <strong>${cores}</strong> ➔ Kept: <strong>${keptCores}</strong> (20%)<br><br>The remaining 80% was lost to the void.`,
-                "Reclaim & Reset",
-                "",
-                "#e74c3c",
-                () => {},
-              );
+              setTimeout(() => {
+                let runLabel = window.playerStats.isCrucibleMode ? "Crucible Wave" : "Dungeon Floor";
+                let color = window.playerStats.isCrucibleMode ? "#9b59b6" : "#8e44ad";
+                if (typeof window.pushHeaderToast === "function") {
+                  window.pushHeaderToast(`🛡️ Resumed active run: ${runLabel}!`, color);
+                }
+                if (typeof window.showCustomConfirm === "function") {
+                  window.showCustomConfirm(
+                    "🛡️ Run Resumed",
+                    `Your active <strong>${runLabel}</strong> was saved and has been successfully restored. Pick up your weapons and prepare to continue the battle!`,
+                    "Resume Battle",
+                    "",
+                    color,
+                    () => {
+                      window.setPauseState(false);
+                    }
+                  );
+                } else {
+                  window.setPauseState(false);
+                }
+              }, 1500);
             }
-          }, 1500);
-
-          window.playerStats.crucibleAccumulatedShards = 0;
-          window.playerStats.crucibleAccumulatedCores = 0;
-          window.playerStats.crucibleRunActive = false;
-
-          window.playerStats.isCrucibleMode = false;
-          window.playerStats.isDungeonMode = false;
-          window.playerStats.isPrestigeBossMode = false;
-          window.mob = null;
-          window.hero.x = 40;
-        };
-        penalizeRewards();
-      }
-
-      if (window.playerStats.isDungeonMode) {
-        window.playerStats.isDungeonMode = false;
-        window.playerStats.currentDungeon = null;
-        window.playerStats.activeDungeonSigil = null;
-        window.playerStats.usedSecondWind = false;
-        window.mob = null;
-        window.hero.x = 40;
-
-        setTimeout(() => {
-          if (typeof window.showCustomConfirm === "function") {
-            window.showCustomConfirm(
-              "🚨 Dungeon Run Interrupted",
-              "Your previous Dungeon run was interrupted (offline or tab closed). You have been safely returned to the Campaign to prevent timeline paradoxes. No equipment was lost!",
-              "Return to Campaign",
-              "",
-              "#8e44ad",
-              () => {},
-            );
-          }
-        }, 2000);
-      }
 
       if (window.playerStats.vendingQLevel === undefined)
         window.playerStats.vendingQLevel = 0;
@@ -2330,25 +2300,27 @@ window.onload = function () {
     };
 
     const handleEnd = (e) => {
-      if (isScrolling) {
-        return; // Stop dismissal if they swiped or scrolled the card
-      }
+          if (isScrolling) {
+            return; // Stop dismissal if they swiped or scrolled the card
+          }
 
-      // Tapped on an interactive element inside the tooltip
-      if (
-        e.target.closest("summary") ||
-        e.target.closest("details") ||
-        e.target.closest("button") ||
-        e.target.closest("select") ||
-        e.target.closest("option") ||
-        e.target.closest(".custom-select")
-      ) {
-        return;
-      }
+          // Tapped on an interactive element inside the tooltip
+          if (
+            e.target.closest("summary") ||
+            e.target.closest("details") ||
+            e.target.closest("button") ||
+            e.target.closest("select") ||
+            e.target.closest("option") ||
+            e.target.closest(".custom-select") ||
+            e.target.closest("label") ||
+            e.target.closest("input")
+          ) {
+            return;
+          }
 
-      e.preventDefault();
-      window.hideTooltip();
-    };
+          e.preventDefault();
+          window.hideTooltip();
+        };
 
     // Modern Pointer Events
     el.addEventListener(
@@ -3108,54 +3080,107 @@ function update() {
   if (window.mob && window.mob.funnyTextTimer > 0) window.mob.funnyTextTimer--;
 
   if (window.mob && window.mob.hp.gt(0)) {
-    if (window.mob.bleedTimer && window.mob.bleedTimer > 0) {
-      window.mob.bleedTimer--;
-      window.mob.bleedTickCounter = (window.mob.bleedTickCounter || 0) + 1;
-      if (window.mob.bleedTickCounter >= 15) {
-        window.mob.bleedTickCounter = 0;
-        let stacks = window.mob.bleedStacks || 1;
-        let bleedDmg = Math.max(
-          1,
-          Math.ceil(((window.mob.bleedDmgPerSecond || 1) * stacks) / 4),
-        );
-        window.mob.hp = window.mob.hp.sub(bleedDmg);
-        window.mob.flashTimer = 5;
-        for (let i = 0; i < 3; i++) {
-          window.particles.push({
-            x: window.mob.x + window.mob.w / 2 + window.randFloat(-10, 10),
-            y: window.mob.y + window.mob.h / 2 + window.randFloat(-10, 10),
-            vx: window.randFloat(-1.0, 1.0),
-            vy: window.randFloat(-2.5, -0.5),
-            radius: window.randFloat(1.2, 2.5),
-            color: "#960018",
-            alpha: 1,
-            life: window.randInt(10, 18),
-          });
-        }
-        window.spawnDamageEffect(bleedDmg, "bleed", false);
-        window.damageHistory.push({ time: Date.now(), amount: bleedDmg });
+      if (window.mob.bleedTimer && window.mob.bleedTimer > 0) {
+        window.mob.bleedTimer--;
+        window.mob.bleedTickCounter = (window.mob.bleedTickCounter || 0) + 1;
+        if (window.mob.bleedTickCounter >= 15) {
+          window.mob.bleedTickCounter = 0;
+          let stacks = window.mob.bleedStacks || 1;
+          let bleedDmg = Math.max(
+            1,
+            Math.ceil(((window.mob.bleedDmgPerSecond || 1) * stacks) / 4),
+          );
+          window.mob.hp = window.mob.hp.sub(bleedDmg);
+          window.mob.flashTimer = 5;
+          for (let i = 0; i < 3; i++) {
+            window.particles.push({
+              x: window.mob.x + window.mob.w / 2 + window.randFloat(-10, 10),
+              y: window.mob.y + window.mob.h / 2 + window.randFloat(-10, 10),
+              vx: window.randFloat(-1.0, 1.0),
+              vy: window.randFloat(-2.5, -0.5),
+              radius: window.randFloat(1.2, 2.5),
+              color: "#960018",
+              alpha: 1,
+              life: window.randInt(10, 18),
+            });
+          }
+          window.spawnDamageEffect(bleedDmg, "bleed", false);
+          window.damageHistory.push({ time: Date.now(), amount: bleedDmg });
 
-        // Sanguine Reaver: Ticks lifesteal with the active bleed damage instead of granting instant flat burst heals!
-        if (window.hasUniquePassive("weapon_sword")) {
-          let bleedHeal = Math.max(1, Math.ceil(bleedDmg * 0.15));
+          // Sanguine Reaver: Ticks lifesteal with the active bleed damage instead of granting instant flat burst heals!
+          if (window.hasUniquePassive("weapon_sword")) {
+            let bleedHeal = Math.max(1, Math.ceil(bleedDmg * 0.15));
+            window.playerStats.currentHp = Math.min(
+              p.maxHp,
+              window.playerStats.currentHp + bleedHeal,
+            );
+            window.effects.push({
+              type: "regen",
+              x: window.hero.x - 20,
+              y: window.hero.y - 12,
+              amount: bleedHeal,
+              color: "#e74c3c",
+              life: 30,
+            });
+          }
+
+          if (window.mob.hp.lte(0)) window.handleMobDeath();
+        }
+      }
+    }
+
+    // --- BIOHAZARD POISON DOT & LIFE-STEAL ---
+    if (window.mob && window.mob.hp.gt(0)) {
+      if (window.mob.poisonTimer && window.mob.poisonTimer > 0) {
+        window.mob.poisonTimer--;
+        window.mob.poisonTickCounter = (window.mob.poisonTickCounter || 0) + 1;
+        if (window.mob.poisonTickCounter >= 15) {
+          window.mob.poisonTickCounter = 0;
+          let pStacks = window.mob.poisonStacks || 1;
+          let poisonDmg = Math.max(
+            1,
+            Math.ceil(((window.mob.poisonDmgPerSecond || 1) * pStacks) / 4),
+          );
+
+          window.mob.hp = window.mob.hp.sub(poisonDmg);
+          window.mob.flashTimer = 5;
+
+          // Spawn toxic green gas particles
+          for (let i = 0; i < 3; i++) {
+            window.particles.push({
+              x: window.mob.x + window.mob.w / 2 + window.randFloat(-10, 10),
+              y: window.mob.y + window.mob.h / 2 + window.randFloat(-10, 10),
+              vx: window.randFloat(-1.0, 1.0),
+              vy: window.randFloat(-2.0, -0.5),
+              radius: window.randFloat(1.2, 2.5),
+              color: "#2ecc71",
+              alpha: 1,
+              life: window.randInt(10, 18),
+            });
+          }
+
+          window.spawnDamageEffect(poisonDmg, "poison", false); // Trigger custom green toxic spore text
+                          window.damageHistory.push({ time: Date.now(), amount: poisonDmg });
+
+          // Life-stealing effect: Heals player for 100% of Poison DoT dealt!
+          let healAmt = poisonDmg;
           window.playerStats.currentHp = Math.min(
             p.maxHp,
-            window.playerStats.currentHp + bleedHeal,
+            window.playerStats.currentHp + healAmt,
           );
           window.effects.push({
             type: "regen",
             x: window.hero.x - 20,
             y: window.hero.y - 12,
-            amount: bleedHeal,
-            color: "#e74c3c",
+            amount: healAmt,
+            color: "#2ecc71",
             life: 30,
           });
-        }
 
-        if (window.mob.hp.lte(0)) window.handleMobDeath();
+          if (window.mob.hp.lte(0)) window.handleMobDeath();
+        }
       }
     }
-  }
 
   if (window.playerStats.frenzyTimer > 0) window.playerStats.frenzyTimer--;
   if (window.playerStats.adrenalineTimer > 0)
@@ -3245,13 +3270,19 @@ function update() {
   }
 
   window.logicClock++;
-  if (window.logicClock % 60 === 0) {
-    if (typeof window.checkAndResetMissions === "function")
-      window.checkAndResetMissions();
-    if (typeof window.checkAchievements === "function")
-      window.checkAchievements();
+    if (window.logicClock % 60 === 0) {
+      if (typeof window.checkAndResetMissions === "function")
+        window.checkAndResetMissions();
+      if (typeof window.checkAchievements === "function")
+        window.checkAchievements();
 
-    // Stacking Apathy Decay Damage ticks
+      // Dynamic Active-Sigil Spawn Pity Accumulator
+      if (window.activeRiftOrbs && window.activeRiftOrbs.length === 0) {
+        window.secondsSinceLastRiftSpawn = (window.secondsSinceLastRiftSpawn || 0) + 1;
+      }
+      let spawnMult = 1 + (window.secondsSinceLastRiftSpawn || 0) * 0.10; // +10% relative chance per second
+
+      // Stacking Apathy Decay Damage ticks
     if (
       window.playerStats.apathyDecayStacks > 0 &&
       window.playerStats.currentHp > 0 &&
@@ -3294,17 +3325,18 @@ function update() {
     }
 
     // Roll for Void Rift Rupture (12% chance per second if Void Rupture is active)
-    if (
-      window.isCavernEffectActive("void_rupture") &&
-      window.activeRiftOrbs.length === 0 &&
-      Math.random() < 0.12 &&
-      !(window.playerStats.purifiedAegisTimer > 0) &&
-      !window.isGamePaused
-    ) {
-      window.spawnVoidSuppressionOrbs();
-    }
+        if (
+          window.isCavernEffectActive("void_rupture") &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.12 * spawnMult &&
+          !(window.playerStats.purifiedAegisTimer > 0) &&
+          !window.isGamePaused
+        ) {
+          window.spawnVoidSuppressionOrbs();
+          window.secondsSinceLastRiftSpawn = 0;
+        }
 
-    // Stacking Apathy Distortion HP drain (0.5% Max HP per active shard)
+        // Stacking Apathy Distortion HP drain (0.5% Max HP per active shard)
     let activeShards = window.activeRiftOrbs.filter(
       (orb) => orb.type === "anomalous_shard",
     );
@@ -3340,57 +3372,62 @@ function update() {
     }
 
     // Roll for Anomalous Shard spawn (8% chance per second when idle and no active rifts if rolled on Sigil/Crucible)
-    if (
-      window.isCavernEffectActive("anomalous_shards") &&
-      window.activeRiftOrbs.length === 0 &&
-      Math.random() < 0.08 &&
-      !window.isGamePaused
-    ) {
-      window.spawnAnomalousShard();
-    }
+        if (
+          window.isCavernEffectActive("anomalous_shards") &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.08 * spawnMult &&
+          !window.isGamePaused
+        ) {
+          window.spawnAnomalousShard();
+          window.secondsSinceLastRiftSpawn = 0;
+        }
 
-    // Roll for Perfect Strike Reticle (5% chance per second when combat is active, no active orbs, and rolled on Sigil/Crucible)
-    if (
-      window.isCavernEffectActive("perfect_strike") &&
-      window.mob &&
-      window.mob.hp.gt(0) &&
-      window.activeRiftOrbs.length === 0 &&
-      Math.random() < 0.05 &&
-      !window.isGamePaused
-    ) {
-      window.spawnPerfectStrikeReticle();
-    }
+        // Roll for Perfect Strike Reticle (5% chance per second when combat is active, no active orbs, and rolled on Sigil/Crucible)
+        if (
+          window.isCavernEffectActive("perfect_strike") &&
+          window.mob &&
+          window.mob.hp.gt(0) &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.05 * spawnMult &&
+          !window.isGamePaused
+        ) {
+          window.spawnPerfectStrikeReticle();
+          window.secondsSinceLastRiftSpawn = 0;
+        }
 
-    // Roll for Aetheric Conduit spawn (4% chance per second when no active orbs if rolled on Sigil/Crucible)
-    if (
-      window.isCavernEffectActive("aetheric_conduit") &&
-      window.activeRiftOrbs.length === 0 &&
-      Math.random() < 0.04 &&
-      !window.isGamePaused
-    ) {
-      window.spawnAethericConduit();
-    }
+        // Roll for Aetheric Conduit spawn (4% chance per second when no active orbs if rolled on Sigil/Crucible)
+        if (
+          window.isCavernEffectActive("aetheric_conduit") &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.04 * spawnMult &&
+          !window.isGamePaused
+        ) {
+          window.spawnAethericConduit();
+          window.secondsSinceLastRiftSpawn = 0;
+        }
 
-    // Roll for Aetheric Spark (6% chance per second when no active orbs and not awakened if rolled on Sigil/Crucible)
-    if (
-      window.isCavernEffectActive("aetheric_spark") &&
-      window.activeRiftOrbs.length === 0 &&
-      Math.random() < 0.06 &&
-      !(window.playerStats.astralAwakeningTimer > 0) &&
-      !window.isGamePaused
-    ) {
-      window.spawnAethericSpark(0); // Commences the chain at Index 0
-    }
+        // Roll for Aetheric Spark (6% chance per second when no active orbs and not awakened if rolled on Sigil/Crucible)
+        if (
+          window.isCavernEffectActive("aetheric_spark") &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.06 * spawnMult &&
+          !(window.playerStats.astralAwakeningTimer > 0) &&
+          !window.isGamePaused
+        ) {
+          window.spawnAethericSpark(0); // Commences the chain at Index 0
+          window.secondsSinceLastRiftSpawn = 0;
+        }
 
-    // Roll for Glimmering Pixie (5% chance per second when no active orbs if rolled on Sigil/Crucible)
-    if (
-      window.isCavernEffectActive("glimmering_pixie") &&
-      window.activeRiftOrbs.length === 0 &&
-      Math.random() < 0.05 &&
-      !window.isGamePaused
-    ) {
-      window.spawnGlimmeringPixie();
-    }
+        // Roll for Glimmering Pixie (5% chance per second when no active orbs if rolled on Sigil/Crucible)
+        if (
+          window.isCavernEffectActive("glimmering_pixie") &&
+          window.activeRiftOrbs.length === 0 &&
+          Math.random() < 0.05 * spawnMult &&
+          !window.isGamePaused
+        ) {
+          window.spawnGlimmeringPixie();
+          window.secondsSinceLastRiftSpawn = 0;
+        }
 
     // Active Debuff: Withering Decay (Periodic combat damage drain)
     if (
@@ -4525,15 +4562,69 @@ window.CombatEngine = {
       if (window.playerStats.adrenalineTimer > 0) finalDamage *= 2;
 
       let isCrit = Math.random() < p.critChance;
-      if (isCrit) {
-        finalDamage = Math.ceil(finalDamage * p.critDamage);
-        if (window.playerStats.pendingClanProgress) {
-          window.playerStats.pendingClanProgress.crits =
-            (window.playerStats.pendingClanProgress.crits || 0) + 1;
-        }
-      }
+            if (isCrit) {
+              finalDamage = Math.ceil(finalDamage * p.critDamage);
+              if (window.playerStats.pendingClanProgress) {
+                window.playerStats.pendingClanProgress.crits =
+                  (window.playerStats.pendingClanProgress.crits || 0) + 1;
+              }
 
-      // Core mitigation layer filtering final base slash damage against active mob defense
+              // --- WARLORD SET: SHATTERING BLOWS ---
+              if (p.hasShatterSet && Math.random() < 0.25 && window.mob && window.mob.hp.gt(0)) {
+                let shatterDmg = Math.ceil(finalDamage * 0.5); // 50% of Crit Damage
+                // Bypasses enemy defense (Armor Pierce / unblockable)
+                window.mob.hp = window.mob.hp.sub(shatterDmg);
+                window.mob.flashTimer = 4;
+                window.spawnDamageEffect(shatterDmg, "lightning", true); // Trigger unblockable lightning/shatter spark
+                window.effects.push({
+                  x: window.mob.x + window.mob.w / 2 - 20,
+                  y: window.mob.y - 15,
+                  text: "💥 SHATTER!",
+                  color: "#e67e22",
+                  life: 45,
+                });
+                for (let i = 0; i < 8; i++) {
+                  window.particles.push({
+                    x: window.mob.x + window.mob.w / 2,
+                    y: window.mob.y + window.mob.h / 2,
+                    vx: window.randFloat(-4, 4),
+                    vy: window.randFloat(-4, 4),
+                    radius: window.randFloat(1, 2.5),
+                    color: "#e67e22",
+                    alpha: 1,
+                    life: window.randInt(15, 25),
+                  });
+                }
+              }
+            }
+
+            // --- BIOHAZARD SET: CORROSIVE SPORES ---
+            if (p.hasCorrosiveSet && Math.random() < 0.20 && window.mob && window.mob.hp.gt(0)) {
+              window.mob.poisonStacks = Math.min(5, (window.mob.poisonStacks || 0) + 1);
+              window.mob.poisonTimer = 300; // 5-second duration
+              window.mob.poisonDmgPerSecond = Math.max(1, Math.ceil(p.atk * 0.12)); // 12% Attack power per stack per second
+              for (let i = 0; i < 5; i++) {
+                window.particles.push({
+                  x: window.mob.x + window.mob.w / 2,
+                  y: window.mob.y + window.mob.h / 2,
+                  vx: window.randFloat(-2, 2),
+                  vy: window.randFloat(-2, 2),
+                  radius: window.randFloat(1, 2),
+                  color: "#2ecc71",
+                  alpha: 1,
+                  life: window.randInt(10, 20),
+                });
+              }
+              window.effects.push({
+                x: window.mob.x + window.mob.w / 2 - 25,
+                y: window.mob.y - 15,
+                text: `🧪 SPORES! [${window.mob.poisonStacks}/5]`,
+                color: "#2ecc71",
+                life: 35,
+              });
+            }
+
+            // Core mitigation layer filtering final base slash damage against active mob defense
       let mobDef = window.mob.def || 0;
       finalDamage = Math.max(
         1,
@@ -5367,16 +5458,8 @@ window.CombatEngine = {
     }
     if (window.mob.isRare) baseCoin *= 4;
 
-    let coinYield = Math.ceil(baseCoin * p.gold);
-    if (
-      window.playerStats.isDungeonMode &&
-      window.playerStats.activeDungeonSigil
-    ) {
-      coinYield = Math.ceil(
-        coinYield *
-          (1.0 + (window.playerStats.activeDungeonSigil.rewardMultiplier || 0)),
-      );
-    }
+    // Natively multiplied through p.gold in resolvePlayerStats
+        let coinYield = Math.ceil(baseCoin * p.gold);
 
     // REDIRECT AND ACCUMULATE INSIDE CRUCIBLE POOLS
         if (window.playerStats.isCrucibleMode) {
@@ -8048,9 +8131,10 @@ window.enterDungeon = function (type) {
           window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
 
         window.playerStats.isDungeonMode = true;
-        window.playerStats.dungeonAccumulatedGold = 0;
-        window.playerStats.dungeonAccumulatedXp = 0;
-        window.playerStats.dungeonAccumulatedLoot = [];
+                window.secondsSinceLastRiftSpawn = 0;
+                window.playerStats.dungeonAccumulatedGold = 0;
+                window.playerStats.dungeonAccumulatedXp = 0;
+                window.playerStats.dungeonAccumulatedLoot = [];
       // Consume and Lock Slotted Cavern Sigil
       if (window.state.slottedCavernSigil) {
         let activeSig = window.state.slottedCavernSigil;
@@ -8127,8 +8211,9 @@ window.enterCrucible = function () {
       }
 
       // Initialize clean run accumulators
-      window.playerStats.crucibleAccumulatedGold = 0;
-      window.playerStats.crucibleAccumulatedXp = 0;
+            window.secondsSinceLastRiftSpawn = 0;
+            window.playerStats.crucibleAccumulatedGold = 0;
+            window.playerStats.crucibleAccumulatedXp = 0;
       window.playerStats.crucibleDraftDeck = [];
       window.playerStats.crucibleWavesClearedThisRun = 0; // Local run wave clear tracker
       window.playerStats.crucibleSelfDmgReduction = 1.0;

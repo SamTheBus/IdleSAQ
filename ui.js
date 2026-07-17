@@ -1697,9 +1697,12 @@ window.updateUI = function () {
     window.updateMedalBanner();
   }
   if (typeof window.updateSpectralReliquaryBanner === "function") {
-    window.updateSpectralReliquaryBanner();
-  }
-};
+      window.updateSpectralReliquaryBanner();
+    }
+    if (typeof window.renderActiveEffectsHudBar === "function") {
+      window.renderActiveEffectsHudBar();
+    }
+  };
 
 // --- ATTRIBUTES MATRIX CONTROLS ---
 
@@ -2640,6 +2643,403 @@ window.leaveActivity = function () {
 };
 
 // --- DYNAMIC ATTRIBUTE HOVER TOOLTIPS ---
+
+/* --- ACTIVE EFFECTS ENGINE & RETRO VECTOR BADGES --- */
+
+window.getActiveEffects = function() {
+  let list = [];
+  let p = window.resolvePlayerStats();
+
+  // 1. Standard Buffs
+  if (window.playerStats.frenzyTimer > 0) {
+    list.push({
+      id: "frenzy",
+      type: "buff",
+      name: "Frenzy Mode",
+      timer: window.playerStats.frenzyTimer,
+      max: window.checkArtifactTrait("extend_buffs") ? 900 : 600,
+      desc: "Critical Strike chance is set to 100%. Moves, slashes, and recovery timers execute at maximum active speed limits."
+    });
+  }
+  if (window.playerStats.adrenalineTimer > 0) {
+    list.push({
+      id: "adrenaline",
+      type: "buff",
+      name: "Adrenaline",
+      timer: window.playerStats.adrenalineTimer,
+      max: window.checkArtifactTrait("extend_buffs") ? 900 : 600,
+      desc: "Doubles all outgoing base slash and spell damage output."
+    });
+  }
+
+  // 2. Potions
+  let potMax = 18000 * (1 + p.int * 0.001);
+  if (window.playerStats.atkPotionTimer > 0) {
+    list.push({
+      id: "atk_potion",
+      type: "potion",
+      name: "Attack Elixir",
+      timer: window.playerStats.atkPotionTimer,
+      max: potMax,
+      desc: `Increases total Attack Power by +${Math.round((window.playerStats.atkPotionStrength || 0.1) * 100)}%.`
+    });
+  }
+  if (window.playerStats.hpPotionTimer > 0) {
+    list.push({
+      id: "hp_potion",
+      type: "potion",
+      name: "Vitality Elixir",
+      timer: window.playerStats.hpPotionTimer,
+      max: potMax,
+      desc: `Increases total Max HP by +${Math.round((window.playerStats.hpPotionStrength || 0.1) * 100)}%.`
+    });
+  }
+  if (window.playerStats.defPotionTimer > 0) {
+    list.push({
+      id: "def_potion",
+      type: "potion",
+      name: "Armored Elixir",
+      timer: window.playerStats.defPotionTimer,
+      max: potMax,
+      desc: `Increases total Defense by +${Math.round((window.playerStats.defPotionStrength || 0.1) * 100)}%.`
+    });
+  }
+  if (window.playerStats.hastePotionTimer > 0) {
+    list.push({
+      id: "haste_potion",
+      type: "potion",
+      name: "Haste Elixir",
+      timer: window.playerStats.hastePotionTimer,
+      max: potMax,
+      desc: `Increases Movement Speed and Active/Idle Attack Speed multipliers by +${(window.playerStats.hastePotionStrength || 1) * 10}%.`
+    });
+  }
+  if (window.playerStats.xpPotionTimer > 0) {
+    list.push({
+      id: "xp_potion",
+      type: "potion",
+      name: "Double XP Elixir",
+      timer: window.playerStats.xpPotionTimer,
+      max: potMax,
+      desc: "Increases global experience gain rates by +100%."
+    });
+  }
+  if (window.playerStats.dropPotionTimer > 0) {
+    list.push({
+      id: "drop_potion",
+      type: "potion",
+      name: "Double Drop Elixir",
+      timer: window.playerStats.dropPotionTimer,
+      max: potMax,
+      desc: "Increases global equipment drop frequency by +100%."
+    });
+  }
+  if (window.playerStats.qlyPotionTimer > 0) {
+    list.push({
+      id: "qly_potion",
+      type: "potion",
+      name: "Drop Quality Elixir",
+      timer: window.playerStats.qlyPotionTimer,
+      max: potMax,
+      desc: "Improves roll quality check chances by +50%."
+    });
+  }
+
+  // 3. Cavern & Dungeon Sigil Modifiers (Dungeon Mode)
+  if (window.playerStats.isDungeonMode && window.playerStats.activeDungeonSigil) {
+    let sig = window.playerStats.activeDungeonSigil;
+    if (sig.buffs) {
+      sig.buffs.forEach(b => {
+        list.push({
+          id: b.id,
+          type: "cavern_buff",
+          name: b.name,
+          desc: b.desc,
+          isPermanent: true
+        });
+      });
+    }
+    if (!(window.playerStats.purifiedAegisTimer > 0) && sig.debuffs) {
+      sig.debuffs.forEach(d => {
+        list.push({
+          id: d.id,
+          type: "cavern_debuff",
+          name: d.name,
+          desc: d.desc,
+          isPermanent: true
+        });
+      });
+    }
+  }
+
+  // 4. Auxiliary Timed Effects
+  if (window.playerStats.purifiedAegisTimer > 0) {
+    list.push({
+      id: "purified_aegis",
+      type: "buff",
+      name: "Purified Aegis",
+      timer: window.playerStats.purifiedAegisTimer,
+      max: 480,
+      desc: "Absolute debuff immunity. Active sigil/crucible debuffs are completely neutralized."
+    });
+  }
+  if (window.playerStats.astralAwakeningTimer > 0) {
+    list.push({
+      id: "astral_awakening",
+      type: "buff",
+      name: "Astral Awakening",
+      timer: window.playerStats.astralAwakeningTimer,
+      max: 900,
+      desc: "Astral Ascension: Grants +100% Total Damage and +15% Active & Idle Speed."
+    });
+  }
+  if (window.playerStats.apathyDecayStacks > 0) {
+    list.push({
+      id: "apathy_decay",
+      type: "debuff",
+      name: "Apathy Decay",
+      timer: window.playerStats.apathyDecayTimer,
+      max: 300,
+      stacks: window.playerStats.apathyDecayStacks,
+      desc: `Inflicts severe progressive damage drain of -${(window.playerStats.apathyDecayStacks * 1.5).toFixed(1)}% Max HP per second.`
+    });
+  }
+
+  // 5. Crucible Mode Structural Modifiers
+  if (window.playerStats.isCrucibleMode) {
+    if (window.playerStats.crucibleActiveBuff) {
+      let b = window.playerStats.crucibleActiveBuff;
+      list.push({
+        id: b.id,
+        type: "cavern_buff",
+        name: b.name,
+        desc: b.desc,
+        isPermanent: true
+      });
+    }
+    if (!(window.playerStats.purifiedAegisTimer > 0) && window.playerStats.crucibleActiveDebuff) {
+      let d = window.playerStats.crucibleActiveDebuff;
+      list.push({
+        id: d.id,
+        type: "cavern_debuff",
+        name: d.name,
+        desc: d.desc,
+        isPermanent: true
+      });
+    }
+
+    // Crucible Draft Deck Card Stacks
+    if (window.playerStats.crucibleDraftDeck && window.playerStats.crucibleDraftDeck.length > 0) {
+      let counts = {};
+      window.playerStats.crucibleDraftDeck.forEach(cardId => {
+        counts[cardId] = (counts[cardId] || 0) + 1;
+      });
+      for (let cardId in counts) {
+        let card = window.CRUCIBLE_DRAFT_POOL.find(c => c.id === cardId);
+        if (card) {
+          let count = counts[cardId];
+          let descText = card.desc;
+          if (count > 1) {
+            if (cardId === "overcharge") {
+              descText = `+${20 * count}% Crit Multiplier, +${2.5 * count}% Crit Chance`;
+            } else if (cardId === "sanguine_tide") {
+              descText = `Heal ${(1.5 * count).toFixed(1)}% Max HP on every Critical Strike hit`;
+            } else if (cardId === "phantom_echo") {
+              descText = `+${15 * count}% chance to trigger secondary Phantom Strike (deals 35% damage)`;
+            } else if (cardId === "titans_wall") {
+              descText = `+${3 * count}% base armor and +${3 * count}% Block/Parry cap limits`;
+            } else if (cardId === "temporal_accel") {
+              descText = `+${15 * count}% Active & Idle Attack Speed multipliers`;
+            } else if (cardId === "astral_attune") {
+              descText = `Earn +${25 * count}% Astral Shards from this run`;
+            } else if (cardId.startsWith("slot_")) {
+              descText = `+${15 * count}% to all stats of the equipped slot for this run`;
+            }
+          }
+          list.push({
+            id: cardId,
+            type: "crucible_card",
+            name: card.name,
+            desc: descText,
+            stacks: count,
+            isPermanent: true
+          });
+        }
+      }
+    }
+  }
+
+  return list;
+};
+
+window.getActiveEffectIconSvg = function (id, color, size = 16) {
+  let path = "";
+  if (id === "frenzy") {
+    path = `<path d="M12 2 C12 2, 7 8, 7 13 C7 18.5, 11 22, 12 22 C13 22, 17 18.5, 17 13 C17 8, 12 2, 12 2 Z" fill="${color}" stroke="#000" stroke-width="1.5"/><path d="M12 8 Q10 13, 10 16 Q12 19, 12 19 Q13 19, 14 16 Q14 13, 12 8 Z" fill="#fff" opacity="0.6"/>`;
+  } else if (id === "adrenaline" || id === "overcharge") {
+    path = `<polygon points="13,2 3,14 11,14 10,22 21,10 13,10" fill="${color}" stroke="#000" stroke-width="1.5"/>`;
+  } else if (id.includes("potion") || id.includes("elixir") || id === "vital_fountain" || id === "sanguine_feast" || id === "sanguine_tide") {
+    path = `<path d="M9 5 L15 5 L15 10 L21 19 C22.5 21.5, 21 23, 18 23 L6 23 C3 23, 1.5 21.5, 3 19 L9 10 Z" fill="${color}" stroke="#000" stroke-width="1.5"/><rect x="11" y="2" width="2" height="3" fill="#a0522d" stroke="#000" stroke-width="0.8"/>`;
+  } else if (id === "purified_aegis" || id === "iron_aegis" || id === "titans_wall" || id === "aegis_bastion" || id === "shattered_armour" || id === "iron_gaze" || id === "defense") {
+    path = `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="${color}" stroke="#000" stroke-width="1.8"/>`;
+  } else if (id === "astral_awakening" || id === "astral_attune" || id === "aetheric_spark" || id === "unstable_surge" || id === "shatter_frenzy") {
+    path = `<polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="${color}" stroke="#000" stroke-width="1.5"/>`;
+  } else if (id === "apathy_decay" || id === "withering_decay" || id === "volatile_sparks" || id === "poison_tip") {
+    path = `<circle cx="12" cy="10" r="6" fill="${color}" stroke="#000" stroke-width="1.5"/><rect x="10" y="16" width="4" height="6" rx="1" fill="${color}" stroke="#000" stroke-width="1.5"/><line x1="8" y1="10" x2="16" y2="10" stroke="#000" stroke-width="1.5"/>`;
+  } else if (id === "swift_strikes" || id === "temporal_accel" || id === "idle_spd" || id === "active_spd") {
+    path = `<circle cx="12" cy="12" r="10" fill="none" stroke="${color}" stroke-width="2"/><line x1="12" y1="12" x2="12" y2="6" stroke="${color}" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="12" x2="16" y2="12" stroke="${color}" stroke-width="2" stroke-linecap="round"/>`;
+  } else if (id === "giant_might" || id.startsWith("slot_") || id === "phantom_echo" || id === "catalyst_resonance") {
+    path = `<path d="M18 10h-2V8c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H6c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h2v2c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2v-2h2c1.1 0 2-.9 2-2v-2c0-1.1-.9-2-2-2z" fill="${color}" stroke="#000" stroke-width="1.5"/>`;
+  } else {
+    path = `<polygon points="12,4 16,12 20,12 14,16 16,22 12,18 8,22 10,16 4,12 8,12" fill="${color}" stroke="#000" stroke-width="1.5"/>`;
+  }
+
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="display:inline-block; vertical-align:middle; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));">${path}</svg>`;
+};
+
+window.showEffectTooltip = function (e, effectId, type) {
+  if (window.isSimulatedMouseEvent && window.isSimulatedMouseEvent(e)) return;
+  e.stopPropagation();
+  let tt = document.getElementById("game-tooltip");
+  if (!tt) return;
+
+  let eff = window.getActiveEffects().find((x) => x.id === effectId);
+  if (!eff) return;
+
+  let color = "#3498db";
+  if (eff.type === "cavern_debuff" || eff.type === "debuff") color = "#e74c3c";
+  else if (eff.type === "cavern_buff") color = "#2ecc71";
+  else if (eff.type === "potion") color = "#9b59b6";
+  else if (eff.type === "crucible_card") color = "#df9ffb";
+  else if (eff.id === "frenzy") color = "#e67e22";
+  else if (eff.id === "adrenaline") color = "#f1c40f";
+
+  let durationText = "";
+  if (!eff.isPermanent && eff.timer) {
+    let secs = Math.ceil(eff.timer / 60);
+    durationText = `<div class="tt-stat-line" style="color:#aaa; font-family:monospace; margin-top:6px;">• Duration Left: <strong style="color:#fff;">${secs}s</strong></div>`;
+  } else {
+    durationText = `<div class="tt-stat-line" style="color:#aaa; font-family:monospace; margin-top:6px;">• Duration: <strong style="color:#2ecc71;">Infinite (Run-bound)</strong></div>`;
+  }
+
+  let stackText = "";
+  if (eff.stacks && eff.stacks > 1) {
+    stackText = `<div class="tt-stat-line" style="color:#aaa; font-family:monospace;">• Stacks: <strong style="color:#ffd700;">x${eff.stacks}</strong></div>`;
+  }
+
+  let iconHtml = window.getActiveEffectIconSvg(eff.id, color, 24);
+
+  tt.innerHTML = `
+    <div style="padding: 10px; width: 220px; box-sizing: border-box; font-family:sans-serif;">
+      <div class="tt-title" style="color:${color}; display:flex; align-items:center; gap:6px;">
+        ${iconHtml}
+        <span>${eff.name}</span>
+      </div>
+      <div class="tt-subtitle" style="text-transform:uppercase; font-size:8px; font-weight:800; color:${color}; margin-top:2px;">${eff.type.replace("_", " ")}</div>
+      <div style="color:#ddd; font-size:11px; white-space:normal; line-height:1.4; margin-top:8px;">
+        ${eff.desc}
+      </div>
+      <div style="margin-top:8px; border-top:1px dashed #333; padding-top:6px;">
+        ${stackText}
+        ${durationText}
+      </div>
+    </div>
+  `;
+  tt.style.borderColor = color;
+  tt.style.display = "block";
+  window.positionTooltip(e, tt);
+};
+
+window.renderActiveEffectsHudBar = function () {
+  let bar = document.getElementById("active-effects-hud-bar");
+  if (!bar) return;
+
+  let activeEffects = window.getActiveEffects ? window.getActiveEffects() : [];
+  if (activeEffects.length === 0) {
+    bar.innerHTML = "";
+    return;
+  }
+
+  bar.innerHTML = activeEffects
+    .map((eff) => {
+      let color = "#3498db";
+      if (eff.type === "cavern_debuff" || eff.type === "debuff") color = "#e74c3c";
+      else if (eff.type === "cavern_buff") color = "#2ecc71";
+      else if (eff.type === "potion") color = "#9b59b6";
+      else if (eff.type === "crucible_card") color = "#df9ffb";
+      else if (eff.id === "frenzy") color = "#e67e22";
+      else if (eff.id === "adrenaline") color = "#f1c40f";
+
+      let stackBadge = "";
+      if (eff.stacks && eff.stacks > 1) {
+        stackBadge = `
+          <span style="
+            position: absolute;
+            bottom: -3px;
+            right: -3px;
+            background: #ffd700;
+            color: #000;
+            font-family: monospace;
+            font-size: 8px;
+            font-weight: 900;
+            padding: 1px 3px;
+            border-radius: 3px;
+            line-height: 1;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+          ">x${eff.stacks}</span>
+        `;
+      }
+
+      let timerBarHtml = "";
+      if (!eff.isPermanent && eff.timer && eff.max) {
+        let pct = (eff.timer / eff.max) * 100;
+        timerBarHtml = `
+          <div style="
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 0.5px solid #111;
+          ">
+            <div style="width: ${pct}%; height: 100%; background: ${color};"></div>
+          </div>
+        `;
+      }
+
+      let iconHtml = window.getActiveEffectIconSvg(eff.id, color, 14);
+      return `
+        <div class="active-effect-badge"
+             data-effect-id="${eff.id}"
+             onmouseenter="window.showEffectTooltip(event, '${eff.id}', '${eff.type}')"
+             onmouseleave="window.hideTooltip()"
+             ontouchstart="window.showEffectTooltip(event, '${eff.id}', '${eff.type}')"
+             style="
+                 width: 28px;
+                 height: 28px;
+                 background: rgba(10, 14, 23, 0.95);
+                 border: 1.5px solid ${color};
+                 border-radius: 6px;
+                 display: inline-flex;
+                 align-items: center;
+                 justify-content: center;
+                 cursor: help;
+                 position: relative;
+                 box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 0 5px rgba(${window.hexToRgbValues ? window.hexToRgbValues(color) : "255,255,255"}, 0.15);
+                 transition: transform 0.15s;
+             "
+             onpointerdown="event.stopPropagation();">
+             ${iconHtml}
+             ${stackBadge}
+             ${timerBarHtml}
+        </div>
+      `;
+    })
+    .join("");
+};
 
 window.showStatBreakdown = function (e, statKey, isPct = false) {
   if (window.isSimulatedMouseEvent && window.isSimulatedMouseEvent(e)) return;
@@ -5252,9 +5652,9 @@ window.generateItemCardHtml = function (
           ${buffDescs}
           ${debuffDescs}
           <div style="border-top:1px dashed #222; margin-top:6px; padding-top:6px; display:flex; flex-direction:column; gap:2px; font-family:monospace; font-size:9.5px;">
-            <span style="color:#3498db; font-weight:bold;">💎 Focus Rewards: +${(item.rewardMultiplier * 100).toFixed(0)}% Loot Multiplier</span>
-            ${item.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold; font-size:9.5px;">✨ Quality Boost: +${(item.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
-          </div>
+                      <span style="color:#3498db; font-weight:bold;">💎 Focus Rewards: +${(item.rewardMultiplier * 100).toFixed(0)}% Gold/Loot Multiplier</span>
+                      ${item.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold; font-size:9.5px;">✨ Quality Boost: +${(item.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
+                    </div>
         </div>
       `;
     return sigHtml;
@@ -13093,11 +13493,11 @@ window.renderCavernSigilConsole = function () {
         </div>
         <strong style="color:${col}; font-size:12px; text-shadow:0 0 6px ${col}33;">${activeSig.name}</strong>
         <div style="background:#090b0e; border:1px solid #222; border-radius:4px; padding:6px; font-size:10px; line-height:1.4;">
-          <strong style="color:#f1c40f; font-family:monospace; display:block; margin-bottom:3px; text-transform:uppercase; font-size:9.5px;">⚡ ACTIVE MODIFIERS:</strong>
-          ${buffDescs}${debuffDescs}
-          <span style="color:#3498db; font-weight:bold; display:block; margin-top:3px; font-size:9.5px;">💎 Focus Rewards: +${(activeSig.rewardMultiplier * 100).toFixed(0)}% Loot Multiplier</span>
-          ${activeSig.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold; font-size:9.5px;">✨ Quality Boost: +${(activeSig.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
-        </div>
+                  <strong style="color:#f1c40f; font-family:monospace; display:block; margin-bottom:3px; text-transform:uppercase; font-size:9.5px;">⚡ ACTIVE MODIFIERS:</strong>
+                  ${buffDescs}${debuffDescs}
+                  <span style="color:#3498db; font-weight:bold; display:block; margin-top:3px; font-size:9.5px;">💎 Focus Rewards: +${(activeSig.rewardMultiplier * 100).toFixed(0)}% Gold/Loot Multiplier</span>
+                  ${activeSig.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold; font-size:9.5px;">✨ Quality Boost: +${(activeSig.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
+                </div>
         <div style="font-size:9px; color:#e74c3c; font-weight:bold; text-align:center; margin-top:1px;">⚠️ Sigil is consumed and locked to this active Dungeon run!</div>
       </div>
     `;
@@ -13126,11 +13526,11 @@ window.renderCavernSigilConsole = function () {
         </div>
         <strong style="color:${col}; font-size:12px;">${slottedSig.name}</strong>
         <div style="background:#090b0e; border:1px solid #222; border-radius:4px; padding:6px; font-size:10px; line-height:1.4;">
-          <strong style="color:#f1c40f; font-family:monospace; display:block; margin-bottom:3px; text-transform:uppercase; font-size:9.5px;">⚡ TARGET MODIFIERS:</strong>
-          ${buffDescs}${debuffDescs}
-          <span style="color:#3498db; font-weight:bold; display:block; margin-top:3px; font-size:9.5px;">💎 Focus Rewards: +${(slottedSig.rewardMultiplier * 100).toFixed(0)}% Loot Multiplier</span>
-          ${slottedSig.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold; font-size:9.5px;">✨ Quality Boost: +${(slottedSig.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
-        </div>
+                  <strong style="color:#f1c40f; font-family:monospace; display:block; margin-bottom:3px; text-transform:uppercase; font-size:9.5px;">⚡ TARGET MODIFIERS:</strong>
+                  ${buffDescs}${debuffDescs}
+                  <span style="color:#3498db; font-weight:bold; display:block; margin-top:3px; font-size:9.5px;">💎 Focus Rewards: +${(slottedSig.rewardMultiplier * 100).toFixed(0)}% Gold/Loot Multiplier</span>
+                  ${slottedSig.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold; font-size:9.5px;">✨ Quality Boost: +${(slottedSig.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
+                </div>
         <span style="font-size:8.5px; color:#888; text-align:center;">(Will be spent immediately upon launching any Infinite Dungeon)</span>
       </div>
     `;
@@ -13201,12 +13601,12 @@ window.openCavernSigilSelectorModal = function (e) {
                  onmouseleave="window.hideTooltip()">
                 <div style="flex-shrink:0; margin-right:6px;">${window.getEquipIconHtml(item, 24)}</div>
                 <div style="min-width:0; flex:1;">
-                    <strong style="color:${col}; font-size:11px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</strong>
-                    <span style="font-size:9.5px; color:#2ecc71; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">☀️ ${bNames}</span>
-                </div>
-            </div>
-            <!-- Right side: Explicit target button -->
-            <button class="btn-action" style="padding:3px 8px; font-size:10px; font-weight:bold; background:var(--accent-green); flex-shrink:0;" ontouchstart="event.stopPropagation();" onclick="window.executeSlotCavernSigil(${item.id})">Slot</button>
+                                    <strong style="color:${col}; font-size:11px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</strong>
+                                    <span style="font-size:9.5px; color:#2ecc71; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">☀️ ${bNames}</span>
+                                </div>
+                            </div>
+                            <!-- Right side: Explicit target button -->
+                            <button class="btn-action" style="padding:3px 8px; font-size:10px; font-weight:bold; background:var(--accent-green); flex-shrink:0;" ontouchstart="event.stopPropagation();" onclick="window.executeSlotCavernSigil(${item.id})">Slot</button>
         </div>
       `;
       })
@@ -13476,12 +13876,12 @@ window.renderCavernsPrepUI = function () {
             </div>
           </div>
           <div style="background:#090b0e; border:1px solid #222; border-radius:4px; padding:8px; font-size:10px; line-height:1.4;">
-            ${buffDescs}${debuffDescs}
-            <div style="border-top:1px dashed #222; margin-top:6px; padding-top:4px; display:flex; flex-direction:column; gap:1px; font-family:monospace; font-size:9.5px;">
-              <span style="color:#3498db; font-weight:bold;">💎 Focus Rewards: +${(slottedSig.rewardMultiplier * 100).toFixed(0)}% Loot Multiplier</span>
-              ${slottedSig.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold;">✨ Quality Boost: +${(slottedSig.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
-            </div>
-          </div>
+                      ${buffDescs}${debuffDescs}
+                      <div style="border-top:1px dashed #222; margin-top:6px; padding-top:4px; display:flex; flex-direction:column; gap:1px; font-family:monospace; font-size:9.5px;">
+                        <span style="color:#3498db; font-weight:bold;">💎 Focus Rewards: +${(slottedSig.rewardMultiplier * 100).toFixed(0)}% Gold/Loot Multiplier</span>
+                        ${slottedSig.qualityBoost > 0 ? `<span style="color:#ff007f; font-weight:bold;">✨ Quality Boost: +${(slottedSig.qualityBoost * 100).toFixed(0)}% Drop Quality</span>` : ""}
+                      </div>
+                    </div>
         </div>
       `;
   } else {
@@ -13509,9 +13909,9 @@ window.renderCavernsPrepUI = function () {
                            onmouseleave="window.hideTooltip()">
                         <div style="flex-shrink:0;">${window.getEquipIconHtml(sig, 24)}</div>
                         <div style="min-width:0; flex:1; text-align:left;">
-                          <strong style="color:${col}; font-size:10px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:115px;">${shortName}</strong>
-                          <span style="font-size:8.5px; color:#888; display:block; font-family:monospace; margin-top:1px;">Loot: +${(sig.rewardMultiplier * 100).toFixed(0)}%</span>
-                        </div>
+                                                  <strong style="color:${col}; font-size:10px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:115px;">${shortName}</strong>
+                                                  <span style="font-size:8.5px; color:#888; display:block; font-family:monospace; margin-top:1px;">Gold/Loot: +${(sig.rewardMultiplier * 100).toFixed(0)}%</span>
+                                                </div>
                       </div>
                       <!-- Right Action Area: Explicit Target Button -->
                       <button class="btn-action" style="background:#2ecc71; color:#fff; font-size:9px; padding:4px 8px; border-radius:4px; font-weight:bold; height:24px; line-height:1; flex-shrink:0;"
