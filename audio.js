@@ -125,426 +125,426 @@ window.SoundManager = {
   },
 
   synthesizeSwing(now, dest) {
-    const duration = window.randFloat(0.08, 0.12);
-    const gainNode = this.ctx.createGain();
-    gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(0.12, now + 0.008); // Lowered slightly to prevent iOS clipping
-    gainNode.gain.linearRampToValueAtTime(0, now + duration); // Linear is much safer on iOS Safari
+      const duration = window.randFloat(0.08, 0.12);
+      const gainNode = this.ctx.createGain();
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.32, now + 0.008); // Boosted from 0.12
+      gainNode.gain.linearRampToValueAtTime(0, now + duration);
 
-    const noiseSource = this.ctx.createBufferSource();
-    noiseSource.buffer = this.cachedNoiseBuffer;
+      const noiseSource = this.ctx.createBufferSource();
+      noiseSource.buffer = this.cachedNoiseBuffer;
 
-    const noiseFilter = this.ctx.createBiquadFilter();
-    noiseFilter.type = "bandpass";
-    noiseFilter.frequency.setValueAtTime(window.randFloat(1100, 1500), now);
-    noiseFilter.frequency.linearRampToValueAtTime(
-      window.randFloat(300, 450),
-      now + duration,
-    );
-    noiseFilter.Q.setValueAtTime(3.5, now);
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(gainNode);
-
-    const osc = this.ctx.createOscillator();
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(window.randFloat(240, 310), now);
-    osc.frequency.linearRampToValueAtTime(
-      window.randFloat(70, 95),
-      now + duration,
-    );
-    const oscGain = this.ctx.createGain();
-    oscGain.gain.setValueAtTime(0, now);
-    oscGain.gain.linearRampToValueAtTime(0.04, now + 0.006); // Lowered from 0.06
-    oscGain.gain.linearRampToValueAtTime(0, now + duration * 0.85);
-
-    osc.connect(oscGain);
-    oscGain.connect(gainNode);
-    gainNode.connect(dest);
-
-    noiseSource.start(now);
-    osc.start(now);
-    noiseSource.stop(now + duration);
-    osc.stop(now + duration);
-
-    setTimeout(
-      () =>
-        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-      duration * 1000 + 40,
-    );
-  },
-
-  synthesizeBlock(now, dest) {
-    const duration = 0.16;
-    const gainNode = this.ctx.createGain();
-    gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(0.11, now + 0.004); // Lowered from 0.14
-    gainNode.gain.linearRampToValueAtTime(0, now + duration);
-
-    const baseOsc = this.ctx.createOscillator();
-    baseOsc.type = "triangle";
-    baseOsc.frequency.setValueAtTime(130, now);
-    baseOsc.frequency.linearRampToValueAtTime(45, now + 0.09);
-    const baseGain = this.ctx.createGain();
-    baseGain.gain.setValueAtTime(0, now);
-    baseGain.gain.linearRampToValueAtTime(0.06, now + 0.005); // Smooth attack
-    baseGain.gain.linearRampToValueAtTime(0, now + 0.09);
-    baseOsc.connect(baseGain);
-    baseGain.connect(gainNode);
-
-    const ironChime1 = this.ctx.createOscillator();
-    ironChime1.type = "sine";
-    ironChime1.frequency.setValueAtTime(440, now);
-    const ironChime2 = this.ctx.createOscillator();
-    ironChime2.type = "sine";
-    ironChime2.frequency.setValueAtTime(659.25, now);
-    const chimeGain = this.ctx.createGain();
-    chimeGain.gain.setValueAtTime(0, now);
-    chimeGain.gain.linearRampToValueAtTime(0.03, now + 0.005); // Lowered from 0.04
-    chimeGain.gain.linearRampToValueAtTime(0, now + duration);
-    ironChime1.connect(chimeGain);
-    ironChime2.connect(chimeGain);
-    chimeGain.connect(gainNode);
-
-    const noiseSource = this.ctx.createBufferSource();
-    noiseSource.buffer = this.cachedNoiseBuffer;
-
-    const noiseFilter = this.ctx.createBiquadFilter();
-    noiseFilter.type = "highpass";
-    noiseFilter.frequency.setValueAtTime(1400, now);
-    const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(0, now);
-    noiseGain.gain.linearRampToValueAtTime(0.02, now + 0.005); // Lowered from 0.03
-    noiseGain.gain.linearRampToValueAtTime(0, now + 0.06);
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(gainNode);
-
-    gainNode.connect(dest);
-
-    baseOsc.start(now);
-    ironChime1.start(now);
-    ironChime2.start(now);
-    noiseSource.start(now);
-    baseOsc.stop(now + duration);
-    ironChime1.stop(now + duration);
-    ironChime2.stop(now + duration);
-    noiseSource.stop(now + duration);
-
-    setTimeout(
-      () =>
-        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-      duration * 1000 + 40,
-    );
-  },
-
-  synthesizeParry(now, dest) {
-    const duration = 0.45;
-    const gainNode = this.ctx.createGain();
-    gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(0.09, now + 0.004); // Lowered from 0.12
-    gainNode.gain.linearRampToValueAtTime(0, now + duration);
-
-    const frequencies = [880, 1046.5, 1318.5, 1760];
-    const oscillators = [];
-    const metalGain = this.ctx.createGain();
-    metalGain.gain.setValueAtTime(0, now);
-    metalGain.gain.linearRampToValueAtTime(0.04, now + 0.005); // Smooth attack, lowered from 0.05
-    metalGain.gain.linearRampToValueAtTime(0, now + 0.32);
-    frequencies.forEach((f) => {
-      const osc = this.ctx.createOscillator();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(f, now);
-      osc.frequency.linearRampToValueAtTime(
-        f + window.randFloat(-10, 10),
-        now + 0.18,
+      const noiseFilter = this.ctx.createBiquadFilter();
+      noiseFilter.type = "bandpass";
+      noiseFilter.frequency.setValueAtTime(window.randFloat(1100, 1500), now);
+      noiseFilter.frequency.linearRampToValueAtTime(
+        window.randFloat(300, 450),
+        now + duration,
       );
-      osc.connect(metalGain);
-      oscillators.push(osc);
-    });
+      noiseFilter.Q.setValueAtTime(3.5, now);
+      noiseSource.connect(noiseFilter);
+      noiseFilter.connect(gainNode);
 
-    const pingOsc = this.ctx.createOscillator();
-    pingOsc.type = "triangle";
-    pingOsc.frequency.setValueAtTime(2400, now);
-    pingOsc.frequency.linearRampToValueAtTime(1100, now + 0.045);
-    const pingGain = this.ctx.createGain();
-    pingGain.gain.setValueAtTime(0, now);
-    pingGain.gain.linearRampToValueAtTime(0.05, now + 0.003); // Lowered from 0.07
-    pingGain.gain.linearRampToValueAtTime(0, now + 0.045);
-    pingOsc.connect(pingGain);
-    pingGain.connect(gainNode);
-
-    const noiseSource = this.ctx.createBufferSource();
-    noiseSource.buffer = this.cachedNoiseBuffer;
-
-    const noiseFilter = this.ctx.createBiquadFilter();
-    noiseFilter.type = "bandpass";
-    noiseFilter.frequency.setValueAtTime(3200, now);
-    noiseFilter.Q.setValueAtTime(3.5, now);
-    const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(0, now);
-    noiseGain.gain.linearRampToValueAtTime(0.018, now + 0.005); // Lowered from 0.025
-    noiseGain.gain.linearRampToValueAtTime(0, now + duration);
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(gainNode);
-
-    metalGain.connect(gainNode);
-    gainNode.connect(dest);
-
-    oscillators.forEach((o) => o.start(now));
-    pingOsc.start(now);
-    noiseSource.start(now);
-    oscillators.forEach((o) => o.stop(now + duration));
-    pingOsc.stop(now + duration);
-    noiseSource.stop(now + duration);
-
-    setTimeout(
-      () =>
-        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-      duration * 1000 + 40,
-    );
-  },
-
-  synthesizeSpell(now, dest) {
-    const duration = 0.45;
-    const gainNode = this.ctx.createGain();
-    gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(0.09, now + 0.05); // Lowered from 0.12
-    gainNode.gain.linearRampToValueAtTime(0, now + duration);
-
-    const freqs = [329.63, 392.0, 493.88, 587.33];
-    const oscillators = [];
-    const chordGain = this.ctx.createGain();
-    chordGain.gain.setValueAtTime(0, now);
-    chordGain.gain.linearRampToValueAtTime(0.035, now + 0.08); // Lowered from 0.05
-    chordGain.gain.linearRampToValueAtTime(0, now + duration);
-
-    const bpFilter = this.ctx.createBiquadFilter();
-    bpFilter.type = "bandpass";
-    bpFilter.frequency.setValueAtTime(300, now);
-    bpFilter.frequency.linearRampToValueAtTime(3000, now + duration);
-    bpFilter.Q.setValueAtTime(4.0, now);
-    freqs.forEach((f, idx) => {
       const osc = this.ctx.createOscillator();
-      osc.type = idx % 2 === 0 ? "triangle" : "sine";
-      osc.frequency.setValueAtTime(f, now);
-      osc.frequency.linearRampToValueAtTime(f * 1.015, now + duration);
-      osc.connect(bpFilter);
-      oscillators.push(osc);
-    });
-    bpFilter.connect(chordGain);
-    chordGain.connect(gainNode);
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(window.randFloat(240, 310), now);
+      osc.frequency.linearRampToValueAtTime(
+        window.randFloat(70, 95),
+        now + duration,
+      );
+      const oscGain = this.ctx.createGain();
+      oscGain.gain.setValueAtTime(0, now);
+      oscGain.gain.linearRampToValueAtTime(0.12, now + 0.006); // Boosted from 0.04
+      oscGain.gain.linearRampToValueAtTime(0, now + duration * 0.85);
 
-    const noiseSource = this.ctx.createBufferSource();
-    noiseSource.buffer = this.cachedNoiseBuffer;
+      osc.connect(oscGain);
+      oscGain.connect(gainNode);
+      gainNode.connect(dest);
 
-    const hpFilter = this.ctx.createBiquadFilter();
-    hpFilter.type = "highpass";
-    hpFilter.frequency.setValueAtTime(4000, now);
-    const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(0, now);
-    noiseGain.gain.linearRampToValueAtTime(0.02, now + 0.01); // Lowered from 0.03, smooth attack
-    noiseGain.gain.linearRampToValueAtTime(0, now + 0.15);
-    noiseSource.connect(hpFilter);
-    hpFilter.connect(noiseGain);
-    noiseGain.connect(gainNode);
+      noiseSource.start(now);
+      osc.start(now);
+      noiseSource.stop(now + duration);
+      osc.stop(now + duration);
 
-    gainNode.connect(dest);
+      setTimeout(
+        () =>
+          (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+        duration * 1000 + 40,
+      );
+    },
 
-    oscillators.forEach((osc) => osc.start(now));
-    noiseSource.start(now);
-    oscillators.forEach((osc) => osc.stop(now + duration));
-    noiseSource.stop(now + duration);
+    synthesizeBlock(now, dest) {
+      const duration = 0.16;
+      const gainNode = this.ctx.createGain();
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.28, now + 0.004); // Boosted from 0.11
+      gainNode.gain.linearRampToValueAtTime(0, now + duration);
 
-    setTimeout(
-      () =>
-        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-      duration * 1000 + 40,
-    );
-  },
+      const baseOsc = this.ctx.createOscillator();
+      baseOsc.type = "triangle";
+      baseOsc.frequency.setValueAtTime(130, now);
+      baseOsc.frequency.linearRampToValueAtTime(45, now + 0.09);
+      const baseGain = this.ctx.createGain();
+      baseGain.gain.setValueAtTime(0, now);
+      baseGain.gain.linearRampToValueAtTime(0.14, now + 0.005); // Boosted from 0.06
+      baseGain.gain.linearRampToValueAtTime(0, now + 0.09);
+      baseOsc.connect(baseGain);
+      baseGain.connect(gainNode);
 
-  synthesizeFairy(now, dest) {
-    const notes = [987.77, 1318.51, 1975.53];
-    const noteLength = 0.05;
-    notes.forEach((freq, idx) => {
-      const noteTime = now + idx * 0.045;
-      const osc = this.ctx.createOscillator();
-      const noteGain = this.ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(freq, noteTime);
-      noteGain.gain.setValueAtTime(0, noteTime);
-      noteGain.gain.linearRampToValueAtTime(0.06, noteTime + 0.005); // Lowered from 0.08
-      noteGain.gain.linearRampToValueAtTime(0, noteTime + noteLength);
-      osc.connect(noteGain);
-      noteGain.connect(dest);
-      osc.start(noteTime);
-      osc.stop(noteTime + noteLength);
-    });
-    setTimeout(
-      () =>
-        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-      250,
-    );
-  },
-
-  synthesizeDeath(now, dest) {
-    const duration = 0.35;
-    const gainNode = this.ctx.createGain();
-    gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(0.09, now + 0.01); // Lowered from 0.12
-    gainNode.gain.linearRampToValueAtTime(0, now + duration);
-
-    const lowOsc = this.ctx.createOscillator();
-    lowOsc.type = "triangle";
-    lowOsc.frequency.setValueAtTime(120, now);
-    lowOsc.frequency.linearRampToValueAtTime(25, now + 0.12);
-    const lowGain = this.ctx.createGain();
-    lowGain.gain.setValueAtTime(0, now);
-    lowGain.gain.linearRampToValueAtTime(0.05, now + 0.01); // Lowered from 0.08, smooth attack
-    lowGain.gain.linearRampToValueAtTime(0, now + 0.15);
-    lowOsc.connect(lowGain);
-    lowGain.connect(gainNode);
-
-    const noiseSource = this.ctx.createBufferSource();
-    noiseSource.buffer = this.cachedNoiseBuffer;
-
-    const lpFilter = this.ctx.createBiquadFilter();
-    lpFilter.type = "lowpass";
-    lpFilter.frequency.setValueAtTime(600, now);
-    lpFilter.frequency.linearRampToValueAtTime(80, now + duration);
-    const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(0, now);
-    noiseGain.gain.linearRampToValueAtTime(0.04, now + 0.01); // Lowered from 0.06, smooth attack
-    noiseGain.gain.linearRampToValueAtTime(0, now + duration);
-    noiseSource.connect(lpFilter);
-    lpFilter.connect(noiseGain);
-    noiseGain.connect(gainNode);
-
-    const soulOsc = this.ctx.createOscillator();
-    soulOsc.type = "sine";
-    soulOsc.frequency.setValueAtTime(800, now);
-    soulOsc.frequency.linearRampToValueAtTime(100, now + duration);
-    const soulGain = this.ctx.createGain();
-    soulGain.gain.setValueAtTime(0, now);
-    soulGain.gain.linearRampToValueAtTime(0.015, now + 0.01); // Lowered from 0.02, smooth attack
-    soulGain.gain.linearRampToValueAtTime(0, now + duration);
-    soulOsc.connect(soulGain);
-    soulGain.connect(gainNode);
-
-    gainNode.connect(dest);
-
-    lowOsc.start(now);
-    noiseSource.start(now);
-    soulOsc.start(now);
-    lowOsc.stop(now + duration);
-    noiseSource.stop(now + duration);
-    soulOsc.stop(now + duration);
-
-    setTimeout(
-      () =>
-        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-      duration * 1000 + 40,
-    );
-  },
-
-  synthesizeDefeat(now, dest) {
-    const duration = 1.6;
-    const gainNode = this.ctx.createGain();
-    gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(0.18, now + 0.05); // Lowered from 0.25
-    gainNode.gain.linearRampToValueAtTime(0, now + duration);
-
-    const freqs = [87.31, 110.0, 130.81, 174.61];
-    const oscillators = [];
-    const lowpass = this.ctx.createBiquadFilter();
-    lowpass.type = "lowpass";
-    lowpass.frequency.setValueAtTime(350, now);
-    lowpass.frequency.linearRampToValueAtTime(80, now + duration);
-    freqs.forEach((f) => {
-      const osc = this.ctx.createOscillator();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(f, now);
-      osc.frequency.linearRampToValueAtTime(f * 0.99, now + duration);
-      osc.connect(lowpass);
-      oscillators.push(osc);
-    });
-
-    const subOsc = this.ctx.createOscillator();
-    subOsc.type = "triangle";
-    subOsc.frequency.setValueAtTime(43.65, now);
-    const subGain = this.ctx.createGain();
-    subGain.gain.setValueAtTime(0, now);
-    subGain.gain.linearRampToValueAtTime(0.1, now + 0.02); // Lowered from 0.15, smooth attack
-    subGain.gain.linearRampToValueAtTime(0, now + 0.8);
-    subOsc.connect(subGain);
-    subGain.connect(gainNode);
-
-    lowpass.connect(gainNode);
-    gainNode.connect(dest);
-
-    oscillators.forEach((o) => o.start(now));
-    subOsc.start(now);
-    oscillators.forEach((o) => o.stop(now + duration));
-    subOsc.stop(now + duration);
-
-    setTimeout(
-      () =>
-        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-      duration * 1000 + 40,
-    );
-  },
-
-  synthesizeRevive(now, dest) {
-    const duration = 1.8;
-    const gainNode = this.ctx.createGain();
-    gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(0.15, now + 0.15); // Lowered from 0.2
-    gainNode.gain.linearRampToValueAtTime(0, now + duration);
-
-    const chord = [261.63, 329.63, 392.0, 523.25, 659.25, 783.99, 1046.5];
-    chord.forEach((freq, idx) => {
-      const delay = idx * 0.08;
-      const noteTime = now + delay;
-      const chimeOsc = this.ctx.createOscillator();
-      chimeOsc.type = "sine";
-      chimeOsc.frequency.setValueAtTime(freq, noteTime);
+      const ironChime1 = this.ctx.createOscillator();
+      ironChime1.type = "sine";
+      ironChime1.frequency.setValueAtTime(440, now);
+      const ironChime2 = this.ctx.createOscillator();
+      ironChime2.type = "sine";
+      ironChime2.frequency.setValueAtTime(659.25, now);
       const chimeGain = this.ctx.createGain();
-      chimeGain.gain.setValueAtTime(0, noteTime);
-      chimeGain.gain.linearRampToValueAtTime(0.035, noteTime + 0.01); // Lowered from 0.05
-      chimeGain.gain.linearRampToValueAtTime(0, noteTime + 0.6);
-      chimeOsc.connect(chimeGain);
+      chimeGain.gain.setValueAtTime(0, now);
+      chimeGain.gain.linearRampToValueAtTime(0.09, now + 0.005); // Boosted from 0.03
+      chimeGain.gain.linearRampToValueAtTime(0, now + duration);
+      ironChime1.connect(chimeGain);
+      ironChime2.connect(chimeGain);
       chimeGain.connect(gainNode);
-      chimeOsc.start(noteTime);
-      chimeOsc.stop(noteTime + 0.65);
-    });
 
-    const padOsc1 = this.ctx.createOscillator();
-    padOsc1.type = "triangle";
-    padOsc1.frequency.setValueAtTime(130.81, now);
-    const padOsc2 = this.ctx.createOscillator();
-    padOsc2.type = "triangle";
-    padOsc2.frequency.setValueAtTime(164.81, now);
-    const padGain = this.ctx.createGain();
-    padGain.gain.setValueAtTime(0, now);
-    padGain.gain.linearRampToValueAtTime(0.06, now + 0.4); // Lowered from 0.08
-    padGain.gain.linearRampToValueAtTime(0, now + duration);
-    padOsc1.connect(padGain);
-    padOsc2.connect(padGain);
-    gainNode.connect(dest);
+      const noiseSource = this.ctx.createBufferSource();
+      noiseSource.buffer = this.cachedNoiseBuffer;
 
-    gainNode.connect(dest);
+      const noiseFilter = this.ctx.createBiquadFilter();
+      noiseFilter.type = "highpass";
+      noiseFilter.frequency.setValueAtTime(1400, now);
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0, now);
+      noiseGain.gain.linearRampToValueAtTime(0.06, now + 0.005); // Boosted from 0.02
+      noiseGain.gain.linearRampToValueAtTime(0, now + 0.06);
+      noiseSource.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(gainNode);
 
-    padOsc1.start(now);
-        padOsc2.start(now);
-        padOsc1.stop(now + duration);
-        padOsc2.stop(now + duration);
+      gainNode.connect(dest);
 
-        setTimeout(
-          () =>
-            (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-          duration * 1000 + 40,
+      baseOsc.start(now);
+      ironChime1.start(now);
+      ironChime2.start(now);
+      noiseSource.start(now);
+      baseOsc.stop(now + duration);
+      ironChime1.stop(now + duration);
+      ironChime2.stop(now + duration);
+      noiseSource.stop(now + duration);
+
+      setTimeout(
+        () =>
+          (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+        duration * 1000 + 40,
+      );
+    },
+
+    synthesizeParry(now, dest) {
+      const duration = 0.45;
+      const gainNode = this.ctx.createGain();
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.24, now + 0.004); // Boosted from 0.09
+      gainNode.gain.linearRampToValueAtTime(0, now + duration);
+
+      const frequencies = [880, 1046.5, 1318.5, 1760];
+      const oscillators = [];
+      const metalGain = this.ctx.createGain();
+      metalGain.gain.setValueAtTime(0, now);
+      metalGain.gain.linearRampToValueAtTime(0.12, now + 0.005); // Boosted from 0.04
+      metalGain.gain.linearRampToValueAtTime(0, now + 0.32);
+      frequencies.forEach((f) => {
+        const osc = this.ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, now);
+        osc.frequency.linearRampToValueAtTime(
+          f + window.randFloat(-10, 10),
+          now + 0.18,
         );
-      },
+        osc.connect(metalGain);
+        oscillators.push(osc);
+      });
+
+      const pingOsc = this.ctx.createOscillator();
+      pingOsc.type = "triangle";
+      pingOsc.frequency.setValueAtTime(2400, now);
+      pingOsc.frequency.linearRampToValueAtTime(1100, now + 0.045);
+      const pingGain = this.ctx.createGain();
+      pingGain.gain.setValueAtTime(0, now);
+      pingGain.gain.linearRampToValueAtTime(0.14, now + 0.003); // Boosted from 0.05
+      pingGain.gain.linearRampToValueAtTime(0, now + 0.045);
+      pingOsc.connect(pingGain);
+      pingGain.connect(gainNode);
+
+      const noiseSource = this.ctx.createBufferSource();
+      noiseSource.buffer = this.cachedNoiseBuffer;
+
+      const noiseFilter = this.ctx.createBiquadFilter();
+      noiseFilter.type = "bandpass";
+      noiseFilter.frequency.setValueAtTime(3200, now);
+      noiseFilter.Q.setValueAtTime(3.5, now);
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0, now);
+      noiseGain.gain.linearRampToValueAtTime(0.05, now + 0.005); // Boosted from 0.018
+      noiseGain.gain.linearRampToValueAtTime(0, now + duration);
+      noiseSource.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(gainNode);
+
+      metalGain.connect(gainNode);
+      gainNode.connect(dest);
+
+      oscillators.forEach((o) => o.start(now));
+      pingOsc.start(now);
+      noiseSource.start(now);
+      oscillators.forEach((o) => o.stop(now + duration));
+      pingOsc.stop(now + duration);
+      noiseSource.stop(now + duration);
+
+      setTimeout(
+        () =>
+          (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+        duration * 1000 + 40,
+      );
+    },
+
+    synthesizeSpell(now, dest) {
+      const duration = 0.45;
+      const gainNode = this.ctx.createGain();
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.24, now + 0.05); // Boosted from 0.09
+      gainNode.gain.linearRampToValueAtTime(0, now + duration);
+
+      const freqs = [329.63, 392.0, 493.88, 587.33];
+      const oscillators = [];
+      const chordGain = this.ctx.createGain();
+      chordGain.gain.setValueAtTime(0, now);
+      chordGain.gain.linearRampToValueAtTime(0.12, now + 0.08); // Boosted from 0.035
+      chordGain.gain.linearRampToValueAtTime(0, now + duration);
+
+      const bpFilter = this.ctx.createBiquadFilter();
+      bpFilter.type = "bandpass";
+      bpFilter.frequency.setValueAtTime(300, now);
+      bpFilter.frequency.linearRampToValueAtTime(3000, now + duration);
+      bpFilter.Q.setValueAtTime(4.0, now);
+      freqs.forEach((f, idx) => {
+        const osc = this.ctx.createOscillator();
+        osc.type = idx % 2 === 0 ? "triangle" : "sine";
+        osc.frequency.setValueAtTime(f, now);
+        osc.frequency.linearRampToValueAtTime(f * 1.015, now + duration);
+        osc.connect(bpFilter);
+        oscillators.push(osc);
+      });
+      bpFilter.connect(chordGain);
+      chordGain.connect(gainNode);
+
+      const noiseSource = this.ctx.createBufferSource();
+      noiseSource.buffer = this.cachedNoiseBuffer;
+
+      const hpFilter = this.ctx.createBiquadFilter();
+      hpFilter.type = "highpass";
+      hpFilter.frequency.setValueAtTime(4000, now);
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0, now);
+      noiseGain.gain.linearRampToValueAtTime(0.06, now + 0.01); // Boosted from 0.02
+      noiseGain.gain.linearRampToValueAtTime(0, now + 0.15);
+      noiseSource.connect(hpFilter);
+      hpFilter.connect(noiseGain);
+      noiseGain.connect(gainNode);
+
+      gainNode.connect(dest);
+
+      oscillators.forEach((osc) => osc.start(now));
+      noiseSource.start(now);
+      oscillators.forEach((osc) => osc.stop(now + duration));
+      noiseSource.stop(now + duration);
+
+      setTimeout(
+        () =>
+          (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+        duration * 1000 + 40,
+      );
+    },
+
+    synthesizeFairy(now, dest) {
+      const notes = [987.77, 1318.51, 1975.53];
+      const noteLength = 0.05;
+      notes.forEach((freq, idx) => {
+        const noteTime = now + idx * 0.045;
+        const osc = this.ctx.createOscillator();
+        const noteGain = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, noteTime);
+        noteGain.gain.setValueAtTime(0, noteTime);
+        noteGain.gain.linearRampToValueAtTime(0.18, noteTime + 0.005); // Boosted from 0.06
+        noteGain.gain.linearRampToValueAtTime(0, noteTime + noteLength);
+        osc.connect(noteGain);
+        noteGain.connect(dest);
+        osc.start(noteTime);
+        osc.stop(noteTime + noteLength);
+      });
+      setTimeout(
+        () =>
+          (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+        250,
+      );
+    },
+
+    synthesizeDeath(now, dest) {
+      const duration = 0.35;
+      const gainNode = this.ctx.createGain();
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.24, now + 0.01); // Boosted from 0.09
+      gainNode.gain.linearRampToValueAtTime(0, now + duration);
+
+      const lowOsc = this.ctx.createOscillator();
+      lowOsc.type = "triangle";
+      lowOsc.frequency.setValueAtTime(120, now);
+      lowOsc.frequency.linearRampToValueAtTime(25, now + 0.12);
+      const lowGain = this.ctx.createGain();
+      lowGain.gain.setValueAtTime(0, now);
+      lowGain.gain.linearRampToValueAtTime(0.14, now + 0.01); // Boosted from 0.05
+      lowGain.gain.linearRampToValueAtTime(0, now + 0.15);
+      lowOsc.connect(lowGain);
+      lowGain.connect(gainNode);
+
+      const noiseSource = this.ctx.createBufferSource();
+      noiseSource.buffer = this.cachedNoiseBuffer;
+
+      const lpFilter = this.ctx.createBiquadFilter();
+      lpFilter.type = "lowpass";
+      lpFilter.frequency.setValueAtTime(600, now);
+      lpFilter.frequency.linearRampToValueAtTime(80, now + duration);
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0, now);
+      noiseGain.gain.linearRampToValueAtTime(0.12, now + 0.01); // Boosted from 0.04
+      noiseGain.gain.linearRampToValueAtTime(0, now + duration);
+      noiseSource.connect(lpFilter);
+      lpFilter.connect(noiseGain);
+      noiseGain.connect(gainNode);
+
+      const soulOsc = this.ctx.createOscillator();
+      soulOsc.type = "sine";
+      soulOsc.frequency.setValueAtTime(800, now);
+      soulOsc.frequency.linearRampToValueAtTime(100, now + duration);
+      const soulGain = this.ctx.createGain();
+      soulGain.gain.setValueAtTime(0, now);
+      soulGain.gain.linearRampToValueAtTime(0.04, now + 0.01); // Boosted from 0.015
+      soulGain.gain.linearRampToValueAtTime(0, now + duration);
+      soulOsc.connect(soulGain);
+      soulGain.connect(gainNode);
+
+      gainNode.connect(dest);
+
+      lowOsc.start(now);
+      noiseSource.start(now);
+      soulOsc.start(now);
+      lowOsc.stop(now + duration);
+      noiseSource.stop(now + duration);
+      soulOsc.stop(now + duration);
+
+      setTimeout(
+        () =>
+          (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+        duration * 1000 + 40,
+      );
+    },
+
+    synthesizeDefeat(now, dest) {
+      const duration = 1.6;
+      const gainNode = this.ctx.createGain();
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.36, now + 0.05); // Boosted from 0.18
+      gainNode.gain.linearRampToValueAtTime(0, now + duration);
+
+      const freqs = [87.31, 110.0, 130.81, 174.61];
+      const oscillators = [];
+      const lowpass = this.ctx.createBiquadFilter();
+      lowpass.type = "lowpass";
+      lowpass.frequency.setValueAtTime(350, now);
+      lowpass.frequency.linearRampToValueAtTime(80, now + duration);
+      freqs.forEach((f) => {
+        const osc = this.ctx.createOscillator();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(f, now);
+        osc.frequency.linearRampToValueAtTime(f * 0.99, now + duration);
+        osc.connect(lowpass);
+        oscillators.push(osc);
+      });
+
+      const subOsc = this.ctx.createOscillator();
+      subOsc.type = "triangle";
+      subOsc.frequency.setValueAtTime(43.65, now);
+      const subGain = this.ctx.createGain();
+      subGain.gain.setValueAtTime(0, now);
+      subGain.gain.linearRampToValueAtTime(0.24, now + 0.02); // Boosted from 0.1
+      subGain.gain.linearRampToValueAtTime(0, now + 0.8);
+      subOsc.connect(subGain);
+      subGain.connect(gainNode);
+
+      lowpass.connect(gainNode);
+      gainNode.connect(dest);
+
+      oscillators.forEach((o) => o.start(now));
+      subOsc.start(now);
+      oscillators.forEach((o) => o.stop(now + duration));
+      subOsc.stop(now + duration);
+
+      setTimeout(
+        () =>
+          (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+        duration * 1000 + 40,
+      );
+    },
+
+    synthesizeRevive(now, dest) {
+      const duration = 1.8;
+      const gainNode = this.ctx.createGain();
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.32, now + 0.15); // Boosted from 0.15
+      gainNode.gain.linearRampToValueAtTime(0, now + duration);
+
+      const chord = [261.63, 329.63, 392.0, 523.25, 659.25, 783.99, 1046.5];
+      chord.forEach((freq, idx) => {
+        const delay = idx * 0.08;
+        const noteTime = now + delay;
+        const chimeOsc = this.ctx.createOscillator();
+        chimeOsc.type = "sine";
+        chimeOsc.frequency.setValueAtTime(freq, noteTime);
+        const chimeGain = this.ctx.createGain();
+        chimeGain.gain.setValueAtTime(0, noteTime);
+        chimeGain.gain.linearRampToValueAtTime(0.12, noteTime + 0.01); // Boosted from 0.035
+        chimeGain.gain.linearRampToValueAtTime(0, noteTime + 0.6);
+        chimeOsc.connect(chimeGain);
+        chimeGain.connect(gainNode);
+        chimeOsc.start(noteTime);
+        chimeOsc.stop(noteTime + 0.65);
+      });
+
+      const padOsc1 = this.ctx.createOscillator();
+      padOsc1.type = "triangle";
+      padOsc1.frequency.setValueAtTime(130.81, now);
+      const padOsc2 = this.ctx.createOscillator();
+      padOsc2.type = "triangle";
+      padOsc2.frequency.setValueAtTime(164.81, now);
+      const padGain = this.ctx.createGain();
+      padGain.gain.setValueAtTime(0, now);
+      padGain.gain.linearRampToValueAtTime(0.14, now + 0.4); // Boosted from 0.06
+      padGain.gain.linearRampToValueAtTime(0, now + duration);
+      padOsc1.connect(padGain);
+      padOsc2.connect(padGain);
+      gainNode.connect(dest);
+
+      gainNode.connect(dest);
+
+      padOsc1.start(now);
+      padOsc2.start(now);
+      padOsc1.stop(now + duration);
+      padOsc2.stop(now + duration);
+
+      setTimeout(
+        () =>
+          (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+        duration * 1000 + 40,
+      );
+    },
 
       playCoinCollect() {
           let audioCtx = this.audioCtx || this.ctx;
@@ -1368,3 +1368,163 @@ if (document.readyState === "loading") {
 } else {
   window.SoundManager.initTactileFeedback();
 }
+
+/* ==========================================================================
+   INTERACTIVE ADAPTIVE BGM ENGINE (MusicManager)
+   Streams a single music file and modifies DSP filters in real-time.
+   ========================================================================== */
+
+window.MusicManager = {
+  ctx: null,
+  audio: null,
+  source: null,
+  filter: null,
+  gainNode: null,
+  initialized: false,
+  currentState: "",
+
+  init() {
+    if (this.initialized) return;
+
+    // Use SoundManager's context if available, otherwise fallback
+    this.ctx = window.SoundManager.ctx || window.SoundManager.audioCtx;
+    if (!this.ctx) {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioContextClass();
+      } catch (e) {
+        return;
+      }
+    }
+
+    try {
+      // 1. Create HTML5 Audio Streaming Element
+      this.audio = new Audio();
+      this.audio.src = "music.mp3"; // Put your loop file here
+      this.audio.loop = true;
+      this.audio.crossOrigin = "anonymous";
+
+      // Safari/WebKit MediaElementAudioSourceNode bug bypass:
+      // On iOS and macOS Safari, routing streaming audio through a filter node frequently results in silence
+      // due to local WebKit security constraints. We detect Safari and stream directly without Web Audio wrapping.
+      let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      if (isSafari) {
+        this.initialized = true;
+        this.audio.play().catch(() => {});
+        this.tick();
+        return;
+      }
+
+      // 2. Build DSP Web Audio Graph
+      this.source = this.ctx.createMediaElementSource(this.audio);
+
+      this.filter = this.ctx.createBiquadFilter();
+      this.filter.type = "lowpass";
+      this.filter.frequency.setValueAtTime(20000, this.ctx.currentTime);
+
+      this.gainNode = this.ctx.createGain();
+      this.gainNode.gain.setValueAtTime(0, this.ctx.currentTime); // Fade in on play
+
+      // Connections
+      this.source.connect(this.filter);
+      this.filter.connect(this.gainNode);
+
+      // Route through SoundManager's masterGain node to respect main volume adjustments
+      if (window.SoundManager && window.SoundManager.masterGain) {
+        this.gainNode.connect(window.SoundManager.masterGain);
+      } else {
+        this.gainNode.connect(this.ctx.destination);
+      }
+
+      this.initialized = true;
+      this.play();
+    } catch (e) {
+      console.warn("Failed to initialize Adaptive Music Manager:", e);
+    }
+  },
+
+  play() {
+    if (!this.initialized) return;
+    if (this.ctx.state === "suspended") {
+      this.ctx.resume();
+    }
+    this.audio.play().catch((err) => {
+      console.warn("BGM playback postponed (waiting for user gesture).");
+    });
+    this.tick();
+  },
+
+  // Continuously monitors game state and sweeps DSP values exponentially
+  tick() {
+    if (!this.initialized) return;
+
+    let now = this.ctx.currentTime;
+    let state = "campaign";
+
+    // Detect Active Game State
+    if (window.deathAnimationTimer > 0 || (window.playerStats && window.playerStats.currentHp <= 0)) {
+      state = "death";
+    } else if (window.playerStats && (window.playerStats.isBossMode || window.playerStats.isUberBoss || window.playerStats.isPrestigeBossMode)) {
+      state = "boss";
+    } else if (window.playerStats && (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode)) {
+      state = "dungeon";
+    } else if (document.getElementById("menu-hub-overlay") && document.getElementById("menu-hub-overlay").style.display === "flex") {
+      state = "town";
+    } else if (window.state && (window.state.currentSubTab === "USE" || window.state.currentSubTab === "ETC" || window.state.currentSubTab === "EQUIP")) {
+      state = "town";
+    }
+
+    let targetFreq = 20000; // Full frequency bypass
+    let volumeScale = 1.0;
+
+    // Apply DSP settings per State
+    switch (state) {
+      case "death":
+        targetFreq = 300;     // Extremely muffled, dark, distant
+        volumeScale = 0.15;   // Drastically ducked
+        break;
+      case "town":
+        targetFreq = 850;     // Warm, soft cozy background blanket
+        volumeScale = 0.65;   // Slightly lower volume
+        break;
+      case "dungeon":
+        targetFreq = 4000;    // Balanced highs, clear echo clarity
+        volumeScale = 0.85;   // Good room for cavern SFX
+        break;
+      case "boss":
+        targetFreq = 20000;   // Bright, intense, dramatic
+        volumeScale = 1.0;    // Max presence
+        break;
+      case "campaign":
+      default:
+        targetFreq = 20000;   // Clean, steady farming output
+        volumeScale = 0.9;
+        break;
+    }
+
+    // Resolve volume levels through settings
+    let isMuted = window.playerStats ? window.playerStats.mute : false;
+    let musicVolSetting = window.playerStats && window.playerStats.volumeMaster !== undefined ? window.playerStats.volumeMaster : 0.5;
+
+    // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
+    let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
+
+    if (this.currentState !== state) {
+      this.currentState = state;
+      console.log(`[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`);
+    }
+
+    // Apply exponential sweeps (Safari direct play ignores filters and uses direct audio element volume)
+    if (this.filter && this.filter.frequency) {
+      this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
+    }
+    if (this.gainNode && this.gainNode.gain) {
+      this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
+    } else if (this.audio) {
+      this.audio.volume = finalTargetVolume;
+    }
+
+    // Call next evaluation frame
+    requestAnimationFrame(() => this.tick());
+  }
+};

@@ -2567,16 +2567,33 @@ window.onload = function () {
   preventTooltipLeaks("etc-tooltip");
   preventTooltipLeaks("stat-tooltip");
 
-  // Warm user gesture activation for Web Audio Context
-  const initAudio = () => {
-    window.SoundManager.init();
-    window.removeEventListener("mousedown", initAudio);
-    window.removeEventListener("touchstart", initAudio);
-    window.removeEventListener("keydown", initAudio);
-  };
-  window.addEventListener("mousedown", initAudio);
-  window.addEventListener("touchstart", initAudio);
-  window.addEventListener("keydown", initAudio);
+  // Warm user gesture activation for Web Audio Context & BGM
+    const initAudio = () => {
+      window.SoundManager.init();
+      if (window.MusicManager) {
+        window.MusicManager.init(); // Starts and loops your BGM adaptively on first click
+      }
+
+      // Force-unlock all mobile Web Audio context threads on touch/tap events
+      const forceUnlockMobileAudio = () => {
+        let sfxCtx = window.SoundManager.ctx || window.SoundManager.audioCtx;
+        if (sfxCtx && sfxCtx.state === "suspended") {
+          sfxCtx.resume().catch(() => {});
+        }
+        if (window.MusicManager && window.MusicManager.ctx && window.MusicManager.ctx.state === "suspended") {
+          window.MusicManager.ctx.resume().catch(() => {});
+        }
+      };
+      document.addEventListener("touchend", forceUnlockMobileAudio, { passive: true });
+      document.addEventListener("click", forceUnlockMobileAudio, { passive: true });
+
+      window.removeEventListener("mousedown", initAudio);
+      window.removeEventListener("touchstart", initAudio);
+      window.removeEventListener("keydown", initAudio);
+    };
+    window.addEventListener("mousedown", initAudio);
+    window.addEventListener("touchstart", initAudio);
+    window.addEventListener("keydown", initAudio);
 
   // Seed procedural foliage if not populated
   const flowerColors = [
@@ -4164,13 +4181,15 @@ function update() {
       }
 
       if (!isHooktail && window.mob.x > window.hero.x + window.hero.w + 30) {
-                    let scalingFactor = (canvas.width - 80) / 670;
-                    window.mob.x -= (4 + scrollSpeed) * scalingFactor;
-                    window.mob.isStopped = false;
-                    scrollScenery(scrollSpeed * scalingFactor);
-                  } else {
-                    window.mob.isStopped = true;
-                  }
+                                let scalingFactor = (canvas.width - 80) / 670;
+                                // Dampened square-root curve ensures smooth progressive approach speeds without teleportation
+                                let mobSpeed = (6.5 + Math.sqrt(scrollSpeed) * 1.6) * scalingFactor;
+                                window.mob.x -= mobSpeed;
+                                window.mob.isStopped = false;
+                                scrollScenery(scrollSpeed * scalingFactor);
+                              } else {
+                                window.mob.isStopped = true;
+                              }
 
                   if (
                     window.logicClock % p.idleAttackSpeed === 0 &&
@@ -6557,245 +6576,127 @@ window.CombatEngine = {
   },
 
   processEnemySpawn() {
-    let p = window.resolvePlayerStats();
-    // Fixed spawning offset relative to player coordinates guarantees uniform combat pacing across all screen widths
-    let spawnX = window.hero.x + 155;
+      let p = window.resolvePlayerStats();
+      // Fixed spawning offset relative to player coordinates guarantees uniform combat pacing across all screen widths
+      let spawnX = window.hero.x + 155;
 
-    // Define activeStage at the top of the function so all sub-blocks can access it
-    let activeStage = window.playerStats.stage;
-    if (window.playerStats.isUberBoss) {
-      let runPeak = Math.max(
-        window.playerStats.stage,
-        window.playerStats.maxStage || 1,
-      );
-      let allTime90 = Math.floor(
-        (window.playerStats.lifetimePeakStage || 1) * 0.9,
-      );
-      activeStage = Math.max(runPeak, allTime90);
-    }
-
-    if (window.playerStats.isCrucibleMode) {
-      let cWave = window.playerStats.crucibleWave || 1;
-      let peak = window.playerStats.lifetimePeakStage || 1;
-      let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
-      let effectiveStage = startingStageOffset + cWave - 1;
-
-      // Absolute exponential wave scaling matching standard campaign progression
-      let scale = Math.pow(1.045, effectiveStage);
-
-      if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-                let hp = BigNum.from(
-                  Math.floor(120 * scale * (1 + effectiveStage * 0.06)),
-                );
-                window.mob = {
-                  x: spawnX,
-                  y: 140,
-                  w: 45,
-                  h: 75,
-                  type: "dungeon_boss",
-                  isCrucible: true,
-                  isRare: false,
-                  hp: hp,
-                  maxHp: hp,
-                  damage: BigNum.from(Math.floor(15 * scale)),
-                  def: 0,
-                  flashTimer: 0,
-                  isStopped: false,
-                  attackCooldown: 100,
-                  attackTimer: 100,
-                };
-              } else {
-                let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
-                let chosenVisual =
-                  cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
-                let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
-
-                let hp = BigNum.from(
-                  Math.floor(25 * scale * (1 + effectiveStage * 0.06)),
-                );
-                window.mob = {
-                  x: spawnX,
-                  y: isFlying ? 145 : 195,
-                  w: 25,
-                  h: 30,
-                  type: "mob",
-                  visualType: chosenVisual,
-                  isCrucible: true,
-                  isRare: false,
-                  hp: hp,
-                  maxHp: hp,
-                  damage: BigNum.from(Math.floor(4.5 * scale)),
-                  def: 0,
-                  flashTimer: 0,
-                  isStopped: false,
-                  attackCooldown: 90,
-                  attackTimer: 90,
-                };
-              }
-      return;
-    }
-
-    let b_scale;
-    if (window.playerStats.isDungeonMode) {
-      window.playerStats.currentDungeonStage = window.playerStats
-        .currentDungeonStage || { equip: 1, gold: 1, mat: 1 };
-      let dStage =
-        window.playerStats.currentDungeonStage[
-          window.playerStats.currentDungeon
-        ] || 1;
-
-      let effStage = window.getEffectiveStage(dStage);
-      let baseRate = 1.045 + (effStage * 0.015) / (effStage + 300);
-      b_scale = BigNum.from(baseRate)
-        .pow(effStage)
-        .mul(1 + effStage * 0.05);
-    } else {
-      let effStage = window.getEffectiveStage(activeStage);
-      let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-      b_scale = BigNum.from(growthRate).pow(effStage);
-    }
-
-    if (window.playerStats.isDungeonMode) {
-      let hpScale = window.playerStats.currentDungeon === "gold" ? 1.5 : 1;
-      let dStage =
-        window.playerStats.currentDungeonStage[
-          window.playerStats.currentDungeon
-        ] || 1;
-
-      if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-        let hp = BigNum.from(100)
-          .mul(b_scale)
-          .mul(hpScale)
-          .mul(1 + dStage * 0.06);
-        window.mob = {
-          x: 750,
-          y: 140,
-          w: 50,
-          h: 90,
-          type: "dungeon_boss",
-          isRare: false,
-          hp: hp,
-          maxHp: hp,
-          damage: BigNum.from(20).mul(b_scale),
-          def: 0,
-          flashTimer: 0,
-          isStopped: false,
-          attackCooldown: 100,
-          attackTimer: 100,
-        };
-        window.playerStats.hasClickedThisBattle = false;
-        window.playerStats.damageTakenThisBattle = 0;
-        window.playerStats.ankhTriggeredThisBattle = false;
-      } else {
-        let dType = window.playerStats.currentDungeon || "gold";
-        let dPool = [];
-        if (dType === "equip")
-          dPool = ["animated_armor", "cursed_blade", "mimic_shield"];
-        else if (dType === "gold")
-          dPool = ["coin_elemental", "hoard_mimic", "gilded_scuttler"];
-        else dPool = ["slag_slime", "rust_nibbler", "corroded_golem"];
-
-        let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
-        let isFlying = [
-          "gargoyle",
-          "toxic_fly",
-          "marsh_ghost",
-          "gilded_wyrmling",
-          "wyrmling",
-          "animated_armor",
-          "cursed_blade",
-        ].includes(chosenVisual);
-
-        let hp = BigNum.from(25)
-          .mul(b_scale)
-          .mul(hpScale)
-          .mul(1 + dStage * 0.06);
-        window.mob = {
-          x: 750,
-          y: isFlying ? 150 : 195,
-          w: 25,
-          h: 40,
-          type: "mob",
-          visualType: chosenVisual,
-          isRare: false,
-          hp: hp,
-          maxHp: hp,
-          damage: BigNum.from(5.2).mul(b_scale),
-          def: 0,
-          flashTimer: 0,
-          isStopped: false,
-          attackCooldown: 90,
-          attackTimer: 90,
-        };
+      // Define activeStage at the top of the function so all sub-blocks can access it
+      let activeStage = window.playerStats.stage;
+      if (window.playerStats.isUberBoss) {
+        let runPeak = Math.max(
+          window.playerStats.stage,
+          window.playerStats.maxStage || 1,
+        );
+        let allTime90 = Math.floor(
+          (window.playerStats.lifetimePeakStage || 1) * 0.9,
+        );
+        activeStage = Math.max(runPeak, allTime90);
       }
-    } else {
-      let tier = window.getStageTier();
-      if (window.playerStats.isBossMode) {
-        if (window.playerStats.isUberBoss) {
-          let bossType = window.playerStats.currentUberBoss || "guardian";
-          let hpMult = 10.0;
-          let dmgMult = 10.0;
-          let speedMult = 100;
-          let mType = "aegis_goliath";
-          let logText =
-            "<strong style='color:#3498db;'>Aegis Goliath, The Iron Sentinel</strong> has materialized from the cracked Aether!";
 
-          if (bossType === "chronos") {
-            speedMult = 90;
-            mType = "chronos_arbitrator";
-            logText =
-              "<strong style='color:#f1c40f;'>Chronos Arbitrator</strong> has stepped from the temporal flow!";
-          } else if (bossType === "nexus") {
-            speedMult = 80;
-            mType = "nexus_overseer";
-            logText =
-              "<strong style='color:#ff007f;'>Nexus Overseer</strong> has infected the reality stream!";
-          }
+      if (window.playerStats.isCrucibleMode) {
+        let cWave = window.playerStats.crucibleWave || 1;
+        let peak = window.playerStats.lifetimePeakStage || 1;
+        let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
+        let effectiveStage = startingStageOffset + cWave - 1;
 
-          let riftLvl = window.playerStats.activeRiftLevel || 1;
-          let equivalentStage = 50 + riftLvl * 10;
-          let riftGrowthRate =
-            1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
-          let b_riftScale = BigNum.from(riftGrowthRate).pow(equivalentStage);
+        // Absolute exponential wave scaling matching standard campaign progression
+        let scale = Math.pow(1.045, effectiveStage);
 
-          let hp = BigNum.from(hpMult)
-            .mul(100)
-            .mul(b_riftScale)
-            .mul(1 + equivalentStage * 0.06);
-          let dmg = BigNum.from(20).mul(b_riftScale).mul(dmgMult);
+        if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
+                  let hp = BigNum.from(
+                    Math.floor(120 * scale * (1 + effectiveStage * 0.06)),
+                  );
+                  window.mob = {
+                    x: spawnX,
+                    y: 140,
+                    w: 45,
+                    h: 75,
+                    type: "dungeon_boss",
+                    isCrucible: true,
+                    isRare: false,
+                    hp: hp,
+                    maxHp: hp,
+                    damage: BigNum.from(Math.floor(15 * scale)),
+                    def: 0,
+                    flashTimer: 0,
+                    isStopped: false,
+                    attackCooldown: 100,
+                    attackTimer: 100,
+                  };
+                } else {
+                  let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
+                  let chosenVisual =
+                    cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
+                  let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
+
+                  let hp = BigNum.from(
+                    Math.floor(25 * scale * (1 + effectiveStage * 0.06)),
+                  );
+                  window.mob = {
+                    x: spawnX,
+                    y: isFlying ? 145 : 195,
+                    w: 25,
+                    h: 30,
+                    type: "mob",
+                    visualType: chosenVisual,
+                    isCrucible: true,
+                    isRare: false,
+                    hp: hp,
+                    maxHp: hp,
+                    damage: BigNum.from(Math.floor(4.5 * scale)),
+                    def: 0,
+                    flashTimer: 0,
+                    isStopped: false,
+                    attackCooldown: 90,
+                    attackTimer: 90,
+                  };
+                }
+        return;
+      }
+
+      let b_scale;
+      if (window.playerStats.isDungeonMode) {
+        window.playerStats.currentDungeonStage = window.playerStats
+          .currentDungeonStage || { equip: 1, gold: 1, mat: 1 };
+        let dStage =
+          window.playerStats.currentDungeonStage[
+            window.playerStats.currentDungeon
+          ] || 1;
+
+        let effStage = window.getEffectiveStage(dStage);
+        let baseRate = 1.045 + (effStage * 0.015) / (effStage + 300);
+        b_scale = BigNum.from(baseRate)
+          .pow(effStage)
+          .mul(1 + effStage * 0.05);
+      } else {
+        let effStage = window.getEffectiveStage(activeStage);
+        let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+        b_scale = BigNum.from(growthRate).pow(effStage);
+      }
+
+      let spawnEdgeX = (window.canvas ? window.canvas.width : 750) + 10; // Dynamic spawn directly at visible screen edge
+
+      if (window.playerStats.isDungeonMode) {
+        let hpScale = window.playerStats.currentDungeon === "gold" ? 1.5 : 1;
+        let dStage =
+          window.playerStats.currentDungeonStage[
+            window.playerStats.currentDungeon
+          ] || 1;
+
+        if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
+          let hp = BigNum.from(100)
+            .mul(b_scale)
+            .mul(hpScale)
+            .mul(1 + dStage * 0.06);
           window.mob = {
-            x: 750,
-            y: 115,
-            w: 60,
-            h: 100,
-            type: mType,
+            x: spawnEdgeX,
+            y: 140,
+            w: 50,
+            h: 90,
+            type: "dungeon_boss",
             isRare: false,
             hp: hp,
             maxHp: hp,
-            damage: dmg,
-            def: 0,
-            flashTimer: 0,
-            isStopped: false,
-            attackCooldown: speedMult,
-            attackTimer: speedMult,
-          };
-          window.pushLog(
-            `<span style='color:#9b59b6; font-weight:bold;'>[RIFT HUNT]</span> ${logText}`,
-          );
-        } else {
-          let baseBossHp = BigNum.from(120)
-            .mul(b_scale)
-            .mul(1 + activeStage * 0.06);
-          window.mob = {
-            x: 750,
-            y: 150,
-            w: 40,
-            h: 80,
-            type: "boss",
-            isRare: false,
-            visualTier: tier,
-            hp: baseBossHp,
-            maxHp: baseBossHp,
             damage: BigNum.from(20).mul(b_scale),
             def: 0,
             flashTimer: 0,
@@ -6803,62 +6704,182 @@ window.CombatEngine = {
             attackCooldown: 100,
             attackTimer: 100,
           };
-          window.pushLog(
-            `<span style='color:#e74c3c; font-weight:bold;'>[STAGE BOSS]</span> blocked your transit route!`,
-          );
+          window.playerStats.hasClickedThisBattle = false;
+          window.playerStats.damageTakenThisBattle = 0;
+          window.playerStats.ankhTriggeredThisBattle = false;
+        } else {
+          let dType = window.playerStats.currentDungeon || "gold";
+          let dPool = [];
+          if (dType === "equip")
+            dPool = ["animated_armor", "cursed_blade", "mimic_shield"];
+          else if (dType === "gold")
+            dPool = ["coin_elemental", "hoard_mimic", "gilded_scuttler"];
+          else dPool = ["slag_slime", "rust_nibbler", "corroded_golem"];
+
+          let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
+          let isFlying = [
+            "gargoyle",
+            "toxic_fly",
+            "marsh_ghost",
+            "gilded_wyrmling",
+            "wyrmling",
+            "animated_armor",
+            "cursed_blade",
+          ].includes(chosenVisual);
+
+          let hp = BigNum.from(25)
+            .mul(b_scale)
+            .mul(hpScale)
+            .mul(1 + dStage * 0.06);
+          window.mob = {
+            x: spawnEdgeX,
+            y: isFlying ? 150 : 195,
+            w: 25,
+            h: 40,
+            type: "mob",
+            visualType: chosenVisual,
+            isRare: false,
+            hp: hp,
+            maxHp: hp,
+            damage: BigNum.from(5.2).mul(b_scale),
+            def: 0,
+            flashTimer: 0,
+            isStopped: false,
+            attackCooldown: 90,
+            attackTimer: 90,
+          };
         }
-        window.playerStats.hasClickedThisBattle = false;
-        window.playerStats.damageTakenThisBattle = 0;
-        window.playerStats.ankhTriggeredThisBattle = false;
       } else {
-        let isMelee = Math.random() > 0.5;
-        let isRare = Math.random() < p.rareSpawn;
-        let hpMult = isRare ? 2.5 : 1;
-        let dmgMult = isRare ? 1.5 : 1;
+        let tier = window.getStageTier();
+        if (window.playerStats.isBossMode) {
+          if (window.playerStats.isUberBoss) {
+            let bossType = window.playerStats.currentUberBoss || "guardian";
+            let hpMult = 10.0;
+            let dmgMult = 10.0;
+            let speedMult = 100;
+            let mType = "aegis_goliath";
+            let logText =
+              "<strong style='color:#3498db;'>Aegis Goliath, The Iron Sentinel</strong> has materialized from the cracked Aether!";
 
-        let visualPool = {
-          0: ["slime", "sprout", "thorn_wyrm"],
-          1: ["golem", "wyrmling", "gargoyle"],
-          2: ["magma_elemental", "lava_serpent", "hell_bat"],
-          3: ["marsh_ghost", "swamp_basilisk", "toxic_fly"],
-          4: ["void_orb", "void_crawler", "void_spectre"],
-          5: ["clockwork_scarab", "temporal_watcher", "clockwork_drone"],
-          6: ["neon_spider", "cyber_wraith", "wireframe_orb"],
-        };
-        let choices = visualPool[tier] || ["slime"];
-        let visualType = choices[Math.floor(Math.random() * choices.length)];
+            if (bossType === "chronos") {
+              speedMult = 90;
+              mType = "chronos_arbitrator";
+              logText =
+                "<strong style='color:#f1c40f;'>Chronos Arbitrator</strong> has stepped from the temporal flow!";
+            } else if (bossType === "nexus") {
+              speedMult = 80;
+              mType = "nexus_overseer";
+              logText =
+                "<strong style='color:#ff007f;'>Nexus Overseer</strong> has infected the reality stream!";
+            }
 
-        let baseSpd = 90;
-        if (
-          window.equippedSlots.subweapon &&
-          window.equippedSlots.subweapon.isUniqueWatch &&
-          window.playerStats.watchActiveTimer > 0
-        )
-          baseSpd = Math.round(baseSpd * 1.33);
+            let riftLvl = window.playerStats.activeRiftLevel || 1;
+            let equivalentStage = 50 + riftLvl * 10;
+            let riftGrowthRate =
+              1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
+            let b_riftScale = BigNum.from(riftGrowthRate).pow(equivalentStage);
 
-        let hp = BigNum.from(25)
-          .mul(b_scale)
-          .mul(hpMult)
-          .mul(1 + activeStage * 0.06);
-        window.mob = {
-          x: 750,
-          y: isMelee ? 195 : 210,
-          w: isMelee ? 25 : 30,
-          h: isMelee ? 40 : 25,
-          type: "mob",
-          visualType: visualType,
-          isRare: isRare,
-          isMelee: isMelee,
-          visualTier: tier,
-          hp: hp,
-          maxHp: hp,
-          damage: BigNum.from(5.2).mul(b_scale).mul(dmgMult),
-          def: 0,
-          flashTimer: 0,
-          isStopped: false,
-          attackCooldown: baseSpd,
-          attackTimer: baseSpd,
-        };
+            let hp = BigNum.from(hpMult)
+              .mul(100)
+              .mul(b_riftScale)
+              .mul(1 + equivalentStage * 0.06);
+            let dmg = BigNum.from(20).mul(b_riftScale).mul(dmgMult);
+            window.mob = {
+              x: spawnEdgeX,
+              y: 115,
+              w: 60,
+              h: 100,
+              type: mType,
+              isRare: false,
+              hp: hp,
+              maxHp: hp,
+              damage: dmg,
+              def: 0,
+              flashTimer: 0,
+              isStopped: false,
+              attackCooldown: speedMult,
+              attackTimer: speedMult,
+            };
+            window.pushLog(
+              `<span style='color:#9b59b6; font-weight:bold;'>[RIFT HUNT]</span> ${logText}`,
+            );
+          } else {
+            let baseBossHp = BigNum.from(120)
+              .mul(b_scale)
+              .mul(1 + activeStage * 0.06);
+            window.mob = {
+              x: spawnEdgeX,
+              y: 150,
+              w: 40,
+              h: 80,
+              type: "boss",
+              isRare: false,
+              visualTier: tier,
+              hp: baseBossHp,
+              maxHp: baseBossHp,
+              damage: BigNum.from(20).mul(b_scale),
+              def: 0,
+              flashTimer: 0,
+              isStopped: false,
+              attackCooldown: 100,
+              attackTimer: 100,
+            };
+            window.pushLog(
+              `<span style='color:#e74c3c; font-weight:bold;'>[STAGE BOSS]</span> blocked your transit route!`,
+            );
+          }
+          window.playerStats.hasClickedThisBattle = false;
+          window.playerStats.damageTakenThisBattle = 0;
+          window.playerStats.ankhTriggeredThisBattle = false;
+        } else {
+          let isMelee = Math.random() > 0.5;
+          let isRare = Math.random() < p.rareSpawn;
+          let hpMult = isRare ? 2.5 : 1;
+          let dmgMult = isRare ? 1.5 : 1;
+
+          let visualPool = {
+            0: ["slime", "sprout", "thorn_wyrm"],
+            1: ["golem", "wyrmling", "gargoyle"],
+            2: ["magma_elemental", "lava_serpent", "hell_bat"],
+            3: ["marsh_ghost", "swamp_basilisk", "toxic_fly"],
+            4: ["void_orb", "void_crawler", "void_spectre"],
+            5: ["clockwork_scarab", "temporal_watcher", "clockwork_drone"],
+            6: ["neon_spider", "cyber_wraith", "wireframe_orb"],
+          };
+          let choices = visualPool[tier] || ["slime"];
+          let visualType = choices[Math.floor(Math.random() * choices.length)];
+
+          let baseSpd = 90;
+          if (
+            window.equippedSlots.subweapon &&
+            window.equippedSlots.subweapon.isUniqueWatch &&
+            window.playerStats.watchActiveTimer > 0
+          )
+            baseSpd = Math.round(baseSpd * 1.33);
+
+          let hp = BigNum.from(25)
+            .mul(b_scale)
+            .mul(hpMult)
+            .mul(1 + activeStage * 0.06);
+          window.mob = {
+            x: spawnEdgeX,
+            y: isMelee ? 195 : 210,
+            w: isMelee ? 25 : 30,
+            h: isMelee ? 40 : 25,
+            type: "mob",
+            visualType: visualType,
+            isRare: isRare,
+            isMelee: isMelee,
+            visualTier: tier,
+            hp: hp,
+            maxHp: hp,
+            damage: BigNum.from(5.2).mul(b_scale).mul(dmgMult),
+            def: 0,
+            flashTimer: 0,
+            isStopped: false,
+            attackCooldown: baseSpd,
+            attackTimer: baseSpd,
+          };
 
         if (isRare) {
           window.pushLog(
