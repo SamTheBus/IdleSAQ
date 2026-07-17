@@ -1898,14 +1898,18 @@ window.loadGameAndSyncCloud = function () {
 
       window.hideLoadingScreen();
 
-      if (resolvedOfflineMs > 60000) {
-        window.applyOfflineGains(resolvedOfflineMs);
-      } else {
-        window.setPauseState(false);
-        window.updateUI();
-        window.renderInventory();
-      }
-    })
+            if (typeof window.checkDailyCalendar === "function") {
+              window.checkDailyCalendar();
+            }
+
+            if (resolvedOfflineMs > 60000) {
+              window.applyOfflineGains(resolvedOfflineMs);
+            } else {
+              window.setPauseState(false);
+              window.updateUI();
+              window.renderInventory();
+            }
+          })
     .catch((err) => {
       // Ignore abort errors from manual play-offline clicks
       if (err.name === "AbortError") return;
@@ -9230,38 +9234,38 @@ window.openCrucibleMidRunDraftModal = function () {
   document.body.appendChild(overlay);
 
   let cardsHtml = selectedCards
-    .map((card, idx) => {
-      return `
-      <div class="market-card" style="
-        background: linear-gradient(135deg, #13111c 0%, #06040a 100%);
-        border: 2px solid #9b59b6;
-        border-radius: 12px;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        width: 130px;
-        height: 220px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.65), inset 0 0 10px rgba(155,89,182,0.1);
-        transition: transform 0.18s, border-color 0.18s;
-      "
-      onclick="window.executeMidRunCardSelection('${card.id}')"
-      onmouseenter="this.style.transform='translateY(-6px)'; this.style.borderColor='#df9ffb';"
-      onmouseleave="this.style.transform='none'; this.style.borderColor='#9b59b6';">
-        <div style="text-align:center; width:100%;">
-          <strong style="color:#df9ffb; font-size:12px; display:block; margin-bottom:2px;">☀️ ${card.name}</strong>
-          <span style="font-size:8px; color:#888; text-transform:uppercase; letter-spacing:0.5px;">AETHER INFUSION</span>
+      .map((card, idx) => {
+        return `
+        <div class="market-card" style="
+          background: linear-gradient(135deg, #13111c 0%, #06040a 100%);
+          border: 2px solid #9b59b6;
+          border-radius: 12px;
+          padding: 15px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          align-items: center;
+          cursor: pointer;
+          width: 130px;
+          height: 220px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.65), inset 0 0 10px rgba(155,89,182,0.1);
+          transition: transform 0.18s, border-color 0.18s;
+        "
+        onclick="window.executeMidRunCardSelection('${card.id}')"
+        onmouseenter="this.style.transform='translateY(-6px)'; this.style.borderColor='#df9ffb';"
+        onmouseleave="this.style.transform='none'; this.style.borderColor='#9b59b6';">
+          <div style="text-align:center; width:100%;">
+            <strong style="color:#df9ffb; font-size:12px; display:block; margin-bottom:2px;">☀️ ${card.name}</strong>
+            <span style="font-size:8px; color:#888; text-transform:uppercase; letter-spacing:0.5px;">AETHER INFUSION</span>
+          </div>
+          <div style="font-size:28px; margin: 10px 0;">🔮</div>
+          <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:55px;">
+            ${card.desc}
+          </div>
+          <button class="btn-action" style="width:100%; font-size:10px; padding:4px 0; background:#9b59b6; font-weight:bold;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.executeMidRunCardSelection('${card.id}')">DRAFT</button>
         </div>
-        <div style="font-size:28px; margin: 10px 0;">🔮</div>
-        <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:55px;">
-          ${card.desc}
-        </div>
-        <button class="btn-action" style="width:100%; font-size:10px; padding:4px 0; background:#9b59b6; font-weight:bold;" onclick="event.stopPropagation(); window.executeMidRunCardSelection('${card.id}')">DRAFT</button>
-      </div>
-    `;
-    })
+      `;
+      })
     .join("");
 
   let accShards = window.playerStats.crucibleAccumulatedShards || 0;

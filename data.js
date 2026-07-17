@@ -454,7 +454,7 @@ window.spendCoins = (amount) => window.GameState.spendCoins(amount);
 window.getAchievementProgress = function (ach) {
   if (ach.reqType === "kills")
     return window.playerStats.totalLifetimeKills || 0;
-  if (ach.reqType === "gold") return window.playerStats.totalGoldEarned || 0;
+  if (ach.reqType === "gold") return window.playerStats.coins || 0;
   if (ach.reqType === "stage") return window.playerStats.maxStage || 1;
   if (ach.reqType === "temper") return window.playerStats.totalTempers || 0;
   if (ach.reqType === "enchant") return window.playerStats.totalEnchants || 0;
@@ -2006,6 +2006,9 @@ window.CRUCIBLE_DRAFT_POOL = [
 ];
 
 window.playerStats = {
+  lastDailyLoginDayStr: "",
+  loginStreak: 0,
+  loginClaimedToday: false,
   slotUpgrades: {
     weapon: 0,
     subweapon: 0,

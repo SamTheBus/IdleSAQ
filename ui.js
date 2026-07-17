@@ -12333,6 +12333,266 @@ document.addEventListener("pointerdown", function (e) {
   }
 });
 
+window.DAILY_CALENDAR_REWARDS = [
+  { day: 1, name: "Gacha Key", qty: 3, color: "#f1c40f", iconType: "etc" },
+  { day: 2, name: "Supernal Attack Elixir", qty: 1, color: "#2ecc71", iconType: "use", extra: { name: "Supernal Haste Elixir", qty: 1, color: "#f1c40f", type: "use" } },
+  { day: 3, name: "Catalyst Core", qty: 1, color: "#2ecc71", iconType: "etc", extra: { name: "Eridium Shard", qty: 10, color: "#8e44ad", type: "etc" } },
+  { day: 4, name: "Daily Reward Sack", qty: 2, color: "#f1c40f", iconType: "use" },
+  { day: 5, name: "Overlord's Sigil", qty: 1, color: "#1abc9c", iconType: "etc", extra: { name: "Gacha Key", qty: 1, color: "#f1c40f", type: "etc" } },
+  { day: 6, name: "Monster Card Sack", qty: 2, color: "#a855f7", iconType: "use" },
+  { day: 7, name: "Glimmering Gachapon Key", qty: 1, color: "#00d2ff", iconType: "etc", extra: { name: "Weekly Reward Sack", qty: 1, color: "#9b59b6", type: "use" }, extraShards: 50 },
+  { day: 8, name: "Gacha Key", qty: 2, color: "#f1c40f", iconType: "etc", extra: { name: "Eridium Shard", qty: 5, color: "#8e44ad", type: "etc" } },
+  { day: 9, name: "Supernal Vitality Elixir", qty: 1, color: "#e74c3c", iconType: "use", extra: { name: "Supernal Armored Elixir", qty: 1, color: "#3498db", type: "use" } },
+  { day: 10, name: "Catalyst Core", qty: 2, color: "#2ecc71", iconType: "etc", extra: { name: "Eridium Shard", qty: 20, color: "#8e44ad", type: "etc" } },
+  { day: 11, name: "Daily Reward Sack", qty: 2, color: "#f1c40f", iconType: "use" },
+  { day: 12, name: "Overlord's Sigil", qty: 2, color: "#1abc9c", iconType: "etc", extra: { name: "Astral Essence", qty: 5, color: "#9b59b6", type: "etc" } },
+  { day: 13, name: "Monster Card Sack", qty: 3, color: "#a855f7", iconType: "use" },
+  { day: 14, name: "Glimmering Gachapon Key", qty: 2, color: "#00d2ff", iconType: "etc", extra: { name: "Weekly Reward Sack", qty: 2, color: "#9b59b6", type: "use" }, extraShards: 100 },
+];
+
+window.checkDailyCalendar = function () {
+  let now = Date.now();
+  let ptString = new Date(now).toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles",
+  });
+  let ptDate = new Date(ptString);
+  let currentDayStr = ptDate.toLocaleDateString("en-US");
+
+  if (window.playerStats.lastDailyLoginDayStr !== currentDayStr) {
+    window.playerStats.loginClaimedToday = false;
+
+    // Evaluate if the consecutive day streak was broken
+    if (window.playerStats.lastDailyLoginDayStr) {
+      let lastClaimDate = new Date(new Date(window.playerStats.lastDailyLoginDayStr).toLocaleString("en-US", {
+        timeZone: "America/Los_Angeles"
+      }));
+      lastClaimDate.setHours(0,0,0,0);
+      let todayMidnight = new Date(ptDate);
+      todayMidnight.setHours(0,0,0,0);
+
+      let diffTime = todayMidnight.getTime() - lastClaimDate.getTime();
+      let diffDays = Math.round(diffTime / 86400000);
+
+      if (diffDays > 1) {
+        window.playerStats.loginStreak = 0; // Missed a day: reset streak to Day 1
+        if (typeof window.pushLog === "function") {
+          window.pushLog("<span style='color:#e74c3c;'>[SYSTEM] Day missed. Daily Calendar streak reset to Day 1.</span>");
+        }
+      }
+    }
+  }
+
+  let badge = document.getElementById("hub-card-calendar-badge");
+  if (badge) {
+    badge.style.display = window.playerStats.loginClaimedToday ? "none" : "inline-block";
+  }
+};
+
+window.toggleDailyCalendar = function () {
+  let modal = document.getElementById("calendar-draggable-window");
+  if (modal) {
+    modal.remove();
+    window.hideTooltip();
+    window.setPauseState(false);
+  } else {
+    window.hideTooltip();
+    window.checkDailyCalendar();
+    window.setPauseState(true);
+
+    let win = document.createElement("div");
+    win.id = "calendar-draggable-window";
+    win.className = "draggable-window";
+    win.style.width = "375px";
+
+    // Position nicely in view
+    let container = document.getElementById("game-container").getBoundingClientRect();
+    let leftOffset = (window.innerWidth - 375) / 2 - container.left;
+    let topOffset = window.scrollY + window.innerHeight / 2 - 190 - container.top;
+    win.style.left = Math.max(5, leftOffset) + "px";
+    win.style.top = Math.max(5, topOffset) + "px";
+
+    win.innerHTML = `
+      <div class="draggable-header" id="calendar-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
+          <span>✦ Daily Calendar</span>
+          <button onclick="document.getElementById('calendar-draggable-window').remove(); window.setPauseState(false); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
+      </div>
+      <div class="draggable-content" id="calendar-win-content" style="max-height: 440px; padding: 12px; background:#07030b;">
+          <!-- Injected dynamically -->
+      </div>
+    `;
+
+    document.getElementById("game-container").appendChild(win);
+    window.renderDailyCalendar();
+    window.makeWindowDraggable(win, document.getElementById("calendar-win-handle"));
+  }
+};
+
+window.renderDailyCalendar = function () {
+  let contentEl = document.getElementById("calendar-win-content");
+  if (!contentEl) return;
+
+  let currentStreak = window.playerStats.loginStreak || 0;
+  let claimedToday = window.playerStats.loginClaimedToday;
+
+  let gridHtml = window.DAILY_CALENDAR_REWARDS.map((r, idx) => {
+    let dayNum = idx + 1;
+    let isCurrent = idx === currentStreak && !claimedToday;
+    let isClaimed = idx < currentStreak || (idx === currentStreak && claimedToday);
+
+    let borderCol = isCurrent ? r.color : isClaimed ? "#2ecc71" : "#2d3748";
+    let opacity = isClaimed ? "opacity:0.4;" : "";
+    let background = isCurrent
+      ? `background: rgba(${window.hexToRgbValues(r.color)}, 0.1); box-shadow: 0 0 10px ${r.color}33;`
+      : isClaimed
+        ? `background: rgba(46,204,113,0.03);`
+        : `background: #0f111a;`;
+
+    let statusText = isClaimed
+      ? `<span style="color:#2ecc71; font-weight:bold; font-size:8.5px; display:block; margin-top:2px;">Claimed ✓</span>`
+      : isCurrent
+        ? `<span style="color:${r.color}; font-weight:bold; font-size:8.5px; display:block; margin-top:2px; animation: pulseGlow 1.5s infinite;">Claim Now</span>`
+        : `<span style="color:#7f8c8d; font-size:8.5px; display:block; margin-top:2px;">Locked</span>`;
+
+    let iconHtml = r.iconType === "use" ? window.getUseIconHtml(r.name, 28) : window.getEtcIconHtml(r.name, 28);
+    iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 4px;");
+
+    let isMilestone = dayNum === 7 || dayNum === 14;
+    let gridSpan = isMilestone ? "grid-column: span 2;" : "";
+    let cardHeight = isMilestone ? "height: 80px;" : "height: 105px;";
+
+    // Milestone extra layouts
+    let extraRewardsText = "";
+    if (isMilestone && r.extra) {
+      extraRewardsText = `
+        <div style="font-size: 8px; color:#aaa; margin-top:1px;">
+          • +${r.extra.qty}x ${r.extra.name.replace(" Reward Sack", " Sack")}<br>
+          • +${r.extraShards}x Astral Shards
+        </div>
+      `;
+    } else if (r.extra) {
+      extraRewardsText = `
+        <div style="font-size: 8px; color:#aaa; margin-top:1px;">
+          • +${r.extra.qty}x ${r.extra.name.replace(" Gachapon Key", "").replace(" Elixir", "").replace(" Shard", "")}
+        </div>
+      `;
+    }
+
+    let escapedName = r.name.replace(/'/g, "\\'");
+    let hoverEvents = r.iconType === "use"
+      ? `onmouseenter="window.showUseTooltip(event, '${escapedName}')" ontouchstart="window.showUseTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`
+      : `onmouseenter="window.showEtcTooltip(event, '${escapedName}')" ontouchstart="window.showEtcTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`;
+
+    return `
+      <div class="market-card" style="${gridSpan} ${cardHeight} ${background} border: 1.5px solid ${borderCol}; border-radius:8px; padding:6px; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; ${opacity}" ${hoverEvents}>
+        <span style="font-size:8px; color:#888; text-transform:uppercase; font-weight:900;">Day ${dayNum}</span>
+        <div style="display:flex; align-items:center; gap:4px; margin-top:2px;">
+          ${iconHtml}
+          <div style="text-align:left; min-width: 0;">
+            <strong style="color:${r.color}; font-size:10.5px; display:block;">+${r.qty}x ${r.name.replace(" Elixir", "").replace(" Gachapon", "")}</strong>
+            ${extraRewardsText}
+          </div>
+        </div>
+        ${statusText}
+      </div>
+    `;
+  }).join("");
+
+  let actionButtonHtml = "";
+  if (claimedToday) {
+    actionButtonHtml = `
+      <button class="btn-action" style="background:#222; border:1px solid #333; color:#555; width:100%; padding:12px; font-weight:bold; cursor:not-allowed;" disabled>
+          ✦ Claimed Today
+      </button>
+    `;
+  } else {
+    let nextReward = window.DAILY_CALENDAR_REWARDS[currentStreak];
+    actionButtonHtml = `
+      <button class="btn-action btn-pulse-teal" style="background:linear-gradient(135deg, ${nextReward.color}, #111); width:100%; padding:12px; font-weight:bold; border:1px solid #fff; box-shadow:0 0 10px ${nextReward.color}44;" onclick="window.claimDailyCalendarReward()">
+          ✦ Claim Day ${currentStreak + 1}
+      </button>
+    `;
+  }
+
+  contentEl.innerHTML = `
+    <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.45;">
+      <strong style="color:#df9ffb; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 2px rgba(155, 89, 182, 0.4));"><path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z"/></svg>
+          Humble Sanctuary Calendar
+      </strong>
+      Login consecutively to claim premium items. Missing a day resets the calendar to Day 1. Day 14 claims loop back infinitely!
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; margin-bottom:12px; max-height: 240px; overflow-y: auto; padding-right: 4px;">
+      ${gridHtml}
+    </div>
+
+    ${actionButtonHtml}
+  `;
+};
+
+window.claimDailyCalendarReward = function () {
+  if (window.playerStats.loginClaimedToday) return;
+
+  let streak = window.playerStats.loginStreak || 0;
+  let reward = window.DAILY_CALENDAR_REWARDS[streak];
+  if (!reward) return;
+
+  let now = Date.now();
+  let ptString = new Date(now).toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles",
+  });
+  let ptDate = new Date(ptString);
+  let currentDayStr = ptDate.toLocaleDateString("en-US");
+
+  window.playerStats.lastDailyLoginDayStr = currentDayStr;
+  window.playerStats.loginClaimedToday = true;
+
+  // 1. Grant main reward
+  if (reward.iconType === "use") {
+    window.addUseDrop(reward.name, reward.qty);
+  } else {
+    window.addEtcDrop(reward.name, reward.qty);
+  }
+
+  // 2. Grant extra if present
+  if (reward.extra) {
+    if (reward.extra.type === "use") {
+      window.addUseDrop(reward.extra.name, reward.extra.qty);
+    } else {
+      window.addEtcDrop(reward.extra.name, reward.extra.qty);
+    }
+  }
+
+  // 3. Grant shards if present
+  if (reward.extraShards) {
+    window.playerStats.astralShards = (window.playerStats.astralShards || 0) + reward.extraShards;
+  }
+
+  // 4. Progress streak (consecutive increments, loops to 0 after 13)
+  let oldStreak = window.playerStats.loginStreak;
+  window.playerStats.loginStreak = (window.playerStats.loginStreak + 1) % 14;
+
+  // Particle feedback burst
+  if (window.SoundManager) window.SoundManager.play("revive");
+  if (window.spawnPurchaseCelebration) {
+    window.spawnPurchaseCelebration("gacha", reward.color, 5);
+  }
+
+  let rewardReport = `${reward.qty}x ${reward.name}`;
+  if (reward.extra) rewardReport += ` and ${reward.extra.qty}x ${reward.extra.name}`;
+  if (reward.extraShards) rewardReport += ` and ${reward.extraShards}x Astral Shards`;
+
+  window.pushHeaderToast(`✦ Claimed Day ${oldStreak + 1}: ${rewardReport}!`, reward.color);
+  window.pushLog(`<strong style="color:${reward.color};">[CALENDAR]</strong> Claimed Day ${oldStreak + 1} rewards: ${rewardReport}.`);
+
+  let win = document.getElementById("calendar-draggable-window");
+  if (win) win.remove();
+  window.hideTooltip();
+
+  window.updateUI();
+  window.saveGame();
+};
+
 window.updateHubAlerts = function () {
   // 1. Evaluate Missions
   let dailies = window.playerStats.dailyMissions || [];
@@ -12395,20 +12655,26 @@ window.updateHubAlerts = function () {
     }
   }
 
-  // 6. Update Main Top Bar Hub Button Dot
-  let mainDot = document.getElementById("hub-menu-alert-dot");
-  if (mainDot) {
-    mainDot.style.display =
-      hasMissionsAlert ||
-      hasTrophiesAlert ||
-      hasMailAlert ||
-      hasClanAlert ||
-      hasSettingsAlert ||
-      hasBestiaryAlert
-        ? "inline-block"
-        : "none";
-  }
-};
+  // Evaluate Daily Calendar alerts
+    let hasCalendarAlert = !window.playerStats.loginClaimedToday;
+    let cBadge = document.getElementById("hub-card-calendar-badge");
+    if (cBadge) cBadge.style.display = hasCalendarAlert ? "inline-block" : "none";
+
+    // 6. Update Main Top Bar Hub Button Dot
+    let mainDot = document.getElementById("hub-menu-alert-dot");
+    if (mainDot) {
+      mainDot.style.display =
+        hasMissionsAlert ||
+        hasTrophiesAlert ||
+        hasMailAlert ||
+        hasClanAlert ||
+        hasSettingsAlert ||
+        hasBestiaryAlert ||
+        hasCalendarAlert
+          ? "inline-block"
+          : "none";
+    }
+  };
 
 window.checkUnreadMail = function () {
   if (!window.GAME_SERVER_URL) return;
@@ -15567,58 +15833,58 @@ window.openSubweaponOfChoiceModal = function () {
   `;
 
   let shieldCardHtml = `
-    <div id="choice-card-shield" class="market-card" style="${cardStyles} border: 2px solid #3498db;"
-         onclick="window.selectChoiceSubweapon('shield')"
-         onmouseenter="window.showInventoryTooltip(event, ${shield.id})"
-         ontouchstart="window.showInventoryTooltip(event, ${shield.id})"
-         onmouseleave="window.hideTooltip()">
-      <div style="text-align:center; width:100%;">
-        <strong style="color:#3498db; font-size:12px; display:block; margin-bottom:2px;">Bulwark</strong>
-        <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Kite Shield</span>
-      </div>
-      <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #3498db;">${window.getEquipIconHtml(shield, 32)}</div>
-      <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
-        Focuses on <strong>STR & Defense</strong>. Unlocks Block Rate and Shield Bash counters.
-      </div>
-      <button class="btn-action" style="width:100%; font-size:10px; background:#3498db;" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(shield).replace(/"/g, "&quot;")})">CLAIM SHIELD</button>
-    </div>
-  `;
+                  <div id="choice-card-shield" class="market-card" style="${cardStyles} border: 2px solid #3498db;"
+                       onclick="window.selectChoiceSubweapon('shield')"
+                       onmouseenter="window.showInventoryTooltip(event, ${shield.id})"
+                       ontouchstart="window.showInventoryTooltip(event, ${shield.id})"
+                       onmouseleave="window.hideTooltip()">
+                    <div style="text-align:center; width:100%;">
+                      <strong style="color:#3498db; font-size:12px; display:block; margin-bottom:2px;">Bulwark</strong>
+                      <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Kite Shield</span>
+                    </div>
+                    <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #3498db;">${window.getEquipIconHtml(shield, 32)}</div>
+                    <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
+                      Focuses on <strong>STR & Defense</strong>. Unlocks Block Rate and Shield Bash counters.
+                    </div>
+                    <button class="btn-action" style="width:100%; font-size:10px; background:#3498db;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(shield).replace(/"/g, "&quot;")})">CLAIM SHIELD</button>
+                  </div>
+                `;
 
-  let daggerCardHtml = `
-    <div id="choice-card-dagger" class="market-card" style="${cardStyles} border: 2px solid #e74c3c;"
-         onclick="window.selectChoiceSubweapon('dagger')"
-         onmouseenter="window.showInventoryTooltip(event, ${dagger.id})"
-         ontouchstart="window.showInventoryTooltip(event, ${dagger.id})"
-         onmouseleave="window.hideTooltip()">
-      <div style="text-align:center; width:100%;">
-        <strong style="color:#e74c3c; font-size:12px; display:block; margin-bottom:2px;">Riposte</strong>
-        <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Kris Dagger</span>
-      </div>
-      <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #e74c3c;">${window.getEquipIconHtml(dagger, 32)}</div>
-      <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
-        Focuses on <strong>DEX & Speed</strong>. Unlocks Parry Rate and Riposte counter strikes.
-      </div>
-      <button class="btn-action" style="width:100%; font-size:10px; background:#e74c3c;" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(dagger).replace(/"/g, "&quot;")})">CLAIM DAGGER</button>
-    </div>
-  `;
+                let daggerCardHtml = `
+                  <div id="choice-card-dagger" class="market-card" style="${cardStyles} border: 2px solid #e74c3c;"
+                       onclick="window.selectChoiceSubweapon('dagger')"
+                       onmouseenter="window.showInventoryTooltip(event, ${dagger.id})"
+                       ontouchstart="window.showInventoryTooltip(event, ${dagger.id})"
+                       onmouseleave="window.hideTooltip()">
+                    <div style="text-align:center; width:100%;">
+                      <strong style="color:#e74c3c; font-size:12px; display:block; margin-bottom:2px;">Riposte</strong>
+                      <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Kris Dagger</span>
+                    </div>
+                    <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #e74c3c;">${window.getEquipIconHtml(dagger, 32)}</div>
+                    <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
+                      Focuses on <strong>DEX & Speed</strong>. Unlocks Parry Rate and Riposte counter strikes.
+                    </div>
+                    <button class="btn-action" style="width:100%; font-size:10px; background:#e74c3c;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(dagger).replace(/"/g, "&quot;")})">CLAIM DAGGER</button>
+                  </div>
+                `;
 
-  let tomeCardHtml = `
-    <div id="choice-card-tome" class="market-card" style="${cardStyles} border: 2px solid #9b59b6;"
-         onclick="window.selectChoiceSubweapon('tome')"
-         onmouseenter="window.showInventoryTooltip(event, ${tome.id})"
-         ontouchstart="window.showInventoryTooltip(event, ${tome.id})"
-         onmouseleave="window.hideTooltip()">
-      <div style="text-align:center; width:100%;">
-        <strong style="color:#9b59b6; font-size:12px; display:block; margin-bottom:2px;">Arcane</strong>
-        <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Grimoire</span>
-      </div>
-      <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #9b59b6;">${window.getEquipIconHtml(tome, 32)}</div>
-      <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
-        Focuses on <strong>INT & Spells</strong>. Unlocks Arcane Barrier and Tome Spell triggers.
-      </div>
-      <button class="btn-action" style="width:100%; font-size:10px; background:#9b59b6;" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(tome).replace(/"/g, "&quot;")})">CLAIM TOME</button>
-    </div>
-  `;
+                let tomeCardHtml = `
+                  <div id="choice-card-tome" class="market-card" style="${cardStyles} border: 2px solid #9b59b6;"
+                       onclick="window.selectChoiceSubweapon('tome')"
+                       onmouseenter="window.showInventoryTooltip(event, ${tome.id})"
+                       ontouchstart="window.showInventoryTooltip(event, ${tome.id})"
+                       onmouseleave="window.hideTooltip()">
+                    <div style="text-align:center; width:100%;">
+                      <strong style="color:#9b59b6; font-size:12px; display:block; margin-bottom:2px;">Arcane</strong>
+                      <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Grimoire</span>
+                    </div>
+                    <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #9b59b6;">${window.getEquipIconHtml(tome, 32)}</div>
+                    <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
+                      Focuses on <strong>INT & Spells</strong>. Unlocks Arcane Barrier and Tome Spell triggers.
+                    </div>
+                    <button class="btn-action" style="width:100%; font-size:10px; background:#9b59b6;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(tome).replace(/"/g, "&quot;")})">CLAIM TOME</button>
+                  </div>
+                `;
 
   let medalHeaderSvg = window.getUiIconSvg("rareSpawn", 14);
   overlay.innerHTML = `

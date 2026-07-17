@@ -160,6 +160,24 @@ body {
 
 body.scroll-lock {
   overflow: hidden !important;
+  touch-action: none;
+}
+
+body.scroll-lock #menu-hub-overlay,
+body.scroll-lock #settings-modal,
+body.scroll-lock #achievements-modal,
+body.scroll-lock #mailbox-modal,
+body.scroll-lock #leaderboard-modal,
+body.scroll-lock #inspect-modal,
+body.scroll-lock #bestiary-modal,
+body.scroll-lock #gacha-modal-overlay,
+body.scroll-lock #caverns-prep-overlay,
+body.scroll-lock #supply-crate-overlay,
+body.scroll-lock #sack-opening-overlay,
+body.scroll-lock #sp-confirm-modal,
+body.scroll-lock .draggable-window,
+body.scroll-lock .draggable-content {
+  touch-action: pan-y !important;
 }
 
 /* --- GAME PLATFORM FRAME --- */
@@ -2071,9 +2089,12 @@ summary {
   background: rgba(0, 0, 0, 0.88);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   z-index: 35000;
   backdrop-filter: blur(8px);
+  overflow-y: auto;
+  padding: 40px 10px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .gacha-cabinet {
