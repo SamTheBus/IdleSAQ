@@ -1453,77 +1453,101 @@ window.MusicManager = {
   },
 
   tick() {
-    if (!this.initialized) return;
+      if (!this.initialized) return;
 
-    let now = this.ctx ? this.ctx.currentTime : 0;
-    let state = "campaign";
+      let now = this.ctx ? this.ctx.currentTime : 0;
+      let state = "campaign";
 
-    // Detect Active Game State
-    if (window.deathAnimationTimer > 0 || (window.playerStats && window.playerStats.currentHp <= 0)) {
-      state = "death";
-    } else if (window.playerStats && (window.playerStats.isBossMode || window.playerStats.isUberBoss || window.playerStats.isPrestigeBossMode)) {
-      state = "boss";
-    } else if (window.playerStats && (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode)) {
-      state = "dungeon";
-    } else if (document.getElementById("menu-hub-overlay") && document.getElementById("menu-hub-overlay").style.display === "flex") {
-      state = "town";
-    } else if (window.state && (window.state.currentSubTab === "USE" || window.state.currentSubTab === "ETC" || window.state.currentSubTab === "EQUIP")) {
-      state = "town";
+      // Detect Active Game State
+      if (window.deathAnimationTimer > 0 || (window.playerStats && window.playerStats.currentHp <= 0)) {
+        state = "death";
+      } else if (window.playerStats && (window.playerStats.isBossMode || window.playerStats.isUberBoss || window.playerStats.isPrestigeBossMode)) {
+        state = "boss";
+      } else if (window.playerStats && (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode)) {
+        state = "dungeon";
+      } else if (document.getElementById("menu-hub-overlay") && document.getElementById("menu-hub-overlay").style.display === "flex") {
+        state = "town";
+      } else if (window.state && (window.state.currentSubTab === "USE" || window.state.currentSubTab === "ETC" || window.state.currentSubTab === "EQUIP")) {
+        state = "town";
+      }
+
+      let targetFreq = 20000; // Full frequency bypass
+      let volumeScale = 1.0;
+      let targetRate = 1.0;   // Tempo & Pitch playback rate (1.0 = normal)
+      let targetQ = 1.0;      // Filter resonance/sharpness
+
+      // Apply advanced DSP sweeps per State
+      switch (state) {
+        case "death":
+          targetFreq = 300;     // Extremely muffled, dark, distant
+          volumeScale = 0.15;   // Drastically ducked
+          targetRate = 0.82;    // Tape-stop slow down and pitch drop on defeat
+          targetQ = 1.0;
+          break;
+        case "town":
+          targetFreq = 850;     // Warm, soft cozy background blanket
+          volumeScale = 0.65;   // Slightly lower volume
+          targetRate = 0.95;    // Relaxed tempo
+          targetQ = 1.0;
+          break;
+        case "dungeon":
+          targetFreq = 4000;    // Balanced highs, clear echo clarity
+          volumeScale = 0.85;   // Good room for cavern SFX
+          targetRate = 1.00;
+          targetQ = 1.2;
+          break;
+        case "boss":
+          targetFreq = 20000;   // Bright, intense, dramatic
+          volumeScale = 1.0;    // Max presence
+          targetRate = 1.15;    // 15% faster tempo and higher pitch for intense boss fights!
+          targetQ = 3.5;        // High resonance adds a sharp, sparkling, aggressive edge to plucks
+          break;
+        case "campaign":
+        default:
+          targetFreq = 20000;   // Clean, steady farming output
+          volumeScale = 0.9;
+          targetRate = 1.00;
+          targetQ = 1.0;
+          break;
+      }
+
+      // Resolve volume levels through settings
+      let isMuted = window.playerStats ? window.playerStats.mute : false;
+      let musicVolSetting = window.playerStats && window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5;
+
+      // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
+      let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
+
+      if (this.currentState !== state) {
+        this.currentState = state;
+        console.log(`[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Q: ${targetQ.toFixed(1)}, Rate: ${targetRate.toFixed(2)}x, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`);
+      }
+
+      // Apply exponential sweeps
+      if (this.filter && this.filter.frequency && this.ctx) {
+        this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
+      }
+      if (this.filter && this.filter.Q && this.ctx) {
+        this.filter.Q.setTargetAtTime(targetQ, now, 0.25);
+      }
+      if (this.gainNode && this.gainNode.gain && this.ctx) {
+        this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
+      }
+
+      // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
+      if (this.audio) {
+        this.audio.volume = finalTargetVolume;
+
+        // Smoothly glide the playback rate/pitch toward target rate to prevent jarring audio pops
+        let currentRate = this.audio.playbackRate;
+        if (Math.abs(currentRate - targetRate) > 0.005) {
+          this.audio.playbackRate = currentRate + (targetRate - currentRate) * 0.08;
+        } else {
+          this.audio.playbackRate = targetRate;
+        }
+      }
+
+      // Call next evaluation frame
+      requestAnimationFrame(() => this.tick());
     }
-
-    let targetFreq = 20000; // Full frequency bypass
-    let volumeScale = 1.0;
-
-    // Apply DSP settings per State
-    switch (state) {
-      case "death":
-        targetFreq = 300;     // Extremely muffled, dark, distant
-        volumeScale = 0.15;   // Drastically ducked
-        break;
-      case "town":
-        targetFreq = 850;     // Warm, soft cozy background blanket
-        volumeScale = 0.65;   // Slightly lower volume
-        break;
-      case "dungeon":
-        targetFreq = 4000;    // Balanced highs, clear echo clarity
-        volumeScale = 0.85;   // Good room for cavern SFX
-        break;
-      case "boss":
-        targetFreq = 20000;   // Bright, intense, dramatic
-        volumeScale = 1.0;    // Max presence
-        break;
-      case "campaign":
-      default:
-        targetFreq = 20000;   // Clean, steady farming output
-        volumeScale = 0.9;
-        break;
-    }
-
-    // Resolve volume levels through settings
-    let isMuted = window.playerStats ? window.playerStats.mute : false;
-    let musicVolSetting = window.playerStats && window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5;
-
-    // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
-    let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
-
-    if (this.currentState !== state) {
-      this.currentState = state;
-      console.log(`[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`);
-    }
-
-    // Apply exponential sweeps
-    if (this.filter && this.filter.frequency && this.ctx) {
-      this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
-    }
-    if (this.gainNode && this.gainNode.gain && this.ctx) {
-      this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
-    }
-    // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
-    if (this.audio) {
-      this.audio.volume = finalTargetVolume;
-    }
-
-    // Call next evaluation frame
-    requestAnimationFrame(() => this.tick());
-  }
 };
