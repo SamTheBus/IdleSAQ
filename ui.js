@@ -5730,10 +5730,16 @@ window.generateItemCardHtml = function (
   let specialtyHtml = ""; // Captured to move inside the collapsible advanced drawer at the bottom
 
   let slotMult = 1.0;
-  if (item.isEquippedSlot && window.playerStats.slotUpgrades) {
-    let slotLvl = window.playerStats.slotUpgrades[item.isEquippedSlot] || 0;
+  if (item.isEquippedSlot) {
+    let slotLvl = 0;
+    if (item.isInspected && window.inspectedPlayerStats) {
+      slotLvl = (window.inspectedPlayerStats.slotUpgrades && window.inspectedPlayerStats.slotUpgrades[item.isEquippedSlot]) || 0;
+    } else if (window.playerStats.slotUpgrades) {
+      slotLvl = window.playerStats.slotUpgrades[item.isEquippedSlot] || 0;
+    }
     let runBonus = 0;
     if (
+      !item.isInspected &&
       window.playerStats.isCrucibleMode &&
       window.cachedPlayerStats &&
       window.cachedPlayerStats.crucibleSlotBonuses
@@ -13790,16 +13796,25 @@ window.renderInspectModal = function (profile) {
   let stats = profile.playerStats;
   let equipped = profile.equippedSlots;
 
-  // Set the title of the Inspect Modal
-  let titleBadgeHtml = "";
-  if (stats.equippedTitle && window.TITLES_DATA[stats.equippedTitle]) {
-    let tData = window.TITLES_DATA[stats.equippedTitle];
-    titleBadgeHtml = ` <span style="color:${tData.color || "#ff007f"}; font-weight:bold;">[${tData.name}]</span>`;
-  }
-  titleEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Inspecting: ${stats.playerName || "Legend"}${titleBadgeHtml}`;
-
-  // Store inspected slots globally in window so hover tooltips can resolve comparison
+  // Save inspected player stats globally to drive contextual tooltip attunement checks
+  window.inspectedPlayerStats = stats;
   window.inspectedSlots = equipped;
+
+  // Parse account creation timestamps
+  let joinedDateStr = "Unknown Era";
+  if (profile.createdAt) {
+    joinedDateStr = new Date(profile.createdAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } else if (stats.createdAt) {
+    joinedDateStr = new Date(stats.createdAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }
 
   // Build the inspected paper doll layout
   let slots = [
@@ -13817,6 +13832,11 @@ window.renderInspectModal = function (profile) {
   let paperDollHtml = slots
     .map((slot) => {
       let item = equipped[slot];
+      let slotLvl = (stats.slotUpgrades && stats.slotUpgrades[slot]) || 0;
+      let lvlBadge =
+        slotLvl > 0
+          ? `<span style="position: absolute; top: 4px; right: 4px; background: rgba(15,23,42,0.9); color: #ffd700; border: 1.5px solid #ffd700; border-radius: 4px; font-size: 8px; font-weight: 900; padding: 2px 4px; line-height: 1; z-index: 10; font-family: monospace; box-shadow: 0 0 6px rgba(241,196,15,0.25);">Lv.${slotLvl}</span>`
+          : "";
 
       // Check locked elements
       if ((slot === "chest" || slot === "leggings") && equipped.overall) {
@@ -13852,13 +13872,14 @@ window.renderInspectModal = function (profile) {
                onmouseenter="window.showInspectSlotTooltip(event, '${slot}')"
                onmouseleave="window.hideTooltip()"
                ontouchstart="window.showInspectSlotTooltip(event, '${slot}')">
+              ${lvlBadge}
               ${iconBox}
               <strong style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block;">${item.name}${temperTag}</strong>
               <span style="color:#aaa; font-size:8px;">${attrs.join(" ")}</span>
           </div>
         `;
       } else {
-        return `<div class="slots-card" style="min-height:48px; font-size:9.5px;"><i>[Empty ${slot.toUpperCase()}]</i></div>`;
+        return `<div class="slots-card" style="min-height:48px; font-size:9.5px; position:relative;">${lvlBadge}<i>[Empty ${slot.toUpperCase()}]</i></div>`;
       }
     })
     .join("");
@@ -13927,24 +13948,25 @@ window.renderInspectModal = function (profile) {
 
   contentEl.innerHTML = `
           <div style="display:grid; grid-template-columns: 1.15fr 0.85fr; gap:12px;">
-              <div style="display:flex; flex-direction:column; gap:8px;">
-                  <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:4px;">
-                      ${paperDollHtml}
-                  </div>
-                  ${medalBannerHtml}
-              </div>
-              <div style="display:flex; flex-direction:column; gap:10px;">
-              <!-- Miniature inspect canvas -->
-              <div style="background:#090b0d; border: 1px solid #333; border-radius:6px; padding:15px; display:flex; justify-content:center; align-items:center;">
-                  <canvas id="inspect-hero-canvas" width="80" height="100" style="background:rgba(0,0,0,0.5); border:1px solid #4a154b; border-radius:6px; display:block; filter: drop-shadow(0 0 10px rgba(52, 152, 219, 0.15));"></canvas>
-              </div>
-              <div style="background:#111; padding:8px; border-radius:6px; border:1px solid #333; text-align:left;">
-                  <div style="font-size:9.5px; color:#888; text-transform:uppercase; letter-spacing:1px;">👑 Legend Progression</div>
-                  <div style="font-size:12px; color:#fff; font-weight:bold; margin-top:2px;">Level ${stats.level} • Stage Peak ${stats.lifetimePeakStage || stats.maxStage || 1}</div>
-                  <div style="font-size:11px; color:#aaa; margin-top:2px;">Ascensions: ${stats.prestigeCount || 0} • Slayed ${stats.totalLifetimeKills?.toLocaleString() || 0} Targets</div>
-              </div>
-              ${statsHtml}
-          </div>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:4px;">
+                                    ${paperDollHtml}
+                                </div>
+                                ${medalBannerHtml}
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                            <!-- Miniature inspect canvas -->
+                            <div style="background:#090b0d; border: 1px solid #333; border-radius:6px; padding:15px; display:flex; justify-content:center; align-items:center;">
+                                <canvas id="inspect-hero-canvas" width="80" height="100" style="background:rgba(0,0,0,0.5); border:1px solid #4a154b; border-radius:6px; display:block; filter: drop-shadow(0 0 10px rgba(52, 152, 219, 0.15));"></canvas>
+                            </div>
+                            <div style="background:#111; padding:8px; border-radius:6px; border:1px solid #333; text-align:left;">
+                                <div style="font-size:9.5px; color:#888; text-transform:uppercase; letter-spacing:1px;">👑 Legend Progression</div>
+                                <div style="font-size:12px; color:#fff; font-weight:bold; margin-top:2px;">Level ${stats.level} • Stage Peak ${stats.lifetimePeakStage || stats.maxStage || 1}</div>
+                                <div style="font-size:11px; color:#aaa; margin-top:2px;">Ascensions: ${stats.prestigeCount || 0} • Slayed ${stats.totalLifetimeKills?.toLocaleString() || 0} Targets</div>
+                                <div style="font-size:10px; color:#7f8c8d; margin-top:4px; font-family:monospace;">📅 Enlisted: ${joinedDateStr}</div>
+                            </div>
+                            ${statsHtml}
+                        </div>
       </div>
     `;
 
@@ -13982,6 +14004,10 @@ window.showInspectSlotTooltip = function (e, slotKey) {
   if (!window.inspectedSlots) return;
   let item = window.inspectedSlots[slotKey];
   if (!item) return;
+
+  // Inject temporary inspected metadata keys to trigger inspect-attunement lookup routines on tooltip cards
+  item.isEquippedSlot = slotKey;
+  item.isInspected = true;
 
   let tt = document.getElementById("game-tooltip");
   tt.innerHTML = window.buildGeneralTooltipHtml(item, false);
@@ -14079,26 +14105,25 @@ window.resolveInspectedPlayerStats = function (profile) {
   }
 
   let effectiveStr = Math.max(0, p.str - 5);
-  let effectiveDex = Math.max(0, p.dex - 5);
-  let effectiveInt = Math.max(0, p.int - 5);
+                let effectiveDex = Math.max(0, p.dex - 5);
+                let effectiveInt = Math.max(0, p.int - 5);
 
-  itemAtkPct += effectiveStr * 0.003;
-  itemHpPct += effectiveStr * 0.003;
-  itemDefPct += Math.log10(effectiveInt + 1) * 0.15;
-  p.critChance += parseFloat(
-    ((effectiveDex * 0.1) / (effectiveDex + 250)).toFixed(4),
-  );
-  p.critDamage += effectiveDex * 0.001;
-  p.moveSpeed += parseFloat(
-    ((effectiveDex * 5.0) / (effectiveDex + 150)).toFixed(1),
-  );
-  p.block += parseFloat(
-    ((effectiveInt * 0.05) / (effectiveInt + 150)).toFixed(4),
-  );
-  p.parry += parseFloat(
-    ((effectiveInt * 0.05) / (effectiveInt + 150)).toFixed(4),
-  );
-  p.fairySpawn += parseFloat((effectiveInt * 0.0001).toFixed(4));
+                // Synchronized with the latest balance formulas in resolvePlayerStats()
+                itemAtkPct += effectiveStr * 0.001;
+                itemHpPct += effectiveStr * 0.001;
+
+                p.critChance += parseFloat(
+                  ((effectiveDex * 0.1) / (effectiveDex + 250)).toFixed(4),
+                );
+                p.critDamage += effectiveDex * 0.001;
+                p.moveSpeed += parseFloat(
+                  ((effectiveDex * 5.0) / (effectiveDex + 150)).toFixed(1),
+                );
+
+                let logInt = Math.log10(effectiveInt + 1);
+                p.block += parseFloat((0.05 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
+                p.parry += parseFloat((0.05 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
+                p.fairySpawn += parseFloat((effectiveInt * 0.0001).toFixed(4));
 
   let flatDef = (stats.baseDef || 0) + (alloc.spDef || 0) * 4;
   let defMultiplier = 1.0;
@@ -14948,14 +14973,22 @@ window.requestRename = function () {
         window.updateUI();
         window.saveGame();
       } else {
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-      }
-    })
-    .catch((err) => {
-      console.error("Rename failed:", err);
-      window.pushHeaderToast("❌ Network error registering name.", "#e74c3c");
-    });
-};
+              window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+            }
+          })
+          .catch(() => {
+            window.pushHeaderToast("❌ Network error contributing resources.", "#e74c3c");
+          });
+      };
+
+      window.triggerGoldPanelReaction = function () {
+        let el = document.querySelector(".panel-gold");
+        if (el) {
+          el.classList.remove("gold-bounce-active");
+          void el.offsetWidth; // Trigger reflow to restart CSS keyframe animation smoothly
+          el.classList.add("gold-bounce-active");
+        }
+      };
 
 // ==========================================================================
 // --- BESTIARY Album SYSTEM (BOOK INTERFACE) ---

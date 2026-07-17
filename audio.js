@@ -12,11 +12,21 @@ window.SoundManager = {
   cachedNoiseBuffer: null, // Cached to prevent real-time GC stutters on iOS
 
   init() {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return false;
-    if (!this.ctx) {
-      try {
-        this.ctx = new AudioContextClass();
+      // Force iOS Safari to map Web Audio API output to the system media playback channel
+      // instead of ambient sound, completely ignoring the physical Ring/Silent mute switch.
+      if (navigator.audioSession) {
+        try {
+          navigator.audioSession.type = "playback";
+        } catch (e) {
+          console.warn("Could not set iOS AudioSession category:", e);
+        }
+      }
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return false;
+      if (!this.ctx) {
+        try {
+          this.ctx = new AudioContextClass();
         this.masterGain = this.ctx.createGain();
         this.sfxGain = this.ctx.createGain();
         this.sfxGain.connect(this.masterGain);
@@ -525,17 +535,165 @@ window.SoundManager = {
     gainNode.connect(dest);
 
     padOsc1.start(now);
-    padOsc2.start(now);
-    padOsc1.stop(now + duration);
-    padOsc2.stop(now + duration);
+        padOsc2.start(now);
+        padOsc1.stop(now + duration);
+        padOsc2.stop(now + duration);
 
-    setTimeout(
-      () =>
-        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-      duration * 1000 + 40,
-    );
-  },
-};
+        setTimeout(
+          () =>
+            (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+          duration * 1000 + 40,
+        );
+      },
+
+      playCoinCollect() {
+          let audioCtx = this.audioCtx || this.ctx;
+          if (!audioCtx) {
+            try {
+              audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+              this.audioCtx = audioCtx;
+            } catch (e) {
+              return;
+            }
+          }
+          if (audioCtx.state === "suspended") {
+            audioCtx.resume();
+          }
+
+          let nowMs = Date.now();
+          let lastCollect = window.SoundManager.lastCoinCollectTime || 0;
+          let cascadeIdx = window.SoundManager.coinCascadeIndex || 0;
+
+          // Faster micro-throttle (35ms) to handle click storms cleanly while keeping feedback instant
+          if (nowMs - lastCollect < 35) return;
+
+          // High-fidelity major pentatonic scale register for positive progression feedback
+          const scale = [659.25, 783.99, 880.00, 987.77, 1174.66, 1318.51, 1567.98];
+
+          if (nowMs - lastCollect < 300) {
+            cascadeIdx = (cascadeIdx + 1) % scale.length;
+          } else {
+            cascadeIdx = 0;
+          }
+
+          window.SoundManager.lastCoinCollectTime = nowMs;
+          window.SoundManager.coinCascadeIndex = cascadeIdx;
+
+          let masterVol = window.playerStats.volumeMaster !== undefined ? window.playerStats.volumeMaster : 0.5;
+          let sfxVol = window.playerStats.volumeSFX !== undefined ? window.playerStats.volumeSFX : 0.8;
+          let finalVol = masterVol * sfxVol;
+          if (window.playerStats.mute || finalVol <= 0) return;
+
+          let now = audioCtx.currentTime;
+          let activeNodes = [];
+          let destNode = window.SoundManager.sfxGain || audioCtx.destination;
+
+          // Synthesizes a snappy, rattling Tap Titans 2 style coin collect sound
+          const playTapTitansStyleCoin = (startTime, baseFreq, volFactor) => {
+            // 1. High-Pass Foley Noise (Models the dry, physical sliding friction of coins)
+            let noiseBuffer = window.SoundManager.cachedNoiseBuffer;
+            if (noiseBuffer) {
+              let noiseSource = audioCtx.createBufferSource();
+              noiseSource.buffer = noiseBuffer;
+
+              let bandpass = audioCtx.createBiquadFilter();
+              bandpass.type = "bandpass";
+              bandpass.Q.setValueAtTime(5.0, startTime);
+              // Rapid downward frequency sweep mimics physical friction settling
+              bandpass.frequency.setValueAtTime(5000, startTime);
+              bandpass.frequency.exponentialRampToValueAtTime(1500, startTime + 0.05);
+
+              let noiseGain = audioCtx.createGain();
+              noiseGain.gain.setValueAtTime(0, startTime);
+              noiseGain.gain.linearRampToValueAtTime(finalVol * 0.14 * volFactor, startTime + 0.001);
+              noiseGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.045); // Snappy, clean rustle
+
+              noiseSource.connect(bandpass);
+              bandpass.connect(noiseGain);
+              noiseGain.connect(destNode);
+
+              noiseSource.start(startTime);
+              noiseSource.stop(startTime + 0.06);
+              activeNodes.push(noiseSource, bandpass, noiseGain);
+            }
+
+            // 2. High-Pitch Metallic Click (The instant, crisp "clink" of coin impact)
+            let clickOsc1 = audioCtx.createOscillator();
+            let clickOsc2 = audioCtx.createOscillator();
+            clickOsc1.type = "sine";
+            clickOsc2.type = "sine";
+
+            // Precise inharmonic frequencies representing high-frequency metallic edge
+            let clickFreq1 = baseFreq * 2.82;
+            let clickFreq2 = baseFreq * 4.15;
+
+            clickOsc1.frequency.setValueAtTime(clickFreq1 * 1.15, startTime);
+            clickOsc1.frequency.exponentialRampToValueAtTime(clickFreq1, startTime + 0.01);
+            clickOsc2.frequency.setValueAtTime(clickFreq2 * 1.15, startTime);
+            clickOsc2.frequency.exponentialRampToValueAtTime(clickFreq2, startTime + 0.01);
+
+            let clickGain = audioCtx.createGain();
+            clickGain.gain.setValueAtTime(0, startTime);
+            clickGain.gain.linearRampToValueAtTime(finalVol * 0.12 * volFactor, startTime + 0.001);
+            clickGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.025); // Damped almost instantly
+
+            clickOsc1.connect(clickGain);
+            clickOsc2.connect(clickGain);
+            clickGain.connect(destNode);
+
+            clickOsc1.start(startTime);
+            clickOsc2.start(startTime);
+            clickOsc1.stop(startTime + 0.04);
+            clickOsc2.stop(startTime + 0.04);
+            activeNodes.push(clickOsc1, clickOsc2, clickGain);
+
+            // 3. Resonant Gold Ring (The pure, rewarding body of the coin)
+            let ringOsc = audioCtx.createOscillator();
+            ringOsc.type = "sine";
+
+            ringOsc.frequency.setValueAtTime(baseFreq * 1.05, startTime);
+            ringOsc.frequency.exponentialRampToValueAtTime(baseFreq, startTime + 0.015);
+
+            let ringGain = audioCtx.createGain();
+            ringGain.gain.setValueAtTime(0, startTime);
+            ringGain.gain.linearRampToValueAtTime(finalVol * 0.18 * volFactor, startTime + 0.002);
+            ringGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.09); // Short, clean ring to avoid fatigue
+
+            // Low-frequency filter to keep the audio pristine during heavy click storms
+            let ringFilter = audioCtx.createBiquadFilter();
+            ringFilter.type = "highpass";
+            ringFilter.frequency.setValueAtTime(250, startTime);
+
+            ringOsc.connect(ringFilter);
+            ringFilter.connect(ringGain);
+            ringGain.connect(destNode);
+
+            ringOsc.start(startTime);
+            ringOsc.stop(startTime + 0.11);
+            activeNodes.push(ringOsc, ringFilter, ringGain);
+          };
+
+          // Jitter pitch slightly (+/- 6Hz) for unique sound instances
+          let baseFreq = scale[cascadeIdx] + (Math.random() * 12 - 6);
+
+          // Primary strike
+          playTapTitansStyleCoin(now, baseFreq, 1.0);
+
+          // Secondary micro-delayed strike (ultra-tight 18ms clatter for organic coin interaction)
+          let bounceDelay = 0.018;
+          let bounceFreq = baseFreq * 1.22 + (Math.random() * 10 - 5); // Harmonic major-third step up
+          playTapTitansStyleCoin(now + bounceDelay, bounceFreq, 0.65);
+
+          // Safely cleanup all scheduled nodes
+          setTimeout(() => {
+            activeNodes.forEach(node => {
+              try {
+                node.disconnect();
+              } catch (err) {}
+            });
+          }, 220);
+        },
+    };
 
 /* --- PROCEDURAL LOOT DROP ACOUSTIC SYNTHESIZER --- */
 window.SoundManager.playLootDrop = function (stars) {

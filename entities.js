@@ -11542,14 +11542,72 @@
     });
 
     window.particles.forEach((pt) => {
-      ctx.save();
-      if (pt.alpha !== undefined) ctx.globalAlpha = pt.alpha;
-      ctx.fillStyle = pt.color;
-      ctx.beginPath();
-      ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    });
+          ctx.save();
+          if (pt.alpha !== undefined) ctx.globalAlpha = pt.alpha;
+          ctx.fillStyle = pt.color;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // Draw Gold Homing Particles
+        if (window.goldParticles) {
+          ctx.save();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.2;
+          for (let i = 0; i < window.goldParticles.length; i++) {
+            let gp = window.goldParticles[i];
+            let r = 4.5;
+            let pulse = Math.abs(Math.sin(Date.now() / 80 + i)) * 0.3 + 0.8;
+
+            ctx.fillStyle = "#b7950b"; // Dark gold border
+            ctx.beginPath();
+            ctx.ellipse(gp.x, gp.y, r * pulse + 0.6, r + 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffd700"; // Bright yellow gold
+            ctx.beginPath();
+            ctx.ellipse(gp.x, gp.y, r * pulse, r, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#ffffff"; // Inner white shine
+            ctx.beginPath();
+            ctx.ellipse(gp.x - 1, gp.y - 1, r * 0.3 * pulse, r * 0.3, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        // Draw Gold Homing Particles
+        if (window.goldParticles) {
+          ctx.save();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.2;
+          for (let i = 0; i < window.goldParticles.length; i++) {
+            let gp = window.goldParticles[i];
+            let r = 4.5;
+            let pulse = Math.abs(Math.sin(Date.now() / 80 + i)) * 0.3 + 0.8;
+
+            ctx.fillStyle = "#b7950b"; // Dark gold border
+            ctx.beginPath();
+            ctx.ellipse(gp.x, gp.y, r * pulse + 0.6, r + 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffd700"; // Bright yellow gold
+            ctx.beginPath();
+            ctx.ellipse(gp.x, gp.y, r * pulse, r, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#ffffff"; // Inner white shine
+            ctx.beginPath();
+            ctx.ellipse(gp.x - 1, gp.y - 1, r * 0.3 * pulse, r * 0.3, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
 
     window.effects.forEach((eff) => {
       ctx.save();

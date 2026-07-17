@@ -29,31 +29,65 @@ let canvas, ctx;
 
 // --- SCREEN WAKE LOCK API ---
 window.wakeLockSentinel = null;
+window.hasBoundWakeLockGesture = false;
+
 window.requestWakeLock = async function () {
-  if ("wakeLock" in navigator) {
-    try {
-      window.wakeLockSentinel = await navigator.wakeLock.request("screen");
-      console.log("🔋 Screen Wake Lock Active (Preventing Sleep)");
-    } catch (err) {
-      console.warn("Wake Lock request rejected or failed:", err);
+  if (!navigator.wakeLock) return;
+  try {
+    if (window.wakeLockSentinel) {
+      await window.wakeLockSentinel.release();
+      window.wakeLockSentinel = null;
     }
+    window.wakeLockSentinel = await navigator.wakeLock.request("screen");
+    console.log("[WAKE LOCK] Screen Wake Lock Active (Preventing Sleep)");
+    window.removeWakeLockGestureListeners();
+  } catch (err) {
+    // iOS Safari strictly blocks wake lock requests until the first active touch on the screen.
+    // Bind a one-time fallback listener to grab the wake lock on the first user interaction.
+    window.bindWakeLockGestureListener();
   }
 };
+
 window.releaseWakeLock = function () {
   if (window.wakeLockSentinel) {
     window.wakeLockSentinel.release().then(() => {
       window.wakeLockSentinel = null;
-      console.log("🔋 Screen Wake Lock Released");
+      console.log("[WAKE LOCK] Screen Wake Lock Released");
     });
   }
+};
+
+window.wakeLockGestureHandler = async function () {
+  if (!window.wakeLockSentinel) {
+    await window.requestWakeLock();
+  }
+};
+
+window.bindWakeLockGestureListener = function () {
+  if (window.hasBoundWakeLockGesture) return;
+  window.hasBoundWakeLockGesture = true;
+  window.addEventListener("pointerdown", window.wakeLockGestureHandler, { once: true, passive: true });
+  window.addEventListener("click", window.wakeLockGestureHandler, { once: true, passive: true });
+  window.addEventListener("keydown", window.wakeLockGestureHandler, { once: true, passive: true });
+};
+
+window.removeWakeLockGestureListeners = function () {
+  window.hasBoundWakeLockGesture = false;
+  window.removeEventListener("pointerdown", window.wakeLockGestureHandler);
+  window.removeEventListener("click", window.wakeLockGestureHandler);
+  window.removeEventListener("keydown", window.wakeLockGestureHandler);
 };
 
 // Re-acquire lock dynamically when returning to focus tab
 document.addEventListener("visibilitychange", async () => {
   if (document.visibilityState === "visible") {
-    if (window.playerStats && !window.wakeLockSentinel) {
-      await window.requestWakeLock();
-    }
+    // iOS blocks immediate visibilitychange wake lock requests with NotAllowedError.
+    // Give it a 1000ms delay to let the OS restore context.
+    setTimeout(async () => {
+      if (window.playerStats && !window.wakeLockSentinel) {
+        await window.requestWakeLock();
+      }
+    }, 1000);
   } else {
     window.releaseWakeLock();
   }
@@ -3067,18 +3101,66 @@ function update() {
     }
   }
   window.particles.length = ptActiveCount;
-  for (let i = window.beams.length - 1; i >= 0; i--) {
-    let bm = window.beams[i];
-    bm.life--;
-    if (bm.life <= 0) window.beams.splice(i, 1);
-  }
 
-  if (window.deathAnimationTimer > 0) {
-    window.deathAnimationTimer--;
-    let p = window.resolvePlayerStats();
-    let speedFactor = window.deathAnimationTimer / window.deathMaxFrames;
-    let scrollSpeed = (2 + p.moveSpeed * 0.05) * speedFactor;
-    scrollScenery(scrollSpeed);
+    // Update Gold Homing Particles with audio-visual collection feedback
+    if (window.goldParticles) {
+      let gpActiveCount = 0;
+      let targetX = window.canvas ? window.canvas.width * 0.75 : 560;
+      let targetY = -15;
+      for (let i = 0; i < window.goldParticles.length; i++) {
+        let gp = window.goldParticles[i];
+        gp.life--;
+        if (gp.life > 0) {
+          if (gp.delay > 0) {
+            gp.delay--;
+            gp.x += gp.vx;
+            gp.y += gp.vy;
+            gp.vy += 0.25; // Apply standard gravity in spew phase
+          } else {
+            let dx = targetX - gp.x;
+            let dy = targetY - gp.y;
+            let dist = Math.hypot(dx, dy);
+            if (dist < 15 || gp.y < -5) {
+              if (typeof window.triggerGoldPanelReaction === "function") {
+                window.triggerGoldPanelReaction();
+              }
+              if (window.SoundManager && typeof window.SoundManager.playCoinCollect === "function") {
+                window.SoundManager.playCoinCollect();
+              }
+              continue; // Reached target, let it die
+            }
+            let pull = 0.85;
+            gp.vx += (dx / dist) * pull;
+            gp.vy += (dy / dist) * pull;
+
+            let speed = Math.hypot(gp.vx, gp.vy);
+            let maxSpeed = 16;
+            if (speed > maxSpeed) {
+              gp.vx = (gp.vx / speed) * maxSpeed;
+              gp.vy = (gp.vy / speed) * maxSpeed;
+            }
+            gp.x += gp.vx;
+            gp.y += gp.vy;
+          }
+          window.goldParticles[gpActiveCount++] = gp;
+        }
+      }
+      window.goldParticles.length = gpActiveCount;
+    }
+
+    for (let i = window.beams.length - 1; i >= 0; i--) {
+      let bm = window.beams[i];
+      bm.life--;
+      if (bm.life <= 0) window.beams.splice(i, 1);
+    }
+
+    if (window.deathAnimationTimer > 0) {
+      window.deathAnimationTimer--;
+      let p = window.resolvePlayerStats();
+      let speedFactor = window.deathAnimationTimer / window.deathMaxFrames;
+      let scalingFactor = (canvas.width - 80) / 670;
+      let scrollSpeed = (2 + p.moveSpeed * 0.05) * speedFactor * scalingFactor;
+      scrollScenery(scrollSpeed);
 
     if (Math.random() < 0.7) {
       window.particles.push({
@@ -3996,12 +4078,13 @@ function update() {
   }
 
   if (
-    window.playerStats.isPrestigeBossMode &&
-    window.playerStats.prestigeApproachTimer > 0
-  ) {
-    window.playerStats.prestigeApproachTimer--;
-    let chargeScrollSpeed = (2 + p.moveSpeed * 0.05) * 3;
-    scrollScenery(chargeScrollSpeed);
+      window.playerStats.isPrestigeBossMode &&
+      window.playerStats.prestigeApproachTimer > 0
+    ) {
+      window.playerStats.prestigeApproachTimer--;
+      let scalingFactor = (canvas.width - 80) / 670;
+      let chargeScrollSpeed = (2 + p.moveSpeed * 0.05) * 3 * scalingFactor;
+      scrollScenery(chargeScrollSpeed);
     let targetHeroX = canvas.width - 180;
     window.hero.x +=
       (targetHeroX - window.hero.x) /
@@ -4054,43 +4137,47 @@ function update() {
   }
 
   if (!window.mob) {
-    window.processEnemySpawn();
-    scrollScenery(scrollSpeed);
-  } else {
-    if (
-      window.mob.isRare &&
-      Math.random() < 0.1 &&
-      window.particles.length < 200
-    ) {
-      window.particles.push({
-        x: window.mob.x + Math.random() * window.mob.w,
-        y: window.mob.y + Math.random() * window.mob.h,
-        vx: (Math.random() - 0.5) * 2,
-        vy: -Math.random() * 3,
-        radius: Math.random() * 2 + 1,
-        color: "#f1c40f",
-        alpha: 1,
-        life: 20,
-      });
-    }
-    let isHooktail = window.mob.type === "prestige_boss";
-    if (isHooktail) {
-      window.mob.x = canvas.width - 230;
-      window.mob.isStopped = true;
-    }
-
-    if (!isHooktail && window.mob.x > window.hero.x + window.hero.w + 30) {
-      window.mob.x -= 4 + scrollSpeed;
-      window.mob.isStopped = false;
-      scrollScenery(scrollSpeed);
+      window.processEnemySpawn();
+      let scalingFactor = (canvas.width - 80) / 670;
+      scrollScenery(scrollSpeed * scalingFactor);
     } else {
-      window.mob.isStopped = true;
       if (
-        window.logicClock % p.idleAttackSpeed === 0 &&
-        window.state.autoAttack
+        window.mob.isRare &&
+        Math.random() < 0.1 &&
+        window.particles.length < 200
       ) {
-        window.triggerPlayerSlash();
+        window.particles.push({
+          x: window.mob.x + Math.random() * window.mob.w,
+          y: window.mob.y + Math.random() * window.mob.h,
+          vx: (Math.random() - 0.5) * 2,
+          vy: -Math.random() * 3,
+          radius: Math.random() * 2 + 1,
+          color: "#f1c40f",
+          alpha: 1,
+          life: 20,
+        });
       }
+      let isHooktail = window.mob.type === "prestige_boss";
+      if (isHooktail) {
+        window.mob.x = canvas.width - 230;
+        window.mob.isStopped = true;
+      }
+
+      if (!isHooktail && window.mob.x > window.hero.x + window.hero.w + 30) {
+                    let scalingFactor = (canvas.width - 80) / 670;
+                    window.mob.x -= (4 + scrollSpeed) * scalingFactor;
+                    window.mob.isStopped = false;
+                    scrollScenery(scrollSpeed * scalingFactor);
+                  } else {
+                    window.mob.isStopped = true;
+                  }
+
+                  if (
+                    window.logicClock % p.idleAttackSpeed === 0 &&
+                    window.state.autoAttack
+                  ) {
+                    window.triggerPlayerSlash();
+                  }
       if (!window.mob) return;
 
       if (isHooktail && Math.random() < 0.2 && window.particles.length < 200) {
@@ -4504,18 +4591,17 @@ function update() {
                   : "Standard Monster";
 
               window.playerStats.killedByMob = { ...window.mob };
-              window.playerStats.currentHp = 0;
-              window.deathAnimationTimer = window.deathMaxFrames;
-              return;
-            }
-          }
-        }
-        window.updateUI();
-      }
-    }
-  }
+                            window.playerStats.currentHp = 0;
+                            window.deathAnimationTimer = window.deathMaxFrames;
+                            return;
+                          }
+                        }
+                      }
+                      window.updateUI();
+                    }
+                  }
 
-  let stateAfter =
+                let stateAfter =
     (window.playerStats.frenzyTimer > 0) |
     ((window.playerStats.adrenalineTimer > 0) << 1) |
     ((window.playerStats.atkPotionTimer > 0) << 2) |
@@ -5682,15 +5768,37 @@ window.CombatEngine = {
     }
 
     // Only render campaign coin visual splashes outside the Crucible
-    if (coinYield > 0 && !window.playerStats.isCrucibleMode) {
-      window.effects.push({
-        x: window.mob.x + 35,
-        y: window.mob.y + 25,
-        text: "+" + coinYield.toLocaleString() + "g",
-        color: "#f1c40f",
-        life: 50,
-      });
-    }
+        if (coinYield > 0 && !window.playerStats.isCrucibleMode) {
+          window.effects.push({
+            x: window.mob.x + 35,
+            y: window.mob.y + 25,
+            text: "+" + coinYield.toLocaleString() + "g",
+            color: "#f1c40f",
+            life: 50,
+          });
+        }
+
+        // Spawn homing gold coin particles to fly to top-right HUD panel (Larger bursts on Bosses)
+        if (coinYield > 0 && window.goldParticles && window.mob) {
+          let startX = window.mob.x + window.mob.w / 2;
+          let startY = window.mob.y + window.mob.h / 2;
+          let isBossType = ["boss", "dungeon_boss", "prestige_boss", "rift_guardian", "aegis_goliath", "chronos_arbitrator", "nexus_overseer"].includes(window.mob.type);
+
+          let particleCount = isBossType
+            ? Math.min(30, Math.max(16, Math.floor(Math.log10(coinYield + 1) * 6.5)))
+            : Math.min(12, Math.max(4, Math.floor(Math.log10(coinYield + 1) * 3)));
+
+          for (let i = 0; i < particleCount; i++) {
+            window.goldParticles.push({
+              x: startX,
+              y: startY,
+              vx: window.randFloat(-4, 4),
+              vy: window.randFloat(-7, -3),
+              life: 120,
+              delay: i * 2, // Staggered delays create a beautiful serpent-style stream
+            });
+          }
+        }
 
     if (window.playerStats.isCrucibleMode) {
       // Active Debuff: Volatile Sparks (On-death mitigatable explosions)
@@ -6450,7 +6558,8 @@ window.CombatEngine = {
 
   processEnemySpawn() {
     let p = window.resolvePlayerStats();
-    let spawnX = canvas ? canvas.width + 15 : 750; // Dynamic mobile-responsive offscreen anchor
+    // Fixed spawning offset relative to player coordinates guarantees uniform combat pacing across all screen widths
+    let spawnX = window.hero.x + 155;
 
     // Define activeStage at the top of the function so all sub-blocks can access it
     let activeStage = window.playerStats.stage;
@@ -6475,54 +6584,54 @@ window.CombatEngine = {
       let scale = Math.pow(1.045, effectiveStage);
 
       if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-        let hp = BigNum.from(
-          Math.floor(120 * scale * (1 + effectiveStage * 0.06)),
-        );
-        window.mob = {
-          x: 750,
-          y: 140,
-          w: 45,
-          h: 75,
-          type: "dungeon_boss",
-          isCrucible: true,
-          isRare: false,
-          hp: hp,
-          maxHp: hp,
-          damage: BigNum.from(Math.floor(15 * scale)),
-          def: 0,
-          flashTimer: 0,
-          isStopped: false,
-          attackCooldown: 100,
-          attackTimer: 100,
-        };
-      } else {
-        let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
-        let chosenVisual =
-          cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
-        let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
+                let hp = BigNum.from(
+                  Math.floor(120 * scale * (1 + effectiveStage * 0.06)),
+                );
+                window.mob = {
+                  x: spawnX,
+                  y: 140,
+                  w: 45,
+                  h: 75,
+                  type: "dungeon_boss",
+                  isCrucible: true,
+                  isRare: false,
+                  hp: hp,
+                  maxHp: hp,
+                  damage: BigNum.from(Math.floor(15 * scale)),
+                  def: 0,
+                  flashTimer: 0,
+                  isStopped: false,
+                  attackCooldown: 100,
+                  attackTimer: 100,
+                };
+              } else {
+                let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
+                let chosenVisual =
+                  cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
+                let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
 
-        let hp = BigNum.from(
-          Math.floor(25 * scale * (1 + effectiveStage * 0.06)),
-        );
-        window.mob = {
-          x: 750,
-          y: isFlying ? 145 : 195,
-          w: 25,
-          h: 30,
-          type: "mob",
-          visualType: chosenVisual,
-          isCrucible: true,
-          isRare: false,
-          hp: hp,
-          maxHp: hp,
-          damage: BigNum.from(Math.floor(4.5 * scale)),
-          def: 0,
-          flashTimer: 0,
-          isStopped: false,
-          attackCooldown: 90,
-          attackTimer: 90,
-        };
-      }
+                let hp = BigNum.from(
+                  Math.floor(25 * scale * (1 + effectiveStage * 0.06)),
+                );
+                window.mob = {
+                  x: spawnX,
+                  y: isFlying ? 145 : 195,
+                  w: 25,
+                  h: 30,
+                  type: "mob",
+                  visualType: chosenVisual,
+                  isCrucible: true,
+                  isRare: false,
+                  hp: hp,
+                  maxHp: hp,
+                  damage: BigNum.from(Math.floor(4.5 * scale)),
+                  def: 0,
+                  flashTimer: 0,
+                  isStopped: false,
+                  attackCooldown: 90,
+                  attackTimer: 90,
+                };
+              }
       return;
     }
 

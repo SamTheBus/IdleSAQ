@@ -2607,6 +2607,7 @@ window.activeRiftOrbs = [];
 window.activeFairies = [];
 window.damageHistory = [];
 window.projectiles = [];
+window.goldParticles = [];
 window.groundScroll = 0;
 window.logicClock = 0;
 window.spacePressed = false;
