@@ -1727,17 +1727,30 @@ window.SaveManager = {
                 return;
               }
 
-              // Fire the cloud-wipe request as a non-blocking background task
-              fetch(`${window.SaveManager.serverUrl}/api/wipe-save`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId }),
-              }).catch((err) => {
-                console.error("Background cloud wipe failed:", err);
-              });
+              // Show a brief wiping indicator
+                      if (typeof window.pushHeaderToast === "function") {
+                        window.pushHeaderToast("Purging server database, please wait...", "#ffd700");
+                      }
 
-              // Instantly perform local wipe and reload without waiting for Render server spin-up
-              performLocalWipe();
+                      // Force the page reload to wait until the cloud wipe resolves or fails
+                      fetch(`${window.SaveManager.serverUrl}/api/wipe-save`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ userId }),
+                      })
+                        .then((response) => response.json())
+                        .then((data) => {
+                          if (data.success) {
+                            console.log("Database wiped successfully on the server.");
+                          } else {
+                            console.warn("Server database wipe returned false:", data.error);
+                          }
+                          performLocalWipe();
+                        })
+                        .catch((err) => {
+                          console.error("Cloud wipe request failed or timed out:", err);
+                          performLocalWipe(); // Proceed with local wipe even if the server is unreachable
+                        });
             },
           );
         },
