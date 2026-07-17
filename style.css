@@ -434,23 +434,39 @@ canvas {
   max-height: 550px !important;
 }
 
+.draggable-window {
+  position: absolute;
+  width: 290px;
+  max-width: 95vw;
+  background: #111115;
+  border: 2px solid var(--accent-blue);
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overscroll-behavior: contain !important;
+}
+
+.draggable-window {
+  position: absolute;
+  width: 290px;
+  max-width: 95vw;
+  background: #111115;
+  border: 2px solid var(--accent-blue);
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overscroll-behavior: contain !important;
+}
+
 .draggable-header {
   background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);
   padding: 8px 12px;
-  .draggable-window {
-    position: absolute;
-    width: 290px;
-    max-width: 95vw;
-    background: #111115;
-    border: 2px solid var(--accent-blue);
-    border-radius: 6px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95);
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    overscroll-behavior: contain !important;
-  }
   cursor: move;
   font-weight: bold;
   font-size: 11px;

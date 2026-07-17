@@ -808,12 +808,25 @@ window.SaveManager = {
         window.playerStats.xpPotionStrength = 1.0;
 
       // Re-inflate serialized gold structures back into BigNum objects
-      window.playerStats.coins = BigNum.from(window.playerStats.coins);
-      window.playerStats.totalGoldEarned = BigNum.from(
-        window.playerStats.totalGoldEarned || 0,
-      );
-      window.playerStats.xp = BigNum.from(window.playerStats.xp || 0);
-      window.playerStats.xpReq = BigNum.from(window.playerStats.xpReq || 100);
+            window.playerStats.coins = BigNum.from(window.playerStats.coins);
+            window.playerStats.totalGoldEarned = BigNum.from(
+              window.playerStats.totalGoldEarned || 0,
+            );
+            window.playerStats.xp = BigNum.from(window.playerStats.xp || 0);
+            window.playerStats.xpReq = BigNum.from(window.playerStats.xpReq || 100);
+
+            // Sanitize stage parameters to primitive integers to prevent mathematical NaN/Infinity loops
+                        const forcePrimitiveNumber = (val) => {
+                          if (val === undefined || val === null) return 1;
+                          if (typeof val === "object" && val.m !== undefined) {
+                            return Number(val.m * Math.pow(10, val.e));
+                          }
+                          let num = Number(val);
+                          return isNaN(num) ? 1 : num;
+                        };
+                        window.playerStats.stage = forcePrimitiveNumber(window.playerStats.stage);
+                        window.playerStats.maxStage = forcePrimitiveNumber(window.playerStats.maxStage);
+                        window.playerStats.lifetimePeakStage = forcePrimitiveNumber(window.playerStats.lifetimePeakStage);
       if (window.playerStats.dropPotionTimer === undefined)
         window.playerStats.dropPotionTimer = 0;
       if (window.playerStats.dropPotionStrength === undefined)

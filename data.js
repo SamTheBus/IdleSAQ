@@ -3,7 +3,7 @@
    initial global state, and system utility functions.
    ========================================================================= */
 
-window.GAME_VERSION = 0.991; // Pre-release Alpha 0.9.91 // Increment this whenever you push a new release
+window.GAME_VERSION = 0.992; // Pre-release Alpha 0.9.92 // Increment this whenever you push a new release
 
 // Core Security: HTML Sanitizer to prevent XSS injection in user lists
 window.escapeHTML = function (str) {

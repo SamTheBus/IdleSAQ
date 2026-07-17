@@ -984,13 +984,26 @@ window.renderClanDashboard = function (clan, members, invitations) {
     }
 
     // Direct, dynamic Stage-scaling calculation for display boxes
-    let peakStage =
-      window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-    let costGoldSmall = Math.floor(10000 * Math.pow(1.045, peakStage));
-    let costGoldLarge = Math.floor(50000 * Math.pow(1.045, peakStage));
-    let goldOwnedBig = BigNum.from(goldOwned);
+        let peakStage = window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+        if (peakStage && typeof peakStage === "object") {
+          peakStage = Number(peakStage.m * Math.pow(10, peakStage.e)) || 1;
+        }
+        peakStage = Number(peakStage);
+        if (isNaN(peakStage) || peakStage < 1) peakStage = 1;
 
-    tabContentHtml = `
+        // Use robust BigNum instances to calculate scaling costs without floating-point overflow
+        let costGoldSmallBig = BigNum.from(10000).mul(BigNum.from(1.045).pow(peakStage));
+        let costGoldLargeBig = BigNum.from(50000).mul(BigNum.from(1.045).pow(peakStage));
+        let goldOwnedBig = BigNum.from(goldOwned);
+
+        let canAffordSmall = goldOwnedBig.gte(costGoldSmallBig);
+        let canAffordLarge = goldOwnedBig.gte(costGoldLargeBig);
+
+        // Stringify exponential parameters to safely pass through inline click handlers on mobile WebViews
+        let costGoldSmallStr = costGoldSmallBig.m + "e" + costGoldSmallBig.e;
+        let costGoldLargeStr = costGoldLargeBig.m + "e" + costGoldLargeBig.e;
+
+        tabContentHtml = `
                 <!-- Cooperative Vault Chest Progression Card -->
                 <div class="chiseled-stone-panel" style="margin-bottom:12px; padding:12px; border-color:#d4af3780;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -1037,26 +1050,26 @@ window.renderClanDashboard = function (clan, members, invitations) {
 
                 <div style="display:flex; flex-direction:column; gap:6px; text-align:left;">
                     <!-- Gold Donation 1 -->
-                                        <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                                            <div style="text-align:left;">
-                                                <div style="font-size:11.5px; font-weight:bold; color:#f1c40f;">Small Gold Tithe</div>
-                                                <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-${window.formatNumber(costGoldSmall)} Gold</span> (Owned: ${window.formatNumber(goldOwned)})</div>
-                                            </div>
-                                            <button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${goldOwnedBig.gte(costGoldSmall) ? "" : "disabled"} onclick="window.executeClanDonate('gold', ${costGoldSmall})">
-                                                +50 Renown
-                                            </button>
-                                        </div>
+                                                            <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                                                                <div style="text-align:left;">
+                                                                    <div style="font-size:11.5px; font-weight:bold; color:#f1c40f;">Small Gold Tithe</div>
+                                                                    <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-${window.formatNumber(costGoldSmallBig)} Gold</span> (Owned: ${window.formatNumber(goldOwned)})</div>
+                                                                </div>
+                                                                <button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${canAffordSmall ? "" : "disabled"} onclick="window.executeClanDonate('gold', '${costGoldSmallStr}')">
+                                                                    +50 Renown
+                                                                </button>
+                                                            </div>
 
-                                        <!-- Gold Donation 2 -->
-                                        <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                                            <div style="text-align:left;">
-                                                <div style="font-size:11.5px; font-weight:bold; color:#f1c40f;">Large Gold Tithe</div>
-                                                <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-${window.formatNumber(costGoldLarge)} Gold</span> (Owned: ${window.formatNumber(goldOwned)})</div>
-                                            </div>
-                                            <button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${goldOwnedBig.gte(costGoldLarge) ? "" : "disabled"} onclick="window.executeClanDonate('gold', ${costGoldLarge})">
-                                                +300 Renown
-                                            </button>
-                                        </div>
+                                                            <!-- Gold Donation 2 -->
+                                                            <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                                                                <div style="text-align:left;">
+                                                                    <div style="font-size:11.5px; font-weight:bold; color:#f1c40f;">Large Gold Tithe</div>
+                                                                    <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-${window.formatNumber(costGoldLargeBig)} Gold</span> (Owned: ${window.formatNumber(goldOwned)})</div>
+                                                                </div>
+                                                                <button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${canAffordLarge ? "" : "disabled"} onclick="window.executeClanDonate('gold', '${costGoldLargeStr}')">
+                                                                    +300 Renown
+                                                                </button>
+                                                            </div>
 
                     <!-- Monster Souls Donation 1 -->
                     <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
@@ -1740,24 +1753,28 @@ window.executeClanDonate = function (type, amount) {
     balance = BigNum.from(window.inventory.ETC["Luminous Soul"] || 0);
   }
 
-  if (balance.lt(amount)) {
+  let amountBig = BigNum.from(amount);
+
+  if (balance.lt(amountBig)) {
     window.pushHeaderToast("❌ Insufficient funds for donation!", "#e74c3c");
     return;
   }
 
   // Deduct locally first
   if (type === "gold") {
-    window.playerStats.coins = balance.sub(amount);
+    window.playerStats.coins = balance.sub(amountBig);
     if (window.playerStats.coins.eq(0)) {
       window.playerStats.hasTriggeredExactChange = true;
     }
   } else if (type === "souls") {
-    window.inventory.ETC["Monster Soul"] -= amount;
+    let amtNum = amountBig.m * Math.pow(10, amountBig.e);
+    window.inventory.ETC["Monster Soul"] -= amtNum;
     if (window.inventory.ETC["Monster Soul"] === 0) {
       delete window.inventory.ETC["Monster Soul"];
     }
   } else if (type === "luminous") {
-    window.inventory.ETC["Luminous Soul"] -= amount;
+    let amtNum = amountBig.m * Math.pow(10, amountBig.e);
+    window.inventory.ETC["Luminous Soul"] -= amtNum;
     if (window.inventory.ETC["Luminous Soul"] === 0) {
       delete window.inventory.ETC["Luminous Soul"];
     }
@@ -1767,29 +1784,29 @@ window.executeClanDonate = function (type, amount) {
   fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, resType: type, amount }),
+    body: JSON.stringify({ userId, resType: type, amount: amountBig.m * Math.pow(10, amountBig.e) }),
   })
     .then((r) => r.json())
     .then((data) => {
       if (data.success) {
-        let cpGain = 0;
-        if (type === "gold") cpGain = Math.floor(amount / 10000);
-        else if (type === "souls") cpGain = amount;
-        else if (type === "luminous") cpGain = amount * 20;
-
         let calculatedRenown = 0;
-                    if (type === "gold") {
-                      let peakStage = window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-                      let costGoldLarge = Math.floor(50000 * Math.pow(1.045, peakStage));
-                      calculatedRenown = amount === costGoldLarge ? 300 : 50;
-                    } else if (type === "souls") {
-          calculatedRenown = amount === 50 ? 250 : 1250;
+        if (type === "gold") {
+          let peakStage = window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+          if (peakStage && typeof peakStage === "object") {
+            peakStage = Number(peakStage.m * Math.pow(10, peakStage.e)) || 1;
+          }
+          peakStage = Number(peakStage);
+          if (isNaN(peakStage) || peakStage < 1) peakStage = 1;
+          let costGoldLargeBig = BigNum.from(50000).mul(BigNum.from(1.045).pow(peakStage));
+          calculatedRenown = amountBig.gte(costGoldLargeBig) ? 300 : 50;
+        } else if (type === "souls") {
+          calculatedRenown = amountBig.gte(250) ? 1250 : 250;
         } else if (type === "luminous") {
-          calculatedRenown = amount === 5 ? 750 : 3750;
+          calculatedRenown = amountBig.gte(25) ? 3750 : 750;
         }
 
         window.pushHeaderToast(
-          `🙏 Contribution Recorded! +${amount.toLocaleString()} (+${calculatedRenown.toLocaleString()} Renown)`,
+          `🙏 Contribution Recorded! +${window.formatNumber(amountBig)} (+${calculatedRenown.toLocaleString()} Renown)`,
           "#2ecc71",
         );
         window.fetchClanData();
@@ -1799,14 +1816,16 @@ window.executeClanDonate = function (type, amount) {
         // Rollback local deduction
         if (type === "gold") {
           window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
-            amount,
+            amountBig,
           );
         } else if (type === "souls") {
+          let amtNum = amountBig.m * Math.pow(10, amountBig.e);
           window.inventory.ETC["Monster Soul"] =
-            (window.inventory.ETC["Monster Soul"] || 0) + amount;
+            (window.inventory.ETC["Monster Soul"] || 0) + amtNum;
         } else if (type === "luminous") {
+          let amtNum = amountBig.m * Math.pow(10, amountBig.e);
           window.inventory.ETC["Luminous Soul"] =
-            (window.inventory.ETC["Luminous Soul"] || 0) + amount;
+            (window.inventory.ETC["Luminous Soul"] || 0) + amtNum;
         }
         window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
       }

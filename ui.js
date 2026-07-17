@@ -2557,72 +2557,7 @@ window.initChatDrag = function () {
   let drawer = document.getElementById("premium-chat-drawer");
   let header = document.getElementById("premium-chat-header");
   if (!drawer || !header) return;
-
-  header.style.touchAction = "none";
-
-  let isDragging = false;
-  let startX = 0;
-  let startY = 0;
-  let initialLeft = 0;
-  let initialTop = 0;
-
-  header.addEventListener("pointerdown", function (e) {
-      if (e.button !== 0) return; // Only process left click or touch
-      if (e.target.closest("button") || e.target.closest("input")) return;
-
-      isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    initialLeft = drawer.offsetLeft;
-    initialTop = drawer.offsetTop;
-
-    try {
-      header.setPointerCapture(e.pointerId);
-    } catch (err) {}
-    e.stopPropagation();
-    e.preventDefault();
-  });
-
-  header.addEventListener("pointermove", function (e) {
-    if (!isDragging) return;
-
-    let dx = e.clientX - startX;
-    let dy = e.clientY - startY;
-
-    let newLeft = initialLeft + dx;
-    let newTop = initialTop + dy;
-
-    let maxLeft = window.innerWidth - drawer.offsetWidth - 10;
-    let maxTop = window.innerHeight - drawer.offsetHeight - 10;
-    if (newLeft < 10) newLeft = 10;
-    if (newTop < 10) newTop = 10;
-    if (newLeft > maxLeft) newLeft = maxLeft;
-    if (newTop > maxTop) newTop = maxTop;
-
-    drawer.style.top = newTop + "px";
-    drawer.style.left = newLeft + "px";
-
-    window.playerStats.chatX = newLeft;
-    window.playerStats.chatY = newTop;
-
-    e.stopPropagation();
-    e.preventDefault();
-  });
-
-  const stopDrag = function (e) {
-    if (isDragging) {
-      isDragging = false;
-      try {
-        header.releasePointerCapture(e.pointerId);
-      } catch (err) {}
-      if (typeof window.saveGame === "function") window.saveGame();
-      e.stopPropagation();
-      e.preventDefault();
-    }
-  };
-
-  header.addEventListener("pointerup", stopDrag);
-  header.addEventListener("pointercancel", stopDrag);
+  window.makeWindowDraggable(drawer, header);
 };
 
 window.toggleSettings = function () {
@@ -4165,18 +4100,98 @@ window.getPrestigeUpgradeCost = function (type, currentLevel) {
   return currentLevel + 1; // Uncapped linear cost progression (1 PP, 2 PP, 3 PP...)
 };
 
-window.changePrestigeBossStage = function (direction) {
-  let p = window.playerStats;
-  let maxS = p.maxStage || 80;
-  if (maxS < 80) maxS = 80;
-  let minPrestigeS = p.highestPrestigeStageCleared || 80;
+window.calculateCumulativePP = function (stage) {
+  if (stage < 80) return 0;
+  return Math.floor(3 * Math.pow(stage / 80, 3.5));
+};
 
-  let newStage = (p.selectedPrestigeStage || minPrestigeS) + direction;
-  if (newStage < minPrestigeS) newStage = minPrestigeS;
-  if (newStage > maxS) newStage = maxS;
+window.executePrestigeAscension = function () {
+  let currentStage = window.playerStats.maxStage || 1;
+  let hwm = window.playerStats.highestPrestigeStageCleared || 80;
+  if (hwm < 80) hwm = 80;
 
-  p.selectedPrestigeStage = newStage;
-  window.renderPrestigeTab();
+  let rCurrent = window.calculateCumulativePP(currentStage);
+  let rHwm = window.calculateCumulativePP(hwm);
+  let deltaPP = Math.max(0, rCurrent - rHwm);
+
+  let message = `Are you sure you want to perform an Ascension? This will soft-reset your current run but award permanent multipliers!<br><br>
+                 • Current Stage Reached: <strong style="color:#fff;">Stage ${currentStage}</strong><br>
+                 • High-Water Mark Peak: <strong style="color:#bdc3c7;">Stage ${hwm}</strong><br>
+                 • <strong>Prestige Points (PP) Awarded: <span style="color:#ffd700;">+${deltaPP} PP</span></strong>`;
+
+  window.showCustomConfirm(
+    "Ascend Soul",
+    message,
+    "Ascend Now",
+    "Cancel",
+    "#9b59b6",
+    function () {
+      // Perform Ascension Reset
+      window.playerStats.prestigePoints = (window.playerStats.prestigePoints || 0) + deltaPP;
+      window.playerStats.prestigeCount = (window.playerStats.prestigeCount || 0) + 1;
+      window.playerStats.highestPrestigeStageCleared = Math.max(window.playerStats.highestPrestigeStageCleared || 80, currentStage);
+
+      window.playerStats.level = 1;
+      window.playerStats.xp = 0;
+      window.playerStats.xpReq = 100;
+
+      let peak = window.playerStats.lifetimePeakStage || 1;
+      let advancedStart = Math.max(1, Math.floor(peak * 0.5));
+      window.playerStats.stage = advancedStart;
+      window.playerStats.maxStage = advancedStart;
+
+      window.playerStats.crucibleWave = 1;
+      window.playerStats.crucibleStartWave = 1;
+      window.playerStats.isPrestigeBossMode = false;
+      window.playerStats.prestigeApproachTimer = 0;
+      window.mob = null;
+      window.hero.x = 40;
+
+      let p = window.resolvePlayerStats();
+      window.playerStats.currentHp = p.maxHp;
+
+      // Show congratulations modal
+      let modal = document.createElement("div");
+      modal.style.position = "fixed";
+      modal.style.top = "0";
+      modal.style.left = "0";
+      modal.style.width = "100%";
+      modal.style.height = "100%";
+      modal.style.backgroundColor = "rgba(0,0,0,0.92)";
+      modal.style.display = "flex";
+      modal.style.justifyContent = "center";
+      modal.style.alignItems = "center";
+      modal.style.zIndex = "35000";
+      modal.style.padding = "15px";
+
+      modal.innerHTML = `
+        <div style="background:#151515; border:3px solid #9b59b6; border-radius: 8px; width:100%; max-width:440px; display:flex; flex-direction:column; box-shadow: 0 10px 40px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s;">
+          <h2 style="margin:0 0 10px 0; color:#df9ffb; letter-spacing:3px; text-transform:uppercase; font-size:22px;">🌌 SOUL ASCENDED!</h2>
+          <div style="height:2px; background:linear-gradient(90deg, transparent, #9b59b6, transparent); margin-bottom:15px;"></div>
+          <p style="font-size:12px; color:#ddd; line-height:1.5; margin-bottom:20px;">
+            Your soul has ascended to a higher plane of permanent power!
+          </p>
+          <div style="background:#0b0f12; border:1px solid #9b59b6; border-radius:6px; padding:15px; margin-bottom:20px;">
+            <div style="font-size:11px; color:#aaa; margin-bottom:4px;">REWARDS EARNED:</div>
+            <div style="font-size:20px; color:#ffd700; font-weight:bold; margin-bottom:6px;">✨ +${deltaPP} Prestige Points</div>
+            <div style="font-size:11px; color:#9b59b6; font-weight:bold; border-top: 1px solid #333; padding-top:6px; margin-top:6px;">Total Ascensions: ${window.playerStats.prestigeCount}</div>
+          </div>
+          <button id="btn-prestige-ascend-confirm" style="background:linear-gradient(135deg, #9b59b6, #8e44ad); color:white; border:1px solid #fff; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:1px; padding:12px 24px; border-radius:4px; cursor:pointer; width:100%;">Continue Journey</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      document.getElementById("btn-prestige-ascend-confirm").onclick = function () {
+        modal.remove();
+        window.isGamePaused = false;
+        window.checkAchievements();
+        window.updateUI();
+        window.renderPrestigeTab();
+        window.renderInventory();
+        window.saveGame();
+      };
+    }
+  );
 };
 
 window.renderPrestigeTab = function () {
@@ -4228,54 +4243,17 @@ window.renderPrestigeTab = function () {
   let fortPts = upgrades.fort || 0;
   let fairyPts = upgrades.fairy || 0;
 
-  // Render Left Column: Hooktail Battle Console with Level Selector
-  let maxS = p.maxStage || 80;
-  if (maxS < 80) maxS = 80;
-  let minPrestigeS = p.highestPrestigeStageCleared || 80;
-  if (
-    p.selectedPrestigeStage === undefined ||
-    p.selectedPrestigeStage < minPrestigeS
-  ) {
-    p.selectedPrestigeStage = minPrestigeS;
-  }
-  p.selectedPrestigeStage = Math.max(
-    minPrestigeS,
-    Math.min(maxS, p.selectedPrestigeStage),
-  );
-  let activeStage = p.selectedPrestigeStage;
-  let effStage = window.getEffectiveStage(activeStage);
-  let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-  let scale = Math.pow(growthRate, effStage);
+  // Model 1 Calculations
+  let hwm = p.highestPrestigeStageCleared || 80;
+  if (hwm < 80) hwm = 80;
+  let currentStage = p.maxStage || 1;
 
-  let hpVal = Math.floor(600 * scale);
-  let dmgVal = Math.floor(6 * scale);
-  let defVal = Math.floor(80 + (activeStage - 80) * 1.5);
+  let rCurrent = window.calculateCumulativePP(currentStage);
+  let rHwm = window.calculateCumulativePP(hwm);
+  let deltaPP = Math.max(0, rCurrent - rHwm);
 
-  // Projected Victory Rewards (Prorated scaling based on selected challenge tier)
-  let basePoints = 3;
-  let bonusPoints = Math.floor(p.prestigeCount / 4);
-  let pushBonus = Math.max(0, Math.floor((activeStage - 80) / 10));
-  let totalPP = Math.min(10, basePoints + bonusPoints) + pushBonus;
-
-  let rewardMultiplier = activeStage / 80;
-  let estCores = Math.round(4 * rewardMultiplier);
-  let estShards = Math.round(11 * rewardMultiplier);
-
-  let challengeBtnHtml = "";
-  let peak = p.lifetimePeakStage || 1;
-  let requiredStage = Math.max(80, Math.floor(peak * 0.9));
-
-  if (p.level < 25) {
-    challengeBtnHtml = `<button class="btn-action" style="background:#333; color:#777; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #444; cursor:not-allowed;" disabled>🔒 Level 25 Required</button>`;
-  } else if (p.maxStage < requiredStage) {
-    challengeBtnHtml = `<button class="btn-action" style="background:#2c1a1a; color:#e74c3c; width:100%; padding:12px; font-weight:bold; font-size:11px; border:1px solid #781c1c; cursor:not-allowed;" disabled>🔒 Reach Stage ${requiredStage} (90% of Peak ${peak})</button>`;
-  } else {
-    challengeBtnHtml = `
-      <button class="btn-action btn-pulse" style="background:#e74c3c; color:white; width:100%; padding:12px; font-weight:bold; font-size:11.5px; border:1px solid #f1c40f; text-shadow:0 1px 2px #000; box-shadow:0 4px 12px rgba(231,76,60,0.35); text-transform:uppercase; letter-spacing:0.5px;" onclick="window.challengeHooktail()">
-          Challenge Hooktail
-      </button>
-    `;
-  }
+  let minReqStage = Math.max(80, Math.floor(hwm * 0.8));
+  let isEligible = currentStage >= minReqStage;
 
   let getUpgradeCardHtml = (
     type,
@@ -4305,7 +4283,7 @@ window.renderPrestigeTab = function () {
       `;
   };
 
-  // Pre-calculate Paragon cost requirements based on P level
+  // Paragon Cost
   let parLevel = p.paragonLevel || 0;
   let parGoldCost = Math.floor(1000000 * Math.pow(1.5, parLevel));
   let parMythicScrapCost = Math.floor(50 * Math.pow(1.3, parLevel));
@@ -4365,73 +4343,66 @@ window.renderPrestigeTab = function () {
                   </div>
               </div>
           </div>
-          <button class="btn-action" style="width:100%; margin-top:10px; padding:10px; font-weight:bold; font-size:11.5px; background:#ff007f; color:white; border:1px solid #fff; box-shadow:0 0 12px rgba(255,0,127,0.35);" ${canAffordParagon ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeParagonUpgrade()">
+          <button class="btn-action" style="width:100%; margin-top:10px; padding:10px; font-weight:bold; font-size:11.5px; background:#ff007f; color:white; border:1px solid #fff; box-shadow:0 0 12px rgba(255, 0, 127, 0.35);" ${canAffordParagon ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeParagonUpgrade()">
               INFUSE MATRIX
           </button>
       </div>
     `;
 
+  let challengeBtnHtml = "";
+  if (isEligible) {
+    challengeBtnHtml = `
+      <button class="btn-action btn-pulse-teal" style="background:linear-gradient(135deg, #9b59b6, #8e44ad); color:white; width:100%; padding:12px; font-weight:bold; font-size:11.5px; border:1px solid #fff; box-shadow:0 0 12px rgba(155,89,182,0.45); text-transform:uppercase; letter-spacing:0.5px;" onclick="window.executePrestigeAscension()">
+          Initiate Ascension
+      </button>
+    `;
+  } else {
+    challengeBtnHtml = `
+      <button class="btn-action" style="background:#222; border:1px solid #444; color:#666; width:100%; padding:12px; font-weight:bold; font-size:10.5px; cursor:not-allowed; opacity:0.8;" disabled>
+          Locked (Needs Stage ${minReqStage})
+      </button>
+    `;
+  }
+
   el.innerHTML = `
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
 
         <!-- LEFT COLUMN: BOSS BATTLE CONSOLE -->
-                <div class="market-card" style="border-color:#e74c3c; background:linear-gradient(135deg, #180505 0%, #050000 100%); text-align:left; padding:12px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.7); display:flex; flex-direction:column; justify-content:space-between;">
+                <div class="market-card" style="border-color:#9b59b6; background:linear-gradient(135deg, #10081a 0%, #030005 100%); text-align:left; padding:12px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.7); display:flex; flex-direction:column; justify-content:space-between;">
                     <div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #4a1111; padding-bottom:6px; margin-bottom:8px;">
-                            <h3 style="margin:0; color:#e74c3c; font-size:13px; text-transform:uppercase; letter-spacing:1px; text-shadow:0 0 10px rgba(231,76,60,0.35); text-align:center; width:100%;">🐉 The Scarlet Summons</h3>
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #4a154b; padding-bottom:6px; margin-bottom:8px;">
+                            <h3 style="margin:0; color:#df9ffb; font-size:13px; text-transform:uppercase; letter-spacing:1px; text-shadow:0 0 10px rgba(155,89,182,0.35); text-align:center; width:100%;">🔮 Altar of Ascension</h3>
                         </div>
 
-                        <!-- Menacing Hooktail Emblem -->
+                        <!-- Ascension Portal graphic -->
                 <div style="margin: 10px 0; text-align:center;">
-                    <svg width="68" height="68" viewBox="0 0 64 64" style="display:inline-block; filter: drop-shadow(0 0 8px rgba(231, 76, 60, 0.55));">
-                        <defs>
-                            <linearGradient id="hooktail_emblem_grad" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stop-color="#ff7675" />
-                                <stop offset="100%" stop-color="#5a0e0e" />
-                            </linearGradient>
-                        </defs>
-                        <!-- Dragon Skull Horn Shape -->
-                        <path d="M32 6 L44 26 L52 14 L42 35 L32 54 L22 35 L12 14 L20 26 Z" fill="url(#hooktail_emblem_grad)" stroke="#000000" stroke-width="2" stroke-linejoin="round" />
-                        <circle cx="23" cy="28" r="3.2" fill="#fff" style="filter: drop-shadow(0 0 4px #ff0000);" />
-                        <circle cx="41" cy="28" r="3.2" fill="#fff" style="filter: drop-shadow(0 0 4px #ff0000);" />
+                    <svg width="68" height="68" viewBox="0 0 64 64" style="display:inline-block; filter: drop-shadow(0 0 8px rgba(155, 89, 182, 0.55));">
+                        <circle cx="32" cy="32" r="28" fill="none" stroke="#9b59b6" stroke-width="2" stroke-dasharray="3 3" />
+                        <circle cx="32" cy="32" r="18" fill="rgba(155, 89, 182, 0.15)" stroke="#df9ffb" stroke-width="1.5" />
+                        <polygon points="32,14 41,32 32,50 23,32" fill="#fff" opacity="0.8" style="filter: drop-shadow(0 0 4px #fff);" />
                     </svg>
                 </div>
 
-                <!-- Challenge Tier Selector Slider -->
-                                <div style="background:rgba(15,7,7,0.85); border:1px solid #5a0e0e; border-radius:6px; padding:10px; margin-bottom:12px;">
-                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                        <div>
-                                            <strong style="color:#ff7675; font-size:11px; text-transform:uppercase;">Challenge Tier Level:</strong>
-                                            <span style="font-size:9.5px; color:#aaa; display:block;">Limits: Stage ${minPrestigeS} to Peak ${maxS}</span>
-                                        </div>
-                                        <div style="display:flex; align-items:center; gap:4px;">
-                                            <button class="btn-action" style="padding:2px 8px; background:#5a0e0e;" ${p.maxStage < minPrestigeS ? "disabled" : ""} onclick="window.changePrestigeBossStage(-1)">-</button>
-                                            <strong style="font-size:13px; font-family:monospace; color:#fff; min-width:28px; text-align:center;">${activeStage}</strong>
-                                            <button class="btn-action" style="padding:2px 8px; background:#5a0e0e;" ${p.maxStage < minPrestigeS ? "disabled" : ""} onclick="window.changePrestigeBossStage(1)">+</button>
-                                        </div>
-                                    </div>
-                                    <!-- Slider Control -->
-                                    <input type="range" min="${minPrestigeS}" max="${maxS}" value="${activeStage}" step="1" ${p.maxStage < minPrestigeS ? "disabled" : ""} oninput="window.changePrestigeBossStage(parseInt(this.value, 10) - window.playerStats.selectedPrestigeStage)" style="width:100%; height:4px; accent-color:#e74c3c; cursor:pointer;" />
-                                </div>
-
-                <!-- Forecasted Boss Stats -->
-                <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:4px; padding:8px; margin-bottom:10px; font-family:monospace; font-size:9.5px;">
-                    <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">📊 Forecasted Boss Parameters:</div>
-                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; text-align:center;">
-                        <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #4a1111;"><span>Life</span><strong style="color:#ff7675; display:block; margin-top:2px;">${window.formatNumber(hpVal)}</strong></div>
-                        <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #4a1111;"><span>Attack</span><strong style="color:#ff7675; display:block; margin-top:2px;">${window.formatNumber(dmgVal)}</strong></div>
-                        <div style="background:#111; padding:4px; border-radius:3px; border:1px solid #4a1111;"><span>Armor</span><strong style="color:#ff7675; display:block; margin-top:2px;">${window.formatNumber(defVal)}</strong></div>
-                    </div>
+                <!-- Milestone tracking dashboard -->
+                <div style="background:rgba(15,7,25,0.85); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; font-family:monospace; font-size:10px; display:flex; flex-direction:column; gap:4px;">
+                    <div style="display:flex; justify-content:space-between;"><span>• High-Water Mark Stage:</span><strong style="color:#df9ffb;">Stage ${hwm}</strong></div>
+                    <div style="display:flex; justify-content:space-between;"><span>• Current Run Peak:</span><strong style="color:#fff;">Stage ${currentStage}</strong></div>
+                    <div style="display:flex; justify-content:space-between;"><span>• Min Stage Required:</span><strong style="color:${isEligible ? "#2ecc71" : "#e74c3c"};">Stage ${minReqStage}</strong></div>
                 </div>
 
-                <!-- Projected Victory Loot Payouts -->
+                <!-- Progression mathematics block -->
                                             <div style="background:rgba(0,0,0,0.5); border:1px solid #222; border-radius:4px; padding:8px; margin-bottom:12px; font-family:monospace; font-size:9.5px;">
-                                                <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">💎 Projected Ascension Loot:</div>
+                                                <div style="color:#aaa; font-weight:bold; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">📐 Projected Milestone Gains:</div>
                                                 <div style="display:flex; flex-direction:column; gap:2px; padding:2px;">
-                                                    <div style="display:flex; justify-content:space-between;"><span>✨ Prestige Points (PP):</span><strong style="color:#f1c40f;">+${totalPP} PP</strong></div>
-                                                                                                        <div style="display:flex; justify-content:space-between;"><span>🔮 Eridium Shards:</span><strong style="color:#8e44ad;">~ ${estShards}</strong></div>
+                                                    <div style="display:flex; justify-content:space-between;"><span>• Cumulative PP (Peak):</span><strong style="color:#888;">${rHwm} PP</strong></div>
+                                                    <div style="display:flex; justify-content:space-between;"><span>• Cumulative PP (Run):</span><strong style="color:#888;">${rCurrent} PP</strong></div>
+                                                    <div style="display:flex; justify-content:space-between; margin-top:4px; border-top:1px dashed #333; padding-top:4px;"><span>• PP Awarded on Reset:</span><strong style="color:#ffd700; font-size:11px;">+${deltaPP} PP</strong></div>
                                                 </div>
                                             </div>
+
+                <p style="font-size:9.5px; color:#aaa; line-height:1.45; white-space:normal; margin-bottom:12px; padding:0 2px;">
+                    💡 <strong>HWM Rule Active:</strong> You will only earn Prestige Points (PP) if your current run's peak stage exceeds your previous High-Water Mark. Repetitive low-stage resets yield 0 PP.
+                </p>
                                         </div>
 
                                         <div style="margin-top:auto;">
@@ -8906,27 +8877,36 @@ window.makeWindowDraggable = function (el, handle) {
   };
 
   const dragMove = (clientX, clientY) => {
-    if (!isDragging) return;
+                  if (!isDragging) return;
 
-    let dx = clientX - startX;
-    let dy = clientY - startY;
+                  let dx = clientX - startX;
+                  let dy = clientY - startY;
 
-    let newLeft = initialLeft + dx;
-    let newTop = initialTop + dy;
+                  let newLeft = initialLeft + dx;
+                  let newTop = initialTop + dy;
 
-    let maxLeft = window.innerWidth - 40;
-    let maxTop = window.innerHeight - 40;
+                  let maxLeft = window.innerWidth - 40;
+                  let maxTop = window.innerHeight - 40;
+                  if (el.id === "premium-chat-drawer") {
+                    maxLeft = window.innerWidth - el.offsetWidth - 10;
+                    maxTop = window.innerHeight - el.offsetHeight - 10;
+                  }
 
-    newLeft = Math.max(-el.offsetWidth + 40, Math.min(maxLeft, newLeft));
-    newTop = Math.max(0, Math.min(maxTop, newTop));
+                  newLeft = Math.max(el.id === "premium-chat-drawer" ? 10 : -el.offsetWidth + 40, Math.min(maxLeft, newLeft));
+                  newTop = Math.max(el.id === "premium-chat-drawer" ? 10 : 0, Math.min(maxTop, newTop));
 
-    el.style.left = newLeft + "px";
-    el.style.top = newTop + "px";
-  };
+                  el.style.left = newLeft + "px";
+                  el.style.top = newTop + "px";
+                };
 
-  const dragEnd = () => {
-    isDragging = false;
-  };
+                const dragEnd = () => {
+                  isDragging = false;
+                  if (el.id === "premium-chat-drawer") {
+                    window.playerStats.chatX = el.offsetLeft;
+                    window.playerStats.chatY = el.offsetTop;
+                    if (typeof window.saveGame === "function") window.saveGame();
+                  }
+                };
 
   handle.addEventListener("pointerdown", function (e) {
     if (e.button !== 0) return;
