@@ -2521,6 +2521,234 @@ window.toggleStickyCanvas = function () {
   if (typeof window.saveGame === "function") window.saveGame();
 };
 
+window.toggleChatFloatingMode = function () {
+  window.playerStats.chatFloatingMode = !window.playerStats.chatFloatingMode;
+  window.updateChatStyle();
+  if (typeof window.saveGame === "function") window.saveGame();
+};
+
+window.toggleChatMinimize = function () {
+  let body = document.getElementById("premium-chat-body");
+  let drawer = document.getElementById("premium-chat-drawer");
+  if (!body || !drawer) return;
+
+  let isCollapsed = body.style.display === "none";
+  if (isCollapsed) {
+    body.style.display = "flex";
+    drawer.style.height = "260px";
+    let toggleIcon = document.getElementById("chat-toggle-icon");
+    if (toggleIcon) toggleIcon.innerText = "✥";
+  } else {
+    body.style.display = "none";
+    drawer.style.height = "32px";
+    let toggleIcon = document.getElementById("chat-toggle-icon");
+    if (toggleIcon) toggleIcon.innerText = "✦";
+  }
+};
+
+window.updateChatStyle = function () {
+  let active = window.playerStats.chatFloatingMode !== false;
+  let btn = document.getElementById("settings-toggle-chat-floating");
+  let drawer = document.getElementById("premium-chat-drawer");
+  let header = document.getElementById("premium-chat-header");
+  let body = document.getElementById("premium-chat-body");
+
+  if (btn) {
+    btn.innerText = active ? "Chat: WINDOW" : "Chat: DRAWER";
+    btn.className = active ? "btn-action" : "btn-action un";
+  }
+
+  if (!drawer) return;
+
+  if (active) {
+    drawer.style.position = "fixed";
+    drawer.style.zIndex = "1050";
+    drawer.style.width = "300px";
+    drawer.style.height = "260px";
+    drawer.style.bottom = "auto";
+    drawer.style.right = "auto";
+    drawer.style.borderRadius = "10px";
+    drawer.style.border = "2px solid #a855f7";
+    drawer.style.background = "rgba(10, 8, 18, 0.88)";
+    drawer.style.backdropFilter = "blur(10px)";
+    drawer.style.webkitBackdropFilter = "blur(10px)";
+    drawer.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.8), 0 0 15px rgba(168, 85, 247, 0.25)";
+    drawer.style.display = "flex";
+    drawer.style.flexDirection = "column";
+    drawer.style.overflow = "hidden";
+
+    if (header) {
+      header.style.cursor = "move";
+      header.style.background = "linear-gradient(180deg, #1d152c 0%, #0c0814 100%)";
+      header.style.borderBottom = "1px solid #a855f744";
+      header.style.padding = "8px 12px";
+      header.style.userSelect = "none";
+      header.style.webkitUserSelect = "none";
+      let toggleIcon = document.getElementById("chat-toggle-icon");
+      if (toggleIcon) toggleIcon.innerText = "✥";
+    }
+
+    if (body) {
+      body.style.display = "flex";
+      body.style.flexDirection = "column";
+      body.style.flex = "1";
+      body.style.height = "calc(100% - 32px)";
+      body.style.maxHeight = "none";
+    }
+
+    let x = window.playerStats.chatX;
+    let y = window.playerStats.chatY;
+    if (x !== null && y !== null) {
+      drawer.style.left = x + "px";
+      drawer.style.top = y + "px";
+    } else {
+      let defLeft = window.innerWidth - 320;
+      let defTop = window.innerHeight - 280;
+      if (defLeft < 10) defLeft = 10;
+      if (defTop < 10) defTop = 10;
+      drawer.style.left = defLeft + "px";
+      drawer.style.top = defTop + "px";
+      window.playerStats.chatX = defLeft;
+      window.playerStats.chatY = defTop;
+    }
+
+    window.initChatDrag();
+  } else {
+    drawer.style.position = "";
+    drawer.style.zIndex = "";
+    drawer.style.width = "";
+    drawer.style.height = "";
+    drawer.style.left = "";
+    drawer.style.top = "";
+    drawer.style.bottom = "";
+    drawer.style.right = "";
+    drawer.style.borderRadius = "";
+    drawer.style.border = "";
+    drawer.style.background = "";
+    drawer.style.backdropFilter = "";
+    drawer.style.webkitBackdropFilter = "";
+    drawer.style.boxShadow = "";
+    drawer.style.display = "";
+    drawer.style.flexDirection = "";
+    drawer.style.overflow = "";
+
+    if (header) {
+      header.style.cursor = "";
+      header.style.background = "";
+      header.style.borderBottom = "";
+      header.style.padding = "";
+      header.style.userSelect = "";
+      header.style.webkitUserSelect = "";
+      let toggleIcon = document.getElementById("chat-toggle-icon");
+      if (toggleIcon) {
+        let isExpanded = drawer.classList.contains("chat-drawer-expanded");
+        toggleIcon.innerText = isExpanded ? "▼" : "▲";
+      }
+    }
+
+    if (body) {
+      body.style.display = "";
+      body.style.flexDirection = "";
+      body.style.flex = "";
+      body.style.height = "";
+      body.style.maxHeight = "";
+    }
+  }
+};
+
+window.initChatDrag = function () {
+  let drawer = document.getElementById("premium-chat-drawer");
+  let header = document.getElementById("premium-chat-header");
+  if (!drawer || !header) return;
+
+  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+  header.onmousedown = dragMouseDown;
+  header.ontouchstart = dragTouchStart;
+
+  function dragMouseDown(e) {
+    if (window.playerStats.chatFloatingMode === false) return;
+    e = e || window.event;
+    if (e.target.closest("button") || e.target.closest("input")) return;
+
+    e.preventDefault();
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    document.onmousemove = elementDrag;
+  }
+
+  function dragTouchStart(e) {
+    if (window.playerStats.chatFloatingMode === false) return;
+    if (e.target.closest("button") || e.target.closest("input")) return;
+
+    if (e.touches.length > 0) {
+      pos3 = e.touches[0].clientX;
+      pos4 = e.touches[0].clientY;
+      document.ontouchend = closeDragElement;
+      document.ontouchmove = elementTouchDrag;
+    }
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+
+    let newTop = drawer.offsetTop - pos2;
+    let newLeft = drawer.offsetLeft - pos1;
+
+    let maxLeft = window.innerWidth - drawer.offsetWidth - 10;
+    let maxTop = window.innerHeight - drawer.offsetHeight - 10;
+    if (newLeft < 10) newLeft = 10;
+    if (newTop < 10) newTop = 10;
+    if (newLeft > maxLeft) newLeft = maxLeft;
+    if (newTop > maxTop) newTop = maxTop;
+
+    drawer.style.top = newTop + "px";
+    drawer.style.left = newLeft + "px";
+
+    window.playerStats.chatX = newLeft;
+    window.playerStats.chatY = newTop;
+  }
+
+  function elementTouchDrag(e) {
+    if (e.touches.length > 0) {
+      pos1 = pos3 - e.touches[0].clientX;
+      pos2 = pos4 - e.touches[0].clientY;
+      pos3 = e.touches[0].clientX;
+      pos4 = e.touches[0].clientY;
+
+      let newTop = drawer.offsetTop - pos2;
+      let newLeft = drawer.offsetLeft - pos1;
+
+      let maxLeft = window.innerWidth - drawer.offsetWidth - 10;
+      let maxTop = window.innerHeight - drawer.offsetHeight - 10;
+      if (newLeft < 10) newLeft = 10;
+      if (newTop < 10) newTop = 10;
+      if (newLeft > maxLeft) newLeft = maxLeft;
+      if (newTop > maxTop) newTop = maxTop;
+
+      drawer.style.top = newTop + "px";
+      drawer.style.left = newLeft + "px";
+
+      window.playerStats.chatX = newLeft;
+      window.playerStats.chatY = newTop;
+    }
+  }
+
+  function closeDragElement() {
+    document.onmouseup = null;
+    document.onmousemove = null;
+    document.ontouchend = null;
+    document.ontouchmove = null;
+    if (typeof window.saveGame === "function") window.saveGame();
+  }
+};
+
 window.toggleSettings = function () {
   let modal = document.getElementById("settings-modal");
   if (!modal) return;
@@ -2529,6 +2757,7 @@ window.toggleSettings = function () {
     modal.style.display = "block";
     window.updateAudioUI();
     window.updateStickyCanvasStyle();
+    window.updateChatStyle();
     window.updateEcoModeStyle();
 
     // Populate and display current character name

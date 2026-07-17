@@ -827,12 +827,12 @@ window.SaveManager = {
         window.playerStats.unlockedAchievements = [];
       if (window.playerStats.unviewedAchievements === undefined)
         window.playerStats.unviewedAchievements = [];
-      if (window.playerStats.showDpsOverlay === undefined)
-        window.playerStats.showDpsOverlay = false;
-      if (window.playerStats.dpsOverlayX === undefined)
-        window.playerStats.dpsOverlayX = null;
-      if (window.playerStats.dpsOverlayY === undefined)
-        window.playerStats.dpsOverlayY = null;
+      if (window.playerStats.chatFloatingMode === undefined)
+              window.playerStats.chatFloatingMode = false;
+            if (window.playerStats.chatX === undefined)
+              window.playerStats.chatX = null;
+            if (window.playerStats.chatY === undefined)
+              window.playerStats.chatY = null;
       if (window.playerStats.totalGoldEarned === undefined)
         window.playerStats.totalGoldEarned = window.playerStats.coins || 0;
       if (window.playerStats.totalTempers === undefined)
@@ -1781,14 +1781,19 @@ window.abortCloudSyncAndPlayOffline = function () {
 
   window.hideLoadingScreen();
 
-  if (offlineMsToApply > 60000) {
-    window.applyOfflineGains(offlineMsToApply);
-  } else {
-    window.setPauseState(false);
-    window.updateUI();
-    window.renderInventory();
-  }
-};
+    if (offlineMsToApply > 60000) {
+      window.applyOfflineGains(offlineMsToApply);
+    } else {
+      window.setPauseState(false);
+      window.updateUI();
+      window.renderInventory();
+    }
+
+    // Warm real-time chat handshakes
+    if (window.ChatManager) {
+      window.ChatManager.init();
+    }
+  };
 
 window.loadGameAndSyncCloud = function () {
   window.isCloudSynced = false;
@@ -1935,14 +1940,19 @@ window.loadGameAndSyncCloud = function () {
       }
 
       if (resolvedOfflineMs > 60000) {
-        window.applyOfflineGains(resolvedOfflineMs);
-      } else {
-        window.setPauseState(false);
-        window.updateUI();
-        window.renderInventory();
-      }
-    })
-    .catch((err) => {
+              window.applyOfflineGains(resolvedOfflineMs);
+            } else {
+              window.setPauseState(false);
+              window.updateUI();
+              window.renderInventory();
+            }
+
+            // Warm real-time chat handshakes
+            if (window.ChatManager) {
+              window.ChatManager.init();
+            }
+          })
+          .catch((err) => {
       // Ignore abort errors from manual play-offline clicks
       if (err.name === "AbortError") return;
 
@@ -2274,12 +2284,15 @@ window.onload = function () {
   }
 
   window.updateStickyCanvasStyle();
-  if (typeof window.updateDpsOverlayStyle === "function") {
-    window.updateDpsOverlayStyle();
-  }
-  if (typeof window.initDpsOverlayDrag === "function") {
-    window.initDpsOverlayDrag();
-  }
+    if (typeof window.updateChatStyle === "function") {
+      window.updateChatStyle();
+    }
+    if (typeof window.updateDpsOverlayStyle === "function") {
+      window.updateDpsOverlayStyle();
+    }
+    if (typeof window.initDpsOverlayDrag === "function") {
+      window.initDpsOverlayDrag();
+    }
   if (typeof window.requestWakeLock === "function") {
     window.requestWakeLock();
   }
@@ -2468,14 +2481,19 @@ window.onload = function () {
   }
 
   // Input Listeners
-  window.addEventListener("keydown", function (e) {
-    if (e.code === "Space" && !window.spacePressed) {
-      e.preventDefault();
-      window.spacePressed = true;
-      window.registerMaelstromTap();
-      window.triggerPlayerSlash();
-    }
-  });
+    window.addEventListener("keydown", function (e) {
+      // Avoid fighting input focus states so players can type spaces normally
+      const active = document.activeElement;
+      if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)) {
+        return;
+      }
+      if (e.code === "Space" && !window.spacePressed) {
+        e.preventDefault();
+        window.spacePressed = true;
+        window.registerMaelstromTap();
+        window.triggerPlayerSlash();
+      }
+    });
   window.addEventListener("keyup", function (e) {
     if (e.code === "Space") {
       window.spacePressed = false;
