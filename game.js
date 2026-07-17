@@ -828,11 +828,11 @@ window.SaveManager = {
       if (window.playerStats.unviewedAchievements === undefined)
         window.playerStats.unviewedAchievements = [];
       if (window.playerStats.chatFloatingMode === undefined)
-              window.playerStats.chatFloatingMode = false;
-            if (window.playerStats.chatX === undefined)
-              window.playerStats.chatX = null;
-            if (window.playerStats.chatY === undefined)
-              window.playerStats.chatY = null;
+        window.playerStats.chatFloatingMode = false;
+      if (window.playerStats.chatX === undefined)
+        window.playerStats.chatX = null;
+      if (window.playerStats.chatY === undefined)
+        window.playerStats.chatY = null;
       if (window.playerStats.totalGoldEarned === undefined)
         window.playerStats.totalGoldEarned = window.playerStats.coins || 0;
       if (window.playerStats.totalTempers === undefined)
@@ -1085,22 +1085,22 @@ window.SaveManager = {
         });
       }
       if (window.playerStats.weeklyMissions) {
-            window.playerStats.weeklyMissions.forEach((m) => {
-              if (m.treat === "Clan Weekly Sack") m.treat = "Weekly Reward Sack";
-            });
-          }
+        window.playerStats.weeklyMissions.forEach((m) => {
+          if (m.treat === "Clan Weekly Sack") m.treat = "Weekly Reward Sack";
+        });
+      }
 
-          let bossCardKeys = [
-            "aegis_goliath",
-            "chronos_arbitrator",
-            "nexus_overseer",
-            "overlord_iron_vault",
-            "gilded_vault_keeper",
-            "corrosive_abomination",
-            "hooktail"
-          ];
+      let bossCardKeys = [
+        "aegis_goliath",
+        "chronos_arbitrator",
+        "nexus_overseer",
+        "overlord_iron_vault",
+        "gilded_vault_keeper",
+        "corrosive_abomination",
+        "hooktail",
+      ];
 
-          if (window.playerStats.lastDailyResetTime === undefined)
+      if (window.playerStats.lastDailyResetTime === undefined)
         window.playerStats.lastDailyResetTime = 0;
       if (window.playerStats.lastWeeklyResetTime === undefined)
         window.playerStats.lastWeeklyResetTime = 0;
@@ -1711,19 +1711,17 @@ window.SaveManager = {
                 return;
               }
 
+              // Fire the cloud-wipe request as a non-blocking background task
               fetch(`${window.SaveManager.serverUrl}/api/wipe-save`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userId }),
-              })
-                .then(() => performLocalWipe())
-                .catch((err) => {
-                  console.error(
-                    "Cloud wipe request failed; falling back to local wipe:",
-                    err,
-                  );
-                  performLocalWipe();
-                });
+              }).catch((err) => {
+                console.error("Background cloud wipe failed:", err);
+              });
+
+              // Instantly perform local wipe and reload without waiting for Render server spin-up
+              performLocalWipe();
             },
           );
         },
@@ -1791,19 +1789,19 @@ window.abortCloudSyncAndPlayOffline = function () {
 
   window.hideLoadingScreen();
 
-    if (offlineMsToApply > 60000) {
-      window.applyOfflineGains(offlineMsToApply);
-    } else {
-      window.setPauseState(false);
-      window.updateUI();
-      window.renderInventory();
-    }
+  if (offlineMsToApply > 60000) {
+    window.applyOfflineGains(offlineMsToApply);
+  } else {
+    window.setPauseState(false);
+    window.updateUI();
+    window.renderInventory();
+  }
 
-    // Warm real-time chat handshakes
-    if (window.ChatManager) {
-      window.ChatManager.init();
-    }
-  };
+  // Warm real-time chat handshakes
+  if (window.ChatManager) {
+    window.ChatManager.init();
+  }
+};
 
 window.loadGameAndSyncCloud = function () {
   window.isCloudSynced = false;
@@ -1950,19 +1948,19 @@ window.loadGameAndSyncCloud = function () {
       }
 
       if (resolvedOfflineMs > 60000) {
-              window.applyOfflineGains(resolvedOfflineMs);
-            } else {
-              window.setPauseState(false);
-              window.updateUI();
-              window.renderInventory();
-            }
+        window.applyOfflineGains(resolvedOfflineMs);
+      } else {
+        window.setPauseState(false);
+        window.updateUI();
+        window.renderInventory();
+      }
 
-            // Warm real-time chat handshakes
-            if (window.ChatManager) {
-              window.ChatManager.init();
-            }
-          })
-          .catch((err) => {
+      // Warm real-time chat handshakes
+      if (window.ChatManager) {
+        window.ChatManager.init();
+      }
+    })
+    .catch((err) => {
       // Ignore abort errors from manual play-offline clicks
       if (err.name === "AbortError") return;
 
@@ -2119,108 +2117,121 @@ window.onload = function () {
           }
 
           let isSwiping = false;
-                    let startX = 0;
-                    let startY = 0;
-                    let hasMoved = false;
+          let startX = 0;
+          let startY = 0;
+          let hasMoved = false;
 
-                    newToast.style.touchAction = "none";
+          newToast.style.touchAction = "none";
 
-                    // Intercept clicks during active swiping gestures
-                    newToast.addEventListener("click", (e) => {
-                      if (hasMoved) {
-                        e.stopPropagation();
-                        e.preventDefault();
-                      }
-                    }, true);
+          // Intercept clicks during active swiping gestures
+          newToast.addEventListener(
+            "click",
+            (e) => {
+              if (hasMoved) {
+                e.stopPropagation();
+                e.preventDefault();
+              }
+            },
+            true,
+          );
 
-                    newToast.addEventListener("pointerdown", (e) => {
-                      if (e.button !== 0) return; // Only process left click or single touch
+          newToast.addEventListener("pointerdown", (e) => {
+            if (e.button !== 0) return; // Only process left click or single touch
 
-                      isSwiping = true;
-                      startX = e.clientX;
-                      startY = e.clientY;
-                      hasMoved = false;
-                      newToast.style.transition = "none";
+            isSwiping = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            hasMoved = false;
+            newToast.style.transition = "none";
 
-                      if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
-                      if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
+            if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
+            if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
 
-                      try {
-                        newToast.setPointerCapture(e.pointerId);
-                      } catch (err) {}
-                      e.stopPropagation();
-                    });
+            try {
+              newToast.setPointerCapture(e.pointerId);
+            } catch (err) {}
+            e.stopPropagation();
+          });
 
-                    newToast.addEventListener("pointermove", (e) => {
-                      if (!isSwiping) return;
+          newToast.addEventListener("pointermove", (e) => {
+            if (!isSwiping) return;
 
-                      let diffX = e.clientX - startX;
-                      let diffY = e.clientY - startY;
+            let diffX = e.clientX - startX;
+            let diffY = e.clientY - startY;
 
-                      if (Math.abs(diffX) > 6 || Math.abs(diffY) > 6) {
-                        hasMoved = true;
-                      }
+            if (Math.abs(diffX) > 6 || Math.abs(diffY) > 6) {
+              hasMoved = true;
+            }
 
-                      let displayY = diffY < 0 ? diffY : diffY * 0.2; // Resist pulling downwards
-                      newToast.style.transform = `translate(${diffX}px, ${displayY}px)`;
+            let displayY = diffY < 0 ? diffY : diffY * 0.2; // Resist pulling downwards
+            newToast.style.transform = `translate(${diffX}px, ${displayY}px)`;
 
-                      let maxDist = 180;
-                      let currentDist = Math.max(Math.abs(diffX), diffY < 0 ? Math.abs(diffY) : 0);
-                      newToast.style.opacity = Math.max(0, 1 - currentDist / maxDist);
+            let maxDist = 180;
+            let currentDist = Math.max(
+              Math.abs(diffX),
+              diffY < 0 ? Math.abs(diffY) : 0,
+            );
+            newToast.style.opacity = Math.max(0, 1 - currentDist / maxDist);
 
-                      e.stopPropagation();
-                    });
+            e.stopPropagation();
+          });
 
-                    const handleSwipeEnd = (e) => {
-                      if (!isSwiping) return;
-                      isSwiping = false;
+          const handleSwipeEnd = (e) => {
+            if (!isSwiping) return;
+            isSwiping = false;
 
-                      try {
-                        newToast.releasePointerCapture(e.pointerId);
-                      } catch (err) {}
+            try {
+              newToast.releasePointerCapture(e.pointerId);
+            } catch (err) {}
 
-                      let diffX = e.clientX - startX;
-                      let diffY = e.clientY - startY;
+            let diffX = e.clientX - startX;
+            let diffY = e.clientY - startY;
 
-                      let threshold = 60;
-                      let isDismissed = false;
-                      let transitionStyle = "";
-                      let transformStyle = "";
+            let threshold = 60;
+            let isDismissed = false;
+            let transitionStyle = "";
+            let transformStyle = "";
 
-                      if (diffY < -threshold) {
-                        isDismissed = true;
-                        transitionStyle = "transform 0.2s ease-out, opacity 0.2s ease-out";
-                        transformStyle = `translate(${diffX}px, -150%)`;
-                      } else if (Math.abs(diffX) > threshold) {
-                        isDismissed = true;
-                        transitionStyle = "transform 0.2s ease-out, opacity 0.2s ease-out";
-                        transformStyle = `translate(${diffX > 0 ? "150%" : "-150%"}, ${diffY < 0 ? diffY : 0}px)`;
-                      }
+            if (diffY < -threshold) {
+              isDismissed = true;
+              transitionStyle =
+                "transform 0.2s ease-out, opacity 0.2s ease-out";
+              transformStyle = `translate(${diffX}px, -150%)`;
+            } else if (Math.abs(diffX) > threshold) {
+              isDismissed = true;
+              transitionStyle =
+                "transform 0.2s ease-out, opacity 0.2s ease-out";
+              transformStyle = `translate(${diffX > 0 ? "150%" : "-150%"}, ${diffY < 0 ? diffY : 0}px)`;
+            }
 
-                      if (isDismissed) {
-                        newToast.style.transition = transitionStyle;
-                        newToast.style.transform = transformStyle;
-                        newToast.style.opacity = "0";
-                        if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
-                        if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
-                        setTimeout(() => newToast.remove(), 200);
-                      } else {
-                        newToast.style.transition = "transform 0.2s ease, opacity 0.2s ease";
-                        newToast.style.transform = "translate(0, 0)";
-                        newToast.style.opacity = "1";
+            if (isDismissed) {
+              newToast.style.transition = transitionStyle;
+              newToast.style.transform = transformStyle;
+              newToast.style.opacity = "0";
+              if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
+              if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
+              setTimeout(() => newToast.remove(), 200);
+            } else {
+              newToast.style.transition =
+                "transform 0.2s ease, opacity 0.2s ease";
+              newToast.style.transform = "translate(0, 0)";
+              newToast.style.opacity = "1";
 
-                        // Reschedule auto-dismiss timer
-                        newToast.timeoutId = setTimeout(() => {
-                          newToast.classList.add("fading-out");
-                          newToast.style.animation = "toastFadeOut 0.5s ease-in forwards";
-                          newToast.fadeTimeoutId = setTimeout(() => newToast.remove(), 450);
-                        }, 3500);
-                      }
-                      e.stopPropagation();
-                    };
+              // Reschedule auto-dismiss timer
+              newToast.timeoutId = setTimeout(() => {
+                newToast.classList.add("fading-out");
+                newToast.style.animation = "toastFadeOut 0.5s ease-in forwards";
+                newToast.fadeTimeoutId = setTimeout(
+                  () => newToast.remove(),
+                  450,
+                );
+              }, 3500);
+            }
+            e.stopPropagation();
+          };
 
-                    newToast.addEventListener("pointerup", handleSwipeEnd);
-                    newToast.addEventListener("pointercancel", handleSwipeEnd);
+          newToast.addEventListener("pointerup", handleSwipeEnd);
+          newToast.addEventListener("pointercancel", handleSwipeEnd);
 
           if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
           if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
@@ -2322,15 +2333,15 @@ window.onload = function () {
   }
 
   window.updateStickyCanvasStyle();
-    if (typeof window.updateChatStyle === "function") {
-      window.updateChatStyle();
-    }
-    if (typeof window.updateDpsOverlayStyle === "function") {
-      window.updateDpsOverlayStyle();
-    }
-    if (typeof window.initDpsOverlayDrag === "function") {
-      window.initDpsOverlayDrag();
-    }
+  if (typeof window.updateChatStyle === "function") {
+    window.updateChatStyle();
+  }
+  if (typeof window.updateDpsOverlayStyle === "function") {
+    window.updateDpsOverlayStyle();
+  }
+  if (typeof window.initDpsOverlayDrag === "function") {
+    window.initDpsOverlayDrag();
+  }
   if (typeof window.requestWakeLock === "function") {
     window.requestWakeLock();
   }
@@ -2519,19 +2530,24 @@ window.onload = function () {
   }
 
   // Input Listeners
-    window.addEventListener("keydown", function (e) {
-      // Avoid fighting input focus states so players can type spaces normally
-      const active = document.activeElement;
-      if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)) {
-        return;
-      }
-      if (e.code === "Space" && !window.spacePressed) {
-        e.preventDefault();
-        window.spacePressed = true;
-        window.registerMaelstromTap();
-        window.triggerPlayerSlash();
-      }
-    });
+  window.addEventListener("keydown", function (e) {
+    // Avoid fighting input focus states so players can type spaces normally
+    const active = document.activeElement;
+    if (
+      active &&
+      (active.tagName === "INPUT" ||
+        active.tagName === "TEXTAREA" ||
+        active.isContentEditable)
+    ) {
+      return;
+    }
+    if (e.code === "Space" && !window.spacePressed) {
+      e.preventDefault();
+      window.spacePressed = true;
+      window.registerMaelstromTap();
+      window.triggerPlayerSlash();
+    }
+  });
   window.addEventListener("keyup", function (e) {
     if (e.code === "Space") {
       window.spacePressed = false;
@@ -6513,22 +6529,23 @@ window.CombatEngine = {
         window.playerStats.ankhTriggeredThisBattle = false;
       } else {
         let dType = window.playerStats.currentDungeon || "gold";
-                let dPool = [];
-                if (dType === "equip") dPool = ["animated_armor", "cursed_blade", "mimic_shield"];
-                        else if (dType === "gold")
-                          dPool = ["coin_elemental", "hoard_mimic", "gilded_scuttler"];
-                        else dPool = ["slag_slime", "rust_nibbler", "corroded_golem"];
+        let dPool = [];
+        if (dType === "equip")
+          dPool = ["animated_armor", "cursed_blade", "mimic_shield"];
+        else if (dType === "gold")
+          dPool = ["coin_elemental", "hoard_mimic", "gilded_scuttler"];
+        else dPool = ["slag_slime", "rust_nibbler", "corroded_golem"];
 
-                let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
+        let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
         let isFlying = [
-                  "gargoyle",
-                  "toxic_fly",
-                  "marsh_ghost",
-                  "gilded_wyrmling",
-                  "wyrmling",
-                  "animated_armor",
-                  "cursed_blade",
-                ].includes(chosenVisual);
+          "gargoyle",
+          "toxic_fly",
+          "marsh_ghost",
+          "gilded_wyrmling",
+          "wyrmling",
+          "animated_armor",
+          "cursed_blade",
+        ].includes(chosenVisual);
 
         let hp = BigNum.from(25)
           .mul(b_scale)
@@ -6906,74 +6923,84 @@ window.CombatEngine = {
     }
 
     // Compile and render tactical actionable advice for unspent points, empty gear, or low defense values
-        const alertsEl = document.getElementById("death-alerts-container");
-        const tipContainerEl = document.getElementById("death-tip-container");
+    const alertsEl = document.getElementById("death-alerts-container");
+    const tipContainerEl = document.getElementById("death-tip-container");
 
-        if (alertsEl) {
-          let adviceText = "";
-          let buttonText = "";
-          let actionCode = "";
-          let accentColor = "#a855f7"; // Sleek purple default
+    if (alertsEl) {
+      let adviceText = "";
+      let buttonText = "";
+      let actionCode = "";
+      let accentColor = "#a855f7"; // Sleek purple default
 
-          let unallocatedSp = window.playerStats.sp || 0;
-          let missingEquipSlots = [];
-          const keySlots = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
-          keySlots.forEach((slotKey) => {
-            if (!window.equippedSlots[slotKey]) {
-              if (window.equippedSlots.overall && (slotKey === "chest" || slotKey === "leggings")) return;
-              missingEquipSlots.push(slotKey.toUpperCase());
-            }
-          });
+      let unallocatedSp = window.playerStats.sp || 0;
+      let missingEquipSlots = [];
+      const keySlots = ["weapon", "subweapon", "helmet", "boots"];
+      keySlots.forEach((slotKey) => {
+        if (!window.equippedSlots[slotKey]) {
+          missingEquipSlots.push(slotKey.toUpperCase());
+        }
+      });
 
-          let currentLvlStage = window.playerStats.stage || 1;
-          let recommendedDefense = currentLvlStage * 8;
-          let activeD = window.resolvePlayerStats();
+      // Smart Body Armor Checks (Chestplate + Leggings OR Overall)
+      if (!window.equippedSlots.overall) {
+        if (!window.equippedSlots.chest) {
+          missingEquipSlots.push("CHESTPLATE");
+        }
+        if (!window.equippedSlots.leggings) {
+          missingEquipSlots.push("LEGGINGS");
+        }
+      }
 
-          // Priority 1: Missing crucial gear
-          if (missingEquipSlots.length > 0) {
-            adviceText = `⚠️ <strong style="color:#ff7675;">Missing Gear:</strong> You are entering battle with empty equipment slots (<strong>${missingEquipSlots.join(", ")}</strong>). Equipping gear is the fastest way to survive.`;
-            buttonText = "Open Sack & Equip ➔";
-            actionCode = "window.respawnHero(); window.switchTab('inv');";
-            accentColor = "#e74c3c"; // Crimson warning
-          }
-          // Priority 2: Unspent Skill Points
-          else if (unallocatedSp > 0) {
-            adviceText = `⚡ <strong style="color:#f1c40f;">Unspent SP:</strong> You have <strong>${unallocatedSp} unspent Skill Points</strong>! Allocating them to STR, DEX, or INT will massively boost your attributes.`;
-            buttonText = "Allocate Skill Points ➔";
-            actionCode = "window.respawnHero(); window.switchTab('hero');";
-            accentColor = "#f39c12"; // Gold advice
-          }
-          // Priority 3: Low Defense
-          else if (activeD.def < recommendedDefense) {
-            adviceText = `⚒️ <strong style="color:#3498db;">Low Defense:</strong> Your defense (<strong>${window.formatNumber(activeD.def)}</strong>) is below target (<strong>${window.formatNumber(recommendedDefense)}</strong>). Go to the Blacksmith to attune and level up your armor!`;
-            buttonText = "Go to Blacksmith ➔";
-            actionCode = "window.respawnHero(); window.switchTab('forge'); window.selectCustomForgeStation('blacksmith'); window.setForgeMode('temper');";
-            accentColor = "#3498db"; // Cyber blue advice
-          }
-          // Priority 4: Default forge/enchanter tip
-          else {
-            adviceText = `🔮 <strong style="color:#a855f7;">Optimize Stats:</strong> Your basic stats are looking solid! To break through further barriers, visit the Mystical Enchanter to infuse modifiers or re-roll your item properties.`;
-            buttonText = "Go to Enchanter ➔";
-            actionCode = "window.respawnHero(); window.switchTab('forge'); window.selectCustomForgeStation('enchanter');";
-            accentColor = "#a855f7"; // Royal purple advice
-          }
+      let currentLvlStage = window.playerStats.stage || 1;
+      let recommendedDefense = currentLvlStage * 8;
+      let activeD = window.resolvePlayerStats();
 
-          alertsEl.innerHTML = `
-            <div style="background: rgba(0, 0, 0, 0.4); border: 1.5px solid ${accentColor}; border-radius: 8px; padding: 12px; text-align: left; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 15px ${window.hexToRgba ? window.hexToRgba(accentColor, 0.1) : "rgba(0,0,0,0.5)"};">
-              <span style="color:${accentColor}; font-size:9px; font-weight:900; letter-spacing:1px; text-transform:uppercase; display:flex; align-items:center; gap:4px;">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                Tactical Action Recommendation
-              </span>
+      // Priority 1: Missing crucial gear
+      if (missingEquipSlots.length > 0) {
+        adviceText = `⚠️ <strong style="color:#ff7675;">Missing Gear:</strong> You are entering battle with empty equipment slots (<strong>${missingEquipSlots.join(", ")}</strong>). Equipping gear is the fastest way to survive.`;
+        buttonText = "Open Sack & Equip ➔";
+        actionCode = "window.respawnHero(); window.switchTab('inv');";
+        accentColor = "#e74c3c"; // Crimson warning
+      }
+      // Priority 2: Unspent Skill Points
+      else if (unallocatedSp > 0) {
+        adviceText = `⚡ <strong style="color:#f1c40f;">Unspent SP:</strong> You have <strong>${unallocatedSp} unspent Skill Points</strong>! Allocating them to STR, DEX, or INT will massively boost your attributes.`;
+        buttonText = "Allocate Skill Points ➔";
+        actionCode = "window.respawnHero(); window.switchTab('hero');";
+        accentColor = "#f39c12"; // Gold advice
+      }
+      // Priority 3: Low Defense
+      else if (activeD.def < recommendedDefense) {
+        adviceText = `⚒️ <strong style="color:#3498db;">Low Defense:</strong> Your defense (<strong>${window.formatNumber(activeD.def)}</strong>) is below target (<strong>${window.formatNumber(recommendedDefense)}</strong>). Go to the Blacksmith to attune and level up your armor!`;
+        buttonText = "Go to Blacksmith ➔";
+        actionCode =
+          "window.respawnHero(); window.switchTab('forge'); window.selectCustomForgeStation('blacksmith'); window.setForgeMode('temper');";
+        accentColor = "#3498db"; // Cyber blue advice
+      }
+      // Priority 4: Default forge/enchanter tip
+      else {
+        adviceText = `🔮 <strong style="color:#a855f7;">Optimize Stats:</strong> Your basic stats are looking solid! To break through further barriers, visit the Mystical Enchanter to infuse modifiers or re-roll your item properties.`;
+        buttonText = "Go to Enchanter ➔";
+        actionCode =
+          "window.respawnHero(); window.switchTab('forge'); window.selectCustomForgeStation('enchanter');";
+        accentColor = "#a855f7"; // Royal purple advice
+      }
+
+      alertsEl.innerHTML = `
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 1.5px solid ${accentColor}; border-radius: 8px; padding: 12px; text-align: left; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 15px ${window.hexToRgba ? window.hexToRgba(accentColor, 0.1) : "rgba(0,0,0,0.5)"};">
+                          <span style="color:${accentColor}; font-size:9.5px; font-weight:900; letter-spacing:1px; text-transform:uppercase; display:flex; align-items:center; gap:4px;">
+                            🏅 Hoor's Advice
+                          </span>
               <span style="font-size:10.5px; color:#f1f5f9; line-height:1.45; white-space:normal;">${adviceText}</span>
               <button onclick="${actionCode}" class="btn-action" style="background:${accentColor}; color:#fff; border:1px solid #fff; font-weight:bold; font-size:10.5px; padding:8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; width:100%; box-shadow: 0 0 10px ${window.hexToRgba ? window.hexToRgba(accentColor, 0.25) : "rgba(0,0,0,0.1)"}; text-align:center; height:32px; line-height:1;">
                 ${buttonText}
               </button>
             </div>
           `;
-          alertsEl.style.display = "block";
+      alertsEl.style.display = "block";
 
-          if (tipContainerEl) tipContainerEl.style.display = "none";
-        }
+      if (tipContainerEl) tipContainerEl.style.display = "none";
+    }
 
     window.updateUI();
 
@@ -7562,20 +7589,20 @@ window.useItem = function (itemName) {
       window.playerStats.hasTriggeredCoffeeRun = true;
     }
   } else if (itemName === "Monster Card Sack") {
-             window.inventory.USE[itemName]--;
-             if (window.inventory.USE[itemName] === 0) {
-               delete window.inventory.USE[itemName];
-             }
+    window.inventory.USE[itemName]--;
+    if (window.inventory.USE[itemName] === 0) {
+      delete window.inventory.USE[itemName];
+    }
 
-             let bossCardKeys = [
-               "aegis_goliath",
-               "chronos_arbitrator",
-               "nexus_overseer",
-               "overlord_iron_vault",
-               "gilded_vault_keeper",
-               "corrosive_abomination",
-               "hooktail"
-             ];
+    let bossCardKeys = [
+      "aegis_goliath",
+      "chronos_arbitrator",
+      "nexus_overseer",
+      "overlord_iron_vault",
+      "gilded_vault_keeper",
+      "corrosive_abomination",
+      "hooktail",
+    ];
     let normalCardKeys = Object.keys(window.MONSTER_CARDS_DATA).filter(
       (k) => !bossCardKeys.includes(k),
     );

@@ -526,8 +526,14 @@ window.SoundManager.playLootDrop = function (stars) {
     audioCtx.resume();
   }
 
-  let masterVol = window.playerStats.volumeMaster !== undefined ? window.playerStats.volumeMaster : 0.5;
-  let sfxVol = window.playerStats.volumeSFX !== undefined ? window.playerStats.volumeSFX : 0.8;
+  let masterVol =
+    window.playerStats.volumeMaster !== undefined
+      ? window.playerStats.volumeMaster
+      : 0.5;
+  let sfxVol =
+    window.playerStats.volumeSFX !== undefined
+      ? window.playerStats.volumeSFX
+      : 0.8;
   let finalVol = masterVol * sfxVol;
   if (window.playerStats.mute) finalVol = 0;
   if (finalVol <= 0) return;
@@ -551,7 +557,7 @@ window.SoundManager.playLootDrop = function (stars) {
 
   let baseFreq = 261.63;
   if (s === 1) baseFreq = 329.63;
-  if (s === 2) baseFreq = 392.00;
+  if (s === 2) baseFreq = 392.0;
   if (s === 3) baseFreq = 523.25;
   if (s === 4) baseFreq = 659.25;
   if (s === 5) baseFreq = 783.99;
@@ -605,7 +611,10 @@ window.SoundManager.playLootDrop = function (stars) {
     let oscGain = audioCtx.createGain();
     oscGain.gain.setValueAtTime(0, now);
     oscGain.gain.setValueAtTime(0, now + delayOffset);
-    oscGain.gain.linearRampToValueAtTime(1.0 / activeOscillatorsCount, now + delayOffset + 0.02);
+    oscGain.gain.linearRampToValueAtTime(
+      1.0 / activeOscillatorsCount,
+      now + delayOffset + 0.02,
+    );
     oscGain.gain.exponentialRampToValueAtTime(0.001, now + decayDuration);
 
     osc.connect(oscGain);
@@ -616,12 +625,15 @@ window.SoundManager.playLootDrop = function (stars) {
     oscillators.push(osc);
   }
 
-  setTimeout(() => {
-    if (lfo) lfo.disconnect();
-    if (lfoGain) lfoGain.disconnect();
-    oscillators.forEach(osc => osc.disconnect());
-    masterGain.disconnect();
-  }, (decayDuration + 0.5) * 1000);
+  setTimeout(
+    () => {
+      if (lfo) lfo.disconnect();
+      if (lfoGain) lfoGain.disconnect();
+      oscillators.forEach((osc) => osc.disconnect());
+      masterGain.disconnect();
+    },
+    (decayDuration + 0.5) * 1000,
+  );
 };
 
 /* --- TACTILE INTERFACE SYNTHESIZER & AUTO-BINDINGS --- */
@@ -645,8 +657,14 @@ window.SoundManager.playClick = function () {
     audioCtx.resume();
   }
 
-  let masterVol = window.playerStats.volumeMaster !== undefined ? window.playerStats.volumeMaster : 0.5;
-  let sfxVol = window.playerStats.volumeSFX !== undefined ? window.playerStats.volumeSFX : 0.8;
+  let masterVol =
+    window.playerStats.volumeMaster !== undefined
+      ? window.playerStats.volumeMaster
+      : 0.5;
+  let sfxVol =
+    window.playerStats.volumeSFX !== undefined
+      ? window.playerStats.volumeSFX
+      : 0.8;
   let finalVol = masterVol * sfxVol;
   if (window.playerStats.mute || finalVol <= 0) return;
 
@@ -710,15 +728,21 @@ window.SoundManager.playPurchase = function () {
     audioCtx.resume();
   }
 
-  let masterVol = window.playerStats.volumeMaster !== undefined ? window.playerStats.volumeMaster : 0.5;
-  let sfxVol = window.playerStats.volumeSFX !== undefined ? window.playerStats.volumeSFX : 0.8;
+  let masterVol =
+    window.playerStats.volumeMaster !== undefined
+      ? window.playerStats.volumeMaster
+      : 0.5;
+  let sfxVol =
+    window.playerStats.volumeSFX !== undefined
+      ? window.playerStats.volumeSFX
+      : 0.8;
   let finalVol = masterVol * sfxVol;
   if (window.playerStats.mute || finalVol <= 0) return;
 
   let now = audioCtx.currentTime;
 
   // Phase A: Rewarding upward pentatonic cascade (magical transition)
-  const notes = [392.00, 523.25, 659.25, 783.99, 1046.50]; // G4, C5, E5, G5, C6
+  const notes = [392.0, 523.25, 659.25, 783.99, 1046.5]; // G4, C5, E5, G5, C6
   const noteDelay = 0.035; // Fast, cascading roll
   const oscs = [];
   const gains = [];
@@ -731,8 +755,14 @@ window.SoundManager.playPurchase = function () {
     let gainNode = audioCtx.createGain();
     gainNode.gain.setValueAtTime(0, now);
     gainNode.gain.setValueAtTime(0, now + index * noteDelay);
-    gainNode.gain.linearRampToValueAtTime(finalVol * 0.08, now + index * noteDelay + 0.01);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + index * noteDelay + 0.22);
+    gainNode.gain.linearRampToValueAtTime(
+      finalVol * 0.08,
+      now + index * noteDelay + 0.01,
+    );
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.0001,
+      now + index * noteDelay + 0.22,
+    );
 
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
@@ -785,8 +815,8 @@ window.SoundManager.playPurchase = function () {
   settleOsc.stop(now + 0.35);
 
   setTimeout(() => {
-    oscs.forEach(o => o.disconnect());
-    gains.forEach(g => g.disconnect());
+    oscs.forEach((o) => o.disconnect());
+    gains.forEach((g) => g.disconnect());
     coinOsc1.disconnect();
     coinOsc2.disconnect();
     coinGain.disconnect();
@@ -815,8 +845,14 @@ window.SoundManager.playHover = function () {
     audioCtx.resume();
   }
 
-  let masterVol = window.playerStats.volumeMaster !== undefined ? window.playerStats.volumeMaster : 0.5;
-  let sfxVol = window.playerStats.volumeSFX !== undefined ? window.playerStats.volumeSFX : 0.8;
+  let masterVol =
+    window.playerStats.volumeMaster !== undefined
+      ? window.playerStats.volumeMaster
+      : 0.5;
+  let sfxVol =
+    window.playerStats.volumeSFX !== undefined
+      ? window.playerStats.volumeSFX
+      : 0.8;
   let finalVol = masterVol * sfxVol;
   if (window.playerStats.mute || finalVol <= 0) return;
 
@@ -840,10 +876,13 @@ window.SoundManager.playHover = function () {
   osc.start(now);
   osc.stop(now + duration + 0.05);
 
-  setTimeout(() => {
-    osc.disconnect();
-    gainNode.disconnect();
-  }, (duration + 0.1) * 1000);
+  setTimeout(
+    () => {
+      osc.disconnect();
+      gainNode.disconnect();
+    },
+    (duration + 0.1) * 1000,
+  );
 };
 
 // 4. Synthesize Sigil Sack Opening Chime sequence
@@ -862,8 +901,14 @@ window.SoundManager.playSigilSackOpen = function () {
     audioCtx.resume();
   }
 
-  let masterVol = window.playerStats.volumeMaster !== undefined ? window.playerStats.volumeMaster : 0.5;
-  let sfxVol = window.playerStats.volumeSFX !== undefined ? window.playerStats.volumeSFX : 0.8;
+  let masterVol =
+    window.playerStats.volumeMaster !== undefined
+      ? window.playerStats.volumeMaster
+      : 0.5;
+  let sfxVol =
+    window.playerStats.volumeSFX !== undefined
+      ? window.playerStats.volumeSFX
+      : 0.8;
   let finalVol = masterVol * sfxVol;
   if (window.playerStats.mute || finalVol <= 0) return;
 
@@ -922,9 +967,15 @@ window.SoundManager.playSigilSackOpen = function () {
   sweepOsc2.type = "sine";
 
   sweepOsc1.frequency.setValueAtTime(261.63, now + 0.08);
-  sweepOsc1.frequency.exponentialRampToValueAtTime(523.25, now + 0.08 + sweepDur);
-  sweepOsc2.frequency.setValueAtTime(392.00, now + 0.08);
-  sweepOsc2.frequency.exponentialRampToValueAtTime(783.99, now + 0.08 + sweepDur);
+  sweepOsc1.frequency.exponentialRampToValueAtTime(
+    523.25,
+    now + 0.08 + sweepDur,
+  );
+  sweepOsc2.frequency.setValueAtTime(392.0, now + 0.08);
+  sweepOsc2.frequency.exponentialRampToValueAtTime(
+    783.99,
+    now + 0.08 + sweepDur,
+  );
 
   let sweepGain = audioCtx.createGain();
   sweepGain.gain.setValueAtTime(0, now);
@@ -969,8 +1020,14 @@ window.SoundManager.playCardPackOpen = function () {
     audioCtx.resume();
   }
 
-  let masterVol = window.playerStats.volumeMaster !== undefined ? window.playerStats.volumeMaster : 0.5;
-  let sfxVol = window.playerStats.volumeSFX !== undefined ? window.playerStats.volumeSFX : 0.8;
+  let masterVol =
+    window.playerStats.volumeMaster !== undefined
+      ? window.playerStats.volumeMaster
+      : 0.5;
+  let sfxVol =
+    window.playerStats.volumeSFX !== undefined
+      ? window.playerStats.volumeSFX
+      : 0.8;
   let finalVol = masterVol * sfxVol;
   if (window.playerStats.mute || finalVol <= 0) return;
 
@@ -1082,7 +1139,7 @@ window.SoundManager.initTactileFeedback = function () {
 
     // A. Detect Sigil Sack Opening triggers
     let sackTarget = e.target.closest(
-      ".open-sack, .sigil-sack, .bag-open, [class*='sigil-sack'], [id*='sigil-sack'], [class*='sack-open'], [id*='sack-open']"
+      ".open-sack, .sigil-sack, .bag-open, [class*='sigil-sack'], [id*='sigil-sack'], [class*='sack-open'], [id*='sack-open']",
     );
     if (sackTarget) {
       window.SoundManager.playSigilSackOpen();
@@ -1091,7 +1148,7 @@ window.SoundManager.initTactileFeedback = function () {
 
     // B. Detect Monster Card Pack Opening triggers
     let packTarget = e.target.closest(
-      ".open-pack, .card-pack, .monster-pack, [class*='card-pack'], [id*='card-pack'], [class*='pack-open'], [id*='pack-open']"
+      ".open-pack, .card-pack, .monster-pack, [class*='card-pack'], [id*='card-pack'], [class*='pack-open'], [id*='pack-open']",
     );
     if (packTarget) {
       window.SoundManager.playCardPackOpen();
@@ -1100,7 +1157,7 @@ window.SoundManager.initTactileFeedback = function () {
 
     // C. Detect Purchases / Upgrades / Gold Sinks / PP / QP Upgrades
     let purchaseTarget = e.target.closest(
-      ".btn-buy, .buy-btn, .purchase-btn, .shop-item-buy, .gold-sink, .gold-sink-btn, .pp-upgrade, .qp-upgrade, .upgrade-btn, .btn-upgrade, [class*='buy-btn'], [class*='purchase'], [class*='upgrade'], [id*='buy'], [id*='upgrade']"
+      ".btn-buy, .buy-btn, .purchase-btn, .shop-item-buy, .gold-sink, .gold-sink-btn, .pp-upgrade, .qp-upgrade, .upgrade-btn, .btn-upgrade, [class*='buy-btn'], [class*='purchase'], [class*='upgrade'], [id*='buy'], [id*='upgrade']",
     );
     if (purchaseTarget) {
       window.SoundManager.playPurchase();
@@ -1109,7 +1166,7 @@ window.SoundManager.initTactileFeedback = function () {
 
     // D. Detect Normal Action Clicks (Tabs, Selectors, Slots, General Buttons)
     let clickTarget = e.target.closest(
-      ".btn-action, .tab-btn, .sub-tab-btn, .slots-card, .forge-anvil-button, .custom-select-trigger, .custom-select-option"
+      ".btn-action, .tab-btn, .sub-tab-btn, .slots-card, .forge-anvil-button, .custom-select-trigger, .custom-select-option",
     );
     if (clickTarget) {
       window.SoundManager.playClick();
@@ -1117,14 +1174,20 @@ window.SoundManager.initTactileFeedback = function () {
   });
 
   // Listen globally for hover focus on bags, cards, and shop entries
-  document.addEventListener("pointerenter", function (e) {
-    if (!e.target || typeof e.target.closest !== "function") return;
+  document.addEventListener(
+    "pointerenter",
+    function (e) {
+      if (!e.target || typeof e.target.closest !== "function") return;
 
-    let target = e.target.closest(".bag-item, .slots-card, .tab-btn, .sub-tab-btn, .shop-row, .active-effect-badge, .hub-card, .bestiary-card-item");
-    if (target) {
-      window.SoundManager.playHover();
-    }
-  }, true);
+      let target = e.target.closest(
+        ".bag-item, .slots-card, .tab-btn, .sub-tab-btn, .shop-row, .active-effect-badge, .hub-card, .bestiary-card-item",
+      );
+      if (target) {
+        window.SoundManager.playHover();
+      }
+    },
+    true,
+  );
 };
 
 // Auto-register listener bindings on script load

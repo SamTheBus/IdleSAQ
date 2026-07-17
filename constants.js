@@ -33,13 +33,6 @@ window.MYSTICAL_STOCK = [
     desc: "Trade 10 rare Luminous Souls for 1 Astral Essence.",
   },
   {
-    name: "Catalyst Core",
-    cost: 15,
-    currency: "Astral Shards",
-    color: "#2ecc71",
-    desc: "Trade 15 Astral Crucible Shards for 1 Catalyst Core.",
-  },
-  {
     name: "Monster Card Sack",
     cost: 25,
     currency: "Luminous Soul",
@@ -3425,102 +3418,110 @@ window.MONSTER_CARDS_DATA = {
   },
 
   // Cosmic Wardens (Bosses)
-    aegis_goliath: {
-      name: "Aegis Goliath Card",
-      baseStat: "def",
-      baseVal: 0.05, // Increased from 0.03 to 0.05 (+5% base Defense)
-      isPct: true,
-      desc: "Event Horizon shielding significantly increases Defense.",
-      set: "Cosmic Wardens",
-    },
-    chronos_arbitrator: {
-      name: "Chronos Arbitrator Card",
-      baseStat: "moveSpeed",
-      baseVal: 5.0, // Increased from 2.5 to 5.0 (+5.0 base Movement Speed)
-      isPct: false,
-      desc: "Temporal dilation accelerates Movement Speed.",
-      set: "Cosmic Wardens",
-    },
-    nexus_overseer: {
-      name: "Nexus Overseer Card",
-      baseStat: "atk",
-      baseVal: 0.05, // Increased from 0.03 to 0.05 (+5% base Attack Power)
-      isPct: true,
-      desc: "Glitch code injections significantly increase Attack Power.",
-      set: "Cosmic Wardens",
-    },
-    overlord_iron_vault: {
-      name: "Iron Overlord Card",
-      baseStat: "atk",
-      baseVal: 0.05,
-      isPct: true,
-      desc: "Unbreakable steel spikes increase Attack Power.",
-      set: "Cosmic Wardens",
-    },
-    gilded_vault_keeper: {
-      name: "Gilded Vault Keeper Card",
-      baseStat: "gold",
-      baseVal: 0.05,
-      isPct: true,
-      desc: "Gilded ancient chest increases gold earnings.",
-      set: "Cosmic Wardens",
-    },
-    corrosive_abomination: {
-      name: "Corrosive Abomination Card",
-      baseStat: "maxHp",
-      baseVal: 0.05,
-      isPct: true,
-      desc: "Dense alchemical sludges increase Maximum HP.",
-      set: "Cosmic Wardens",
-    },
-    hooktail: {
-      name: "Hooktail Card",
-      baseStat: "atk",
-      baseVal: 0.08,
-      isPct: true,
-      desc: "The Scarlet Calamity's blazing presence drastically augments your Attack Power.",
-      set: "Cosmic Wardens",
-    },
-  };
+  aegis_goliath: {
+    name: "Aegis Goliath Card",
+    baseStat: "def",
+    baseVal: 0.05, // Increased from 0.03 to 0.05 (+5% base Defense)
+    isPct: true,
+    desc: "Event Horizon shielding significantly increases Defense.",
+    set: "Cosmic Wardens",
+  },
+  chronos_arbitrator: {
+    name: "Chronos Arbitrator Card",
+    baseStat: "moveSpeed",
+    baseVal: 5.0, // Increased from 2.5 to 5.0 (+5.0 base Movement Speed)
+    isPct: false,
+    desc: "Temporal dilation accelerates Movement Speed.",
+    set: "Cosmic Wardens",
+  },
+  nexus_overseer: {
+    name: "Nexus Overseer Card",
+    baseStat: "atk",
+    baseVal: 0.05, // Increased from 0.03 to 0.05 (+5% base Attack Power)
+    isPct: true,
+    desc: "Glitch code injections significantly increase Attack Power.",
+    set: "Cosmic Wardens",
+  },
+  overlord_iron_vault: {
+    name: "Iron Overlord Card",
+    baseStat: "atk",
+    baseVal: 0.05,
+    isPct: true,
+    desc: "Unbreakable steel spikes increase Attack Power.",
+    set: "Cosmic Wardens",
+  },
+  gilded_vault_keeper: {
+    name: "Gilded Vault Keeper Card",
+    baseStat: "gold",
+    baseVal: 0.05,
+    isPct: true,
+    desc: "Gilded ancient chest increases gold earnings.",
+    set: "Cosmic Wardens",
+  },
+  corrosive_abomination: {
+    name: "Corrosive Abomination Card",
+    baseStat: "maxHp",
+    baseVal: 0.05,
+    isPct: true,
+    desc: "Dense alchemical sludges increase Maximum HP.",
+    set: "Cosmic Wardens",
+  },
+  hooktail: {
+    name: "Hooktail Card",
+    baseStat: "atk",
+    baseVal: 0.08,
+    isPct: true,
+    desc: "The Scarlet Calamity's blazing presence drastically augments your Attack Power.",
+    set: "Cosmic Wardens",
+  },
+};
 
-  window.CARD_SETS_DATA = {
-    "Whispering Woods": {
-      name: "Whispering Woods Set",
-      theme: "XP Rate Multiplier",
-      statKey: "xpRate",
-      cards: ["slime", "sprout", "thorn_wyrm"],
-    },
-    "Mountain Peaks": {
-      name: "Mountain Peaks Set",
-      theme: "Global Defense",
-      statKey: "defPctBonus",
-      cards: ["golem", "wyrmling", "gargoyle"],
-    },
-    "Inferno Depths": {
-      name: "Inferno Depths Set",
-      theme: "Global Attack",
-      statKey: "atkPctBonus",
-      cards: ["magma_elemental", "lava_serpent", "hell_bat"],
-    },
-    "Fungal Swamp": {
-      name: "Fungal Swamp Set",
-      theme: "Global Max HP",
-      statKey: "maxHpPctBonus",
-      cards: ["swamp_basilisk", "toxic_fly", "marsh_ghost"],
-    },
-    "Void Singularity": {
-      name: "Void Singularity Set",
-      theme: "Global Drop Quality",
-      statKey: "qly",
-      cards: ["void_orb", "void_crawler", "void_spectre"],
-    },
-    "Cosmic Wardens": {
-      name: "Cosmic Wardens Set",
-      theme: "All Core Attributes (STR/DEX/INT)",
-      statKey: "attributesMult", // Special handler in data.js to scale str, dex, int
-      cards: ["aegis_goliath", "chronos_arbitrator", "nexus_overseer", "overlord_iron_vault", "gilded_vault_keeper", "corrosive_abomination", "hooktail"],
-    },
-  };
+window.CARD_SETS_DATA = {
+  "Whispering Woods": {
+    name: "Whispering Woods Set",
+    theme: "XP Rate Multiplier",
+    statKey: "xpRate",
+    cards: ["slime", "sprout", "thorn_wyrm"],
+  },
+  "Mountain Peaks": {
+    name: "Mountain Peaks Set",
+    theme: "Global Defense",
+    statKey: "defPctBonus",
+    cards: ["golem", "wyrmling", "gargoyle"],
+  },
+  "Inferno Depths": {
+    name: "Inferno Depths Set",
+    theme: "Global Attack",
+    statKey: "atkPctBonus",
+    cards: ["magma_elemental", "lava_serpent", "hell_bat"],
+  },
+  "Fungal Swamp": {
+    name: "Fungal Swamp Set",
+    theme: "Global Max HP",
+    statKey: "maxHpPctBonus",
+    cards: ["swamp_basilisk", "toxic_fly", "marsh_ghost"],
+  },
+  "Void Singularity": {
+    name: "Void Singularity Set",
+    theme: "Global Drop Quality",
+    statKey: "qly",
+    cards: ["void_orb", "void_crawler", "void_spectre"],
+  },
+  "Cosmic Wardens": {
+    name: "Cosmic Wardens Set",
+    theme: "All Core Attributes (STR/DEX/INT)",
+    statKey: "attributesMult", // Special handler in data.js to scale str, dex, int
+    cards: [
+      "aegis_goliath",
+      "chronos_arbitrator",
+      "nexus_overseer",
+      "overlord_iron_vault",
+      "gilded_vault_keeper",
+      "corrosive_abomination",
+      "hooktail",
+    ],
+  },
+};
 
 window.useDex["Monster Card Sack"] = {
   desc: "A heavy, dust-covered burlap booster pack sealed with a runic wax stamp. Tearing it open dispenses a booster pack of 5 random cards for your Bestiary Album. Duplicates are spent on card rank elevations.",

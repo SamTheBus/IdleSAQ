@@ -391,25 +391,28 @@ window.GameState = {
     };
 
     if (leveledUp) {
-          window.triggerLevelUpEffect();
+      window.triggerLevelUpEffect();
 
-          // Check if they reached Level 25 for the first time to trigger Altar / Clan Hall Unlock
-          if (window.playerStats.level >= 25 && !window.playerStats.hasTriggeredLevel25Unlock) {
-            window.playerStats.hasTriggeredLevel25Unlock = true;
-            setTimeout(() => {
-              if (typeof window.playGlobalUnlockAnimation === "function") {
-                window.playGlobalUnlockAnimation(
-                  "RIFT ALTAR & CLAN HALL UNLOCKED",
-                  "🔮",
-                  () => {
-                    if (typeof window.switchTab === "function") {
-                      window.switchTab("activities");
-                    }
-                  }
-                );
-              }
-            }, 1500); // Trigger shortly after the level-up flash settles
+      // Check if they reached Level 25 for the first time to trigger Altar / Clan Hall Unlock
+      if (
+        window.playerStats.level >= 25 &&
+        !window.playerStats.hasTriggeredLevel25Unlock
+      ) {
+        window.playerStats.hasTriggeredLevel25Unlock = true;
+        setTimeout(() => {
+          if (typeof window.playGlobalUnlockAnimation === "function") {
+            window.playGlobalUnlockAnimation(
+              "RIFT ALTAR & CLAN HALL UNLOCKED",
+              "🔮",
+              () => {
+                if (typeof window.switchTab === "function") {
+                  window.switchTab("activities");
+                }
+              },
+            );
           }
+        }, 1500); // Trigger shortly after the level-up flash settles
+      }
 
       window.invalidatePlayerStats();
       let p = window.resolvePlayerStats();
@@ -2247,12 +2250,12 @@ window.playerStats = {
   dailyRewardClaimed: false,
   weeklyRewardClaimed: false,
   unviewedAchievements: [],
-    selectedPrestigeStage: 80,
-    unlockedTitles: [],
-    tutorialStep: 0,
-    completedTutorialSteps: [],
-    visitedTabs: [],
-    hasTriggeredLevel25Unlock: false,
+  selectedPrestigeStage: 80,
+  unlockedTitles: [],
+  tutorialStep: 0,
+  completedTutorialSteps: [],
+  visitedTabs: [],
+  hasTriggeredLevel25Unlock: false,
   equippedTitle: null,
   achievementTimestamps: {},
   claimedMailIds: [],
@@ -2281,6 +2284,9 @@ window.playerStats = {
   showDpsOverlay: false,
   dpsOverlayX: null,
   dpsOverlayY: null,
+  chatFloatingMode: false,
+  chatX: null,
+  chatY: null,
 };
 
 // Initialize the QuestSystem namespace and define generateDailyMissions

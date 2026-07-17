@@ -2519,9 +2519,9 @@ window.toggleStickyCanvas = function () {
   window.playerStats.stickyCanvas = !window.playerStats.stickyCanvas;
   window.updateStickyCanvasStyle();
 
-    if (window.HoorTutorial) {
-      window.HoorTutorial.init();
-    }
+  if (window.HoorTutorial) {
+    window.HoorTutorial.init();
+  }
   if (typeof window.saveGame === "function") window.saveGame();
 };
 
@@ -2536,22 +2536,30 @@ window.toggleChatMinimize = function () {
   let drawer = document.getElementById("premium-chat-drawer");
   if (!body || !drawer) return;
 
-  let isCollapsed = body.style.display === "none";
-  if (isCollapsed) {
-    body.style.display = "flex";
-    drawer.style.height = "260px";
-    let toggleIcon = document.getElementById("chat-toggle-icon");
-    if (toggleIcon) toggleIcon.innerText = "✥";
+  if (window.playerStats && window.playerStats.chatFloatingMode) {
+    let isCollapsed = body.style.display === "none";
+    if (isCollapsed) {
+      body.style.display = "flex";
+      drawer.style.height = "260px";
+      let toggleIcon = document.getElementById("chat-toggle-icon");
+      if (toggleIcon) toggleIcon.innerText = "✥";
+    } else {
+      body.style.display = "none";
+      drawer.style.height = "32px";
+      let toggleIcon = document.getElementById("chat-toggle-icon");
+      if (toggleIcon) toggleIcon.innerText = "✦";
+    }
   } else {
-    body.style.display = "none";
-    drawer.style.height = "32px";
-    let toggleIcon = document.getElementById("chat-toggle-icon");
-    if (toggleIcon) toggleIcon.innerText = "✦";
+    // Drawer mode minimize
+    if (window.ChatManager) {
+      window.ChatManager.isExpanded = !window.ChatManager.isExpanded;
+      window.updateChatStyle();
+    }
   }
 };
 
 window.updateChatStyle = function () {
-  let active = window.playerStats.chatFloatingMode !== false;
+  let active = window.playerStats.chatFloatingMode === true;
   let btn = document.getElementById("settings-toggle-chat-floating");
   let chatToggleBtn = document.getElementById("btn-chat-toggle");
   let drawer = document.getElementById("premium-chat-drawer");
@@ -2578,7 +2586,8 @@ window.updateChatStyle = function () {
     drawer.style.background = "rgba(10, 8, 18, 0.88)";
     drawer.style.backdropFilter = "blur(10px)";
     drawer.style.webkitBackdropFilter = "blur(10px)";
-    drawer.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.8), 0 0 15px rgba(168, 85, 247, 0.25)";
+    drawer.style.boxShadow =
+      "0 8px 32px rgba(0, 0, 0, 0.8), 0 0 15px rgba(168, 85, 247, 0.25)";
     drawer.style.display = "flex";
     drawer.style.flexDirection = "column";
     drawer.style.overflow = "hidden";
@@ -2586,7 +2595,8 @@ window.updateChatStyle = function () {
     if (header) {
       header.style.display = "flex";
       header.style.cursor = "move";
-      header.style.background = "linear-gradient(180deg, #1d152c 0%, #0c0814 100%)";
+      header.style.background =
+        "linear-gradient(180deg, #1d152c 0%, #0c0814 100%)";
       header.style.borderBottom = "1px solid #a855f744";
       header.style.padding = "8px 12px";
       header.style.userSelect = "none";
@@ -2621,39 +2631,50 @@ window.updateChatStyle = function () {
 
     window.initChatDrag();
   } else {
-    // --- DROPDOWN MODE (Fully collapsible dropdown panel directly below Top Nav) ---
-    drawer.style.position = "absolute";
-    drawer.style.top = "44px"; // Cleanly aligned right under the top-navigation controls bar
-    drawer.style.right = "16px";
-    drawer.style.width = "300px";
-    drawer.style.height = "250px";
-    drawer.style.left = "";
-    drawer.style.bottom = "";
-    drawer.style.borderRadius = "8px";
-    drawer.style.border = "1.5px solid #a855f7";
-    drawer.style.background = "rgba(10, 8, 18, 0.94)";
-    drawer.style.backdropFilter = "blur(10px)";
-    drawer.style.webkitBackdropFilter = "blur(10px)";
-    drawer.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.9), 0 0 15px rgba(168, 85, 247, 0.2)";
-    drawer.style.display = window.ChatManager && window.ChatManager.isExpanded ? "flex" : "none";
+    // --- DRAWER MODE (Sticky Bottom Collapsible Panel) ---
+    drawer.style.position = "sticky";
+    drawer.style.bottom = "0";
+    drawer.style.top = "auto";
+    drawer.style.right = "auto";
+    drawer.style.left = "auto";
+    drawer.style.width = "100%";
+    drawer.style.height =
+      window.ChatManager && window.ChatManager.isExpanded ? "260px" : "32px";
+    drawer.style.borderRadius = "0";
+    drawer.style.border = "none";
+    drawer.style.borderTop = "2px solid #2d3748";
+    drawer.style.background = "rgba(18, 18, 24, 0.95)";
+    drawer.style.backdropFilter = "blur(12px)";
+    drawer.style.webkitBackdropFilter = "blur(12px)";
+    drawer.style.display = "flex";
     drawer.style.flexDirection = "column";
     drawer.style.overflow = "hidden";
-    drawer.style.zIndex = "1010";
+    drawer.style.zIndex = "999";
 
     if (header) {
-      header.style.display = "none"; // Hide the inner header in Dropdown mode (the toggle button represents the header)
+      header.style.display = "flex";
+      header.style.cursor = "pointer";
+      header.style.background =
+        "linear-gradient(180deg, #1a202c 0%, #0d1117 100%)";
+      header.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+      header.style.padding = "10px 16px";
+      let toggleIcon = document.getElementById("chat-toggle-icon");
+      if (toggleIcon)
+        toggleIcon.innerText =
+          window.ChatManager && window.ChatManager.isExpanded ? "▲" : "▼";
     }
 
     if (body) {
-      body.style.display = "flex";
+      body.style.display =
+        window.ChatManager && window.ChatManager.isExpanded ? "flex" : "none";
       body.style.flexDirection = "column";
       body.style.flex = "1";
-      body.style.height = "100%";
+      body.style.height = "228px";
       body.style.maxHeight = "none";
     }
 
     if (chatToggleBtn) {
-      chatToggleBtn.style.borderColor = window.ChatManager && window.ChatManager.isExpanded ? "#ff007f" : "#a855f7";
+      chatToggleBtn.style.borderColor = "#a855f7";
     }
   }
 };
@@ -6837,6 +6858,8 @@ window.showUseTooltip = function (e, keyName) {
 
 window.switchTab = function (tabId) {
   window.hideTooltip();
+  // Keep backward-compatibility with code that tries to target 'gear' or 'stats'
+  if (tabId === "gear" || tabId === "stats") tabId = "hero";
 
   // Record visited tabs to activate first-time tutorial dialogue checks
   if (window.playerStats && window.playerStats.visitedTabs) {
@@ -6851,8 +6874,6 @@ window.switchTab = function (tabId) {
       }, 100);
     }
   }
-  // Keep backward-compatibility with code that tries to target 'gear' or 'stats'
-  if (tabId === "gear" || tabId === "stats") tabId = "hero";
 
   document
     .querySelectorAll(".tab-content")
@@ -8975,72 +8996,136 @@ window.showRiftRewardBreakdownTooltip = function (e, lvl) {
 };
 
 window.makeWindowDraggable = function (el, handle) {
-    if (!el || !handle) return;
+  if (!el || !handle) return;
 
-    handle.style.touchAction = "none";
+  handle.style.touchAction = "none";
+  el.style.touchAction = "none";
 
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-    let initialLeft = 0;
-    let initialTop = 0;
+  let contentEl = el.querySelector(".draggable-content");
+  if (contentEl) {
+    contentEl.style.touchAction = "pan-y";
+  }
 
-    handle.addEventListener("pointerdown", function (e) {
-      if (e.button !== 0) return; // Only process primary left clicks or single touches
+  let isDragging = false;
+  let startX = 0;
+  let startY = 0;
+  let initialLeft = 0;
+  let initialTop = 0;
 
-      if (e.target.closest("button") || e.target.closest("input") || e.target.closest("select") || e.target.closest("option")) {
-        return;
-      }
+  const dragStart = (clientX, clientY) => {
+    isDragging = true;
+    startX = clientX;
+    startY = clientY;
+    initialLeft = el.offsetLeft;
+    initialTop = el.offsetTop;
+  };
 
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      initialLeft = el.offsetLeft;
-      initialTop = el.offsetTop;
+  const dragMove = (clientX, clientY) => {
+    if (!isDragging) return;
 
+    let dx = clientX - startX;
+    let dy = clientY - startY;
+
+    let newLeft = initialLeft + dx;
+    let newTop = initialTop + dy;
+
+    let maxLeft = window.innerWidth - 40;
+    let maxTop = window.innerHeight - 40;
+
+    newLeft = Math.max(-el.offsetWidth + 40, Math.min(maxLeft, newLeft));
+    newTop = Math.max(0, Math.min(maxTop, newTop));
+
+    el.style.left = newLeft + "px";
+    el.style.top = newTop + "px";
+  };
+
+  const dragEnd = () => {
+    isDragging = false;
+  };
+
+  handle.addEventListener("pointerdown", function (e) {
+    if (e.button !== 0) return;
+    if (
+      e.target.closest("button") ||
+      e.target.closest("input") ||
+      e.target.closest("select") ||
+      e.target.closest("option")
+    ) {
+      return;
+    }
+    dragStart(e.clientX, e.clientY);
+    try {
+      handle.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    e.stopPropagation();
+    e.preventDefault();
+  });
+
+  handle.addEventListener("pointermove", function (e) {
+    if (!isDragging) return;
+    dragMove(e.clientX, e.clientY);
+    e.stopPropagation();
+    e.preventDefault();
+  });
+
+  const stopDrag = function (e) {
+    if (isDragging) {
+      dragEnd();
       try {
-        handle.setPointerCapture(e.pointerId);
+        handle.releasePointerCapture(e.pointerId);
       } catch (err) {}
       e.stopPropagation();
       e.preventDefault();
-    });
+    }
+  };
 
-    handle.addEventListener("pointermove", function (e) {
+  handle.addEventListener("pointerup", stopDrag);
+  handle.addEventListener("pointercancel", stopDrag);
+
+  // Responsive Touch fallback handlers for flawless Android/iOS WebView dragging
+  handle.addEventListener(
+    "touchstart",
+    function (e) {
+      if (
+        e.target.closest("button") ||
+        e.target.closest("input") ||
+        e.target.closest("select") ||
+        e.target.closest("option")
+      ) {
+        return;
+      }
+      if (e.touches && e.touches[0]) {
+        dragStart(e.touches[0].clientX, e.touches[0].clientY);
+      }
+      e.stopPropagation();
+    },
+    { passive: false },
+  );
+
+  handle.addEventListener(
+    "touchmove",
+    function (e) {
       if (!isDragging) return;
-
-      let dx = e.clientX - startX;
-      let dy = e.clientY - startY;
-
-      let newLeft = initialLeft + dx;
-      let newTop = initialTop + dy;
-
-      let maxLeft = window.innerWidth - 40;
-      let maxTop = window.innerHeight - 40;
-
-      newLeft = Math.max(-el.offsetWidth + 40, Math.min(maxLeft, newLeft));
-      newTop = Math.max(0, Math.min(maxTop, newTop));
-
-      el.style.left = newLeft + "px";
-      el.style.top = newTop + "px";
-
+      if (e.touches && e.touches[0]) {
+        dragMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
       e.stopPropagation();
       e.preventDefault();
-    });
+    },
+    { passive: false },
+  );
 
-    const stopDrag = function (e) {
+  handle.addEventListener(
+    "touchend",
+    function (e) {
       if (isDragging) {
-        isDragging = false;
-        try {
-          handle.releasePointerCapture(e.pointerId);
-        } catch (err) {}
+        dragEnd();
         e.stopPropagation();
-        e.preventDefault();
       }
-    };
-
-    handle.addEventListener("pointerup", stopDrag);
-    handle.addEventListener("pointercancel", stopDrag);
-  };
+    },
+    { passive: false },
+  );
+};
 
 // --- ALTAR NATIVE CAROUSEL RENDER ENGINE ---
 window.altarSlideIndex = 0;
@@ -9893,7 +9978,10 @@ window.revealGachaReward = function (item) {
   if (chute) chute.innerHTML = ""; // Clear dispensed ball
 
   window.gachaActiveState = "idle";
-  if (window.SoundManager && typeof window.SoundManager.playLootDrop === "function") {
+  if (
+    window.SoundManager &&
+    typeof window.SoundManager.playLootDrop === "function"
+  ) {
     window.SoundManager.playLootDrop(item.statsRolled);
   } else if (window.SoundManager) {
     window.SoundManager.play("revive");
@@ -11236,7 +11324,10 @@ window.openDailyRewardSack = function (specificName) {
   }
 
   // Play opening sound
-  if (window.SoundManager && typeof window.SoundManager.playLootDrop === "function") {
+  if (
+    window.SoundManager &&
+    typeof window.SoundManager.playLootDrop === "function"
+  ) {
     window.SoundManager.playLootDrop(newEquip.statsRolled);
   } else if (window.SoundManager) {
     window.SoundManager.play("fairy");
@@ -11615,7 +11706,10 @@ window.openWeeklyRewardSack = function (specificName) {
   }
 
   // Play opening sound
-  if (window.SoundManager && typeof window.SoundManager.playLootDrop === "function") {
+  if (
+    window.SoundManager &&
+    typeof window.SoundManager.playLootDrop === "function"
+  ) {
     window.SoundManager.playLootDrop(5); // Treats weekly grand chests as 5★ Mythic sound swells
   } else if (window.SoundManager) {
     window.SoundManager.play("revive");
@@ -12313,13 +12407,19 @@ window.switchForgeStation = function (val) {
   let blacksmithModes = document.getElementById("blacksmith-modes");
   let enchanterModes = document.getElementById("enchanter-modes");
   if (val === "blacksmith") {
-    if (blacksmithModes) blacksmithModes.style.setProperty("display", "flex", "important");
-    if (enchanterModes) enchanterModes.style.setProperty("display", "none", "important");
-    if (typeof window.setForgeMode === "function") window.setForgeMode("temper");
+    if (blacksmithModes)
+      blacksmithModes.style.setProperty("display", "flex", "important");
+    if (enchanterModes)
+      enchanterModes.style.setProperty("display", "none", "important");
+    if (typeof window.setForgeMode === "function")
+      window.setForgeMode("temper");
   } else if (val === "enchanter") {
-    if (blacksmithModes) blacksmithModes.style.setProperty("display", "none", "important");
-    if (enchanterModes) enchanterModes.style.setProperty("display", "flex", "important");
-    if (typeof window.setForgeMode === "function") window.setForgeMode("enchant");
+    if (blacksmithModes)
+      blacksmithModes.style.setProperty("display", "none", "important");
+    if (enchanterModes)
+      enchanterModes.style.setProperty("display", "flex", "important");
+    if (typeof window.setForgeMode === "function")
+      window.setForgeMode("enchant");
   }
 };
 
@@ -13134,6 +13234,7 @@ window.claimDailyCalendarReward = function () {
 
   let win = document.getElementById("calendar-draggable-window");
   if (win) win.remove();
+  window.setPauseState(false); // RESUME GAME LOOP
   window.hideTooltip();
 
   window.updateUI();
@@ -14976,7 +15077,10 @@ window.requestRename = function () {
 // ==========================================================================
 
 window.selectedBestiarySetKey =
-  window.selectedBestiarySetKey || (window.CARD_SETS_DATA ? Object.keys(window.CARD_SETS_DATA)[0] : "Whispering Woods");
+  window.selectedBestiarySetKey ||
+  (window.CARD_SETS_DATA
+    ? Object.keys(window.CARD_SETS_DATA)[0]
+    : "Whispering Woods");
 
 window.toggleBestiaryAlbum = function () {
   let modal = document.getElementById("bestiary-modal");
@@ -15044,7 +15148,7 @@ window.renderBestiaryAlbum = function () {
         theme: "Armor Pierce",
         statKey: "atkPctBonus",
         cards: ["animated_armor", "cursed_blade", "mimic_shield"],
-        isDungeon: true
+        isDungeon: true,
       };
     }
     if (!window.CARD_SETS_DATA["Material Cavern"]) {
@@ -15053,7 +15157,7 @@ window.renderBestiaryAlbum = function () {
         theme: "Vigor Synergy",
         statKey: "maxHpPctBonus",
         cards: ["slag_slime", "rust_nibbler", "corroded_golem"],
-        isDungeon: true
+        isDungeon: true,
       };
     }
     if (!window.CARD_SETS_DATA["Gold Mine"]) {
@@ -15062,93 +15166,93 @@ window.renderBestiaryAlbum = function () {
         theme: "Midas Resonance",
         statKey: "gold",
         cards: ["coin_elemental", "hoard_mimic", "gilded_scuttler"],
-        isDungeon: true
+        isDungeon: true,
       };
     }
   }
   if (window.MONSTER_CARDS_DATA) {
-      if (!window.MONSTER_CARDS_DATA["animated_armor"]) {
-        window.MONSTER_CARDS_DATA["animated_armor"] = {
-          name: "Sentinel Suit",
-          desc: "A spectral suit of runic armor animated by ancient kinetic forces.",
-          baseStat: "def",
-          baseVal: 6,
-          isPct: false
-        };
-      }
-      if (!window.MONSTER_CARDS_DATA["cursed_blade"]) {
-        window.MONSTER_CARDS_DATA["cursed_blade"] = {
-          name: "Spectral Sword",
-          desc: "An ancient obsidian blade wrapped in undying purple cursed flames.",
-          baseStat: "atk",
-          baseVal: 5,
-          isPct: false
-        };
-      }
-      if (!window.MONSTER_CARDS_DATA["mimic_shield"]) {
-        window.MONSTER_CARDS_DATA["mimic_shield"] = {
-          name: "Aegis Mimic",
-          desc: "A heavy shield that breathes, lined with sharp golden teeth.",
-          baseStat: "block",
-          baseVal: 0.005,
-          isPct: true
-        };
-      }
-      if (!window.MONSTER_CARDS_DATA["slag_slime"]) {
-        window.MONSTER_CARDS_DATA["slag_slime"] = {
-          name: "Slag Sludge",
-          desc: "A bubbling mass of corrosive alchemical run-off containing melted metallic waste.",
-          baseStat: "maxHp",
-          baseVal: 40,
-          isPct: false
-        };
-      }
-      if (!window.MONSTER_CARDS_DATA["rust_nibbler"]) {
-        window.MONSTER_CARDS_DATA["rust_nibbler"] = {
-          name: "Rust Scuttler",
-          desc: "A voracious scavenger that feeds on oxidized alloys, leaving corroded ruins in its wake.",
-          baseStat: "dex",
-          baseVal: 4,
-          isPct: false
-        };
-      }
-      if (!window.MONSTER_CARDS_DATA["corroded_golem"]) {
-        window.MONSTER_CARDS_DATA["corroded_golem"] = {
-          name: "Alchemical Sentinel",
-          desc: "A clay automaton powered by highly pressurized tubes of glowing toxic sludge.",
-          baseStat: "def",
-          baseVal: 8,
-          isPct: false
-        };
-      }
-      if (!window.MONSTER_CARDS_DATA["coin_elemental"]) {
-        window.MONSTER_CARDS_DATA["coin_elemental"] = {
-          name: "Coin Elemental",
-          desc: "A magnetic vortex of animated gold coins swirling around a highly concentrated nucleus.",
-          baseStat: "gold",
-          baseVal: 0.015,
-          isPct: true
-        };
-      }
-      if (!window.MONSTER_CARDS_DATA["hoard_mimic"]) {
-        window.MONSTER_CARDS_DATA["hoard_mimic"] = {
-          name: "Hoard Mimic",
-          desc: "A wooden chest masquerading as rich treasure, snapping its heavy lid on greedy hands.",
-          baseStat: "critChance",
-          baseVal: 0.005,
-          isPct: true
-        };
-      }
-      if (!window.MONSTER_CARDS_DATA["gilded_scuttler"]) {
-        window.MONSTER_CARDS_DATA["gilded_scuttler"] = {
-          name: "Gilded Scuttler",
-          desc: "A skittering gold-shelled scarab that absorbs metal ores to crystallize its carapace.",
-          baseStat: "dropRate",
-          baseVal: 0.01,
-          isPct: true
-        };
-      }
+    if (!window.MONSTER_CARDS_DATA["animated_armor"]) {
+      window.MONSTER_CARDS_DATA["animated_armor"] = {
+        name: "Sentinel Suit",
+        desc: "A spectral suit of runic armor animated by ancient kinetic forces.",
+        baseStat: "def",
+        baseVal: 6,
+        isPct: false,
+      };
     }
+    if (!window.MONSTER_CARDS_DATA["cursed_blade"]) {
+      window.MONSTER_CARDS_DATA["cursed_blade"] = {
+        name: "Spectral Sword",
+        desc: "An ancient obsidian blade wrapped in undying purple cursed flames.",
+        baseStat: "atk",
+        baseVal: 5,
+        isPct: false,
+      };
+    }
+    if (!window.MONSTER_CARDS_DATA["mimic_shield"]) {
+      window.MONSTER_CARDS_DATA["mimic_shield"] = {
+        name: "Aegis Mimic",
+        desc: "A heavy shield that breathes, lined with sharp golden teeth.",
+        baseStat: "block",
+        baseVal: 0.005,
+        isPct: true,
+      };
+    }
+    if (!window.MONSTER_CARDS_DATA["slag_slime"]) {
+      window.MONSTER_CARDS_DATA["slag_slime"] = {
+        name: "Slag Sludge",
+        desc: "A bubbling mass of corrosive alchemical run-off containing melted metallic waste.",
+        baseStat: "maxHp",
+        baseVal: 40,
+        isPct: false,
+      };
+    }
+    if (!window.MONSTER_CARDS_DATA["rust_nibbler"]) {
+      window.MONSTER_CARDS_DATA["rust_nibbler"] = {
+        name: "Rust Scuttler",
+        desc: "A voracious scavenger that feeds on oxidized alloys, leaving corroded ruins in its wake.",
+        baseStat: "dex",
+        baseVal: 4,
+        isPct: false,
+      };
+    }
+    if (!window.MONSTER_CARDS_DATA["corroded_golem"]) {
+      window.MONSTER_CARDS_DATA["corroded_golem"] = {
+        name: "Alchemical Sentinel",
+        desc: "A clay automaton powered by highly pressurized tubes of glowing toxic sludge.",
+        baseStat: "def",
+        baseVal: 8,
+        isPct: false,
+      };
+    }
+    if (!window.MONSTER_CARDS_DATA["coin_elemental"]) {
+      window.MONSTER_CARDS_DATA["coin_elemental"] = {
+        name: "Coin Elemental",
+        desc: "A magnetic vortex of animated gold coins swirling around a highly concentrated nucleus.",
+        baseStat: "gold",
+        baseVal: 0.015,
+        isPct: true,
+      };
+    }
+    if (!window.MONSTER_CARDS_DATA["hoard_mimic"]) {
+      window.MONSTER_CARDS_DATA["hoard_mimic"] = {
+        name: "Hoard Mimic",
+        desc: "A wooden chest masquerading as rich treasure, snapping its heavy lid on greedy hands.",
+        baseStat: "critChance",
+        baseVal: 0.005,
+        isPct: true,
+      };
+    }
+    if (!window.MONSTER_CARDS_DATA["gilded_scuttler"]) {
+      window.MONSTER_CARDS_DATA["gilded_scuttler"] = {
+        name: "Gilded Scuttler",
+        desc: "A skittering gold-shelled scarab that absorbs metal ores to crystallize its carapace.",
+        baseStat: "dropRate",
+        baseVal: 0.01,
+        isPct: true,
+      };
+    }
+  }
 
   let contentEl = document.getElementById("bestiary-content");
   if (!contentEl) return;
@@ -15946,7 +16050,7 @@ window.drawMonsterOnCanvas = function (canvas, cKey, isLocked) {
     "overlord_iron_vault",
     "gilded_vault_keeper",
     "corrosive_abomination",
-    "hooktail"
+    "hooktail",
   ].includes(cKey);
 
   // Set up mock mob properties
@@ -16629,72 +16733,84 @@ if (!window.ChatManager) {
       this.renderWelcome();
     },
     toggleChat() {
-          let drawer = document.getElementById("premium-chat-drawer");
-          let btn = document.getElementById("btn-chat-toggle");
-          if (!drawer) return;
+      let drawer = document.getElementById("premium-chat-drawer");
+      let btn = document.getElementById("btn-chat-toggle");
+      if (!drawer) return;
 
-          if (window.playerStats && window.playerStats.chatFloatingMode) {
-            window.toggleChatMinimize();
-            return;
-          }
+      if (window.playerStats && window.playerStats.chatFloatingMode) {
+        window.toggleChatMinimize();
+        return;
+      }
 
-          this.isExpanded = !this.isExpanded;
-          if (this.isExpanded) {
-            drawer.style.display = "flex";
-            if (btn) btn.style.borderColor = "#ff007f";
-          } else {
-            drawer.style.display = "none";
-            if (btn) btn.style.borderColor = "#a855f7";
-          }
-          if (typeof window.updateChatStyle === "function") {
-            window.updateChatStyle();
-          }
-        },
+      this.isExpanded = !this.isExpanded;
+      if (this.isExpanded) {
+        drawer.style.display = "flex";
+        if (btn) btn.style.borderColor = "#ff007f";
+      } else {
+        drawer.style.display = "none";
+        if (btn) btn.style.borderColor = "#a855f7";
+      }
+      if (typeof window.updateChatStyle === "function") {
+        window.updateChatStyle();
+      }
+    },
     switchChannel(chan) {
-          this.channel = chan;
-          document.querySelectorAll(".chat-sub-tab").forEach(btn => btn.classList.remove("active"));
-          let activeBtn = document.getElementById("chat-tab-" + chan.toLowerCase());
-          if (activeBtn) {
-            activeBtn.classList.add("active");
-          }
-        },
+      this.channel = chan;
+      document
+        .querySelectorAll(".chat-sub-tab")
+        .forEach((btn) => btn.classList.remove("active"));
+      let activeBtn = document.getElementById("chat-tab-" + chan.toLowerCase());
+      if (activeBtn) {
+        activeBtn.classList.add("active");
+      }
+    },
     handleInputKeydown(e) {
       if (e.key === "Enter") {
         this.sendCurrentMessage();
       }
     },
     sendCurrentMessage() {
-          let input = document.getElementById("chat-message-input");
-          if (!input) return;
-          let msg = input.value.trim();
-          if (!msg) return;
+      let input = document.getElementById("chat-message-input");
+      if (!input) return;
+      let msg = input.value.trim();
+      if (!msg) return;
 
-          input.value = "";
-          let name = (window.playerStats && window.playerStats.playerName) || "Guest";
-          let color = (window.playerStats && window.playerStats.playerName === "Guest") ? "#7f8c8d" : "#ffd700";
+      input.value = "";
+      let name =
+        (window.playerStats && window.playerStats.playerName) || "Guest";
+      let color =
+        window.playerStats && window.playerStats.playerName === "Guest"
+          ? "#7f8c8d"
+          : "#ffd700";
 
-          this.pushMessage(name, msg, color);
-        },
+      this.pushMessage(name, msg, color);
+    },
     pushMessage(sender, text, color) {
       let container = document.getElementById("chat-messages-container");
       if (!container) return;
 
       let msgEl = document.createElement("div");
-      msgEl.style.cssText = "margin-bottom: 6px; font-size: 11px; line-height: 1.35; text-align: left; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 4px;";
+      msgEl.style.cssText =
+        "margin-bottom: 6px; font-size: 11px; line-height: 1.35; text-align: left; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 4px;";
       msgEl.innerHTML = `<strong style="color: ${color};">${sender}:</strong> <span style="color: #fff; white-space: normal; word-break: break-word;">${window.escapeHTML(text)}</span>`;
 
       container.appendChild(msgEl);
       container.scrollTop = container.scrollHeight;
     },
     renderWelcome() {
-      this.pushMessage("System", "Welcome to the real-time chat network! Synchronizing channels...", "#e67e22");
-    }
+      this.pushMessage(
+        "System",
+        "Welcome to the real-time chat network! Synchronizing channels...",
+        "#e67e22",
+      );
+    },
   };
 }
 
 // --- HIGH-FIDELITY FORGE LIVE PREVIEW GENERATOR ---
 window.generateForgePreviewHtml = function (item, currentLvl, nextLvl) {
-  if (!item) return `<div style="color:#666; font-style:italic; padding: 15px 0; text-align:center;">No item equipped in this slot.</div>`;
+  if (!item)
+    return `<div style="color:#666; font-style:italic; padding: 15px 0; text-align:center;">No item equipped in this slot.</div>`;
 
   let runBonus = 0;
   if (
@@ -16703,7 +16819,8 @@ window.generateForgePreviewHtml = function (item, currentLvl, nextLvl) {
     window.cachedPlayerStats.crucibleSlotBonuses &&
     item.isEquippedSlot
   ) {
-    runBonus = window.cachedPlayerStats.crucibleSlotBonuses[item.isEquippedSlot] || 0;
+    runBonus =
+      window.cachedPlayerStats.crucibleSlotBonuses[item.isEquippedSlot] || 0;
   }
 
   let curMult = 1.0 + currentLvl * 0.01 + runBonus;
@@ -16713,7 +16830,8 @@ window.generateForgePreviewHtml = function (item, currentLvl, nextLvl) {
   let affixesHtml = [];
 
   // Helper to format values cleanly
-  let formatVal = (v, isPct) => isPct ? Math.round(v * 100) + "%" : window.formatNumber(Math.ceil(v));
+  let formatVal = (v, isPct) =>
+    isPct ? Math.round(v * 100) + "%" : window.formatNumber(Math.ceil(v));
 
   // 1. Process Base Properties
   const baseStatsKeys = [
@@ -16723,10 +16841,10 @@ window.generateForgePreviewHtml = function (item, currentLvl, nextLvl) {
     { key: "baseMoveSpeed", label: "Speed", icon: "moveSpeed" },
     { key: "baseBlock", label: "Block Rate", icon: "block", isPct: true },
     { key: "baseParry", label: "Parry Rate", icon: "parry", isPct: true },
-    { key: "baseInt", label: "Intelligence", icon: "int" }
+    { key: "baseInt", label: "Intelligence", icon: "int" },
   ];
 
-  baseStatsKeys.forEach(s => {
+  baseStatsKeys.forEach((s) => {
     let baseVal = item[s.key] || 0;
     if (baseVal > 0) {
       let curVal = baseVal * curMult;
@@ -16764,21 +16882,35 @@ window.generateForgePreviewHtml = function (item, currentLvl, nextLvl) {
     { key: "critDamage", label: "Crit Multi", isPct: true },
     { key: "block", label: "Block Rate", isPct: true, baseKey: "baseBlock" },
     { key: "parry", label: "Parry Rate", isPct: true, baseKey: "baseParry" },
-    { key: "activeAttackSpeed", label: "Active Atk Spd", isPct: true, baseKey: "baseActiveSpeed" },
-    { key: "idleAttackSpeed", label: "Idle Atk Spd", isPct: true, baseKey: "baseIdleSpeed" },
+    {
+      key: "activeAttackSpeed",
+      label: "Active Atk Spd",
+      isPct: true,
+      baseKey: "baseActiveSpeed",
+    },
+    {
+      key: "idleAttackSpeed",
+      label: "Idle Atk Spd",
+      isPct: true,
+      baseKey: "baseIdleSpeed",
+    },
     { key: "dropRate", label: "Drop Rate", isPct: true },
     { key: "quality", label: "Drop Quality", isPct: true },
     { key: "goldMulti", label: "Gold Multi", isPct: true },
     { key: "rareSpawn", label: "Rare Spawn", isPct: true, isDoublePct: true },
-    { key: "fairySpawn", label: "Fairy Spawn", isPct: true }
+    { key: "fairySpawn", label: "Fairy Spawn", isPct: true },
   ];
 
-  statsKeys.forEach(s => {
+  statsKeys.forEach((s) => {
     let totalVal = item[s.key] || 0;
     let baseVal = s.baseKey ? item[s.baseKey] || 0 : 0;
     let affixVal = totalVal - baseVal;
 
-    if (affixVal > 0.0001 || ((s.key === "activeAttackSpeed" || s.key === "idleAttackSpeed") && affixVal > 0)) {
+    if (
+      affixVal > 0.0001 ||
+      ((s.key === "activeAttackSpeed" || s.key === "idleAttackSpeed") &&
+        affixVal > 0)
+    ) {
       let curVal = affixVal * curMult;
       let newVal = affixVal * nextMult;
       let diff = newVal - curVal;
@@ -16790,8 +16922,12 @@ window.generateForgePreviewHtml = function (item, currentLvl, nextLvl) {
           ? `+${Math.round(diff * 100)}%`
           : `+${window.formatNumber(Math.ceil(diff))}`;
 
-      let curStr = s.isDoublePct ? `+${(curVal * 100).toFixed(2)}%` : formatVal(curVal, s.isPct);
-      let newStr = s.isDoublePct ? `+${(newVal * 100).toFixed(2)}%` : formatVal(newVal, s.isPct);
+      let curStr = s.isDoublePct
+        ? `+${(curVal * 100).toFixed(2)}%`
+        : formatVal(curVal, s.isPct);
+      let newStr = s.isDoublePct
+        ? `+${(newVal * 100).toFixed(2)}%`
+        : formatVal(newVal, s.isPct);
 
       affixesHtml.push(`
         <div style="display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.02); padding-bottom:3px;">
@@ -16807,21 +16943,26 @@ window.generateForgePreviewHtml = function (item, currentLvl, nextLvl) {
   });
 
   let nameColor = window.getTierColor(item.statsRolled);
-  let starsLabel = item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
+  let starsLabel =
+    item.statsRolled === "UNIQUE"
+      ? "UNIQUE"
+      : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
 
-  let baseSectionHtml = baseStatsHtml.length > 0
-    ? `<div style="margin-bottom:8px;">
+  let baseSectionHtml =
+    baseStatsHtml.length > 0
+      ? `<div style="margin-bottom:8px;">
          <strong style="color:#3498db; font-size:10px; display:block; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase;">📊 BASE PROPERTIES:</strong>
          ${baseStatsHtml.join("")}
        </div>`
-    : "";
+      : "";
 
-  let affixSectionHtml = affixesHtml.length > 0
-    ? `<div style="margin-bottom:8px;">
+  let affixSectionHtml =
+    affixesHtml.length > 0
+      ? `<div style="margin-bottom:8px;">
          <strong style="color:#e67e22; font-size:10px; display:block; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase;">🎲 EXTENDED AFFIXES:</strong>
          ${affixesHtml.join("")}
        </div>`
-    : "";
+      : "";
 
   let setSectionHtml = "";
   let setName = window.getItemSetName ? window.getItemSetName(item) : null;
@@ -16912,79 +17053,183 @@ window.HoorTutorial = {
   highlightedElements: [],
   originalStyles: null,
 
+  getActiveTab() {
+    let activeContent = document.querySelector(".tab-content.active");
+    if (!activeContent) return "hero";
+    return activeContent.id.replace("tab-", "");
+  },
+
   // Short, punchy, classic retro-RPG dialogues with targeted focus selectors
   steps: {
-    "start": {
+    start: {
       title: "Hoor",
       avatar: "🏅",
       text: "Well, look who finally crawled out of the tavern. I'm Hoor. If you want to survive out here, you'd better start swinging. Tap the screen or hold Space to help your auto-attacks out.",
-      trigger: () => window.playerStats.totalLifetimeKills === 0 && window.playerStats.stage === 1,
-      highlightSelector: null
+      trigger: () =>
+        window.playerStats.totalLifetimeKills === 0 &&
+        window.playerStats.stage === 1 &&
+        window.HoorTutorial.getActiveTab() === "hero",
+      highlightSelector: null,
     },
-    "level_up": {
+    level_up: {
       title: "Hoor",
       avatar: "🏅",
-      text: "You leveled up! You've been awarded 6 Skill Points (SP). Spend them on Strength, Dexterity, or Intelligence in the Attribute Matrix to increase your combat power.",
-      trigger: () => window.playerStats.level > 1 && (window.playerStats.sp || 0) >= 6,
-      setup: () => {
-        if (typeof window.switchTab === "function") {
-          window.switchTab("hero");
-        }
-      },
-      highlightSelector: ".stats-panel-right"
+      text: "You leveled up! You've been awarded 6 Skill Points (SP). Click on the Hero tab to spend them in the Attribute Matrix and increase your combat power.",
+      trigger: () =>
+        window.playerStats.level > 1 && (window.playerStats.sp || 0) >= 6,
+      highlightSelector: "button[onclick*='hero']",
     },
-    "tab_hero": {
+    tab_hero: {
       title: "Hoor",
       avatar: "🏅",
       text: "Your core attributes are here. Spend your Skill Points (SP) on the Attribute Matrix: STR increases your Attack and Max HP multipliers, DEX boosts Crit Chance/Damage and Movement Speed, while INT powers up your Block, Parry, and Fairy Spawn rates.",
-      trigger: () => window.playerStats.visitedTabs.includes("hero"),
-      setup: () => {
-        if (typeof window.switchTab === "function") {
-          window.switchTab("hero");
-        }
-      },
-      highlightSelector: ".stats-panel-right"
+      trigger: () =>
+        window.playerStats.visitedTabs.includes("hero") &&
+        window.HoorTutorial.getActiveTab() === "hero",
+      highlightSelector: ".stats-panel-right",
     },
-    "tab_inv": {
+    tab_inv: {
       title: "Hoor",
       avatar: "🏅",
       text: "Your bag holds all your spoils. Don't worry about overflow—any new equipment picked up when your bag is full is automatically salvaged into Gold, Souls, and upgrade scraps based on your Auto-Salvage Threshold at the bottom of the tab! Locked items are always safe.",
-      trigger: () => window.playerStats.visitedTabs.includes("inv"),
-      setup: () => {
-        if (typeof window.switchTab === "function") {
-          window.switchTab("inv");
-        }
-      },
-      highlightSelector: "#bulk-salvage-bar"
+      trigger: () =>
+        window.playerStats.visitedTabs.includes("inv") &&
+        window.HoorTutorial.getActiveTab() === "inv",
+      highlightSelector: "#bulk-salvage-bar",
     },
-    "tab_forge": {
+    tab_forge: {
       title: "Hoor",
       avatar: "🏅",
       text: "This is the Forge. Instead of temporary individual item upgrades, we Attune the equipment slots themselves. Slot Attunement permanently multiplies the stats of any item you equip in that slot, and persists across item swaps and prestiges!",
-      trigger: () => window.playerStats.visitedTabs.includes("forge"),
-      setup: () => {
-        if (typeof window.switchTab === "function") {
-          window.switchTab("forge");
-        }
-      },
-      highlightSelector: "#forge-station-container"
+      trigger: () =>
+        window.playerStats.visitedTabs.includes("forge") &&
+        window.HoorTutorial.getActiveTab() === "forge",
+      highlightSelector: "#forge-station-container",
     },
-    "tab_altar": {
+    tab_altar: {
       title: "Hoor",
       avatar: "🏅",
       text: "The Altar of Rifts is where we summon Reality Rifts to hunt down Rift Guardians. Spend Ancient Cores to trigger Rift encounters. Slaying Rift Guardians yields valuable Eridium Shards, Gacha Keys, and legendary crafting scraps!",
-      trigger: () => window.playerStats.visitedTabs.includes("activities") && window.playerStats.level >= 25,
-      setup: () => {
-        if (typeof window.switchTab === "function") {
-          window.switchTab("activities");
-        }
-      },
-      highlightSelector: "#runs-sec-altar"
+      trigger: () =>
+        window.playerStats.visitedTabs.includes("activities") &&
+        window.HoorTutorial.getActiveTab() === "activities" &&
+        window.state.currentActivitiesSubTab === "ALTAR" &&
+        window.playerStats.level >= 25,
+      highlightSelector: "#runs-sec-altar",
+    },
+    quests_board: {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "Ah, the Kingdom's Quest Board! Complete Daily and Weekly objectives to earn Quest Points (QP) and Reward Sacks. Spend your QP in the Quest Shop below to buy premium reagents!",
+      trigger: () =>
+        document.getElementById("missions-draggable-window") !== null,
+      highlightSelector: "#missions-draggable-window",
+    },
+    dungeons_mode: {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "Welcome to the Infinite Caverns! Spend Dungeon Keys here to delve deep. You can find equipment, materials, and gold. Slot a Cavern Sigil below to scale your drops and gold multiplier!",
+      trigger: () =>
+        window.HoorTutorial.getActiveTab() === "activities" &&
+        window.state.currentActivitiesSubTab === "DUNGEONS",
+      highlightSelector: "#cavern-sigil-slot-container",
+    },
+    crucible_mode: {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "The Astral Crucible is an endless gladiatorial arena. Defeat waves of celestial monsters to earn Shards and Catalyst Cores. Each completed wave lets you draft powerful upgrade cards!",
+      trigger: () =>
+        window.HoorTutorial.getActiveTab() === "activities" &&
+        window.state.currentActivitiesSubTab === "CRUCIBLE",
+      highlightSelector: "#activities-sec-crucible",
+    },
+    prestige_tab: {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "This is the Altar of Ascension. Challenge the dragon Hooktail at the maximum stage you can survive. Slaying her lets you Ascend, granting permanent Prestige Points (PP) to invest in multipliers!",
+      trigger: () => window.HoorTutorial.getActiveTab() === "prestige",
+      highlightSelector: "#tab-prestige",
+    },
+    reforge_mode: {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "Reforging allows you to re-roll individual stats on your gear. Once you re-roll a stat line, all other lines on that item become locked! Reforging requires 1x Overlord's Sigil and Gold.",
+      trigger: () =>
+        window.HoorTutorial.getActiveTab() === "forge" &&
+        window.forgeMode === "reforge",
+      highlightSelector: "#forge-details",
+    },
+    tier_mode: {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "Rarity Awakening elevates your item's star rating (0★ to 5★). It permanently increases base parameters by +10% and immediately unlocks a brand new random stat line!",
+      trigger: () =>
+        window.HoorTutorial.getActiveTab() === "forge" &&
+        window.forgeMode === "tier",
+      highlightSelector: "#forge-details",
+    },
+    set_mode: {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "Set Re-Resonance lets you roll a different named set affiliation at random. Collect matching 2-piece and 3-piece sets to unlock massive passive combat bonuses!",
+      trigger: () =>
+        window.HoorTutorial.getActiveTab() === "forge" &&
+        window.forgeMode === "set",
+      highlightSelector: "#forge-details",
+    },
+    enchant_mode: {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "Celestial Enchanting targets an existing stat line at random and amplifies its value by a whopping +25%! Requires 1x Astral Essence and Slot Attunement Lv. 50.",
+      trigger: () =>
+        window.HoorTutorial.getActiveTab() === "forge" &&
+        window.forgeMode === "enchant",
+      highlightSelector: "#forge-details",
+    },
+    reset_enchant_mode: {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "Arcane Purge dispels all active enchantments from an item, restoring its stats to their original pre-enchanted baseline so you can re-enchant them.",
+      trigger: () =>
+        window.HoorTutorial.getActiveTab() === "forge" &&
+        window.forgeMode === "reset_enchant",
+      highlightSelector: "#forge-details",
+    },
+    shatter_mode: {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "Spectral Shatter permanently sacrifices an unequipped Unique weapon or armor piece to unlock its active passive effect inside your permanent Spectral Codex!",
+      trigger: () =>
+        window.HoorTutorial.getActiveTab() === "forge" &&
+        window.forgeMode === "shatter",
+      highlightSelector: "#forge-details",
+    },
+  },
+
+  init() {
+    window.playerStats.completedTutorialSteps =
+      window.playerStats.completedTutorialSteps || [];
+    window.playerStats.visitedTabs = window.playerStats.visitedTabs || [];
+    this.checkTriggers();
+  },
+
+  checkTriggers() {
+    if (window.isGamePaused && this.activeDialog) return;
+
+    for (let key in this.steps) {
+      if (window.playerStats.completedTutorialSteps.includes(key)) continue;
+
+      let step = this.steps[key];
+      if (step.trigger()) {
+        this.showDialog(key, step);
+        break;
+      }
     }
   },
 
   init() {
-    window.playerStats.completedTutorialSteps = window.playerStats.completedTutorialSteps || [];
+    window.playerStats.completedTutorialSteps =
+      window.playerStats.completedTutorialSteps || [];
     window.playerStats.visitedTabs = window.playerStats.visitedTabs || [];
     this.checkTriggers();
   },
@@ -17022,13 +17267,13 @@ window.HoorTutorial = {
       backdrop = document.createElement("div");
       backdrop.id = "tutorial-backdrop";
       backdrop.style.cssText = `
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(8, 5, 15, 0.65);
-        backdrop-filter: blur(4px);
-        z-index: 44000;
-        pointer-events: auto;
-      `;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(8, 5, 15, 0.45);
+            backdrop-filter: blur(1.5px);
+            z-index: 44000;
+            pointer-events: auto;
+          `;
       document.body.appendChild(backdrop);
     }
 
@@ -17047,13 +17292,14 @@ window.HoorTutorial = {
           zIndex: el.style.zIndex,
           boxShadow: el.style.boxShadow,
           borderColor: el.style.borderColor,
-          transition: el.style.transition
+          transition: el.style.transition,
         };
 
         el.style.position = "relative";
         el.style.zIndex = "44500";
         el.style.transition = "box-shadow 0.3s, border-color 0.3s";
-        el.style.boxShadow = "0 0 15px #ffd700, inset 0 0 10px rgba(255, 215, 0, 0.5)";
+        el.style.boxShadow =
+          "0 0 15px #ffd700, inset 0 0 10px rgba(255, 215, 0, 0.5)";
         el.style.borderColor = "#ffd700";
         this.highlightedElements.push(el);
       }
@@ -17158,14 +17404,18 @@ window.HoorTutorial = {
           window.setPauseState(false);
           window.updateUI();
           window.saveGame();
-        }
+        },
       );
     }
-  }
+  },
 };
 
 /* --- FULL-SCREEN CHAINS SHATTERING UNLOCK ANIMATION ENGINE --- */
-window.playGlobalUnlockAnimation = function (title, iconSymbol = "🔮", callback = null) {
+window.playGlobalUnlockAnimation = function (
+  title,
+  iconSymbol = "🔮",
+  callback = null,
+) {
   let overlay = document.getElementById("unlock-animation-overlay");
   if (overlay) overlay.remove();
 
@@ -17265,8 +17515,8 @@ window.playGlobalUnlockAnimation = function (title, iconSymbol = "🔮", callbac
           window.randFloat(2, 5),
           Math.random() > 0.4 ? "#f1c40f" : "#fff",
           1,
-          window.randInt(30, 50)
-        )
+          window.randInt(30, 50),
+        ),
       );
     }
 

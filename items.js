@@ -603,16 +603,20 @@ window.renderForgeTab = function () {
       );
 
     let eqItem = window.equippedSlots[slotKey];
-        let liveComparisonHtml = "";
-        if (typeof window.generateForgePreviewHtml === "function") {
-          liveComparisonHtml = window.generateForgePreviewHtml(eqItem, lvl, lvl + 1);
-        } else {
-          liveComparisonHtml = `
+    let liveComparisonHtml = "";
+    if (typeof window.generateForgePreviewHtml === "function") {
+      liveComparisonHtml = window.generateForgePreviewHtml(
+        eqItem,
+        lvl,
+        lvl + 1,
+      );
+    } else {
+      liveComparisonHtml = `
             <div style="margin-top:12px; padding:10px; background:#111; border:1px dashed #444; border-radius:6px; font-size:10.5px; color:#aaa; text-align:center;">
               No item currently equipped in this slot.<br>Attunement multiplier (+${lvl}%) is fully prepared and waiting.
             </div>
           `;
-        }
+    }
 
     detailEl.innerHTML = `
       <div style="font-weight:bold; font-size:13px; color:#df9ffb; border-bottom:1px solid #333; padding-bottom:4px; margin-bottom:10px; text-align:left;">${displayLabel}</div>
@@ -4657,7 +4661,10 @@ window.buyShopItem = function (index) {
   window.frozenItemDb[item.id] = window.cloneItemForTooltip(item);
 
   window.pushHeaderToast(`🛒 Purchased ${item.name}!`, "#2ecc71");
-  if (window.SoundManager && typeof window.SoundManager.playLootDrop === "function") {
+  if (
+    window.SoundManager &&
+    typeof window.SoundManager.playLootDrop === "function"
+  ) {
     window.SoundManager.playLootDrop(item.statsRolled);
   } else if (window.SoundManager) {
     window.SoundManager.play("fairy");
