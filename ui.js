@@ -8909,7 +8909,7 @@ window.makeWindowDraggable = function (el, handle) {
                 };
 
   handle.addEventListener("pointerdown", function (e) {
-    if (e.button !== 0) return;
+                  if (e.pointerType === "mouse" && e.button !== 0) return; // Only process left click
     if (
       e.target.closest("button") ||
       e.target.closest("input") ||

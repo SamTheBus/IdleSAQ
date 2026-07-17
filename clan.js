@@ -2133,9 +2133,10 @@ window.confirmResearchDonateMax = function (
   let accentColor = resType === "gold" ? "#f1c40f" : "#9b59b6";
 
   if (resType === "gold") {
-    personalBalance = window.playerStats.coins || 0;
-    rawName = "Gold";
-  } else {
+      let coins = BigNum.from(window.playerStats.coins);
+      personalBalance = Number(coins.m * Math.pow(10, Math.min(15, coins.e))) || 0;
+      rawName = "Gold";
+    } else {
     let rawSoulName =
       skillKey === "steel_phalanx" || skillKey === "vitality_well"
         ? "Monster Soul"
@@ -2232,9 +2233,10 @@ window.openHearthDonateModal = function (resType) {
   let accentColor = resType === "gold" ? "#f1c40f" : "#9b59b6";
 
   if (resType === "gold") {
-    personalBalance = window.playerStats.coins || 0;
-    rawName = "Gold";
-  } else {
+      let coins = BigNum.from(window.playerStats.coins);
+      personalBalance = Number(coins.m * Math.pow(10, Math.min(15, coins.e))) || 0;
+      rawName = "Gold";
+    } else {
     // Prompt choice of Monster or Luminous Souls
     window.showCustomConfirm(
       "Infuse Hearth Souls",

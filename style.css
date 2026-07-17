@@ -1927,17 +1927,17 @@ summary {
   }
 
   /* Snaps absolute draggable windows into fixed centered overlays on mobile */
-    .draggable-window {
-      position: fixed !important;
-      left: 2.5vw !important;
-      right: auto !important;
-      top: 10% !important;
-      width: 95vw !important;
-      max-width: 95vw !important;
-      transform: none !important;
-      height: auto !important;
-      max-height: 80vh !important;
-    }
+      .draggable-window:not(#premium-chat-drawer) {
+        position: fixed !important;
+        left: 2.5vw !important;
+        right: auto !important;
+        top: 10% !important;
+        width: 95vw !important;
+        max-width: 95vw !important;
+        transform: none !important;
+        height: auto !important;
+        max-height: 80vh !important;
+      }
     #clan-draggable-window {
       width: 95vw !important;
     }

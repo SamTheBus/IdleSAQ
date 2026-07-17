@@ -348,22 +348,29 @@ window.GameState = {
     let xpReq = BigNum.from(window.playerStats.xpReq || 100);
 
     // Process potential consecutive level-ups via a loop (important for offline catch-up)
-    while (xp.gte(xpReq)) {
-      xp = xp.sub(xpReq);
-      window.playerStats.level++;
-      window.playerStats.sp += 6; // Award 6 Skill Points per level up
+            while (xp.gte(xpReq)) {
+              xp = xp.sub(xpReq);
+              window.playerStats.level++;
 
-      // Keep active UI Attribute Matrix draft allocations in sync with each consecutive level-up
-      if (window.draftAllocations !== null) {
-        window.draftSP += 6;
-      }
+              // Initialize maxLevel safety fallback
+              window.playerStats.maxLevel = Math.max(window.playerStats.maxLevel || 1, window.playerStats.level - 1);
 
-      // Calculate next xpReq safely using BigNum exponential power scaling
-      xpReq = BigNum.from(100).mul(
-        BigNum.from(1.2).pow(window.playerStats.level - 1),
-      );
-      leveledUp = true;
-    }
+              if (window.playerStats.level > window.playerStats.maxLevel) {
+                window.playerStats.maxLevel = window.playerStats.level;
+                window.playerStats.sp += 6; // Only award SP if we exceed our lifetime peak level!
+
+                // Keep active UI Attribute Matrix draft allocations in sync with each consecutive level-up
+                if (window.draftAllocations !== null) {
+                  window.draftSP += 6;
+                }
+              }
+
+              // Calculate next xpReq safely using BigNum exponential power scaling
+              xpReq = BigNum.from(100).mul(
+                BigNum.from(1.2).pow(window.playerStats.level - 1),
+              );
+              leveledUp = true;
+            }
 
     if (leveledUp) {
       window.playerStats.xp = xp;
@@ -2029,6 +2036,7 @@ window.CRUCIBLE_DRAFT_POOL = [
 ];
 
 window.playerStats = {
+  maxLevel: 1,
   lastDailyLoginDayStr: "",
   loginStreak: 0,
   loginClaimedToday: false,
