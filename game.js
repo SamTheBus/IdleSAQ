@@ -673,11 +673,14 @@ window.SaveManager = {
         window.playerStats.crucibleKills = 0;
 
       if (!window.playerStats.level) {
-              window.playerStats.level = 1;
-              window.playerStats.xp = 0;
-              window.playerStats.sp = 0;
-            }
-            window.playerStats.maxLevel = Math.max(window.playerStats.maxLevel || 1, window.playerStats.level || 1);
+        window.playerStats.level = 1;
+        window.playerStats.xp = 0;
+        window.playerStats.sp = 0;
+      }
+      window.playerStats.maxLevel = Math.max(
+        window.playerStats.maxLevel || 1,
+        window.playerStats.level || 1,
+      );
 
       if (window.playerStats.achievementTimestamps === undefined) {
         window.playerStats.achievementTimestamps = {};
@@ -809,25 +812,29 @@ window.SaveManager = {
         window.playerStats.xpPotionStrength = 1.0;
 
       // Re-inflate serialized gold structures back into BigNum objects
-            window.playerStats.coins = BigNum.from(window.playerStats.coins);
-            window.playerStats.totalGoldEarned = BigNum.from(
-              window.playerStats.totalGoldEarned || 0,
-            );
-            window.playerStats.xp = BigNum.from(window.playerStats.xp || 0);
-            window.playerStats.xpReq = BigNum.from(window.playerStats.xpReq || 100);
+      window.playerStats.coins = BigNum.from(window.playerStats.coins);
+      window.playerStats.totalGoldEarned = BigNum.from(
+        window.playerStats.totalGoldEarned || 0,
+      );
+      window.playerStats.xp = BigNum.from(window.playerStats.xp || 0);
+      window.playerStats.xpReq = BigNum.from(window.playerStats.xpReq || 100);
 
-            // Sanitize stage parameters to primitive integers to prevent mathematical NaN/Infinity loops
-                        const forcePrimitiveNumber = (val) => {
-                          if (val === undefined || val === null) return 1;
-                          if (typeof val === "object" && val.m !== undefined) {
-                            return Number(val.m * Math.pow(10, val.e));
-                          }
-                          let num = Number(val);
-                          return isNaN(num) ? 1 : num;
-                        };
-                        window.playerStats.stage = forcePrimitiveNumber(window.playerStats.stage);
-                        window.playerStats.maxStage = forcePrimitiveNumber(window.playerStats.maxStage);
-                        window.playerStats.lifetimePeakStage = forcePrimitiveNumber(window.playerStats.lifetimePeakStage);
+      // Sanitize stage parameters to primitive integers to prevent mathematical NaN/Infinity loops
+      const forcePrimitiveNumber = (val) => {
+        if (val === undefined || val === null) return 1;
+        if (typeof val === "object" && val.m !== undefined) {
+          return Number(val.m * Math.pow(10, val.e));
+        }
+        let num = Number(val);
+        return isNaN(num) ? 1 : num;
+      };
+      window.playerStats.stage = forcePrimitiveNumber(window.playerStats.stage);
+      window.playerStats.maxStage = forcePrimitiveNumber(
+        window.playerStats.maxStage,
+      );
+      window.playerStats.lifetimePeakStage = forcePrimitiveNumber(
+        window.playerStats.lifetimePeakStage,
+      );
       if (window.playerStats.dropPotionTimer === undefined)
         window.playerStats.dropPotionTimer = 0;
       if (window.playerStats.dropPotionStrength === undefined)
@@ -838,11 +845,11 @@ window.SaveManager = {
         window.playerStats.qlyPotionStrength = 0.5;
 
       if (window.playerStats.unlockedAchievements === undefined)
-              window.playerStats.unlockedAchievements = [];
-            if (window.playerStats.unviewedAchievements === undefined)
-              window.playerStats.unviewedAchievements = [];
-            if (window.playerStats.visitedSubTabs === undefined)
-              window.playerStats.visitedSubTabs = [];
+        window.playerStats.unlockedAchievements = [];
+      if (window.playerStats.unviewedAchievements === undefined)
+        window.playerStats.unviewedAchievements = [];
+      if (window.playerStats.visitedSubTabs === undefined)
+        window.playerStats.visitedSubTabs = [];
       if (window.playerStats.chatFloatingMode === undefined)
         window.playerStats.chatFloatingMode = false;
       if (window.playerStats.chatX === undefined)
@@ -1728,29 +1735,35 @@ window.SaveManager = {
               }
 
               // Show a brief wiping indicator
-                      if (typeof window.pushHeaderToast === "function") {
-                        window.pushHeaderToast("Purging server database, please wait...", "#ffd700");
-                      }
+              if (typeof window.pushHeaderToast === "function") {
+                window.pushHeaderToast(
+                  "Purging server database, please wait...",
+                  "#ffd700",
+                );
+              }
 
-                      // Force the page reload to wait until the cloud wipe resolves or fails
-                      fetch(`${window.SaveManager.serverUrl}/api/wipe-save`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ userId }),
-                      })
-                        .then((response) => response.json())
-                        .then((data) => {
-                          if (data.success) {
-                            console.log("Database wiped successfully on the server.");
-                          } else {
-                            console.warn("Server database wipe returned false:", data.error);
-                          }
-                          performLocalWipe();
-                        })
-                        .catch((err) => {
-                          console.error("Cloud wipe request failed or timed out:", err);
-                          performLocalWipe(); // Proceed with local wipe even if the server is unreachable
-                        });
+              // Force the page reload to wait until the cloud wipe resolves or fails
+              fetch(`${window.SaveManager.serverUrl}/api/wipe-save`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    console.log("Database wiped successfully on the server.");
+                  } else {
+                    console.warn(
+                      "Server database wipe returned false:",
+                      data.error,
+                    );
+                  }
+                  performLocalWipe();
+                })
+                .catch((err) => {
+                  console.error("Cloud wipe request failed or timed out:", err);
+                  performLocalWipe(); // Proceed with local wipe even if the server is unreachable
+                });
             },
           );
         },
@@ -2362,16 +2375,16 @@ window.onload = function () {
   }
 
   // Setup non-blocking background auto-save loop every 60 seconds
-    setInterval(() => {
-      if (!window.isGamePaused && typeof window.saveGame === "function") {
-        window.saveGame();
-      }
-    }, 60000);
+  setInterval(() => {
+    if (!window.isGamePaused && typeof window.saveGame === "function") {
+      window.saveGame();
+    }
+  }, 60000);
 
-    window.updateStickyCanvasStyle();
-      if (typeof window.updateChatStyle === "function") {
-        window.updateChatStyle();
-      }
+  window.updateStickyCanvasStyle();
+  if (typeof window.updateChatStyle === "function") {
+    window.updateChatStyle();
+  }
   if (typeof window.updateDpsOverlayStyle === "function") {
     window.updateDpsOverlayStyle();
   }
@@ -3016,10 +3029,10 @@ function update() {
       }
     } else {
       if (window.playerStats.watchTick >= 1200) {
-                  window.playerStats.watchTick = 0;
-                  let pResolved = window.resolvePlayerStats();
-                  let extraFrames = Math.floor(pResolved.int * 0.05);
-                  window.playerStats.watchActiveTimer = Math.min(480, 240 + extraFrames);
+        window.playerStats.watchTick = 0;
+        let pResolved = window.resolvePlayerStats();
+        let extraFrames = Math.floor(pResolved.int * 0.05);
+        window.playerStats.watchActiveTimer = Math.min(480, 240 + extraFrames);
         window.pushLog(
           "<span style='color:#f1c40f; font-weight:bold;'>[CHRONOS WATCH] A Temporal Fracture opened! speeds dilated (+15% speed, -25% enemy speed).</span>",
         );

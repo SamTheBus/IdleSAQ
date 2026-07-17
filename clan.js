@@ -197,11 +197,11 @@ window.toggleClanHall = function () {
     window.clanActiveTab = "OVERVIEW";
 
     let win = document.createElement("div");
-        win.id = "clan-draggable-window";
-        win.className = "draggable-window";
-        win.style.left = "80px";
-        win.style.top = "60px";
-        win.style.width = "550px";
+    win.id = "clan-draggable-window";
+    win.className = "draggable-window";
+    win.style.left = "80px";
+    win.style.top = "60px";
+    win.style.width = "550px";
 
     win.innerHTML = `
       <div class="draggable-header" id="clan-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
@@ -984,26 +984,31 @@ window.renderClanDashboard = function (clan, members, invitations) {
     }
 
     // Direct, dynamic Stage-scaling calculation for display boxes
-        let peakStage = window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-        if (peakStage && typeof peakStage === "object") {
-          peakStage = Number(peakStage.m * Math.pow(10, peakStage.e)) || 1;
-        }
-        peakStage = Number(peakStage);
-        if (isNaN(peakStage) || peakStage < 1) peakStage = 1;
+    let peakStage =
+      window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+    if (peakStage && typeof peakStage === "object") {
+      peakStage = Number(peakStage.m * Math.pow(10, peakStage.e)) || 1;
+    }
+    peakStage = Number(peakStage);
+    if (isNaN(peakStage) || peakStage < 1) peakStage = 1;
 
-        // Use robust BigNum instances to calculate scaling costs without floating-point overflow
-        let costGoldSmallBig = BigNum.from(10000).mul(BigNum.from(1.045).pow(peakStage));
-        let costGoldLargeBig = BigNum.from(50000).mul(BigNum.from(1.045).pow(peakStage));
-        let goldOwnedBig = BigNum.from(goldOwned);
+    // Use robust BigNum instances to calculate scaling costs without floating-point overflow
+    let costGoldSmallBig = BigNum.from(10000).mul(
+      BigNum.from(1.045).pow(peakStage),
+    );
+    let costGoldLargeBig = BigNum.from(50000).mul(
+      BigNum.from(1.045).pow(peakStage),
+    );
+    let goldOwnedBig = BigNum.from(goldOwned);
 
-        let canAffordSmall = goldOwnedBig.gte(costGoldSmallBig);
-        let canAffordLarge = goldOwnedBig.gte(costGoldLargeBig);
+    let canAffordSmall = goldOwnedBig.gte(costGoldSmallBig);
+    let canAffordLarge = goldOwnedBig.gte(costGoldLargeBig);
 
-        // Stringify exponential parameters to safely pass through inline click handlers on mobile WebViews
-        let costGoldSmallStr = costGoldSmallBig.m + "e" + costGoldSmallBig.e;
-        let costGoldLargeStr = costGoldLargeBig.m + "e" + costGoldLargeBig.e;
+    // Stringify exponential parameters to safely pass through inline click handlers on mobile WebViews
+    let costGoldSmallStr = costGoldSmallBig.m + "e" + costGoldSmallBig.e;
+    let costGoldLargeStr = costGoldLargeBig.m + "e" + costGoldLargeBig.e;
 
-        tabContentHtml = `
+    tabContentHtml = `
                 <!-- Cooperative Vault Chest Progression Card -->
                 <div class="chiseled-stone-panel" style="margin-bottom:12px; padding:12px; border-color:#d4af3780;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -1784,20 +1789,29 @@ window.executeClanDonate = function (type, amount) {
   fetch(`${window.GAME_SERVER_URL}/api/clan/donate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, resType: type, amount: amountBig.m * Math.pow(10, amountBig.e) }),
+    body: JSON.stringify({
+      userId,
+      resType: type,
+      amount: amountBig.m * Math.pow(10, amountBig.e),
+    }),
   })
     .then((r) => r.json())
     .then((data) => {
       if (data.success) {
         let calculatedRenown = 0;
         if (type === "gold") {
-          let peakStage = window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+          let peakStage =
+            window.playerStats.lifetimePeakStage ||
+            window.playerStats.stage ||
+            1;
           if (peakStage && typeof peakStage === "object") {
             peakStage = Number(peakStage.m * Math.pow(10, peakStage.e)) || 1;
           }
           peakStage = Number(peakStage);
           if (isNaN(peakStage) || peakStage < 1) peakStage = 1;
-          let costGoldLargeBig = BigNum.from(50000).mul(BigNum.from(1.045).pow(peakStage));
+          let costGoldLargeBig = BigNum.from(50000).mul(
+            BigNum.from(1.045).pow(peakStage),
+          );
           calculatedRenown = amountBig.gte(costGoldLargeBig) ? 300 : 50;
         } else if (type === "souls") {
           calculatedRenown = amountBig.gte(250) ? 1250 : 250;
@@ -2133,10 +2147,11 @@ window.confirmResearchDonateMax = function (
   let accentColor = resType === "gold" ? "#f1c40f" : "#9b59b6";
 
   if (resType === "gold") {
-      let coins = BigNum.from(window.playerStats.coins);
-      personalBalance = Number(coins.m * Math.pow(10, Math.min(15, coins.e))) || 0;
-      rawName = "Gold";
-    } else {
+    let coins = BigNum.from(window.playerStats.coins);
+    personalBalance =
+      Number(coins.m * Math.pow(10, Math.min(15, coins.e))) || 0;
+    rawName = "Gold";
+  } else {
     let rawSoulName =
       skillKey === "steel_phalanx" || skillKey === "vitality_well"
         ? "Monster Soul"
@@ -2233,10 +2248,11 @@ window.openHearthDonateModal = function (resType) {
   let accentColor = resType === "gold" ? "#f1c40f" : "#9b59b6";
 
   if (resType === "gold") {
-      let coins = BigNum.from(window.playerStats.coins);
-      personalBalance = Number(coins.m * Math.pow(10, Math.min(15, coins.e))) || 0;
-      rawName = "Gold";
-    } else {
+    let coins = BigNum.from(window.playerStats.coins);
+    personalBalance =
+      Number(coins.m * Math.pow(10, Math.min(15, coins.e))) || 0;
+    rawName = "Gold";
+  } else {
     // Prompt choice of Monster or Luminous Souls
     window.showCustomConfirm(
       "Infuse Hearth Souls",

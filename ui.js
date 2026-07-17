@@ -4127,9 +4127,14 @@ window.executePrestigeAscension = function () {
     "#9b59b6",
     function () {
       // Perform Ascension Reset
-      window.playerStats.prestigePoints = (window.playerStats.prestigePoints || 0) + deltaPP;
-      window.playerStats.prestigeCount = (window.playerStats.prestigeCount || 0) + 1;
-      window.playerStats.highestPrestigeStageCleared = Math.max(window.playerStats.highestPrestigeStageCleared || 80, currentStage);
+      window.playerStats.prestigePoints =
+        (window.playerStats.prestigePoints || 0) + deltaPP;
+      window.playerStats.prestigeCount =
+        (window.playerStats.prestigeCount || 0) + 1;
+      window.playerStats.highestPrestigeStageCleared = Math.max(
+        window.playerStats.highestPrestigeStageCleared || 80,
+        currentStage,
+      );
 
       window.playerStats.level = 1;
       window.playerStats.xp = 0;
@@ -4181,16 +4186,17 @@ window.executePrestigeAscension = function () {
       `;
       document.body.appendChild(modal);
 
-      document.getElementById("btn-prestige-ascend-confirm").onclick = function () {
-        modal.remove();
-        window.isGamePaused = false;
-        window.checkAchievements();
-        window.updateUI();
-        window.renderPrestigeTab();
-        window.renderInventory();
-        window.saveGame();
-      };
-    }
+      document.getElementById("btn-prestige-ascend-confirm").onclick =
+        function () {
+          modal.remove();
+          window.isGamePaused = false;
+          window.checkAchievements();
+          window.updateUI();
+          window.renderPrestigeTab();
+          window.renderInventory();
+          window.saveGame();
+        };
+    },
   );
 };
 
@@ -6785,22 +6791,22 @@ window.switchSubTab = function (subTabId) {
     subTabId === "USE" ? "block" : "none";
 
   // Register visited sub-tab
-    if (window.playerStats && window.playerStats.visitedSubTabs) {
-      let subTabKey = "sub_" + subTabId.toLowerCase();
-      if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
-        window.playerStats.visitedSubTabs.push(subTabKey);
-      }
+  if (window.playerStats && window.playerStats.visitedSubTabs) {
+    let subTabKey = "sub_" + subTabId.toLowerCase();
+    if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
+      window.playerStats.visitedSubTabs.push(subTabKey);
     }
+  }
 
-    // Evaluate triggers on every single sub-tab transition
-    setTimeout(() => {
-      if (window.HoorTutorial) {
-        window.HoorTutorial.checkTriggers();
-      }
-    }, 100);
+  // Evaluate triggers on every single sub-tab transition
+  setTimeout(() => {
+    if (window.HoorTutorial) {
+      window.HoorTutorial.checkTriggers();
+    }
+  }, 100);
 
-    window.updateUI();
-  };
+  window.updateUI();
+};
 
 window.switchMarketSubTab = function (subTabId) {
   document
@@ -6856,22 +6862,22 @@ window.switchMarketSubTab = function (subTabId) {
   }
 
   // Register visited sub-tab
-    if (window.playerStats && window.playerStats.visitedSubTabs) {
-      let subTabKey = "market_" + subTabId.toLowerCase();
-      if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
-        window.playerStats.visitedSubTabs.push(subTabKey);
-      }
+  if (window.playerStats && window.playerStats.visitedSubTabs) {
+    let subTabKey = "market_" + subTabId.toLowerCase();
+    if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
+      window.playerStats.visitedSubTabs.push(subTabKey);
     }
+  }
 
-    // Evaluate triggers on every single market sub-tab transition
-    setTimeout(() => {
-      if (window.HoorTutorial) {
-        window.HoorTutorial.checkTriggers();
-      }
-    }, 100);
+  // Evaluate triggers on every single market sub-tab transition
+  setTimeout(() => {
+    if (window.HoorTutorial) {
+      window.HoorTutorial.checkTriggers();
+    }
+  }, 100);
 
-    if (typeof window.hideTooltip === "function") window.hideTooltip();
-  };
+  if (typeof window.hideTooltip === "function") window.hideTooltip();
+};
 
 window.switchActivitiesSubTab = function (subTabId) {
   window.state.currentActivitiesSubTab = subTabId;
@@ -6904,22 +6910,22 @@ window.switchActivitiesSubTab = function (subTabId) {
   }
 
   // Register visited sub-tab
-    if (window.playerStats && window.playerStats.visitedSubTabs) {
-      let subTabKey = "activities_" + subTabId.toLowerCase();
-      if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
-        window.playerStats.visitedSubTabs.push(subTabKey);
-      }
+  if (window.playerStats && window.playerStats.visitedSubTabs) {
+    let subTabKey = "activities_" + subTabId.toLowerCase();
+    if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
+      window.playerStats.visitedSubTabs.push(subTabKey);
     }
+  }
 
-    // Evaluate triggers on every single activities sub-tab transition
-    setTimeout(() => {
-      if (window.HoorTutorial) {
-        window.HoorTutorial.checkTriggers();
-      }
-    }, 100);
+  // Evaluate triggers on every single activities sub-tab transition
+  setTimeout(() => {
+    if (window.HoorTutorial) {
+      window.HoorTutorial.checkTriggers();
+    }
+  }, 100);
 
-    if (typeof window.hideTooltip === "function") window.hideTooltip();
-  };
+  if (typeof window.hideTooltip === "function") window.hideTooltip();
+};
 
 window.toggleFullscreen = function () {
   if (!document.fullscreenElement) {
@@ -8877,39 +8883,45 @@ window.makeWindowDraggable = function (el, handle) {
   };
 
   const dragMove = (clientX, clientY) => {
-                  if (!isDragging) return;
+    if (!isDragging) return;
 
-                  let dx = clientX - startX;
-                  let dy = clientY - startY;
+    let dx = clientX - startX;
+    let dy = clientY - startY;
 
-                  let newLeft = initialLeft + dx;
-                  let newTop = initialTop + dy;
+    let newLeft = initialLeft + dx;
+    let newTop = initialTop + dy;
 
-                  let maxLeft = window.innerWidth - 40;
-                  let maxTop = window.innerHeight - 40;
-                  if (el.id === "premium-chat-drawer") {
-                    maxLeft = window.innerWidth - el.offsetWidth - 10;
-                    maxTop = window.innerHeight - el.offsetHeight - 10;
-                  }
+    let maxLeft = window.innerWidth - 40;
+    let maxTop = window.innerHeight - 40;
+    if (el.id === "premium-chat-drawer") {
+      maxLeft = window.innerWidth - el.offsetWidth - 10;
+      maxTop = window.innerHeight - el.offsetHeight - 10;
+    }
 
-                  newLeft = Math.max(el.id === "premium-chat-drawer" ? 10 : -el.offsetWidth + 40, Math.min(maxLeft, newLeft));
-                  newTop = Math.max(el.id === "premium-chat-drawer" ? 10 : 0, Math.min(maxTop, newTop));
+    newLeft = Math.max(
+      el.id === "premium-chat-drawer" ? 10 : -el.offsetWidth + 40,
+      Math.min(maxLeft, newLeft),
+    );
+    newTop = Math.max(
+      el.id === "premium-chat-drawer" ? 10 : 0,
+      Math.min(maxTop, newTop),
+    );
 
-                  el.style.left = newLeft + "px";
-                  el.style.top = newTop + "px";
-                };
+    el.style.left = newLeft + "px";
+    el.style.top = newTop + "px";
+  };
 
-                const dragEnd = () => {
-                  isDragging = false;
-                  if (el.id === "premium-chat-drawer") {
-                    window.playerStats.chatX = el.offsetLeft;
-                    window.playerStats.chatY = el.offsetTop;
-                    if (typeof window.saveGame === "function") window.saveGame();
-                  }
-                };
+  const dragEnd = () => {
+    isDragging = false;
+    if (el.id === "premium-chat-drawer") {
+      window.playerStats.chatX = el.offsetLeft;
+      window.playerStats.chatY = el.offsetTop;
+      if (typeof window.saveGame === "function") window.saveGame();
+    }
+  };
 
   handle.addEventListener("pointerdown", function (e) {
-                  if (e.pointerType === "mouse" && e.button !== 0) return; // Only process left click
+    if (e.pointerType === "mouse" && e.button !== 0) return; // Only process left click
     if (
       e.target.closest("button") ||
       e.target.closest("input") ||
@@ -10363,20 +10375,20 @@ window.toggleMissions = function () {
     `;
 
     document.getElementById("game-container").appendChild(win);
-      window.renderMissionsWindow();
-      window.makeWindowDraggable(
-        win,
-        document.getElementById("missions-win-handle"),
-      );
+    window.renderMissionsWindow();
+    window.makeWindowDraggable(
+      win,
+      document.getElementById("missions-win-handle"),
+    );
 
-      // Evaluate Quest Board tutorial trigger upon opening
-      setTimeout(() => {
-        if (window.HoorTutorial) {
-          window.HoorTutorial.checkTriggers();
-        }
-      }, 100);
-    }
-    };
+    // Evaluate Quest Board tutorial trigger upon opening
+    setTimeout(() => {
+      if (window.HoorTutorial) {
+        window.HoorTutorial.checkTriggers();
+      }
+    }, 100);
+  }
+};
 
 window.renderMissionsWindow = function () {
   let contentEl = document.getElementById("missions-win-content");
@@ -16610,7 +16622,8 @@ if (!window.ChatManager) {
       let btn = document.getElementById("btn-chat-toggle");
       if (!drawer) return;
 
-      let isHidden = drawer.style.display === "none" || drawer.style.display === "";
+      let isHidden =
+        drawer.style.display === "none" || drawer.style.display === "";
       if (isHidden) {
         drawer.style.display = "flex";
         if (btn) btn.style.borderColor = "#ff007f";

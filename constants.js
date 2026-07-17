@@ -1915,14 +1915,14 @@ window.AchievementsData = [
 
   // 13. COLOSSUS STRIKE (Single Hit) - Smooth Bridge
   {
-      id: "hit_1",
-      name: "Colossus Strike I",
-      icon: "⚔️",
-      desc: "Deal 150 single hit damage",
-      reqType: "single_hit",
-      reqValue: 150,
-      stats: { critChance: 0.002, critDamage: 0.01 },
-    },
+    id: "hit_1",
+    name: "Colossus Strike I",
+    icon: "⚔️",
+    desc: "Deal 150 single hit damage",
+    reqType: "single_hit",
+    reqValue: 150,
+    stats: { critChance: 0.002, critDamage: 0.01 },
+  },
   {
     id: "hit_2",
     name: "Colossus Strike II",

@@ -3602,23 +3602,23 @@ Object.assign(window.ForgeManager, {
     }
 
     // Register visited sub-tab
-        if (window.playerStats && window.playerStats.visitedSubTabs) {
-          let subTabKey = "forge_" + mode;
-          if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
-            window.playerStats.visitedSubTabs.push(subTabKey);
-          }
-        }
-
-        // Evaluate triggers on every single forge mode change
-        setTimeout(() => {
-          if (window.HoorTutorial) {
-            window.HoorTutorial.checkTriggers();
-          }
-        }, 100);
-
-        if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+    if (window.playerStats && window.playerStats.visitedSubTabs) {
+      let subTabKey = "forge_" + mode;
+      if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
+        window.playerStats.visitedSubTabs.push(subTabKey);
       }
-    });
+    }
+
+    // Evaluate triggers on every single forge mode change
+    setTimeout(() => {
+      if (window.HoorTutorial) {
+        window.HoorTutorial.checkTriggers();
+      }
+    }, 100);
+
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+  },
+});
 
 // Legacy Compatibility Aliases to protect references
 window.setForgeMode = (mode) => window.ForgeManager.setForgeMode(mode);
