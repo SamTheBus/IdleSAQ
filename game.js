@@ -78,17 +78,31 @@ window.removeWakeLockGestureListeners = function () {
   window.removeEventListener("keydown", window.wakeLockGestureHandler);
 };
 
-// Re-acquire lock dynamically when returning to focus tab
+// Handle tab visibility changes to pause audio and release wake locks when minimized
 document.addEventListener("visibilitychange", async () => {
   if (document.visibilityState === "visible") {
+    // Resume BGM and Web Audio context only if the player hasn't muted the game
+    if (window.MusicManager && window.MusicManager.audio && (!window.playerStats || !window.playerStats.mute)) {
+      window.MusicManager.audio.play().catch(() => {});
+    }
+    if (window.SoundManager && window.SoundManager.ctx) {
+      window.SoundManager.ctx.resume().catch(() => {});
+    }
+
     // iOS blocks immediate visibilitychange wake lock requests with NotAllowedError.
-    // Give it a 1000ms delay to let the OS restore context.
     setTimeout(async () => {
       if (window.playerStats && !window.wakeLockSentinel) {
         await window.requestWakeLock();
       }
     }, 1000);
   } else {
+    // Pause BGM and suspend Web Audio context to completely halt background audio and conserve resource/battery
+    if (window.MusicManager && window.MusicManager.audio) {
+      window.MusicManager.audio.pause();
+    }
+    if (window.SoundManager && window.SoundManager.ctx) {
+      window.SoundManager.ctx.suspend().catch(() => {});
+    }
     window.releaseWakeLock();
   }
 });
@@ -903,11 +917,13 @@ window.SaveManager = {
       if (window.playerStats.itemsSalvaged === undefined)
         window.playerStats.itemsSalvaged = 0;
       if (window.playerStats.volumeMaster === undefined)
-        window.playerStats.volumeMaster = 0.5;
-      if (window.playerStats.volumeSFX === undefined)
-        window.playerStats.volumeSFX = 0.8;
-      if (window.playerStats.mute === undefined)
-        window.playerStats.mute = false;
+              window.playerStats.volumeMaster = 0.5;
+            if (window.playerStats.volumeSFX === undefined)
+              window.playerStats.volumeSFX = 0.8;
+            if (window.playerStats.volumeMusic === undefined)
+              window.playerStats.volumeMusic = 0.5;
+            if (window.playerStats.mute === undefined)
+              window.playerStats.mute = false;
 
       if (
         window.playerStats.prestigeUpgrades &&

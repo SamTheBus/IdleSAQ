@@ -2143,9 +2143,10 @@ window.playerStats = {
   qlyPotionStrength: 0.5,
   autoSalvageThreshold: -1,
   volumeMaster: 0.5,
-  volumeSFX: 0.8,
-  mute: false,
-  ecoMode:
+        volumeSFX: 0.8,
+        volumeMusic: 0.5,
+        mute: false,
+        ecoMode:
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent,
     ),

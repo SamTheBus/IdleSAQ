@@ -1503,26 +1503,28 @@ window.MusicManager = {
     }
 
     // Resolve volume levels through settings
-    let isMuted = window.playerStats ? window.playerStats.mute : false;
-    let musicVolSetting = window.playerStats && window.playerStats.volumeMaster !== undefined ? window.playerStats.volumeMaster : 0.5;
+        let isMuted = window.playerStats ? window.playerStats.mute : false;
+        let musicVolSetting = window.playerStats && window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5;
 
-    // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
-    let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
+        // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
+        let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
 
-    if (this.currentState !== state) {
-      this.currentState = state;
-      console.log(`[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`);
-    }
+        if (this.currentState !== state) {
+          this.currentState = state;
+          console.log(`[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`);
+        }
 
-    // Apply exponential sweeps (Safari direct play ignores filters and uses direct audio element volume)
-    if (this.filter && this.filter.frequency) {
-      this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
-    }
-    if (this.gainNode && this.gainNode.gain) {
-      this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
-    } else if (this.audio) {
-      this.audio.volume = finalTargetVolume;
-    }
+        // Apply exponential sweeps
+        if (this.filter && this.filter.frequency) {
+          this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
+        }
+        if (this.gainNode && this.gainNode.gain) {
+          this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
+        }
+        // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
+        if (this.audio) {
+          this.audio.volume = finalTargetVolume;
+        }
 
     // Call next evaluation frame
     requestAnimationFrame(() => this.tick());
