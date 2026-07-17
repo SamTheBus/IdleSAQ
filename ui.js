@@ -11342,15 +11342,6 @@ window.openDailyRewardSack = function (specificName) {
     delete window.inventory.USE[itemToConsume];
   }
 
-  // Play opening sound
-  if (
-    window.SoundManager &&
-    typeof window.SoundManager.playLootDrop === "function"
-  ) {
-    window.SoundManager.playLootDrop(newEquip.statsRolled);
-  } else if (window.SoundManager) {
-    window.SoundManager.play("fairy");
-  }
   window.setPauseState(true);
 
   // Determine rewards (Standardized Daily QP and randomized pool rolls)
@@ -11395,6 +11386,16 @@ window.openDailyRewardSack = function (specificName) {
 
   window.inventory.EQUIP.push(newEquip);
   window.frozenItemDb[newEquip.id] = JSON.parse(JSON.stringify(newEquip));
+
+  // Play opening sound safely after the item is successfully initialized
+  if (
+    window.SoundManager &&
+    typeof window.SoundManager.playLootDrop === "function"
+  ) {
+    window.SoundManager.playLootDrop(newEquip.statsRolled);
+  } else if (window.SoundManager) {
+    window.SoundManager.play("fairy");
+  }
 
   const sackPool = [
     {

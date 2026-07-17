@@ -197,11 +197,11 @@ window.toggleClanHall = function () {
     window.clanActiveTab = "OVERVIEW";
 
     let win = document.createElement("div");
-    win.id = "clan-draggable-window";
-    win.className = "draggable-window";
-    win.style.left = "80px";
-    win.style.top = "60px";
-    win.style.width = "390px";
+        win.id = "clan-draggable-window";
+        win.className = "draggable-window";
+        win.style.left = "80px";
+        win.style.top = "60px";
+        win.style.width = "550px";
 
     win.innerHTML = `
       <div class="draggable-header" id="clan-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
@@ -762,11 +762,11 @@ window.renderClanDashboard = function (clan, members, invitations) {
     });
 
     tabContentHtml = `
-      ${leaderboardHtml}
-      <div style="max-height: 280px; overflow-y:auto; padding-right:4px;">
-          ${rosterHtml}
-      </div>
-    `;
+          ${leaderboardHtml}
+          <div style="display:flex; flex-direction:column; gap:4px;">
+              ${rosterHtml}
+          </div>
+        `;
 
     setTimeout(() => {
       members.forEach((m) => {
@@ -927,16 +927,16 @@ window.renderClanDashboard = function (clan, members, invitations) {
 
     tabContentHtml = `
                 <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.4;">
-                    <strong style="color:#df9ffb; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 2px rgba(155, 89, 182, 0.4));"><path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z"/></svg>
-                        Weekly Clan Quests
-                    </strong>
-                    Cooperate with your Clan to achieve these weekly active goals. Each completed quest yields massive rewards like **Gacha Keys, Catalyst Cores, Astral Essence, Eridium Shards, or PP** for every single member!
-                </div>
-                <div style="max-height: 280px; overflow-y:auto; padding-right:4px;">
-                    ${listHtml}
-                </div>
-              `;
+                                      <strong style="color:#df9ffb; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
+                                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; filter: drop-shadow(0 0 2px rgba(155, 89, 182, 0.4));"><path d="M12 2c-.5 5-4 8-8 8 4 0 7.5 3 8 8 .5-5 4-8 8-8-4 0-7.5-3-8-8z"/></svg>
+                                          Weekly Clan Quests
+                                      </strong>
+                                      Cooperate with your Clan to achieve these weekly active goals. Each completed quest yields massive rewards like **Gacha Keys, Catalyst Cores, Astral Essence, Eridium Shards, or PP** for every single member!
+                                  </div>
+                                  <div style="display:flex; flex-direction:column; gap:6px;">
+                                      ${listHtml}
+                                  </div>
+                                `;
   } else if (currentTab === "DONATE") {
     let goldOwned = window.playerStats.coins || 0;
     let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
@@ -1121,7 +1121,7 @@ window.renderClanDashboard = function (clan, members, invitations) {
                 ${
                   isLeader
                     ? `
-                    <div style="display:flex; flex-direction:column; gap:8px; text-align:left; max-height:280px; overflow-y:auto; padding-right:4px;">
+                    <div style="display:flex; flex-direction:column; gap:8px; text-align:left;">
                         <!-- Description -->
                         <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px;">
                             <label for="settings-clan-desc" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Custom Announcement / Desc:</label>
@@ -1362,8 +1362,8 @@ window.renderClanDashboard = function (clan, members, invitations) {
       `;
 
     tabContentHtml = `
-          <div style="display:flex; flex-direction:column; gap:10px; max-height:280px; overflow-y:auto; padding-right:4px;">
-              ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", "+" + ((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1) + "% Attack & Defense", clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                  ${getSkillUpgradeCardHtml("steel_phalanx", "Steel Phalanx", "+" + ((clan.skill_steel_phalanx || 0) * 0.5).toFixed(1) + "% Attack & Defense", clan.skill_steel_phalanx || 0, 50, "#e74c3c")}
               ${getSkillUpgradeCardHtml("vitality_well", "Vitality Well", "+" + ((clan.skill_vitality_well || 0) * 0.8).toFixed(1) + "% Max HP", clan.skill_vitality_well || 0, 50, "#3498db")}
               ${getSkillUpgradeCardHtml("prosperity_accord", "Prosperity Accord", "+" + ((clan.skill_prosperity_accord || 0) * 1.0).toFixed(1) + "% Gold Multiplier", clan.skill_prosperity_accord || 0, 30, "#f1c40f")}
               ${getSkillUpgradeCardHtml("voyagers_guidance", "Voyager's Guidance", "+" + ((clan.skill_voyagers_guidance || 0) * 0.5).toFixed(1) + "% Drop Rate & Quality", clan.skill_voyagers_guidance || 0, 30, "#2ecc71")}
@@ -1778,9 +1778,11 @@ window.executeClanDonate = function (type, amount) {
         else if (type === "luminous") cpGain = amount * 20;
 
         let calculatedRenown = 0;
-        if (type === "gold") {
-          calculatedRenown = amount === costGoldLarge ? 300 : 50;
-        } else if (type === "souls") {
+                    if (type === "gold") {
+                      let peakStage = window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+                      let costGoldLarge = Math.floor(50000 * Math.pow(1.045, peakStage));
+                      calculatedRenown = amount === costGoldLarge ? 300 : 50;
+                    } else if (type === "souls") {
           calculatedRenown = amount === 50 ? 250 : 1250;
         } else if (type === "luminous") {
           calculatedRenown = amount === 5 ? 750 : 3750;

@@ -427,6 +427,12 @@ canvas {
   flex-direction: column;
   overflow: hidden;
 }
+#clan-draggable-window {
+  width: 550px !important;
+}
+#clan-draggable-window .draggable-content {
+  max-height: 550px !important;
+}
 
 .draggable-header {
   background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);
@@ -1905,17 +1911,23 @@ summary {
   }
 
   /* Snaps absolute draggable windows into fixed centered overlays on mobile */
-  .draggable-window {
-    position: fixed !important;
-    left: 2.5vw !important;
-    right: auto !important;
-    top: 10% !important;
-    width: 95vw !important;
-    max-width: 95vw !important;
-    transform: none !important;
-    height: auto !important;
-    max-height: 80vh !important;
-  }
+    .draggable-window {
+      position: fixed !important;
+      left: 2.5vw !important;
+      right: auto !important;
+      top: 10% !important;
+      width: 95vw !important;
+      max-width: 95vw !important;
+      transform: none !important;
+      height: auto !important;
+      max-height: 80vh !important;
+    }
+    #clan-draggable-window {
+      width: 95vw !important;
+    }
+    #clan-draggable-window .draggable-content {
+      max-height: 60vh !important;
+    }
 }
 
 /* ==========================================================================
