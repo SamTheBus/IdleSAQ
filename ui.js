@@ -2663,45 +2663,40 @@ window.initChatDrag = function () {
   let header = document.getElementById("premium-chat-header");
   if (!drawer || !header) return;
 
-  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  header.style.touchAction = "none";
 
-  header.onmousedown = dragMouseDown;
-  header.ontouchstart = dragTouchStart;
+  let isDragging = false;
+  let startX = 0;
+  let startY = 0;
+  let initialLeft = 0;
+  let initialTop = 0;
 
-  function dragMouseDown(e) {
+  header.addEventListener("pointerdown", function (e) {
     if (window.playerStats.chatFloatingMode === false) return;
-    e = e || window.event;
+    if (e.button !== 0) return; // Only process left click or touch
     if (e.target.closest("button") || e.target.closest("input")) return;
 
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    initialLeft = drawer.offsetLeft;
+    initialTop = drawer.offsetTop;
+
+    try {
+      header.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    e.stopPropagation();
     e.preventDefault();
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    document.onmousemove = elementDrag;
-  }
+  });
 
-  function dragTouchStart(e) {
-    if (window.playerStats.chatFloatingMode === false) return;
-    if (e.target.closest("button") || e.target.closest("input")) return;
+  header.addEventListener("pointermove", function (e) {
+    if (!isDragging) return;
 
-    if (e.touches.length > 0) {
-      pos3 = e.touches[0].clientX;
-      pos4 = e.touches[0].clientY;
-      document.ontouchend = closeDragElement;
-      document.ontouchmove = elementTouchDrag;
-    }
-  }
+    let dx = e.clientX - startX;
+    let dy = e.clientY - startY;
 
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-
-    let newTop = drawer.offsetTop - pos2;
-    let newLeft = drawer.offsetLeft - pos1;
+    let newLeft = initialLeft + dx;
+    let newTop = initialTop + dy;
 
     let maxLeft = window.innerWidth - drawer.offsetWidth - 10;
     let maxTop = window.innerHeight - drawer.offsetHeight - 10;
@@ -2715,40 +2710,25 @@ window.initChatDrag = function () {
 
     window.playerStats.chatX = newLeft;
     window.playerStats.chatY = newTop;
-  }
 
-  function elementTouchDrag(e) {
-    if (e.touches.length > 0) {
-      pos1 = pos3 - e.touches[0].clientX;
-      pos2 = pos4 - e.touches[0].clientY;
-      pos3 = e.touches[0].clientX;
-      pos4 = e.touches[0].clientY;
+    e.stopPropagation();
+    e.preventDefault();
+  });
 
-      let newTop = drawer.offsetTop - pos2;
-      let newLeft = drawer.offsetLeft - pos1;
-
-      let maxLeft = window.innerWidth - drawer.offsetWidth - 10;
-      let maxTop = window.innerHeight - drawer.offsetHeight - 10;
-      if (newLeft < 10) newLeft = 10;
-      if (newTop < 10) newTop = 10;
-      if (newLeft > maxLeft) newLeft = maxLeft;
-      if (newTop > maxTop) newTop = maxTop;
-
-      drawer.style.top = newTop + "px";
-      drawer.style.left = newLeft + "px";
-
-      window.playerStats.chatX = newLeft;
-      window.playerStats.chatY = newTop;
+  const stopDrag = function (e) {
+    if (isDragging) {
+      isDragging = false;
+      try {
+        header.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+      if (typeof window.saveGame === "function") window.saveGame();
+      e.stopPropagation();
+      e.preventDefault();
     }
-  }
+  };
 
-  function closeDragElement() {
-    document.onmouseup = null;
-    document.onmousemove = null;
-    document.ontouchend = null;
-    document.ontouchmove = null;
-    if (typeof window.saveGame === "function") window.saveGame();
-  }
+  header.addEventListener("pointerup", stopDrag);
+  header.addEventListener("pointercancel", stopDrag);
 };
 
 window.toggleSettings = function () {
@@ -8995,62 +8975,72 @@ window.showRiftRewardBreakdownTooltip = function (e, lvl) {
 };
 
 window.makeWindowDraggable = function (el, handle) {
-  let pos1 = 0,
-    pos2 = 0,
-    pos3 = 0,
-    pos4 = 0;
-  handle.onmousedown = dragMouseDown;
-  handle.ontouchstart = dragTouchStart;
+    if (!el || !handle) return;
 
-  function dragMouseDown(e) {
-    e = e || window.event;
-    e.preventDefault();
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    document.onmousemove = elementDrag;
-  }
+    handle.style.touchAction = "none";
 
-  function dragTouchStart(e) {
-    if (e.touches.length > 0) {
-      pos3 = e.touches[0].clientX;
-      pos4 = e.touches[0].clientY;
-      document.ontouchend = closeDragElement;
-      document.ontouchmove = elementTouchDrag;
-    }
-  }
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let initialLeft = 0;
+    let initialTop = 0;
 
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
+    handle.addEventListener("pointerdown", function (e) {
+      if (e.button !== 0) return; // Only process primary left clicks or single touches
 
-    el.style.top = el.offsetTop - pos2 + "px";
-    el.style.left = el.offsetLeft - pos1 + "px";
-  }
+      if (e.target.closest("button") || e.target.closest("input") || e.target.closest("select") || e.target.closest("option")) {
+        return;
+      }
 
-  function elementTouchDrag(e) {
-    if (e.touches.length > 0) {
-      pos1 = pos3 - e.touches[0].clientX;
-      pos2 = pos4 - e.touches[0].clientY;
-      pos3 = e.touches[0].clientX;
-      pos4 = e.touches[0].clientY;
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      initialLeft = el.offsetLeft;
+      initialTop = el.offsetTop;
 
-      el.style.top = el.offsetTop - pos2 + "px";
-      el.style.left = el.offsetLeft - pos1 + "px";
-    }
-  }
+      try {
+        handle.setPointerCapture(e.pointerId);
+      } catch (err) {}
+      e.stopPropagation();
+      e.preventDefault();
+    });
 
-  function closeDragElement() {
-    document.onmouseup = null;
-    document.onmousemove = null;
-    document.ontouchend = null;
-    document.ontouchmove = null;
-  }
-};
+    handle.addEventListener("pointermove", function (e) {
+      if (!isDragging) return;
+
+      let dx = e.clientX - startX;
+      let dy = e.clientY - startY;
+
+      let newLeft = initialLeft + dx;
+      let newTop = initialTop + dy;
+
+      let maxLeft = window.innerWidth - 40;
+      let maxTop = window.innerHeight - 40;
+
+      newLeft = Math.max(-el.offsetWidth + 40, Math.min(maxLeft, newLeft));
+      newTop = Math.max(0, Math.min(maxTop, newTop));
+
+      el.style.left = newLeft + "px";
+      el.style.top = newTop + "px";
+
+      e.stopPropagation();
+      e.preventDefault();
+    });
+
+    const stopDrag = function (e) {
+      if (isDragging) {
+        isDragging = false;
+        try {
+          handle.releasePointerCapture(e.pointerId);
+        } catch (err) {}
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    };
+
+    handle.addEventListener("pointerup", stopDrag);
+    handle.addEventListener("pointercancel", stopDrag);
+  };
 
 // --- ALTAR NATIVE CAROUSEL RENDER ENGINE ---
 window.altarSlideIndex = 0;
@@ -9903,7 +9893,11 @@ window.revealGachaReward = function (item) {
   if (chute) chute.innerHTML = ""; // Clear dispensed ball
 
   window.gachaActiveState = "idle";
-  window.SoundManager.play("revive");
+  if (window.SoundManager && typeof window.SoundManager.playLootDrop === "function") {
+    window.SoundManager.playLootDrop(item.statsRolled);
+  } else if (window.SoundManager) {
+    window.SoundManager.play("revive");
+  }
 
   let color = window.getTierColor(item.statsRolled);
 
@@ -11242,7 +11236,11 @@ window.openDailyRewardSack = function (specificName) {
   }
 
   // Play opening sound
-  window.SoundManager.play("fairy");
+  if (window.SoundManager && typeof window.SoundManager.playLootDrop === "function") {
+    window.SoundManager.playLootDrop(newEquip.statsRolled);
+  } else if (window.SoundManager) {
+    window.SoundManager.play("fairy");
+  }
   window.setPauseState(true);
 
   // Determine rewards (Standardized Daily QP and randomized pool rolls)
@@ -11617,7 +11615,11 @@ window.openWeeklyRewardSack = function (specificName) {
   }
 
   // Play opening sound
-  window.SoundManager.play("revive");
+  if (window.SoundManager && typeof window.SoundManager.playLootDrop === "function") {
+    window.SoundManager.playLootDrop(5); // Treats weekly grand chests as 5★ Mythic sound swells
+  } else if (window.SoundManager) {
+    window.SoundManager.play("revive");
+  }
   window.setPauseState(true);
 
   // Determine rewards (Guaranteed high value MP, Core, Sigil, Shard, and Scraps!)
@@ -14974,7 +14976,7 @@ window.requestRename = function () {
 // ==========================================================================
 
 window.selectedBestiarySetKey =
-  window.selectedBestiarySetKey || "Whispering Woods";
+  window.selectedBestiarySetKey || (window.CARD_SETS_DATA ? Object.keys(window.CARD_SETS_DATA)[0] : "Whispering Woods");
 
 window.toggleBestiaryAlbum = function () {
   let modal = document.getElementById("bestiary-modal");
@@ -15035,6 +15037,119 @@ window.getCardUpgradeCost = function (currentTier) {
 };
 
 window.renderBestiaryAlbum = function () {
+  if (window.CARD_SETS_DATA) {
+    if (!window.CARD_SETS_DATA["Equipment Vault"]) {
+      window.CARD_SETS_DATA["Equipment Vault"] = {
+        name: "Equipment Vault",
+        theme: "Armor Pierce",
+        statKey: "atkPctBonus",
+        cards: ["animated_armor", "cursed_blade", "mimic_shield"],
+        isDungeon: true
+      };
+    }
+    if (!window.CARD_SETS_DATA["Material Cavern"]) {
+      window.CARD_SETS_DATA["Material Cavern"] = {
+        name: "Material Cavern",
+        theme: "Vigor Synergy",
+        statKey: "maxHpPctBonus",
+        cards: ["slag_slime", "rust_nibbler", "corroded_golem"],
+        isDungeon: true
+      };
+    }
+    if (!window.CARD_SETS_DATA["Gold Mine"]) {
+      window.CARD_SETS_DATA["Gold Mine"] = {
+        name: "Gold Mine",
+        theme: "Midas Resonance",
+        statKey: "gold",
+        cards: ["coin_elemental", "hoard_mimic", "gilded_scuttler"],
+        isDungeon: true
+      };
+    }
+  }
+  if (window.MONSTER_CARDS_DATA) {
+      if (!window.MONSTER_CARDS_DATA["animated_armor"]) {
+        window.MONSTER_CARDS_DATA["animated_armor"] = {
+          name: "Sentinel Suit",
+          desc: "A spectral suit of runic armor animated by ancient kinetic forces.",
+          baseStat: "def",
+          baseVal: 6,
+          isPct: false
+        };
+      }
+      if (!window.MONSTER_CARDS_DATA["cursed_blade"]) {
+        window.MONSTER_CARDS_DATA["cursed_blade"] = {
+          name: "Spectral Sword",
+          desc: "An ancient obsidian blade wrapped in undying purple cursed flames.",
+          baseStat: "atk",
+          baseVal: 5,
+          isPct: false
+        };
+      }
+      if (!window.MONSTER_CARDS_DATA["mimic_shield"]) {
+        window.MONSTER_CARDS_DATA["mimic_shield"] = {
+          name: "Aegis Mimic",
+          desc: "A heavy shield that breathes, lined with sharp golden teeth.",
+          baseStat: "block",
+          baseVal: 0.005,
+          isPct: true
+        };
+      }
+      if (!window.MONSTER_CARDS_DATA["slag_slime"]) {
+        window.MONSTER_CARDS_DATA["slag_slime"] = {
+          name: "Slag Sludge",
+          desc: "A bubbling mass of corrosive alchemical run-off containing melted metallic waste.",
+          baseStat: "maxHp",
+          baseVal: 40,
+          isPct: false
+        };
+      }
+      if (!window.MONSTER_CARDS_DATA["rust_nibbler"]) {
+        window.MONSTER_CARDS_DATA["rust_nibbler"] = {
+          name: "Rust Scuttler",
+          desc: "A voracious scavenger that feeds on oxidized alloys, leaving corroded ruins in its wake.",
+          baseStat: "dex",
+          baseVal: 4,
+          isPct: false
+        };
+      }
+      if (!window.MONSTER_CARDS_DATA["corroded_golem"]) {
+        window.MONSTER_CARDS_DATA["corroded_golem"] = {
+          name: "Alchemical Sentinel",
+          desc: "A clay automaton powered by highly pressurized tubes of glowing toxic sludge.",
+          baseStat: "def",
+          baseVal: 8,
+          isPct: false
+        };
+      }
+      if (!window.MONSTER_CARDS_DATA["coin_elemental"]) {
+        window.MONSTER_CARDS_DATA["coin_elemental"] = {
+          name: "Coin Elemental",
+          desc: "A magnetic vortex of animated gold coins swirling around a highly concentrated nucleus.",
+          baseStat: "gold",
+          baseVal: 0.015,
+          isPct: true
+        };
+      }
+      if (!window.MONSTER_CARDS_DATA["hoard_mimic"]) {
+        window.MONSTER_CARDS_DATA["hoard_mimic"] = {
+          name: "Hoard Mimic",
+          desc: "A wooden chest masquerading as rich treasure, snapping its heavy lid on greedy hands.",
+          baseStat: "critChance",
+          baseVal: 0.005,
+          isPct: true
+        };
+      }
+      if (!window.MONSTER_CARDS_DATA["gilded_scuttler"]) {
+        window.MONSTER_CARDS_DATA["gilded_scuttler"] = {
+          name: "Gilded Scuttler",
+          desc: "A skittering gold-shelled scarab that absorbs metal ores to crystallize its carapace.",
+          baseStat: "dropRate",
+          baseVal: 0.01,
+          isPct: true
+        };
+      }
+    }
+
   let contentEl = document.getElementById("bestiary-content");
   if (!contentEl) return;
 
@@ -15051,8 +15166,7 @@ window.renderBestiaryAlbum = function () {
       <h4 style="margin: 0 0 8px 0; color:#df9ffb; font-size:12px; text-transform:uppercase; letter-spacing:1px; text-align:left; border-bottom:1px solid #333; padding-bottom:4px;">📜 Album Directory</h4>
   `;
 
-  for (let sKey in window.CARD_SETS_DATA) {
-    let sData = window.CARD_SETS_DATA[sKey];
+  let renderTabItem = (sKey, sData) => {
     let minTierInSet = 5;
     let anyLocked = false;
     let unlockedCount = 0;
@@ -15089,15 +15203,29 @@ window.renderBestiaryAlbum = function () {
       ? "background:rgba(168, 85, 247, 0.12); border-color:#a855f7;"
       : "background:#111; border-color:#333;";
 
-    leftPageHtml += `
+    return `
       <div class="bag-item" style="${tabBg} padding:8px 10px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; margin-bottom:0;" onclick="window.selectBestiarySet('${sKey}')">
         <span style="font-size:11.5px; font-weight:bold; color:${isSelected ? "#df9ffb" : "#ccc"};">${sData.name.replace(" Set", "")}</span>
         ${setBadge}
       </div>
     `;
+  };
+
+  leftPageHtml += `<div style="font-size:9px; color:#ffb6c1; font-weight:bold; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; text-align:left;">🗺️ Campaign Areas</div>`;
+  for (let sKey in window.CARD_SETS_DATA) {
+    let sData = window.CARD_SETS_DATA[sKey];
+    if (sData.isDungeon) continue;
+    leftPageHtml += renderTabItem(sKey, sData);
   }
 
-  leftPageHtml += `</div>`; // Close .bestiary-page-left
+  leftPageHtml += `<div style="font-size:9px; color:#00d2ff; font-weight:bold; text-transform:uppercase; letter-spacing:1px; margin-top:10px; margin-bottom:4px; text-align:left;">🏰 Instanced Dungeons</div>`;
+  for (let sKey in window.CARD_SETS_DATA) {
+    let sData = window.CARD_SETS_DATA[sKey];
+    if (!sData.isDungeon) continue;
+    leftPageHtml += renderTabItem(sKey, sData);
+  }
+
+  leftPageHtml += `</div>`;
   let dustOwned = pStats.astralDust || 0;
 
   // --- RIGHT PAGE: CARD DECK ALBUM ---
@@ -15815,6 +15943,10 @@ window.drawMonsterOnCanvas = function (canvas, cKey, isLocked) {
     "aegis_goliath",
     "chronos_arbitrator",
     "nexus_overseer",
+    "overlord_iron_vault",
+    "gilded_vault_keeper",
+    "corrosive_abomination",
+    "hooktail"
   ].includes(cKey);
 
   // Set up mock mob properties

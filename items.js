@@ -4657,7 +4657,11 @@ window.buyShopItem = function (index) {
   window.frozenItemDb[item.id] = window.cloneItemForTooltip(item);
 
   window.pushHeaderToast(`🛒 Purchased ${item.name}!`, "#2ecc71");
-  window.SoundManager.play("fairy");
+  if (window.SoundManager && typeof window.SoundManager.playLootDrop === "function") {
+    window.SoundManager.playLootDrop(item.statsRolled);
+  } else if (window.SoundManager) {
+    window.SoundManager.play("fairy");
+  }
 
   if (window.spawnPurchaseCelebration) {
     window.spawnPurchaseCelebration(

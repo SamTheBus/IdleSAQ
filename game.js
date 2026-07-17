@@ -1085,12 +1085,22 @@ window.SaveManager = {
         });
       }
       if (window.playerStats.weeklyMissions) {
-        window.playerStats.weeklyMissions.forEach((m) => {
-          if (m.treat === "Clan Weekly Sack") m.treat = "Weekly Reward Sack";
-        });
-      }
+            window.playerStats.weeklyMissions.forEach((m) => {
+              if (m.treat === "Clan Weekly Sack") m.treat = "Weekly Reward Sack";
+            });
+          }
 
-      if (window.playerStats.lastDailyResetTime === undefined)
+          let bossCardKeys = [
+            "aegis_goliath",
+            "chronos_arbitrator",
+            "nexus_overseer",
+            "overlord_iron_vault",
+            "gilded_vault_keeper",
+            "corrosive_abomination",
+            "hooktail"
+          ];
+
+          if (window.playerStats.lastDailyResetTime === undefined)
         window.playerStats.lastDailyResetTime = 0;
       if (window.playerStats.lastWeeklyResetTime === undefined)
         window.playerStats.lastWeeklyResetTime = 0;
@@ -2108,81 +2118,109 @@ window.onload = function () {
             }
           }
 
-          let activeTouchId = null;
-          let startX = 0;
-          let currentX = 0;
           let isSwiping = false;
+                    let startX = 0;
+                    let startY = 0;
+                    let hasMoved = false;
 
-          newToast.addEventListener(
-            "touchstart",
-            (e) => {
-              if (isSwiping) return;
-              // Capture the specific touch instance that initiated on this toast element
-              let touch = e.changedTouches ? e.changedTouches[0] : null;
-              if (touch) {
-                activeTouchId = touch.identifier;
-                startX = touch.clientX;
-                currentX = startX;
-                isSwiping = true;
-                newToast.style.transition = "none";
-              }
-            },
-            { passive: true },
-          );
+                    newToast.style.touchAction = "none";
 
-          newToast.addEventListener(
-            "touchmove",
-            (e) => {
-              if (!isSwiping || activeTouchId === null) return;
-              // Map the movement calculations specifically to our active swiping finger
-              let touch = Array.from(e.touches).find(
-                (t) => t.identifier === activeTouchId,
-              );
-              if (!touch) return;
-              currentX = touch.clientX;
-              let diffX = currentX - startX;
-              let absDiffX = Math.abs(diffX);
-              newToast.style.transform = `translateX(${diffX}px)`;
-              newToast.style.opacity = Math.max(0, 1 - absDiffX / 180);
-            },
-            { passive: true },
-          );
+                    // Intercept clicks during active swiping gestures
+                    newToast.addEventListener("click", (e) => {
+                      if (hasMoved) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }
+                    }, true);
 
-          const handleSwipeEnd = (e) => {
-            if (!isSwiping || activeTouchId === null) return;
-            // Verify that the finger leaving the screen matches our swiping finger
-            let touch = Array.from(e.changedTouches).find(
-              (t) => t.identifier === activeTouchId,
-            );
-            if (!touch) return;
+                    newToast.addEventListener("pointerdown", (e) => {
+                      if (e.button !== 0) return; // Only process left click or single touch
 
-            isSwiping = false;
-            activeTouchId = null;
+                      isSwiping = true;
+                      startX = e.clientX;
+                      startY = e.clientY;
+                      hasMoved = false;
+                      newToast.style.transition = "none";
 
-            let diffX = currentX - startX;
-            let absDiffX = Math.abs(diffX);
-            if (absDiffX > 80) {
-              newToast.style.transition =
-                "transform 0.2s ease-out, opacity 0.2s ease-out";
-              newToast.style.transform = `translateX(${diffX > 0 ? 120 : -120}%)`;
-              newToast.style.opacity = "0";
-              if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
-              if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
-              setTimeout(() => newToast.remove(), 200);
-            } else {
-              newToast.style.transition =
-                "transform 0.2s ease, opacity 0.2s ease";
-              newToast.style.transform = "translateX(0)";
-              newToast.style.opacity = "1";
-            }
-          };
+                      if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
+                      if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
 
-          newToast.addEventListener("touchend", handleSwipeEnd, {
-            passive: true,
-          });
-          newToast.addEventListener("touchcancel", handleSwipeEnd, {
-            passive: true,
-          });
+                      try {
+                        newToast.setPointerCapture(e.pointerId);
+                      } catch (err) {}
+                      e.stopPropagation();
+                    });
+
+                    newToast.addEventListener("pointermove", (e) => {
+                      if (!isSwiping) return;
+
+                      let diffX = e.clientX - startX;
+                      let diffY = e.clientY - startY;
+
+                      if (Math.abs(diffX) > 6 || Math.abs(diffY) > 6) {
+                        hasMoved = true;
+                      }
+
+                      let displayY = diffY < 0 ? diffY : diffY * 0.2; // Resist pulling downwards
+                      newToast.style.transform = `translate(${diffX}px, ${displayY}px)`;
+
+                      let maxDist = 180;
+                      let currentDist = Math.max(Math.abs(diffX), diffY < 0 ? Math.abs(diffY) : 0);
+                      newToast.style.opacity = Math.max(0, 1 - currentDist / maxDist);
+
+                      e.stopPropagation();
+                    });
+
+                    const handleSwipeEnd = (e) => {
+                      if (!isSwiping) return;
+                      isSwiping = false;
+
+                      try {
+                        newToast.releasePointerCapture(e.pointerId);
+                      } catch (err) {}
+
+                      let diffX = e.clientX - startX;
+                      let diffY = e.clientY - startY;
+
+                      let threshold = 60;
+                      let isDismissed = false;
+                      let transitionStyle = "";
+                      let transformStyle = "";
+
+                      if (diffY < -threshold) {
+                        isDismissed = true;
+                        transitionStyle = "transform 0.2s ease-out, opacity 0.2s ease-out";
+                        transformStyle = `translate(${diffX}px, -150%)`;
+                      } else if (Math.abs(diffX) > threshold) {
+                        isDismissed = true;
+                        transitionStyle = "transform 0.2s ease-out, opacity 0.2s ease-out";
+                        transformStyle = `translate(${diffX > 0 ? "150%" : "-150%"}, ${diffY < 0 ? diffY : 0}px)`;
+                      }
+
+                      if (isDismissed) {
+                        newToast.style.transition = transitionStyle;
+                        newToast.style.transform = transformStyle;
+                        newToast.style.opacity = "0";
+                        if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
+                        if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
+                        setTimeout(() => newToast.remove(), 200);
+                      } else {
+                        newToast.style.transition = "transform 0.2s ease, opacity 0.2s ease";
+                        newToast.style.transform = "translate(0, 0)";
+                        newToast.style.opacity = "1";
+
+                        // Reschedule auto-dismiss timer
+                        newToast.timeoutId = setTimeout(() => {
+                          newToast.classList.add("fading-out");
+                          newToast.style.animation = "toastFadeOut 0.5s ease-in forwards";
+                          newToast.fadeTimeoutId = setTimeout(() => newToast.remove(), 450);
+                        }, 3500);
+                      }
+                      e.stopPropagation();
+                    };
+
+                    newToast.addEventListener("pointerup", handleSwipeEnd);
+                    newToast.addEventListener("pointercancel", handleSwipeEnd);
 
           if (newToast.timeoutId) clearTimeout(newToast.timeoutId);
           if (newToast.fadeTimeoutId) clearTimeout(newToast.fadeTimeoutId);
@@ -6475,20 +6513,22 @@ window.CombatEngine = {
         window.playerStats.ankhTriggeredThisBattle = false;
       } else {
         let dType = window.playerStats.currentDungeon || "gold";
-        let dPool = [];
-        if (dType === "equip") dPool = ["golem", "gargoyle", "wyrmling"];
-        else if (dType === "gold")
-          dPool = ["coin_elemental", "hoard_mimic", "gilded_scuttler"];
-        else dPool = ["swamp_basilisk", "toxic_fly", "marsh_ghost"];
+                let dPool = [];
+                if (dType === "equip") dPool = ["animated_armor", "cursed_blade", "mimic_shield"];
+                        else if (dType === "gold")
+                          dPool = ["coin_elemental", "hoard_mimic", "gilded_scuttler"];
+                        else dPool = ["slag_slime", "rust_nibbler", "corroded_golem"];
 
-        let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
+                let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
         let isFlying = [
-          "gargoyle",
-          "toxic_fly",
-          "marsh_ghost",
-          "gilded_wyrmling",
-          "wyrmling",
-        ].includes(chosenVisual);
+                  "gargoyle",
+                  "toxic_fly",
+                  "marsh_ghost",
+                  "gilded_wyrmling",
+                  "wyrmling",
+                  "animated_armor",
+                  "cursed_blade",
+                ].includes(chosenVisual);
 
         let hp = BigNum.from(25)
           .mul(b_scale)
@@ -7522,16 +7562,20 @@ window.useItem = function (itemName) {
       window.playerStats.hasTriggeredCoffeeRun = true;
     }
   } else if (itemName === "Monster Card Sack") {
-    window.inventory.USE[itemName]--;
-    if (window.inventory.USE[itemName] === 0) {
-      delete window.inventory.USE[itemName];
-    }
+             window.inventory.USE[itemName]--;
+             if (window.inventory.USE[itemName] === 0) {
+               delete window.inventory.USE[itemName];
+             }
 
-    let bossCardKeys = [
-      "aegis_goliath",
-      "chronos_arbitrator",
-      "nexus_overseer",
-    ];
+             let bossCardKeys = [
+               "aegis_goliath",
+               "chronos_arbitrator",
+               "nexus_overseer",
+               "overlord_iron_vault",
+               "gilded_vault_keeper",
+               "corrosive_abomination",
+               "hooktail"
+             ];
     let normalCardKeys = Object.keys(window.MONSTER_CARDS_DATA).filter(
       (k) => !bossCardKeys.includes(k),
     );

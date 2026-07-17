@@ -9,7 +9,13 @@
 
   // Static particle themes to avoid runtime array allocations on entity death
   window.PARTICLE_THEMES = {
-    gold_dungeon: ["#ffd700", "#f1c40f", "#b7950b", "#ffffff"],
+      slag_slime: ["#2ecc71", "#27ae60", "#a3fd83", "#111116"],
+      rust_nibbler: ["#d35400", "#e67e22", "#7f8c8d", "#5c3a21"],
+      corroded_golem: ["#2ecc71", "#34495e", "#1abc9c", "#111116"],
+      animated_armor: ["#34495e", "#5d6d7e", "#00d2ff", "#1a252f"],
+      cursed_blade: ["#9b59b6", "#8e44ad", "#e84393", "#111116"],
+      mimic_shield: ["#2c3e50", "#7f8c8d", "#f1c40f", "#e74c3c"],
+      gold_dungeon: ["#ffd700", "#f1c40f", "#b7950b", "#ffffff"],
     coin_elemental: ["#ffd700", "#f1c40f", "#b7950b", "#ffffff"],
     hoard_mimic: ["#ffd700", "#f1c40f", "#b7950b", "#ffffff"],
     gilded_scuttler: ["#ffd700", "#f1c40f", "#b7950b", "#ffffff"],
@@ -977,136 +983,145 @@
           c.fill();
         }
       } else if (vType === "golem") {
-        let hover = Math.sin(Date.now() / 120) * 2.5;
-        let bodyColor = m.flashTimer > 0 ? "#ffffff" : "#1e222b"; // Dark iron
-        let trimColor = m.flashTimer > 0 ? "#ffffff" : "#4a5568"; // Cast iron
-        let furnaceColor = m.isRare ? "#ff007f" : "#e67e22"; // Molten orange / magenta
+              let hover = Math.sin(Date.now() / 120) * 2.5;
+              let bodyColor = m.flashTimer > 0 ? "#ffffff" : "#7f8c8d"; // Granite grey
+              let trimColor = m.flashTimer > 0 ? "#ffffff" : "#95a5a6"; // Light stone
+              let runeColor = m.isRare ? "#ff007f" : "#00d2ff"; // Glowing sapphire
 
-        // Background Exhaust Chimneys
-        c.fillStyle = "#111317";
-        c.beginPath();
-        c.rect(m.x + 4, m.y + 4 + hover, 4, 12);
-        c.rect(m.x + m.w - 8, m.y + 4 + hover, 4, 12);
-        c.fill();
-        c.stroke();
+              // Levitating Stone Shoulders
+              c.fillStyle = trimColor;
+              c.beginPath();
+              c.roundRect(m.x + 2, m.y + 2 + hover, 6, 8, [1]);
+              c.roundRect(m.x + m.w - 8, m.y + 2 + hover, 6, 8, [1]);
+              c.fill();
+              c.stroke();
 
-        // Main Torso
-        c.fillStyle = bodyColor;
-        c.beginPath();
-        c.roundRect(m.x + 3, m.y + 12 + hover, m.w - 6, m.h - 14, [4]);
-        c.fill();
-        c.stroke();
+              // Main Granite Torso
+              c.fillStyle = bodyColor;
+              c.beginPath();
+              c.roundRect(m.x + 3, m.y + 12 + hover, m.w - 6, m.h - 14, [6]);
+              c.fill();
+              c.stroke();
 
-        // Head / Upper Armature
-        c.fillStyle = trimColor;
-        c.beginPath();
-        c.rect(m.x + 6, m.y + 4 + hover, m.w - 12, 10);
-        c.fill();
-        c.stroke();
+              // Chiseled Head
+              c.fillStyle = trimColor;
+              c.beginPath();
+              c.roundRect(m.x + 6, m.y + 4 + hover, m.w - 12, 10, [2]);
+              c.fill();
+              c.stroke();
 
-        // Glowing Furnace Visor Eye
-        if (m.flashTimer === 0) {
-          c.fillStyle = furnaceColor;
-          c.shadowBlur = 8;
-          c.shadowColor = furnaceColor;
-          c.beginPath();
-          c.rect(m.x + 9, m.y + 7 + hover, m.w - 18, 3);
-          c.fill();
-          c.shadowBlur = 0;
-        }
+              // Glowing Core Eye
+              if (m.flashTimer === 0) {
+                c.fillStyle = runeColor;
+                c.shadowBlur = 8;
+                c.shadowColor = runeColor;
+                c.beginPath();
+                c.rect(m.x + 9, m.y + 8 + hover, m.w - 18, 2.5);
+                c.fill();
+                c.shadowBlur = 0;
+              }
 
-        // Giant Fists
-        c.fillStyle = bodyColor;
-        c.beginPath();
-        c.roundRect(m.x - 6, m.y + 14 + hover, 8, 12, [2]);
-        c.roundRect(m.x + m.w - 2, m.y + 14 + hover, 8, 12, [2]);
-        c.fill();
-        c.stroke();
+              // Giant Fists
+              c.fillStyle = bodyColor;
+              c.beginPath();
+              c.roundRect(m.x - 5, m.y + 14 + hover, 8, 12, [3]);
+              c.roundRect(m.x + m.w - 3, m.y + 14 + hover, 8, 12, [3]);
+              c.fill();
+              c.stroke();
 
-        // Rivets on Fists
-        c.fillStyle = "#ffd700";
-        c.beginPath();
-        c.arc(m.x - 2, m.y + 18 + hover, 1.2, 0, Math.PI * 2);
-        c.arc(m.x + m.w + 2, m.y + 18 + hover, 1.2, 0, Math.PI * 2);
-        c.fill();
-        c.stroke();
+              // Crystals on Fists
+              c.fillStyle = runeColor;
+              c.beginPath();
+              c.arc(m.x - 1, m.y + 18 + hover, 1.5, 0, Math.PI * 2);
+              c.arc(m.x + m.w + 1, m.y + 18 + hover, 1.5, 0, Math.PI * 2);
+              c.fill();
+              c.stroke();
 
-        // Central Molten Core Fissure
-        if (m.flashTimer === 0) {
-          c.strokeStyle = furnaceColor;
-          c.lineWidth = 1.8;
-          c.beginPath();
-          c.moveTo(m.x + m.w / 2, m.y + 16 + hover);
-          c.lineTo(m.x + m.w / 2, m.y + m.h - 12 + hover);
-          c.moveTo(m.x + m.w / 2 - 4, m.y + 20 + hover);
-          c.lineTo(m.x + m.w / 2 + 4, m.y + 20 + hover);
-          c.stroke();
-        }
-      } else if (vType === "wyrmling") {
-        let cx = m.x + m.w / 2;
-        let cy = m.y + m.h / 2 + Math.sin(Date.now() / 100) * 3;
-        let bodyColor =
-          m.flashTimer > 0 ? "#ffffff" : m.isRare ? "#8e44ad" : "#a2592a"; // Copper/Brass / Purple
-        let ringColor = m.isRare ? "#ff007f" : "#ffd700";
+              // Crystal geode core fissure
+              if (m.flashTimer === 0) {
+                c.strokeStyle = runeColor;
+                c.lineWidth = 2;
+                c.beginPath();
+                c.moveTo(m.x + m.w / 2, m.y + 15 + hover);
+                c.lineTo(m.x + m.w / 2, m.y + m.h - 11 + hover);
+                c.moveTo(m.x + m.w / 2 - 3, m.y + 21 + hover);
+                c.lineTo(m.x + m.w / 2 + 3, m.y + 21 + hover);
+                c.stroke();
+              }
+            } else if (vType === "wyrmling") {
+                    let cx = m.x + m.w / 2;
+                    let cy = m.y + m.h / 2 + Math.sin(Date.now() / 100) * 3;
+                    let bodyColor =
+                      m.flashTimer > 0 ? "#ffffff" : m.isRare ? "#8e44ad" : "#3498db"; // Sky blue scale
+                    let ringColor = m.isRare ? "#ff007f" : "rgba(255, 255, 255, 0.55)"; // Swirling frost
 
-        // Segmented metallic body parts
-        for (let i = 3; i >= 0; i--) {
-          let segX = cx + i * 8;
-          let segY = cy + Math.sin(Date.now() / 150 - i) * 5;
+                    // Segmented winged body drakes
+                    for (let i = 3; i >= 0; i--) {
+                      let segX = cx + i * 8;
+                      let segY = cy + Math.sin(Date.now() / 150 - i) * 5;
 
-          // Concentric clockwork rings orbiting each segment (3D perspective)
-          if (m.flashTimer === 0) {
-            c.strokeStyle = ringColor;
-            c.lineWidth = 1;
-            c.save();
-            c.translate(segX, segY);
-            c.rotate(Date.now() / 300 + i);
-            c.beginPath();
-            c.ellipse(0, 0, 11 - i * 1.5, 4 - i * 0.5, 0, 0, Math.PI * 2);
-            c.stroke();
-            c.restore();
-          }
+                      // Swirling icy particles orbiting the segmented tail
+                      if (m.flashTimer === 0) {
+                        c.strokeStyle = ringColor;
+                        c.lineWidth = 1.2;
+                        c.save();
+                        c.translate(segX, segY);
+                        c.rotate(Date.now() / 250 + i);
+                        c.beginPath();
+                        c.ellipse(0, 0, 11 - i * 1.5, 4 - i * 0.5, 0, 0, Math.PI * 2);
+                        c.stroke();
+                        c.restore();
+                      }
 
-          c.fillStyle = bodyColor;
-          c.beginPath();
-          c.arc(segX, segY, 8.5 - i * 1.3, 0, Math.PI * 2);
-          c.fill();
-          c.stroke();
-        }
+                      c.fillStyle = bodyColor;
+                      c.beginPath();
+                      c.arc(segX, segY, 8.5 - i * 1.3, 0, Math.PI * 2);
+                      c.fill();
+                      c.stroke();
+                    }
 
-        // Metallic Head
-        c.fillStyle = bodyColor;
-        c.beginPath();
-        c.arc(cx, cy - 13, 8.5, 0, Math.PI * 2);
-        c.fill();
-        c.stroke();
+                    // Feathered Drake Head
+                    c.fillStyle = bodyColor;
+                    c.beginPath();
+                    c.arc(cx, cy - 13, 8.5, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
 
-        // Sparking glowing jaws
-        if (m.flashTimer === 0) {
-          c.fillStyle = m.isRare ? "#00ffff" : "#00d2ff"; // Blue plasma
-          c.shadowBlur = 8;
-          c.shadowColor = c.fillStyle;
-          c.beginPath();
-          c.arc(cx - 3, cy - 15, 1.8, 0, Math.PI * 2);
-          c.arc(cx + 3, cy - 15, 1.8, 0, Math.PI * 2);
-          c.fill();
-          c.shadowBlur = 0;
+                    // White beak/horns
+                    c.fillStyle = "#ffffff";
+                    c.beginPath();
+                    c.moveTo(cx - 3, cy - 20);
+                    c.lineTo(cx, cy - 26);
+                    c.lineTo(cx + 3, cy - 20);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
 
-          // Spew tiny blue sparks
-          if (Math.random() < 0.15 && !window.isGamePaused) {
-            window.particles.push({
-              x: cx + window.randFloat(-5, 5),
-              y: cy - 13,
-              vx: -window.randFloat(1, 3),
-              vy: window.randFloat(-1, 1),
-              radius: window.randFloat(1, 2),
-              color: m.isRare ? "#ff007f" : "#00d2ff",
-              alpha: 0.9,
-              life: window.randInt(10, 20),
-            });
-          }
-        }
-      } else if (vType === "rift_drifter") {
+                    // Sub-zero frost vapors
+                    if (m.flashTimer === 0) {
+                      c.fillStyle = "#81ecec";
+                      c.shadowBlur = 6;
+                      c.shadowColor = "#81ecec";
+                      c.beginPath();
+                      c.arc(cx - 3, cy - 14, 1.5, 0, Math.PI * 2);
+                      c.arc(cx + 3, cy - 14, 1.5, 0, Math.PI * 2);
+                      c.fill();
+                      c.shadowBlur = 0;
+
+                      if (Math.random() < 0.15 && !window.isGamePaused) {
+                        window.particles.push({
+                          x: cx + window.randFloat(-5, 5),
+                          y: cy - 14,
+                          vx: -window.randFloat(1, 3),
+                          vy: window.randFloat(-1, 1),
+                          radius: window.randFloat(1, 2.2),
+                          color: m.isRare ? "#ff007f" : "#ffffff",
+                          alpha: 0.85,
+                          life: window.randInt(12, 22),
+                        });
+                      }
+                    }
+                  } else if (vType === "rift_drifter") {
         let hover = Math.sin(Date.now() / 110) * 6;
         let cx = m.x + m.w / 2;
         let cy = m.y + m.h / 2 + hover;
@@ -1351,86 +1366,101 @@
           c.fill();
         }
       } else if (vType === "gargoyle") {
-        let cx = m.x + m.w / 2;
-        let cy = m.y + m.h / 2;
-        let wings = Math.sin(Date.now() / 90) * 11;
-        let skinColor = m.flashTimer > 0 ? "#ffffff" : "#11141a"; // Dark obsidian/iron
-        let wingColor = m.flashTimer > 0 ? "#ffffff" : "#212833"; // Crystalline/Iron
-        let eyeColor = m.isRare ? "#00ffff" : "#e74c3c";
+              let cx = m.x + m.w / 2;
+              let cy = m.y + m.h / 2;
+              let wings = Math.sin(Date.now() / 90) * 11;
+              let skinColor = m.flashTimer > 0 ? "#ffffff" : "#4a5568"; // Moss-gray ruins stone
+              let wingColor = m.flashTimer > 0 ? "#ffffff" : "#2f3640"; // Weathered slate
+              let eyeColor = m.isRare ? "#00ffff" : "#f39c12"; // Glowing amber
 
-        // Razor-sharp obsidian wings
-        c.fillStyle = wingColor;
-        c.beginPath();
-        c.moveTo(cx - 3, cy);
-        c.lineTo(cx - 24, cy - 14 + wings);
-        c.lineTo(cx - 18, cy + 4);
-        c.lineTo(cx - 22, cy + 12);
-        c.lineTo(cx - 8, cy + 5);
-        c.closePath();
-        c.moveTo(cx + 3, cy);
-        c.lineTo(cx + 24, cy - 14 + wings);
-        c.lineTo(cx + 18, cy + 4);
-        c.lineTo(cx + 22, cy + 12);
-        c.lineTo(cx + 8, cy + 5);
-        c.closePath();
-        c.fill();
-        c.stroke();
+              // Weathered chiseled ruin wings
+              c.fillStyle = wingColor;
+              c.beginPath();
+              c.moveTo(cx - 3, cy);
+              c.lineTo(cx - 24, cy - 14 + wings);
+              c.lineTo(cx - 18, cy + 4);
+              c.lineTo(cx - 22, cy + 12);
+              c.lineTo(cx - 8, cy + 5);
+              c.closePath();
+              c.moveTo(cx + 3, cy);
+              c.lineTo(cx + 24, cy - 14 + wings);
+              c.lineTo(cx + 18, cy + 4);
+              c.lineTo(cx + 22, cy + 12);
+              c.lineTo(cx + 8, cy + 5);
+              c.closePath();
+              c.fill();
+              c.stroke();
 
-        // Main heavy torso
-        c.fillStyle = skinColor;
-        c.beginPath();
-        c.ellipse(cx, cy + 6, 8.5, 11.5, 0, 0, Math.PI * 2);
-        c.fill();
-        c.stroke();
+              // Main moss-grown stone torso
+              c.fillStyle = skinColor;
+              c.beginPath();
+              c.ellipse(cx, cy + 6, 8.5, 11.5, 0, 0, Math.PI * 2);
+              c.fill();
+              c.stroke();
 
-        // Horned Head
-        c.beginPath();
-        c.arc(cx, cy - 10, 7.8, 0, Math.PI * 2);
-        c.fill();
-        c.stroke();
+              // Mossy patches
+              if (m.flashTimer === 0) {
+                c.fillStyle = "#164d1f";
+                c.beginPath();
+                c.ellipse(cx - 3, cy + 3, 3, 4, Math.PI / 4, 0, Math.PI * 2);
+                c.ellipse(cx + 4, cy + 8, 2.5, 3, -Math.PI / 4, 0, Math.PI * 2);
+                c.fill();
+              }
 
-        // Curved horns
-        c.fillStyle = wingColor;
-        c.beginPath();
-        c.moveTo(cx - 6, cy - 14);
-        c.quadraticCurveTo(cx - 12, cy - 22, cx - 14, cy - 20);
-        c.lineTo(cx - 2, cy - 12);
-        c.closePath();
-        c.moveTo(cx + 6, cy - 14);
-        c.quadraticCurveTo(cx + 12, cy - 22, cx + 14, cy - 20);
-        c.lineTo(cx + 2, cy - 12);
-        c.closePath();
-        c.fill();
-        c.stroke();
+              // Masonry Head
+              c.fillStyle = skinColor;
+              c.beginPath();
+              c.arc(cx, cy - 10, 7.8, 0, Math.PI * 2);
+              c.fill();
+              c.stroke();
 
-        // Glowing Eyes
-        if (m.flashTimer === 0) {
-          c.fillStyle = eyeColor;
-          c.shadowBlur = 6;
-          c.shadowColor = eyeColor;
-          c.beginPath();
-          c.arc(cx - 2.5, cy - 11, 1.6, 0, Math.PI * 2);
-          c.arc(cx + 2.5, cy - 11, 1.6, 0, Math.PI * 2);
-          c.fill();
-          c.shadowBlur = 0;
-        }
+              // Chiseled horns
+              c.fillStyle = wingColor;
+              c.beginPath();
+              c.moveTo(cx - 6, cy - 14);
+              c.quadraticCurveTo(cx - 12, cy - 22, cx - 14, cy - 20);
+              c.lineTo(cx - 2, cy - 12);
+              c.closePath();
+              c.moveTo(cx + 6, cy - 14);
+              c.quadraticCurveTo(cx + 12, cy - 22, cx + 14, cy - 20);
+              c.lineTo(cx + 2, cy - 12);
+              c.closePath();
+              c.fill();
+              c.stroke();
 
-        // Wields a tiny forged iron executioner blade
-        c.fillStyle = "#7f8c8d";
-        c.beginPath();
-        c.moveTo(cx - 10, cy + 2);
-        c.lineTo(cx - 20, cy + 10);
-        c.lineTo(cx - 17, cy + 13);
-        c.lineTo(cx - 7, cy + 5);
-        c.closePath();
-        c.fill();
-        c.stroke();
-        c.fillStyle = "#ffd700"; // gold pommel
-        c.beginPath();
-        c.arc(cx - 7, cy + 5, 1.5, 0, Math.PI * 2);
-        c.fill();
-        c.stroke();
-      } else if (vType === "magma_elemental") {
+              // Glowing Amber Eyes
+              if (m.flashTimer === 0) {
+                c.fillStyle = eyeColor;
+                c.shadowBlur = 6;
+                c.shadowColor = eyeColor;
+                c.beginPath();
+                c.arc(cx - 2.5, cy - 11, 1.6, 0, Math.PI * 2);
+                c.arc(cx + 2.5, cy - 11, 1.6, 0, Math.PI * 2);
+                c.fill();
+                c.shadowBlur = 0;
+              }
+
+              // Wields a tiny weathered stone relic greatsword
+              c.fillStyle = "#95a5a6";
+              c.beginPath();
+              c.moveTo(cx - 10, cy + 2);
+              c.lineTo(cx - 22, cy + 12);
+              c.lineTo(cx - 19, cy + 15);
+              c.lineTo(cx - 7, cy + 5);
+              c.closePath();
+              c.fill();
+              c.stroke();
+
+              // Weathered hilt inscription
+              if (m.flashTimer === 0) {
+                c.strokeStyle = "#ffd700";
+                c.lineWidth = 1;
+                c.beginPath();
+                c.moveTo(cx - 13, cy + 5);
+                c.lineTo(cx - 18, cy + 10);
+                c.stroke();
+              }
+            } else if (vType === "magma_elemental") {
         let flicker = Math.sin(Date.now() / 60) * 3;
         let cx = m.x + m.w / 2;
         let cy = m.y + m.h / 2;
@@ -1862,16 +1892,424 @@
           c.stroke();
         }
       } else if (vType === "wireframe_orb") {
-        let cx = m.x + m.w / 2;
-        let cy = m.y + m.h / 2;
-        c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#3498db";
-        c.lineWidth = 1.5;
-        c.save();
-        c.translate(cx, cy);
-        c.rotate(Date.now() / 600);
-        c.strokeRect(-10, -10, 20, 20);
-        c.restore();
-      }
+              let cx = m.x + m.w / 2;
+              let cy = m.y + m.h / 2;
+              c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#3498db";
+              c.lineWidth = 1.5;
+              c.save();
+              c.translate(cx, cy);
+              c.rotate(Date.now() / 600);
+              c.strokeRect(-10, -10, 20, 20);
+              c.restore();
+            } else if (vType === "animated_armor") {
+              let hover = Math.sin(Date.now() / 150) * 4;
+              let cx = m.x + m.w / 2;
+              let cy = m.y + m.h / 2 + hover;
+
+              if (m.flashTimer === 0) {
+                c.save();
+                c.strokeStyle = "rgba(0, 210, 255, 0.4)";
+                c.lineWidth = 4;
+                c.shadowBlur = 10;
+                c.shadowColor = "#00d2ff";
+                c.beginPath();
+                c.roundRect(cx - 14, cy - 14, 28, 30, [4]);
+                c.stroke();
+                c.restore();
+              }
+
+              c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#2c3e50";
+              c.beginPath();
+              c.ellipse(cx - 18, cy - 8, 7, 5, -Math.PI / 6, 0, Math.PI * 2);
+              c.ellipse(cx + 18, cy - 8, 7, 5, Math.PI / 6, 0, Math.PI * 2);
+              c.fill();
+              c.stroke();
+
+              c.beginPath();
+              c.moveTo(cx - 12, cy - 12);
+              c.lineTo(cx + 12, cy - 12);
+              c.lineTo(cx + 9, cy + 12);
+              c.lineTo(cx - 9, cy + 12);
+              c.closePath();
+              c.fill();
+              c.stroke();
+
+              if (m.flashTimer === 0) {
+                c.strokeStyle = "#00d2ff";
+                c.lineWidth = 2;
+                c.beginPath();
+                c.moveTo(cx, cy - 8);
+                c.lineTo(cx, cy + 8);
+                c.moveTo(cx - 4, cy);
+                c.lineTo(cx + 4, cy);
+                c.stroke();
+              }
+
+              c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#1a252f";
+              c.beginPath();
+              c.roundRect(cx - 8, cy - 28, 16, 14, [4]);
+              c.fill();
+              c.stroke();
+
+              if (m.flashTimer === 0) {
+                c.fillStyle = "#ff0055";
+                c.fillRect(cx - 5, cy - 22, 10, 2.5);
+              }
+
+              c.save();
+              c.translate(cx + 12, cy + 6);
+              c.rotate(Math.PI / 12 + Math.sin(Date.now() / 120) * 0.05);
+              c.fillStyle = "rgba(0, 210, 255, 0.25)";
+              c.strokeStyle = "#00d2ff";
+              c.lineWidth = 1.5;
+              c.beginPath();
+              c.moveTo(-2, 0);
+              c.lineTo(2, 0);
+              c.lineTo(1.5, -24);
+              c.lineTo(-1.5, -24);
+              c.closePath();
+              c.fill();
+              c.stroke();
+              c.restore();
+            } else if (vType === "cursed_blade") {
+              let hover = Math.sin(Date.now() / 110) * 5;
+              let cx = m.x + m.w / 2;
+              let cy = m.y + m.h / 2 + hover;
+              let rot = Date.now() / 500;
+
+              c.save();
+              c.translate(cx, cy);
+              c.rotate(rot);
+
+              if (m.flashTimer === 0 && !window.isGamePaused && Math.random() < 0.2 && window.particles.length < 250) {
+                window.particles.push(
+                  window.ParticlePool.get(
+                    cx + window.randFloat(-15, 15),
+                    cy + window.randFloat(-15, 15),
+                    window.randFloat(-0.5, 0.5),
+                    -window.randFloat(1, 2),
+                    window.randFloat(1.5, 3),
+                    "#9b59b6",
+                    0.8,
+                    window.randInt(15, 30)
+                  )
+                );
+              }
+
+              if (m.flashTimer === 0) {
+                c.save();
+                c.shadowBlur = 12;
+                c.shadowColor = "#9b59b6";
+                c.strokeStyle = "rgba(155, 89, 182, 0.3)";
+                c.lineWidth = 3;
+                c.beginPath();
+                c.moveTo(-3, -22);
+                c.lineTo(3, -22);
+                c.lineTo(4, 12);
+                c.lineTo(-4, 12);
+                c.closePath();
+                c.stroke();
+                c.restore();
+              }
+
+              c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#111116";
+              c.beginPath();
+              c.moveTo(-4, -16);
+              c.lineTo(0, -22);
+              c.lineTo(4, -14);
+              c.lineTo(3.5, 12);
+              c.lineTo(-3.5, 12);
+              c.closePath();
+              c.fill();
+              c.stroke();
+
+              if (m.flashTimer === 0) {
+                c.strokeStyle = "#e84393";
+                c.lineWidth = 1.2;
+                c.beginPath();
+                c.moveTo(-2, -6);
+                c.lineTo(2, -2);
+                c.lineTo(-1, 4);
+                c.stroke();
+              }
+
+              c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#7f8c8d";
+              c.beginPath();
+              c.roundRect(-8, 12, 16, 4, [1]);
+              c.fill();
+              c.stroke();
+
+              c.fillStyle = "#4a154b";
+              c.fillRect(-2, 16, 4, 10);
+              c.strokeRect(-2, 16, 4, 10);
+
+              c.fillStyle = "#9b59b6";
+              c.beginPath();
+              c.arc(0, 27, 2.5, 0, Math.PI * 2);
+              c.fill();
+              c.stroke();
+
+              c.restore();
+            } else if (vType === "mimic_shield") {
+                    let cx = m.x + m.w / 2;
+                    let cy = m.y + m.h / 2;
+                    let time = Date.now();
+                    let breathe = Math.sin(time / 140) * 2;
+                    let eyeBlink = Math.sin(time / 800);
+
+                    c.save();
+                    c.translate(cx, cy);
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#2c3e50";
+                    c.beginPath();
+                    c.moveTo(-16, -16);
+                    c.lineTo(16, -16);
+                    c.lineTo(18, 2);
+                    c.lineTo(0, 22);
+                    c.lineTo(-18, 2);
+                    c.closePath();
+                    c.fill();
+                    c.stroke();
+
+                    c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#7f8c8d";
+                    c.lineWidth = 1.8;
+                    c.beginPath();
+                    c.moveTo(-13, -13);
+                    c.lineTo(13, -13);
+                    c.lineTo(15, 1);
+                    c.lineTo(0, 18);
+                    c.lineTo(-15, 1);
+                    c.closePath();
+                    c.stroke();
+
+                    let mouthOpen = Math.max(1, 3.5 + breathe);
+                    c.fillStyle = "#110202";
+                    c.beginPath();
+                    c.ellipse(0, 2, 8, mouthOpen, 0, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = "#f1c40f";
+                    c.strokeStyle = "#000000";
+                    c.lineWidth = 1;
+                    let tOffsets = [-5, -2, 2, 5];
+                    tOffsets.forEach(dx => {
+                      c.beginPath();
+                      c.moveTo(dx - 1.2, 2 - mouthOpen);
+                      c.lineTo(dx, 2 - mouthOpen + 3);
+                      c.lineTo(dx + 1.2, 2 - mouthOpen);
+                      c.closePath();
+                      c.fill();
+                      c.stroke();
+
+                      c.beginPath();
+                      c.moveTo(dx - 1.2, 2 + mouthOpen);
+                      c.lineTo(dx, 2 + mouthOpen - 3);
+                      c.lineTo(dx + 1.2, 2 + mouthOpen);
+                      c.closePath();
+                      c.fill();
+                      c.stroke();
+                    });
+
+                    if (m.flashTimer === 0) {
+                      c.fillStyle = "#ffffff";
+                      c.beginPath();
+                      c.ellipse(0, -7, 6, 4, 0, 0, Math.PI * 2);
+                      c.fill();
+                      c.stroke();
+
+                      if (eyeBlink > -0.85) {
+                        c.fillStyle = "#e74c3c";
+                        c.beginPath();
+                        c.arc(0, -7, 2.5, 0, Math.PI * 2);
+                        c.fill();
+
+                        c.fillStyle = "#000000";
+                        c.beginPath();
+                        c.ellipse(0, -7, 0.8, 2.2, 0, 0, Math.PI * 2);
+                        c.fill();
+                      } else {
+                        c.strokeStyle = "#000";
+                        c.lineWidth = 2;
+                        c.beginPath();
+                        c.moveTo(-6, -7);
+                        c.lineTo(6, -7);
+                        c.stroke();
+                      }
+                    }
+
+                    c.restore();
+                  } else if (vType === "slag_slime") {
+                    let squish = Math.sin(Date.now() / 100) * 3.5;
+                    let wScale = m.w / 2 + squish;
+                    let hScale = m.h / 2 - squish;
+                    let cx = m.x + m.w / 2;
+                    let cy = m.y + m.h - 10 + squish / 2;
+
+                    let slimeGrad = c.createRadialGradient(cx - 3, cy - 5, 2, cx, cy, m.w * 0.75);
+                    if (m.flashTimer > 0) {
+                      slimeGrad.addColorStop(0, "#ffffff");
+                      slimeGrad.addColorStop(1, "#ffffff");
+                    } else {
+                      slimeGrad.addColorStop(0, "#a3fd83");
+                      slimeGrad.addColorStop(1, "#27ae60");
+                    }
+
+                    c.fillStyle = slimeGrad;
+                    c.beginPath();
+                    c.ellipse(cx, cy, wScale * 1.2, hScale * 0.9, 0, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0 && !window.isGamePaused && Math.random() < 0.25) {
+                      let bY = cy - hScale * 0.7;
+                      let bX = cx + window.randFloat(-wScale * 0.5, wScale * 0.5);
+                      c.fillStyle = "rgba(46, 204, 113, 0.6)";
+                      c.beginPath();
+                      c.arc(bX, bY, window.randFloat(2, 4), 0, Math.PI * 2);
+                      c.fill();
+                      c.stroke();
+                    }
+
+                    if (m.flashTimer === 0) {
+                      c.fillStyle = "#7f8c8d";
+                      c.beginPath();
+                      c.moveTo(cx - 4, cy - 2);
+                      c.lineTo(cx + 4, cy - 5);
+                      c.lineTo(cx + 2, cy + 3);
+                      c.closePath();
+                      c.fill();
+                      c.stroke();
+
+                      c.fillStyle = "#110202";
+                      let eyeOffsetX = wScale * 0.35;
+                      let eyeOffsetY = hScale * 0.1;
+                      c.beginPath();
+                      c.arc(cx - eyeOffsetX + 3, cy - eyeOffsetY, 1.8, 0, Math.PI * 2);
+                      c.arc(cx + eyeOffsetX + 3, cy - eyeOffsetY, 1.8, 0, Math.PI * 2);
+                      c.fill();
+
+                      c.fillStyle = "#1e272e";
+                      c.fillRect(cx - 8, cy + hScale * 0.3, 3, 5);
+                      c.fillRect(cx + 4, cy + hScale * 0.2, 2, 4);
+                    }
+                  } else if (vType === "rust_nibbler") {
+                    let cx = m.x + m.w / 2;
+                    let cy = m.y + m.h - 15;
+                    let time = Date.now();
+                    let legSway = Math.sin(time / 80) * 4;
+
+                    c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#5c3a21";
+                    c.lineWidth = 2.2;
+                    for (let i = -1; i <= 1; i += 2) {
+                      let legX = cx + i * 10;
+                      c.beginPath();
+                      c.moveTo(legX, cy + 2);
+                      c.lineTo(legX + i * 8 + legSway * i, cy + 12);
+                      c.stroke();
+                      c.beginPath();
+                      c.moveTo(legX, cy + 2);
+                      c.lineTo(legX - i * 8 - legSway * i, cy + 12);
+                      c.stroke();
+                    }
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#d35400";
+                    c.beginPath();
+                    c.ellipse(cx, cy, 14, 8, 0, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    c.strokeStyle = "#000";
+                    c.lineWidth = 1.2;
+                    c.beginPath();
+                    c.moveTo(cx - 6, cy - 7);
+                    c.lineTo(cx - 6, cy + 7);
+                    c.moveTo(cx, cy - 8);
+                    c.lineTo(cx, cy + 8);
+                    c.moveTo(cx + 6, cy - 7);
+                    c.lineTo(cx + 6, cy + 7);
+                    c.stroke();
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#5c3a21";
+                    c.beginPath();
+                    c.arc(cx + 12, cy - 1, 5, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    c.strokeStyle = m.flashTimer > 0 ? "#ffffff" : "#e67e22";
+                    c.lineWidth = 1.5;
+                    let antSway = Math.sin(time / 100) * 3;
+                    c.beginPath();
+                    c.moveTo(cx + 15, cy - 3);
+                    c.quadraticCurveTo(cx + 20, cy - 10 + antSway, cx + 24, cy - 8 + antSway);
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                      c.fillStyle = "#f1c40f";
+                      c.beginPath();
+                      c.arc(cx + 14, cy - 2, 1.2, 0, Math.PI * 2);
+                      c.fill();
+                    }
+                  } else if (vType === "corroded_golem") {
+                    let hover = Math.sin(Date.now() / 130) * 2;
+                    let cx = m.x + m.w / 2;
+                    let cy = m.y + m.h / 2 + hover;
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#2c3e50";
+                    c.beginPath();
+                    c.roundRect(cx - 15, cy - 10, 30, 20, [3]);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                      c.strokeStyle = "#2ecc71";
+                      c.lineWidth = 1.8;
+                      c.beginPath();
+                      c.moveTo(cx - 8, cy - 4);
+                      c.lineTo(cx - 2, cy + 2);
+                      c.lineTo(cx + 6, cy - 6);
+                      c.stroke();
+                    }
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#5d6d7e";
+                    c.beginPath();
+                    c.arc(cx - 18, cy - 6, 6, 0, Math.PI * 2);
+                    c.arc(cx + 18, cy - 6, 6, 0, Math.PI * 2);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                      c.strokeStyle = "#2ecc71";
+                      c.lineWidth = 2.5;
+                      c.beginPath();
+                      c.moveTo(cx - 15, cy + 2);
+                      c.quadraticCurveTo(cx - 22, cy + 12, cx - 18, cy + 18);
+                      c.moveTo(cx + 15, cy + 2);
+                      c.quadraticCurveTo(cx + 22, cy + 12, cx + 18, cy + 18);
+                      c.stroke();
+                    }
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#2c3e50";
+                    c.beginPath();
+                    c.roundRect(cx - 22, cy + 14, 8, 8, [2]);
+                    c.roundRect(cx + 14, cy + 14, 8, 8, [2]);
+                    c.fill();
+                    c.stroke();
+
+                    c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#2c3e50";
+                    c.beginPath();
+                    c.roundRect(cx - 8, cy - 24, 16, 14, [4]);
+                    c.fill();
+                    c.stroke();
+
+                    if (m.flashTimer === 0) {
+                      c.fillStyle = "#2ecc71";
+                      c.shadowBlur = 8;
+                      c.shadowColor = "#2ecc71";
+                      c.fillRect(cx - 6, cy - 18, 12, 3);
+                      c.shadowBlur = 0;
+                    }
+                  }
 
       if (m.isRare) {
         c.save();
@@ -2161,12 +2599,12 @@
         c.fillRect(-1.2, -4, 2.4, 8);
       }
       c.restore();
-    } else if (m.type === "dungeon_boss") {
-      let bounce = 0;
-      let coreColor = "#9b59b6";
-      let glowColor = "#e84393";
-      let shadowColor = "#1a052e";
-      if (m.isCrucible) {
+    } else if (m.type === "dungeon_boss" || m.type === "gilded_vault_keeper" || m.type === "corrosive_abomination" || m.type === "overlord_iron_vault" || m.visualType === "gilded_vault_keeper" || m.visualType === "corrosive_abomination" || m.visualType === "overlord_iron_vault") {
+          let bounce = 0;
+          let coreColor = "#9b59b6";
+          let glowColor = "#e84393";
+          let shadowColor = "#1a052e";
+          if (m.isCrucible) {
         bounce = Math.sin(Date.now() / 150) * 4;
         coreColor = m.flashTimer > 0 ? "#ffffff" : "#9b59b6";
         let rot1 = Date.now() / 700;
@@ -2918,9 +3356,9 @@
           }
         }
       }
-    } else if (m.type === "prestige_boss") {
-      let hoverY = Math.sin(Date.now() / 150) * 6;
-      let jawOpen = Math.abs(Math.sin(Date.now() / 400)) * 12;
+    } else if (m.type === "prestige_boss" || m.type === "hooktail" || m.visualType === "hooktail") {
+          let hoverY = Math.sin(Date.now() / 150) * 6;
+          let jawOpen = Math.abs(Math.sin(Date.now() / 400)) * 12;
       c.save();
       c.translate(m.x, m.y + hoverY);
       let baseW = 70;
@@ -10743,8 +11181,8 @@
           barColor = "#8e44ad";
           barGlow = "#e84393";
         } else {
-          let dType = window.playerStats.currentDungeon || "gold";
-          if (dType === "gold") {
+                  let dType = m.visualType === "gilded_vault_keeper" ? "gold" : m.visualType === "corrosive_abomination" ? "mat" : m.visualType === "overlord_iron_vault" ? "equip" : (window.playerStats.currentDungeon || "gold");
+                  if (dType === "gold") {
             bossName = "Gilded Vault Keeper";
             barColor = "#f1c40f";
             barGlow = "#d4af37";
