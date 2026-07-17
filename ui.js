@@ -2518,6 +2518,10 @@ window.updateStickyCanvasStyle = function () {
 window.toggleStickyCanvas = function () {
   window.playerStats.stickyCanvas = !window.playerStats.stickyCanvas;
   window.updateStickyCanvasStyle();
+
+    if (window.HoorTutorial) {
+      window.HoorTutorial.init();
+    }
   if (typeof window.saveGame === "function") window.saveGame();
 };
 
@@ -6853,6 +6857,20 @@ window.showUseTooltip = function (e, keyName) {
 
 window.switchTab = function (tabId) {
   window.hideTooltip();
+
+  // Record visited tabs to activate first-time tutorial dialogue checks
+  if (window.playerStats && window.playerStats.visitedTabs) {
+    if (!window.playerStats.visitedTabs.includes(tabId)) {
+      window.playerStats.visitedTabs.push(tabId);
+
+      // Let the UI evaluate immediately upon registering the first-time visit
+      setTimeout(() => {
+        if (window.HoorTutorial) {
+          window.HoorTutorial.checkTriggers();
+        }
+      }, 100);
+    }
+  }
   // Keep backward-compatibility with code that tries to target 'gear' or 'stats'
   if (tabId === "gear" || tabId === "stats") tabId = "hero";
 
@@ -6920,6 +6938,18 @@ window.switchSubTab = function (subTabId) {
     subTabId === "ETC" ? "block" : "none";
   document.getElementById("bag-use").style.display =
     subTabId === "USE" ? "block" : "none";
+
+  // Register visited sub-tab
+  if (window.playerStats && window.playerStats.visitedSubTabs) {
+    let subTabKey = "sub_" + subTabId.toLowerCase();
+    if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
+      window.playerStats.visitedSubTabs.push(subTabKey);
+      setTimeout(() => {
+        if (window.HoorTutorial) window.HoorTutorial.checkTriggers();
+      }, 100);
+    }
+  }
+
   window.updateUI();
 };
 
@@ -6976,6 +7006,17 @@ window.switchMarketSubTab = function (subTabId) {
     window.renderAstralShop();
   }
 
+  // Register visited sub-tab
+  if (window.playerStats && window.playerStats.visitedSubTabs) {
+    let subTabKey = "market_" + subTabId.toLowerCase();
+    if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
+      window.playerStats.visitedSubTabs.push(subTabKey);
+      setTimeout(() => {
+        if (window.HoorTutorial) window.HoorTutorial.checkTriggers();
+      }, 100);
+    }
+  }
+
   if (typeof window.hideTooltip === "function") window.hideTooltip();
 };
 
@@ -7008,6 +7049,18 @@ window.switchActivitiesSubTab = function (subTabId) {
   ) {
     window.renderCrucibleTab();
   }
+
+  // Register visited sub-tab
+  if (window.playerStats && window.playerStats.visitedSubTabs) {
+    let subTabKey = "activities_" + subTabId.toLowerCase();
+    if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
+      window.playerStats.visitedSubTabs.push(subTabKey);
+      setTimeout(() => {
+        if (window.HoorTutorial) window.HoorTutorial.checkTriggers();
+      }, 100);
+    }
+  }
+
   if (typeof window.hideTooltip === "function") window.hideTooltip();
 };
 
@@ -12254,6 +12307,20 @@ window.selectCustomForgeStation = function (val) {
   window.switchForgeStation(val);
 };
 
+window.switchForgeStation = function (val) {
+  let blacksmithModes = document.getElementById("blacksmith-modes");
+  let enchanterModes = document.getElementById("enchanter-modes");
+  if (val === "blacksmith") {
+    if (blacksmithModes) blacksmithModes.style.setProperty("display", "flex", "important");
+    if (enchanterModes) enchanterModes.style.setProperty("display", "none", "important");
+    if (typeof window.setForgeMode === "function") window.setForgeMode("temper");
+  } else if (val === "enchanter") {
+    if (blacksmithModes) blacksmithModes.style.setProperty("display", "none", "important");
+    if (enchanterModes) enchanterModes.style.setProperty("display", "flex", "important");
+    if (typeof window.setForgeMode === "function") window.setForgeMode("enchant");
+  }
+};
+
 window.selectedBoutiqueSkinKey =
   window.selectedBoutiqueSkinKey ||
   window.playerStats.cosmeticSkin ||
@@ -16452,43 +16519,30 @@ if (!window.ChatManager) {
           }
         },
     switchChannel(chan) {
-      this.channel = chan;
-      document.querySelectorAll(".chat-sub-tab").forEach(btn => btn.classList.remove("active"));
-      let activeBtn = document.getElementById("chat-tab-" + chan.toLowerCase());
-      if (activeBtn) activeBtn.classList.add("active");
-      this.pushMessage("System", `Switched to ${chan} channel.`, "#3498db");
-    },
+          this.channel = chan;
+          document.querySelectorAll(".chat-sub-tab").forEach(btn => btn.classList.remove("active"));
+          let activeBtn = document.getElementById("chat-tab-" + chan.toLowerCase());
+          if (activeBtn) {
+            activeBtn.classList.add("active");
+          }
+        },
     handleInputKeydown(e) {
       if (e.key === "Enter") {
         this.sendCurrentMessage();
       }
     },
     sendCurrentMessage() {
-      let input = document.getElementById("chat-message-input");
-      if (!input) return;
-      let msg = input.value.trim();
-      if (!msg) return;
+          let input = document.getElementById("chat-message-input");
+          if (!input) return;
+          let msg = input.value.trim();
+          if (!msg) return;
 
-      input.value = "";
-      let name = (window.playerStats && window.playerStats.playerName) || "Guest";
-      let color = (window.playerStats && window.playerStats.playerName === "Guest") ? "#7f8c8d" : "#ffd700";
+          input.value = "";
+          let name = (window.playerStats && window.playerStats.playerName) || "Guest";
+          let color = (window.playerStats && window.playerStats.playerName === "Guest") ? "#7f8c8d" : "#ffd700";
 
-      this.pushMessage(name, msg, color);
-
-      // Simulate NPC Oracle interactions to verify local typing is perfectly functional
-      setTimeout(() => {
-        const replies = [
-          "May your critical strikes be frequent, hero!",
-          "Slay on! Those stage bosses won't defeat themselves.",
-          "Attune your slots inside the Forge to unlock massive multipliers.",
-          "Reality Rift guardians hold powerful unique relics... choose your targets carefully!",
-          "Need more Gold? Try diving into the Gold Mine Caverns!",
-          "A healthy balance of STR, DEX, and INT keeps you prepared for any onslaught."
-        ];
-        let randomReply = replies[Math.floor(Math.random() * replies.length)];
-        this.pushMessage("Oracle", randomReply, "#a855f7");
-      }, 1500);
-    },
+          this.pushMessage(name, msg, color);
+        },
     pushMessage(sender, text, color) {
       let container = document.getElementById("chat-messages-container");
       if (!container) return;
@@ -16505,3 +16559,602 @@ if (!window.ChatManager) {
     }
   };
 }
+
+// --- HIGH-FIDELITY FORGE LIVE PREVIEW GENERATOR ---
+window.generateForgePreviewHtml = function (item, currentLvl, nextLvl) {
+  if (!item) return `<div style="color:#666; font-style:italic; padding: 15px 0; text-align:center;">No item equipped in this slot.</div>`;
+
+  let runBonus = 0;
+  if (
+    window.playerStats.isCrucibleMode &&
+    window.cachedPlayerStats &&
+    window.cachedPlayerStats.crucibleSlotBonuses &&
+    item.isEquippedSlot
+  ) {
+    runBonus = window.cachedPlayerStats.crucibleSlotBonuses[item.isEquippedSlot] || 0;
+  }
+
+  let curMult = 1.0 + currentLvl * 0.01 + runBonus;
+  let nextMult = 1.0 + nextLvl * 0.01 + runBonus;
+
+  let baseStatsHtml = [];
+  let affixesHtml = [];
+
+  // Helper to format values cleanly
+  let formatVal = (v, isPct) => isPct ? Math.round(v * 100) + "%" : window.formatNumber(Math.ceil(v));
+
+  // 1. Process Base Properties
+  const baseStatsKeys = [
+    { key: "baseAtk", label: "Weapon Damage", icon: "atk" },
+    { key: "baseDef", label: "Armor", icon: "def" },
+    { key: "baseMaxHp", label: "Max Life", icon: "maxHp" },
+    { key: "baseMoveSpeed", label: "Speed", icon: "moveSpeed" },
+    { key: "baseBlock", label: "Block Rate", icon: "block", isPct: true },
+    { key: "baseParry", label: "Parry Rate", icon: "parry", isPct: true },
+    { key: "baseInt", label: "Intelligence", icon: "int" }
+  ];
+
+  baseStatsKeys.forEach(s => {
+    let baseVal = item[s.key] || 0;
+    if (baseVal > 0) {
+      let curVal = baseVal * curMult;
+      let newVal = baseVal * nextMult;
+      let diff = newVal - curVal;
+      let icon = window.getUiIconSvg(s.icon, 11);
+
+      let diffStr = s.isPct
+        ? `+${Math.round(diff * 100)}%`
+        : `+${window.formatNumber(Math.ceil(diff))}`;
+
+      baseStatsHtml.push(`
+        <div style="display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.02); padding-bottom:3px;">
+          <span style="color:#aaa; display:flex; align-items:center; gap:4px;">${icon} ${s.label}:</span>
+          <span>
+            <span style="color:#7f8c8d;">${formatVal(curVal, s.isPct)}</span> ➔
+            <strong style="color:#fff;">${formatVal(newVal, s.isPct)}</strong>
+            <span style="color:#2ecc71; font-weight:bold; margin-left:4px;">(${diffStr})</span>
+          </span>
+        </div>
+      `);
+    }
+  });
+
+  // 2. Process Extended Affixes (Custom rolled stats)
+  const statsKeys = [
+    { key: "atk", label: "Attack" },
+    { key: "maxHp", label: "Max HP" },
+    { key: "def", label: "Defense" },
+    { key: "moveSpeed", label: "Move Speed" },
+    { key: "str", label: "STR" },
+    { key: "dex", label: "DEX" },
+    { key: "int", label: "INT" },
+    { key: "critChance", label: "Crit Chance", isPct: true },
+    { key: "critDamage", label: "Crit Multi", isPct: true },
+    { key: "block", label: "Block Rate", isPct: true, baseKey: "baseBlock" },
+    { key: "parry", label: "Parry Rate", isPct: true, baseKey: "baseParry" },
+    { key: "activeAttackSpeed", label: "Active Atk Spd", isPct: true, baseKey: "baseActiveSpeed" },
+    { key: "idleAttackSpeed", label: "Idle Atk Spd", isPct: true, baseKey: "baseIdleSpeed" },
+    { key: "dropRate", label: "Drop Rate", isPct: true },
+    { key: "quality", label: "Drop Quality", isPct: true },
+    { key: "goldMulti", label: "Gold Multi", isPct: true },
+    { key: "rareSpawn", label: "Rare Spawn", isPct: true, isDoublePct: true },
+    { key: "fairySpawn", label: "Fairy Spawn", isPct: true }
+  ];
+
+  statsKeys.forEach(s => {
+    let totalVal = item[s.key] || 0;
+    let baseVal = s.baseKey ? item[s.baseKey] || 0 : 0;
+    let affixVal = totalVal - baseVal;
+
+    if (affixVal > 0.0001 || ((s.key === "activeAttackSpeed" || s.key === "idleAttackSpeed") && affixVal > 0)) {
+      let curVal = affixVal * curMult;
+      let newVal = affixVal * nextMult;
+      let diff = newVal - curVal;
+      let icon = window.getUiIconSvg(s.key, 11);
+
+      let diffStr = s.isDoublePct
+        ? `+${(diff * 100).toFixed(2)}%`
+        : s.isPct
+          ? `+${Math.round(diff * 100)}%`
+          : `+${window.formatNumber(Math.ceil(diff))}`;
+
+      let curStr = s.isDoublePct ? `+${(curVal * 100).toFixed(2)}%` : formatVal(curVal, s.isPct);
+      let newStr = s.isDoublePct ? `+${(newVal * 100).toFixed(2)}%` : formatVal(newVal, s.isPct);
+
+      affixesHtml.push(`
+        <div style="display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.02); padding-bottom:3px;">
+          <span style="color:#aaa; display:flex; align-items:center; gap:4px;">${icon} ${s.label}:</span>
+          <span>
+            <span style="color:#7f8c8d;">+${curStr}</span> ➔
+            <strong style="color:#fff;">+${newStr}</strong>
+            <span style="color:#2ecc71; font-weight:bold; margin-left:4px;">(${diffStr})</span>
+          </span>
+        </div>
+      `);
+    }
+  });
+
+  let nameColor = window.getTierColor(item.statsRolled);
+  let starsLabel = item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★ ${window.getTierName(item.statsRolled)}`;
+
+  let baseSectionHtml = baseStatsHtml.length > 0
+    ? `<div style="margin-bottom:8px;">
+         <strong style="color:#3498db; font-size:10px; display:block; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase;">📊 BASE PROPERTIES:</strong>
+         ${baseStatsHtml.join("")}
+       </div>`
+    : "";
+
+  let affixSectionHtml = affixesHtml.length > 0
+    ? `<div style="margin-bottom:8px;">
+         <strong style="color:#e67e22; font-size:10px; display:block; border-bottom:1px solid #333; padding-bottom:2px; margin-bottom:4px; text-transform:uppercase;">🎲 EXTENDED AFFIXES:</strong>
+         ${affixesHtml.join("")}
+       </div>`
+    : "";
+
+  let setSectionHtml = "";
+  let setName = window.getItemSetName ? window.getItemSetName(item) : null;
+  if (setName) {
+    setSectionHtml = `
+      <div style="margin-top:6px; border-top:1px dashed #444; padding-top:4px; text-align:left; font-size:10px; color:#2ecc71;">
+        ✨ <strong>Set Affinity:</strong> ${setName}
+      </div>
+    `;
+  }
+
+  return `
+    <div style="background:rgba(0,0,0,0.45); border: 1.5px solid ${nameColor}; border-radius:8px; padding:12px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+      <div style="display:flex; align-items:center; gap:8px; border-bottom:1px solid #333; padding-bottom:6px; margin-bottom:10px; text-align:left;">
+        <div style="flex-shrink:0;">${window.getEquipIconHtml(item, 28)}</div>
+        <div style="min-width:0; flex:1;">
+          <strong style="color:${nameColor}; font-size:12.5px; text-shadow:0 0 8px ${window.hexToRgba(nameColor, 0.25)}; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</strong>
+          <span style="font-size:9px; color:#aaa; font-family:monospace; display:block; margin-top:2px;">Rarity: ${starsLabel}</span>
+        </div>
+      </div>
+
+      ${baseSectionHtml}
+      ${affixSectionHtml}
+      ${setSectionHtml}
+    </div>
+  `;
+};
+
+/* ==========================================================================
+   HOOR'S TUTORIAL & CHAIN-SHATTERING UNLOCK ENGINE
+   ========================================================================= */
+
+// Procedural vector avatar generator for Hoor (Hot Knight Chick)
+window.getHoorAvatarHtml = function (size = 44) {
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 64 64" style="display:block; overflow:visible; filter: drop-shadow(0 0 5px rgba(255, 0, 127, 0.5));">
+      <!-- Deep void aura backing -->
+      <circle cx="32" cy="32" r="28" fill="#0d0812" stroke="#ff007f" stroke-width="1.8" />
+
+      <!-- Long flowing golden hair (back layer) -->
+      <path d="M14 26 C8 32, 10 52, 14 58 C16 45, 12 36, 16 30 Z" fill="#e67e22" />
+      <path d="M50 26 C56 32, 54 52, 50 58 C48 45, 52 36, 48 30 Z" fill="#e67e22" />
+
+      <path d="M12 28 C6 35, 8 55, 16 60 C18 48, 14 38, 18 32 Z" fill="#f1c40f" />
+      <path d="M52 28 C58 35, 56 55, 48 60 C46 48, 50 38, 46 32 Z" fill="#f1c40f" />
+
+      <!-- Face plate -->
+      <path d="M20 22 Q32 16, 44 22 Q48 32, 44 42 Q32 50, 20 42 Q16 32, 20 22 Z" fill="#ffddc5" stroke="#111" stroke-width="1.2" />
+
+      <!-- Winking Cute Eyes & Eyebrows -->
+      <!-- Left Eye (Open, focused, blue-eyed) -->
+      <ellipse cx="26" cy="30" rx="3.5" ry="2.2" fill="#fff" stroke="#111" stroke-width="1" />
+      <circle cx="26" cy="30" r="1.8" fill="#3498db" />
+      <circle cx="27" cy="29" r="0.6" fill="#fff" />
+      <path d="M22 26 Q26 23, 30 26" fill="none" stroke="#683d12" stroke-width="1.5" stroke-linecap="round" />
+
+      <!-- Right Eye (Seductive wink/closed arc) -->
+      <path d="M36 30 Q40 33, 44 29" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round" />
+      <path d="M35 25 Q39 23, 43 26" fill="none" stroke="#683d12" stroke-width="1.5" stroke-linecap="round" />
+
+      <!-- Blushing cheeks -->
+      <circle cx="21" cy="35" r="3.5" fill="#ff7675" opacity="0.65" />
+      <circle cx="43" cy="34" r="3.5" fill="#ff7675" opacity="0.65" />
+
+      <!-- Cute lips -->
+      <path d="M29 41 Q32 44, 35 41 Q32 42, 29 41 Z" fill="#ff007f" stroke="#4d001a" stroke-width="1" />
+
+      <!-- Front fringe/bangs hair -->
+      <path d="M19 22 Q32 14, 45 22 Q36 21, 31 25 Q26 20, 19 22 Z" fill="#ffd700" />
+      <path d="M20 22 Q23 27, 25 31 C24 26, 21 24, 20 22 Z" fill="#ffd700" />
+      <path d="M44 22 Q41 27, 39 31 C40 26, 43 24, 44 22 Z" fill="#ffd700" />
+
+      <!-- Shining Silver & Gold Crown/Circlet with Ruby Gem -->
+      <path d="M18 19 Q32 13, 46 19 L48 16 Q32 9, 16 16 Z" fill="#d4af37" stroke="#000" stroke-width="1.2" />
+      <path d="M24 16 L32 6 L40 16 Z" fill="#bdc3c7" stroke="#000" stroke-width="1.5" />
+      <polygon points="32,7 35,11 32,15 29,11" fill="#ff007f" style="filter: drop-shadow(0 0 3px #ff007f);" />
+
+      <!-- Steel Pauldrons / Neck Plate armor -->
+      <path d="M14 43 L50 43 L48 58 L16 58 Z" fill="#7f8c8d" stroke="#000" stroke-width="1.5" />
+      <!-- Rose-gold neck collar lining -->
+      <path d="M18 43 Q32 47, 46 43 L44 47 Q32 51, 20 47 Z" fill="#e67e22" stroke="#000" stroke-width="1" />
+    </svg>
+  `;
+};
+
+window.HoorTutorial = {
+  activeDialog: null,
+  highlightedElements: [],
+  originalStyles: null,
+
+  // Short, punchy, classic retro-RPG dialogues with targeted focus selectors
+  steps: {
+    "start": {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "Well, look who finally crawled out of the tavern. I'm Hoor. If you want to survive out here, you'd better start swinging. Tap the screen or hold Space to help your auto-attacks out.",
+      trigger: () => window.playerStats.totalLifetimeKills === 0 && window.playerStats.stage === 1,
+      highlightSelector: null
+    },
+    "level_up": {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "You leveled up! You've been awarded 6 Skill Points (SP). Spend them on Strength, Dexterity, or Intelligence in the Attribute Matrix to increase your combat power.",
+      trigger: () => window.playerStats.level > 1 && (window.playerStats.sp || 0) >= 6,
+      setup: () => {
+        if (typeof window.switchTab === "function") {
+          window.switchTab("hero");
+        }
+      },
+      highlightSelector: ".stats-panel-right"
+    },
+    "tab_hero": {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "Your core attributes are here. Spend your Skill Points (SP) on the Attribute Matrix: STR increases your Attack and Max HP multipliers, DEX boosts Crit Chance/Damage and Movement Speed, while INT powers up your Block, Parry, and Fairy Spawn rates.",
+      trigger: () => window.playerStats.visitedTabs.includes("hero"),
+      setup: () => {
+        if (typeof window.switchTab === "function") {
+          window.switchTab("hero");
+        }
+      },
+      highlightSelector: ".stats-panel-right"
+    },
+    "tab_inv": {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "Your bag holds all your spoils. Don't worry about overflow—any new equipment picked up when your bag is full is automatically salvaged into Gold, Souls, and upgrade scraps based on your Auto-Salvage Threshold at the bottom of the tab! Locked items are always safe.",
+      trigger: () => window.playerStats.visitedTabs.includes("inv"),
+      setup: () => {
+        if (typeof window.switchTab === "function") {
+          window.switchTab("inv");
+        }
+      },
+      highlightSelector: "#bulk-salvage-bar"
+    },
+    "tab_forge": {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "This is the Forge. Instead of temporary individual item upgrades, we Attune the equipment slots themselves. Slot Attunement permanently multiplies the stats of any item you equip in that slot, and persists across item swaps and prestiges!",
+      trigger: () => window.playerStats.visitedTabs.includes("forge"),
+      setup: () => {
+        if (typeof window.switchTab === "function") {
+          window.switchTab("forge");
+        }
+      },
+      highlightSelector: "#forge-station-container"
+    },
+    "tab_altar": {
+      title: "Hoor",
+      avatar: "🏅",
+      text: "The Altar of Rifts is where we summon Reality Rifts to hunt down Rift Guardians. Spend Ancient Cores to trigger Rift encounters. Slaying Rift Guardians yields valuable Eridium Shards, Gacha Keys, and legendary crafting scraps!",
+      trigger: () => window.playerStats.visitedTabs.includes("activities") && window.playerStats.level >= 25,
+      setup: () => {
+        if (typeof window.switchTab === "function") {
+          window.switchTab("activities");
+        }
+      },
+      highlightSelector: "#runs-sec-altar"
+    }
+  },
+
+  init() {
+    window.playerStats.completedTutorialSteps = window.playerStats.completedTutorialSteps || [];
+    window.playerStats.visitedTabs = window.playerStats.visitedTabs || [];
+    this.checkTriggers();
+  },
+
+  checkTriggers() {
+    if (window.isGamePaused && this.activeDialog) return;
+
+    for (let key in this.steps) {
+      if (window.playerStats.completedTutorialSteps.includes(key)) continue;
+
+      let step = this.steps[key];
+      if (step.trigger()) {
+        this.showDialog(key, step);
+        break;
+      }
+    }
+  },
+
+  showDialog(key, step) {
+    this.activeDialog = key;
+    window.setPauseState(true);
+
+    // 1. Run tab switch / menu setup before rendering the highlights
+    if (step.setup) {
+      step.setup();
+    }
+
+    // 2. Clear out any previous layout
+    let overlay = document.getElementById("hoor-tutorial-overlay");
+    if (overlay) overlay.remove();
+
+    // 3. Spawns high-z-index background dimming backdrop
+    let backdrop = document.getElementById("tutorial-backdrop");
+    if (!backdrop) {
+      backdrop = document.createElement("div");
+      backdrop.id = "tutorial-backdrop";
+      backdrop.style.cssText = `
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(8, 5, 15, 0.65);
+        backdrop-filter: blur(4px);
+        z-index: 44000;
+        pointer-events: auto;
+      `;
+      document.body.appendChild(backdrop);
+    }
+
+    // 4. Anchor and pull targeted element z-index above the backdrop
+    if (step.highlightSelector) {
+      let el = document.querySelector(step.highlightSelector);
+      if (el) {
+        // Scroll the targeted element centered nicely on the viewport
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 50);
+
+        this.originalStyles = {
+          element: el,
+          position: el.style.position,
+          zIndex: el.style.zIndex,
+          boxShadow: el.style.boxShadow,
+          borderColor: el.style.borderColor,
+          transition: el.style.transition
+        };
+
+        el.style.position = "relative";
+        el.style.zIndex = "44500";
+        el.style.transition = "box-shadow 0.3s, border-color 0.3s";
+        el.style.boxShadow = "0 0 15px #ffd700, inset 0 0 10px rgba(255, 215, 0, 0.5)";
+        el.style.borderColor = "#ffd700";
+        this.highlightedElements.push(el);
+      }
+    }
+
+    overlay = document.createElement("div");
+    overlay.id = "hoor-tutorial-overlay";
+    overlay.style.zIndex = "45000";
+    document.body.appendChild(overlay);
+
+    let box = document.createElement("div");
+    box.style.cssText = `
+      background: linear-gradient(135deg, #131720 0%, #0c0f16 100%);
+      border: 2px solid #ff007f;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 440px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.95), inset 0 0 15px rgba(255, 0, 127, 0.1);
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    `;
+
+    box.innerHTML = `
+      <div style="flex-shrink:0;">
+        ${window.getHoorAvatarHtml(44)}
+      </div>
+      <div style="flex: 1; text-align: left;">
+        <strong style="color: #ff007f; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">
+          ${step.title}
+        </strong>
+        <p style="font-size: 11px; color: #f1f5f9; line-height: 1.45; margin: 0 0 12px 0; white-space: normal;">
+          ${step.text}
+        </p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <button onclick="window.HoorTutorial.skipAll()" style="background: transparent; border: none; color: #555; font-size: 9.5px; cursor: pointer;">
+            Skip all tips
+          </button>
+          <button onclick="window.HoorTutorial.dismiss('${key}')" class="btn-action" style="background: #ff007f; color: #fff; padding: 4px 14px; font-size: 10px; border-radius: 4px;">
+            Got it
+          </button>
+        </div>
+      </div>
+    `;
+
+    overlay.appendChild(box);
+
+    if (window.SoundManager) window.SoundManager.play("fairy");
+  },
+
+  clearHighlights() {
+    if (this.originalStyles) {
+      let el = this.originalStyles.element;
+      if (el) {
+        el.style.position = this.originalStyles.position;
+        el.style.zIndex = this.originalStyles.zIndex;
+        el.style.boxShadow = this.originalStyles.boxShadow;
+        el.style.borderColor = this.originalStyles.borderColor;
+        el.style.transition = this.originalStyles.transition;
+      }
+      this.originalStyles = null;
+    }
+    this.highlightedElements = [];
+
+    let backdrop = document.getElementById("tutorial-backdrop");
+    if (backdrop) backdrop.remove();
+  },
+
+  dismiss(key) {
+    let overlay = document.getElementById("hoor-tutorial-overlay");
+    if (overlay) overlay.remove();
+
+    this.clearHighlights();
+
+    window.playerStats.completedTutorialSteps.push(key);
+    this.activeDialog = null;
+    window.setPauseState(false);
+
+    window.updateUI();
+    window.saveGame();
+  },
+
+  skipAll() {
+    if (typeof window.showCustomConfirm === "function") {
+      window.showCustomConfirm(
+        "Mute Hoor's Advice?",
+        "Are you sure you want to skip all future tips? You can always consult the Guidebook manually.",
+        "Mute Tips",
+        "Keep Tips",
+        "#e74c3c",
+        () => {
+          for (let key in this.steps) {
+            if (!window.playerStats.completedTutorialSteps.includes(key)) {
+              window.playerStats.completedTutorialSteps.push(key);
+            }
+          }
+          let overlay = document.getElementById("hoor-tutorial-overlay");
+          if (overlay) overlay.remove();
+          this.clearHighlights();
+          this.activeDialog = null;
+          window.setPauseState(false);
+          window.updateUI();
+          window.saveGame();
+        }
+      );
+    }
+  }
+};
+
+/* --- FULL-SCREEN CHAINS SHATTERING UNLOCK ANIMATION ENGINE --- */
+window.playGlobalUnlockAnimation = function (title, iconSymbol = "🔮", callback = null) {
+  let overlay = document.getElementById("unlock-animation-overlay");
+  if (overlay) overlay.remove();
+
+  window.setPauseState(true);
+
+  // 1. Redirect viewport first so the background changes behind our transparent lock
+  if (callback) {
+    callback();
+  }
+
+  // 2. Create the beautiful semi-transparent glassmorphic overlay over the active tab
+  overlay = document.createElement("div");
+  overlay.id = "unlock-animation-overlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundColor = "rgba(8, 5, 15, 0.65)"; // High visibility transparent backing
+  overlay.style.display = "flex";
+  overlay.style.flexDirection = "column";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = "50000";
+  overlay.style.backdropFilter = "blur(4px)"; // Modern glass blur
+  overlay.style.color = "#fff";
+  overlay.style.fontFamily = "sans-serif";
+  overlay.style.userSelect = "none";
+  overlay.style.webkitUserSelect = "none";
+
+  document.body.appendChild(overlay);
+
+  // Padlock SVG with separate shackle group to slide up
+  let padlockSvg = `
+    <svg width="100" height="120" viewBox="0 0 64 80" style="display:block;">
+      <g class="padlock-shackle" style="transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2); transform-origin: 32px 36px;">
+        <path d="M18 36 V22 C18 13, 22 8, 32 8 C42 8, 46 13, 46 22 V36" fill="none" stroke="#d4af37" stroke-width="5" stroke-linecap="round" />
+      </g>
+      <rect x="12" y="32" width="40" height="34" rx="6" fill="linear-gradient(135deg, #ffd700, #b7950b)" stroke="#000" stroke-width="2.5" />
+      <path d="M32 44 A3.5 3.5 0 0 0 30 47.5 L28 56 H36 L34 47.5 A3.5 3.5 0 0 0 32 44 Z" fill="#111" stroke="#444" stroke-width="1" />
+    </svg>
+  `;
+
+  // Segmented Chain SVGs wrapped inside individual left/right coordinate spaces
+  let chainLeftSvg = `
+    <svg width="100" height="120" viewBox="0 0 50 80" style="display:block;">
+      <rect x="25" y="10" width="8" height="16" rx="3.5" fill="none" stroke="#7f8c8d" stroke-width="4.5" transform="rotate(-15 29 18)" />
+      <rect x="15" y="24" width="8" height="16" rx="3.5" fill="none" stroke="#7f8c8d" stroke-width="4.5" transform="rotate(15 19 32)" />
+      <rect x="25" y="38" width="8" height="16" rx="3.5" fill="none" stroke="#7f8c8d" stroke-width="4.5" transform="rotate(-15 29 46)" />
+      <rect x="15" y="52" width="8" height="16" rx="3.5" fill="none" stroke="#7f8c8d" stroke-width="4.5" transform="rotate(15 19 60)" />
+    </svg>
+  `;
+
+  let chainRightSvg = `
+    <svg width="100" height="120" viewBox="0 0 50 80" style="display:block;">
+      <rect x="17" y="10" width="8" height="16" rx="3.5" fill="none" stroke="#7f8c8d" stroke-width="4.5" transform="rotate(15 21 18)" />
+      <rect x="27" y="24" width="8" height="16" rx="3.5" fill="none" stroke="#7f8c8d" stroke-width="4.5" transform="rotate(-15 31 32)" />
+      <rect x="17" y="38" width="8" height="16" rx="3.5" fill="none" stroke="#7f8c8d" stroke-width="4.5" transform="rotate(15 21 46)" />
+      <rect x="27" y="52" width="8" height="16" rx="3.5" fill="none" stroke="#7f8c8d" stroke-width="4.5" transform="rotate(-15 31 60)" />
+    </svg>
+  `;
+
+  overlay.innerHTML = `
+    <div style="text-align:center; animation: toastFadeIn 0.3s ease-out;">
+      <div class="unlock-container" id="unlock-container-element">
+        <div class="unlock-chain-left">${chainLeftSvg}</div>
+        <div class="unlock-chain-right">${chainRightSvg}</div>
+        <div class="unlock-padlock shaking" id="unlock-padlock-element">${padlockSvg}</div>
+      </div>
+      <h2 style="margin:0 0 6px 0; color:#ffd700; letter-spacing:3px; text-transform:uppercase; font-size:18px; text-shadow: 0 0 10px rgba(241,196,15,0.45); font-family:sans-serif;">${iconSymbol} UNLOCKED!</h2>
+      <div style="font-size:11.5px; color:#aaa; font-family:monospace; margin-bottom:20px;" id="unlock-title-element">${title}</div>
+    </div>
+  `;
+
+  let container = document.getElementById("unlock-container-element");
+  let lock = document.getElementById("unlock-padlock-element");
+
+  setTimeout(() => {
+    if (lock) {
+      lock.classList.remove("shaking");
+      lock.classList.add("open");
+    }
+    if (window.SoundManager) window.SoundManager.play("parry");
+
+    let cvs = document.getElementById("gameCanvas");
+    let w = cvs ? cvs.width : 750;
+    let h = cvs ? cvs.height : 250;
+    for (let i = 0; i < 45; i++) {
+      let angle = Math.random() * Math.PI * 2;
+      let vel = window.randFloat(4, 9);
+      window.particles.push(
+        window.ParticlePool.get(
+          w / 2,
+          h / 2,
+          Math.cos(angle) * vel,
+          Math.sin(angle) * vel - 1.5,
+          window.randFloat(2, 5),
+          Math.random() > 0.4 ? "#f1c40f" : "#fff",
+          1,
+          window.randInt(30, 50)
+        )
+      );
+    }
+
+    setTimeout(() => {
+      if (container) {
+        container.classList.add("shattered");
+      }
+      if (window.SoundManager) window.SoundManager.play("death");
+
+      setTimeout(() => {
+        overlay.style.transition = "opacity 0.4s ease";
+        overlay.style.opacity = "0";
+
+        setTimeout(() => {
+          overlay.remove();
+          window.setPauseState(false);
+          window.updateUI();
+          window.saveGame();
+        }, 400);
+      }, 700);
+    }, 450);
+  }, 700);
+};

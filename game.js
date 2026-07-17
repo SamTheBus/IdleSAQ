@@ -6865,76 +6865,75 @@ window.CombatEngine = {
       );
     }
 
-    // Compile and render tactical alerts for unspent points, empty gear, or low defense values
-    const alertsEl = document.getElementById("death-alerts-container");
-    const tipContainerEl = document.getElementById("death-tip-container");
+    // Compile and render tactical actionable advice for unspent points, empty gear, or low defense values
+        const alertsEl = document.getElementById("death-alerts-container");
+        const tipContainerEl = document.getElementById("death-tip-container");
 
-    if (alertsEl) {
-      let alertsList = [];
+        if (alertsEl) {
+          let adviceText = "";
+          let buttonText = "";
+          let actionCode = "";
+          let accentColor = "#a855f7"; // Sleek purple default
 
-      // Alert 1: Unspent Skill Points check
-      let unallocatedSp = window.playerStats.sp || 0;
-      if (unallocatedSp > 0) {
-        alertsList.push(
-          `⚠️ <strong style="color:#f1c40f;">${unallocatedSp} SP Available:</strong> spend them under the <strong>Hero</strong> tab!`,
-        );
-      }
+          let unallocatedSp = window.playerStats.sp || 0;
+          let missingEquipSlots = [];
+          const keySlots = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
+          keySlots.forEach((slotKey) => {
+            if (!window.equippedSlots[slotKey]) {
+              if (window.equippedSlots.overall && (slotKey === "chest" || slotKey === "leggings")) return;
+              missingEquipSlots.push(slotKey.toUpperCase());
+            }
+          });
 
-      // Alert 2: Empty Non-Relic Equipment Slots check
-      let missingEquipSlots = [];
-      const keySlots = [
-        "weapon",
-        "subweapon",
-        "helmet",
-        "chest",
-        "leggings",
-        "boots",
-      ];
-      keySlots.forEach((slotKey) => {
-        if (!window.equippedSlots[slotKey]) {
-          // Bypass piece-slots if they are using a full overall composite suit
-          if (
-            window.equippedSlots.overall &&
-            (slotKey === "chest" || slotKey === "leggings")
-          )
-            return;
-          missingEquipSlots.push(slotKey.toUpperCase());
+          let currentLvlStage = window.playerStats.stage || 1;
+          let recommendedDefense = currentLvlStage * 8;
+          let activeD = window.resolvePlayerStats();
+
+          // Priority 1: Missing crucial gear
+          if (missingEquipSlots.length > 0) {
+            adviceText = `⚠️ <strong style="color:#ff7675;">Missing Gear:</strong> You are entering battle with empty equipment slots (<strong>${missingEquipSlots.join(", ")}</strong>). Equipping gear is the fastest way to survive.`;
+            buttonText = "Open Sack & Equip ➔";
+            actionCode = "window.respawnHero(); window.switchTab('inv');";
+            accentColor = "#e74c3c"; // Crimson warning
+          }
+          // Priority 2: Unspent Skill Points
+          else if (unallocatedSp > 0) {
+            adviceText = `⚡ <strong style="color:#f1c40f;">Unspent SP:</strong> You have <strong>${unallocatedSp} unspent Skill Points</strong>! Allocating them to STR, DEX, or INT will massively boost your attributes.`;
+            buttonText = "Allocate Skill Points ➔";
+            actionCode = "window.respawnHero(); window.switchTab('hero');";
+            accentColor = "#f39c12"; // Gold advice
+          }
+          // Priority 3: Low Defense
+          else if (activeD.def < recommendedDefense) {
+            adviceText = `⚒️ <strong style="color:#3498db;">Low Defense:</strong> Your defense (<strong>${window.formatNumber(activeD.def)}</strong>) is below target (<strong>${window.formatNumber(recommendedDefense)}</strong>). Go to the Blacksmith to attune and level up your armor!`;
+            buttonText = "Go to Blacksmith ➔";
+            actionCode = "window.respawnHero(); window.switchTab('forge'); window.selectCustomForgeStation('blacksmith'); window.setForgeMode('temper');";
+            accentColor = "#3498db"; // Cyber blue advice
+          }
+          // Priority 4: Default forge/enchanter tip
+          else {
+            adviceText = `🔮 <strong style="color:#a855f7;">Optimize Stats:</strong> Your basic stats are looking solid! To break through further barriers, visit the Mystical Enchanter to infuse modifiers or re-roll your item properties.`;
+            buttonText = "Go to Enchanter ➔";
+            actionCode = "window.respawnHero(); window.switchTab('forge'); window.selectCustomForgeStation('enchanter');";
+            accentColor = "#a855f7"; // Royal purple advice
+          }
+
+          alertsEl.innerHTML = `
+            <div style="background: rgba(0, 0, 0, 0.4); border: 1.5px solid ${accentColor}; border-radius: 8px; padding: 12px; text-align: left; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 15px ${window.hexToRgba ? window.hexToRgba(accentColor, 0.1) : "rgba(0,0,0,0.5)"};">
+              <span style="color:${accentColor}; font-size:9px; font-weight:900; letter-spacing:1px; text-transform:uppercase; display:flex; align-items:center; gap:4px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                Tactical Action Recommendation
+              </span>
+              <span style="font-size:10.5px; color:#f1f5f9; line-height:1.45; white-space:normal;">${adviceText}</span>
+              <button onclick="${actionCode}" class="btn-action" style="background:${accentColor}; color:#fff; border:1px solid #fff; font-weight:bold; font-size:10.5px; padding:8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; width:100%; box-shadow: 0 0 10px ${window.hexToRgba ? window.hexToRgba(accentColor, 0.25) : "rgba(0,0,0,0.1)"}; text-align:center; height:32px; line-height:1;">
+                ${buttonText}
+              </button>
+            </div>
+          `;
+          alertsEl.style.display = "block";
+
+          if (tipContainerEl) tipContainerEl.style.display = "none";
         }
-      });
-      if (missingEquipSlots.length > 0) {
-        alertsList.push(
-          `⚠️ <strong style="color:#ff7675;">Missing Gear:</strong> Empty slot: <strong>${missingEquipSlots.join(", ")}</strong>.`,
-        );
-      }
-
-      // Alert 3: Armor Recommendation check relative to their Stage progression
-      let currentLvlStage = window.playerStats.stage || 1;
-      let recommendedDefense = currentLvlStage * 8;
-      let activeD = window.resolvePlayerStats();
-      if (activeD.def < recommendedDefense) {
-        alertsList.push(
-          `⚒️ <strong style="color:#3498db;">Low Defense:</strong> Your defense (${window.formatNumber(activeD.def)}) is below target (${window.formatNumber(recommendedDefense)}). Temper armor!`,
-        );
-      }
-
-      if (alertsList.length > 0) {
-        alertsEl.innerHTML = alertsList
-          .map(
-            (itemText) =>
-              `<div style="margin-bottom:4px; line-height:1.3;">${itemText}</div>`,
-          )
-          .join("");
-        alertsEl.style.display = "block";
-
-        // Collapse height by hiding the generic advisory banner whenever custom action warnings exist
-        if (tipContainerEl) tipContainerEl.style.display = "none";
-      } else {
-        alertsEl.style.display = "none";
-
-        // Restore generic static advisory if there are no action alerts
-        if (tipContainerEl) tipContainerEl.style.display = "block";
-      }
-    }
 
     window.updateUI();
 

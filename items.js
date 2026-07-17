@@ -603,57 +603,16 @@ window.renderForgeTab = function () {
       );
 
     let eqItem = window.equippedSlots[slotKey];
-    let liveComparisonHtml = "";
-    if (eqItem) {
-      let curMult = 1.0 + lvl * 0.01;
-      let nextMult = 1.0 + (lvl + 1) * 0.01;
-
-      if (eqItem.type === "artifact") {
-        liveComparisonHtml = `
-              <div style="margin-top:12px; padding:10px; background:#111; border:1px solid #9b59b6; border-radius:6px; font-family:monospace; font-size:10.5px; text-align:left;">
-                <div style="color:#9b59b6; font-weight:bold; margin-bottom:4px; text-transform:uppercase;">📊 Artifact Attunement:</div>
-                <div style="color:#fff;">${eqItem.name}</div>
-                <div style="font-size:10px; color:#aaa; margin-top:4px; line-height:1.4; white-space:normal;">
-                  Attuning this slot multiplies all base and bonus attributes (including Drop Rate, Gold Multipliers, Crit stats, and flat Attributes) on this artifact by <strong style="color:#2ecc71; font-size:11px;">+1%</strong> per Level!
-                </div>
-              </div>
-            `;
-      } else {
-        let primaryStatKey =
-          eqItem.type === "weapon"
-            ? "atk"
-            : eqItem.type === "subweapon"
-              ? eqItem.subType === "shield"
-                ? "def"
-                : eqItem.subType === "dagger"
-                  ? "atk"
-                  : "int"
-              : "def";
-        let labelStat = primaryStatKey.toUpperCase();
-        let baseItemVal = eqItem[primaryStatKey] || 10;
-
-        let curEffective = Math.ceil(baseItemVal * curMult);
-        let nextEffective = Math.ceil(baseItemVal * nextMult);
-        let diff = nextEffective - curEffective;
-
-        liveComparisonHtml = `
-              <div style="margin-top:12px; padding:10px; background:#111; border:1px solid #3498db; border-radius:6px; font-family:monospace; font-size:10.5px; text-align:left;">
-                <div style="color:#3498db; font-weight:bold; margin-bottom:4px; text-transform:uppercase;">📊 Equipped Item Live Preview:</div>
-                <div style="color:#fff;">${eqItem.name}</div>
-                <div style="display:flex; justify-content:space-between; margin-top:4px;">
-                  <span>Effective ${labelStat}:</span>
-                  <span><span style="color:#aaa;">${curEffective}</span> ➔ <strong style="color:#fff;">${nextEffective}</strong> <span style="color:#2ecc71;">(+${diff})</span></span>
-                </div>
-              </div>
-            `;
-      }
-    } else {
-      liveComparisonHtml = `
-        <div style="margin-top:12px; padding:10px; background:#111; border:1px dashed #444; border-radius:6px; font-size:10.5px; color:#aaa; text-align:center;">
-          No item currently equipped in this slot.<br>Attunement multiplier (+${lvl}%) is fully prepared and waiting.
-        </div>
-      `;
-    }
+        let liveComparisonHtml = "";
+        if (typeof window.generateForgePreviewHtml === "function") {
+          liveComparisonHtml = window.generateForgePreviewHtml(eqItem, lvl, lvl + 1);
+        } else {
+          liveComparisonHtml = `
+            <div style="margin-top:12px; padding:10px; background:#111; border:1px dashed #444; border-radius:6px; font-size:10.5px; color:#aaa; text-align:center;">
+              No item currently equipped in this slot.<br>Attunement multiplier (+${lvl}%) is fully prepared and waiting.
+            </div>
+          `;
+        }
 
     detailEl.innerHTML = `
       <div style="font-weight:bold; font-size:13px; color:#df9ffb; border-bottom:1px solid #333; padding-bottom:4px; margin-bottom:10px; text-align:left;">${displayLabel}</div>
@@ -3637,6 +3596,18 @@ Object.assign(window.ForgeManager, {
       if (mode === "set") activeEl.style.background = "#2ecc71";
       if (mode === "shatter") activeEl.style.background = "#c0392b";
     }
+
+    // Register visited sub-tab
+    if (window.playerStats && window.playerStats.visitedSubTabs) {
+      let subTabKey = "forge_" + mode;
+      if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
+        window.playerStats.visitedSubTabs.push(subTabKey);
+        setTimeout(() => {
+          if (window.HoorTutorial) window.HoorTutorial.checkTriggers();
+        }, 100);
+      }
+    }
+
     if (typeof window.renderForgeTab === "function") window.renderForgeTab();
   },
 });

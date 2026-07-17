@@ -3,7 +3,7 @@
    initial global state, and system utility functions.
    ========================================================================= */
 
-window.GAME_VERSION = 0.99; // Pre-release Alpha 0.9.9 // Increment this whenever you push a new release
+window.GAME_VERSION = 0.991; // Pre-release Alpha 0.9.91 // Increment this whenever you push a new release
 
 // Core Security: HTML Sanitizer to prevent XSS injection in user lists
 window.escapeHTML = function (str) {
@@ -391,7 +391,25 @@ window.GameState = {
     };
 
     if (leveledUp) {
-      window.triggerLevelUpEffect();
+          window.triggerLevelUpEffect();
+
+          // Check if they reached Level 25 for the first time to trigger Altar / Clan Hall Unlock
+          if (window.playerStats.level >= 25 && !window.playerStats.hasTriggeredLevel25Unlock) {
+            window.playerStats.hasTriggeredLevel25Unlock = true;
+            setTimeout(() => {
+              if (typeof window.playGlobalUnlockAnimation === "function") {
+                window.playGlobalUnlockAnimation(
+                  "RIFT ALTAR & CLAN HALL UNLOCKED",
+                  "🔮",
+                  () => {
+                    if (typeof window.switchTab === "function") {
+                      window.switchTab("activities");
+                    }
+                  }
+                );
+              }
+            }, 1500); // Trigger shortly after the level-up flash settles
+          }
 
       window.invalidatePlayerStats();
       let p = window.resolvePlayerStats();
@@ -2229,8 +2247,12 @@ window.playerStats = {
   dailyRewardClaimed: false,
   weeklyRewardClaimed: false,
   unviewedAchievements: [],
-  selectedPrestigeStage: 80,
-  unlockedTitles: [],
+    selectedPrestigeStage: 80,
+    unlockedTitles: [],
+    tutorialStep: 0,
+    completedTutorialSteps: [],
+    visitedTabs: [],
+    hasTriggeredLevel25Unlock: false,
   equippedTitle: null,
   achievementTimestamps: {},
   claimedMailIds: [],
