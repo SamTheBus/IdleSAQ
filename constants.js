@@ -1915,14 +1915,14 @@ window.AchievementsData = [
 
   // 13. COLOSSUS STRIKE (Single Hit) - Smooth Bridge
   {
-    id: "hit_1",
-    name: "Colossus Strike I",
-    icon: "⚔️",
-    desc: "Deal 150 single hit damage",
-    reqType: "single_hit",
-    reqValue: 150,
-    stats: { Math: 0.002, critDamage: 0.01 }, // Wait, in the user's provided file there was a typo "critChance: 0.002" written as "Math: 0.002"? Let's fix that!
-  },
+      id: "hit_1",
+      name: "Colossus Strike I",
+      icon: "⚔️",
+      desc: "Deal 150 single hit damage",
+      reqType: "single_hit",
+      reqValue: 150,
+      stats: { critChance: 0.002, critDamage: 0.01 },
+    },
   {
     id: "hit_2",
     name: "Colossus Strike II",

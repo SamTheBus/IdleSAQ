@@ -2525,158 +2525,32 @@ window.toggleStickyCanvas = function () {
   if (typeof window.saveGame === "function") window.saveGame();
 };
 
-window.toggleChatFloatingMode = function () {
-  window.playerStats.chatFloatingMode = !window.playerStats.chatFloatingMode;
-  window.updateChatStyle();
-  if (typeof window.saveGame === "function") window.saveGame();
-};
-
-window.toggleChatMinimize = function () {
-  let body = document.getElementById("premium-chat-body");
-  let drawer = document.getElementById("premium-chat-drawer");
-  if (!body || !drawer) return;
-
-  if (window.playerStats && window.playerStats.chatFloatingMode) {
-    let isCollapsed = body.style.display === "none";
-    if (isCollapsed) {
-      body.style.display = "flex";
-      drawer.style.height = "260px";
-      let toggleIcon = document.getElementById("chat-toggle-icon");
-      if (toggleIcon) toggleIcon.innerText = "✥";
-    } else {
-      body.style.display = "none";
-      drawer.style.height = "32px";
-      let toggleIcon = document.getElementById("chat-toggle-icon");
-      if (toggleIcon) toggleIcon.innerText = "✦";
-    }
-  } else {
-    // Drawer mode minimize
-    if (window.ChatManager) {
-      window.ChatManager.isExpanded = !window.ChatManager.isExpanded;
-      window.updateChatStyle();
-    }
-  }
-};
-
 window.updateChatStyle = function () {
-  let active = window.playerStats.chatFloatingMode === true;
-  let btn = document.getElementById("settings-toggle-chat-floating");
-  let chatToggleBtn = document.getElementById("btn-chat-toggle");
   let drawer = document.getElementById("premium-chat-drawer");
-  let header = document.getElementById("premium-chat-header");
-  let body = document.getElementById("premium-chat-body");
-
-  if (btn) {
-    btn.innerText = active ? "Chat: WINDOW" : "Chat: DRAWER";
-    btn.className = active ? "btn-action" : "btn-action un";
-  }
-
   if (!drawer) return;
 
-  if (active) {
-    // --- FLOATING WINDOW MODE (Draggable Card) ---
-    drawer.style.position = "fixed";
-    drawer.style.zIndex = "1050";
-    drawer.style.width = "300px";
-    drawer.style.height = "260px";
-    drawer.style.bottom = "auto";
-    drawer.style.right = "auto";
-    drawer.style.borderRadius = "10px";
-    drawer.style.border = "2px solid #a855f7";
-    drawer.style.background = "rgba(10, 8, 18, 0.88)";
-    drawer.style.backdropFilter = "blur(10px)";
-    drawer.style.webkitBackdropFilter = "blur(10px)";
-    drawer.style.boxShadow =
-      "0 8px 32px rgba(0, 0, 0, 0.8), 0 0 15px rgba(168, 85, 247, 0.25)";
-    drawer.style.display = "flex";
-    drawer.style.flexDirection = "column";
-    drawer.style.overflow = "hidden";
+  drawer.style.position = "fixed";
+  drawer.style.zIndex = "1050";
+  drawer.style.bottom = "auto";
+  drawer.style.right = "auto";
 
-    if (header) {
-      header.style.display = "flex";
-      header.style.cursor = "move";
-      header.style.background =
-        "linear-gradient(180deg, #1d152c 0%, #0c0814 100%)";
-      header.style.borderBottom = "1px solid #a855f744";
-      header.style.padding = "8px 12px";
-      header.style.userSelect = "none";
-      header.style.webkitUserSelect = "none";
-      let toggleIcon = document.getElementById("chat-toggle-icon");
-      if (toggleIcon) toggleIcon.innerText = "✥";
-    }
-
-    if (body) {
-      body.style.display = "flex";
-      body.style.flexDirection = "column";
-      body.style.flex = "1";
-      body.style.height = "calc(100% - 32px)";
-      body.style.maxHeight = "none";
-    }
-
-    let x = window.playerStats.chatX;
-    let y = window.playerStats.chatY;
-    if (x !== null && y !== null) {
-      drawer.style.left = x + "px";
-      drawer.style.top = y + "px";
-    } else {
-      let defLeft = window.innerWidth - 320;
-      let defTop = window.innerHeight - 280;
-      if (defLeft < 10) defLeft = 10;
-      if (defTop < 10) defTop = 10;
-      drawer.style.left = defLeft + "px";
-      drawer.style.top = defTop + "px";
-      window.playerStats.chatX = defLeft;
-      window.playerStats.chatY = defTop;
-    }
-
-    window.initChatDrag();
+  let x = window.playerStats.chatX;
+  let y = window.playerStats.chatY;
+  if (x !== null && y !== null) {
+    drawer.style.left = x + "px";
+    drawer.style.top = y + "px";
   } else {
-    // --- DRAWER MODE (Sticky Bottom Collapsible Panel) ---
-    drawer.style.position = "sticky";
-    drawer.style.bottom = "0";
-    drawer.style.top = "auto";
-    drawer.style.right = "auto";
-    drawer.style.left = "auto";
-    drawer.style.width = "100%";
-    drawer.style.height =
-      window.ChatManager && window.ChatManager.isExpanded ? "260px" : "32px";
-    drawer.style.borderRadius = "0";
-    drawer.style.border = "none";
-    drawer.style.borderTop = "2px solid #2d3748";
-    drawer.style.background = "rgba(18, 18, 24, 0.95)";
-    drawer.style.backdropFilter = "blur(12px)";
-    drawer.style.webkitBackdropFilter = "blur(12px)";
-    drawer.style.display = "flex";
-    drawer.style.flexDirection = "column";
-    drawer.style.overflow = "hidden";
-    drawer.style.zIndex = "999";
-
-    if (header) {
-      header.style.display = "flex";
-      header.style.cursor = "pointer";
-      header.style.background =
-        "linear-gradient(180deg, #1a202c 0%, #0d1117 100%)";
-      header.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
-      header.style.padding = "10px 16px";
-      let toggleIcon = document.getElementById("chat-toggle-icon");
-      if (toggleIcon)
-        toggleIcon.innerText =
-          window.ChatManager && window.ChatManager.isExpanded ? "▲" : "▼";
-    }
-
-    if (body) {
-      body.style.display =
-        window.ChatManager && window.ChatManager.isExpanded ? "flex" : "none";
-      body.style.flexDirection = "column";
-      body.style.flex = "1";
-      body.style.height = "228px";
-      body.style.maxHeight = "none";
-    }
-
-    if (chatToggleBtn) {
-      chatToggleBtn.style.borderColor = "#a855f7";
-    }
+    let defLeft = window.innerWidth - 320;
+    let defTop = window.innerHeight - 280;
+    if (defLeft < 10) defLeft = 10;
+    if (defTop < 10) defTop = 10;
+    drawer.style.left = defLeft + "px";
+    drawer.style.top = defTop + "px";
+    window.playerStats.chatX = defLeft;
+    window.playerStats.chatY = defTop;
   }
+
+  window.initChatDrag();
 };
 
 window.initChatDrag = function () {
@@ -2693,11 +2567,10 @@ window.initChatDrag = function () {
   let initialTop = 0;
 
   header.addEventListener("pointerdown", function (e) {
-    if (window.playerStats.chatFloatingMode === false) return;
-    if (e.button !== 0) return; // Only process left click or touch
-    if (e.target.closest("button") || e.target.closest("input")) return;
+      if (e.button !== 0) return; // Only process left click or touch
+      if (e.target.closest("button") || e.target.closest("input")) return;
 
-    isDragging = true;
+      isDragging = true;
     startX = e.clientX;
     startY = e.clientY;
     initialLeft = drawer.offsetLeft;
@@ -16757,21 +16630,16 @@ if (!window.ChatManager) {
       let btn = document.getElementById("btn-chat-toggle");
       if (!drawer) return;
 
-      if (window.playerStats && window.playerStats.chatFloatingMode) {
-        window.toggleChatMinimize();
-        return;
-      }
-
-      this.isExpanded = !this.isExpanded;
-      if (this.isExpanded) {
+      let isHidden = drawer.style.display === "none" || drawer.style.display === "";
+      if (isHidden) {
         drawer.style.display = "flex";
         if (btn) btn.style.borderColor = "#ff007f";
+        if (typeof window.updateChatStyle === "function") {
+          window.updateChatStyle();
+        }
       } else {
         drawer.style.display = "none";
         if (btn) btn.style.borderColor = "#a855f7";
-      }
-      if (typeof window.updateChatStyle === "function") {
-        window.updateChatStyle();
       }
     },
     switchChannel(chan) {

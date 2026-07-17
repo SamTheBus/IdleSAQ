@@ -2989,9 +2989,10 @@ function update() {
       }
     } else {
       if (window.playerStats.watchTick >= 1200) {
-        window.playerStats.watchTick = 0;
-        let extraFrames = Math.floor(p.int * 0.05);
-        window.playerStats.watchActiveTimer = Math.min(480, 240 + extraFrames);
+                  window.playerStats.watchTick = 0;
+                  let pResolved = window.resolvePlayerStats();
+                  let extraFrames = Math.floor(pResolved.int * 0.05);
+                  window.playerStats.watchActiveTimer = Math.min(480, 240 + extraFrames);
         window.pushLog(
           "<span style='color:#f1c40f; font-weight:bold;'>[CHRONOS WATCH] A Temporal Fracture opened! speeds dilated (+15% speed, -25% enemy speed).</span>",
         );
