@@ -824,9 +824,11 @@ window.SaveManager = {
         window.playerStats.qlyPotionStrength = 0.5;
 
       if (window.playerStats.unlockedAchievements === undefined)
-        window.playerStats.unlockedAchievements = [];
-      if (window.playerStats.unviewedAchievements === undefined)
-        window.playerStats.unviewedAchievements = [];
+              window.playerStats.unlockedAchievements = [];
+            if (window.playerStats.unviewedAchievements === undefined)
+              window.playerStats.unviewedAchievements = [];
+            if (window.playerStats.visitedSubTabs === undefined)
+              window.playerStats.visitedSubTabs = [];
       if (window.playerStats.chatFloatingMode === undefined)
         window.playerStats.chatFloatingMode = false;
       if (window.playerStats.chatX === undefined)
@@ -2332,10 +2334,17 @@ window.onload = function () {
     window.invalidatePlayerStats();
   }
 
-  window.updateStickyCanvasStyle();
-  if (typeof window.updateChatStyle === "function") {
-    window.updateChatStyle();
-  }
+  // Setup non-blocking background auto-save loop every 60 seconds
+    setInterval(() => {
+      if (!window.isGamePaused && typeof window.saveGame === "function") {
+        window.saveGame();
+      }
+    }, 60000);
+
+    window.updateStickyCanvasStyle();
+      if (typeof window.updateChatStyle === "function") {
+        window.updateChatStyle();
+      }
   if (typeof window.updateDpsOverlayStyle === "function") {
     window.updateDpsOverlayStyle();
   }

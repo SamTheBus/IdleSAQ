@@ -6865,15 +6865,15 @@ window.switchTab = function (tabId) {
   if (window.playerStats && window.playerStats.visitedTabs) {
     if (!window.playerStats.visitedTabs.includes(tabId)) {
       window.playerStats.visitedTabs.push(tabId);
-
-      // Let the UI evaluate immediately upon registering the first-time visit
-      setTimeout(() => {
-        if (window.HoorTutorial) {
-          window.HoorTutorial.checkTriggers();
-        }
-      }, 100);
     }
   }
+
+  // Evaluate triggers on every single tab transition
+  setTimeout(() => {
+    if (window.HoorTutorial) {
+      window.HoorTutorial.checkTriggers();
+    }
+  }, 100);
 
   document
     .querySelectorAll(".tab-content")
@@ -6941,18 +6941,22 @@ window.switchSubTab = function (subTabId) {
     subTabId === "USE" ? "block" : "none";
 
   // Register visited sub-tab
-  if (window.playerStats && window.playerStats.visitedSubTabs) {
-    let subTabKey = "sub_" + subTabId.toLowerCase();
-    if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
-      window.playerStats.visitedSubTabs.push(subTabKey);
-      setTimeout(() => {
-        if (window.HoorTutorial) window.HoorTutorial.checkTriggers();
-      }, 100);
+    if (window.playerStats && window.playerStats.visitedSubTabs) {
+      let subTabKey = "sub_" + subTabId.toLowerCase();
+      if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
+        window.playerStats.visitedSubTabs.push(subTabKey);
+      }
     }
-  }
 
-  window.updateUI();
-};
+    // Evaluate triggers on every single sub-tab transition
+    setTimeout(() => {
+      if (window.HoorTutorial) {
+        window.HoorTutorial.checkTriggers();
+      }
+    }, 100);
+
+    window.updateUI();
+  };
 
 window.switchMarketSubTab = function (subTabId) {
   document
@@ -7008,18 +7012,22 @@ window.switchMarketSubTab = function (subTabId) {
   }
 
   // Register visited sub-tab
-  if (window.playerStats && window.playerStats.visitedSubTabs) {
-    let subTabKey = "market_" + subTabId.toLowerCase();
-    if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
-      window.playerStats.visitedSubTabs.push(subTabKey);
-      setTimeout(() => {
-        if (window.HoorTutorial) window.HoorTutorial.checkTriggers();
-      }, 100);
+    if (window.playerStats && window.playerStats.visitedSubTabs) {
+      let subTabKey = "market_" + subTabId.toLowerCase();
+      if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
+        window.playerStats.visitedSubTabs.push(subTabKey);
+      }
     }
-  }
 
-  if (typeof window.hideTooltip === "function") window.hideTooltip();
-};
+    // Evaluate triggers on every single market sub-tab transition
+    setTimeout(() => {
+      if (window.HoorTutorial) {
+        window.HoorTutorial.checkTriggers();
+      }
+    }, 100);
+
+    if (typeof window.hideTooltip === "function") window.hideTooltip();
+  };
 
 window.switchActivitiesSubTab = function (subTabId) {
   window.state.currentActivitiesSubTab = subTabId;
@@ -7052,18 +7060,22 @@ window.switchActivitiesSubTab = function (subTabId) {
   }
 
   // Register visited sub-tab
-  if (window.playerStats && window.playerStats.visitedSubTabs) {
-    let subTabKey = "activities_" + subTabId.toLowerCase();
-    if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
-      window.playerStats.visitedSubTabs.push(subTabKey);
-      setTimeout(() => {
-        if (window.HoorTutorial) window.HoorTutorial.checkTriggers();
-      }, 100);
+    if (window.playerStats && window.playerStats.visitedSubTabs) {
+      let subTabKey = "activities_" + subTabId.toLowerCase();
+      if (!window.playerStats.visitedSubTabs.includes(subTabKey)) {
+        window.playerStats.visitedSubTabs.push(subTabKey);
+      }
     }
-  }
 
-  if (typeof window.hideTooltip === "function") window.hideTooltip();
-};
+    // Evaluate triggers on every single activities sub-tab transition
+    setTimeout(() => {
+      if (window.HoorTutorial) {
+        window.HoorTutorial.checkTriggers();
+      }
+    }, 100);
+
+    if (typeof window.hideTooltip === "function") window.hideTooltip();
+  };
 
 window.toggleFullscreen = function () {
   if (!document.fullscreenElement) {
@@ -10498,13 +10510,20 @@ window.toggleMissions = function () {
     `;
 
     document.getElementById("game-container").appendChild(win);
-    window.renderMissionsWindow();
-    window.makeWindowDraggable(
-      win,
-      document.getElementById("missions-win-handle"),
-    );
-  }
-};
+      window.renderMissionsWindow();
+      window.makeWindowDraggable(
+        win,
+        document.getElementById("missions-win-handle"),
+      );
+
+      // Evaluate Quest Board tutorial trigger upon opening
+      setTimeout(() => {
+        if (window.HoorTutorial) {
+          window.HoorTutorial.checkTriggers();
+        }
+      }, 100);
+    }
+    };
 
 window.renderMissionsWindow = function () {
   let contentEl = document.getElementById("missions-win-content");
