@@ -1441,44 +1441,44 @@ window.MusicManager = {
     }
 
     let targetFreq = 20000; // Full frequency bypass
-    let volumeScale = 1.0;
-    let targetRate = 1.0; // Tempo & Pitch playback rate (1.0 = normal)
-    let targetQ = 1.0; // Filter resonance/sharpness
+          let volumeScale = 1.0;
+          let targetRate = 1.0;   // Tempo & Pitch playback rate (1.0 = normal)
+          let targetQ = 1.0;      // Filter resonance/sharpness
 
-    // Apply advanced DSP sweeps per State
-    switch (state) {
-      case "death":
-        targetFreq = 300; // Extremely muffled, dark, distant
-        volumeScale = 0.15; // Drastically ducked
-        targetRate = 0.82; // Tape-stop slow down and pitch drop on defeat
-        targetQ = 1.0;
-        break;
-      case "town":
-        targetFreq = 850; // Warm, soft cozy background blanket
-        volumeScale = 0.65; // Slightly lower volume
-        targetRate = 0.95; // Relaxed tempo
-        targetQ = 1.0;
-        break;
-      case "dungeon":
-        targetFreq = 4000; // Balanced highs, clear echo clarity
-        volumeScale = 0.85; // Good room for cavern SFX
-        targetRate = 1.0;
-        targetQ = 1.2;
-        break;
-      case "boss":
-        targetFreq = 20000; // Bright, intense, dramatic
-        volumeScale = 1.0; // Max presence
-        targetRate = 1.15; // 15% faster tempo and higher pitch for intense boss fights!
-        targetQ = 3.5; // High resonance adds a sharp, sparkling, aggressive edge to plucks
-        break;
-      case "campaign":
-      default:
-        targetFreq = 20000; // Clean, steady farming output
-        volumeScale = 0.9;
-        targetRate = 1.0;
-        targetQ = 1.0;
-        break;
-    }
+          // Apply advanced DSP sweeps per State
+          switch (state) {
+            case "death":
+              targetFreq = 300;     // Extremely muffled, dark, distant
+              volumeScale = 0.15;   // Drastically ducked
+              targetRate = 1.00;    // Keep stable at 1.00 to prevent buffer drops
+              targetQ = 1.0;
+              break;
+            case "town":
+              targetFreq = 850;     // Warm, soft cozy background blanket
+              volumeScale = 0.65;   // Slightly lower volume
+              targetRate = 1.00;    // Keep stable at 1.00 to prevent buffer drops
+              targetQ = 1.0;
+              break;
+            case "dungeon":
+              targetFreq = 4000;    // Balanced highs, clear echo clarity
+              volumeScale = 0.85;   // Good room for cavern SFX
+              targetRate = 1.00;
+              targetQ = 1.0;        // Flat resonance to prevent filter blowout
+              break;
+            case "boss":
+              targetFreq = 20000;   // Bright, intense, dramatic
+              volumeScale = 1.0;    // Max presence
+              targetRate = 1.00;    // Stable rate prevents chipmunk speedup node crashes
+              targetQ = 1.0;        // Flat resonance prevents mathematical instability at Nyquist edge
+              break;
+            case "campaign":
+            default:
+              targetFreq = 20000;   // Clean, steady farming output
+              volumeScale = 0.9;
+              targetRate = 1.00;
+              targetQ = 1.0;
+              break;
+          }
 
     // Resolve volume levels through settings
     let isMuted = window.playerStats ? window.playerStats.mute : false;
@@ -1509,18 +1509,23 @@ window.MusicManager = {
     }
 
     // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
-    if (this.audio) {
-      this.audio.volume = finalTargetVolume;
+              if (this.audio) {
+                this.audio.volume = finalTargetVolume;
+                if (this.audio.playbackRate !== 1.0) {
+                  this.audio.playbackRate = 1.0;
+                }
 
-      // Smoothly glide the playback rate/pitch toward target rate to prevent jarring audio pops
-      let currentRate = this.audio.playbackRate;
-      if (Math.abs(currentRate - targetRate) > 0.005) {
-        this.audio.playbackRate =
-          currentRate + (targetRate - currentRate) * 0.08;
-      } else {
-        this.audio.playbackRate = targetRate;
-      }
-    }
+                // Power-Saving Optimization: Suspend streaming and decoding when muted to preserve mobile CPU/battery
+                if (finalTargetVolume <= 0) {
+                  if (!this.audio.paused) {
+                    this.audio.pause();
+                  }
+                } else {
+                  if (this.audio.paused) {
+                    this.audio.play().catch(() => {});
+                  }
+                }
+              }
 
     // Call next evaluation frame
     requestAnimationFrame(() => this.tick());
