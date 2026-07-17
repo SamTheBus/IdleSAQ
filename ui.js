@@ -2549,6 +2549,7 @@ window.toggleChatMinimize = function () {
 window.updateChatStyle = function () {
   let active = window.playerStats.chatFloatingMode !== false;
   let btn = document.getElementById("settings-toggle-chat-floating");
+  let chatToggleBtn = document.getElementById("btn-chat-toggle");
   let drawer = document.getElementById("premium-chat-drawer");
   let header = document.getElementById("premium-chat-header");
   let body = document.getElementById("premium-chat-body");
@@ -2561,6 +2562,7 @@ window.updateChatStyle = function () {
   if (!drawer) return;
 
   if (active) {
+    // --- FLOATING WINDOW MODE (Draggable Card) ---
     drawer.style.position = "fixed";
     drawer.style.zIndex = "1050";
     drawer.style.width = "300px";
@@ -2578,6 +2580,7 @@ window.updateChatStyle = function () {
     drawer.style.overflow = "hidden";
 
     if (header) {
+      header.style.display = "flex";
       header.style.cursor = "move";
       header.style.background = "linear-gradient(180deg, #1d152c 0%, #0c0814 100%)";
       header.style.borderBottom = "1px solid #a855f744";
@@ -2614,44 +2617,39 @@ window.updateChatStyle = function () {
 
     window.initChatDrag();
   } else {
-    drawer.style.position = "";
-    drawer.style.zIndex = "";
-    drawer.style.width = "";
-    drawer.style.height = "";
+    // --- DROPDOWN MODE (Fully collapsible dropdown panel directly below Top Nav) ---
+    drawer.style.position = "absolute";
+    drawer.style.top = "44px"; // Cleanly aligned right under the top-navigation controls bar
+    drawer.style.right = "16px";
+    drawer.style.width = "300px";
+    drawer.style.height = "250px";
     drawer.style.left = "";
-    drawer.style.top = "";
     drawer.style.bottom = "";
-    drawer.style.right = "";
-    drawer.style.borderRadius = "";
-    drawer.style.border = "";
-    drawer.style.background = "";
-    drawer.style.backdropFilter = "";
-    drawer.style.webkitBackdropFilter = "";
-    drawer.style.boxShadow = "";
-    drawer.style.display = "";
-    drawer.style.flexDirection = "";
-    drawer.style.overflow = "";
+    drawer.style.borderRadius = "8px";
+    drawer.style.border = "1.5px solid #a855f7";
+    drawer.style.background = "rgba(10, 8, 18, 0.94)";
+    drawer.style.backdropFilter = "blur(10px)";
+    drawer.style.webkitBackdropFilter = "blur(10px)";
+    drawer.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.9), 0 0 15px rgba(168, 85, 247, 0.2)";
+    drawer.style.display = window.ChatManager && window.ChatManager.isExpanded ? "flex" : "none";
+    drawer.style.flexDirection = "column";
+    drawer.style.overflow = "hidden";
+    drawer.style.zIndex = "1010";
 
     if (header) {
-      header.style.cursor = "";
-      header.style.background = "";
-      header.style.borderBottom = "";
-      header.style.padding = "";
-      header.style.userSelect = "";
-      header.style.webkitUserSelect = "";
-      let toggleIcon = document.getElementById("chat-toggle-icon");
-      if (toggleIcon) {
-        let isExpanded = drawer.classList.contains("chat-drawer-expanded");
-        toggleIcon.innerText = isExpanded ? "▼" : "▲";
-      }
+      header.style.display = "none"; // Hide the inner header in Dropdown mode (the toggle button represents the header)
     }
 
     if (body) {
-      body.style.display = "";
-      body.style.flexDirection = "";
-      body.style.flex = "";
-      body.style.height = "";
-      body.style.maxHeight = "";
+      body.style.display = "flex";
+      body.style.flexDirection = "column";
+      body.style.flex = "1";
+      body.style.height = "100%";
+      body.style.maxHeight = "none";
+    }
+
+    if (chatToggleBtn) {
+      chatToggleBtn.style.borderColor = window.ChatManager && window.ChatManager.isExpanded ? "#ff007f" : "#a855f7";
     }
   }
 };
@@ -16421,3 +16419,89 @@ window.openSubweaponOfChoiceModal = function () {
     window.saveGame();
   };
 };
+
+// --- RESILIENT CHAT FALLBACK ROUTINES ---
+if (!window.ChatManager) {
+  window.ChatManager = {
+    channel: "GLOBAL",
+    isExpanded: false,
+    init() {
+      console.log("💬 ChatManager Fallback Initialized.");
+      this.renderWelcome();
+    },
+    toggleChat() {
+          let drawer = document.getElementById("premium-chat-drawer");
+          let btn = document.getElementById("btn-chat-toggle");
+          if (!drawer) return;
+
+          if (window.playerStats && window.playerStats.chatFloatingMode) {
+            window.toggleChatMinimize();
+            return;
+          }
+
+          this.isExpanded = !this.isExpanded;
+          if (this.isExpanded) {
+            drawer.style.display = "flex";
+            if (btn) btn.style.borderColor = "#ff007f";
+          } else {
+            drawer.style.display = "none";
+            if (btn) btn.style.borderColor = "#a855f7";
+          }
+          if (typeof window.updateChatStyle === "function") {
+            window.updateChatStyle();
+          }
+        },
+    switchChannel(chan) {
+      this.channel = chan;
+      document.querySelectorAll(".chat-sub-tab").forEach(btn => btn.classList.remove("active"));
+      let activeBtn = document.getElementById("chat-tab-" + chan.toLowerCase());
+      if (activeBtn) activeBtn.classList.add("active");
+      this.pushMessage("System", `Switched to ${chan} channel.`, "#3498db");
+    },
+    handleInputKeydown(e) {
+      if (e.key === "Enter") {
+        this.sendCurrentMessage();
+      }
+    },
+    sendCurrentMessage() {
+      let input = document.getElementById("chat-message-input");
+      if (!input) return;
+      let msg = input.value.trim();
+      if (!msg) return;
+
+      input.value = "";
+      let name = (window.playerStats && window.playerStats.playerName) || "Guest";
+      let color = (window.playerStats && window.playerStats.playerName === "Guest") ? "#7f8c8d" : "#ffd700";
+
+      this.pushMessage(name, msg, color);
+
+      // Simulate NPC Oracle interactions to verify local typing is perfectly functional
+      setTimeout(() => {
+        const replies = [
+          "May your critical strikes be frequent, hero!",
+          "Slay on! Those stage bosses won't defeat themselves.",
+          "Attune your slots inside the Forge to unlock massive multipliers.",
+          "Reality Rift guardians hold powerful unique relics... choose your targets carefully!",
+          "Need more Gold? Try diving into the Gold Mine Caverns!",
+          "A healthy balance of STR, DEX, and INT keeps you prepared for any onslaught."
+        ];
+        let randomReply = replies[Math.floor(Math.random() * replies.length)];
+        this.pushMessage("Oracle", randomReply, "#a855f7");
+      }, 1500);
+    },
+    pushMessage(sender, text, color) {
+      let container = document.getElementById("chat-messages-container");
+      if (!container) return;
+
+      let msgEl = document.createElement("div");
+      msgEl.style.cssText = "margin-bottom: 6px; font-size: 11px; line-height: 1.35; text-align: left; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 4px;";
+      msgEl.innerHTML = `<strong style="color: ${color};">${sender}:</strong> <span style="color: #fff; white-space: normal; word-break: break-word;">${window.escapeHTML(text)}</span>`;
+
+      container.appendChild(msgEl);
+      container.scrollTop = container.scrollHeight;
+    },
+    renderWelcome() {
+      this.pushMessage("System", "Welcome to the real-time chat network! Synchronizing channels...", "#e67e22");
+    }
+  };
+}
