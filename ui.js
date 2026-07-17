@@ -2338,50 +2338,50 @@ window.toggleAudioMenu = function () {
 };
 
 window.updateAudioUI = function () {
-    let masterSlider = document.getElementById("slider-vol-master");
-    let sfxSlider = document.getElementById("slider-vol-sfx");
-    let musicSlider = document.getElementById("slider-vol-music");
-    let masterLabel = document.getElementById("vol-master-label");
-    let sfxLabel = document.getElementById("vol-sfx-label");
-    let musicLabel = document.getElementById("vol-music-label");
-    let muteBtn = document.getElementById("btn-audio-mute");
+  let masterSlider = document.getElementById("slider-vol-master");
+  let sfxSlider = document.getElementById("slider-vol-sfx");
+  let musicSlider = document.getElementById("slider-vol-music");
+  let masterLabel = document.getElementById("vol-master-label");
+  let sfxLabel = document.getElementById("vol-sfx-label");
+  let musicLabel = document.getElementById("vol-music-label");
+  let muteBtn = document.getElementById("btn-audio-mute");
 
-    if (masterSlider) masterSlider.value = window.playerStats.volumeMaster;
-    if (sfxSlider) sfxSlider.value = window.playerStats.volumeSFX;
-    if (musicSlider) musicSlider.value = window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5;
-    if (masterLabel)
-      masterLabel.innerText =
-        Math.round(window.playerStats.volumeMaster * 100) + "%";
-    if (sfxLabel)
-      sfxLabel.innerText = Math.round(window.playerStats.volumeSFX * 100) + "%";
-    if (musicLabel)
-      musicLabel.innerText = Math.round((window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5) * 100) + "%";
-    if (muteBtn) {
-      if (window.playerStats.mute) {
-        muteBtn.innerText = "Unmute Audio";
-        muteBtn.style.background = "#2ecc71";
-      } else {
-        muteBtn.innerText = "Mute Audio";
-        muteBtn.style.background = "#c0392b";
-      }
+  if (masterSlider) masterSlider.value = window.playerStats.volumeMaster;
+  if (sfxSlider) sfxSlider.value = window.playerStats.volumeSFX;
+  if (musicSlider) musicSlider.value = window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5;
+  if (masterLabel)
+    masterLabel.innerText =
+      Math.round(window.playerStats.volumeMaster * 100) + "%";
+  if (sfxLabel)
+    sfxLabel.innerText = Math.round(window.playerStats.volumeSFX * 100) + "%";
+  if (musicLabel)
+    musicLabel.innerText = Math.round((window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5) * 100) + "%";
+  if (muteBtn) {
+    if (window.playerStats.mute) {
+      muteBtn.innerText = "Unmute Audio";
+      muteBtn.style.background = "#2ecc71";
+    } else {
+      muteBtn.innerText = "Mute Audio";
+      muteBtn.style.background = "#c0392b";
     }
-  };
+  }
+};
 
-  window.changeVolume = function (type, val) {
-    let numVal = parseFloat(val);
-    if (type === "master") {
-      window.playerStats.volumeMaster = numVal;
-      setText("vol-master-label", Math.round(numVal * 100) + "%");
-    } else if (type === "sfx") {
-      window.playerStats.volumeSFX = numVal;
-      setText("vol-sfx-label", Math.round(numVal * 100) + "%");
-    } else if (type === "music") {
-      window.playerStats.volumeMusic = numVal;
-      setText("vol-music-label", Math.round(numVal * 100) + "%");
-    }
-    window.SoundManager.updateVolumes();
-    window.saveGame();
-  };
+window.changeVolume = function (type, val) {
+  let numVal = parseFloat(val);
+  if (type === "master") {
+    window.playerStats.volumeMaster = numVal;
+    setText("vol-master-label", Math.round(numVal * 100) + "%");
+  } else if (type === "sfx") {
+    window.playerStats.volumeSFX = numVal;
+    setText("vol-sfx-label", Math.round(numVal * 100) + "%");
+  } else if (type === "music") {
+    window.playerStats.volumeMusic = numVal;
+    setText("vol-music-label", Math.round(numVal * 100) + "%");
+  }
+  window.SoundManager.updateVolumes();
+  window.saveGame();
+};
 
 window.toggleMute = function () {
   window.playerStats.mute = !window.playerStats.mute;

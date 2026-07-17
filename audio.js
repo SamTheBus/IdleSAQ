@@ -1385,6 +1385,13 @@ window.MusicManager = {
 
   init() {
     if (this.initialized) return;
+    this.initialized = true; // Block duplicate triggers instantly
+
+    // Create HTML5 Audio Element first so we always have a fallback player
+    this.audio = new Audio();
+    this.audio.src = "music.mp3";
+    this.audio.loop = true;
+    this.audio.crossOrigin = "anonymous";
 
     // Use SoundManager's context if available, otherwise fallback
     this.ctx = window.SoundManager.ctx || window.SoundManager.audioCtx;
@@ -1393,29 +1400,22 @@ window.MusicManager = {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         this.ctx = new AudioContextClass();
       } catch (e) {
-        return;
-      }
-    }
-
-    try {
-      // 1. Create HTML5 Audio Streaming Element
-      this.audio = new Audio();
-      this.audio.src = "music.mp3"; // Put your loop file here
-      this.audio.loop = true;
-      this.audio.crossOrigin = "anonymous";
-
-      // Safari/WebKit MediaElementAudioSourceNode bug bypass:
-      // On iOS and macOS Safari, routing streaming audio through a filter node frequently results in silence
-      // due to local WebKit security constraints. We detect Safari and stream directly without Web Audio wrapping.
-      let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      if (isSafari) {
-        this.initialized = true;
+        // If Web Audio completely fails, play directly on speakers
         this.audio.play().catch(() => {});
         this.tick();
         return;
       }
+    }
 
-      // 2. Build DSP Web Audio Graph
+    let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) {
+      this.audio.play().catch(() => {});
+      this.tick();
+      return;
+    }
+
+    try {
+      // Build DSP Web Audio Graph
       this.source = this.ctx.createMediaElementSource(this.audio);
 
       this.filter = this.ctx.createBiquadFilter();
@@ -1423,30 +1423,28 @@ window.MusicManager = {
       this.filter.frequency.setValueAtTime(20000, this.ctx.currentTime);
 
       this.gainNode = this.ctx.createGain();
-      this.gainNode.gain.setValueAtTime(0, this.ctx.currentTime); // Fade in on play
+      this.gainNode.gain.setValueAtTime(0, this.ctx.currentTime);
 
-      // Connections
       this.source.connect(this.filter);
       this.filter.connect(this.gainNode);
 
-      // Route through SoundManager's masterGain node to respect main volume adjustments
       if (window.SoundManager && window.SoundManager.masterGain) {
         this.gainNode.connect(window.SoundManager.masterGain);
       } else {
         this.gainNode.connect(this.ctx.destination);
       }
-
-      this.initialized = true;
-      this.play();
     } catch (e) {
-      console.warn("Failed to initialize Adaptive Music Manager:", e);
+      // If Web Audio routing throws an exception (CORS, suspended, etc.), log it but let the direct speaker path play!
+      console.warn("Web Audio BGM routing failed, falling back to direct speaker mode:", e);
     }
+
+    this.play();
   },
 
   play() {
     if (!this.initialized) return;
-    if (this.ctx.state === "suspended") {
-      this.ctx.resume();
+    if (this.ctx && this.ctx.state === "suspended") {
+      this.ctx.resume().catch(() => {});
     }
     this.audio.play().catch((err) => {
       console.warn("BGM playback postponed (waiting for user gesture).");
@@ -1454,11 +1452,10 @@ window.MusicManager = {
     this.tick();
   },
 
-  // Continuously monitors game state and sweeps DSP values exponentially
   tick() {
     if (!this.initialized) return;
 
-    let now = this.ctx.currentTime;
+    let now = this.ctx ? this.ctx.currentTime : 0;
     let state = "campaign";
 
     // Detect Active Game State
@@ -1503,28 +1500,28 @@ window.MusicManager = {
     }
 
     // Resolve volume levels through settings
-        let isMuted = window.playerStats ? window.playerStats.mute : false;
-        let musicVolSetting = window.playerStats && window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5;
+    let isMuted = window.playerStats ? window.playerStats.mute : false;
+    let musicVolSetting = window.playerStats && window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5;
 
-        // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
-        let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
+    // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
+    let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
 
-        if (this.currentState !== state) {
-          this.currentState = state;
-          console.log(`[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`);
-        }
+    if (this.currentState !== state) {
+      this.currentState = state;
+      console.log(`[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`);
+    }
 
-        // Apply exponential sweeps
-        if (this.filter && this.filter.frequency) {
-          this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
-        }
-        if (this.gainNode && this.gainNode.gain) {
-          this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
-        }
-        // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
-        if (this.audio) {
-          this.audio.volume = finalTargetVolume;
-        }
+    // Apply exponential sweeps
+    if (this.filter && this.filter.frequency && this.ctx) {
+      this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
+    }
+    if (this.gainNode && this.gainNode.gain && this.ctx) {
+      this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
+    }
+    // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
+    if (this.audio) {
+      this.audio.volume = finalTargetVolume;
+    }
 
     // Call next evaluation frame
     requestAnimationFrame(() => this.tick());
