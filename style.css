@@ -816,9 +816,17 @@ canvas {
 }
 
 @keyframes goldBounce {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); border-color: #ffd700; box-shadow: 0 0 15px rgba(241, 196, 15, 0.5); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.5);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 .gold-bounce-active {
   animation: goldBounce 0.22s cubic-bezier(0.25, 0.8, 0.25, 1) !important;

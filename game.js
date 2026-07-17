@@ -66,9 +66,18 @@ window.wakeLockGestureHandler = async function () {
 window.bindWakeLockGestureListener = function () {
   if (window.hasBoundWakeLockGesture) return;
   window.hasBoundWakeLockGesture = true;
-  window.addEventListener("pointerdown", window.wakeLockGestureHandler, { once: true, passive: true });
-  window.addEventListener("click", window.wakeLockGestureHandler, { once: true, passive: true });
-  window.addEventListener("keydown", window.wakeLockGestureHandler, { once: true, passive: true });
+  window.addEventListener("pointerdown", window.wakeLockGestureHandler, {
+    once: true,
+    passive: true,
+  });
+  window.addEventListener("click", window.wakeLockGestureHandler, {
+    once: true,
+    passive: true,
+  });
+  window.addEventListener("keydown", window.wakeLockGestureHandler, {
+    once: true,
+    passive: true,
+  });
 };
 
 window.removeWakeLockGestureListeners = function () {
@@ -82,7 +91,11 @@ window.removeWakeLockGestureListeners = function () {
 document.addEventListener("visibilitychange", async () => {
   if (document.visibilityState === "visible") {
     // Resume BGM and Web Audio context only if the player hasn't muted the game
-    if (window.MusicManager && window.MusicManager.audio && (!window.playerStats || !window.playerStats.mute)) {
+    if (
+      window.MusicManager &&
+      window.MusicManager.audio &&
+      (!window.playerStats || !window.playerStats.mute)
+    ) {
       window.MusicManager.audio.play().catch(() => {});
     }
     if (window.SoundManager && window.SoundManager.ctx) {
@@ -917,13 +930,13 @@ window.SaveManager = {
       if (window.playerStats.itemsSalvaged === undefined)
         window.playerStats.itemsSalvaged = 0;
       if (window.playerStats.volumeMaster === undefined)
-              window.playerStats.volumeMaster = 0.5;
-            if (window.playerStats.volumeSFX === undefined)
-              window.playerStats.volumeSFX = 0.8;
-            if (window.playerStats.volumeMusic === undefined)
-              window.playerStats.volumeMusic = 0.5;
-            if (window.playerStats.mute === undefined)
-              window.playerStats.mute = false;
+        window.playerStats.volumeMaster = 0.5;
+      if (window.playerStats.volumeSFX === undefined)
+        window.playerStats.volumeSFX = 0.8;
+      if (window.playerStats.volumeMusic === undefined)
+        window.playerStats.volumeMusic = 0.5;
+      if (window.playerStats.mute === undefined)
+        window.playerStats.mute = false;
 
       if (
         window.playerStats.prestigeUpgrades &&
@@ -2584,32 +2597,40 @@ window.onload = function () {
   preventTooltipLeaks("stat-tooltip");
 
   // Warm user gesture activation for Web Audio Context & BGM
-    const initAudio = () => {
-      window.SoundManager.init();
-      if (window.MusicManager) {
-        window.MusicManager.init(); // Starts and loops your BGM adaptively on first click
+  const initAudio = () => {
+    window.SoundManager.init();
+    if (window.MusicManager) {
+      window.MusicManager.init(); // Starts and loops your BGM adaptively on first click
+    }
+
+    // Force-unlock all mobile Web Audio context threads on touch/tap events
+    const forceUnlockMobileAudio = () => {
+      let sfxCtx = window.SoundManager.ctx || window.SoundManager.audioCtx;
+      if (sfxCtx && sfxCtx.state === "suspended") {
+        sfxCtx.resume().catch(() => {});
       }
-
-      // Force-unlock all mobile Web Audio context threads on touch/tap events
-      const forceUnlockMobileAudio = () => {
-        let sfxCtx = window.SoundManager.ctx || window.SoundManager.audioCtx;
-        if (sfxCtx && sfxCtx.state === "suspended") {
-          sfxCtx.resume().catch(() => {});
-        }
-        if (window.MusicManager && window.MusicManager.ctx && window.MusicManager.ctx.state === "suspended") {
-          window.MusicManager.ctx.resume().catch(() => {});
-        }
-      };
-      document.addEventListener("touchend", forceUnlockMobileAudio, { passive: true });
-      document.addEventListener("click", forceUnlockMobileAudio, { passive: true });
-
-      window.removeEventListener("mousedown", initAudio);
-      window.removeEventListener("touchstart", initAudio);
-      window.removeEventListener("keydown", initAudio);
+      if (
+        window.MusicManager &&
+        window.MusicManager.ctx &&
+        window.MusicManager.ctx.state === "suspended"
+      ) {
+        window.MusicManager.ctx.resume().catch(() => {});
+      }
     };
-    window.addEventListener("mousedown", initAudio);
-    window.addEventListener("touchstart", initAudio);
-    window.addEventListener("keydown", initAudio);
+    document.addEventListener("touchend", forceUnlockMobileAudio, {
+      passive: true,
+    });
+    document.addEventListener("click", forceUnlockMobileAudio, {
+      passive: true,
+    });
+
+    window.removeEventListener("mousedown", initAudio);
+    window.removeEventListener("touchstart", initAudio);
+    window.removeEventListener("keydown", initAudio);
+  };
+  window.addEventListener("mousedown", initAudio);
+  window.addEventListener("touchstart", initAudio);
+  window.addEventListener("keydown", initAudio);
 
   // Seed procedural foliage if not populated
   const flowerColors = [
@@ -3135,65 +3156,68 @@ function update() {
   }
   window.particles.length = ptActiveCount;
 
-    // Update Gold Homing Particles with audio-visual collection feedback
-    if (window.goldParticles) {
-      let gpActiveCount = 0;
-      let targetX = window.canvas ? window.canvas.width * 0.75 : 560;
-      let targetY = -15;
-      for (let i = 0; i < window.goldParticles.length; i++) {
-        let gp = window.goldParticles[i];
-        gp.life--;
-        if (gp.life > 0) {
-          if (gp.delay > 0) {
-            gp.delay--;
-            gp.x += gp.vx;
-            gp.y += gp.vy;
-            gp.vy += 0.25; // Apply standard gravity in spew phase
-          } else {
-            let dx = targetX - gp.x;
-            let dy = targetY - gp.y;
-            let dist = Math.hypot(dx, dy);
-            if (dist < 15 || gp.y < -5) {
-              if (typeof window.triggerGoldPanelReaction === "function") {
-                window.triggerGoldPanelReaction();
-              }
-              if (window.SoundManager && typeof window.SoundManager.playCoinCollect === "function") {
-                window.SoundManager.playCoinCollect();
-              }
-              continue; // Reached target, let it die
+  // Update Gold Homing Particles with audio-visual collection feedback
+  if (window.goldParticles) {
+    let gpActiveCount = 0;
+    let targetX = window.canvas ? window.canvas.width * 0.75 : 560;
+    let targetY = -15;
+    for (let i = 0; i < window.goldParticles.length; i++) {
+      let gp = window.goldParticles[i];
+      gp.life--;
+      if (gp.life > 0) {
+        if (gp.delay > 0) {
+          gp.delay--;
+          gp.x += gp.vx;
+          gp.y += gp.vy;
+          gp.vy += 0.25; // Apply standard gravity in spew phase
+        } else {
+          let dx = targetX - gp.x;
+          let dy = targetY - gp.y;
+          let dist = Math.hypot(dx, dy);
+          if (dist < 15 || gp.y < -5) {
+            if (typeof window.triggerGoldPanelReaction === "function") {
+              window.triggerGoldPanelReaction();
             }
-            let pull = 0.85;
-            gp.vx += (dx / dist) * pull;
-            gp.vy += (dy / dist) * pull;
-
-            let speed = Math.hypot(gp.vx, gp.vy);
-            let maxSpeed = 16;
-            if (speed > maxSpeed) {
-              gp.vx = (gp.vx / speed) * maxSpeed;
-              gp.vy = (gp.vy / speed) * maxSpeed;
+            if (
+              window.SoundManager &&
+              typeof window.SoundManager.playCoinCollect === "function"
+            ) {
+              window.SoundManager.playCoinCollect();
             }
-            gp.x += gp.vx;
-            gp.y += gp.vy;
+            continue; // Reached target, let it die
           }
-          window.goldParticles[gpActiveCount++] = gp;
+          let pull = 0.85;
+          gp.vx += (dx / dist) * pull;
+          gp.vy += (dy / dist) * pull;
+
+          let speed = Math.hypot(gp.vx, gp.vy);
+          let maxSpeed = 16;
+          if (speed > maxSpeed) {
+            gp.vx = (gp.vx / speed) * maxSpeed;
+            gp.vy = (gp.vy / speed) * maxSpeed;
+          }
+          gp.x += gp.vx;
+          gp.y += gp.vy;
         }
+        window.goldParticles[gpActiveCount++] = gp;
       }
-      window.goldParticles.length = gpActiveCount;
     }
+    window.goldParticles.length = gpActiveCount;
+  }
 
-    for (let i = window.beams.length - 1; i >= 0; i--) {
-      let bm = window.beams[i];
-      bm.life--;
-      if (bm.life <= 0) window.beams.splice(i, 1);
-    }
+  for (let i = window.beams.length - 1; i >= 0; i--) {
+    let bm = window.beams[i];
+    bm.life--;
+    if (bm.life <= 0) window.beams.splice(i, 1);
+  }
 
-    if (window.deathAnimationTimer > 0) {
-      window.deathAnimationTimer--;
-      let p = window.resolvePlayerStats();
-      let speedFactor = window.deathAnimationTimer / window.deathMaxFrames;
-      let scalingFactor = (canvas.width - 80) / 670;
-      let scrollSpeed = (2 + p.moveSpeed * 0.05) * speedFactor * scalingFactor;
-      scrollScenery(scrollSpeed);
+  if (window.deathAnimationTimer > 0) {
+    window.deathAnimationTimer--;
+    let p = window.resolvePlayerStats();
+    let speedFactor = window.deathAnimationTimer / window.deathMaxFrames;
+    let scalingFactor = (canvas.width - 80) / 670;
+    let scrollSpeed = (2 + p.moveSpeed * 0.05) * speedFactor * scalingFactor;
+    scrollScenery(scrollSpeed);
 
     if (Math.random() < 0.7) {
       window.particles.push({
@@ -4111,13 +4135,13 @@ function update() {
   }
 
   if (
-      window.playerStats.isPrestigeBossMode &&
-      window.playerStats.prestigeApproachTimer > 0
-    ) {
-      window.playerStats.prestigeApproachTimer--;
-      let scalingFactor = (canvas.width - 80) / 670;
-      let chargeScrollSpeed = (2 + p.moveSpeed * 0.05) * 3 * scalingFactor;
-      scrollScenery(chargeScrollSpeed);
+    window.playerStats.isPrestigeBossMode &&
+    window.playerStats.prestigeApproachTimer > 0
+  ) {
+    window.playerStats.prestigeApproachTimer--;
+    let scalingFactor = (canvas.width - 80) / 670;
+    let chargeScrollSpeed = (2 + p.moveSpeed * 0.05) * 3 * scalingFactor;
+    scrollScenery(chargeScrollSpeed);
     let targetHeroX = canvas.width - 180;
     window.hero.x +=
       (targetHeroX - window.hero.x) /
@@ -4170,152 +4194,301 @@ function update() {
   }
 
   if (!window.mob) {
-      window.processEnemySpawn();
+    window.processEnemySpawn();
+    let scalingFactor = (canvas.width - 80) / 670;
+    scrollScenery(scrollSpeed * scalingFactor);
+  } else {
+    if (
+      window.mob.isRare &&
+      Math.random() < 0.1 &&
+      window.particles.length < 200
+    ) {
+      window.particles.push({
+        x: window.mob.x + Math.random() * window.mob.w,
+        y: window.mob.y + Math.random() * window.mob.h,
+        vx: (Math.random() - 0.5) * 2,
+        vy: -Math.random() * 3,
+        radius: Math.random() * 2 + 1,
+        color: "#f1c40f",
+        alpha: 1,
+        life: 20,
+      });
+    }
+    let isHooktail = window.mob.type === "prestige_boss";
+    if (isHooktail) {
+      window.mob.x = canvas.width - 230;
+      window.mob.isStopped = true;
+    }
+
+    if (!isHooktail && window.mob.x > window.hero.x + window.hero.w + 30) {
       let scalingFactor = (canvas.width - 80) / 670;
+      // Dampened square-root curve ensures smooth progressive approach speeds without teleportation
+      let mobSpeed = (6.5 + Math.sqrt(scrollSpeed) * 1.6) * scalingFactor;
+      window.mob.x -= mobSpeed;
+      window.mob.isStopped = false;
       scrollScenery(scrollSpeed * scalingFactor);
     } else {
-      if (
-        window.mob.isRare &&
-        Math.random() < 0.1 &&
-        window.particles.length < 200
-      ) {
-        window.particles.push({
-          x: window.mob.x + Math.random() * window.mob.w,
-          y: window.mob.y + Math.random() * window.mob.h,
-          vx: (Math.random() - 0.5) * 2,
-          vy: -Math.random() * 3,
-          radius: Math.random() * 2 + 1,
-          color: "#f1c40f",
-          alpha: 1,
-          life: 20,
-        });
-      }
-      let isHooktail = window.mob.type === "prestige_boss";
-      if (isHooktail) {
-        window.mob.x = canvas.width - 230;
-        window.mob.isStopped = true;
-      }
+      window.mob.isStopped = true;
+    }
 
-      if (!isHooktail && window.mob.x > window.hero.x + window.hero.w + 30) {
-                                let scalingFactor = (canvas.width - 80) / 670;
-                                // Dampened square-root curve ensures smooth progressive approach speeds without teleportation
-                                let mobSpeed = (6.5 + Math.sqrt(scrollSpeed) * 1.6) * scalingFactor;
-                                window.mob.x -= mobSpeed;
-                                window.mob.isStopped = false;
-                                scrollScenery(scrollSpeed * scalingFactor);
-                              } else {
-                                window.mob.isStopped = true;
-                              }
+    if (
+      window.logicClock % p.idleAttackSpeed === 0 &&
+      window.state.autoAttack
+    ) {
+      window.triggerPlayerSlash();
+    }
+    if (!window.mob) return;
 
-                  if (
-                    window.logicClock % p.idleAttackSpeed === 0 &&
-                    window.state.autoAttack
-                  ) {
-                    window.triggerPlayerSlash();
-                  }
-      if (!window.mob) return;
+    if (isHooktail && Math.random() < 0.2 && window.particles.length < 200) {
+      let hoverY = Math.sin(Date.now() / 150) * 6;
+      window.particles.push({
+        x: window.mob.x - 35,
+        y: window.mob.y + 55 + hoverY,
+        vx: window.randFloat(-0.4, 0.2),
+        vy: -window.randFloat(1.2, 2.2),
+        gravity: -0.06,
+        radius: window.randFloat(3.0, 5.0),
+        growth: 0.15,
+        color:
+          Math.random() > 0.5
+            ? "rgba(60, 60, 65, 0.65)"
+            : "rgba(30, 30, 35, 0.65)",
+        alpha: 0.75,
+        fade: true,
+        maxLife: 80,
+        life: window.randInt(60, 80),
+      });
+    }
 
-      if (isHooktail && Math.random() < 0.2 && window.particles.length < 200) {
-        let hoverY = Math.sin(Date.now() / 150) * 6;
-        window.particles.push({
-          x: window.mob.x - 35,
-          y: window.mob.y + 55 + hoverY,
-          vx: window.randFloat(-0.4, 0.2),
-          vy: -window.randFloat(1.2, 2.2),
-          gravity: -0.06,
-          radius: window.randFloat(3.0, 5.0),
-          growth: 0.15,
-          color:
-            Math.random() > 0.5
-              ? "rgba(60, 60, 65, 0.65)"
-              : "rgba(30, 30, 35, 0.65)",
-          alpha: 0.75,
-          fade: true,
-          maxLife: 80,
-          life: window.randInt(60, 80),
-        });
-      }
+    if (window.mob.attackTimer === undefined)
+      window.mob.attackTimer = window.mob.attackCooldown || 120;
+    if (!window.isGamePaused) window.mob.attackTimer--;
 
-      if (window.mob.attackTimer === undefined)
-        window.mob.attackTimer = window.mob.attackCooldown || 120;
-      if (!window.isGamePaused) window.mob.attackTimer--;
+    if (window.mob.attackTimer <= 0 && window.mob && window.mob.hp.gt(0)) {
+      window.mob.attackTimer = window.mob.attackCooldown || 120;
 
-      if (window.mob.attackTimer <= 0 && window.mob && window.mob.hp.gt(0)) {
-        window.mob.attackTimer = window.mob.attackCooldown || 120;
+      let isBlocked = Math.random() < p.block;
 
-        let isBlocked = Math.random() < p.block;
+      if (isBlocked) {
+        window.SoundManager.play("block");
 
-        if (isBlocked) {
-          window.SoundManager.play("block");
+        // High-Powered Shield Bash Counter-Attack for all Shields!
+        if (window.mob && window.mob.hp.gt(0)) {
+          let sub = window.equippedSlots.subweapon;
+          let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+          let bashMult = 1.5;
 
-          // High-Powered Shield Bash Counter-Attack for all Shields!
-          if (window.mob && window.mob.hp.gt(0)) {
-            let sub = window.equippedSlots.subweapon;
-            let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
-            let bashMult = 1.5;
+          if (noun.includes("buckler")) {
+            bashMult = 1.0;
+          } else if (noun.includes("tower")) {
+            bashMult = 2.5;
+          } else {
+            bashMult = 1.6;
+          }
 
-            if (noun.includes("buckler")) {
-              bashMult = 1.0;
-            } else if (noun.includes("tower")) {
-              bashMult = 2.5;
-            } else {
-              bashMult = 1.6;
-            }
+          let bashDmg = Math.ceil(p.def * bashMult * (1.0 + p.str * 0.002));
+          let isAegis = window.hasUniquePassive("shield_aegis");
 
-            let bashDmg = Math.ceil(p.def * bashMult * (1.0 + p.str * 0.002));
-            let isAegis = window.hasUniquePassive("shield_aegis");
+          if (isAegis) {
+            let shieldLvl = window.equippedSlots.subweapon.stageLevel || 1;
+            bashDmg = Math.ceil(
+              p.def * (2.2 + shieldLvl * 0.05) * (1.0 + p.str * 0.003),
+            );
+          }
 
-            if (isAegis) {
-              let shieldLvl = window.equippedSlots.subweapon.stageLevel || 1;
-              bashDmg = Math.ceil(
-                p.def * (2.2 + shieldLvl * 0.05) * (1.0 + p.str * 0.003),
-              );
-            }
+          if (window.playerStats.singularityState === "storing") {
+            window.playerStats.singularityStoredDmg += bashDmg;
+            window.effects.push({
+              x: window.mob.x + window.mob.w / 2,
+              y: window.mob.y - 10,
+              text: `+${window.formatNumber(bashDmg)} [STORED]`,
+              color: "#8e44ad",
+              life: 45,
+            });
+          } else {
+            window.mob.hp = window.mob.hp.sub(bashDmg);
+            window.mob.flashTimer = 5;
+            window.spawnDamageEffect(
+              bashDmg,
+              isAegis ? "aegis_counter" : "counter",
+              false,
+            );
+            window.damageHistory.push({ time: Date.now(), amount: bashDmg });
 
-            if (window.playerStats.singularityState === "storing") {
-              window.playerStats.singularityStoredDmg += bashDmg;
-              window.effects.push({
+            // Shield slam visual impact particles
+            for (let i = 0; i < 8; i++) {
+              window.particles.push({
                 x: window.mob.x + window.mob.w / 2,
-                y: window.mob.y - 10,
-                text: `+${window.formatNumber(bashDmg)} [STORED]`,
-                color: "#8e44ad",
-                life: 45,
+                y: window.mob.y + window.mob.h / 2,
+                vx: window.randFloat(-3, 3),
+                vy: window.randFloat(-3, 3),
+                radius: window.randFloat(1.5, 3.5),
+                color: isAegis ? "#8e44ad" : "#3498db",
+                alpha: 1,
+                life: window.randInt(15, 25),
               });
-            } else {
-              window.mob.hp = window.mob.hp.sub(bashDmg);
-              window.mob.flashTimer = 5;
-              window.spawnDamageEffect(
-                bashDmg,
-                isAegis ? "aegis_counter" : "counter",
-                false,
+            }
+
+            if (window.mob.hp <= 0) {
+              window.handleMobDeath();
+              return;
+            }
+          }
+        }
+
+        window.playerStats.totalDeflections =
+          (window.playerStats.totalDeflections || 0) + 1;
+        window.playerStats.recentBlockTime = Date.now();
+        window.playerStats.consecutiveParries = 0;
+        if (
+          window.playerStats.recentCritTime &&
+          window.playerStats.recentBlockTime &&
+          window.playerStats.recentParryTime
+        ) {
+          let times = [
+            window.playerStats.recentCritTime,
+            window.playerStats.recentBlockTime,
+            window.playerStats.recentParryTime,
+          ];
+          if (Math.max(...times) - Math.min(...times) <= 1000)
+            window.playerStats.hasTriggeredLuckySeven = true;
+        }
+        if (window.checkArtifactTrait("dodge_buff"))
+          window.playerStats.adrenalineTimer = window.checkArtifactTrait(
+            "extend_buffs",
+          )
+            ? 900
+            : 600;
+      } else {
+        // If not blocked, calculate net damage, which can still be parried or mitigated!
+        // Calculate dynamic armor constant based on active stage scale to prevent flatlocked high-tier defenses
+        let actStg = window.playerStats.stage;
+        if (
+          window.playerStats.isDungeonMode &&
+          window.playerStats.currentDungeon
+        ) {
+          actStg =
+            window.playerStats.currentDungeonStage[
+              window.playerStats.currentDungeon
+            ] || 1;
+        } else if (window.playerStats.isUberBoss) {
+          let rLvl = window.playerStats.activeRiftLevel || 1;
+          actStg = 50 + rLvl * 10;
+        }
+        let dEffStage = window.getEffectiveStage(actStg);
+        let dGrowthRate = 1.045 + (dEffStage * 0.04) / (dEffStage + 200);
+        let dScaleBig = BigNum.from(dGrowthRate).pow(dEffStage);
+        let dScale = Number(
+          dScaleBig.m * Math.pow(10, Math.min(15, dScaleBig.e)),
+        );
+
+        let armorConstant = Math.max(100, 5.0 * dScale);
+        let netDamageBig = BigNum.from(window.mob.damage).mul(
+          armorConstant / (armorConstant + p.def),
+        );
+        let netDamage = 0;
+        if (netDamageBig.e > 15) {
+          netDamage = p.maxHp * 2; // Instant death without numeric overflow
+        } else {
+          netDamage = Math.max(
+            1,
+            Math.ceil(Number(netDamageBig.m * Math.pow(10, netDamageBig.e))),
+          );
+        }
+
+        const subType = window.equippedSlots.subweapon
+          ? window.equippedSlots.subweapon.subType
+          : null;
+
+        let isParried = Math.random() < p.parry;
+
+        if (isParried) {
+          // Mitigate incoming damage by 60% (takes 40% damage)
+          netDamage = Math.max(1, Math.ceil(netDamage * 0.4));
+          window.SoundManager.play("parry");
+
+          // Instant offensive Riposte counter-attack scaling with DEX & ATK!
+          let sub = window.equippedSlots.subweapon;
+          let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+          let riposteMult = 1.0;
+
+          if (noun.includes("kris") || noun.includes("dirk")) {
+            riposteMult = 1.3;
+          } else if (noun.includes("stiletto") || noun.includes("baselard")) {
+            riposteMult = 0.8;
+          } else {
+            riposteMult = 1.0;
+          }
+
+          let riposteDmg = Math.ceil(
+            p.atk * riposteMult * (1.0 + p.dex * 0.003),
+          );
+
+          // Active Buff: Echoing Step (Counter strike scaling on parry)
+          if (
+            window.playerStats.isCrucibleMode &&
+            window.playerStats.crucibleActiveBuff?.id === "echoing_step"
+          ) {
+            let buffStrength =
+              window.playerStats.crucibleInfusedType === "buff" ? 1.5 : 1.0;
+            riposteDmg += Math.ceil(p.atk * (1.0 * buffStrength));
+          }
+
+          if (window.checkArtifactTrait("parry_strike")) {
+            let T = window.getArtifactTemperLevel("parry_strike");
+            let mult = 0.5 + T * 0.15; // 50% base + 15% per level (max 140%)
+            riposteDmg += Math.ceil(p.atk * mult);
+          }
+
+          if (window.playerStats.adrenalineTimer > 0) riposteDmg *= 2;
+
+          // Apply active defense mitigation to offhand dagger strikes
+          let mobDef = window.mob.def || 0;
+          riposteDmg = Math.max(
+            1,
+            Math.ceil(riposteDmg * (100 / (100 + mobDef))),
+          );
+
+          if (window.playerStats.singularityState === "storing") {
+            window.playerStats.singularityStoredDmg += riposteDmg;
+            window.effects.push({
+              x: window.mob.x + window.mob.w / 2,
+              y: window.mob.y - 10,
+              text: `+${window.formatNumber(riposteDmg)} [STORED]`,
+              color: "#8e44ad",
+              life: 45,
+            });
+          } else if (window.mob && window.mob.hp.gt(0)) {
+            window.mob.hp = window.mob.hp.sub(riposteDmg);
+            window.mob.flashTimer = 5; // Flashes the monster on counter-attack connection!
+            window.spawnDamageEffect(riposteDmg, "parry_counter", false);
+            window.damageHistory.push({
+              time: Date.now(),
+              amount: riposteDmg,
+            });
+
+            // Apply Poison Tip (Dagger-specific parry card) bleed stacks
+            if (p.crucibleDaggerBleed && window.mob && window.mob.hp.gt(0)) {
+              window.mob.bleedStacks = Math.min(
+                5,
+                (window.mob.bleedStacks || 0) + p.crucibleDaggerBleed,
               );
-              window.damageHistory.push({ time: Date.now(), amount: bashDmg });
-
-              // Shield slam visual impact particles
-              for (let i = 0; i < 8; i++) {
-                window.particles.push({
-                  x: window.mob.x + window.mob.w / 2,
-                  y: window.mob.y + window.mob.h / 2,
-                  vx: window.randFloat(-3, 3),
-                  vy: window.randFloat(-3, 3),
-                  radius: window.randFloat(1.5, 3.5),
-                  color: isAegis ? "#8e44ad" : "#3498db",
-                  alpha: 1,
-                  life: window.randInt(15, 25),
-                });
-              }
-
-              if (window.mob.hp <= 0) {
-                window.handleMobDeath();
-                return;
-              }
+              window.mob.bleedTimer = 300;
+              window.mob.bleedDmgPerSecond = Math.max(
+                1,
+                Math.ceil(p.atk * 0.15),
+              );
             }
           }
 
           window.playerStats.totalDeflections =
             (window.playerStats.totalDeflections || 0) + 1;
-          window.playerStats.recentBlockTime = Date.now();
-          window.playerStats.consecutiveParries = 0;
+          window.playerStats.recentParryTime = Date.now();
+          window.playerStats.consecutiveParries =
+            (window.playerStats.consecutiveParries || 0) + 1;
+          if (window.playerStats.consecutiveParries >= 3)
+            window.playerStats.hasTriggeredPerfectDeflection = true;
+
           if (
             window.playerStats.recentCritTime &&
             window.playerStats.recentBlockTime &&
@@ -4329,314 +4502,164 @@ function update() {
             if (Math.max(...times) - Math.min(...times) <= 1000)
               window.playerStats.hasTriggeredLuckySeven = true;
           }
-          if (window.checkArtifactTrait("dodge_buff"))
-            window.playerStats.adrenalineTimer = window.checkArtifactTrait(
-              "extend_buffs",
-            )
-              ? 900
-              : 600;
+
+          if (window.checkArtifactTrait("dodge_buff")) {
+            let ext = window.checkArtifactTrait("extend_buffs")
+              ? 180 + window.getArtifactTemperLevel("extend_buffs") * 30
+              : 0;
+            window.playerStats.adrenalineTimer = 360 + ext; // 6s base + extension
+          }
+
+          if (window.mob && window.mob.hp <= 0) {
+            window.handleMobDeath();
+            return;
+          }
         } else {
-          // If not blocked, calculate net damage, which can still be parried or mitigated!
-          // Calculate dynamic armor constant based on active stage scale to prevent flatlocked high-tier defenses
-          let actStg = window.playerStats.stage;
-          if (
-            window.playerStats.isDungeonMode &&
-            window.playerStats.currentDungeon
-          ) {
-            actStg =
-              window.playerStats.currentDungeonStage[
-                window.playerStats.currentDungeon
-              ] || 1;
-          } else if (window.playerStats.isUberBoss) {
-            let rLvl = window.playerStats.activeRiftLevel || 1;
-            actStg = 50 + rLvl * 10;
-          }
-          let dEffStage = window.getEffectiveStage(actStg);
-          let dGrowthRate = 1.045 + (dEffStage * 0.04) / (dEffStage + 200);
-          let dScaleBig = BigNum.from(dGrowthRate).pow(dEffStage);
-          let dScale = Number(
-            dScaleBig.m * Math.pow(10, Math.min(15, dScaleBig.e)),
-          );
+          window.playerStats.consecutiveParries = 0;
+        }
 
-          let armorConstant = Math.max(100, 5.0 * dScale);
-          let netDamageBig = BigNum.from(window.mob.damage).mul(
-            armorConstant / (armorConstant + p.def),
-          );
-          let netDamage = 0;
-          if (netDamageBig.e > 15) {
-            netDamage = p.maxHp * 2; // Instant death without numeric overflow
-          } else {
-            netDamage = Math.max(
-              1,
-              Math.ceil(Number(netDamageBig.m * Math.pow(10, netDamageBig.e))),
-            );
-          }
-
-          const subType = window.equippedSlots.subweapon
-            ? window.equippedSlots.subweapon.subType
-            : null;
-
-          let isParried = Math.random() < p.parry;
-
-          if (isParried) {
-            // Mitigate incoming damage by 60% (takes 40% damage)
-            netDamage = Math.max(1, Math.ceil(netDamage * 0.4));
-            window.SoundManager.play("parry");
-
-            // Instant offensive Riposte counter-attack scaling with DEX & ATK!
-            let sub = window.equippedSlots.subweapon;
-            let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
-            let riposteMult = 1.0;
-
-            if (noun.includes("kris") || noun.includes("dirk")) {
-              riposteMult = 1.3;
-            } else if (noun.includes("stiletto") || noun.includes("baselard")) {
-              riposteMult = 0.8;
-            } else {
-              riposteMult = 1.0;
-            }
-
-            let riposteDmg = Math.ceil(
-              p.atk * riposteMult * (1.0 + p.dex * 0.003),
-            );
-
-            // Active Buff: Echoing Step (Counter strike scaling on parry)
-            if (
-              window.playerStats.isCrucibleMode &&
-              window.playerStats.crucibleActiveBuff?.id === "echoing_step"
-            ) {
-              let buffStrength =
-                window.playerStats.crucibleInfusedType === "buff" ? 1.5 : 1.0;
-              riposteDmg += Math.ceil(p.atk * (1.0 * buffStrength));
-            }
-
-            if (window.checkArtifactTrait("parry_strike")) {
-              let T = window.getArtifactTemperLevel("parry_strike");
-              let mult = 0.5 + T * 0.15; // 50% base + 15% per level (max 140%)
-              riposteDmg += Math.ceil(p.atk * mult);
-            }
-
-            if (window.playerStats.adrenalineTimer > 0) riposteDmg *= 2;
-
-            // Apply active defense mitigation to offhand dagger strikes
-            let mobDef = window.mob.def || 0;
-            riposteDmg = Math.max(
-              1,
-              Math.ceil(riposteDmg * (100 / (100 + mobDef))),
-            );
-
-            if (window.playerStats.singularityState === "storing") {
-              window.playerStats.singularityStoredDmg += riposteDmg;
-              window.effects.push({
-                x: window.mob.x + window.mob.w / 2,
-                y: window.mob.y - 10,
-                text: `+${window.formatNumber(riposteDmg)} [STORED]`,
-                color: "#8e44ad",
-                life: 45,
-              });
-            } else if (window.mob && window.mob.hp.gt(0)) {
-              window.mob.hp = window.mob.hp.sub(riposteDmg);
-              window.mob.flashTimer = 5; // Flashes the monster on counter-attack connection!
-              window.spawnDamageEffect(riposteDmg, "parry_counter", false);
-              window.damageHistory.push({
-                time: Date.now(),
-                amount: riposteDmg,
-              });
-
-              // Apply Poison Tip (Dagger-specific parry card) bleed stacks
-              if (p.crucibleDaggerBleed && window.mob && window.mob.hp.gt(0)) {
-                window.mob.bleedStacks = Math.min(
-                  5,
-                  (window.mob.bleedStacks || 0) + p.crucibleDaggerBleed,
-                );
-                window.mob.bleedTimer = 300;
-                window.mob.bleedDmgPerSecond = Math.max(
-                  1,
-                  Math.ceil(p.atk * 0.15),
-                );
-              }
-            }
-
-            window.playerStats.totalDeflections =
-              (window.playerStats.totalDeflections || 0) + 1;
-            window.playerStats.recentParryTime = Date.now();
-            window.playerStats.consecutiveParries =
-              (window.playerStats.consecutiveParries || 0) + 1;
-            if (window.playerStats.consecutiveParries >= 3)
-              window.playerStats.hasTriggeredPerfectDeflection = true;
-
-            if (
-              window.playerStats.recentCritTime &&
-              window.playerStats.recentBlockTime &&
-              window.playerStats.recentParryTime
-            ) {
-              let times = [
-                window.playerStats.recentCritTime,
-                window.playerStats.recentBlockTime,
-                window.playerStats.recentParryTime,
-              ];
-              if (Math.max(...times) - Math.min(...times) <= 1000)
-                window.playerStats.hasTriggeredLuckySeven = true;
-            }
-
-            if (window.checkArtifactTrait("dodge_buff")) {
-              let ext = window.checkArtifactTrait("extend_buffs")
-                ? 180 + window.getArtifactTemperLevel("extend_buffs") * 30
-                : 0;
-              window.playerStats.adrenalineTimer = 360 + ext; // 6s base + extension
-            }
-
-            if (window.mob && window.mob.hp <= 0) {
-              window.handleMobDeath();
-              return;
-            }
-          } else {
-            window.playerStats.consecutiveParries = 0;
-          }
-
-          if (p.arcaneBarrier && subType === "tome") {
-            let absorbed = Math.ceil(netDamage * p.arcaneBarrier);
-            netDamage = Math.max(1, netDamage - absorbed);
-            window.effects.push({
-              type: "barrier",
-              x: window.hero.x - 5,
-              y: window.hero.y - 18,
-              amount: Math.round(p.arcaneBarrier * 100),
-              color: "#9b59b6",
-              life: 55,
-            });
-          }
-
-          if (window.playerStats.godMode) netDamage = 0;
-
-          window.playerStats.currentHp -= netDamage;
-          window.playerStats.damageTakenThisBattle =
-            (window.playerStats.damageTakenThisBattle || 0) + netDamage;
+        if (p.arcaneBarrier && subType === "tome") {
+          let absorbed = Math.ceil(netDamage * p.arcaneBarrier);
+          netDamage = Math.max(1, netDamage - absorbed);
           window.effects.push({
-            x: window.hero.x,
-            y: window.hero.y,
-            text: "-" + window.formatNumber(netDamage),
-            color: "#e74c3c",
-            life: 40,
+            type: "barrier",
+            x: window.hero.x - 5,
+            y: window.hero.y - 18,
+            amount: Math.round(p.arcaneBarrier * 100),
+            color: "#9b59b6",
+            life: 55,
           });
+        }
 
-          if (
-            window.hasUniquePassive("helmet_tempest") &&
-            window.mob &&
-            window.mob.hp.gt(0)
-          ) {
-            if (window.playerStats.tempestCooldown === undefined)
-              window.playerStats.tempestCooldown = 0;
-            if (window.playerStats.tempestCooldown <= 0) {
-              window.playerStats.tempestCooldown = 60;
-              if (Math.random() < 0.15) {
-                let boltDmg = Math.ceil(p.atk * 1.5 * (1.0 + p.int * 0.002));
-                if (window.playerStats.singularityState === "storing") {
-                  window.playerStats.singularityStoredDmg += boltDmg;
+        if (window.playerStats.godMode) netDamage = 0;
+
+        window.playerStats.currentHp -= netDamage;
+        window.playerStats.damageTakenThisBattle =
+          (window.playerStats.damageTakenThisBattle || 0) + netDamage;
+        window.effects.push({
+          x: window.hero.x,
+          y: window.hero.y,
+          text: "-" + window.formatNumber(netDamage),
+          color: "#e74c3c",
+          life: 40,
+        });
+
+        if (
+          window.hasUniquePassive("helmet_tempest") &&
+          window.mob &&
+          window.mob.hp.gt(0)
+        ) {
+          if (window.playerStats.tempestCooldown === undefined)
+            window.playerStats.tempestCooldown = 0;
+          if (window.playerStats.tempestCooldown <= 0) {
+            window.playerStats.tempestCooldown = 60;
+            if (Math.random() < 0.15) {
+              let boltDmg = Math.ceil(p.atk * 1.5 * (1.0 + p.int * 0.002));
+              if (window.playerStats.singularityState === "storing") {
+                window.playerStats.singularityStoredDmg += boltDmg;
+                window.effects.push({
+                  x: window.mob.x + window.mob.w / 2,
+                  y: window.mob.y - 10,
+                  text: `+${window.formatNumber(boltDmg)} [STORED]`,
+                  color: "#8e44ad",
+                  life: 45,
+                });
+              } else {
+                window.mob.hp = window.mob.hp.sub(boltDmg);
+                window.mob.flashTimer = 5;
+                window.spawnDamageEffect(boltDmg, "lightning", false);
+                window.damageHistory.push({
+                  time: Date.now(),
+                  amount: boltDmg,
+                });
+
+                let isBossType =
+                  window.mob.type === "boss" ||
+                  window.mob.type === "dungeon_boss" ||
+                  window.mob.type === "prestige_boss" ||
+                  window.mob.type === "rift_guardian" ||
+                  window.mob.type === "aegis_goliath" ||
+                  window.mob.type === "chronos_arbitrator" ||
+                  window.mob.type === "nexus_overseer";
+                if (!isBossType) {
+                  window.mob.attackTimer = window.mob.attackCooldown;
                   window.effects.push({
-                    x: window.mob.x + window.mob.w / 2,
-                    y: window.mob.y - 10,
-                    text: `+${window.formatNumber(boltDmg)} [STORED]`,
-                    color: "#8e44ad",
-                    life: 45,
-                  });
-                } else {
-                  window.mob.hp = window.mob.hp.sub(boltDmg);
-                  window.mob.flashTimer = 5;
-                  window.spawnDamageEffect(boltDmg, "lightning", false);
-                  window.damageHistory.push({
-                    time: Date.now(),
-                    amount: boltDmg,
-                  });
-
-                  let isBossType =
-                    window.mob.type === "boss" ||
-                    window.mob.type === "dungeon_boss" ||
-                    window.mob.type === "prestige_boss" ||
-                    window.mob.type === "rift_guardian" ||
-                    window.mob.type === "aegis_goliath" ||
-                    window.mob.type === "chronos_arbitrator" ||
-                    window.mob.type === "nexus_overseer";
-                  if (!isBossType) {
-                    window.mob.attackTimer = window.mob.attackCooldown;
-                    window.effects.push({
-                      x: window.mob.x,
-                      y: window.mob.y - 18,
-                      text: "⚡ STUNNED!",
-                      color: "#00d2ff",
-                      life: 40,
-                    });
-                  }
-                  if (window.mob.hp <= 0) {
-                    window.handleMobDeath();
-                    return;
-                  }
-                }
-                window.SoundManager.play("parry");
-                for (let i = 0; i < 15; i++) {
-                  window.particles.push({
-                    x:
-                      window.mob.x + window.mob.w / 2 + window.randFloat(-5, 5),
-                    y: window.mob.y - 40 + (i * (window.mob.h + 40)) / 15,
-                    vx: window.randFloat(-1.5, 1.5),
-                    vy: window.randFloat(-0.5, 0.5),
-                    radius: window.randFloat(1.5, 3.5),
+                    x: window.mob.x,
+                    y: window.mob.y - 18,
+                    text: "⚡ STUNNED!",
                     color: "#00d2ff",
-                    alpha: 1,
-                    life: window.randInt(12, 22),
+                    life: 40,
                   });
                 }
+                if (window.mob.hp <= 0) {
+                  window.handleMobDeath();
+                  return;
+                }
+              }
+              window.SoundManager.play("parry");
+              for (let i = 0; i < 15; i++) {
+                window.particles.push({
+                  x: window.mob.x + window.mob.w / 2 + window.randFloat(-5, 5),
+                  y: window.mob.y - 40 + (i * (window.mob.h + 40)) / 15,
+                  vx: window.randFloat(-1.5, 1.5),
+                  vy: window.randFloat(-0.5, 0.5),
+                  radius: window.randFloat(1.5, 3.5),
+                  color: "#00d2ff",
+                  alpha: 1,
+                  life: window.randInt(12, 22),
+                });
               }
             }
           }
-          if (window.playerStats.currentHp <= 0) {
-            if (
-              window.checkArtifactTrait("second_wind") &&
-              !window.playerStats.usedSecondWind
-            ) {
-              window.playerStats.usedSecondWind = true;
-              let T = window.getArtifactTemperLevel("second_wind");
-              let healPct = 0.4 + T * 0.05; // 40% base + 5% per level (max 70%)
-              window.playerStats.currentHp = Math.floor(p.maxHp * healPct);
-              window.playerStats.ankhTriggeredThisBattle = true;
-              window.effects.push({
-                x: window.hero.x,
-                y: window.hero.y - 20,
-                text: "🔥 SECOND WIND!",
-                color: "#e67e22",
-                life: 80,
-              });
-            } else {
-              if (window.playerStats.isPrestigeBossMode)
-                window.playerStats.killedBy = "Hooktail (Prestige Boss)";
-              else if (window.playerStats.isDungeonMode)
-                window.playerStats.killedBy =
-                  window.mob.type === "dungeon_boss"
-                    ? "Dungeon Boss"
-                    : window.mob.type === "dungeon_miniboss"
-                      ? "Dungeon Miniboss"
-                      : "Dungeon Minion";
-              else if (window.playerStats.isUberBoss)
-                window.playerStats.killedBy = "Rift Guardian";
-              else if (window.playerStats.isBossMode)
-                window.playerStats.killedBy = "Stage Boss";
-              else
-                window.playerStats.killedBy = window.mob.isRare
-                  ? "Rare Monster"
-                  : "Standard Monster";
+        }
+        if (window.playerStats.currentHp <= 0) {
+          if (
+            window.checkArtifactTrait("second_wind") &&
+            !window.playerStats.usedSecondWind
+          ) {
+            window.playerStats.usedSecondWind = true;
+            let T = window.getArtifactTemperLevel("second_wind");
+            let healPct = 0.4 + T * 0.05; // 40% base + 5% per level (max 70%)
+            window.playerStats.currentHp = Math.floor(p.maxHp * healPct);
+            window.playerStats.ankhTriggeredThisBattle = true;
+            window.effects.push({
+              x: window.hero.x,
+              y: window.hero.y - 20,
+              text: "🔥 SECOND WIND!",
+              color: "#e67e22",
+              life: 80,
+            });
+          } else {
+            if (window.playerStats.isPrestigeBossMode)
+              window.playerStats.killedBy = "Hooktail (Prestige Boss)";
+            else if (window.playerStats.isDungeonMode)
+              window.playerStats.killedBy =
+                window.mob.type === "dungeon_boss"
+                  ? "Dungeon Boss"
+                  : window.mob.type === "dungeon_miniboss"
+                    ? "Dungeon Miniboss"
+                    : "Dungeon Minion";
+            else if (window.playerStats.isUberBoss)
+              window.playerStats.killedBy = "Rift Guardian";
+            else if (window.playerStats.isBossMode)
+              window.playerStats.killedBy = "Stage Boss";
+            else
+              window.playerStats.killedBy = window.mob.isRare
+                ? "Rare Monster"
+                : "Standard Monster";
 
-              window.playerStats.killedByMob = { ...window.mob };
-                            window.playerStats.currentHp = 0;
-                            window.deathAnimationTimer = window.deathMaxFrames;
-                            return;
-                          }
-                        }
-                      }
-                      window.updateUI();
-                    }
-                  }
+            window.playerStats.killedByMob = { ...window.mob };
+            window.playerStats.currentHp = 0;
+            window.deathAnimationTimer = window.deathMaxFrames;
+            return;
+          }
+        }
+      }
+      window.updateUI();
+    }
+  }
 
-                let stateAfter =
+  let stateAfter =
     (window.playerStats.frenzyTimer > 0) |
     ((window.playerStats.adrenalineTimer > 0) << 1) |
     ((window.playerStats.atkPotionTimer > 0) << 2) |
@@ -5803,37 +5826,48 @@ window.CombatEngine = {
     }
 
     // Only render campaign coin visual splashes outside the Crucible
-        if (coinYield > 0 && !window.playerStats.isCrucibleMode) {
-          window.effects.push({
-            x: window.mob.x + 35,
-            y: window.mob.y + 25,
-            text: "+" + coinYield.toLocaleString() + "g",
-            color: "#f1c40f",
-            life: 50,
-          });
-        }
+    if (coinYield > 0 && !window.playerStats.isCrucibleMode) {
+      window.effects.push({
+        x: window.mob.x + 35,
+        y: window.mob.y + 25,
+        text: "+" + coinYield.toLocaleString() + "g",
+        color: "#f1c40f",
+        life: 50,
+      });
+    }
 
-        // Spawn homing gold coin particles to fly to top-right HUD panel (Larger bursts on Bosses)
-        if (coinYield > 0 && window.goldParticles && window.mob) {
-          let startX = window.mob.x + window.mob.w / 2;
-          let startY = window.mob.y + window.mob.h / 2;
-          let isBossType = ["boss", "dungeon_boss", "prestige_boss", "rift_guardian", "aegis_goliath", "chronos_arbitrator", "nexus_overseer"].includes(window.mob.type);
+    // Spawn homing gold coin particles to fly to top-right HUD panel (Larger bursts on Bosses)
+    if (coinYield > 0 && window.goldParticles && window.mob) {
+      let startX = window.mob.x + window.mob.w / 2;
+      let startY = window.mob.y + window.mob.h / 2;
+      let isBossType = [
+        "boss",
+        "dungeon_boss",
+        "prestige_boss",
+        "rift_guardian",
+        "aegis_goliath",
+        "chronos_arbitrator",
+        "nexus_overseer",
+      ].includes(window.mob.type);
 
-          let particleCount = isBossType
-            ? Math.min(30, Math.max(16, Math.floor(Math.log10(coinYield + 1) * 6.5)))
-            : Math.min(12, Math.max(4, Math.floor(Math.log10(coinYield + 1) * 3)));
+      let particleCount = isBossType
+        ? Math.min(
+            30,
+            Math.max(16, Math.floor(Math.log10(coinYield + 1) * 6.5)),
+          )
+        : Math.min(12, Math.max(4, Math.floor(Math.log10(coinYield + 1) * 3)));
 
-          for (let i = 0; i < particleCount; i++) {
-            window.goldParticles.push({
-              x: startX,
-              y: startY,
-              vx: window.randFloat(-4, 4),
-              vy: window.randFloat(-7, -3),
-              life: 120,
-              delay: i * 2, // Staggered delays create a beautiful serpent-style stream
-            });
-          }
-        }
+      for (let i = 0; i < particleCount; i++) {
+        window.goldParticles.push({
+          x: startX,
+          y: startY,
+          vx: window.randFloat(-4, 4),
+          vy: window.randFloat(-7, -3),
+          life: 120,
+          delay: i * 2, // Staggered delays create a beautiful serpent-style stream
+        });
+      }
+    }
 
     if (window.playerStats.isCrucibleMode) {
       // Active Debuff: Volatile Sparks (On-death mitigatable explosions)
@@ -6592,127 +6626,247 @@ window.CombatEngine = {
   },
 
   processEnemySpawn() {
-      let p = window.resolvePlayerStats();
-      // Fixed spawning offset relative to player coordinates guarantees uniform combat pacing across all screen widths
-      let spawnX = window.hero.x + 155;
+    let p = window.resolvePlayerStats();
+    // Fixed spawning offset relative to player coordinates guarantees uniform combat pacing across all screen widths
+    let spawnX = window.hero.x + 155;
 
-      // Define activeStage at the top of the function so all sub-blocks can access it
-      let activeStage = window.playerStats.stage;
-      if (window.playerStats.isUberBoss) {
-        let runPeak = Math.max(
-          window.playerStats.stage,
-          window.playerStats.maxStage || 1,
+    // Define activeStage at the top of the function so all sub-blocks can access it
+    let activeStage = window.playerStats.stage;
+    if (window.playerStats.isUberBoss) {
+      let runPeak = Math.max(
+        window.playerStats.stage,
+        window.playerStats.maxStage || 1,
+      );
+      let allTime90 = Math.floor(
+        (window.playerStats.lifetimePeakStage || 1) * 0.9,
+      );
+      activeStage = Math.max(runPeak, allTime90);
+    }
+
+    if (window.playerStats.isCrucibleMode) {
+      let cWave = window.playerStats.crucibleWave || 1;
+      let peak = window.playerStats.lifetimePeakStage || 1;
+      let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
+      let effectiveStage = startingStageOffset + cWave - 1;
+
+      // Absolute exponential wave scaling matching standard campaign progression
+      let scale = Math.pow(1.045, effectiveStage);
+
+      if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
+        let hp = BigNum.from(
+          Math.floor(120 * scale * (1 + effectiveStage * 0.06)),
         );
-        let allTime90 = Math.floor(
-          (window.playerStats.lifetimePeakStage || 1) * 0.9,
-        );
-        activeStage = Math.max(runPeak, allTime90);
-      }
-
-      if (window.playerStats.isCrucibleMode) {
-        let cWave = window.playerStats.crucibleWave || 1;
-        let peak = window.playerStats.lifetimePeakStage || 1;
-        let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
-        let effectiveStage = startingStageOffset + cWave - 1;
-
-        // Absolute exponential wave scaling matching standard campaign progression
-        let scale = Math.pow(1.045, effectiveStage);
-
-        if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-                  let hp = BigNum.from(
-                    Math.floor(120 * scale * (1 + effectiveStage * 0.06)),
-                  );
-                  window.mob = {
-                    x: spawnX,
-                    y: 140,
-                    w: 45,
-                    h: 75,
-                    type: "dungeon_boss",
-                    isCrucible: true,
-                    isRare: false,
-                    hp: hp,
-                    maxHp: hp,
-                    damage: BigNum.from(Math.floor(15 * scale)),
-                    def: 0,
-                    flashTimer: 0,
-                    isStopped: false,
-                    attackCooldown: 100,
-                    attackTimer: 100,
-                  };
-                } else {
-                  let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
-                  let chosenVisual =
-                    cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
-                  let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
-
-                  let hp = BigNum.from(
-                    Math.floor(25 * scale * (1 + effectiveStage * 0.06)),
-                  );
-                  window.mob = {
-                    x: spawnX,
-                    y: isFlying ? 145 : 195,
-                    w: 25,
-                    h: 30,
-                    type: "mob",
-                    visualType: chosenVisual,
-                    isCrucible: true,
-                    isRare: false,
-                    hp: hp,
-                    maxHp: hp,
-                    damage: BigNum.from(Math.floor(4.5 * scale)),
-                    def: 0,
-                    flashTimer: 0,
-                    isStopped: false,
-                    attackCooldown: 90,
-                    attackTimer: 90,
-                  };
-                }
-        return;
-      }
-
-      let b_scale;
-      if (window.playerStats.isDungeonMode) {
-        window.playerStats.currentDungeonStage = window.playerStats
-          .currentDungeonStage || { equip: 1, gold: 1, mat: 1 };
-        let dStage =
-          window.playerStats.currentDungeonStage[
-            window.playerStats.currentDungeon
-          ] || 1;
-
-        let effStage = window.getEffectiveStage(dStage);
-        let baseRate = 1.045 + (effStage * 0.015) / (effStage + 300);
-        b_scale = BigNum.from(baseRate)
-          .pow(effStage)
-          .mul(1 + effStage * 0.05);
+        window.mob = {
+          x: spawnX,
+          y: 140,
+          w: 45,
+          h: 75,
+          type: "dungeon_boss",
+          isCrucible: true,
+          isRare: false,
+          hp: hp,
+          maxHp: hp,
+          damage: BigNum.from(Math.floor(15 * scale)),
+          def: 0,
+          flashTimer: 0,
+          isStopped: false,
+          attackCooldown: 100,
+          attackTimer: 100,
+        };
       } else {
-        let effStage = window.getEffectiveStage(activeStage);
-        let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-        b_scale = BigNum.from(growthRate).pow(effStage);
+        let cruciblePool = ["rift_drifter", "star_weaver", "void_wraith"];
+        let chosenVisual =
+          cruciblePool[Math.floor(Math.random() * cruciblePool.length)];
+        let isFlying = ["rift_drifter", "void_wraith"].includes(chosenVisual);
+
+        let hp = BigNum.from(
+          Math.floor(25 * scale * (1 + effectiveStage * 0.06)),
+        );
+        window.mob = {
+          x: spawnX,
+          y: isFlying ? 145 : 195,
+          w: 25,
+          h: 30,
+          type: "mob",
+          visualType: chosenVisual,
+          isCrucible: true,
+          isRare: false,
+          hp: hp,
+          maxHp: hp,
+          damage: BigNum.from(Math.floor(4.5 * scale)),
+          def: 0,
+          flashTimer: 0,
+          isStopped: false,
+          attackCooldown: 90,
+          attackTimer: 90,
+        };
       }
+      return;
+    }
 
-      let spawnEdgeX = (window.canvas ? window.canvas.width : 750) + 10; // Dynamic spawn directly at visible screen edge
+    let b_scale;
+    if (window.playerStats.isDungeonMode) {
+      window.playerStats.currentDungeonStage = window.playerStats
+        .currentDungeonStage || { equip: 1, gold: 1, mat: 1 };
+      let dStage =
+        window.playerStats.currentDungeonStage[
+          window.playerStats.currentDungeon
+        ] || 1;
 
-      if (window.playerStats.isDungeonMode) {
-        let hpScale = window.playerStats.currentDungeon === "gold" ? 1.5 : 1;
-        let dStage =
-          window.playerStats.currentDungeonStage[
-            window.playerStats.currentDungeon
-          ] || 1;
+      let effStage = window.getEffectiveStage(dStage);
+      let baseRate = 1.045 + (effStage * 0.015) / (effStage + 300);
+      b_scale = BigNum.from(baseRate)
+        .pow(effStage)
+        .mul(1 + effStage * 0.05);
+    } else {
+      let effStage = window.getEffectiveStage(activeStage);
+      let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+      b_scale = BigNum.from(growthRate).pow(effStage);
+    }
 
-        if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
-          let hp = BigNum.from(100)
-            .mul(b_scale)
-            .mul(hpScale)
-            .mul(1 + dStage * 0.06);
+    let spawnEdgeX = (window.canvas ? window.canvas.width : 750) + 10; // Dynamic spawn directly at visible screen edge
+
+    if (window.playerStats.isDungeonMode) {
+      let hpScale = window.playerStats.currentDungeon === "gold" ? 1.5 : 1;
+      let dStage =
+        window.playerStats.currentDungeonStage[
+          window.playerStats.currentDungeon
+        ] || 1;
+
+      if (window.playerStats.killCount >= window.playerStats.targetsRequired) {
+        let hp = BigNum.from(100)
+          .mul(b_scale)
+          .mul(hpScale)
+          .mul(1 + dStage * 0.06);
+        window.mob = {
+          x: spawnEdgeX,
+          y: 140,
+          w: 50,
+          h: 90,
+          type: "dungeon_boss",
+          isRare: false,
+          hp: hp,
+          maxHp: hp,
+          damage: BigNum.from(20).mul(b_scale),
+          def: 0,
+          flashTimer: 0,
+          isStopped: false,
+          attackCooldown: 100,
+          attackTimer: 100,
+        };
+        window.playerStats.hasClickedThisBattle = false;
+        window.playerStats.damageTakenThisBattle = 0;
+        window.playerStats.ankhTriggeredThisBattle = false;
+      } else {
+        let dType = window.playerStats.currentDungeon || "gold";
+        let dPool = [];
+        if (dType === "equip")
+          dPool = ["animated_armor", "cursed_blade", "mimic_shield"];
+        else if (dType === "gold")
+          dPool = ["coin_elemental", "hoard_mimic", "gilded_scuttler"];
+        else dPool = ["slag_slime", "rust_nibbler", "corroded_golem"];
+
+        let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
+        let isFlying = [
+          "gargoyle",
+          "toxic_fly",
+          "marsh_ghost",
+          "gilded_wyrmling",
+          "wyrmling",
+          "animated_armor",
+          "cursed_blade",
+        ].includes(chosenVisual);
+
+        let hp = BigNum.from(25)
+          .mul(b_scale)
+          .mul(hpScale)
+          .mul(1 + dStage * 0.06);
+        window.mob = {
+          x: spawnEdgeX,
+          y: isFlying ? 150 : 195,
+          w: 25,
+          h: 40,
+          type: "mob",
+          visualType: chosenVisual,
+          isRare: false,
+          hp: hp,
+          maxHp: hp,
+          damage: BigNum.from(5.2).mul(b_scale),
+          def: 0,
+          flashTimer: 0,
+          isStopped: false,
+          attackCooldown: 90,
+          attackTimer: 90,
+        };
+      }
+    } else {
+      let tier = window.getStageTier();
+      if (window.playerStats.isBossMode) {
+        if (window.playerStats.isUberBoss) {
+          let bossType = window.playerStats.currentUberBoss || "guardian";
+          let hpMult = 10.0;
+          let dmgMult = 10.0;
+          let speedMult = 100;
+          let mType = "aegis_goliath";
+          let logText =
+            "<strong style='color:#3498db;'>Aegis Goliath, The Iron Sentinel</strong> has materialized from the cracked Aether!";
+
+          if (bossType === "chronos") {
+            speedMult = 90;
+            mType = "chronos_arbitrator";
+            logText =
+              "<strong style='color:#f1c40f;'>Chronos Arbitrator</strong> has stepped from the temporal flow!";
+          } else if (bossType === "nexus") {
+            speedMult = 80;
+            mType = "nexus_overseer";
+            logText =
+              "<strong style='color:#ff007f;'>Nexus Overseer</strong> has infected the reality stream!";
+          }
+
+          let riftLvl = window.playerStats.activeRiftLevel || 1;
+          let equivalentStage = 50 + riftLvl * 10;
+          let riftGrowthRate =
+            1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
+          let b_riftScale = BigNum.from(riftGrowthRate).pow(equivalentStage);
+
+          let hp = BigNum.from(hpMult)
+            .mul(100)
+            .mul(b_riftScale)
+            .mul(1 + equivalentStage * 0.06);
+          let dmg = BigNum.from(20).mul(b_riftScale).mul(dmgMult);
           window.mob = {
             x: spawnEdgeX,
-            y: 140,
-            w: 50,
-            h: 90,
-            type: "dungeon_boss",
+            y: 115,
+            w: 60,
+            h: 100,
+            type: mType,
             isRare: false,
             hp: hp,
             maxHp: hp,
+            damage: dmg,
+            def: 0,
+            flashTimer: 0,
+            isStopped: false,
+            attackCooldown: speedMult,
+            attackTimer: speedMult,
+          };
+          window.pushLog(
+            `<span style='color:#9b59b6; font-weight:bold;'>[RIFT HUNT]</span> ${logText}`,
+          );
+        } else {
+          let baseBossHp = BigNum.from(120)
+            .mul(b_scale)
+            .mul(1 + activeStage * 0.06);
+          window.mob = {
+            x: spawnEdgeX,
+            y: 150,
+            w: 40,
+            h: 80,
+            type: "boss",
+            isRare: false,
+            visualTier: tier,
+            hp: baseBossHp,
+            maxHp: baseBossHp,
             damage: BigNum.from(20).mul(b_scale),
             def: 0,
             flashTimer: 0,
@@ -6720,182 +6874,62 @@ window.CombatEngine = {
             attackCooldown: 100,
             attackTimer: 100,
           };
-          window.playerStats.hasClickedThisBattle = false;
-          window.playerStats.damageTakenThisBattle = 0;
-          window.playerStats.ankhTriggeredThisBattle = false;
-        } else {
-          let dType = window.playerStats.currentDungeon || "gold";
-          let dPool = [];
-          if (dType === "equip")
-            dPool = ["animated_armor", "cursed_blade", "mimic_shield"];
-          else if (dType === "gold")
-            dPool = ["coin_elemental", "hoard_mimic", "gilded_scuttler"];
-          else dPool = ["slag_slime", "rust_nibbler", "corroded_golem"];
-
-          let chosenVisual = dPool[Math.floor(Math.random() * dPool.length)];
-          let isFlying = [
-            "gargoyle",
-            "toxic_fly",
-            "marsh_ghost",
-            "gilded_wyrmling",
-            "wyrmling",
-            "animated_armor",
-            "cursed_blade",
-          ].includes(chosenVisual);
-
-          let hp = BigNum.from(25)
-            .mul(b_scale)
-            .mul(hpScale)
-            .mul(1 + dStage * 0.06);
-          window.mob = {
-            x: spawnEdgeX,
-            y: isFlying ? 150 : 195,
-            w: 25,
-            h: 40,
-            type: "mob",
-            visualType: chosenVisual,
-            isRare: false,
-            hp: hp,
-            maxHp: hp,
-            damage: BigNum.from(5.2).mul(b_scale),
-            def: 0,
-            flashTimer: 0,
-            isStopped: false,
-            attackCooldown: 90,
-            attackTimer: 90,
-          };
+          window.pushLog(
+            `<span style='color:#e74c3c; font-weight:bold;'>[STAGE BOSS]</span> blocked your transit route!`,
+          );
         }
+        window.playerStats.hasClickedThisBattle = false;
+        window.playerStats.damageTakenThisBattle = 0;
+        window.playerStats.ankhTriggeredThisBattle = false;
       } else {
-        let tier = window.getStageTier();
-        if (window.playerStats.isBossMode) {
-          if (window.playerStats.isUberBoss) {
-            let bossType = window.playerStats.currentUberBoss || "guardian";
-            let hpMult = 10.0;
-            let dmgMult = 10.0;
-            let speedMult = 100;
-            let mType = "aegis_goliath";
-            let logText =
-              "<strong style='color:#3498db;'>Aegis Goliath, The Iron Sentinel</strong> has materialized from the cracked Aether!";
+        let isMelee = Math.random() > 0.5;
+        let isRare = Math.random() < p.rareSpawn;
+        let hpMult = isRare ? 2.5 : 1;
+        let dmgMult = isRare ? 1.5 : 1;
 
-            if (bossType === "chronos") {
-              speedMult = 90;
-              mType = "chronos_arbitrator";
-              logText =
-                "<strong style='color:#f1c40f;'>Chronos Arbitrator</strong> has stepped from the temporal flow!";
-            } else if (bossType === "nexus") {
-              speedMult = 80;
-              mType = "nexus_overseer";
-              logText =
-                "<strong style='color:#ff007f;'>Nexus Overseer</strong> has infected the reality stream!";
-            }
+        let visualPool = {
+          0: ["slime", "sprout", "thorn_wyrm"],
+          1: ["golem", "wyrmling", "gargoyle"],
+          2: ["magma_elemental", "lava_serpent", "hell_bat"],
+          3: ["marsh_ghost", "swamp_basilisk", "toxic_fly"],
+          4: ["void_orb", "void_crawler", "void_spectre"],
+          5: ["clockwork_scarab", "temporal_watcher", "clockwork_drone"],
+          6: ["neon_spider", "cyber_wraith", "wireframe_orb"],
+        };
+        let choices = visualPool[tier] || ["slime"];
+        let visualType = choices[Math.floor(Math.random() * choices.length)];
 
-            let riftLvl = window.playerStats.activeRiftLevel || 1;
-            let equivalentStage = 50 + riftLvl * 10;
-            let riftGrowthRate =
-              1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
-            let b_riftScale = BigNum.from(riftGrowthRate).pow(equivalentStage);
+        let baseSpd = 90;
+        if (
+          window.equippedSlots.subweapon &&
+          window.equippedSlots.subweapon.isUniqueWatch &&
+          window.playerStats.watchActiveTimer > 0
+        )
+          baseSpd = Math.round(baseSpd * 1.33);
 
-            let hp = BigNum.from(hpMult)
-              .mul(100)
-              .mul(b_riftScale)
-              .mul(1 + equivalentStage * 0.06);
-            let dmg = BigNum.from(20).mul(b_riftScale).mul(dmgMult);
-            window.mob = {
-              x: spawnEdgeX,
-              y: 115,
-              w: 60,
-              h: 100,
-              type: mType,
-              isRare: false,
-              hp: hp,
-              maxHp: hp,
-              damage: dmg,
-              def: 0,
-              flashTimer: 0,
-              isStopped: false,
-              attackCooldown: speedMult,
-              attackTimer: speedMult,
-            };
-            window.pushLog(
-              `<span style='color:#9b59b6; font-weight:bold;'>[RIFT HUNT]</span> ${logText}`,
-            );
-          } else {
-            let baseBossHp = BigNum.from(120)
-              .mul(b_scale)
-              .mul(1 + activeStage * 0.06);
-            window.mob = {
-              x: spawnEdgeX,
-              y: 150,
-              w: 40,
-              h: 80,
-              type: "boss",
-              isRare: false,
-              visualTier: tier,
-              hp: baseBossHp,
-              maxHp: baseBossHp,
-              damage: BigNum.from(20).mul(b_scale),
-              def: 0,
-              flashTimer: 0,
-              isStopped: false,
-              attackCooldown: 100,
-              attackTimer: 100,
-            };
-            window.pushLog(
-              `<span style='color:#e74c3c; font-weight:bold;'>[STAGE BOSS]</span> blocked your transit route!`,
-            );
-          }
-          window.playerStats.hasClickedThisBattle = false;
-          window.playerStats.damageTakenThisBattle = 0;
-          window.playerStats.ankhTriggeredThisBattle = false;
-        } else {
-          let isMelee = Math.random() > 0.5;
-          let isRare = Math.random() < p.rareSpawn;
-          let hpMult = isRare ? 2.5 : 1;
-          let dmgMult = isRare ? 1.5 : 1;
-
-          let visualPool = {
-            0: ["slime", "sprout", "thorn_wyrm"],
-            1: ["golem", "wyrmling", "gargoyle"],
-            2: ["magma_elemental", "lava_serpent", "hell_bat"],
-            3: ["marsh_ghost", "swamp_basilisk", "toxic_fly"],
-            4: ["void_orb", "void_crawler", "void_spectre"],
-            5: ["clockwork_scarab", "temporal_watcher", "clockwork_drone"],
-            6: ["neon_spider", "cyber_wraith", "wireframe_orb"],
-          };
-          let choices = visualPool[tier] || ["slime"];
-          let visualType = choices[Math.floor(Math.random() * choices.length)];
-
-          let baseSpd = 90;
-          if (
-            window.equippedSlots.subweapon &&
-            window.equippedSlots.subweapon.isUniqueWatch &&
-            window.playerStats.watchActiveTimer > 0
-          )
-            baseSpd = Math.round(baseSpd * 1.33);
-
-          let hp = BigNum.from(25)
-            .mul(b_scale)
-            .mul(hpMult)
-            .mul(1 + activeStage * 0.06);
-          window.mob = {
-            x: spawnEdgeX,
-            y: isMelee ? 195 : 210,
-            w: isMelee ? 25 : 30,
-            h: isMelee ? 40 : 25,
-            type: "mob",
-            visualType: visualType,
-            isRare: isRare,
-            isMelee: isMelee,
-            visualTier: tier,
-            hp: hp,
-            maxHp: hp,
-            damage: BigNum.from(5.2).mul(b_scale).mul(dmgMult),
-            def: 0,
-            flashTimer: 0,
-            isStopped: false,
-            attackCooldown: baseSpd,
-            attackTimer: baseSpd,
-          };
+        let hp = BigNum.from(25)
+          .mul(b_scale)
+          .mul(hpMult)
+          .mul(1 + activeStage * 0.06);
+        window.mob = {
+          x: spawnEdgeX,
+          y: isMelee ? 195 : 210,
+          w: isMelee ? 25 : 30,
+          h: isMelee ? 40 : 25,
+          type: "mob",
+          visualType: visualType,
+          isRare: isRare,
+          isMelee: isMelee,
+          visualTier: tier,
+          hp: hp,
+          maxHp: hp,
+          damage: BigNum.from(5.2).mul(b_scale).mul(dmgMult),
+          def: 0,
+          flashTimer: 0,
+          isStopped: false,
+          attackCooldown: baseSpd,
+          attackTimer: baseSpd,
+        };
 
         if (isRare) {
           window.pushLog(

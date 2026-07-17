@@ -2348,14 +2348,23 @@ window.updateAudioUI = function () {
 
   if (masterSlider) masterSlider.value = window.playerStats.volumeMaster;
   if (sfxSlider) sfxSlider.value = window.playerStats.volumeSFX;
-  if (musicSlider) musicSlider.value = window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5;
+  if (musicSlider)
+    musicSlider.value =
+      window.playerStats.volumeMusic !== undefined
+        ? window.playerStats.volumeMusic
+        : 0.5;
   if (masterLabel)
     masterLabel.innerText =
       Math.round(window.playerStats.volumeMaster * 100) + "%";
   if (sfxLabel)
     sfxLabel.innerText = Math.round(window.playerStats.volumeSFX * 100) + "%";
   if (musicLabel)
-    musicLabel.innerText = Math.round((window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5) * 100) + "%";
+    musicLabel.innerText =
+      Math.round(
+        (window.playerStats.volumeMusic !== undefined
+          ? window.playerStats.volumeMusic
+          : 0.5) * 100,
+      ) + "%";
   if (muteBtn) {
     if (window.playerStats.mute) {
       muteBtn.innerText = "Unmute Audio";
@@ -5741,7 +5750,10 @@ window.generateItemCardHtml = function (
   if (item.isEquippedSlot) {
     let slotLvl = 0;
     if (item.isInspected && window.inspectedPlayerStats) {
-      slotLvl = (window.inspectedPlayerStats.slotUpgrades && window.inspectedPlayerStats.slotUpgrades[item.isEquippedSlot]) || 0;
+      slotLvl =
+        (window.inspectedPlayerStats.slotUpgrades &&
+          window.inspectedPlayerStats.slotUpgrades[item.isEquippedSlot]) ||
+        0;
     } else if (window.playerStats.slotUpgrades) {
       slotLvl = window.playerStats.slotUpgrades[item.isEquippedSlot] || 0;
     }
@@ -14113,25 +14125,25 @@ window.resolveInspectedPlayerStats = function (profile) {
   }
 
   let effectiveStr = Math.max(0, p.str - 5);
-                let effectiveDex = Math.max(0, p.dex - 5);
-                let effectiveInt = Math.max(0, p.int - 5);
+  let effectiveDex = Math.max(0, p.dex - 5);
+  let effectiveInt = Math.max(0, p.int - 5);
 
-                // Synchronized with the latest balance formulas in resolvePlayerStats()
-                itemAtkPct += effectiveStr * 0.001;
-                itemHpPct += effectiveStr * 0.001;
+  // Synchronized with the latest balance formulas in resolvePlayerStats()
+  itemAtkPct += effectiveStr * 0.001;
+  itemHpPct += effectiveStr * 0.001;
 
-                p.critChance += parseFloat(
-                  ((effectiveDex * 0.1) / (effectiveDex + 250)).toFixed(4),
-                );
-                p.critDamage += effectiveDex * 0.001;
-                p.moveSpeed += parseFloat(
-                  ((effectiveDex * 5.0) / (effectiveDex + 150)).toFixed(1),
-                );
+  p.critChance += parseFloat(
+    ((effectiveDex * 0.1) / (effectiveDex + 250)).toFixed(4),
+  );
+  p.critDamage += effectiveDex * 0.001;
+  p.moveSpeed += parseFloat(
+    ((effectiveDex * 5.0) / (effectiveDex + 150)).toFixed(1),
+  );
 
-                let logInt = Math.log10(effectiveInt + 1);
-                p.block += parseFloat((0.05 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
-                p.parry += parseFloat((0.05 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
-                p.fairySpawn += parseFloat((effectiveInt * 0.0001).toFixed(4));
+  let logInt = Math.log10(effectiveInt + 1);
+  p.block += parseFloat((0.05 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
+  p.parry += parseFloat((0.05 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
+  p.fairySpawn += parseFloat((effectiveInt * 0.0001).toFixed(4));
 
   let flatDef = (stats.baseDef || 0) + (alloc.spDef || 0) * 4;
   let defMultiplier = 1.0;
@@ -14981,22 +14993,25 @@ window.requestRename = function () {
         window.updateUI();
         window.saveGame();
       } else {
-              window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
-            }
-          })
-          .catch(() => {
-            window.pushHeaderToast("❌ Network error contributing resources.", "#e74c3c");
-          });
-      };
+        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+      }
+    })
+    .catch(() => {
+      window.pushHeaderToast(
+        "❌ Network error contributing resources.",
+        "#e74c3c",
+      );
+    });
+};
 
-      window.triggerGoldPanelReaction = function () {
-        let el = document.querySelector(".panel-gold");
-        if (el) {
-          el.classList.remove("gold-bounce-active");
-          void el.offsetWidth; // Trigger reflow to restart CSS keyframe animation smoothly
-          el.classList.add("gold-bounce-active");
-        }
-      };
+window.triggerGoldPanelReaction = function () {
+  let el = document.querySelector(".panel-gold");
+  if (el) {
+    el.classList.remove("gold-bounce-active");
+    void el.offsetWidth; // Trigger reflow to restart CSS keyframe animation smoothly
+    el.classList.add("gold-bounce-active");
+  }
+};
 
 // ==========================================================================
 // --- BESTIARY Album SYSTEM (BOOK INTERFACE) ---
