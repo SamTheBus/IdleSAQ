@@ -107,11 +107,20 @@ window.SoundManager = {
         this.synthesizeParry(now, dest);
         break;
       case "spell":
-        this.synthesizeSpell(now, dest);
-        break;
-      case "fairy":
-        this.synthesizeFairy(now, dest);
-        break;
+              this.synthesizeSpell(now, dest);
+              break;
+            case "spell_fire":
+              this.synthesizeSpellFire(now, dest);
+              break;
+            case "spell_lightning":
+              this.synthesizeSpellLightning(now, dest);
+              break;
+            case "spell_frost":
+              this.synthesizeSpellFrost(now, dest);
+              break;
+            case "fairy":
+              this.synthesizeFairy(now, dest);
+              break;
       case "death":
         this.synthesizeDeath(now, dest);
         break;
@@ -352,18 +361,173 @@ window.SoundManager = {
     gainNode.connect(dest);
 
     oscillators.forEach((osc) => osc.start(now));
-    noiseSource.start(now);
-    oscillators.forEach((osc) => osc.stop(now + duration));
-    noiseSource.stop(now + duration);
+          noiseSource.start(now);
+          oscillators.forEach((osc) => osc.stop(now + duration));
+          noiseSource.stop(now + duration);
 
-    setTimeout(
-      () =>
-        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-      duration * 1000 + 40,
-    );
-  },
+          setTimeout(
+            () =>
+              (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+            duration * 1000 + 40,
+          );
+        },
 
-  synthesizeFairy(now, dest) {
+        synthesizeSpellFire(now, dest) {
+          const duration = 0.38;
+          const gainNode = this.ctx.createGain();
+          gainNode.gain.setValueAtTime(0, now);
+          gainNode.gain.linearRampToValueAtTime(0.24, now + 0.02);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          // Low explosion thud
+          const boomOsc = this.ctx.createOscillator();
+          boomOsc.type = "triangle";
+          boomOsc.frequency.setValueAtTime(160, now);
+          boomOsc.frequency.exponentialRampToValueAtTime(30, now + 0.18);
+
+          const boomGain = this.ctx.createGain();
+          boomGain.gain.setValueAtTime(0.18, now);
+          boomGain.gain.linearRampToValueAtTime(0, now + 0.22);
+          boomOsc.connect(boomGain);
+          boomGain.connect(gainNode);
+
+          // Combustion white noise crackle
+          const noiseSource = this.ctx.createBufferSource();
+          noiseSource.buffer = this.cachedNoiseBuffer;
+
+          const lpFilter = this.ctx.createBiquadFilter();
+          lpFilter.type = "lowpass";
+          lpFilter.frequency.setValueAtTime(800, now);
+          lpFilter.frequency.exponentialRampToValueAtTime(150, now + duration);
+
+          const noiseGain = this.ctx.createGain();
+          noiseGain.gain.setValueAtTime(0, now);
+          noiseGain.gain.linearRampToValueAtTime(0.14, now + 0.015);
+          noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          noiseSource.connect(lpFilter);
+          lpFilter.connect(noiseGain);
+          noiseGain.connect(gainNode);
+
+          gainNode.connect(dest);
+
+          boomOsc.start(now);
+          noiseSource.start(now);
+          boomOsc.stop(now + duration);
+          noiseSource.stop(now + duration);
+
+          setTimeout(
+            () => (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+            duration * 1000 + 40,
+          );
+        },
+
+        synthesizeSpellLightning(now, dest) {
+          const duration = 0.22;
+          const gainNode = this.ctx.createGain();
+          gainNode.gain.setValueAtTime(0, now);
+          gainNode.gain.linearRampToValueAtTime(0.22, now + 0.005);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          // Sharp electrical zap
+          const zapOsc = this.ctx.createOscillator();
+          zapOsc.type = "sawtooth";
+          zapOsc.frequency.setValueAtTime(2200, now);
+          zapOsc.frequency.exponentialRampToValueAtTime(600, now + 0.08);
+
+          const zapGain = this.ctx.createGain();
+          zapGain.gain.setValueAtTime(0.12, now);
+          zapGain.gain.linearRampToValueAtTime(0, now + 0.12);
+          zapOsc.connect(zapGain);
+          zapGain.connect(gainNode);
+
+          // Static highpass noise discharge
+          const noiseSource = this.ctx.createBufferSource();
+          noiseSource.buffer = this.cachedNoiseBuffer;
+
+          const hpFilter = this.ctx.createBiquadFilter();
+          hpFilter.type = "highpass";
+          hpFilter.frequency.setValueAtTime(1500, now);
+
+          const noiseGain = this.ctx.createGain();
+          noiseGain.gain.setValueAtTime(0, now);
+          noiseGain.gain.linearRampToValueAtTime(0.18, now + 0.005);
+          noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          noiseSource.connect(hpFilter);
+          hpFilter.connect(noiseGain);
+          noiseGain.connect(gainNode);
+
+          gainNode.connect(dest);
+
+          zapOsc.start(now);
+          noiseSource.start(now);
+          zapOsc.stop(now + duration);
+          noiseSource.stop(now + duration);
+
+          setTimeout(
+            () => (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+            duration * 1000 + 40,
+          );
+        },
+
+        synthesizeSpellFrost(now, dest) {
+          const duration = 0.5;
+          const gainNode = this.ctx.createGain();
+          gainNode.gain.setValueAtTime(0, now);
+          gainNode.gain.linearRampToValueAtTime(0.20, now + 0.015);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          // Crystalline major triad sweep
+          const freqs = [1046.5, 1318.51, 1567.98, 2093.0]; // C6, E6, G6, C7
+          const oscillators = [];
+
+          const chimeGain = this.ctx.createGain();
+          chimeGain.gain.setValueAtTime(0.08, now);
+          chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          freqs.forEach((f) => {
+            const osc = this.ctx.createOscillator();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(f, now);
+            osc.frequency.linearRampToValueAtTime(f * 0.98, now + duration);
+            osc.connect(chimeGain);
+            oscillators.push(osc);
+          });
+          chimeGain.connect(gainNode);
+
+          // Glacial frost friction noise
+          const noiseSource = this.ctx.createBufferSource();
+          noiseSource.buffer = this.cachedNoiseBuffer;
+
+          const bpFilter = this.ctx.createBiquadFilter();
+          bpFilter.type = "bandpass";
+          bpFilter.frequency.setValueAtTime(3200, now);
+          bpFilter.Q.setValueAtTime(5.0, now);
+
+          const noiseGain = this.ctx.createGain();
+          noiseGain.gain.setValueAtTime(0, now);
+          noiseGain.gain.linearRampToValueAtTime(0.06, now + 0.02);
+          noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.7);
+
+          noiseSource.connect(bpFilter);
+          bpFilter.connect(noiseGain);
+          noiseGain.connect(gainNode);
+
+          gainNode.connect(dest);
+
+          oscillators.forEach((o) => o.start(now));
+          noiseSource.start(now);
+          oscillators.forEach((o) => o.stop(now + duration));
+          noiseSource.stop(now + duration);
+
+          setTimeout(
+            () => (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+            duration * 1000 + 40,
+          );
+        },
+
+        synthesizeFairy(now, dest) {
     const notes = [987.77, 1318.51, 1975.53];
     const noteLength = 0.05;
     notes.forEach((freq, idx) => {
@@ -1354,16 +1518,9 @@ window.MusicManager = {
       }
     }
 
-    let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    if (isSafari) {
-      this.audio.play().catch(() => {});
-      this.tick();
-      return;
-    }
-
     try {
-      // Build DSP Web Audio Graph
-      this.source = this.ctx.createMediaElementSource(this.audio);
+          // Build DSP Web Audio Graph and route through GainNode for iOS volume compatibility
+          this.source = this.ctx.createMediaElementSource(this.audio);
 
       this.filter = this.ctx.createBiquadFilter();
       this.filter.type = "lowpass";
@@ -1509,23 +1666,30 @@ window.MusicManager = {
     }
 
     // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
-              if (this.audio) {
-                this.audio.volume = finalTargetVolume;
-                if (this.audio.playbackRate !== 1.0) {
-                  this.audio.playbackRate = 1.0;
-                }
+                  if (this.audio) {
+                    // Apply iOS-friendly HTML5 mute state fallback
+                    this.audio.muted = isMuted;
 
-                // Power-Saving Optimization: Suspend streaming and decoding when muted to preserve mobile CPU/battery
-                if (finalTargetVolume <= 0) {
-                  if (!this.audio.paused) {
-                    this.audio.pause();
+                    // Setting .volume is blocked/ignored on iOS, but fully supported on Android / Desktop
+                    try {
+                      this.audio.volume = finalTargetVolume;
+                    } catch (e) {}
+
+                    if (this.audio.playbackRate !== 1.0) {
+                      this.audio.playbackRate = 1.0;
+                    }
+
+                    // Power-Saving Optimization: Suspend streaming and decoding when muted to preserve mobile CPU/battery
+                    if (finalTargetVolume <= 0 || isMuted) {
+                      if (!this.audio.paused) {
+                        this.audio.pause();
+                      }
+                    } else {
+                      if (this.audio.paused) {
+                        this.audio.play().catch(() => {});
+                      }
+                    }
                   }
-                } else {
-                  if (this.audio.paused) {
-                    this.audio.play().catch(() => {});
-                  }
-                }
-              }
 
     // Call next evaluation frame
     requestAnimationFrame(() => this.tick());

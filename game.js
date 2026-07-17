@@ -3930,73 +3930,75 @@ function update() {
         proj.hitMobs.push(window.mob.id);
         let mobDef = window.mob.def || 0;
         if (proj.isMaelstromCrescent) {
-          let windDmg = Math.max(
-            1,
-            Math.ceil(p.atk * 0.5 * (1.0 + p.dex * 0.0015)),
-          );
-          windDmg = Math.max(1, Math.ceil(windDmg * (100 / (100 + mobDef))));
+                  let windDmg = Math.max(
+                    1,
+                    Math.ceil(p.atk * 0.5 * (1.0 + p.dex * 0.0015)),
+                  );
+                  windDmg = Math.max(1, Math.ceil(windDmg * (100 / (100 + mobDef))));
 
-          if (window.playerStats.singularityState === "storing") {
-            window.playerStats.singularityStoredDmg += windDmg;
-            window.effects.push({
-              x: window.mob.x + window.mob.w / 2,
-              y: window.mob.y - 10,
-              text: `+${window.formatNumber(windDmg)} [STORED]`,
-              color: "#8e44ad",
-              life: 45,
-            });
-          } else {
-            window.mob.hp = window.mob.hp.sub(windDmg);
-            window.mob.flashTimer = 5;
-            window.spawnDamageEffect(windDmg, "echo", false);
-            window.damageHistory.push({ time: Date.now(), amount: windDmg });
-            if (
-              !window.playerStats.isDungeonMode &&
-              !window.playerStats.isCrucibleMode &&
-              !window.playerStats.isBossMode &&
-              !window.playerStats.isFarmingLoop
-            ) {
-              window.playerStats.killCount = Math.min(
-                window.playerStats.targetsRequired,
-                window.playerStats.killCount + 1,
-              );
-              window.effects.push({
-                x: window.hero.x + 12,
-                y: window.hero.y - 12,
-                text: "⏩ PROGRESS SKIP!",
-                color: "#2ecc71",
-                life: 55,
-              });
-              if (
-                window.playerStats.killCount >=
-                window.playerStats.targetsRequired
-              )
-                window.playerStats.isBossMode = true;
-            }
-          }
-        } else {
-          let flameDmg = Math.max(
-            1,
-            Math.ceil(p.atk * 0.25 * (1.0 + p.int * 0.002)),
-          );
-          flameDmg = Math.max(1, Math.ceil(flameDmg * (100 / (100 + mobDef))));
+                  if (window.playerStats.singularityState === "storing") {
+                    window.playerStats.singularityStoredDmg += windDmg;
+                    window.effects.push({
+                      x: window.mob.x + window.mob.w / 2,
+                      y: window.mob.y - 10,
+                      text: `+${window.formatNumber(windDmg)} [STORED]`,
+                      color: "#8e44ad",
+                      life: 45,
+                    });
+                  } else {
+                    window.mob.hp = window.mob.hp.sub(windDmg);
+                    window.mob.flashTimer = 5;
+                    window.spawnDamageEffect(windDmg, "echo", false);
+                    window.damageHistory.push({ time: Date.now(), amount: windDmg });
+                    window.SoundManager.play("spell_frost");
+                    if (
+                      !window.playerStats.isDungeonMode &&
+                      !window.playerStats.isCrucibleMode &&
+                      !window.playerStats.isBossMode &&
+                      !window.playerStats.isFarmingLoop
+                    ) {
+                      window.playerStats.killCount = Math.min(
+                        window.playerStats.targetsRequired,
+                        window.playerStats.killCount + 1,
+                      );
+                      window.effects.push({
+                        x: window.hero.x + 12,
+                        y: window.hero.y - 12,
+                        text: "⏩ PROGRESS SKIP!",
+                        color: "#2ecc71",
+                        life: 55,
+                      });
+                      if (
+                        window.playerStats.killCount >=
+                        window.playerStats.targetsRequired
+                      )
+                        window.playerStats.isBossMode = true;
+                    }
+                  }
+                } else {
+                  let flameDmg = Math.max(
+                    1,
+                    Math.ceil(p.atk * 0.25 * (1.0 + p.int * 0.002)),
+                  );
+                  flameDmg = Math.max(1, Math.ceil(flameDmg * (100 / (100 + mobDef))));
 
-          if (window.playerStats.singularityState === "storing") {
-            window.playerStats.singularityStoredDmg += flameDmg;
-            window.effects.push({
-              x: window.mob.x + window.mob.w / 2,
-              y: window.mob.y - 10,
-              text: `+${window.formatNumber(flameDmg)} [STORED]`,
-              color: "#8e44ad",
-              life: 45,
-            });
-          } else {
-            window.mob.hp = window.mob.hp.sub(flameDmg);
-            window.mob.flashTimer = 5;
-            window.spawnDamageEffect(flameDmg, "fire", false);
-            window.damageHistory.push({ time: Date.now(), amount: flameDmg });
-          }
-        }
+                  if (window.playerStats.singularityState === "storing") {
+                    window.playerStats.singularityStoredDmg += flameDmg;
+                    window.effects.push({
+                      x: window.mob.x + window.mob.w / 2,
+                      y: window.mob.y - 10,
+                      text: `+${window.formatNumber(flameDmg)} [STORED]`,
+                      color: "#8e44ad",
+                      life: 45,
+                    });
+                  } else {
+                    window.mob.hp = window.mob.hp.sub(flameDmg);
+                    window.mob.flashTimer = 5;
+                    window.spawnDamageEffect(flameDmg, "fire", false);
+                    window.damageHistory.push({ time: Date.now(), amount: flameDmg });
+                    window.SoundManager.play("spell_fire");
+                  }
+                }
         for (let pIdx = 0; pIdx < 6; pIdx++) {
           window.particles.push({
             x: proj.x,
@@ -5302,141 +5304,146 @@ window.CombatEngine = {
           frostProc = false;
 
         // 1. Lightning Spell Roll
-        if (Math.random() < spellChance) {
-          lightProc = true;
-          triggeredSpell = true;
-          let lightningDmg = spellDmgBase;
-          let isSpellCrit = Math.random() < p.critChance;
-          if (isSpellCrit)
-            lightningDmg = Math.ceil(lightningDmg * p.critDamage);
+                    if (Math.random() < spellChance) {
+                      lightProc = true;
+                      triggeredSpell = true;
+                      let lightningDmg = spellDmgBase;
+                      let isSpellCrit = Math.random() < p.critChance;
+                      if (isSpellCrit)
+                        lightningDmg = Math.ceil(lightningDmg * p.critDamage);
 
-          // Apply active defense mitigation to lightning spells
-          lightningDmg = Math.max(
-            1,
-            Math.ceil(lightningDmg * (100 / (100 + mobDef))),
-          );
+                      // Apply active defense mitigation to lightning spells
+                      let mobDef = window.mob.def || 0;
+                      lightningDmg = Math.max(
+                        1,
+                        Math.ceil(lightningDmg * (100 / (100 + mobDef))),
+                      );
 
-          if (window.playerStats.singularityState === "storing") {
-            window.playerStats.singularityStoredDmg += lightningDmg;
-            window.effects.push({
-              x: window.mob.x + window.mob.w / 2,
-              y: window.mob.y - 10,
-              text: `+${window.formatNumber(lightningDmg)} [STORED]`,
-              color: "#8e44ad",
-              life: 45,
-            });
-          } else {
-            window.mob.hp = window.mob.hp.sub(lightningDmg);
-            window.spawnDamageEffect(lightningDmg, "lightning", isSpellCrit);
-            window.damageHistory.push({
-              time: Date.now(),
-              amount: lightningDmg,
-            });
-          }
+                      if (window.playerStats.singularityState === "storing") {
+                        window.playerStats.singularityStoredDmg += lightningDmg;
+                        window.effects.push({
+                          x: window.mob.x + window.mob.w / 2,
+                          y: window.mob.y - 10,
+                          text: `+${window.formatNumber(lightningDmg)} [STORED]`,
+                          color: "#8e44ad",
+                          life: 45,
+                        });
+                      } else {
+                        window.mob.hp = window.mob.hp.sub(lightningDmg);
+                        window.spawnDamageEffect(lightningDmg, "lightning", isSpellCrit);
+                        window.damageHistory.push({
+                          time: Date.now(),
+                          amount: lightningDmg,
+                        });
+                        window.SoundManager.play("spell_lightning");
+                      }
 
-          // Descending crackling lightning bolt particles
-          for (let i = 0; i < 15; i++) {
-            window.particles.push({
-              x: window.mob.x + window.mob.w / 2 + window.randFloat(-6, 6),
-              y: window.mob.y - 40 + (i * (window.mob.h + 40)) / 15,
-              vx: window.randFloat(-2.5, 2.5),
-              vy: window.randFloat(-1, 1),
-              radius: window.randFloat(1.5, 3),
-              color: Math.random() > 0.3 ? "#f1c40f" : "#fff",
-              alpha: 1,
-              life: window.randInt(10, 18),
-            });
-          }
-        }
+                      // Descending crackling lightning bolt particles
+                      for (let i = 0; i < 15; i++) {
+                        window.particles.push({
+                          x: window.mob.x + window.mob.w / 2 + window.randFloat(-6, 6),
+                          y: window.mob.y - 40 + (i * (window.mob.h + 40)) / 15,
+                          vx: window.randFloat(-2.5, 2.5),
+                          vy: window.randFloat(-1, 1),
+                          radius: window.randFloat(1.5, 3),
+                          color: Math.random() > 0.3 ? "#f1c40f" : "#fff",
+                          alpha: 1,
+                          life: window.randInt(10, 18),
+                        });
+                      }
+                    }
 
-        // 2. Fire Spell Roll
-        if (Math.random() < spellChance) {
-          fireProc = true;
-          triggeredSpell = true;
-          let fireDmg = spellDmgBase;
-          let isSpellCrit = Math.random() < p.critChance;
-          if (isSpellCrit) fireDmg = Math.ceil(fireDmg * p.critDamage);
+                    // 2. Fire Spell Roll
+                    if (Math.random() < spellChance) {
+                      fireProc = true;
+                      triggeredSpell = true;
+                      let fireDmg = spellDmgBase;
+                      let isSpellCrit = Math.random() < p.critChance;
+                      if (isSpellCrit) fireDmg = Math.ceil(fireDmg * p.critDamage);
 
-          // Apply active defense mitigation to fire spells
-          fireDmg = Math.max(1, Math.ceil(fireDmg * (100 / (100 + mobDef))));
+                      // Apply active defense mitigation to fire spells
+                      let mobDef = window.mob.def || 0;
+                      fireDmg = Math.max(1, Math.ceil(fireDmg * (100 / (100 + mobDef))));
 
-          if (window.playerStats.singularityState === "storing") {
-            window.playerStats.singularityStoredDmg += fireDmg;
-            window.effects.push({
-              x: window.mob.x + window.mob.w / 2,
-              y: window.mob.y - 10,
-              text: `+${window.formatNumber(fireDmg)} [STORED]`,
-              color: "#8e44ad",
-              life: 45,
-            });
-          } else {
-            window.mob.hp = window.mob.hp.sub(fireDmg);
-            window.spawnDamageEffect(fireDmg, "fire", isSpellCrit);
-            window.damageHistory.push({ time: Date.now(), amount: fireDmg });
-          }
+                      if (window.playerStats.singularityState === "storing") {
+                        window.playerStats.singularityStoredDmg += fireDmg;
+                        window.effects.push({
+                          x: window.mob.x + window.mob.w / 2,
+                          y: window.mob.y - 10,
+                          text: `+${window.formatNumber(fireDmg)} [STORED]`,
+                          color: "#8e44ad",
+                          life: 45,
+                        });
+                      } else {
+                        window.mob.hp = window.mob.hp.sub(fireDmg);
+                        window.spawnDamageEffect(fireDmg, "fire", isSpellCrit);
+                        window.damageHistory.push({ time: Date.now(), amount: fireDmg });
+                        window.SoundManager.play("spell_fire");
+                      }
 
-          // Rising flame embers
-          for (let i = 0; i < 15; i++) {
-            window.particles.push({
-              x: window.mob.x + window.randFloat(0, window.mob.w),
-              y: window.mob.y + window.mob.h - 5,
-              vx: window.randFloat(-1.2, 1.2),
-              vy: window.randFloat(-4.5, -2),
-              radius: window.randFloat(2, 4),
-              color: Math.random() > 0.4 ? "#e67e22" : "#e74c3c",
-              alpha: 1,
-              life: window.randInt(18, 32),
-            });
-          }
-        }
+                      // Rising flame embers
+                      for (let i = 0; i < 15; i++) {
+                        window.particles.push({
+                          x: window.mob.x + window.randFloat(0, window.mob.w),
+                          y: window.mob.y + window.mob.h - 5,
+                          vx: window.randFloat(-1.2, 1.2),
+                          vy: window.randFloat(-4.5, -2),
+                          radius: window.randFloat(2, 4),
+                          color: Math.random() > 0.4 ? "#e67e22" : "#e74c3c",
+                          alpha: 1,
+                          life: window.randInt(18, 32),
+                        });
+                      }
+                    }
 
-        // 3. Frost Spell Roll
-        if (Math.random() < spellChance) {
-          frostProc = true;
-          triggeredSpell = true;
-          let frostDmg = spellDmgBase;
-          let isSpellCrit = Math.random() < p.critChance;
-          if (isSpellCrit) frostDmg = Math.ceil(frostDmg * p.critDamage);
+                    // 3. Frost Spell Roll
+                    if (Math.random() < spellChance) {
+                      frostProc = true;
+                      triggeredSpell = true;
+                      let frostDmg = spellDmgBase;
+                      let isSpellCrit = Math.random() < p.critChance;
+                      if (isSpellCrit) frostDmg = Math.ceil(frostDmg * p.critDamage);
 
-          // Apply active defense mitigation to frost spells
-          frostDmg = Math.max(1, Math.ceil(frostDmg * (100 / (100 + mobDef))));
+                      // Apply active defense mitigation to frost spells
+                      let mobDef = window.mob.def || 0;
+                      frostDmg = Math.max(1, Math.ceil(frostDmg * (100 / (100 + mobDef))));
 
-          if (window.playerStats.singularityState === "storing") {
-            window.playerStats.singularityStoredDmg += frostDmg;
-            window.effects.push({
-              x: window.mob.x + window.mob.w / 2,
-              y: window.mob.y - 10,
-              text: `+${window.formatNumber(frostDmg)} [STORED]`,
-              color: "#8e44ad",
-              life: 45,
-            });
-          } else {
-            window.mob.hp = window.mob.hp.sub(frostDmg);
-            window.spawnDamageEffect(frostDmg, "frost", isSpellCrit);
-            window.damageHistory.push({ time: Date.now(), amount: frostDmg });
-          }
+                      if (window.playerStats.singularityState === "storing") {
+                        window.playerStats.singularityStoredDmg += frostDmg;
+                        window.effects.push({
+                          x: window.mob.x + window.mob.w / 2,
+                          y: window.mob.y - 10,
+                          text: `+${window.formatNumber(frostDmg)} [STORED]`,
+                          color: "#8e44ad",
+                          life: 45,
+                        });
+                      } else {
+                        window.mob.hp = window.mob.hp.sub(frostDmg);
+                        window.spawnDamageEffect(frostDmg, "frost", isSpellCrit);
+                        window.damageHistory.push({ time: Date.now(), amount: frostDmg });
+                        window.SoundManager.play("spell_frost");
+                      }
 
-          // Radial ice shard burst
-          for (let i = 0; i < 15; i++) {
-            window.particles.push({
-              x: window.mob.x + window.mob.w / 2,
-              y: window.mob.y + window.mob.h / 2,
-              vx: window.randFloat(-3.5, 3.5),
-              vy: window.randFloat(-2.5, 2.5),
-              radius: window.randFloat(1.5, 3),
-              color: Math.random() > 0.5 ? "#3498db" : "#ffffff",
-              alpha: 1,
-              life: window.randInt(15, 28),
-            });
-          }
-        }
+                      // Radial ice shard burst
+                      for (let i = 0; i < 15; i++) {
+                        window.particles.push({
+                          x: window.mob.x + window.mob.w / 2,
+                          y: window.mob.y + window.mob.h / 2,
+                          vx: window.randFloat(-3.5, 3.5),
+                          vy: window.randFloat(-2.5, 2.5),
+                          radius: window.randFloat(1.5, 3),
+                          color: Math.random() > 0.5 ? "#3498db" : "#ffffff",
+                          alpha: 1,
+                          life: window.randInt(15, 28),
+                        });
+                      }
+                    }
 
-        if (triggeredSpell) {
-          window.SoundManager.play("spell");
-          if (lightProc && fireProc && frostProc) {
-            window.playerStats.hasTriggeredElementalConvergence = true;
-          }
-        }
+                    if (triggeredSpell) {
+                      if (lightProc && fireProc && frostProc) {
+                        window.playerStats.hasTriggeredElementalConvergence = true;
+                      }
+                    }
       }
 
       if (window.checkArtifactTrait("echo_strike") && Math.random() < 0.3) {
@@ -10621,19 +10628,22 @@ window.executeConduitDischarge = function (orb, index) {
     );
 
     // 1. Detonate FIRE Tome Spell
-    window.mob.hp = window.mob.hp.sub(finalSpellDmg);
-    window.spawnDamageEffect(finalSpellDmg, "fire", false);
-    window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
+        window.mob.hp = window.mob.hp.sub(finalSpellDmg);
+        window.spawnDamageEffect(finalSpellDmg, "fire", false);
+        window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
+        window.SoundManager.play("spell_fire");
 
-    // 2. Detonate LIGHTNING Tome Spell
-    window.mob.hp = window.mob.hp.sub(finalSpellDmg);
-    window.spawnDamageEffect(finalSpellDmg, "lightning", false);
-    window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
+        // 2. Detonate LIGHTNING Tome Spell
+        window.mob.hp = window.mob.hp.sub(finalSpellDmg);
+        window.spawnDamageEffect(finalSpellDmg, "lightning", false);
+        window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
+        window.SoundManager.play("spell_lightning");
 
-    // 3. Detonate FROST Tome Spell
-    window.mob.hp = window.mob.hp.sub(finalSpellDmg);
-    window.spawnDamageEffect(finalSpellDmg, "frost", false);
-    window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
+        // 3. Detonate FROST Tome Spell
+        window.mob.hp = window.mob.hp.sub(finalSpellDmg);
+        window.spawnDamageEffect(finalSpellDmg, "frost", false);
+        window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
+        window.SoundManager.play("spell_frost");
 
     // Spawn rich tri-color elements particles
     let colors = ["#f1c40f", "#e67e22", "#3498db", "#ffffff"];
