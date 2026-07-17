@@ -252,31 +252,31 @@ window.formatNumber = function (val) {
   ];
 
   let i = Math.floor(b.e / 3);
-    let rem = b.e % 3;
-    let displayVal = b.m * Math.pow(10, rem);
+  let rem = b.e % 3;
+  let displayVal = b.m * Math.pow(10, rem);
 
-    if (i < standardSuffixes.length) {
-      return `${displayVal.toFixed(2)}${standardSuffixes[i]}`;
-    }
+  if (i < standardSuffixes.length) {
+    return `${displayVal.toFixed(2)}${standardSuffixes[i]}`;
+  }
 
-    // Alphabetical suffix generator (aa - zz, then aaa - zzz)
-    let baseAlpha = i - standardSuffixes.length;
-    let suffix = "";
-    if (baseAlpha < 676) {
-      let char1 = String.fromCharCode(97 + Math.floor(baseAlpha / 26));
-      let char2 = String.fromCharCode(97 + (baseAlpha % 26));
-      suffix = char1 + char2;
-    } else {
-      let temp = baseAlpha - 676;
-      let char1 = String.fromCharCode(97 + Math.floor(temp / 676));
-      let char2 = String.fromCharCode(97 + Math.floor((temp % 676) / 26));
-      let char3 = String.fromCharCode(97 + (temp % 26));
-      suffix = char1 + char2 + char3;
-    }
-    suffix = suffix.toUpperCase();
+  // Alphabetical suffix generator (aa - zz, then aaa - zzz)
+  let baseAlpha = i - standardSuffixes.length;
+  let suffix = "";
+  if (baseAlpha < 676) {
+    let char1 = String.fromCharCode(97 + Math.floor(baseAlpha / 26));
+    let char2 = String.fromCharCode(97 + (baseAlpha % 26));
+    suffix = char1 + char2;
+  } else {
+    let temp = baseAlpha - 676;
+    let char1 = String.fromCharCode(97 + Math.floor(temp / 676));
+    let char2 = String.fromCharCode(97 + Math.floor((temp % 676) / 26));
+    let char3 = String.fromCharCode(97 + (temp % 26));
+    suffix = char1 + char2 + char3;
+  }
+  suffix = suffix.toUpperCase();
 
-    return `${displayVal.toFixed(2)}${suffix}`;
-  };
+  return `${displayVal.toFixed(2)}${suffix}`;
+};
 
 window.randInt = (min, max) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
@@ -1356,15 +1356,17 @@ window.resolvePlayerStats = function (useDraft = false) {
       p.block = 0.0; // STRICT: Can't block with a tome
       p.parry = 0.0; // STRICT: Can't parry with a tome
     } else if (subType === "dagger") {
-        let sub = window.equippedSlots.subweapon;
-        let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
-        let baseCap = noun.includes("main-gauche") ? 0.30 : 0.25;
+      let sub = window.equippedSlots.subweapon;
+      let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+      let baseCap = noun.includes("main-gauche") ? 0.3 : 0.25;
 
-        maxParryCap = window.checkArtifactTrait("titan_grip") ? (baseCap + 0.05) : baseCap;
-        if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
-        // Removed duplicate p.parry flat add; Parry is now read directly from Dagger Item base stats!
-        p.block = 0.0; // STRICT: Can't block with a dagger
-      }
+      maxParryCap = window.checkArtifactTrait("titan_grip")
+        ? baseCap + 0.05
+        : baseCap;
+      if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
+      // Removed duplicate p.parry flat add; Parry is now read directly from Dagger Item base stats!
+      p.block = 0.0; // STRICT: Can't block with a dagger
+    }
   } else {
     p.block = 0.0; // STRICT: Can't block without subweapon
     p.parry = 0.0; // STRICT: Can't parry without subweapon
@@ -1378,16 +1380,16 @@ window.resolvePlayerStats = function (useDraft = false) {
     (achMoveSpeedPct + itemSpdPct + (setCtx.moveSpeedPctBonus || 0)); // Factored percent speed
 
   // Apply Cavern Sigil Active Modifiers (Dungeon Mode)
-    if (
-      window.playerStats.isDungeonMode &&
-      window.playerStats.activeDungeonSigil
-    ) {
-      let activeSig = window.playerStats.activeDungeonSigil;
-      p.qly += activeSig.qualityBoost || 0;
-      p.gold += activeSig.rewardMultiplier || 0; // Sigil also increases Gold natively
-      p.drop += activeSig.rewardMultiplier || 0; // Sigil also increases Drop Rate natively
+  if (
+    window.playerStats.isDungeonMode &&
+    window.playerStats.activeDungeonSigil
+  ) {
+    let activeSig = window.playerStats.activeDungeonSigil;
+    p.qly += activeSig.qualityBoost || 0;
+    p.gold += activeSig.rewardMultiplier || 0; // Sigil also increases Gold natively
+    p.drop += activeSig.rewardMultiplier || 0; // Sigil also increases Drop Rate natively
 
-      // Loop and apply the sigil's buffs and debuffs
+    // Loop and apply the sigil's buffs and debuffs
     activeSig.buffs.forEach((b) => {
       if (b.id === "swift_strikes") {
         p.idleAttackSpeed = Math.max(10, Math.round(p.idleAttackSpeed / 1.25));
@@ -2024,15 +2026,15 @@ window.playerStats = {
   crucibleAccumulatedGold: 0,
   crucibleAccumulatedXp: 0,
   crucibleDraftDeck: [],
-        crucibleAccumulatedLoot: [],
-        dungeonAccumulatedGold: 0,
-    dungeonAccumulatedXp: 0,
-    dungeonAccumulatedLoot: [],
-      hasRefundedLegacyTempers: false,
-    level: 1,
-    xp: new BigNum(0, 0),
-    xpReq: new BigNum(100, 0),
-    sp: 0,
+  crucibleAccumulatedLoot: [],
+  dungeonAccumulatedGold: 0,
+  dungeonAccumulatedXp: 0,
+  dungeonAccumulatedLoot: [],
+  hasRefundedLegacyTempers: false,
+  level: 1,
+  xp: new BigNum(0, 0),
+  xpReq: new BigNum(100, 0),
+  sp: 0,
   spAllocations: {
     spHp: 0,
     spAtk: 0,

@@ -1026,49 +1026,72 @@ window.setText = (id, text) => window.UIManager.setText(id, text);
 // --- CORE UI REFRESHER ---
 
 // Append updateScrollLock inside window.UIManager
-Object.assign(window.UIManager, {
-  updateScrollLock() {
-    const idsToCheck = [
-      "menu-hub-overlay",
-      "settings-modal",
-      "achievements-modal",
-      "mailbox-modal",
-      "leaderboard-modal",
-      "inspect-modal",
-    ];
-    const selectorsToCheck = [
-      "#gacha-modal-overlay",
-      "#supply-crate-overlay",
-      "#sack-opening-overlay",
-      "#sp-confirm-modal",
-    ];
+window.UIManager.updateScrollLock = function () {
+  const idsToCheck = [
+    "menu-hub-overlay",
+    "settings-modal",
+    "achievements-modal",
+    "mailbox-modal",
+    "leaderboard-modal",
+    "inspect-modal",
+  ];
+  const selectorsToCheck = [
+    "#gacha-modal-overlay",
+    "#supply-crate-overlay",
+    "#sack-opening-overlay",
+    "#sp-confirm-modal",
+  ];
 
-    let isAnyOpen = false;
+  let isAnyOpen = false;
 
-    for (let id of idsToCheck) {
-      let el = document.getElementById(id);
-      if (el && el.style.display !== "none" && el.style.display !== "") {
+  for (let id of idsToCheck) {
+    let el = document.getElementById(id);
+    if (el && el.style.display !== "none" && el.style.display !== "") {
+      isAnyOpen = true;
+      if (!el.dataset.hasTouchBlocker) {
+        el.dataset.hasTouchBlocker = "true";
+        el.addEventListener(
+          "touchmove",
+          (e) => {
+            if (e.target === el) {
+              e.preventDefault();
+            }
+          },
+          { passive: false },
+        );
+      }
+      break;
+    }
+  }
+
+  if (!isAnyOpen) {
+    for (let sel of selectorsToCheck) {
+      let el = document.querySelector(sel);
+      if (el) {
         isAnyOpen = true;
+        if (!el.dataset.hasTouchBlocker) {
+          el.dataset.hasTouchBlocker = "true";
+          el.addEventListener(
+            "touchmove",
+            (e) => {
+              if (e.target === el) {
+                e.preventDefault();
+              }
+            },
+            { passive: false },
+          );
+        }
         break;
       }
     }
+  }
 
-    if (!isAnyOpen) {
-      for (let sel of selectorsToCheck) {
-        if (document.querySelector(sel)) {
-          isAnyOpen = true;
-          break;
-        }
-      }
-    }
-
-    if (isAnyOpen) {
-      document.body.classList.add("scroll-lock");
-    } else {
-      document.body.classList.remove("scroll-lock");
-    }
-  },
-});
+  if (isAnyOpen) {
+    document.body.classList.add("scroll-lock");
+  } else {
+    document.body.classList.remove("scroll-lock");
+  }
+};
 
 // Legacy Compatibility Aliases to protect references
 window.updateScrollLock = () => window.UIManager.updateScrollLock();
@@ -1697,12 +1720,12 @@ window.updateUI = function () {
     window.updateMedalBanner();
   }
   if (typeof window.updateSpectralReliquaryBanner === "function") {
-      window.updateSpectralReliquaryBanner();
-    }
-    if (typeof window.renderActiveEffectsHudBar === "function") {
-      window.renderActiveEffectsHudBar();
-    }
-  };
+    window.updateSpectralReliquaryBanner();
+  }
+  if (typeof window.renderActiveEffectsHudBar === "function") {
+    window.renderActiveEffectsHudBar();
+  }
+};
 
 // --- ATTRIBUTES MATRIX CONTROLS ---
 
@@ -2590,32 +2613,32 @@ window.leaveActivity = function () {
             false,
           );
       } else if (window.playerStats.isDungeonMode) {
-              let dType = window.playerStats.currentDungeon;
-              let dStage = window.playerStats.currentDungeonStage[dType] || 1;
-              window.playerStats.dungeonPeaks[dType] = Math.max(
-                window.playerStats.dungeonPeaks[dType] || 1,
-                dStage,
-              );
+        let dType = window.playerStats.currentDungeon;
+        let dStage = window.playerStats.currentDungeonStage[dType] || 1;
+        window.playerStats.dungeonPeaks[dType] = Math.max(
+          window.playerStats.dungeonPeaks[dType] || 1,
+          dStage,
+        );
 
-              let gold = window.playerStats.dungeonAccumulatedGold || 0;
-              let xp = window.playerStats.dungeonAccumulatedXp || 0;
-              let loot = window.playerStats.dungeonAccumulatedLoot || [];
+        let gold = window.playerStats.dungeonAccumulatedGold || 0;
+        let xp = window.playerStats.dungeonAccumulatedXp || 0;
+        let loot = window.playerStats.dungeonAccumulatedLoot || [];
 
-              if (typeof window.pushLog === "function")
-                window.pushLog(
-                  `<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON RETREAT] Safely retreated from ${dType.toUpperCase()} Dungeon at Stage ${dStage}.</span>`,
-                );
-              if (typeof window.pushHeaderToast === "function")
-                window.pushHeaderToast(`🏃 Retreated! Stage ${dStage}`, "#8e44ad");
+        if (typeof window.pushLog === "function")
+          window.pushLog(
+            `<span style='color:#8e44ad; font-weight:bold;'>[DUNGEON RETREAT] Safely retreated from ${dType.toUpperCase()} Dungeon at Stage ${dStage}.</span>`,
+          );
+        if (typeof window.pushHeaderToast === "function")
+          window.pushHeaderToast(`🏃 Retreated! Stage ${dStage}`, "#8e44ad");
 
-              window.playerStats.dungeonAccumulatedGold = 0;
-              window.playerStats.dungeonAccumulatedXp = 0;
-              window.playerStats.dungeonAccumulatedLoot = [];
+        window.playerStats.dungeonAccumulatedGold = 0;
+        window.playerStats.dungeonAccumulatedXp = 0;
+        window.playerStats.dungeonAccumulatedLoot = [];
 
-              if (typeof window.showDungeonSummaryModal === "function") {
-                window.showDungeonSummaryModal(dType, dStage, gold, xp, loot, false);
-              }
-            }
+        if (typeof window.showDungeonSummaryModal === "function") {
+          window.showDungeonSummaryModal(dType, dStage, gold, xp, loot, false);
+        }
+      }
 
       window.playerStats.isDungeonMode = false;
       window.playerStats.isCrucibleMode = false;
@@ -2646,7 +2669,7 @@ window.leaveActivity = function () {
 
 /* --- ACTIVE EFFECTS ENGINE & RETRO VECTOR BADGES --- */
 
-window.getActiveEffects = function() {
+window.getActiveEffects = function () {
   let list = [];
   let p = window.resolvePlayerStats();
 
@@ -2658,7 +2681,7 @@ window.getActiveEffects = function() {
       name: "Frenzy Mode",
       timer: window.playerStats.frenzyTimer,
       max: window.checkArtifactTrait("extend_buffs") ? 900 : 600,
-      desc: "Critical Strike chance is set to 100%. Moves, slashes, and recovery timers execute at maximum active speed limits."
+      desc: "Critical Strike chance is set to 100%. Moves, slashes, and recovery timers execute at maximum active speed limits.",
     });
   }
   if (window.playerStats.adrenalineTimer > 0) {
@@ -2668,7 +2691,7 @@ window.getActiveEffects = function() {
       name: "Adrenaline",
       timer: window.playerStats.adrenalineTimer,
       max: window.checkArtifactTrait("extend_buffs") ? 900 : 600,
-      desc: "Doubles all outgoing base slash and spell damage output."
+      desc: "Doubles all outgoing base slash and spell damage output.",
     });
   }
 
@@ -2681,7 +2704,7 @@ window.getActiveEffects = function() {
       name: "Attack Elixir",
       timer: window.playerStats.atkPotionTimer,
       max: potMax,
-      desc: `Increases total Attack Power by +${Math.round((window.playerStats.atkPotionStrength || 0.1) * 100)}%.`
+      desc: `Increases total Attack Power by +${Math.round((window.playerStats.atkPotionStrength || 0.1) * 100)}%.`,
     });
   }
   if (window.playerStats.hpPotionTimer > 0) {
@@ -2691,7 +2714,7 @@ window.getActiveEffects = function() {
       name: "Vitality Elixir",
       timer: window.playerStats.hpPotionTimer,
       max: potMax,
-      desc: `Increases total Max HP by +${Math.round((window.playerStats.hpPotionStrength || 0.1) * 100)}%.`
+      desc: `Increases total Max HP by +${Math.round((window.playerStats.hpPotionStrength || 0.1) * 100)}%.`,
     });
   }
   if (window.playerStats.defPotionTimer > 0) {
@@ -2701,7 +2724,7 @@ window.getActiveEffects = function() {
       name: "Armored Elixir",
       timer: window.playerStats.defPotionTimer,
       max: potMax,
-      desc: `Increases total Defense by +${Math.round((window.playerStats.defPotionStrength || 0.1) * 100)}%.`
+      desc: `Increases total Defense by +${Math.round((window.playerStats.defPotionStrength || 0.1) * 100)}%.`,
     });
   }
   if (window.playerStats.hastePotionTimer > 0) {
@@ -2711,7 +2734,7 @@ window.getActiveEffects = function() {
       name: "Haste Elixir",
       timer: window.playerStats.hastePotionTimer,
       max: potMax,
-      desc: `Increases Movement Speed and Active/Idle Attack Speed multipliers by +${(window.playerStats.hastePotionStrength || 1) * 10}%.`
+      desc: `Increases Movement Speed and Active/Idle Attack Speed multipliers by +${(window.playerStats.hastePotionStrength || 1) * 10}%.`,
     });
   }
   if (window.playerStats.xpPotionTimer > 0) {
@@ -2721,7 +2744,7 @@ window.getActiveEffects = function() {
       name: "Double XP Elixir",
       timer: window.playerStats.xpPotionTimer,
       max: potMax,
-      desc: "Increases global experience gain rates by +100%."
+      desc: "Increases global experience gain rates by +100%.",
     });
   }
   if (window.playerStats.dropPotionTimer > 0) {
@@ -2731,7 +2754,7 @@ window.getActiveEffects = function() {
       name: "Double Drop Elixir",
       timer: window.playerStats.dropPotionTimer,
       max: potMax,
-      desc: "Increases global equipment drop frequency by +100%."
+      desc: "Increases global equipment drop frequency by +100%.",
     });
   }
   if (window.playerStats.qlyPotionTimer > 0) {
@@ -2741,32 +2764,35 @@ window.getActiveEffects = function() {
       name: "Drop Quality Elixir",
       timer: window.playerStats.qlyPotionTimer,
       max: potMax,
-      desc: "Improves roll quality check chances by +50%."
+      desc: "Improves roll quality check chances by +50%.",
     });
   }
 
   // 3. Cavern & Dungeon Sigil Modifiers (Dungeon Mode)
-  if (window.playerStats.isDungeonMode && window.playerStats.activeDungeonSigil) {
+  if (
+    window.playerStats.isDungeonMode &&
+    window.playerStats.activeDungeonSigil
+  ) {
     let sig = window.playerStats.activeDungeonSigil;
     if (sig.buffs) {
-      sig.buffs.forEach(b => {
+      sig.buffs.forEach((b) => {
         list.push({
           id: b.id,
           type: "cavern_buff",
           name: b.name,
           desc: b.desc,
-          isPermanent: true
+          isPermanent: true,
         });
       });
     }
     if (!(window.playerStats.purifiedAegisTimer > 0) && sig.debuffs) {
-      sig.debuffs.forEach(d => {
+      sig.debuffs.forEach((d) => {
         list.push({
           id: d.id,
           type: "cavern_debuff",
           name: d.name,
           desc: d.desc,
-          isPermanent: true
+          isPermanent: true,
         });
       });
     }
@@ -2780,7 +2806,7 @@ window.getActiveEffects = function() {
       name: "Purified Aegis",
       timer: window.playerStats.purifiedAegisTimer,
       max: 480,
-      desc: "Absolute debuff immunity. Active sigil/crucible debuffs are completely neutralized."
+      desc: "Absolute debuff immunity. Active sigil/crucible debuffs are completely neutralized.",
     });
   }
   if (window.playerStats.astralAwakeningTimer > 0) {
@@ -2790,7 +2816,7 @@ window.getActiveEffects = function() {
       name: "Astral Awakening",
       timer: window.playerStats.astralAwakeningTimer,
       max: 900,
-      desc: "Astral Ascension: Grants +100% Total Damage and +15% Active & Idle Speed."
+      desc: "Astral Ascension: Grants +100% Total Damage and +15% Active & Idle Speed.",
     });
   }
   if (window.playerStats.apathyDecayStacks > 0) {
@@ -2801,7 +2827,7 @@ window.getActiveEffects = function() {
       timer: window.playerStats.apathyDecayTimer,
       max: 300,
       stacks: window.playerStats.apathyDecayStacks,
-      desc: `Inflicts severe progressive damage drain of -${(window.playerStats.apathyDecayStacks * 1.5).toFixed(1)}% Max HP per second.`
+      desc: `Inflicts severe progressive damage drain of -${(window.playerStats.apathyDecayStacks * 1.5).toFixed(1)}% Max HP per second.`,
     });
   }
 
@@ -2814,28 +2840,34 @@ window.getActiveEffects = function() {
         type: "cavern_buff",
         name: b.name,
         desc: b.desc,
-        isPermanent: true
+        isPermanent: true,
       });
     }
-    if (!(window.playerStats.purifiedAegisTimer > 0) && window.playerStats.crucibleActiveDebuff) {
+    if (
+      !(window.playerStats.purifiedAegisTimer > 0) &&
+      window.playerStats.crucibleActiveDebuff
+    ) {
       let d = window.playerStats.crucibleActiveDebuff;
       list.push({
         id: d.id,
         type: "cavern_debuff",
         name: d.name,
         desc: d.desc,
-        isPermanent: true
+        isPermanent: true,
       });
     }
 
     // Crucible Draft Deck Card Stacks
-    if (window.playerStats.crucibleDraftDeck && window.playerStats.crucibleDraftDeck.length > 0) {
+    if (
+      window.playerStats.crucibleDraftDeck &&
+      window.playerStats.crucibleDraftDeck.length > 0
+    ) {
       let counts = {};
-      window.playerStats.crucibleDraftDeck.forEach(cardId => {
+      window.playerStats.crucibleDraftDeck.forEach((cardId) => {
         counts[cardId] = (counts[cardId] || 0) + 1;
       });
       for (let cardId in counts) {
-        let card = window.CRUCIBLE_DRAFT_POOL.find(c => c.id === cardId);
+        let card = window.CRUCIBLE_DRAFT_POOL.find((c) => c.id === cardId);
         if (card) {
           let count = counts[cardId];
           let descText = card.desc;
@@ -2862,7 +2894,7 @@ window.getActiveEffects = function() {
             name: card.name,
             desc: descText,
             stacks: count,
-            isPermanent: true
+            isPermanent: true,
           });
         }
       }
@@ -2878,17 +2910,52 @@ window.getActiveEffectIconSvg = function (id, color, size = 16) {
     path = `<path d="M12 2 C12 2, 7 8, 7 13 C7 18.5, 11 22, 12 22 C13 22, 17 18.5, 17 13 C17 8, 12 2, 12 2 Z" fill="${color}" stroke="#000" stroke-width="1.5"/><path d="M12 8 Q10 13, 10 16 Q12 19, 12 19 Q13 19, 14 16 Q14 13, 12 8 Z" fill="#fff" opacity="0.6"/>`;
   } else if (id === "adrenaline" || id === "overcharge") {
     path = `<polygon points="13,2 3,14 11,14 10,22 21,10 13,10" fill="${color}" stroke="#000" stroke-width="1.5"/>`;
-  } else if (id.includes("potion") || id.includes("elixir") || id === "vital_fountain" || id === "sanguine_feast" || id === "sanguine_tide") {
+  } else if (
+    id.includes("potion") ||
+    id.includes("elixir") ||
+    id === "vital_fountain" ||
+    id === "sanguine_feast" ||
+    id === "sanguine_tide"
+  ) {
     path = `<path d="M9 5 L15 5 L15 10 L21 19 C22.5 21.5, 21 23, 18 23 L6 23 C3 23, 1.5 21.5, 3 19 L9 10 Z" fill="${color}" stroke="#000" stroke-width="1.5"/><rect x="11" y="2" width="2" height="3" fill="#a0522d" stroke="#000" stroke-width="0.8"/>`;
-  } else if (id === "purified_aegis" || id === "iron_aegis" || id === "titans_wall" || id === "aegis_bastion" || id === "shattered_armour" || id === "iron_gaze" || id === "defense") {
+  } else if (
+    id === "purified_aegis" ||
+    id === "iron_aegis" ||
+    id === "titans_wall" ||
+    id === "aegis_bastion" ||
+    id === "shattered_armour" ||
+    id === "iron_gaze" ||
+    id === "defense"
+  ) {
     path = `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="${color}" stroke="#000" stroke-width="1.8"/>`;
-  } else if (id === "astral_awakening" || id === "astral_attune" || id === "aetheric_spark" || id === "unstable_surge" || id === "shatter_frenzy") {
+  } else if (
+    id === "astral_awakening" ||
+    id === "astral_attune" ||
+    id === "aetheric_spark" ||
+    id === "unstable_surge" ||
+    id === "shatter_frenzy"
+  ) {
     path = `<polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="${color}" stroke="#000" stroke-width="1.5"/>`;
-  } else if (id === "apathy_decay" || id === "withering_decay" || id === "volatile_sparks" || id === "poison_tip") {
+  } else if (
+    id === "apathy_decay" ||
+    id === "withering_decay" ||
+    id === "volatile_sparks" ||
+    id === "poison_tip"
+  ) {
     path = `<circle cx="12" cy="10" r="6" fill="${color}" stroke="#000" stroke-width="1.5"/><rect x="10" y="16" width="4" height="6" rx="1" fill="${color}" stroke="#000" stroke-width="1.5"/><line x1="8" y1="10" x2="16" y2="10" stroke="#000" stroke-width="1.5"/>`;
-  } else if (id === "swift_strikes" || id === "temporal_accel" || id === "idle_spd" || id === "active_spd") {
+  } else if (
+    id === "swift_strikes" ||
+    id === "temporal_accel" ||
+    id === "idle_spd" ||
+    id === "active_spd"
+  ) {
     path = `<circle cx="12" cy="12" r="10" fill="none" stroke="${color}" stroke-width="2"/><line x1="12" y1="12" x2="12" y2="6" stroke="${color}" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="12" x2="16" y2="12" stroke="${color}" stroke-width="2" stroke-linecap="round"/>`;
-  } else if (id === "giant_might" || id.startsWith("slot_") || id === "phantom_echo" || id === "catalyst_resonance") {
+  } else if (
+    id === "giant_might" ||
+    id.startsWith("slot_") ||
+    id === "phantom_echo" ||
+    id === "catalyst_resonance"
+  ) {
     path = `<path d="M18 10h-2V8c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H6c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h2v2c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2v-2h2c1.1 0 2-.9 2-2v-2c0-1.1-.9-2-2-2z" fill="${color}" stroke="#000" stroke-width="1.5"/>`;
   } else {
     path = `<polygon points="12,4 16,12 20,12 14,16 16,22 12,18 8,22 10,16 4,12 8,12" fill="${color}" stroke="#000" stroke-width="1.5"/>`;
@@ -2963,7 +3030,8 @@ window.renderActiveEffectsHudBar = function () {
   bar.innerHTML = activeEffects
     .map((eff) => {
       let color = "#3498db";
-      if (eff.type === "cavern_debuff" || eff.type === "debuff") color = "#e74c3c";
+      if (eff.type === "cavern_debuff" || eff.type === "debuff")
+        color = "#e74c3c";
       else if (eff.type === "cavern_buff") color = "#2ecc71";
       else if (eff.type === "potion") color = "#9b59b6";
       else if (eff.type === "crucible_card") color = "#df9ffb";
@@ -3948,17 +4016,17 @@ window.renderAstralShop = function () {
   let html = "";
 
   window.ASTRAL_SHOP_STOCK.forEach((item, index) => {
-      let canAfford = ownedShards >= item.cost;
-      let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-      let iconHtml = window
-        .getEtcIconHtml(item.name)
-        .replace("margin-right: 12px;", "margin-right: 6px;");
+    let canAfford = ownedShards >= item.cost;
+    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+    let iconHtml = window
+      .getEtcIconHtml(item.name)
+      .replace("margin-right: 12px;", "margin-right: 6px;");
 
-      let btnStyle = canAfford
-        ? `background: ${item.color}; color: ${item.color === "#f1c40f" || item.color === "#ffb6c1" ? "#111" : "#fff"}; font-weight: bold;`
-        : "";
+    let btnStyle = canAfford
+      ? `background: ${item.color}; color: ${item.color === "#f1c40f" || item.color === "#ffb6c1" ? "#111" : "#fff"}; font-weight: bold;`
+      : "";
 
-      html += `
+    html += `
         <div class="runic-altar-card" style="flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; height:100%; display:flex; justify-content:space-between; margin-bottom:0;" onmouseenter="window.showAstralShopItemTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
             <!-- Animated rotating stars background -->
             <div class="starry-bg"></div>
@@ -3982,7 +4050,7 @@ window.renderAstralShop = function () {
                                           </div>
         </div>
       `;
-    });
+  });
 
   el.innerHTML = html;
 };
@@ -5315,12 +5383,15 @@ Object.assign(window.UIManager, {
   hideTooltip() {
     if (window.tooltipHideTimeoutId) clearTimeout(window.tooltipHideTimeoutId);
     window.tooltipHideTimeoutId = setTimeout(() => {
-      ["game-tooltip", "etc-tooltip", "stat-tooltip", "log-item-tooltip"].forEach(
-        (id) => {
-          let el = window.getCachedEl(id);
-          if (el) el.style.display = "none";
-        },
-      );
+      [
+        "game-tooltip",
+        "etc-tooltip",
+        "stat-tooltip",
+        "log-item-tooltip",
+      ].forEach((id) => {
+        let el = window.getCachedEl(id);
+        if (el) el.style.display = "none";
+      });
       window.activeStatTooltip = null;
     }, 150); // 150ms grace period to move mouse into tooltip on desktop
   },
@@ -5552,7 +5623,7 @@ window.generateItemCardHtml = function (
   isEquipped = false,
 ) {
   if (!item) return "";
-  let toggleId = `${item.id}_${isEquipped ? 'eq' : 'bag'}_${Math.floor(Math.random() * 100000)}`;
+  let toggleId = `${item.id}_${isEquipped ? "eq" : "bag"}_${Math.floor(Math.random() * 100000)}`;
   let html = `
     <style>
       #attune-toggle-${toggleId}:checked ~ .base-stats-grid .attuned-val {
@@ -5700,30 +5771,34 @@ window.generateItemCardHtml = function (
   html += `<div class="tt-subtitle">${subtitle}</div>`;
 
   // Render Slot Attunement details inside the metadata section instead of a floating top badge
-    if (slotMult > 1.0) {
-      let pctBonus = Math.round((slotMult - 1.0) * 100);
-      html += `
+  if (slotMult > 1.0) {
+    let pctBonus = Math.round((slotMult - 1.0) * 100);
+    html += `
           <label for="attune-toggle-${toggleId}" class="attune-label" style="font-size: 10px; font-weight: bold; margin-top: 4px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #2ecc71; border-radius: 4px; padding: 2px 6px; cursor: pointer; user-select: none; width: fit-content; margin-left: auto; margin-right: auto; text-transform: uppercase;">
             ⚡ Slot Attunement: +${pctBonus}% Stats Applied (Tap to view Raw)
           </label>
         `;
-    }
+  }
 
   if (item.type === "subweapon") {
-          let rgbVals = "127, 140, 141";
-          let color = window.getTierColor(item.statsRolled);
-          if (color && color.charAt(0) === '#') rgbVals = window.hexToRgbValues(color);
+    let rgbVals = "127, 140, 141";
+    let color = window.getTierColor(item.statsRolled);
+    if (color && color.charAt(0) === "#")
+      rgbVals = window.hexToRgbValues(color);
 
-          if (item.subType === "shield") {
-            let noun = item.noun ? item.noun.toLowerCase() : "";
-            let descText = "Blocks completely negate damage (Cap: 20% / 25% with Titan's Grip). Every Block triggers a Shield Bash scaling with Defense.";
-            if (noun.includes("buckler")) {
-              descText = "Grants +12% base Block Rate. Shield Bash is lightweight, dealing 100% Defense damage (+0.2% per Strength point).";
-            } else if (noun.includes("tower")) {
-              descText = "Grants +2% base Block Rate. Triggers a massive Shield Bash dealing 250% Defense damage (+0.2% per Strength point).";
-            }
+    if (item.subType === "shield") {
+      let noun = item.noun ? item.noun.toLowerCase() : "";
+      let descText =
+        "Blocks completely negate damage (Cap: 20% / 25% with Titan's Grip). Every Block triggers a Shield Bash scaling with Defense.";
+      if (noun.includes("buckler")) {
+        descText =
+          "Grants +12% base Block Rate. Shield Bash is lightweight, dealing 100% Defense damage (+0.2% per Strength point).";
+      } else if (noun.includes("tower")) {
+        descText =
+          "Grants +2% base Block Rate. Triggers a massive Shield Bash dealing 250% Defense damage (+0.2% per Strength point).";
+      }
 
-            specialtyHtml = `
+      specialtyHtml = `
                 <div style="border: 1px solid ${color}44; border-radius:6px; background: rgba(${rgbVals}, 0.04); padding: 6px 10px; font-size: 10px; line-height: 1.4; text-align: left; white-space: normal;">
                   <div style="color:${color}; font-weight: 900; letter-spacing: 0.5px; font-size: 9.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
                     🛡️ <span>BULWARK SPECIALTY</span>
@@ -5733,18 +5808,22 @@ window.generateItemCardHtml = function (
                   </div>
                 </div>
               `;
-          } else if (item.subType === "dagger") {
-            let noun = item.noun ? item.noun.toLowerCase() : "";
-            let descText = "Parries mitigate 60% of incoming damage (Cap: 25% / 30% with Titan's Grip). Parries trigger an automatic Riposte counter strike.";
-            if (noun.includes("kris") || noun.includes("dirk")) {
-              descText = "Low Multi-Strike chance (25% base) but deals a massive 55% Attack. Riposte parry counters deal 130% Attack.";
-            } else if (noun.includes("stiletto") || noun.includes("baselard")) {
-              descText = "High Multi-Strike chance (60% base) but deals a lighter 25% Attack. Riposte parry counters deal 80% Attack.";
-            } else if (noun.includes("main-gauche")) {
-              descText = "Natively grants +10% base Parry Rate. Cap increased to 30% (35% with Titan's Grip). Multi-Strike triggers at 40% base.";
-            }
+    } else if (item.subType === "dagger") {
+      let noun = item.noun ? item.noun.toLowerCase() : "";
+      let descText =
+        "Parries mitigate 60% of incoming damage (Cap: 25% / 30% with Titan's Grip). Parries trigger an automatic Riposte counter strike.";
+      if (noun.includes("kris") || noun.includes("dirk")) {
+        descText =
+          "Low Multi-Strike chance (25% base) but deals a massive 55% Attack. Riposte parry counters deal 130% Attack.";
+      } else if (noun.includes("stiletto") || noun.includes("baselard")) {
+        descText =
+          "High Multi-Strike chance (60% base) but deals a lighter 25% Attack. Riposte parry counters deal 80% Attack.";
+      } else if (noun.includes("main-gauche")) {
+        descText =
+          "Natively grants +10% base Parry Rate. Cap increased to 30% (35% with Titan's Grip). Multi-Strike triggers at 40% base.";
+      }
 
-            specialtyHtml = `
+      specialtyHtml = `
                 <div style="border: 1px solid ${color}44; border-radius:6px; background: rgba(${rgbVals}, 0.04); padding: 6px 10px; font-size: 10px; line-height: 1.4; text-align: left; white-space: normal;">
                   <div style="color:${color}; font-weight: 900; letter-spacing: 0.5px; font-size: 9.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
                     🗡️ <span>RIPOSTE SPECIALTY</span>
@@ -5754,16 +5833,19 @@ window.generateItemCardHtml = function (
                   </div>
                 </div>
               `;
-          } else if (item.subType === "tome") {
-            let noun = item.noun ? item.noun.toLowerCase() : "";
-            let descText = "Absorbs 20% to 35% of damage (scales with INT) before Defense checks. Slashes trigger random elemental spells.";
-            if (noun.includes("grimoire") || noun.includes("chronicle")) {
-              descText = "Low spell trigger chance (10% base) but spells deal a cataclysmic 180% damage. Absorbs up to 35% of damage.";
-            } else if (noun.includes("lexicon")) {
-              descText = "High spell trigger chance (26% base) but spells deal a lighter 60% damage. Absorbs up to 35% of damage.";
-            }
+    } else if (item.subType === "tome") {
+      let noun = item.noun ? item.noun.toLowerCase() : "";
+      let descText =
+        "Absorbs 20% to 35% of damage (scales with INT) before Defense checks. Slashes trigger random elemental spells.";
+      if (noun.includes("grimoire") || noun.includes("chronicle")) {
+        descText =
+          "Low spell trigger chance (10% base) but spells deal a cataclysmic 180% damage. Absorbs up to 35% of damage.";
+      } else if (noun.includes("lexicon")) {
+        descText =
+          "High spell trigger chance (26% base) but spells deal a lighter 60% damage. Absorbs up to 35% of damage.";
+      }
 
-            specialtyHtml = `
+      specialtyHtml = `
                 <div style="border: 1px solid ${color}44; border-radius:6px; background: rgba(${rgbVals}, 0.04); padding: 6px 10px; font-size: 10px; line-height: 1.4; text-align: left; white-space: normal;">
                   <div style="color:${color}; font-weight: 900; letter-spacing: 0.5px; font-size: 9.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
                     🔮 <span>ARCANE BARRIER SPECIALTY</span>
@@ -5773,189 +5855,217 @@ window.generateItemCardHtml = function (
                   </div>
                 </div>
               `;
-          }
-        }
+    }
+  }
 
   // --- BASE STATS SECTION ---
-    if (item.id !== "dummy" && item.type !== "artifact") {
-      let baseStats = [];
+  if (item.id !== "dummy" && item.type !== "artifact") {
+    let baseStats = [];
 
-      if (item.baseAtk > 0) {
-        let rawVal = window.formatNumber(item.baseAtk);
-        let attunedVal = slotMult > 1.0 ? window.formatNumber(Math.ceil(item.baseAtk * slotMult)) : rawVal;
+    if (item.baseAtk > 0) {
+      let rawVal = window.formatNumber(item.baseAtk);
+      let attunedVal =
+        slotMult > 1.0
+          ? window.formatNumber(Math.ceil(item.baseAtk * slotMult))
+          : rawVal;
+      baseStats.push({
+        label: "Weapon Damage",
+        raw: rawVal,
+        attuned: attunedVal,
+        icon: window.getUiIconSvg("atk", 14),
+      });
+    }
+    if (item.baseDef > 0) {
+      let rawVal = window.formatNumber(item.baseDef);
+      let attunedVal =
+        slotMult > 1.0
+          ? window.formatNumber(Math.ceil(item.baseDef * slotMult))
+          : rawVal;
+      baseStats.push({
+        label: "Armor",
+        raw: rawVal,
+        attuned: attunedVal,
+        icon: window.getUiIconSvg("def", 14),
+      });
+    }
+    if (item.baseMaxHp > 0) {
+      let rawVal = window.formatNumber(item.baseMaxHp);
+      let attunedVal =
+        slotMult > 1.0
+          ? window.formatNumber(Math.ceil(item.baseMaxHp * slotMult))
+          : rawVal;
+      baseStats.push({
+        label: "Max Life",
+        raw: rawVal,
+        attuned: attunedVal,
+        icon: window.getUiIconSvg("maxHp", 14),
+      });
+    }
+    if (item.baseMoveSpeed > 0) {
+      let rawVal = window.formatNumber(item.baseMoveSpeed);
+      let attunedVal =
+        slotMult > 1.0
+          ? window.formatNumber(Math.ceil(item.baseMoveSpeed * slotMult))
+          : rawVal;
+      baseStats.push({
+        label: "Speed",
+        raw: rawVal,
+        attuned: attunedVal,
+        icon: window.getUiIconSvg("moveSpeed", 14),
+      });
+    }
+    if (item.baseBlock > 0) {
+      let rawVal = Math.round(item.baseBlock * 100) + "%";
+      let attunedVal =
+        slotMult > 1.0
+          ? Math.round(item.baseBlock * slotMult * 100) + "%"
+          : rawVal;
+      baseStats.push({
+        label: "Block Rate",
+        raw: rawVal,
+        attuned: attunedVal,
+        icon: window.getUiIconSvg("block", 14),
+      });
+    }
+    if (item.baseParry > 0) {
+      let rawVal = Math.round(item.baseParry * 100) + "%";
+      let attunedVal =
+        slotMult > 1.0
+          ? Math.round(item.baseParry * slotMult * 100) + "%"
+          : rawVal;
+      baseStats.push({
+        label: "Parry Rate",
+        raw: rawVal,
+        attuned: attunedVal,
+        icon: window.getUiIconSvg("parry", 14),
+      });
+    }
+    if (item.baseInt > 0) {
+      let rawVal = window.formatNumber(item.baseInt);
+      let attunedVal =
+        slotMult > 1.0
+          ? window.formatNumber(Math.ceil(item.baseInt * slotMult))
+          : rawVal;
+      baseStats.push({
+        label: "Intelligence",
+        raw: rawVal,
+        attuned: attunedVal,
+        icon: window.getUiIconSvg("int", 14),
+      });
+    }
+
+    // --- SUBWEAPON COMPASS STATS ---
+    if (item.type === "subweapon") {
+      let noun = item.noun ? item.noun.toLowerCase() : "";
+      if (item.subType === "shield") {
+        // Shield Bash Base Multiplier
+        let bashMult = 160;
+        if (item.isUniqueAegis) bashMult = 220;
+        else if (noun.includes("buckler")) bashMult = 100;
+        else if (noun.includes("tower")) bashMult = 250;
+
         baseStats.push({
-          label: "Weapon Damage",
-          raw: rawVal,
-          attuned: attunedVal,
+          label: "Shield Bash Dmg",
+          raw: `${bashMult}% Def`,
+          attuned: `${bashMult}% Def`,
+          icon: window.getUiIconSvg("block", 14),
+        });
+      } else if (item.subType === "dagger") {
+        // Offhand Multi-Strike Chance
+        let offhandChance = 40;
+        if (noun.includes("kris") || noun.includes("dirk")) offhandChance = 25;
+        else if (noun.includes("stiletto") || noun.includes("baselard"))
+          offhandChance = 60;
+
+        // Offhand Multi-Strike Damage Multiplier
+        let offhandDmg = 35;
+        if (noun.includes("kris") || noun.includes("dirk")) offhandDmg = 55;
+        else if (noun.includes("stiletto") || noun.includes("baselard"))
+          offhandDmg = 25;
+
+        // Riposte Parry Counter Damage Multiplier
+        let riposteDmg = 100;
+        if (noun.includes("kris") || noun.includes("dirk")) riposteDmg = 130;
+        else if (noun.includes("stiletto") || noun.includes("baselard"))
+          riposteDmg = 80;
+
+        baseStats.push({
+          label: "Multi-Strike Rate",
+          raw: `${offhandChance}%`,
+          attuned: `${offhandChance}%`,
+          icon: window.getUiIconSvg("dex", 14),
+        });
+        baseStats.push({
+          label: "Multi-Strike Dmg",
+          raw: `${offhandDmg}% Atk`,
+          attuned: `${offhandDmg}% Atk`,
+          icon: window.getUiIconSvg("atk", 14),
+        });
+        baseStats.push({
+          label: "Riposte Dmg",
+          raw: `${riposteDmg}% Atk`,
+          attuned: `${riposteDmg}% Atk`,
+          icon: window.getUiIconSvg("parry", 14),
+        });
+      } else if (item.subType === "tome") {
+        // Spell Trigger Chance
+        let spellChance = 15;
+        if (item.isUniqueWatch) spellChance = 20;
+        else if (item.isUniqueChronicle) spellChance = 15;
+        else if (noun.includes("grimoire") || noun.includes("chronicle"))
+          spellChance = 10;
+        else if (noun.includes("spellbook") || noun.includes("codex"))
+          spellChance = 18;
+        else if (noun.includes("lexicon")) spellChance = 26;
+
+        // Spell Damage Multiplier
+        let spellDmg = 100;
+        if (item.isUniqueWatch) spellDmg = 100;
+        else if (item.isUniqueChronicle) spellDmg = 120;
+        else if (noun.includes("grimoire") || noun.includes("chronicle"))
+          spellDmg = 180;
+        else if (noun.includes("spellbook") || noun.includes("codex"))
+          spellDmg = 100;
+        else if (noun.includes("lexicon")) spellDmg = 60;
+
+        baseStats.push({
+          label: "Spell Chance",
+          raw: `${spellChance}%`,
+          attuned: `${spellChance}%`,
+          icon: window.getUiIconSvg("int", 14),
+        });
+        baseStats.push({
+          label: "Spell Dmg",
+          raw: `${spellDmg}% Atk`,
+          attuned: `${spellDmg}% Atk`,
           icon: window.getUiIconSvg("atk", 14),
         });
       }
-      if (item.baseDef > 0) {
-        let rawVal = window.formatNumber(item.baseDef);
-        let attunedVal = slotMult > 1.0 ? window.formatNumber(Math.ceil(item.baseDef * slotMult)) : rawVal;
-        baseStats.push({
-          label: "Armor",
-          raw: rawVal,
-          attuned: attunedVal,
-          icon: window.getUiIconSvg("def", 14),
-        });
-      }
-      if (item.baseMaxHp > 0) {
-        let rawVal = window.formatNumber(item.baseMaxHp);
-        let attunedVal = slotMult > 1.0 ? window.formatNumber(Math.ceil(item.baseMaxHp * slotMult)) : rawVal;
-        baseStats.push({
-          label: "Max Life",
-          raw: rawVal,
-          attuned: attunedVal,
-          icon: window.getUiIconSvg("maxHp", 14),
-        });
-      }
-      if (item.baseMoveSpeed > 0) {
-        let rawVal = window.formatNumber(item.baseMoveSpeed);
-        let attunedVal = slotMult > 1.0 ? window.formatNumber(Math.ceil(item.baseMoveSpeed * slotMult)) : rawVal;
-        baseStats.push({
-          label: "Speed",
-          raw: rawVal,
-          attuned: attunedVal,
-          icon: window.getUiIconSvg("moveSpeed", 14),
-        });
-      }
-      if (item.baseBlock > 0) {
-        let rawVal = Math.round(item.baseBlock * 100) + "%";
-        let attunedVal = slotMult > 1.0 ? Math.round(item.baseBlock * slotMult * 100) + "%" : rawVal;
-        baseStats.push({
-          label: "Block Rate",
-          raw: rawVal,
-          attuned: attunedVal,
-          icon: window.getUiIconSvg("block", 14),
-        });
-      }
-      if (item.baseParry > 0) {
-        let rawVal = Math.round(item.baseParry * 100) + "%";
-        let attunedVal = slotMult > 1.0 ? Math.round(item.baseParry * slotMult * 100) + "%" : rawVal;
-        baseStats.push({
-          label: "Parry Rate",
-          raw: rawVal,
-          attuned: attunedVal,
-          icon: window.getUiIconSvg("parry", 14),
-        });
-      }
-      if (item.baseInt > 0) {
-        let rawVal = window.formatNumber(item.baseInt);
-        let attunedVal = slotMult > 1.0 ? window.formatNumber(Math.ceil(item.baseInt * slotMult)) : rawVal;
-        baseStats.push({
-          label: "Intelligence",
-          raw: rawVal,
-          attuned: attunedVal,
-          icon: window.getUiIconSvg("int", 14),
-        });
-      }
+    }
 
-      // --- SUBWEAPON COMPASS STATS ---
-      if (item.type === "subweapon") {
-        let noun = item.noun ? item.noun.toLowerCase() : "";
-        if (item.subType === "shield") {
-          // Shield Bash Base Multiplier
-          let bashMult = 160;
-          if (item.isUniqueAegis) bashMult = 220;
-          else if (noun.includes("buckler")) bashMult = 100;
-          else if (noun.includes("tower")) bashMult = 250;
-
-          baseStats.push({
-            label: "Shield Bash Dmg",
-            raw: `${bashMult}% Def`,
-            attuned: `${bashMult}% Def`,
-            icon: window.getUiIconSvg("block", 14),
-          });
-        } else if (item.subType === "dagger") {
-          // Offhand Multi-Strike Chance
-          let offhandChance = 40;
-          if (noun.includes("kris") || noun.includes("dirk")) offhandChance = 25;
-          else if (noun.includes("stiletto") || noun.includes("baselard")) offhandChance = 60;
-
-          // Offhand Multi-Strike Damage Multiplier
-          let offhandDmg = 35;
-          if (noun.includes("kris") || noun.includes("dirk")) offhandDmg = 55;
-          else if (noun.includes("stiletto") || noun.includes("baselard")) offhandDmg = 25;
-
-          // Riposte Parry Counter Damage Multiplier
-          let riposteDmg = 100;
-          if (noun.includes("kris") || noun.includes("dirk")) riposteDmg = 130;
-          else if (noun.includes("stiletto") || noun.includes("baselard")) riposteDmg = 80;
-
-          baseStats.push({
-            label: "Multi-Strike Rate",
-            raw: `${offhandChance}%`,
-            attuned: `${offhandChance}%`,
-            icon: window.getUiIconSvg("dex", 14),
-          });
-          baseStats.push({
-            label: "Multi-Strike Dmg",
-            raw: `${offhandDmg}% Atk`,
-            attuned: `${offhandDmg}% Atk`,
-            icon: window.getUiIconSvg("atk", 14),
-          });
-          baseStats.push({
-            label: "Riposte Dmg",
-            raw: `${riposteDmg}% Atk`,
-            attuned: `${riposteDmg}% Atk`,
-            icon: window.getUiIconSvg("parry", 14),
-          });
-        } else if (item.subType === "tome") {
-          // Spell Trigger Chance
-          let spellChance = 15;
-          if (item.isUniqueWatch) spellChance = 20;
-          else if (item.isUniqueChronicle) spellChance = 15;
-          else if (noun.includes("grimoire") || noun.includes("chronicle")) spellChance = 10;
-          else if (noun.includes("spellbook") || noun.includes("codex")) spellChance = 18;
-          else if (noun.includes("lexicon")) spellChance = 26;
-
-          // Spell Damage Multiplier
-          let spellDmg = 100;
-          if (item.isUniqueWatch) spellDmg = 100;
-          else if (item.isUniqueChronicle) spellDmg = 120;
-          else if (noun.includes("grimoire") || noun.includes("chronicle")) spellDmg = 180;
-          else if (noun.includes("spellbook") || noun.includes("codex")) spellDmg = 100;
-          else if (noun.includes("lexicon")) spellDmg = 60;
-
-          baseStats.push({
-            label: "Spell Chance",
-            raw: `${spellChance}%`,
-            attuned: `${spellChance}%`,
-            icon: window.getUiIconSvg("int", 14),
-          });
-          baseStats.push({
-            label: "Spell Dmg",
-            raw: `${spellDmg}% Atk`,
-            attuned: `${spellDmg}% Atk`,
-            icon: window.getUiIconSvg("atk", 14),
-          });
+    if (baseStats.length > 0) {
+      html += `<div class="base-stats-grid" style="background: rgba(255, 255, 255, 0.015); border: 1px solid #222; border-radius: 6px; padding: 8px 6px; margin: 8px 0; display: flex; justify-content: space-around; align-items: center; gap: 4px;">`;
+      baseStats.forEach((b, idx) => {
+        if (idx > 0) {
+          html += `<div style="width: 1px; height: 18px; background: rgba(255, 255, 255, 0.085);"></div>`;
         }
-      }
+        // Shorten labels on the fly for horizontal layout fit
+        let shortLabel = b.label;
+        if (shortLabel === "Weapon Damage") shortLabel = "Damage";
+        if (shortLabel === "Block Rate") shortLabel = "Block";
+        if (shortLabel === "Parry Rate") shortLabel = "Parry";
+        if (shortLabel === "Shield Bash Dmg") shortLabel = "Bash Dmg";
+        if (shortLabel === "Multi-Strike Rate") shortLabel = "Multi %";
+        if (shortLabel === "Multi-Strike Dmg") shortLabel = "Multi Dmg";
+        if (shortLabel === "Riposte Dmg") shortLabel = "Riposte";
+        if (shortLabel === "Spell Chance") shortLabel = "Spell %";
+        if (shortLabel === "Spell Dmg") shortLabel = "Spell Dmg";
+        if (shortLabel === "Max Life") shortLabel = "Max HP";
+        if (shortLabel === "Intelligence") shortLabel = "INT";
 
-      if (baseStats.length > 0) {
-        html += `<div class="base-stats-grid" style="background: rgba(255, 255, 255, 0.015); border: 1px solid #222; border-radius: 6px; padding: 8px 6px; margin: 8px 0; display: flex; justify-content: space-around; align-items: center; gap: 4px;">`;
-        baseStats.forEach((b, idx) => {
-          if (idx > 0) {
-            html += `<div style="width: 1px; height: 18px; background: rgba(255, 255, 255, 0.085);"></div>`;
-          }
-          // Shorten labels on the fly for horizontal layout fit
-          let shortLabel = b.label;
-          if (shortLabel === "Weapon Damage") shortLabel = "Damage";
-          if (shortLabel === "Block Rate") shortLabel = "Block";
-          if (shortLabel === "Parry Rate") shortLabel = "Parry";
-          if (shortLabel === "Shield Bash Dmg") shortLabel = "Bash Dmg";
-          if (shortLabel === "Multi-Strike Rate") shortLabel = "Multi %";
-          if (shortLabel === "Multi-Strike Dmg") shortLabel = "Multi Dmg";
-          if (shortLabel === "Riposte Dmg") shortLabel = "Riposte";
-          if (shortLabel === "Spell Chance") shortLabel = "Spell %";
-          if (shortLabel === "Spell Dmg") shortLabel = "Spell Dmg";
-          if (shortLabel === "Max Life") shortLabel = "Max HP";
-          if (shortLabel === "Intelligence") shortLabel = "INT";
+        let attunedColor = b.raw !== b.attuned ? "#2ecc71" : "#f5f6fa";
 
-          let attunedColor = (b.raw !== b.attuned) ? "#2ecc71" : "#f5f6fa";
-
-          html += `
+        html += `
                       <div style="display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; min-width: 0;">
                         <span style="font-size: 7.5px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${shortLabel}</span>
                         <div style="font-size: 11.5px; font-weight: bold; display: flex; align-items: center; gap: 3px; line-height: 1;">
@@ -5965,12 +6075,12 @@ window.generateItemCardHtml = function (
                         </div>
                       </div>
                     `;
-                  });
-                  html += `</div>`;
-                }
-              }
+      });
+      html += `</div>`;
+    }
+  }
 
-            if (item.type === "artifact") {
+  if (item.type === "artifact") {
     html += `<div class="tt-trait">${item.breakdown}</div>`;
 
     // Only display potential extra rolls on preview (dummy) items to prevent clutter on equipped items
@@ -5992,110 +6102,110 @@ window.generateItemCardHtml = function (
   }
 
   // --- EXPLICIT AFFIXES SECTION ---
-    if (item.id !== "dummy") {
-      let affixes = [];
-      let rangeLines = [];
+  if (item.id !== "dummy") {
+    let affixes = [];
+    let rangeLines = [];
 
-      const statsKeys = [
-        { key: "atk", label: "Attack", baseKey: "baseAtk" },
-        { key: "maxHp", label: "Max HP", baseKey: "baseMaxHp" },
-        { key: "def", label: "Defense", baseKey: "baseDef" },
-        {
-          key: "moveSpeed",
-          label: "Move Speed",
-          baseKey: "baseMoveSpeed",
-        },
-        { key: "str", label: "STR", baseKey: "baseStr" },
-        { key: "dex", label: "DEX", baseKey: "baseDex" },
-        { key: "int", label: "INT", baseKey: "baseInt" },
-        { key: "critChance", label: "Crit Chance", isPct: true },
-        { key: "critDamage", label: "Crit Multi", isPct: true },
-        {
-          key: "block",
-          label: "Block Rate",
-          isPct: true,
-          baseKey: "baseBlock",
-        },
-        {
-          key: "parry",
-          label: "Parry Rate",
-          isPct: true,
-          baseKey: "baseParry",
-        },
-        {
-          key: "activeAttackSpeed",
-          label: "Active Atk Spd",
-          isPct: true,
-          baseKey: "baseActiveSpeed",
-        },
-        {
-          key: "idleAttackSpeed",
-          label: "Idle Atk Spd",
-          isPct: true,
-          baseKey: "baseIdleSpeed",
-        },
-        { key: "dropRate", label: "Drop Rate", isPct: true },
-        { key: "quality", label: "Drop Quality", isPct: true },
-        { key: "goldMulti", label: "Gold Multi", isPct: true },
-        {
-          key: "rareSpawn",
-          label: "Rare Spawn",
-          isPct: true,
-          isDoublePct: true,
-        },
-        { key: "fairySpawn", label: "Fairy Spawn", isPct: true },
-      ];
+    const statsKeys = [
+      { key: "atk", label: "Attack", baseKey: "baseAtk" },
+      { key: "maxHp", label: "Max HP", baseKey: "baseMaxHp" },
+      { key: "def", label: "Defense", baseKey: "baseDef" },
+      {
+        key: "moveSpeed",
+        label: "Move Speed",
+        baseKey: "baseMoveSpeed",
+      },
+      { key: "str", label: "STR", baseKey: "baseStr" },
+      { key: "dex", label: "DEX", baseKey: "baseDex" },
+      { key: "int", label: "INT", baseKey: "baseInt" },
+      { key: "critChance", label: "Crit Chance", isPct: true },
+      { key: "critDamage", label: "Crit Multi", isPct: true },
+      {
+        key: "block",
+        label: "Block Rate",
+        isPct: true,
+        baseKey: "baseBlock",
+      },
+      {
+        key: "parry",
+        label: "Parry Rate",
+        isPct: true,
+        baseKey: "baseParry",
+      },
+      {
+        key: "activeAttackSpeed",
+        label: "Active Atk Spd",
+        isPct: true,
+        baseKey: "baseActiveSpeed",
+      },
+      {
+        key: "idleAttackSpeed",
+        label: "Idle Atk Spd",
+        isPct: true,
+        baseKey: "baseIdleSpeed",
+      },
+      { key: "dropRate", label: "Drop Rate", isPct: true },
+      { key: "quality", label: "Drop Quality", isPct: true },
+      { key: "goldMulti", label: "Gold Multi", isPct: true },
+      {
+        key: "rareSpawn",
+        label: "Rare Spawn",
+        isPct: true,
+        isDoublePct: true,
+      },
+      { key: "fairySpawn", label: "Fairy Spawn", isPct: true },
+    ];
 
-      statsKeys.forEach((s) => {
-        let totalVal = item[s.key] || 0;
-        let baseVal =
-          item.type !== "artifact" && s.baseKey ? item[s.baseKey] || 0 : 0;
-        let affixVal = totalVal - baseVal;
+    statsKeys.forEach((s) => {
+      let totalVal = item[s.key] || 0;
+      let baseVal =
+        item.type !== "artifact" && s.baseKey ? item[s.baseKey] || 0 : 0;
+      let affixVal = totalVal - baseVal;
 
-        if (
-          affixVal > 0.0001 ||
-          ((s.key === "activeAttackSpeed" || s.key === "idleAttackSpeed") &&
-            affixVal > 0)
-        ) {
-          let displayVal = "";
-          if (slotMult > 1.0) {
-            let scaledVal = affixVal * slotMult;
-            if (s.isDoublePct) {
-              displayVal = `+${(affixVal * 100).toFixed(2)}% <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${(scaledVal * 100).toFixed(2)}%)</span>`;
-            } else if (s.isPct) {
-              displayVal = `+${Math.floor(affixVal * 100)}% <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${Math.floor(scaledVal * 100)}%)</span>`;
-            } else {
-              displayVal = `+${window.formatNumber(affixVal)} <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${window.formatNumber(scaledVal)})</span>`;
-            }
+      if (
+        affixVal > 0.0001 ||
+        ((s.key === "activeAttackSpeed" || s.key === "idleAttackSpeed") &&
+          affixVal > 0)
+      ) {
+        let displayVal = "";
+        if (slotMult > 1.0) {
+          let scaledVal = affixVal * slotMult;
+          if (s.isDoublePct) {
+            displayVal = `+${(affixVal * 100).toFixed(2)}% <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${(scaledVal * 100).toFixed(2)}%)</span>`;
+          } else if (s.isPct) {
+            displayVal = `+${Math.floor(affixVal * 100)}% <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${Math.floor(scaledVal * 100)}%)</span>`;
           } else {
-            if (s.isDoublePct) {
-              displayVal = `+${(affixVal * 100).toFixed(2)}%`;
-            } else if (s.isPct) {
-              displayVal = `+${Math.floor(affixVal * 100)}%`;
-            } else {
-              displayVal = `+${window.formatNumber(affixVal)}`;
-            }
+            displayVal = `+${window.formatNumber(affixVal)} <span style="color:#2ecc71; font-size:10px; font-weight:bold;">(➔ +${window.formatNumber(scaledVal)})</span>`;
           }
+        } else {
+          if (s.isDoublePct) {
+            displayVal = `+${(affixVal * 100).toFixed(2)}%`;
+          } else if (s.isPct) {
+            displayVal = `+${Math.floor(affixVal * 100)}%`;
+          } else {
+            displayVal = `+${window.formatNumber(affixVal)}`;
+          }
+        }
 
-          let iconSvg = window.getUiIconSvg(s.key, 11);
-          let rangeStr = window.formatStatRangeStr
-            ? window.formatStatRangeStr(item, s.key, s.isPct || s.isDoublePct)
-            : "";
+        let iconSvg = window.getUiIconSvg(s.key, 11);
+        let rangeStr = window.formatStatRangeStr
+          ? window.formatStatRangeStr(item, s.key, s.isPct || s.isDoublePct)
+          : "";
 
-          if (rangeStr) {
-            rangeLines.push(`
+        if (rangeStr) {
+          rangeLines.push(`
               <div style="font-size: 9.5px; color: #aaa; display: flex; justify-content: space-between; align-items: center; font-family: monospace; background: rgba(0,0,0,0.22); padding: 4px 6px; border-radius: 4px; border: 1.5px solid #111;">
                 <span style="color: #94a3b8; font-weight: bold; display: flex; align-items: center; gap: 4px;">${iconSvg} ${s.label} Range:</span>
                 <span>${rangeStr}</span>
               </div>
             `);
-          }
-
-          affixes.push(
-            `<div class="tt-stat-line" style="color:${s.key === "critChance" || s.key === "critDamage" ? "#e67e22" : "#ecf0f1"}; font-weight: bold;">• ${iconSvg} ${s.label}: ${displayVal}${window.getStatEnchantSuffix ? window.getStatEnchantSuffix(item, s.key) : ""}</div>`,
-          );
         }
-      });
+
+        affixes.push(
+          `<div class="tt-stat-line" style="color:${s.key === "critChance" || s.key === "critDamage" ? "#e67e22" : "#ecf0f1"}; font-weight: bold;">• ${iconSvg} ${s.label}: ${displayVal}${window.getStatEnchantSuffix ? window.getStatEnchantSuffix(item, s.key) : ""}</div>`,
+        );
+      }
+    });
 
     if (affixes.length > 0) {
       if (item.type === "artifact") {
@@ -6146,57 +6256,61 @@ window.generateItemCardHtml = function (
 
   // --- COMPARISON PANEL NET CHANGE RESOLUTION ---
   if (compareItem) {
-      html += `<div style="font-weight:bold; color:#3498db; margin-top:8px; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Net Change:</div>`;
-      let hasDiffs = false;
-      let statsList = [
-        { key: "atk", icon: "⚔️" },
-        { key: "maxHp", icon: "❤️" },
-        { key: "def", icon: "🛡️" },
-        { key: "moveSpeed", icon: "👟" },
-        { key: "str", icon: "💪" },
-        { key: "dex", icon: "🎯" },
-        { key: "int", icon: "🧠" },
-        { key: "critChance", isPct: true, icon: "✨" },
-        { key: "critDamage", isPct: true, icon: "💥" },
-        { key: "block", isPct: true, icon: "🛡️" },
-        { key: "parry", isPct: true, icon: "⚡" },
-        { key: "activeAttackSpeed", icon: "⚡", isPct: true },
-        { key: "idleAttackSpeed", icon: "⏱️", isPct: true },
-      ];
+    html += `<div style="font-weight:bold; color:#3498db; margin-top:8px; margin-bottom:4px; border-bottom: 1px solid #333; padding-bottom: 2px;">Net Change:</div>`;
+    let hasDiffs = false;
+    let statsList = [
+      { key: "atk", icon: "⚔️" },
+      { key: "maxHp", icon: "❤️" },
+      { key: "def", icon: "🛡️" },
+      { key: "moveSpeed", icon: "👟" },
+      { key: "str", icon: "💪" },
+      { key: "dex", icon: "🎯" },
+      { key: "int", icon: "🧠" },
+      { key: "critChance", isPct: true, icon: "✨" },
+      { key: "critDamage", isPct: true, icon: "💥" },
+      { key: "block", isPct: true, icon: "🛡️" },
+      { key: "parry", isPct: true, icon: "⚡" },
+      { key: "activeAttackSpeed", icon: "⚡", isPct: true },
+      { key: "idleAttackSpeed", icon: "⏱️", isPct: true },
+    ];
 
-      statsList.forEach((s) => {
-        let val = item[s.key] || 0;
-        let eqVal = compareItem[s.key] || 0;
-        let diff = val - eqVal;
-        if (Math.abs(diff) > 0.001) {
-          hasDiffs = true;
-          let isPct =
-            s.isPct || ["activeAttackSpeed", "idleAttackSpeed"].includes(s.key);
-          let isPositive = s.inverseGood ? diff < 0 : diff > 0;
-          let color = isPositive ? "#2ecc71" : "#e74c3c";
-          let sign = diff > 0 ? "+" : "";
-          let diffStr = isPct
-            ? sign + Math.round(diff * 100) + "%"
-            : sign + window.formatNumber(diff);
-          let emoji = s.icon ? s.icon + " " : "";
-          let sLabel = window.getStatLabel(s.key);
+    statsList.forEach((s) => {
+      let val = item[s.key] || 0;
+      let eqVal = compareItem[s.key] || 0;
+      let diff = val - eqVal;
+      if (Math.abs(diff) > 0.001) {
+        hasDiffs = true;
+        let isPct =
+          s.isPct || ["activeAttackSpeed", "idleAttackSpeed"].includes(s.key);
+        let isPositive = s.inverseGood ? diff < 0 : diff > 0;
+        let color = isPositive ? "#2ecc71" : "#e74c3c";
+        let sign = diff > 0 ? "+" : "";
+        let diffStr = isPct
+          ? sign + Math.round(diff * 100) + "%"
+          : sign + window.formatNumber(diff);
+        let emoji = s.icon ? s.icon + " " : "";
+        let sLabel = window.getStatLabel(s.key);
 
-          html += `<div class="tt-stat-line" style="color:${color}; font-weight:bold; white-space:nowrap;">• ${emoji}${sLabel}: ${diffStr}</div>`;
-        }
-      });
-      if (!hasDiffs)
-        html += `<div class="tt-stat-line" style="color:#7f8c8d; font-style:italic;">No net difference.</div>`;
-    }
+        html += `<div class="tt-stat-line" style="color:${color}; font-weight:bold; white-space:nowrap;">• ${emoji}${sLabel}: ${diffStr}</div>`;
+      }
+    });
+    if (!hasDiffs)
+      html += `<div class="tt-stat-line" style="color:#7f8c8d; font-style:italic;">No net difference.</div>`;
+  }
 
-    // Build Collapsible Advanced Details Block (Ranges & Subweapon Specialty)
-    if (specialtyHtml || (typeof rangeLines !== "undefined" && rangeLines.length > 0)) {
-      let specialtySecHtml = specialtyHtml
-        ? `<div style="margin-bottom: 8px;">
+  // Build Collapsible Advanced Details Block (Ranges & Subweapon Specialty)
+  if (
+    specialtyHtml ||
+    (typeof rangeLines !== "undefined" && rangeLines.length > 0)
+  ) {
+    let specialtySecHtml = specialtyHtml
+      ? `<div style="margin-bottom: 8px;">
              ${specialtyHtml}
            </div>`
-        : "";
+      : "";
 
-      let rangeSecHtml = (typeof rangeLines !== "undefined" && rangeLines.length > 0)
+    let rangeSecHtml =
+      typeof rangeLines !== "undefined" && rangeLines.length > 0
         ? `<div>
              <strong style="color: #a855f7; display: block; font-size: 9.5px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">🎲 Affix Roll Ranges:</strong>
              <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -6205,7 +6319,7 @@ window.generateItemCardHtml = function (
            </div>`
         : "";
 
-      html += `
+    html += `
         <style>
           .tooltip-advanced-details summary::-webkit-details-marker { display: none; }
           .tooltip-advanced-details summary { list-style: none; }
@@ -6222,9 +6336,9 @@ window.generateItemCardHtml = function (
           </div>
         </details>
       `;
-    }
+  }
 
-    if (uniqueStyle) {
+  if (uniqueStyle) {
     if (uniqueStyle.lore) {
       html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
     }
@@ -9885,24 +9999,24 @@ window.claimMasterMissionReward = function (isWeekly = false) {
         `<strong style="color:#f1c40f;">🏆 [QUEST BOARD] Beaten Weekly Board! Earned +${scalingPP} PP, 1x Card Sack, Gacha Keys, 10x Quest Points, and ${grandItem.name}!</strong>`,
       );
   } else {
-        window.playerStats.dailyRewardClaimed = true;
+    window.playerStats.dailyRewardClaimed = true;
 
-        // Award 3 Mission Tokens for Daily Board completion
-        window.playerStats.missionTokens =
-          (window.playerStats.missionTokens || 0) + 3;
+    // Award 3 Mission Tokens for Daily Board completion
+    window.playerStats.missionTokens =
+      (window.playerStats.missionTokens || 0) + 3;
 
-        window.addEtcDrop("Gacha Key", 1);
-        window.addEtcDrop("Catalyst Core", 1);
-        window.addEtcDrop("Eridium Shard", 2);
+    window.addEtcDrop("Gacha Key", 1);
+    window.addEtcDrop("Catalyst Core", 1);
+    window.addEtcDrop("Eridium Shard", 2);
 
-        // Guaranteed 1x Card Sack for completing the Daily Board
-        window.addUseDrop("Monster Card Sack", 1);
-        if (typeof window.pushLog === "function") {
-          window.pushLog(
-            "<span style='color:#a855f7;'>[MISSION BOARD] Awarded 1x Monster Card Sack for completing the Daily Board!</span>",
-          );
-        }
-      }
+    // Guaranteed 1x Card Sack for completing the Daily Board
+    window.addUseDrop("Monster Card Sack", 1);
+    if (typeof window.pushLog === "function") {
+      window.pushLog(
+        "<span style='color:#a855f7;'>[MISSION BOARD] Awarded 1x Monster Card Sack for completing the Daily Board!</span>",
+      );
+    }
+  }
 
   if (window.SoundManager) window.SoundManager.play("revive");
 
@@ -10966,15 +11080,15 @@ window.openDailyRewardSack = function (specificName) {
   receivedRewards.push(reward1);
 
   // 5% chance to find a Monster Card Sack in any Daily/Guild Reward Sack
-    if (Math.random() < 0.05) {
-      window.addUseDrop("Monster Card Sack", 1);
-      receivedRewards.push({
-        name: "Monster Card Sack",
-        qty: 1,
-        color: "#a855f7",
-        type: "use",
-      });
-    }
+  if (Math.random() < 0.05) {
+    window.addUseDrop("Monster Card Sack", 1);
+    receivedRewards.push({
+      name: "Monster Card Sack",
+      qty: 1,
+      color: "#a855f7",
+      type: "use",
+    });
+  }
 
   // Roll 2: 20% chance
   let hasRoll2 = Math.random() < 0.2;
@@ -11839,7 +11953,7 @@ window.claimMailReward = function (mailId) {
 
         // Visual / Audio Feedback
         if (typeof window.spawnPurchaseCelebration === "function") {
-          window.spawnPurchaseCelebration("gacha", "#e74c3c", 5); // Crimson celebration burst
+          window.spawnPurchaseCelebration("mail", "#e74c3c", 5); // Crimson celebration burst
         }
         if (window.SoundManager) window.SoundManager.play("revive");
 
@@ -12335,19 +12449,128 @@ document.addEventListener("pointerdown", function (e) {
 
 window.DAILY_CALENDAR_REWARDS = [
   { day: 1, name: "Gacha Key", qty: 3, color: "#f1c40f", iconType: "etc" },
-  { day: 2, name: "Supernal Attack Elixir", qty: 1, color: "#2ecc71", iconType: "use", extra: { name: "Supernal Haste Elixir", qty: 1, color: "#f1c40f", type: "use" } },
-  { day: 3, name: "Catalyst Core", qty: 1, color: "#2ecc71", iconType: "etc", extra: { name: "Eridium Shard", qty: 10, color: "#8e44ad", type: "etc" } },
-  { day: 4, name: "Daily Reward Sack", qty: 2, color: "#f1c40f", iconType: "use" },
-  { day: 5, name: "Overlord's Sigil", qty: 1, color: "#1abc9c", iconType: "etc", extra: { name: "Gacha Key", qty: 1, color: "#f1c40f", type: "etc" } },
-  { day: 6, name: "Monster Card Sack", qty: 2, color: "#a855f7", iconType: "use" },
-  { day: 7, name: "Glimmering Gachapon Key", qty: 1, color: "#00d2ff", iconType: "etc", extra: { name: "Weekly Reward Sack", qty: 1, color: "#9b59b6", type: "use" }, extraShards: 50 },
-  { day: 8, name: "Gacha Key", qty: 2, color: "#f1c40f", iconType: "etc", extra: { name: "Eridium Shard", qty: 5, color: "#8e44ad", type: "etc" } },
-  { day: 9, name: "Supernal Vitality Elixir", qty: 1, color: "#e74c3c", iconType: "use", extra: { name: "Supernal Armored Elixir", qty: 1, color: "#3498db", type: "use" } },
-  { day: 10, name: "Catalyst Core", qty: 2, color: "#2ecc71", iconType: "etc", extra: { name: "Eridium Shard", qty: 20, color: "#8e44ad", type: "etc" } },
-  { day: 11, name: "Daily Reward Sack", qty: 2, color: "#f1c40f", iconType: "use" },
-  { day: 12, name: "Overlord's Sigil", qty: 2, color: "#1abc9c", iconType: "etc", extra: { name: "Astral Essence", qty: 5, color: "#9b59b6", type: "etc" } },
-  { day: 13, name: "Monster Card Sack", qty: 3, color: "#a855f7", iconType: "use" },
-  { day: 14, name: "Glimmering Gachapon Key", qty: 2, color: "#00d2ff", iconType: "etc", extra: { name: "Weekly Reward Sack", qty: 2, color: "#9b59b6", type: "use" }, extraShards: 100 },
+  {
+    day: 2,
+    name: "Supernal Attack Elixir",
+    qty: 1,
+    color: "#2ecc71",
+    iconType: "use",
+    extra: {
+      name: "Supernal Haste Elixir",
+      qty: 1,
+      color: "#f1c40f",
+      type: "use",
+    },
+  },
+  {
+    day: 3,
+    name: "Catalyst Core",
+    qty: 1,
+    color: "#2ecc71",
+    iconType: "etc",
+    extra: { name: "Eridium Shard", qty: 10, color: "#8e44ad", type: "etc" },
+  },
+  {
+    day: 4,
+    name: "Daily Reward Sack",
+    qty: 2,
+    color: "#f1c40f",
+    iconType: "use",
+  },
+  {
+    day: 5,
+    name: "Overlord's Sigil",
+    qty: 1,
+    color: "#1abc9c",
+    iconType: "etc",
+    extra: { name: "Gacha Key", qty: 1, color: "#f1c40f", type: "etc" },
+  },
+  {
+    day: 6,
+    name: "Monster Card Sack",
+    qty: 2,
+    color: "#a855f7",
+    iconType: "use",
+  },
+  {
+    day: 7,
+    name: "Glimmering Gachapon Key",
+    qty: 1,
+    color: "#00d2ff",
+    iconType: "etc",
+    extra: {
+      name: "Weekly Reward Sack",
+      qty: 1,
+      color: "#9b59b6",
+      type: "use",
+    },
+    extraShards: 50,
+  },
+  {
+    day: 8,
+    name: "Gacha Key",
+    qty: 2,
+    color: "#f1c40f",
+    iconType: "etc",
+    extra: { name: "Eridium Shard", qty: 5, color: "#8e44ad", type: "etc" },
+  },
+  {
+    day: 9,
+    name: "Supernal Vitality Elixir",
+    qty: 1,
+    color: "#e74c3c",
+    iconType: "use",
+    extra: {
+      name: "Supernal Armored Elixir",
+      qty: 1,
+      color: "#3498db",
+      type: "use",
+    },
+  },
+  {
+    day: 10,
+    name: "Catalyst Core",
+    qty: 2,
+    color: "#2ecc71",
+    iconType: "etc",
+    extra: { name: "Eridium Shard", qty: 20, color: "#8e44ad", type: "etc" },
+  },
+  {
+    day: 11,
+    name: "Daily Reward Sack",
+    qty: 2,
+    color: "#f1c40f",
+    iconType: "use",
+  },
+  {
+    day: 12,
+    name: "Overlord's Sigil",
+    qty: 2,
+    color: "#1abc9c",
+    iconType: "etc",
+    extra: { name: "Astral Essence", qty: 5, color: "#9b59b6", type: "etc" },
+  },
+  {
+    day: 13,
+    name: "Monster Card Sack",
+    qty: 3,
+    color: "#a855f7",
+    iconType: "use",
+  },
+  {
+    day: 14,
+    name: "Glimmering Gachapon Key",
+    qty: 2,
+    color: "#00d2ff",
+    iconType: "etc",
+    extra: {
+      name: "Weekly Reward Sack",
+      qty: 2,
+      color: "#9b59b6",
+      type: "use",
+    },
+    extraShards: 100,
+  },
 ];
 
 window.checkDailyCalendar = function () {
@@ -12363,12 +12586,17 @@ window.checkDailyCalendar = function () {
 
     // Evaluate if the consecutive day streak was broken
     if (window.playerStats.lastDailyLoginDayStr) {
-      let lastClaimDate = new Date(new Date(window.playerStats.lastDailyLoginDayStr).toLocaleString("en-US", {
-        timeZone: "America/Los_Angeles"
-      }));
-      lastClaimDate.setHours(0,0,0,0);
+      let lastClaimDate = new Date(
+        new Date(window.playerStats.lastDailyLoginDayStr).toLocaleString(
+          "en-US",
+          {
+            timeZone: "America/Los_Angeles",
+          },
+        ),
+      );
+      lastClaimDate.setHours(0, 0, 0, 0);
       let todayMidnight = new Date(ptDate);
-      todayMidnight.setHours(0,0,0,0);
+      todayMidnight.setHours(0, 0, 0, 0);
 
       let diffTime = todayMidnight.getTime() - lastClaimDate.getTime();
       let diffDays = Math.round(diffTime / 86400000);
@@ -12376,7 +12604,9 @@ window.checkDailyCalendar = function () {
       if (diffDays > 1) {
         window.playerStats.loginStreak = 0; // Missed a day: reset streak to Day 1
         if (typeof window.pushLog === "function") {
-          window.pushLog("<span style='color:#e74c3c;'>[SYSTEM] Day missed. Daily Calendar streak reset to Day 1.</span>");
+          window.pushLog(
+            "<span style='color:#e74c3c;'>[SYSTEM] Day missed. Daily Calendar streak reset to Day 1.</span>",
+          );
         }
       }
     }
@@ -12384,7 +12614,9 @@ window.checkDailyCalendar = function () {
 
   let badge = document.getElementById("hub-card-calendar-badge");
   if (badge) {
-    badge.style.display = window.playerStats.loginClaimedToday ? "none" : "inline-block";
+    badge.style.display = window.playerStats.loginClaimedToday
+      ? "none"
+      : "inline-block";
   }
 };
 
@@ -12405,9 +12637,12 @@ window.toggleDailyCalendar = function () {
     win.style.width = "375px";
 
     // Position nicely in view
-    let container = document.getElementById("game-container").getBoundingClientRect();
+    let container = document
+      .getElementById("game-container")
+      .getBoundingClientRect();
     let leftOffset = (window.innerWidth - 375) / 2 - container.left;
-    let topOffset = window.scrollY + window.innerHeight / 2 - 190 - container.top;
+    let topOffset =
+      window.scrollY + window.innerHeight / 2 - 190 - container.top;
     win.style.left = Math.max(5, leftOffset) + "px";
     win.style.top = Math.max(5, topOffset) + "px";
 
@@ -12423,7 +12658,10 @@ window.toggleDailyCalendar = function () {
 
     document.getElementById("game-container").appendChild(win);
     window.renderDailyCalendar();
-    window.makeWindowDraggable(win, document.getElementById("calendar-win-handle"));
+    window.makeWindowDraggable(
+      win,
+      document.getElementById("calendar-win-handle"),
+    );
   }
 };
 
@@ -12437,7 +12675,8 @@ window.renderDailyCalendar = function () {
   let gridHtml = window.DAILY_CALENDAR_REWARDS.map((r, idx) => {
     let dayNum = idx + 1;
     let isCurrent = idx === currentStreak && !claimedToday;
-    let isClaimed = idx < currentStreak || (idx === currentStreak && claimedToday);
+    let isClaimed =
+      idx < currentStreak || (idx === currentStreak && claimedToday);
 
     let borderCol = isCurrent ? r.color : isClaimed ? "#2ecc71" : "#2d3748";
     let opacity = isClaimed ? "opacity:0.4;" : "";
@@ -12453,7 +12692,10 @@ window.renderDailyCalendar = function () {
         ? `<span style="color:${r.color}; font-weight:bold; font-size:8.5px; display:block; margin-top:2px; animation: pulseGlow 1.5s infinite;">Claim Now</span>`
         : `<span style="color:#7f8c8d; font-size:8.5px; display:block; margin-top:2px;">Locked</span>`;
 
-    let iconHtml = r.iconType === "use" ? window.getUseIconHtml(r.name, 28) : window.getEtcIconHtml(r.name, 28);
+    let iconHtml =
+      r.iconType === "use"
+        ? window.getUseIconHtml(r.name, 28)
+        : window.getEtcIconHtml(r.name, 28);
     iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 4px;");
 
     let isMilestone = dayNum === 7 || dayNum === 14;
@@ -12478,9 +12720,10 @@ window.renderDailyCalendar = function () {
     }
 
     let escapedName = r.name.replace(/'/g, "\\'");
-    let hoverEvents = r.iconType === "use"
-      ? `onmouseenter="window.showUseTooltip(event, '${escapedName}')" ontouchstart="window.showUseTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`
-      : `onmouseenter="window.showEtcTooltip(event, '${escapedName}')" ontouchstart="window.showEtcTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`;
+    let hoverEvents =
+      r.iconType === "use"
+        ? `onmouseenter="window.showUseTooltip(event, '${escapedName}')" ontouchstart="window.showUseTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`
+        : `onmouseenter="window.showEtcTooltip(event, '${escapedName}')" ontouchstart="window.showEtcTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`;
 
     return `
       <div class="market-card" style="${gridSpan} ${cardHeight} ${background} border: 1.5px solid ${borderCol}; border-radius:8px; padding:6px; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; ${opacity}" ${hoverEvents}>
@@ -12565,7 +12808,8 @@ window.claimDailyCalendarReward = function () {
 
   // 3. Grant shards if present
   if (reward.extraShards) {
-    window.playerStats.astralShards = (window.playerStats.astralShards || 0) + reward.extraShards;
+    window.playerStats.astralShards =
+      (window.playerStats.astralShards || 0) + reward.extraShards;
   }
 
   // 4. Progress streak (consecutive increments, loops to 0 after 13)
@@ -12579,11 +12823,18 @@ window.claimDailyCalendarReward = function () {
   }
 
   let rewardReport = `${reward.qty}x ${reward.name}`;
-  if (reward.extra) rewardReport += ` and ${reward.extra.qty}x ${reward.extra.name}`;
-  if (reward.extraShards) rewardReport += ` and ${reward.extraShards}x Astral Shards`;
+  if (reward.extra)
+    rewardReport += ` and ${reward.extra.qty}x ${reward.extra.name}`;
+  if (reward.extraShards)
+    rewardReport += ` and ${reward.extraShards}x Astral Shards`;
 
-  window.pushHeaderToast(`✦ Claimed Day ${oldStreak + 1}: ${rewardReport}!`, reward.color);
-  window.pushLog(`<strong style="color:${reward.color};">[CALENDAR]</strong> Claimed Day ${oldStreak + 1} rewards: ${rewardReport}.`);
+  window.pushHeaderToast(
+    `✦ Claimed Day ${oldStreak + 1}: ${rewardReport}!`,
+    reward.color,
+  );
+  window.pushLog(
+    `<strong style="color:${reward.color};">[CALENDAR]</strong> Claimed Day ${oldStreak + 1} rewards: ${rewardReport}.`,
+  );
 
   let win = document.getElementById("calendar-draggable-window");
   if (win) win.remove();
@@ -12656,25 +12907,25 @@ window.updateHubAlerts = function () {
   }
 
   // Evaluate Daily Calendar alerts
-    let hasCalendarAlert = !window.playerStats.loginClaimedToday;
-    let cBadge = document.getElementById("hub-card-calendar-badge");
-    if (cBadge) cBadge.style.display = hasCalendarAlert ? "inline-block" : "none";
+  let hasCalendarAlert = !window.playerStats.loginClaimedToday;
+  let cBadge = document.getElementById("hub-card-calendar-badge");
+  if (cBadge) cBadge.style.display = hasCalendarAlert ? "inline-block" : "none";
 
-    // 6. Update Main Top Bar Hub Button Dot
-    let mainDot = document.getElementById("hub-menu-alert-dot");
-    if (mainDot) {
-      mainDot.style.display =
-        hasMissionsAlert ||
-        hasTrophiesAlert ||
-        hasMailAlert ||
-        hasClanAlert ||
-        hasSettingsAlert ||
-        hasBestiaryAlert ||
-        hasCalendarAlert
-          ? "inline-block"
-          : "none";
-    }
-  };
+  // 6. Update Main Top Bar Hub Button Dot
+  let mainDot = document.getElementById("hub-menu-alert-dot");
+  if (mainDot) {
+    mainDot.style.display =
+      hasMissionsAlert ||
+      hasTrophiesAlert ||
+      hasMailAlert ||
+      hasClanAlert ||
+      hasSettingsAlert ||
+      hasBestiaryAlert ||
+      hasCalendarAlert
+        ? "inline-block"
+        : "none";
+  }
+};
 
 window.checkUnreadMail = function () {
   if (!window.GAME_SERVER_URL) return;
@@ -13853,12 +14104,12 @@ window.openCavernSigilSelectorModal = function (e) {
   );
 
   let contentHtml = sigils
-      .map((item) => {
-        let col = window.getTierColor(item.statsRolled);
-        let bNames = item.buffs.map((b) => b.name).join(", ");
-        let dNames = item.debuffs.map((d) => d.name).join(", ");
+    .map((item) => {
+      let col = window.getTierColor(item.statsRolled);
+      let bNames = item.buffs.map((b) => b.name).join(", ");
+      let dNames = item.debuffs.map((d) => d.name).join(", ");
 
-        return `
+      return `
         <div class="bag-item" style="padding:6px; margin-bottom:5px; background:#181c22; border:1px solid #333; display:flex; justify-content:space-between; align-items:center; gap:6px;">
             <!-- Left side details: Tap safe for mobile tooltip (no auto-slotting) -->
             <div style="text-align:left; max-width: 170px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; cursor:help; display:flex; align-items:center;"
@@ -13875,8 +14126,8 @@ window.openCavernSigilSelectorModal = function (e) {
                             <button class="btn-action" style="padding:3px 8px; font-size:10px; font-weight:bold; background:var(--accent-green); flex-shrink:0;" ontouchstart="event.stopPropagation();" onclick="window.executeSlotCavernSigil(${item.id})">Slot</button>
         </div>
       `;
-      })
-      .join("");
+    })
+    .join("");
 
   win.innerHTML = `
       <div class="draggable-header" id="sigil-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
@@ -14162,11 +14413,11 @@ window.renderCavernsPrepUI = function () {
         `;
     } else {
       // Build an elegant grid for direct, one-click slotting
-            let gridHtml = ownedSigils
-              .map((sig) => {
-                let col = window.getTierColor(sig.statsRolled);
-                let shortName = sig.name.split(" (")[0];
-                return `
+      let gridHtml = ownedSigils
+        .map((sig) => {
+          let col = window.getTierColor(sig.statsRolled);
+          let shortName = sig.name.split(" (")[0];
+          return `
                     <div style="background:#111; border: 1.5px solid ${col}44; border-radius:6px; padding:6px; display:flex; align-items:center; justify-content:space-between; gap:6px; transition: all 0.15s ease; position:relative;">
                       <!-- Left Details Area: Tap-safe for mobile tooltip (does not auto-slot) -->
                       <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; cursor:help;"
@@ -14187,8 +14438,8 @@ window.renderCavernsPrepUI = function () {
                       </button>
                     </div>
                   `;
-              })
-              .join("");
+        })
+        .join("");
 
       sigilSlotHtml = `
           <div style="margin-bottom: 12px; text-align:left;">
@@ -14275,60 +14526,60 @@ window.unslotCavernSigilInline = function (event) {
   window.renderCavernsPrepUI();
 };
 
-    window.executeCavernsDescent = function () {
-        if (
-          window.playerStats.isDungeonMode ||
-          window.playerStats.isCrucibleMode ||
-          window.playerStats.isPrestigeBossMode ||
-          window.playerStats.isUberBoss
-        ) {
-          window.pushHeaderToast(
-            "Cannot enter: already in another activity!",
-            "#e74c3c",
-          );
-          return;
-        }
-        let mode = window.state.selectedCavernsMode || "equip";
-        let keys = window.playerStats.dungeonKeys || 0;
+window.executeCavernsDescent = function () {
+  if (
+    window.playerStats.isDungeonMode ||
+    window.playerStats.isCrucibleMode ||
+    window.playerStats.isPrestigeBossMode ||
+    window.playerStats.isUberBoss
+  ) {
+    window.pushHeaderToast(
+      "Cannot enter: already in another activity!",
+      "#e74c3c",
+    );
+    return;
+  }
+  let mode = window.state.selectedCavernsMode || "equip";
+  let keys = window.playerStats.dungeonKeys || 0;
 
-        if (keys < 1) {
-          window.pushHeaderToast("❌ Insufficient Dungeon Keys!", "#e74c3c");
-          return;
-        }
+  if (keys < 1) {
+    window.pushHeaderToast("❌ Insufficient Dungeon Keys!", "#e74c3c");
+    return;
+  }
 
-        // Consume key and launch!
-        window.playerStats.dungeonKeys--;
-        if (window.playerStats.dungeonKeys === 4) {
-          window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
-        }
+  // Consume key and launch!
+  window.playerStats.dungeonKeys--;
+  if (window.playerStats.dungeonKeys === 4) {
+    window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
+  }
 
-        // Consume and Lock Slotted Cavern Sigil if applied
-        if (window.state.slottedCavernSigil) {
-          let activeSig = window.state.slottedCavernSigil;
-          window.playerStats.activeDungeonSigil = activeSig;
-          window.state.slottedCavernSigil = null;
+  // Consume and Lock Slotted Cavern Sigil if applied
+  if (window.state.slottedCavernSigil) {
+    let activeSig = window.state.slottedCavernSigil;
+    window.playerStats.activeDungeonSigil = activeSig;
+    window.state.slottedCavernSigil = null;
 
-          // Properly remove sigil from the SIGIL pouch
-          let sIdx = window.inventory.SIGIL.findIndex((i) => i.id === activeSig.id);
-          if (sIdx !== -1) {
-            window.inventory.SIGIL.splice(sIdx, 1);
-          }
-        } else {
-          window.playerStats.activeDungeonSigil = null;
-        }
+    // Properly remove sigil from the SIGIL pouch
+    let sIdx = window.inventory.SIGIL.findIndex((i) => i.id === activeSig.id);
+    if (sIdx !== -1) {
+      window.inventory.SIGIL.splice(sIdx, 1);
+    }
+  } else {
+    window.playerStats.activeDungeonSigil = null;
+  }
 
-        let peak = window.playerStats.dungeonPeaks[mode] || 1;
-        let campaignStage = window.playerStats.stage || 1;
-        let checkpoint = Math.max(
-          1,
-          Math.floor(peak * 0.8),
-          Math.floor(campaignStage * 0.7),
-        );
+  let peak = window.playerStats.dungeonPeaks[mode] || 1;
+  let campaignStage = window.playerStats.stage || 1;
+  let checkpoint = Math.max(
+    1,
+    Math.floor(peak * 0.8),
+    Math.floor(campaignStage * 0.7),
+  );
 
-        window.playerStats.isDungeonMode = true;
-        window.playerStats.dungeonAccumulatedGold = 0;
-        window.playerStats.dungeonAccumulatedXp = 0;
-        window.playerStats.dungeonAccumulatedLoot = [];
+  window.playerStats.isDungeonMode = true;
+  window.playerStats.dungeonAccumulatedGold = 0;
+  window.playerStats.dungeonAccumulatedXp = 0;
+  window.playerStats.dungeonAccumulatedLoot = [];
   window.playerStats.isCrucibleMode = false;
   window.playerStats.currentDungeon = mode;
   window.playerStats.currentDungeonStage[mode] = checkpoint;
@@ -14646,16 +14897,16 @@ window.renderBestiaryAlbum = function () {
         : `background:linear-gradient(90deg, #ffd700, #ff007f);`;
 
     let upgradeBtnHtml = "";
-        if (isMaxed) {
-          upgradeBtnHtml = `<span style="color:#2ecc71; font-weight:bold; font-size:8px; font-family:monospace;">MAX</span>`;
-        } else if (canUpgrade) {
-          upgradeBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:2px 6px; font-size:8px; font-weight:bold; height:18px; line-height:1;" ontouchstart="event.stopPropagation();" onclick="window.upgradeBestiaryCard('${cKey}')">UP</button>`;
-        } else if (canAffordDuplicates) {
-          let mColor = soulsOwned >= costs.mSouls ? "#2ecc71" : "#e74c3c";
-          upgradeBtnHtml = `<span style="font-size:8px; color:#888; font-family:monospace; line-height:1; display:block;">Req: <span style="color:${mColor}">${costs.mSouls}</span></span>`;
-        } else {
-          upgradeBtnHtml = `<span style="font-size:8px; color:#666; font-family:monospace;">Locked</span>`;
-        }
+    if (isMaxed) {
+      upgradeBtnHtml = `<span style="color:#2ecc71; font-weight:bold; font-size:8px; font-family:monospace;">MAX</span>`;
+    } else if (canUpgrade) {
+      upgradeBtnHtml = `<button class="btn-action btn-pulse-teal" style="padding:2px 6px; font-size:8px; font-weight:bold; height:18px; line-height:1;" ontouchstart="event.stopPropagation();" onclick="window.upgradeBestiaryCard('${cKey}')">UP</button>`;
+    } else if (canAffordDuplicates) {
+      let mColor = soulsOwned >= costs.mSouls ? "#2ecc71" : "#e74c3c";
+      upgradeBtnHtml = `<span style="font-size:8px; color:#888; font-family:monospace; line-height:1; display:block;">Req: <span style="color:${mColor}">${costs.mSouls}</span></span>`;
+    } else {
+      upgradeBtnHtml = `<span style="font-size:8px; color:#666; font-family:monospace;">Locked</span>`;
+    }
 
     let statsDisplayLabelShort = "";
     if (isLocked) {
@@ -14813,18 +15064,18 @@ window.renderAstralRecyclingShop = function (dustOwned) {
   ];
 
   let itemsHtml = items
-      .map((item) => {
-        let canAfford = dustOwned >= item.cost;
-        let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-        let btnStyle = canAfford
-          ? `background: ${item.color}; color: ${item.color === "#f1c40f" || item.color === "#ffb6c1" ? "#111" : "#fff"}; font-weight: bold; cursor: pointer; border: 1px solid #fff; box-shadow: 0 0 8px ${item.color}44;`
-          : `background: #222; color: #555; border: 1px solid #333; cursor: not-allowed;`;
+    .map((item) => {
+      let canAfford = dustOwned >= item.cost;
+      let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+      let btnStyle = canAfford
+        ? `background: ${item.color}; color: ${item.color === "#f1c40f" || item.color === "#ffb6c1" ? "#111" : "#fff"}; font-weight: bold; cursor: pointer; border: 1px solid #fff; box-shadow: 0 0 8px ${item.color}44;`
+        : `background: #222; color: #555; border: 1px solid #333; cursor: not-allowed;`;
 
-        let cleanIcon = item.icon
-          .replace("margin-right: 12px;", "margin-right: 4px;")
-          .replace("margin-right: 8px;", "margin-right: 4px;");
+      let cleanIcon = item.icon
+        .replace("margin-right: 12px;", "margin-right: 4px;")
+        .replace("margin-right: 8px;", "margin-right: 4px;");
 
-        return `
+      return `
           <div class="shop-row" style="border: 1.5px solid ${item.color}50; background: linear-gradient(135deg, #13111c 0%, #08060c 100%); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; transition: transform 0.15s, border-color 0.15s; margin-bottom: 0;"
                onmouseenter="window.showAstralDustShopTooltip(event, '${item.key}')"
                onmouseleave="window.hideTooltip()">
@@ -14842,8 +15093,8 @@ window.renderAstralRecyclingShop = function (dustOwned) {
                       </div>
           </div>
         `;
-      })
-      .join("");
+    })
+    .join("");
 
   return `
       <!-- Astral Dust Recycling Shop lower section -->
@@ -15850,7 +16101,7 @@ window.openSubweaponOfChoiceModal = function () {
                   </div>
                 `;
 
-                let daggerCardHtml = `
+  let daggerCardHtml = `
                   <div id="choice-card-dagger" class="market-card" style="${cardStyles} border: 2px solid #e74c3c;"
                        onclick="window.selectChoiceSubweapon('dagger')"
                        onmouseenter="window.showInventoryTooltip(event, ${dagger.id})"
@@ -15868,7 +16119,7 @@ window.openSubweaponOfChoiceModal = function () {
                   </div>
                 `;
 
-                let tomeCardHtml = `
+  let tomeCardHtml = `
                   <div id="choice-card-tome" class="market-card" style="${cardStyles} border: 2px solid #9b59b6;"
                        onclick="window.selectChoiceSubweapon('tome')"
                        onmouseenter="window.showInventoryTooltip(event, ${tome.id})"

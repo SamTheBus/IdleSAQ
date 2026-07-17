@@ -431,6 +431,20 @@ canvas {
 .draggable-header {
   background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);
   padding: 8px 12px;
+  .draggable-window {
+    position: absolute;
+    width: 290px;
+    max-width: 95vw;
+    background: #111115;
+    border: 2px solid var(--accent-blue);
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overscroll-behavior: contain !important;
+  }
   cursor: move;
   font-weight: bold;
   font-size: 11px;
@@ -560,7 +574,7 @@ canvas {
 @media (max-width: 580px) {
   .btn-action {
     padding: 8px 14px !important; /* Larger comfortable tap target */
-    min-height: 36px !important;   /* Touch safety cushion */
+    min-height: 36px !important; /* Touch safety cushion */
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -691,7 +705,11 @@ canvas {
 
 .hud-stat-panel {
   position: relative; /* Essential for glass highlight overlay */
-  background: linear-gradient(135deg, rgba(16, 22, 34, 0.85) 0%, rgba(8, 12, 18, 0.9) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 22, 34, 0.85) 0%,
+    rgba(8, 12, 18, 0.9) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 8px;
   padding: 6px 12px;
@@ -713,14 +731,25 @@ canvas {
 .hud-stat-panel::before {
   content: "";
   position: absolute;
-  top: 0; left: 0; right: 0; height: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 100%);
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
   pointer-events: none;
   border-radius: 8px 8px 0 0;
 }
 
 .hud-stat-panel:hover {
-  background: linear-gradient(135deg, rgba(24, 32, 48, 0.9) 0%, rgba(12, 18, 26, 0.95) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(24, 32, 48, 0.9) 0%,
+    rgba(12, 18, 26, 0.95) 100%
+  );
   border-color: rgba(255, 255, 255, 0.12);
   box-shadow:
     0 6px 20px rgba(0, 0, 0, 0.65),
@@ -744,7 +773,9 @@ canvas {
 /* --- THEMED PANEL OVERLAYS, GLOWS & ICON CHAMBERS --- */
 .panel-hp {
   border-bottom: 2px solid #e74c3c !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.55), 0 0 10px rgba(231, 76, 60, 0.15) !important;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.55),
+    0 0 10px rgba(231, 76, 60, 0.15) !important;
 }
 .panel-hp .chip-icon {
   background: rgba(231, 76, 60, 0.12) !important;
@@ -757,7 +788,9 @@ canvas {
 
 .panel-gold {
   border-bottom: 2px solid #f1c40f !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.55), 0 0 10px rgba(241, 196, 15, 0.15) !important;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.55),
+    0 0 10px rgba(241, 196, 15, 0.15) !important;
 }
 .panel-gold .chip-icon {
   background: rgba(241, 196, 15, 0.12) !important;
@@ -770,7 +803,9 @@ canvas {
 
 .panel-stage {
   border-bottom: 2px solid #3498db !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.55), 0 0 10px rgba(52, 152, 219, 0.15) !important;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.55),
+    0 0 10px rgba(52, 152, 219, 0.15) !important;
 }
 .panel-stage .chip-icon {
   background: rgba(52, 152, 219, 0.12) !important;
@@ -1584,36 +1619,36 @@ summary {
   }
 
   #top-nav {
-          padding: 6px 8px !important;
-          display: flex !important;
-          width: 100% !important;
-        }
-        .header-controls {
-          display: flex !important;
-          width: 100% !important;
-          justify-content: space-between !important;
-          gap: 4px !important;
-        }
-        .header-controls > button,
-        .header-controls > div {
-          flex: 1 1 0px !important; /* perfectly equal 33.3% shares */
-          min-width: 0 !important;
-          height: 32px !important;
-          font-size: 9px !important;
-          padding: 0 4px !important;
-          margin: 0 !important;
-          display: inline-flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-        }
-        .nav-btn {
-          padding: 4px 6px !important;
-          font-size: 10px !important;
-          gap: 2px !important;
-          justify-content: center !important;
-          min-height: 32px !important;
-          align-items: center;
-        }
+    padding: 6px 8px !important;
+    display: flex !important;
+    width: 100% !important;
+  }
+  .header-controls {
+    display: flex !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+  }
+  .header-controls > button,
+  .header-controls > div {
+    flex: 1 1 0px !important; /* perfectly equal 33.3% shares */
+    min-width: 0 !important;
+    height: 32px !important;
+    font-size: 9px !important;
+    padding: 0 4px !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .nav-btn {
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+    gap: 2px !important;
+    justify-content: center !important;
+    min-height: 32px !important;
+    align-items: center;
+  }
   .nav-btn svg {
     width: 11px !important;
     height: 11px !important;
@@ -1735,37 +1770,37 @@ summary {
   }
 
   #forge-station-container {
-          flex-direction: column !important;
-          align-items: stretch !important;
-          gap: 6px !important;
-        }
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 6px !important;
+  }
 
-        #forge-station-select {
-          width: 100% !important;
-          max-width: 100% !important;
-        }
+  #forge-station-select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
 
-        /* Forge mode sub-tabs wrap to 2-column grid to prevent horizontal bleed */
-        #blacksmith-modes,
-        #enchanter-modes {
-          display: grid !important;
-          grid-template-columns: repeat(2, 1fr) !important;
-          gap: 4px !important;
-          width: 100% !important;
-        }
-        #blacksmith-modes .btn-toggle,
-        #enchanter-modes .btn-toggle {
-          width: 100% !important;
-          margin: 0 !important;
-          font-size: 9.5px !important;
-          padding: 6px 2px !important;
-          height: auto !important;
-          min-height: 32px !important;
-          display: inline-flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-        }
-      }
+  /* Forge mode sub-tabs wrap to 2-column grid to prevent horizontal bleed */
+  #blacksmith-modes,
+  #enchanter-modes {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+  #blacksmith-modes .btn-toggle,
+  #enchanter-modes .btn-toggle {
+    width: 100% !important;
+    margin: 0 !important;
+    font-size: 9.5px !important;
+    padding: 6px 2px !important;
+    height: auto !important;
+    min-height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
 
 @media (max-width: 480px) {
   .bag-item,
@@ -1833,23 +1868,23 @@ summary {
     padding: 10px !important;
   }
   #control-bar {
-      height: 38px !important;
-      flex-direction: row !important;
-      align-items: center !important;
-      padding: 4px 10px !important;
-      border-bottom-width: 1px !important;
-      gap: 4px !important;
-    }
-    .control-actions {
-      width: 100% !important;
-      display: flex !important;
-      align-items: center !important;
-      height: 30px !important;
-      gap: 8px !important;
-    }
-    .control-actions .btn-toggle {
-      text-align: center !important;
-    }
+    height: 38px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 4px 10px !important;
+    border-bottom-width: 1px !important;
+    gap: 4px !important;
+  }
+  .control-actions {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 30px !important;
+    gap: 8px !important;
+  }
+  .control-actions .btn-toggle {
+    text-align: center !important;
+  }
   .brand-title {
     display: none !important; /* Hides the logo title completely on mobile to maximize button space */
   }
@@ -2095,6 +2130,7 @@ summary {
   overflow-y: auto;
   padding: 40px 10px;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain !important;
 }
 
 .gacha-cabinet {
@@ -2529,30 +2565,30 @@ summary {
   }
 
   #forge-list {
-      height: auto !important;
-      min-height: 160px !important;
-    }
+    height: auto !important;
+    min-height: 160px !important;
+  }
 
-    /* Landscape forge mode layout */
-    #blacksmith-modes,
-    #enchanter-modes {
-      display: grid !important;
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 4px !important;
-      width: 100% !important;
-    }
-    #blacksmith-modes .btn-toggle,
-    #enchanter-modes .btn-toggle {
-      width: 100% !important;
-      margin: 0 !important;
-      font-size: 9px !important;
-      padding: 4px 2px !important;
-      height: auto !important;
-      min-height: 28px !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
+  /* Landscape forge mode layout */
+  #blacksmith-modes,
+  #enchanter-modes {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+  #blacksmith-modes .btn-toggle,
+  #enchanter-modes .btn-toggle {
+    width: 100% !important;
+    margin: 0 !important;
+    font-size: 9px !important;
+    padding: 4px 2px !important;
+    height: auto !important;
+    min-height: 28px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
 
   /* --- COMPACT ELEGANT SACK ITEMS --- */
   #menu-panel .bag-item {
@@ -2606,10 +2642,10 @@ summary {
   }
 
   .slots-card button {
-      padding: 4px 6px !important;
-      font-size: 9px !important;
-      min-height: 24px !important;
-    }
+    padding: 4px 6px !important;
+    font-size: 9px !important;
+    min-height: 24px !important;
+  }
 
   /* --- COMPACT HIGH-YIELD TOOLTIPS --- */
   .tooltip-base {
@@ -2754,8 +2790,10 @@ summary {
   justify-content: center;
   cursor: help;
   pointer-events: auto;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.6);
-  transition: transform 0.15s cubic-bezier(0.25, 0.8, 0.25, 1.1), box-shadow 0.15s;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+  transition:
+    transform 0.15s cubic-bezier(0.25, 0.8, 0.25, 1.1),
+    box-shadow 0.15s;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -2872,6 +2910,7 @@ summary {
   z-index: 10500;
   backdrop-filter: none !important; /* Removed blur entirely */
   animation: deathFadeIn 0.25s ease-out forwards;
+  overscroll-behavior: contain !important;
 }
 
 /* Draggable Metallic Slate Frame with Cyber Cyan Aura */
@@ -4327,33 +4366,53 @@ summary {
 /* Individual Stat Panel Color Accentuations, Borders & box-shadow glows */
 /* --- TOP HUD PANEL SPECIFIC ACCENTS --- */
 .canvas-top-hud .panel-hp {
-  background: linear-gradient(135deg, rgba(30, 16, 16, 0.85) 0%, rgba(12, 6, 6, 0.9) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(30, 16, 16, 0.85) 0%,
+    rgba(12, 6, 6, 0.9) 100%
+  ) !important;
   border: 1.5px solid rgba(231, 76, 60, 0.2) !important;
   border-bottom: 3.5px solid #e74c3c !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65), 0 0 8px rgba(231, 76, 60, 0.12) !important;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.65),
+    0 0 8px rgba(231, 76, 60, 0.12) !important;
 }
 .canvas-top-hud .panel-hp:hover {
   transform: translateY(-1px) !important;
   border-color: rgba(231, 76, 60, 0.4) !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.75), 0 0 12px rgba(231, 76, 60, 0.2) !important;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.75),
+    0 0 12px rgba(231, 76, 60, 0.2) !important;
 }
 
 .canvas-top-hud .panel-gold {
-  background: linear-gradient(135deg, rgba(30, 26, 12, 0.85) 0%, rgba(12, 10, 5, 0.9) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(30, 26, 12, 0.85) 0%,
+    rgba(12, 10, 5, 0.9) 100%
+  ) !important;
   border: 1.5px solid rgba(241, 196, 15, 0.2) !important;
   border-bottom: 3.5px solid #f1c40f !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65), 0 0 8px rgba(241, 196, 15, 0.12) !important;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.65),
+    0 0 8px rgba(241, 196, 15, 0.12) !important;
 }
 .canvas-top-hud .panel-gold:hover {
   transform: translateY(-1px) !important;
   border-color: rgba(241, 196, 15, 0.4) !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.75), 0 0 12px rgba(241, 196, 15, 0.2) !important;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.75),
+    0 0 12px rgba(241, 196, 15, 0.2) !important;
 }
 
 /* --- BOTTOM CONSOLE STAGE PANEL COCKPIT REDESIGN --- */
 #control-bar .panel-stage {
   height: 40px !important;
-  background: linear-gradient(135deg, rgba(18, 24, 34, 0.9) 0%, rgba(8, 11, 16, 0.95) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(18, 24, 34, 0.9) 0%,
+    rgba(8, 11, 16, 0.95) 100%
+  ) !important;
   border: 1.5px solid rgba(52, 152, 219, 0.18) !important;
   border-bottom: 3.5px solid #3498db !important;
   border-radius: 8px !important;

@@ -208,20 +208,32 @@
 
       let count = 25;
       let speed = 5;
-      let text = "PURCHASED!";
+      let text = "✦ PURCHASED! ✦";
 
       if (theme === "gacha") {
         count = 55;
         speed = 8;
-        text = "🎰 DISPENSED! 🎰";
+        text = "✦ DISPENSED! ✦";
       } else if (theme === "altar") {
         count = 65;
         speed = 11;
-        text = "🔮 RIFT OPENED! 🔮";
+        text = "✦ RIFT OPENED! ✦";
       } else if (theme === "alchemy") {
         count = 20;
         speed = 4;
-        text = "🧪 BREWED!";
+        text = "✦ BREWED! ✦";
+      } else if (theme === "mail") {
+        count = 35;
+        speed = 6;
+        text = "✦ GIFT CLAIMED! ✦";
+      } else if (theme === "paragon") {
+        count = 75;
+        speed = 12;
+        text = "✦ MATRIX INFUSED! ✦";
+      } else if (theme === "upgrade") {
+        count = 45;
+        speed = 7;
+        text = "✦ ATTUNEMENT AWAKENED! ✦";
       }
 
       if (rarity === 5 || rarity === "UNIQUE") {
@@ -342,25 +354,27 @@
         hitColor = "#e74c3c";
         hitText = "💥 " + window.formatNumber(amount);
       } else {
-              if (type === "lightning") hitColor = "#f1c40f";
-              else if (type === "fire") hitColor = "#e67e22";
-              else if (type === "frost") hitColor = "#3498db";
-              else if (type === "echo") hitColor = "#9b59b6";
-              else if (type === "counter") hitColor = "#f1c40f";
-              else if (type === "aegis_counter") hitColor = "#9b59b6";
-              else if (type === "parry_counter") hitColor = "#a855f7";
-              else if (type === "bleed") hitColor = "#960018";
-              else if (type === "poison") hitColor = "#2ecc71"; // Vibrant toxic green
-              else if (type === "dagger") hitColor = "#a5b1c2"; // Elegant steel-grey
-            }
+        if (type === "lightning") hitColor = "#f1c40f";
+        else if (type === "fire") hitColor = "#e67e22";
+        else if (type === "frost") hitColor = "#3498db";
+        else if (type === "echo") hitColor = "#9b59b6";
+        else if (type === "counter") hitColor = "#f1c40f";
+        else if (type === "aegis_counter") hitColor = "#9b59b6";
+        else if (type === "parry_counter") hitColor = "#a855f7";
+        else if (type === "bleed") hitColor = "#960018";
+        else if (type === "poison")
+          hitColor = "#2ecc71"; // Vibrant toxic green
+        else if (type === "dagger") hitColor = "#a5b1c2"; // Elegant steel-grey
+      }
 
-            // Add "poison" to the icon index
-            const iconsWithPoison = {
-              ...icons,
-              poison: "🧪"
-            };
+      // Add "poison" to the icon index
+      const iconsWithPoison = {
+        ...icons,
+        poison: "🧪",
+      };
 
-            if (type !== "slash") hitText = `${iconsWithPoison[type] || "❖"} ${hitText}`;
+      if (type !== "slash")
+        hitText = `${iconsWithPoison[type] || "❖"} ${hitText}`;
 
       let offsetX = window.randFloat(-40, 40);
       let offsetY = window.randFloat(-50, 15);
@@ -963,135 +977,136 @@
           c.fill();
         }
       } else if (vType === "golem") {
-              let hover = Math.sin(Date.now() / 120) * 2.5;
-              let bodyColor = m.flashTimer > 0 ? "#ffffff" : "#1e222b"; // Dark iron
-              let trimColor = m.flashTimer > 0 ? "#ffffff" : "#4a5568"; // Cast iron
-              let furnaceColor = m.isRare ? "#ff007f" : "#e67e22"; // Molten orange / magenta
+        let hover = Math.sin(Date.now() / 120) * 2.5;
+        let bodyColor = m.flashTimer > 0 ? "#ffffff" : "#1e222b"; // Dark iron
+        let trimColor = m.flashTimer > 0 ? "#ffffff" : "#4a5568"; // Cast iron
+        let furnaceColor = m.isRare ? "#ff007f" : "#e67e22"; // Molten orange / magenta
 
-              // Background Exhaust Chimneys
-              c.fillStyle = "#111317";
-              c.beginPath();
-              c.rect(m.x + 4, m.y + 4 + hover, 4, 12);
-              c.rect(m.x + m.w - 8, m.y + 4 + hover, 4, 12);
-              c.fill();
-              c.stroke();
+        // Background Exhaust Chimneys
+        c.fillStyle = "#111317";
+        c.beginPath();
+        c.rect(m.x + 4, m.y + 4 + hover, 4, 12);
+        c.rect(m.x + m.w - 8, m.y + 4 + hover, 4, 12);
+        c.fill();
+        c.stroke();
 
-              // Main Torso
-              c.fillStyle = bodyColor;
-              c.beginPath();
-              c.roundRect(m.x + 3, m.y + 12 + hover, m.w - 6, m.h - 14, [4]);
-              c.fill();
-              c.stroke();
+        // Main Torso
+        c.fillStyle = bodyColor;
+        c.beginPath();
+        c.roundRect(m.x + 3, m.y + 12 + hover, m.w - 6, m.h - 14, [4]);
+        c.fill();
+        c.stroke();
 
-              // Head / Upper Armature
-              c.fillStyle = trimColor;
-              c.beginPath();
-              c.rect(m.x + 6, m.y + 4 + hover, m.w - 12, 10);
-              c.fill();
-              c.stroke();
+        // Head / Upper Armature
+        c.fillStyle = trimColor;
+        c.beginPath();
+        c.rect(m.x + 6, m.y + 4 + hover, m.w - 12, 10);
+        c.fill();
+        c.stroke();
 
-              // Glowing Furnace Visor Eye
-              if (m.flashTimer === 0) {
-                c.fillStyle = furnaceColor;
-                c.shadowBlur = 8;
-                c.shadowColor = furnaceColor;
-                c.beginPath();
-                c.rect(m.x + 9, m.y + 7 + hover, m.w - 18, 3);
-                c.fill();
-                c.shadowBlur = 0;
-              }
+        // Glowing Furnace Visor Eye
+        if (m.flashTimer === 0) {
+          c.fillStyle = furnaceColor;
+          c.shadowBlur = 8;
+          c.shadowColor = furnaceColor;
+          c.beginPath();
+          c.rect(m.x + 9, m.y + 7 + hover, m.w - 18, 3);
+          c.fill();
+          c.shadowBlur = 0;
+        }
 
-              // Giant Fists
-              c.fillStyle = bodyColor;
-              c.beginPath();
-              c.roundRect(m.x - 6, m.y + 14 + hover, 8, 12, [2]);
-              c.roundRect(m.x + m.w - 2, m.y + 14 + hover, 8, 12, [2]);
-              c.fill();
-              c.stroke();
+        // Giant Fists
+        c.fillStyle = bodyColor;
+        c.beginPath();
+        c.roundRect(m.x - 6, m.y + 14 + hover, 8, 12, [2]);
+        c.roundRect(m.x + m.w - 2, m.y + 14 + hover, 8, 12, [2]);
+        c.fill();
+        c.stroke();
 
-              // Rivets on Fists
-              c.fillStyle = "#ffd700";
-              c.beginPath();
-              c.arc(m.x - 2, m.y + 18 + hover, 1.2, 0, Math.PI * 2);
-              c.arc(m.x + m.w + 2, m.y + 18 + hover, 1.2, 0, Math.PI * 2);
-              c.fill();
-              c.stroke();
+        // Rivets on Fists
+        c.fillStyle = "#ffd700";
+        c.beginPath();
+        c.arc(m.x - 2, m.y + 18 + hover, 1.2, 0, Math.PI * 2);
+        c.arc(m.x + m.w + 2, m.y + 18 + hover, 1.2, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
 
-              // Central Molten Core Fissure
-              if (m.flashTimer === 0) {
-                c.strokeStyle = furnaceColor;
-                c.lineWidth = 1.8;
-                c.beginPath();
-                c.moveTo(m.x + m.w / 2, m.y + 16 + hover);
-                c.lineTo(m.x + m.w / 2, m.y + m.h - 12 + hover);
-                c.moveTo(m.x + m.w / 2 - 4, m.y + 20 + hover);
-                c.lineTo(m.x + m.w / 2 + 4, m.y + 20 + hover);
-                c.stroke();
-              }
-            } else if (vType === "wyrmling") {
-                    let cx = m.x + m.w / 2;
-                    let cy = m.y + m.h / 2 + Math.sin(Date.now() / 100) * 3;
-                    let bodyColor = m.flashTimer > 0 ? "#ffffff" : m.isRare ? "#8e44ad" : "#a2592a"; // Copper/Brass / Purple
-                    let ringColor = m.isRare ? "#ff007f" : "#ffd700";
+        // Central Molten Core Fissure
+        if (m.flashTimer === 0) {
+          c.strokeStyle = furnaceColor;
+          c.lineWidth = 1.8;
+          c.beginPath();
+          c.moveTo(m.x + m.w / 2, m.y + 16 + hover);
+          c.lineTo(m.x + m.w / 2, m.y + m.h - 12 + hover);
+          c.moveTo(m.x + m.w / 2 - 4, m.y + 20 + hover);
+          c.lineTo(m.x + m.w / 2 + 4, m.y + 20 + hover);
+          c.stroke();
+        }
+      } else if (vType === "wyrmling") {
+        let cx = m.x + m.w / 2;
+        let cy = m.y + m.h / 2 + Math.sin(Date.now() / 100) * 3;
+        let bodyColor =
+          m.flashTimer > 0 ? "#ffffff" : m.isRare ? "#8e44ad" : "#a2592a"; // Copper/Brass / Purple
+        let ringColor = m.isRare ? "#ff007f" : "#ffd700";
 
-                    // Segmented metallic body parts
-                    for (let i = 3; i >= 0; i--) {
-                      let segX = cx + i * 8;
-                      let segY = cy + Math.sin(Date.now() / 150 - i) * 5;
+        // Segmented metallic body parts
+        for (let i = 3; i >= 0; i--) {
+          let segX = cx + i * 8;
+          let segY = cy + Math.sin(Date.now() / 150 - i) * 5;
 
-                      // Concentric clockwork rings orbiting each segment (3D perspective)
-                      if (m.flashTimer === 0) {
-                        c.strokeStyle = ringColor;
-                        c.lineWidth = 1;
-                        c.save();
-                        c.translate(segX, segY);
-                        c.rotate(Date.now() / 300 + i);
-                        c.beginPath();
-                        c.ellipse(0, 0, 11 - i * 1.5, 4 - i * 0.5, 0, 0, Math.PI * 2);
-                        c.stroke();
-                        c.restore();
-                      }
+          // Concentric clockwork rings orbiting each segment (3D perspective)
+          if (m.flashTimer === 0) {
+            c.strokeStyle = ringColor;
+            c.lineWidth = 1;
+            c.save();
+            c.translate(segX, segY);
+            c.rotate(Date.now() / 300 + i);
+            c.beginPath();
+            c.ellipse(0, 0, 11 - i * 1.5, 4 - i * 0.5, 0, 0, Math.PI * 2);
+            c.stroke();
+            c.restore();
+          }
 
-                      c.fillStyle = bodyColor;
-                      c.beginPath();
-                      c.arc(segX, segY, 8.5 - i * 1.3, 0, Math.PI * 2);
-                      c.fill();
-                      c.stroke();
-                    }
+          c.fillStyle = bodyColor;
+          c.beginPath();
+          c.arc(segX, segY, 8.5 - i * 1.3, 0, Math.PI * 2);
+          c.fill();
+          c.stroke();
+        }
 
-                    // Metallic Head
-                    c.fillStyle = bodyColor;
-                    c.beginPath();
-                    c.arc(cx, cy - 13, 8.5, 0, Math.PI * 2);
-                    c.fill();
-                    c.stroke();
+        // Metallic Head
+        c.fillStyle = bodyColor;
+        c.beginPath();
+        c.arc(cx, cy - 13, 8.5, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
 
-                    // Sparking glowing jaws
-                    if (m.flashTimer === 0) {
-                      c.fillStyle = m.isRare ? "#00ffff" : "#00d2ff"; // Blue plasma
-                      c.shadowBlur = 8;
-                      c.shadowColor = c.fillStyle;
-                      c.beginPath();
-                      c.arc(cx - 3, cy - 15, 1.8, 0, Math.PI * 2);
-                      c.arc(cx + 3, cy - 15, 1.8, 0, Math.PI * 2);
-                      c.fill();
-                      c.shadowBlur = 0;
+        // Sparking glowing jaws
+        if (m.flashTimer === 0) {
+          c.fillStyle = m.isRare ? "#00ffff" : "#00d2ff"; // Blue plasma
+          c.shadowBlur = 8;
+          c.shadowColor = c.fillStyle;
+          c.beginPath();
+          c.arc(cx - 3, cy - 15, 1.8, 0, Math.PI * 2);
+          c.arc(cx + 3, cy - 15, 1.8, 0, Math.PI * 2);
+          c.fill();
+          c.shadowBlur = 0;
 
-                      // Spew tiny blue sparks
-                      if (Math.random() < 0.15 && !window.isGamePaused) {
-                        window.particles.push({
-                          x: cx + window.randFloat(-5, 5),
-                          y: cy - 13,
-                          vx: -window.randFloat(1, 3),
-                          vy: window.randFloat(-1, 1),
-                          radius: window.randFloat(1, 2),
-                          color: m.isRare ? "#ff007f" : "#00d2ff",
-                          alpha: 0.9,
-                          life: window.randInt(10, 20)
-                        });
-                      }
-                    }
-                  } else if (vType === "rift_drifter") {
+          // Spew tiny blue sparks
+          if (Math.random() < 0.15 && !window.isGamePaused) {
+            window.particles.push({
+              x: cx + window.randFloat(-5, 5),
+              y: cy - 13,
+              vx: -window.randFloat(1, 3),
+              vy: window.randFloat(-1, 1),
+              radius: window.randFloat(1, 2),
+              color: m.isRare ? "#ff007f" : "#00d2ff",
+              alpha: 0.9,
+              life: window.randInt(10, 20),
+            });
+          }
+        }
+      } else if (vType === "rift_drifter") {
         let hover = Math.sin(Date.now() / 110) * 6;
         let cx = m.x + m.w / 2;
         let cy = m.y + m.h / 2 + hover;
@@ -1336,86 +1351,86 @@
           c.fill();
         }
       } else if (vType === "gargoyle") {
-              let cx = m.x + m.w / 2;
-              let cy = m.y + m.h / 2;
-              let wings = Math.sin(Date.now() / 90) * 11;
-              let skinColor = m.flashTimer > 0 ? "#ffffff" : "#11141a"; // Dark obsidian/iron
-              let wingColor = m.flashTimer > 0 ? "#ffffff" : "#212833"; // Crystalline/Iron
-              let eyeColor = m.isRare ? "#00ffff" : "#e74c3c";
+        let cx = m.x + m.w / 2;
+        let cy = m.y + m.h / 2;
+        let wings = Math.sin(Date.now() / 90) * 11;
+        let skinColor = m.flashTimer > 0 ? "#ffffff" : "#11141a"; // Dark obsidian/iron
+        let wingColor = m.flashTimer > 0 ? "#ffffff" : "#212833"; // Crystalline/Iron
+        let eyeColor = m.isRare ? "#00ffff" : "#e74c3c";
 
-              // Razor-sharp obsidian wings
-              c.fillStyle = wingColor;
-              c.beginPath();
-              c.moveTo(cx - 3, cy);
-              c.lineTo(cx - 24, cy - 14 + wings);
-              c.lineTo(cx - 18, cy + 4);
-              c.lineTo(cx - 22, cy + 12);
-              c.lineTo(cx - 8, cy + 5);
-              c.closePath();
-              c.moveTo(cx + 3, cy);
-              c.lineTo(cx + 24, cy - 14 + wings);
-              c.lineTo(cx + 18, cy + 4);
-              c.lineTo(cx + 22, cy + 12);
-              c.lineTo(cx + 8, cy + 5);
-              c.closePath();
-              c.fill();
-              c.stroke();
+        // Razor-sharp obsidian wings
+        c.fillStyle = wingColor;
+        c.beginPath();
+        c.moveTo(cx - 3, cy);
+        c.lineTo(cx - 24, cy - 14 + wings);
+        c.lineTo(cx - 18, cy + 4);
+        c.lineTo(cx - 22, cy + 12);
+        c.lineTo(cx - 8, cy + 5);
+        c.closePath();
+        c.moveTo(cx + 3, cy);
+        c.lineTo(cx + 24, cy - 14 + wings);
+        c.lineTo(cx + 18, cy + 4);
+        c.lineTo(cx + 22, cy + 12);
+        c.lineTo(cx + 8, cy + 5);
+        c.closePath();
+        c.fill();
+        c.stroke();
 
-              // Main heavy torso
-              c.fillStyle = skinColor;
-              c.beginPath();
-              c.ellipse(cx, cy + 6, 8.5, 11.5, 0, 0, Math.PI * 2);
-              c.fill();
-              c.stroke();
+        // Main heavy torso
+        c.fillStyle = skinColor;
+        c.beginPath();
+        c.ellipse(cx, cy + 6, 8.5, 11.5, 0, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
 
-              // Horned Head
-              c.beginPath();
-              c.arc(cx, cy - 10, 7.8, 0, Math.PI * 2);
-              c.fill();
-              c.stroke();
+        // Horned Head
+        c.beginPath();
+        c.arc(cx, cy - 10, 7.8, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
 
-              // Curved horns
-              c.fillStyle = wingColor;
-              c.beginPath();
-              c.moveTo(cx - 6, cy - 14);
-              c.quadraticCurveTo(cx - 12, cy - 22, cx - 14, cy - 20);
-              c.lineTo(cx - 2, cy - 12);
-              c.closePath();
-              c.moveTo(cx + 6, cy - 14);
-              c.quadraticCurveTo(cx + 12, cy - 22, cx + 14, cy - 20);
-              c.lineTo(cx + 2, cy - 12);
-              c.closePath();
-              c.fill();
-              c.stroke();
+        // Curved horns
+        c.fillStyle = wingColor;
+        c.beginPath();
+        c.moveTo(cx - 6, cy - 14);
+        c.quadraticCurveTo(cx - 12, cy - 22, cx - 14, cy - 20);
+        c.lineTo(cx - 2, cy - 12);
+        c.closePath();
+        c.moveTo(cx + 6, cy - 14);
+        c.quadraticCurveTo(cx + 12, cy - 22, cx + 14, cy - 20);
+        c.lineTo(cx + 2, cy - 12);
+        c.closePath();
+        c.fill();
+        c.stroke();
 
-              // Glowing Eyes
-              if (m.flashTimer === 0) {
-                c.fillStyle = eyeColor;
-                c.shadowBlur = 6;
-                c.shadowColor = eyeColor;
-                c.beginPath();
-                c.arc(cx - 2.5, cy - 11, 1.6, 0, Math.PI * 2);
-                c.arc(cx + 2.5, cy - 11, 1.6, 0, Math.PI * 2);
-                c.fill();
-                c.shadowBlur = 0;
-              }
+        // Glowing Eyes
+        if (m.flashTimer === 0) {
+          c.fillStyle = eyeColor;
+          c.shadowBlur = 6;
+          c.shadowColor = eyeColor;
+          c.beginPath();
+          c.arc(cx - 2.5, cy - 11, 1.6, 0, Math.PI * 2);
+          c.arc(cx + 2.5, cy - 11, 1.6, 0, Math.PI * 2);
+          c.fill();
+          c.shadowBlur = 0;
+        }
 
-              // Wields a tiny forged iron executioner blade
-              c.fillStyle = "#7f8c8d";
-              c.beginPath();
-              c.moveTo(cx - 10, cy + 2);
-              c.lineTo(cx - 20, cy + 10);
-              c.lineTo(cx - 17, cy + 13);
-              c.lineTo(cx - 7, cy + 5);
-              c.closePath();
-              c.fill();
-              c.stroke();
-              c.fillStyle = "#ffd700"; // gold pommel
-              c.beginPath();
-              c.arc(cx - 7, cy + 5, 1.5, 0, Math.PI * 2);
-              c.fill();
-              c.stroke();
-            } else if (vType === "magma_elemental") {
+        // Wields a tiny forged iron executioner blade
+        c.fillStyle = "#7f8c8d";
+        c.beginPath();
+        c.moveTo(cx - 10, cy + 2);
+        c.lineTo(cx - 20, cy + 10);
+        c.lineTo(cx - 17, cy + 13);
+        c.lineTo(cx - 7, cy + 5);
+        c.closePath();
+        c.fill();
+        c.stroke();
+        c.fillStyle = "#ffd700"; // gold pommel
+        c.beginPath();
+        c.arc(cx - 7, cy + 5, 1.5, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+      } else if (vType === "magma_elemental") {
         let flicker = Math.sin(Date.now() / 60) * 3;
         let cx = m.x + m.w / 2;
         let cy = m.y + m.h / 2;
@@ -2350,202 +2365,219 @@
           });
 
           let hover = Math.sin(Date.now() / 150) * 4;
-                        let idolX = bx + bw / 2;
-                        let idolY = cy - 28 + hover;
-                        let time = Date.now();
+          let idolX = bx + bw / 2;
+          let idolY = cy - 28 + hover;
+          let time = Date.now();
 
-                        // 1. DRAW GIANT SHIELD/SWORD WINGS BEHIND
-                        let wingFlap = Math.sin(time / 120) * 0.12;
-                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b"; // Golden/Bronze shields
-                        c.strokeStyle = "#000000";
-                        c.lineWidth = 2.4;
+          // 1. DRAW GIANT SHIELD/SWORD WINGS BEHIND
+          let wingFlap = Math.sin(time / 120) * 0.12;
+          c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b"; // Golden/Bronze shields
+          c.strokeStyle = "#000000";
+          c.lineWidth = 2.4;
 
-                        for (let side = -1; side <= 1; side += 2) {
-                          c.save();
-                          c.translate(idolX + side * 12, idolY - 4);
-                          c.rotate(side * (Math.PI / 6 + wingFlap));
+          for (let side = -1; side <= 1; side += 2) {
+            c.save();
+            c.translate(idolX + side * 12, idolY - 4);
+            c.rotate(side * (Math.PI / 6 + wingFlap));
 
-                          // Draw shield wing
-                          c.beginPath();
-                          c.moveTo(0, 0);
-                          c.lineTo(side * 36, -15);
-                          c.lineTo(side * 28, 12);
-                          c.lineTo(side * 32, 25);
-                          c.lineTo(side * 8, 15);
-                          c.closePath();
-                          c.fill();
-                          c.stroke();
+            // Draw shield wing
+            c.beginPath();
+            c.moveTo(0, 0);
+            c.lineTo(side * 36, -15);
+            c.lineTo(side * 28, 12);
+            c.lineTo(side * 32, 25);
+            c.lineTo(side * 8, 15);
+            c.closePath();
+            c.fill();
+            c.stroke();
 
-                          // Shiny inner plate on shield
-                          c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#ffd700";
-                          c.beginPath();
-                          c.moveTo(side * 4, -2);
-                          c.lineTo(side * 32, -13);
-                          c.lineTo(side * 25, 10);
-                          c.closePath();
-                          c.fill();
-                          c.stroke();
+            // Shiny inner plate on shield
+            c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#ffd700";
+            c.beginPath();
+            c.moveTo(side * 4, -2);
+            c.lineTo(side * 32, -13);
+            c.lineTo(side * 25, 10);
+            c.closePath();
+            c.fill();
+            c.stroke();
 
-                          c.restore();
-                        }
+            c.restore();
+          }
 
-                        // 2. DRAW THE ANCIENT TREASURY CHEST BODY (Golem Torso)
-                        let lidAngle = -Math.abs(Math.sin(time / 240)) * 0.35; // Chest snapping open/close
+          // 2. DRAW THE ANCIENT TREASURY CHEST BODY (Golem Torso)
+          let lidAngle = -Math.abs(Math.sin(time / 240)) * 0.35; // Chest snapping open/close
 
-                        // Draw Lower Chest Box
-                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#4a2d18"; // Mahogany wood
-                        c.beginPath();
-                        c.roundRect(idolX - 16, idolY - 4, 32, 18, [3]);
-                        c.fill();
-                        c.stroke();
+          // Draw Lower Chest Box
+          c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#4a2d18"; // Mahogany wood
+          c.beginPath();
+          c.roundRect(idolX - 16, idolY - 4, 32, 18, [3]);
+          c.fill();
+          c.stroke();
 
-                        // Iron Corner Bands on the box
-                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#333339";
-                        c.fillRect(idolX - 16, idolY - 4, 4, 18);
-                        c.strokeRect(m.flashTimer > 0 ? idolX - 16 : idolX - 16, idolY - 4, 4, 18);
-                        c.fillRect(idolX + 12, idolY - 4, 4, 18);
-                        c.strokeRect(m.flashTimer > 0 ? idolX + 12 : idolX + 12, idolY - 4, 4, 18);
+          // Iron Corner Bands on the box
+          c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#333339";
+          c.fillRect(idolX - 16, idolY - 4, 4, 18);
+          c.strokeRect(
+            m.flashTimer > 0 ? idolX - 16 : idolX - 16,
+            idolY - 4,
+            4,
+            18,
+          );
+          c.fillRect(idolX + 12, idolY - 4, 4, 18);
+          c.strokeRect(
+            m.flashTimer > 0 ? idolX + 12 : idolX + 12,
+            idolY - 4,
+            4,
+            18,
+          );
 
-                        // 3. DRAW GLOWING RUBY SOUL-CORE (Inside Mouth / Chest Opening)
-                        if (m.flashTimer === 0) {
-                          let corePulse = 6 + Math.sin(time / 90) * 2;
-                          let coreGrad = c.createRadialGradient(idolX, idolY - 4, 1, idolX, idolY - 4, corePulse);
-                          coreGrad.addColorStop(0, "#ffffff");
-                          coreGrad.addColorStop(0.3, "#ff0055"); // Ruby Core
-                          coreGrad.addColorStop(1, "rgba(142, 68, 173, 0)");
-                          c.fillStyle = coreGrad;
-                          c.beginPath();
-                          c.arc(idolX, idolY - 4, corePulse + 6, 0, Math.PI * 2);
-                          c.fill();
+          // 3. DRAW GLOWING RUBY SOUL-CORE (Inside Mouth / Chest Opening)
+          if (m.flashTimer === 0) {
+            let corePulse = 6 + Math.sin(time / 90) * 2;
+            let coreGrad = c.createRadialGradient(
+              idolX,
+              idolY - 4,
+              1,
+              idolX,
+              idolY - 4,
+              corePulse,
+            );
+            coreGrad.addColorStop(0, "#ffffff");
+            coreGrad.addColorStop(0.3, "#ff0055"); // Ruby Core
+            coreGrad.addColorStop(1, "rgba(142, 68, 173, 0)");
+            c.fillStyle = coreGrad;
+            c.beginPath();
+            c.arc(idolX, idolY - 4, corePulse + 6, 0, Math.PI * 2);
+            c.fill();
 
-                          // Draw jagged golden teeth lining the chest rims
-                          c.fillStyle = "#f1c40f";
-                          let teethX = [-12, -6, 0, 6, 12];
-                          teethX.forEach(dx => {
-                            // Upper hanging teeth (on the lid, rotates with it)
-                            c.save();
-                            c.translate(idolX, idolY - 4);
-                            c.rotate(lidAngle);
-                            c.beginPath();
-                            c.moveTo(dx - 1.8, 0);
-                            c.lineTo(dx, 4);
-                            c.lineTo(dx + 1.8, 0);
-                            c.closePath();
-                            c.fill();
-                            c.stroke();
-                            c.restore();
+            // Draw jagged golden teeth lining the chest rims
+            c.fillStyle = "#f1c40f";
+            let teethX = [-12, -6, 0, 6, 12];
+            teethX.forEach((dx) => {
+              // Upper hanging teeth (on the lid, rotates with it)
+              c.save();
+              c.translate(idolX, idolY - 4);
+              c.rotate(lidAngle);
+              c.beginPath();
+              c.moveTo(dx - 1.8, 0);
+              c.lineTo(dx, 4);
+              c.lineTo(dx + 1.8, 0);
+              c.closePath();
+              c.fill();
+              c.stroke();
+              c.restore();
 
-                            // Lower teeth (static)
-                            c.beginPath();
-                            c.moveTo(idolX + dx - 1.8, idolY - 4);
-                            c.lineTo(idolX + dx, idolY - 7);
-                            c.lineTo(idolX + dx + 1.8, idolY - 4);
-                            c.closePath();
-                            c.fill();
-                            c.stroke();
-                          });
-                        }
+              // Lower teeth (static)
+              c.beginPath();
+              c.moveTo(idolX + dx - 1.8, idolY - 4);
+              c.lineTo(idolX + dx, idolY - 7);
+              c.lineTo(idolX + dx + 1.8, idolY - 4);
+              c.closePath();
+              c.fill();
+              c.stroke();
+            });
+          }
 
-                        // 4. DRAW CHEST LID (Pivoting Head)
-                        c.save();
-                        c.translate(idolX, idolY - 4);
-                        c.rotate(lidAngle);
+          // 4. DRAW CHEST LID (Pivoting Head)
+          c.save();
+          c.translate(idolX, idolY - 4);
+          c.rotate(lidAngle);
 
-                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#5c3a21"; // Bright mahogany
-                        c.beginPath();
-                        c.roundRect(-16, -11, 32, 11, [4, 4, 1, 1]);
-                        c.fill();
-                        c.stroke();
+          c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#5c3a21"; // Bright mahogany
+          c.beginPath();
+          c.roundRect(-16, -11, 32, 11, [4, 4, 1, 1]);
+          c.fill();
+          c.stroke();
 
-                        // Gilded decorative bands on lid
-                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#ffd700";
-                        c.fillRect(-15, -11, 3, 11);
-                        c.strokeRect(-15, -11, 3, 11);
-                        c.fillRect(12, -11, 3, 11);
-                        c.strokeRect(12, -11, 3, 11);
+          // Gilded decorative bands on lid
+          c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#ffd700";
+          c.fillRect(-15, -11, 3, 11);
+          c.strokeRect(-15, -11, 3, 11);
+          c.fillRect(12, -11, 3, 11);
+          c.strokeRect(12, -11, 3, 11);
 
-                        // Giant Gold lock latch
-                        c.fillRect(-2, -3, 4, 6);
-                        c.strokeRect(-2, -3, 4, 6);
-                        c.fillStyle = "#111";
-                        c.beginPath();
-                        c.arc(0, 0, 1.2, 0, Math.PI * 2);
-                        c.fill();
+          // Giant Gold lock latch
+          c.fillRect(-2, -3, 4, 6);
+          c.strokeRect(-2, -3, 4, 6);
+          c.fillStyle = "#111";
+          c.beginPath();
+          c.arc(0, 0, 1.2, 0, Math.PI * 2);
+          c.fill();
 
-                        // Floating Crown of Gold bars above the lid
-                        if (m.flashTimer === 0) {
-                          c.fillStyle = "#ffd700";
-                          c.shadowBlur = 8;
-                          c.shadowColor = "#ffd700";
-                          c.beginPath();
-                          c.moveTo(-8, -15);
-                          c.lineTo(-12, -21);
-                          c.lineTo(-6, -18);
-                          c.lineTo(0, -26); // Tall center point
-                          c.lineTo(6, -18);
-                          c.lineTo(12, -21);
-                          c.lineTo(8, -15);
-                          c.closePath();
-                          c.fill();
-                          c.stroke();
-                          c.shadowBlur = 0;
-                        }
+          // Floating Crown of Gold bars above the lid
+          if (m.flashTimer === 0) {
+            c.fillStyle = "#ffd700";
+            c.shadowBlur = 8;
+            c.shadowColor = "#ffd700";
+            c.beginPath();
+            c.moveTo(-8, -15);
+            c.lineTo(-12, -21);
+            c.lineTo(-6, -18);
+            c.lineTo(0, -26); // Tall center point
+            c.lineTo(6, -18);
+            c.lineTo(12, -21);
+            c.lineTo(8, -15);
+            c.closePath();
+            c.fill();
+            c.stroke();
+            c.shadowBlur = 0;
+          }
 
-                        c.restore();
+          c.restore();
 
-                        // 5. GIANT CLAW ARMS (Made of fused gold bars)
-                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
-                        let armSwing = Math.sin(time / 100) * 4;
+          // 5. GIANT CLAW ARMS (Made of fused gold bars)
+          c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
+          let armSwing = Math.sin(time / 100) * 4;
 
-                        // Left Arm
-                        c.beginPath();
-                        c.roundRect(idolX - 26 + armSwing, idolY + 1, 7, 12, [2]);
-                        c.fill();
-                        c.stroke();
-                        // Left Claws
-                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#ffd700";
-                        c.beginPath();
-                        c.moveTo(idolX - 26 + armSwing, idolY + 13);
-                        c.lineTo(idolX - 29 + armSwing, 18 + idolY);
-                        c.lineTo(idolX - 23 + armSwing, idolY + 13);
-                        c.closePath();
-                        c.fill();
-                        c.stroke();
+          // Left Arm
+          c.beginPath();
+          c.roundRect(idolX - 26 + armSwing, idolY + 1, 7, 12, [2]);
+          c.fill();
+          c.stroke();
+          // Left Claws
+          c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#ffd700";
+          c.beginPath();
+          c.moveTo(idolX - 26 + armSwing, idolY + 13);
+          c.lineTo(idolX - 29 + armSwing, 18 + idolY);
+          c.lineTo(idolX - 23 + armSwing, idolY + 13);
+          c.closePath();
+          c.fill();
+          c.stroke();
 
-                        // Right Arm
-                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
-                        c.beginPath();
-                        c.roundRect(idolX + 19 - armSwing, idolY + 1, 7, 12, [2]);
-                        c.fill();
-                        c.stroke();
-                        // Right Claws
-                        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#ffd700";
-                        c.beginPath();
-                        c.moveTo(idolX + 19 - armSwing, idolY + 13);
-                        c.lineTo(idolX + 22 - armSwing, 18 + idolY);
-                        c.lineTo(idolX + 26 - armSwing, idolY + 13);
-                        c.closePath();
-                        c.fill();
-                        c.stroke();
+          // Right Arm
+          c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#b7950b";
+          c.beginPath();
+          c.roundRect(idolX + 19 - armSwing, idolY + 1, 7, 12, [2]);
+          c.fill();
+          c.stroke();
+          // Right Claws
+          c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#ffd700";
+          c.beginPath();
+          c.moveTo(idolX + 19 - armSwing, idolY + 13);
+          c.lineTo(idolX + 22 - armSwing, 18 + idolY);
+          c.lineTo(idolX + 26 - armSwing, idolY + 13);
+          c.closePath();
+          c.fill();
+          c.stroke();
 
-                        // 6. REAL-TIME EMBER AND SPARK EMISSION
-                        if (
-                          !window.isGamePaused &&
-                          Math.random() < 0.22 &&
-                          window.particles.length < 250
-                        ) {
-                          window.particles.push({
-                            x: idolX + window.randFloat(-10, 10),
-                            y: idolY + 4,
-                            vx: window.randFloat(-1.8, 1.8),
-                            vy: -window.randFloat(1.2, 3.2),
-                            radius: window.randFloat(2, 4.2),
-                            color: Math.random() > 0.4 ? "#f1c40f" : "#ff5500", // Gold and lava sparks
-                            alpha: 0.95,
-                            life: window.randInt(25, 45),
-                          });
-                        }
-                      } else if (dType === "mat") {
+          // 6. REAL-TIME EMBER AND SPARK EMISSION
+          if (
+            !window.isGamePaused &&
+            Math.random() < 0.22 &&
+            window.particles.length < 250
+          ) {
+            window.particles.push({
+              x: idolX + window.randFloat(-10, 10),
+              y: idolY + 4,
+              vx: window.randFloat(-1.8, 1.8),
+              vy: -window.randFloat(1.2, 3.2),
+              radius: window.randFloat(2, 4.2),
+              color: Math.random() > 0.4 ? "#f1c40f" : "#ff5500", // Gold and lava sparks
+              alpha: 0.95,
+              life: window.randInt(25, 45),
+            });
+          }
+        } else if (dType === "mat") {
           let bx = m.x;
           let by = m.y;
           let bw = m.w;
@@ -9559,51 +9591,51 @@
         ctx.strokeRect(barX, window.mob.y - 13, barW, 7);
 
         // Bleed Stacks Row
-                if (window.mob.bleedStacks > 0) {
-                  let dotSize = 2.2;
-                  let dotSpacing = 3;
-                  let totalWidth = 5 * (dotSize * 2) + 4 * dotSpacing;
-                  let startDotX = barX + (barW - totalWidth) / 2;
-                  let dotY = window.mob.y - 4;
-                  for (let i = 0; i < 5; i++) {
-                    ctx.beginPath();
-                    ctx.arc(
-                      startDotX + i * (dotSize * 2 + dotSpacing) + dotSize,
-                      dotY,
-                      dotSize,
-                      0,
-                      Math.PI * 2,
-                    );
-                    ctx.fillStyle = i < window.mob.bleedStacks ? "#e74c3c" : "#2c3e50";
-                    ctx.fill();
-                    ctx.strokeStyle = "#000000";
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                  }
-                }
-                // Poison Stacks Row (Stacked slightly higher)
-                if (window.mob.poisonStacks > 0) {
-                  let dotSize = 2.2;
-                  let dotSpacing = 3;
-                  let totalWidth = 5 * (dotSize * 2) + 4 * dotSpacing;
-                  let startDotX = barX + (barW - totalWidth) / 2;
-                  let dotY = window.mob.y - 9;
-                  for (let i = 0; i < 5; i++) {
-                    ctx.beginPath();
-                    ctx.arc(
-                      startDotX + i * (dotSize * 2 + dotSpacing) + dotSize,
-                      dotY,
-                      dotSize,
-                      0,
-                      Math.PI * 2,
-                    );
-                    ctx.fillStyle = i < window.mob.poisonStacks ? "#2ecc71" : "#1a301f";
-                    ctx.fill();
-                    ctx.strokeStyle = "#000000";
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                  }
-                }
+        if (window.mob.bleedStacks > 0) {
+          let dotSize = 2.2;
+          let dotSpacing = 3;
+          let totalWidth = 5 * (dotSize * 2) + 4 * dotSpacing;
+          let startDotX = barX + (barW - totalWidth) / 2;
+          let dotY = window.mob.y - 4;
+          for (let i = 0; i < 5; i++) {
+            ctx.beginPath();
+            ctx.arc(
+              startDotX + i * (dotSize * 2 + dotSpacing) + dotSize,
+              dotY,
+              dotSize,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fillStyle = i < window.mob.bleedStacks ? "#e74c3c" : "#2c3e50";
+            ctx.fill();
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+        // Poison Stacks Row (Stacked slightly higher)
+        if (window.mob.poisonStacks > 0) {
+          let dotSize = 2.2;
+          let dotSpacing = 3;
+          let totalWidth = 5 * (dotSize * 2) + 4 * dotSpacing;
+          let startDotX = barX + (barW - totalWidth) / 2;
+          let dotY = window.mob.y - 9;
+          for (let i = 0; i < 5; i++) {
+            ctx.beginPath();
+            ctx.arc(
+              startDotX + i * (dotSize * 2 + dotSpacing) + dotSize,
+              dotY,
+              dotSize,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fillStyle = i < window.mob.poisonStacks ? "#2ecc71" : "#1a301f";
+            ctx.fill();
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
       }
     }
 
@@ -10830,65 +10862,65 @@
       ctx.fillText(bossName, canvas.width / 2, barY - 4);
 
       // Boss Bleed Row
-            if (window.mob.bleedStacks > 0) {
-              let dotSize = 3.5;
-              let dotSpacing = 5;
-              let totalWidth = 5 * (dotSize * 2) + 4 * dotSpacing;
-              let startDotX = (canvas.width - totalWidth) / 2;
-              let dotY = barY + barH + 7;
-              for (let i = 0; i < 5; i++) {
-                ctx.beginPath();
-                ctx.arc(
-                  startDotX + i * (dotSize * 2 + dotSpacing) + dotSize,
-                  dotY,
-                  dotSize,
-                  0,
-                  Math.PI * 2,
-                );
-                if (i < window.mob.bleedStacks) {
-                  ctx.fillStyle = "#e74c3c";
-                  ctx.shadowColor = "#e74c3c";
-                  ctx.shadowBlur = 4;
-                } else {
-                  ctx.fillStyle = "rgba(44, 62, 80, 0.7)";
-                }
-                ctx.fill();
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 1.2;
-                ctx.stroke();
-                ctx.shadowBlur = 0;
-              }
-            }
-            // Boss Poison Row (Ticked slightly lower)
-            if (window.mob.poisonStacks > 0) {
-              let dotSize = 3.5;
-              let dotSpacing = 5;
-              let totalWidth = 5 * (dotSize * 2) + 4 * dotSpacing;
-              let startDotX = (canvas.width - totalWidth) / 2;
-              let dotY = barY + barH + 17;
-              for (let i = 0; i < 5; i++) {
-                ctx.beginPath();
-                ctx.arc(
-                  startDotX + i * (dotSize * 2 + dotSpacing) + dotSize,
-                  dotY,
-                  dotSize,
-                  0,
-                  Math.PI * 2,
-                );
-                if (i < window.mob.poisonStacks) {
-                  ctx.fillStyle = "#2ecc71";
-                  ctx.shadowColor = "#2ecc71";
-                  ctx.shadowBlur = 4;
-                } else {
-                  ctx.fillStyle = "rgba(26, 82, 40, 0.7)";
-                }
-                ctx.fill();
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 1.2;
-                ctx.stroke();
-                ctx.shadowBlur = 0;
-              }
-            }
+      if (window.mob.bleedStacks > 0) {
+        let dotSize = 3.5;
+        let dotSpacing = 5;
+        let totalWidth = 5 * (dotSize * 2) + 4 * dotSpacing;
+        let startDotX = (canvas.width - totalWidth) / 2;
+        let dotY = barY + barH + 7;
+        for (let i = 0; i < 5; i++) {
+          ctx.beginPath();
+          ctx.arc(
+            startDotX + i * (dotSize * 2 + dotSpacing) + dotSize,
+            dotY,
+            dotSize,
+            0,
+            Math.PI * 2,
+          );
+          if (i < window.mob.bleedStacks) {
+            ctx.fillStyle = "#e74c3c";
+            ctx.shadowColor = "#e74c3c";
+            ctx.shadowBlur = 4;
+          } else {
+            ctx.fillStyle = "rgba(44, 62, 80, 0.7)";
+          }
+          ctx.fill();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+      }
+      // Boss Poison Row (Ticked slightly lower)
+      if (window.mob.poisonStacks > 0) {
+        let dotSize = 3.5;
+        let dotSpacing = 5;
+        let totalWidth = 5 * (dotSize * 2) + 4 * dotSpacing;
+        let startDotX = (canvas.width - totalWidth) / 2;
+        let dotY = barY + barH + 17;
+        for (let i = 0; i < 5; i++) {
+          ctx.beginPath();
+          ctx.arc(
+            startDotX + i * (dotSize * 2 + dotSpacing) + dotSize,
+            dotY,
+            dotSize,
+            0,
+            Math.PI * 2,
+          );
+          if (i < window.mob.poisonStacks) {
+            ctx.fillStyle = "#2ecc71";
+            ctx.shadowColor = "#2ecc71";
+            ctx.shadowBlur = 4;
+          } else {
+            ctx.fillStyle = "rgba(26, 82, 40, 0.7)";
+          }
+          ctx.fill();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+      }
       ctx.restore();
     }
 
@@ -11670,70 +11702,70 @@
         ctx.fillStyle = eff.color || "#9b59b6";
         ctx.fillText(hitText, hx + 14, hy + 4);
       } else if (eff.type === "bleed") {
-                      // 1. Draw Shiny Crimson Blood Droplet
-                      ctx.fillStyle = "#c0392b"; // Deep crimson blood
-                      ctx.strokeStyle = "#000000";
-                      ctx.lineWidth = 3.5;
-                      ctx.lineJoin = "round";
-                      ctx.beginPath();
-                      ctx.moveTo(hx, hy - 8);
-                      ctx.quadraticCurveTo(hx - 6, hy, hx - 6, hy + 4);
-                      ctx.quadraticCurveTo(hx - 6, hy + 9, hx, hy + 9);
-                      ctx.quadraticCurveTo(hx + 6, hy + 9, hx + 6, hy + 4);
-                      ctx.quadraticCurveTo(hx + 6, hy - 2, hx, hy - 8);
-                      ctx.closePath();
-                      ctx.fill();
-                      ctx.stroke();
+        // 1. Draw Shiny Crimson Blood Droplet
+        ctx.fillStyle = "#c0392b"; // Deep crimson blood
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(hx, hy - 8);
+        ctx.quadraticCurveTo(hx - 6, hy, hx - 6, hy + 4);
+        ctx.quadraticCurveTo(hx - 6, hy + 9, hx, hy + 9);
+        ctx.quadraticCurveTo(hx + 6, hy + 9, hx + 6, hy + 4);
+        ctx.quadraticCurveTo(hx + 6, hy - 2, hx, hy - 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
 
-                      // Specular shine
-                      ctx.fillStyle = "#ffffff";
-                      ctx.beginPath();
-                      ctx.ellipse(hx - 2, hy + 2, 1.2, 2.5, Math.PI / 4, 0, Math.PI * 2);
-                      ctx.fill();
+        // Specular shine
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.ellipse(hx - 2, hy + 2, 1.2, 2.5, Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
 
-                      // 2. Draw Damage Text (Dark Crimson)
-                      let hitText = window.formatNumber(eff.amount);
-                      ctx.font = "bold 15px monospace";
-                      ctx.strokeStyle = "#000000";
-                      ctx.lineWidth = 3.5;
-                      ctx.lineJoin = "round";
-                      ctx.strokeText(hitText, hx + 14, hy + 4);
-                      ctx.fillStyle = eff.color || "#960018";
-                      ctx.fillText(hitText, hx + 14, hy + 4);
-                    } else if (eff.type === "poison") {
-                      // 1. Draw 2-Layer Bubbling Toxic Spore / Biohazard Droplet
-                      ctx.beginPath();
-                      ctx.arc(hx, hy, 6, 0, Math.PI * 2);
-                      ctx.fillStyle = "#2ecc71"; // Vibrant toxic green
-                      ctx.strokeStyle = "#000000";
-                      ctx.lineWidth = 3.5;
-                      ctx.lineJoin = "round";
-                      ctx.stroke();
-                      ctx.fill();
+        // 2. Draw Damage Text (Dark Crimson)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#960018";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "poison") {
+        // 1. Draw 2-Layer Bubbling Toxic Spore / Biohazard Droplet
+        ctx.beginPath();
+        ctx.arc(hx, hy, 6, 0, Math.PI * 2);
+        ctx.fillStyle = "#2ecc71"; // Vibrant toxic green
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.stroke();
+        ctx.fill();
 
-                      // Draw tiny inner bubbles / nucleus
-                      ctx.fillStyle = "#27ae60";
-                      ctx.beginPath();
-                      ctx.arc(hx - 2, hy - 2, 1.5, 0, Math.PI * 2);
-                      ctx.arc(hx + 2, hy + 2, 1.2, 0, Math.PI * 2);
-                      ctx.fill();
+        // Draw tiny inner bubbles / nucleus
+        ctx.fillStyle = "#27ae60";
+        ctx.beginPath();
+        ctx.arc(hx - 2, hy - 2, 1.5, 0, Math.PI * 2);
+        ctx.arc(hx + 2, hy + 2, 1.2, 0, Math.PI * 2);
+        ctx.fill();
 
-                      // White specular shine
-                      ctx.fillStyle = "#ffffff";
-                      ctx.beginPath();
-                      ctx.arc(hx - 2, hy - 2, 0.6, 0, Math.PI * 2);
-                      ctx.fill();
+        // White specular shine
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(hx - 2, hy - 2, 0.6, 0, Math.PI * 2);
+        ctx.fill();
 
-                      // 2. Draw Damage Text (Vibrant Green)
-                      let hitText = window.formatNumber(eff.amount);
-                      ctx.font = "bold 15px monospace";
-                      ctx.strokeStyle = "#000000";
-                      ctx.lineWidth = 3.5;
-                      ctx.lineJoin = "round";
-                      ctx.strokeText(hitText, hx + 14, hy + 4);
-                      ctx.fillStyle = eff.color || "#2ecc71";
-                      ctx.fillText(hitText, hx + 14, hy + 4);
-                    } else if (eff.type === "item_drop") {
+        // 2. Draw Damage Text (Vibrant Green)
+        let hitText = window.formatNumber(eff.amount);
+        ctx.font = "bold 15px monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.strokeText(hitText, hx + 14, hy + 4);
+        ctx.fillStyle = eff.color || "#2ecc71";
+        ctx.fillText(hitText, hx + 14, hy + 4);
+      } else if (eff.type === "item_drop") {
         ctx.font = "bold 13px sans-serif";
         ctx.strokeStyle = "#000000";
         ctx.lineWidth = 3.5;

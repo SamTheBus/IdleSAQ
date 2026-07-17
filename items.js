@@ -1585,41 +1585,41 @@ Object.assign(window.ItemFactory, {
           6.0 * hpDefExpScale * prestigeMult * baseRarityMult * overallMult,
         );
       } else if (chosenType === "helmet" || chosenType === "leggings") {
-              item.baseDef = Math.ceil(
-                0.7 * hpDefExpScale * prestigeMult * baseRarityMult,
-              );
-              item.baseMaxHp = Math.ceil(
-                3.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-              );
-            } else if (item.type === "boots") {
-                item.baseDef = Math.ceil(
-                  0.35 * hpDefExpScale * prestigeMult * baseRarityMult,
-                );
-                item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
-              } else if (item.type === "subweapon") {
-                if (item.subType === "shield") {
-                item.baseDef = Math.ceil(
-                  1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-                );
-                let noun = item.noun ? item.noun.toLowerCase() : "";
-                if (noun.includes("buckler")) {
-                  item.baseBlock = 0.12;
-                } else if (noun.includes("tower")) {
-                  item.baseBlock = 0.02;
-                } else {
-                  item.baseBlock = 0.05;
-                }
-              } else if (item.subType === "dagger") {
-                item.baseAtk = Math.ceil(
-                  0.8 * expScale * prestigeMult * baseRarityMult,
-                );
-                let noun = item.noun ? item.noun.toLowerCase() : "";
-                if (noun.includes("main-gauche")) {
-                  item.baseParry = 0.10;
-                } else {
-                  item.baseParry = 0.05;
-                }
-              } else if (item.subType === "tome") {
+        item.baseDef = Math.ceil(
+          0.7 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+        item.baseMaxHp = Math.ceil(
+          3.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+      } else if (item.type === "boots") {
+        item.baseDef = Math.ceil(
+          0.35 * hpDefExpScale * prestigeMult * baseRarityMult,
+        );
+        item.baseMoveSpeed = Math.ceil(1.0 * stageScale * prestigeMult);
+      } else if (item.type === "subweapon") {
+        if (item.subType === "shield") {
+          item.baseDef = Math.ceil(
+            1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+          );
+          let noun = item.noun ? item.noun.toLowerCase() : "";
+          if (noun.includes("buckler")) {
+            item.baseBlock = 0.12;
+          } else if (noun.includes("tower")) {
+            item.baseBlock = 0.02;
+          } else {
+            item.baseBlock = 0.05;
+          }
+        } else if (item.subType === "dagger") {
+          item.baseAtk = Math.ceil(
+            0.8 * expScale * prestigeMult * baseRarityMult,
+          );
+          let noun = item.noun ? item.noun.toLowerCase() : "";
+          if (noun.includes("main-gauche")) {
+            item.baseParry = 0.1;
+          } else {
+            item.baseParry = 0.05;
+          }
+        } else if (item.subType === "tome") {
           item.baseInt = Math.ceil(
             1.5 * expScale * prestigeMult * baseRarityMult,
           );
@@ -2682,43 +2682,43 @@ window.recalculateItemStats = function (item) {
   }
 
   if (
-      item.type === "subweapon" &&
-      !item.isUniqueAegis &&
-      !item.isUniqueWatch &&
-      !item.isUniqueChronicle
-    ) {
-      let stars = item.statsRolled || 0;
-      let baseRarityMult = 1.0 + stars * 0.3;
-      let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
-      let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-      let repScale = Math.pow(repGrowth, repStage);
-      let expScale = repScale;
-      let hpDefExpScale = repScale;
-      let prestigeMult = 1.0;
+    item.type === "subweapon" &&
+    !item.isUniqueAegis &&
+    !item.isUniqueWatch &&
+    !item.isUniqueChronicle
+  ) {
+    let stars = item.statsRolled || 0;
+    let baseRarityMult = 1.0 + stars * 0.3;
+    let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
+    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+    let repScale = Math.pow(repGrowth, repStage);
+    let expScale = repScale;
+    let hpDefExpScale = repScale;
+    let prestigeMult = 1.0;
 
-      if (item.subType === "shield") {
-        item.rawBaseDef = Math.ceil(
-          1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
-        );
-        let noun = item.noun ? item.noun.toLowerCase() : "";
-        if (noun.includes("buckler")) {
-          item.rawBaseBlock = 0.12;
-        } else if (noun.includes("tower")) {
-          item.rawBaseBlock = 0.02;
-        } else {
-          item.rawBaseBlock = 0.05;
-        }
-      } else if (item.subType === "dagger") {
-        item.rawBaseAtk = Math.ceil(
-          0.8 * expScale * prestigeMult * baseRarityMult,
-        );
-        let noun = item.noun ? item.noun.toLowerCase() : "";
-        if (noun.includes("main-gauche")) {
-          item.rawBaseParry = 0.10;
-        } else {
-          item.rawBaseParry = 0.05;
-        }
-      } else if (item.subType === "tome") {
+    if (item.subType === "shield") {
+      item.rawBaseDef = Math.ceil(
+        1.0 * hpDefExpScale * prestigeMult * baseRarityMult,
+      );
+      let noun = item.noun ? item.noun.toLowerCase() : "";
+      if (noun.includes("buckler")) {
+        item.rawBaseBlock = 0.12;
+      } else if (noun.includes("tower")) {
+        item.rawBaseBlock = 0.02;
+      } else {
+        item.rawBaseBlock = 0.05;
+      }
+    } else if (item.subType === "dagger") {
+      item.rawBaseAtk = Math.ceil(
+        0.8 * expScale * prestigeMult * baseRarityMult,
+      );
+      let noun = item.noun ? item.noun.toLowerCase() : "";
+      if (noun.includes("main-gauche")) {
+        item.rawBaseParry = 0.1;
+      } else {
+        item.rawBaseParry = 0.05;
+      }
+    } else if (item.subType === "tome") {
       item.rawBaseInt = Math.ceil(
         1.5 * expScale * prestigeMult * baseRarityMult,
       );
@@ -4796,7 +4796,7 @@ window.buyGoldUpgrade = function (type) {
   window.SoundManager.play("spell");
 
   if (window.spawnPurchaseCelebration) {
-    window.spawnPurchaseCelebration("alchemy", "#f1c40f", 4);
+    window.spawnPurchaseCelebration("upgrade", "#f1c40f", 4);
   }
 
   window.updateUI();
@@ -5033,7 +5033,7 @@ window.executeParagonUpgrade = function () {
       );
       if (window.SoundManager) window.SoundManager.play("revive");
       if (window.spawnPurchaseCelebration) {
-        window.spawnPurchaseCelebration("alchemy", "#ff007f", 5);
+        window.spawnPurchaseCelebration("paragon", "#ff007f", 5);
       }
       window.invalidatePlayerStats();
       window.updateUI();

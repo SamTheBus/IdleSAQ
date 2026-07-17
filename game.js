@@ -386,22 +386,27 @@ window.SaveManager = {
         item && typeof item === "object" && !Array.isArray(item);
 
       const deepSanitize = (defaultObj, savedObj) => {
-              if (savedObj === undefined || savedObj === null) {
-                return JSON.parse(JSON.stringify(defaultObj));
-              }
-              // Protect BigNum objects (m & e) from getting wiped by primitive default values
-              if (savedObj && typeof savedObj === "object" && savedObj.m !== undefined && savedObj.e !== undefined) {
-                return savedObj;
-              }
-              if (!isObject(defaultObj)) {
-                if (typeof defaultObj === "number") {
-                  let parsedNum = Number(savedObj);
-                  return isNaN(parsedNum) || savedObj === null
-                    ? defaultObj
-                    : parsedNum;
-                }
-                return savedObj;
-              }
+        if (savedObj === undefined || savedObj === null) {
+          return JSON.parse(JSON.stringify(defaultObj));
+        }
+        // Protect BigNum objects (m & e) from getting wiped by primitive default values
+        if (
+          savedObj &&
+          typeof savedObj === "object" &&
+          savedObj.m !== undefined &&
+          savedObj.e !== undefined
+        ) {
+          return savedObj;
+        }
+        if (!isObject(defaultObj)) {
+          if (typeof defaultObj === "number") {
+            let parsedNum = Number(savedObj);
+            return isNaN(parsedNum) || savedObj === null
+              ? defaultObj
+              : parsedNum;
+          }
+          return savedObj;
+        }
         let result = {};
         for (let key in defaultObj) {
           if (Object.prototype.hasOwnProperty.call(defaultObj, key)) {
@@ -630,17 +635,21 @@ window.SaveManager = {
       }
 
       if (window.playerStats.dungeonPeaks === undefined) {
-              window.playerStats.dungeonPeaks = {
-                equip: 1,
-                gold: 1,
-                mat: 1,
-              };
-            }
+        window.playerStats.dungeonPeaks = {
+          equip: 1,
+          gold: 1,
+          mat: 1,
+        };
+      }
 
-            if (window.playerStats.dungeonAccumulatedGold === undefined) window.playerStats.dungeonAccumulatedGold = 0;
-            if (window.playerStats.dungeonAccumulatedXp === undefined) window.playerStats.dungeonAccumulatedXp = 0;
-            if (window.playerStats.dungeonAccumulatedLoot === undefined) window.playerStats.dungeonAccumulatedLoot = [];
-                          if (window.playerStats.crucibleAccumulatedLoot === undefined) window.playerStats.crucibleAccumulatedLoot = [];
+      if (window.playerStats.dungeonAccumulatedGold === undefined)
+        window.playerStats.dungeonAccumulatedGold = 0;
+      if (window.playerStats.dungeonAccumulatedXp === undefined)
+        window.playerStats.dungeonAccumulatedXp = 0;
+      if (window.playerStats.dungeonAccumulatedLoot === undefined)
+        window.playerStats.dungeonAccumulatedLoot = [];
+      if (window.playerStats.crucibleAccumulatedLoot === undefined)
+        window.playerStats.crucibleAccumulatedLoot = [];
 
       if (window.playerStats.currentDungeonStage === undefined) {
         window.playerStats.currentDungeonStage = {
@@ -976,34 +985,42 @@ window.SaveManager = {
       }
 
       // --- ACCUMULATIVE INSTANCED RESUME SYSTEM ---
-            // Allows players to seamlessly return to active runs after browser tab suspensions
-            if (window.playerStats.isCrucibleMode || window.playerStats.isDungeonMode) {
-              window.mob = null; // Clear active monster to spawn a fresh, scaled threat
-              window.hero.x = 40; // Reset hero to starting coordinate
-              window.setPauseState(true); // Soft-pause so the player can prepare before the battle resumes
+      // Allows players to seamlessly return to active runs after browser tab suspensions
+      if (
+        window.playerStats.isCrucibleMode ||
+        window.playerStats.isDungeonMode
+      ) {
+        window.mob = null; // Clear active monster to spawn a fresh, scaled threat
+        window.hero.x = 40; // Reset hero to starting coordinate
+        window.setPauseState(true); // Soft-pause so the player can prepare before the battle resumes
 
-              setTimeout(() => {
-                let runLabel = window.playerStats.isCrucibleMode ? "Crucible Wave" : "Dungeon Floor";
-                let color = window.playerStats.isCrucibleMode ? "#9b59b6" : "#8e44ad";
-                if (typeof window.pushHeaderToast === "function") {
-                  window.pushHeaderToast(`🛡️ Resumed active run: ${runLabel}!`, color);
-                }
-                if (typeof window.showCustomConfirm === "function") {
-                  window.showCustomConfirm(
-                    "🛡️ Run Resumed",
-                    `Your active <strong>${runLabel}</strong> was saved and has been successfully restored. Pick up your weapons and prepare to continue the battle!`,
-                    "Resume Battle",
-                    "",
-                    color,
-                    () => {
-                      window.setPauseState(false);
-                    }
-                  );
-                } else {
-                  window.setPauseState(false);
-                }
-              }, 1500);
-            }
+        setTimeout(() => {
+          let runLabel = window.playerStats.isCrucibleMode
+            ? "Crucible Wave"
+            : "Dungeon Floor";
+          let color = window.playerStats.isCrucibleMode ? "#9b59b6" : "#8e44ad";
+          if (typeof window.pushHeaderToast === "function") {
+            window.pushHeaderToast(
+              `🛡️ Resumed active run: ${runLabel}!`,
+              color,
+            );
+          }
+          if (typeof window.showCustomConfirm === "function") {
+            window.showCustomConfirm(
+              "🛡️ Run Resumed",
+              `Your active <strong>${runLabel}</strong> was saved and has been successfully restored. Pick up your weapons and prepare to continue the battle!`,
+              "Resume Battle",
+              "",
+              color,
+              () => {
+                window.setPauseState(false);
+              },
+            );
+          } else {
+            window.setPauseState(false);
+          }
+        }, 1500);
+      }
 
       if (window.playerStats.vendingQLevel === undefined)
         window.playerStats.vendingQLevel = 0;
@@ -1164,15 +1181,15 @@ window.SaveManager = {
     let elapsedSeconds = 0;
 
     let totalGold = 0;
-        let totalXp = 0;
-        let totalKills = 0;
-        let stagesGained = 0;
-        let diedOffline = false;
-        let deathStage = 0;
-        let itemsDropped = [];
-        let scrapsGainedMap = {};
-        let farmKills = 0;
-        let cardSacksGained = 0;
+    let totalXp = 0;
+    let totalKills = 0;
+    let stagesGained = 0;
+    let diedOffline = false;
+    let deathStage = 0;
+    let itemsDropped = [];
+    let scrapsGainedMap = {};
+    let farmKills = 0;
+    let cardSacksGained = 0;
 
     function recordScrapGained(name, amount) {
       if (!scrapsGainedMap[name]) scrapsGainedMap[name] = 0;
@@ -1439,32 +1456,35 @@ window.SaveManager = {
         stagesGained++;
 
         // Award resources for clear
-                totalKills += targetsRequired + 1;
-                let stageGoldReward = BigNum.from(2)
-                  .mul(b_expScale)
-                  .mul(targetsRequired + 5)
-                  .mul(p.gold);
-                b_totalGold = b_totalGold.add(stageGoldReward);
-                let stageXpReward = BigNum.from(5)
-                  .mul(b_expScale)
-                  .mul(targetsRequired + 5);
-                b_totalXp = b_totalXp.add(stageXpReward);
+        totalKills += targetsRequired + 1;
+        let stageGoldReward = BigNum.from(2)
+          .mul(b_expScale)
+          .mul(targetsRequired + 5)
+          .mul(p.gold);
+        b_totalGold = b_totalGold.add(stageGoldReward);
+        let stageXpReward = BigNum.from(5)
+          .mul(b_expScale)
+          .mul(targetsRequired + 5);
+        b_totalXp = b_totalXp.add(stageXpReward);
 
-                // Roll item drops for stage completion (Offline: Manual Play Bonus disabled)
-                let dropR = 0.0015;
-                if (Math.random() < dropR * p.drop * 1.0) {
-                  rollOfflineItem(true, currentStage, false);
-                }
+        // Roll item drops for stage completion (Offline: Manual Play Bonus disabled)
+        let dropR = 0.0015;
+        if (Math.random() < dropR * p.drop * 1.0) {
+          rollOfflineItem(true, currentStage, false);
+        }
 
-                // Roll for Monster Card Sack from stage boss clears
-                if (cardSacksGained < 2) {
-                  let stageFactor = Math.min(1.0, Math.pow((window.playerStats.lifetimePeakStage || 1) / 100000, 0.5));
-                  let cardChance = 0.01 * p.drop * stageFactor;
-                  if (Math.random() < cardChance) {
-                    recordScrapGained("Monster Card Sack", 1);
-                    cardSacksGained++;
-                  }
-                }
+        // Roll for Monster Card Sack from stage boss clears
+        if (cardSacksGained < 2) {
+          let stageFactor = Math.min(
+            1.0,
+            Math.pow((window.playerStats.lifetimePeakStage || 1) / 100000, 0.5),
+          );
+          let cardChance = 0.01 * p.drop * stageFactor;
+          if (Math.random() < cardChance) {
+            recordScrapGained("Monster Card Sack", 1);
+            cardSacksGained++;
+          }
+        }
       } else {
         break; // Time ran out for this stage advancement
       }
@@ -1498,97 +1518,109 @@ window.SaveManager = {
       b_totalXp = b_totalXp.add(xpFarmed);
 
       // Roll item and potion drops for farmed kills (Offline: Manual Play Bonus disabled)
-            let dropR = 0.001;
-            for (let k = 0; k < farmKills; k++) {
-              if (Math.random() < dropR * p.drop * 1.0) {
-                rollOfflineItem(false, currentStage, false);
-              }
+      let dropR = 0.001;
+      for (let k = 0; k < farmKills; k++) {
+        if (Math.random() < dropR * p.drop * 1.0) {
+          rollOfflineItem(false, currentStage, false);
+        }
+      }
+
+      // Potion and Card Sack drop rolls
+      if (farmKills > 0) {
+        let stageFactor = Math.min(
+          1.0,
+          Math.pow((window.playerStats.lifetimePeakStage || 1) / 100000, 0.5),
+        );
+        let pCurrent = window.resolvePlayerStats();
+
+        // 1. Potion Roll Engine
+        let rollChance = 0.0004 * pCurrent.drop * stageFactor;
+        let maxPotionsLimit = Math.min(
+          40,
+          Math.max(5, Math.floor(40 * (offlineSeconds / 28800) * stageFactor)),
+        );
+
+        let potionsGained = 0;
+        const types = [
+          "Attack Elixir",
+          "Vitality Elixir",
+          "Armored Elixir",
+          "Haste Elixir",
+        ];
+
+        for (let k = 0; k < farmKills; k++) {
+          if (potionsGained >= maxPotionsLimit) break;
+          if (Math.random() < rollChance) {
+            let rolledPot = types[Math.floor(Math.random() * types.length)];
+            recordScrapGained(rolledPot, 1);
+            potionsGained++;
+          }
+        }
+
+        // 2. Card Sack Roll Engine from Farming
+        if (cardSacksGained < 3) {
+          // Combined cap (2 from pushing + 1 from farming = max 3)
+          let maxFarmSacksLimit = cardSacksGained < 2 ? 1 : 0; // Can only get max 1 from farming itself
+          let farmSacksGained = 0;
+          let cardChance = 0.00002 * pCurrent.drop * stageFactor;
+
+          for (let k = 0; k < farmKills; k++) {
+            if (farmSacksGained >= maxFarmSacksLimit || cardSacksGained >= 3)
+              break;
+            if (Math.random() < cardChance) {
+              recordScrapGained("Monster Card Sack", 1);
+              cardSacksGained++;
+              farmSacksGained++;
             }
-
-            // Potion and Card Sack drop rolls
-            if (farmKills > 0) {
-              let stageFactor = Math.min(1.0, Math.pow((window.playerStats.lifetimePeakStage || 1) / 100000, 0.5));
-              let pCurrent = window.resolvePlayerStats();
-
-              // 1. Potion Roll Engine
-              let rollChance = 0.0004 * pCurrent.drop * stageFactor;
-              let maxPotionsLimit = Math.min(40, Math.max(5, Math.floor(40 * (offlineSeconds / 28800) * stageFactor)));
-
-              let potionsGained = 0;
-              const types = [
-                "Attack Elixir",
-                "Vitality Elixir",
-                "Armored Elixir",
-                "Haste Elixir",
-              ];
-
-              for (let k = 0; k < farmKills; k++) {
-                if (potionsGained >= maxPotionsLimit) break;
-                if (Math.random() < rollChance) {
-                  let rolledPot = types[Math.floor(Math.random() * types.length)];
-                  recordScrapGained(rolledPot, 1);
-                  potionsGained++;
-                }
-              }
-
-              // 2. Card Sack Roll Engine from Farming
-              if (cardSacksGained < 3) { // Combined cap (2 from pushing + 1 from farming = max 3)
-                let maxFarmSacksLimit = cardSacksGained < 2 ? 1 : 0; // Can only get max 1 from farming itself
-                let farmSacksGained = 0;
-                let cardChance = 0.00002 * pCurrent.drop * stageFactor;
-
-                for (let k = 0; k < farmKills; k++) {
-                  if (farmSacksGained >= maxFarmSacksLimit || cardSacksGained >= 3) break;
-                  if (Math.random() < cardChance) {
-                    recordScrapGained("Monster Card Sack", 1);
-                    cardSacksGained++;
-                    farmSacksGained++;
-                  }
-                }
-              }
-            }
+          }
+        }
+      }
 
       elapsedSeconds += remainingSeconds;
       remainingSeconds = 0;
     }
 
     // Calculate offline soul gains to match online campaign rates
-        let offlineMonsterSouls = 0;
+    let offlineMonsterSouls = 0;
 
-        // 1. Expected Souls from cleared progression stages
-                  if (stagesGained > 0) {
-                    for (let stg = originalStage; stg < currentStage; stg++) {
-                      // Simulated Boss-Scale Monster Soul drop (30% chance per progression stage cleared)
-                      if (Math.random() < 0.30) {
-                        let baseQty = window.randInt(2, 6);
-                        let scaleMultiplier = 1 + Math.log10(stg);
-                        let finalQty = Math.round(baseQty * scaleMultiplier * Math.sqrt(p.qly || 1.0));
-                        offlineMonsterSouls += finalQty;
-                      }
-
-                      // Normal mobs: targetsRequired * 12% drop chance * (1 + Math.floor(Math.sqrt(stg / 10)))
-                                            let progNormalSoulExpected = targetsRequired * (0.12 * p.drop);
-                                            let progNormalSoulQty = 1 + Math.floor(Math.sqrt(stg / 10));
-                                            offlineMonsterSouls += Math.round(progNormalSoulExpected * progNormalSoulQty);
-                    }
-                  }
-
-        // 2. Expected Souls from idle farming kills on the final stage
-        if (farmKills > 0) {
-          let rareSpawnChance = p.rareSpawn || 0.01;
-          let expectedRares = farmKills * rareSpawnChance;
-          let expectedNormals = farmKills - expectedRares;
-
-          // Normal mob Monster Souls: 12% chance * (1 + Math.floor(Math.sqrt(currentStage / 10)))
-                    let normalSoulExpected = expectedNormals * (0.12 * p.drop);
-                    let normalSoulQty = 1 + Math.floor(Math.sqrt(currentStage / 10));
-                    offlineMonsterSouls += Math.round(normalSoulExpected * normalSoulQty);
+    // 1. Expected Souls from cleared progression stages
+    if (stagesGained > 0) {
+      for (let stg = originalStage; stg < currentStage; stg++) {
+        // Simulated Boss-Scale Monster Soul drop (30% chance per progression stage cleared)
+        if (Math.random() < 0.3) {
+          let baseQty = window.randInt(2, 6);
+          let scaleMultiplier = 1 + Math.log10(stg);
+          let finalQty = Math.round(
+            baseQty * scaleMultiplier * Math.sqrt(p.qly || 1.0),
+          );
+          offlineMonsterSouls += finalQty;
         }
 
-        // Apply and record to the summary card
-        if (offlineMonsterSouls > 0) {
-          recordScrapGained("Monster Soul", offlineMonsterSouls);
-        }
+        // Normal mobs: targetsRequired * 12% drop chance * (1 + Math.floor(Math.sqrt(stg / 10)))
+        let progNormalSoulExpected = targetsRequired * (0.12 * p.drop);
+        let progNormalSoulQty = 1 + Math.floor(Math.sqrt(stg / 10));
+        offlineMonsterSouls += Math.round(
+          progNormalSoulExpected * progNormalSoulQty,
+        );
+      }
+    }
+
+    // 2. Expected Souls from idle farming kills on the final stage
+    if (farmKills > 0) {
+      let rareSpawnChance = p.rareSpawn || 0.01;
+      let expectedRares = farmKills * rareSpawnChance;
+      let expectedNormals = farmKills - expectedRares;
+
+      // Normal mob Monster Souls: 12% chance * (1 + Math.floor(Math.sqrt(currentStage / 10)))
+      let normalSoulExpected = expectedNormals * (0.12 * p.drop);
+      let normalSoulQty = 1 + Math.floor(Math.sqrt(currentStage / 10));
+      offlineMonsterSouls += Math.round(normalSoulExpected * normalSoulQty);
+    }
+
+    // Apply and record to the summary card
+    if (offlineMonsterSouls > 0) {
+      recordScrapGained("Monster Soul", offlineMonsterSouls);
+    }
 
     // Update active player statistics on return
     window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
@@ -1898,18 +1930,18 @@ window.loadGameAndSyncCloud = function () {
 
       window.hideLoadingScreen();
 
-            if (typeof window.checkDailyCalendar === "function") {
-              window.checkDailyCalendar();
-            }
+      if (typeof window.checkDailyCalendar === "function") {
+        window.checkDailyCalendar();
+      }
 
-            if (resolvedOfflineMs > 60000) {
-              window.applyOfflineGains(resolvedOfflineMs);
-            } else {
-              window.setPauseState(false);
-              window.updateUI();
-              window.renderInventory();
-            }
-          })
+      if (resolvedOfflineMs > 60000) {
+        window.applyOfflineGains(resolvedOfflineMs);
+      } else {
+        window.setPauseState(false);
+        window.updateUI();
+        window.renderInventory();
+      }
+    })
     .catch((err) => {
       // Ignore abort errors from manual play-offline clicks
       if (err.name === "AbortError") return;
@@ -2156,13 +2188,13 @@ window.onload = function () {
   })();
 
   if (typeof window.addEtcDrop === "function") {
-      const originalAddEtcDrop = window.addEtcDrop;
-      window.addEtcDrop = function (itemName, amount = 1, silent = false) {
-        originalAddEtcDrop(itemName, amount);
-        if (!silent && typeof window.recordRunLoot === "function") {
-                    window.recordRunLoot(itemName, amount, "etc");
-                  }
-        if (!silent) {
+    const originalAddEtcDrop = window.addEtcDrop;
+    window.addEtcDrop = function (itemName, amount = 1, silent = false) {
+      originalAddEtcDrop(itemName, amount);
+      if (!silent && typeof window.recordRunLoot === "function") {
+        window.recordRunLoot(itemName, amount, "etc");
+      }
+      if (!silent) {
         let color = "#bdc3c7";
         if (itemName === "Eridium Shard") color = "#8e44ad";
         else if (itemName === "Gacha Key") color = "#f1c40f";
@@ -2184,13 +2216,13 @@ window.onload = function () {
   }
 
   if (typeof window.addUseDrop === "function") {
-      const originalAddUseDrop = window.addUseDrop;
-      window.addUseDrop = function (itemName, amount = 1, silent = false) {
-        originalAddUseDrop(itemName, amount);
-        if (!silent && typeof window.recordRunLoot === "function") {
-                    window.recordRunLoot(itemName, amount, "use");
-                  }
-        if (!silent) {
+    const originalAddUseDrop = window.addUseDrop;
+    window.addUseDrop = function (itemName, amount = 1, silent = false) {
+      originalAddUseDrop(itemName, amount);
+      if (!silent && typeof window.recordRunLoot === "function") {
+        window.recordRunLoot(itemName, amount, "use");
+      }
+      if (!silent) {
         let color = "#bdc3c7";
         if (window.useDex && window.useDex[itemName]) {
           color = window.useDex[itemName].color || "#2ecc71";
@@ -2270,26 +2302,26 @@ window.onload = function () {
   }, 4000);
 
   // Block pointer event leaks and click-through propagation on tooltips (Gesture-Detecting Redesign)
-    const preventTooltipLeaks = (id) => {
-      let el = document.getElementById(id);
-      if (!el) return;
+  const preventTooltipLeaks = (id) => {
+    let el = document.getElementById(id);
+    if (!el) return;
 
-      let startY = 0;
-      let startX = 0;
-      let isScrolling = false;
+    let startY = 0;
+    let startX = 0;
+    let isScrolling = false;
 
-      // Desktop Keep-Alive Hover Listeners
-      el.addEventListener("mouseenter", () => {
-        if (window.tooltipHideTimeoutId) {
-          clearTimeout(window.tooltipHideTimeoutId);
-          window.tooltipHideTimeoutId = null;
-        }
-      });
-      el.addEventListener("mouseleave", () => {
-        window.hideTooltip();
-      });
+    // Desktop Keep-Alive Hover Listeners
+    el.addEventListener("mouseenter", () => {
+      if (window.tooltipHideTimeoutId) {
+        clearTimeout(window.tooltipHideTimeoutId);
+        window.tooltipHideTimeoutId = null;
+      }
+    });
+    el.addEventListener("mouseleave", () => {
+      window.hideTooltip();
+    });
 
-      const handleStart = (clientX, clientY) => {
+    const handleStart = (clientX, clientY) => {
       startY = clientY;
       startX = clientX;
       isScrolling = false;
@@ -2304,27 +2336,27 @@ window.onload = function () {
     };
 
     const handleEnd = (e) => {
-          if (isScrolling) {
-            return; // Stop dismissal if they swiped or scrolled the card
-          }
+      if (isScrolling) {
+        return; // Stop dismissal if they swiped or scrolled the card
+      }
 
-          // Tapped on an interactive element inside the tooltip
-          if (
-            e.target.closest("summary") ||
-            e.target.closest("details") ||
-            e.target.closest("button") ||
-            e.target.closest("select") ||
-            e.target.closest("option") ||
-            e.target.closest(".custom-select") ||
-            e.target.closest("label") ||
-            e.target.closest("input")
-          ) {
-            return;
-          }
+      // Tapped on an interactive element inside the tooltip
+      if (
+        e.target.closest("summary") ||
+        e.target.closest("details") ||
+        e.target.closest("button") ||
+        e.target.closest("select") ||
+        e.target.closest("option") ||
+        e.target.closest(".custom-select") ||
+        e.target.closest("label") ||
+        e.target.closest("input")
+      ) {
+        return;
+      }
 
-          e.preventDefault();
-          window.hideTooltip();
-        };
+      e.preventDefault();
+      window.hideTooltip();
+    };
 
     // Modern Pointer Events
     el.addEventListener(
@@ -3084,107 +3116,107 @@ function update() {
   if (window.mob && window.mob.funnyTextTimer > 0) window.mob.funnyTextTimer--;
 
   if (window.mob && window.mob.hp.gt(0)) {
-      if (window.mob.bleedTimer && window.mob.bleedTimer > 0) {
-        window.mob.bleedTimer--;
-        window.mob.bleedTickCounter = (window.mob.bleedTickCounter || 0) + 1;
-        if (window.mob.bleedTickCounter >= 15) {
-          window.mob.bleedTickCounter = 0;
-          let stacks = window.mob.bleedStacks || 1;
-          let bleedDmg = Math.max(
-            1,
-            Math.ceil(((window.mob.bleedDmgPerSecond || 1) * stacks) / 4),
-          );
-          window.mob.hp = window.mob.hp.sub(bleedDmg);
-          window.mob.flashTimer = 5;
-          for (let i = 0; i < 3; i++) {
-            window.particles.push({
-              x: window.mob.x + window.mob.w / 2 + window.randFloat(-10, 10),
-              y: window.mob.y + window.mob.h / 2 + window.randFloat(-10, 10),
-              vx: window.randFloat(-1.0, 1.0),
-              vy: window.randFloat(-2.5, -0.5),
-              radius: window.randFloat(1.2, 2.5),
-              color: "#960018",
-              alpha: 1,
-              life: window.randInt(10, 18),
-            });
-          }
-          window.spawnDamageEffect(bleedDmg, "bleed", false);
-          window.damageHistory.push({ time: Date.now(), amount: bleedDmg });
-
-          // Sanguine Reaver: Ticks lifesteal with the active bleed damage instead of granting instant flat burst heals!
-          if (window.hasUniquePassive("weapon_sword")) {
-            let bleedHeal = Math.max(1, Math.ceil(bleedDmg * 0.15));
-            window.playerStats.currentHp = Math.min(
-              p.maxHp,
-              window.playerStats.currentHp + bleedHeal,
-            );
-            window.effects.push({
-              type: "regen",
-              x: window.hero.x - 20,
-              y: window.hero.y - 12,
-              amount: bleedHeal,
-              color: "#e74c3c",
-              life: 30,
-            });
-          }
-
-          if (window.mob.hp.lte(0)) window.handleMobDeath();
+    if (window.mob.bleedTimer && window.mob.bleedTimer > 0) {
+      window.mob.bleedTimer--;
+      window.mob.bleedTickCounter = (window.mob.bleedTickCounter || 0) + 1;
+      if (window.mob.bleedTickCounter >= 15) {
+        window.mob.bleedTickCounter = 0;
+        let stacks = window.mob.bleedStacks || 1;
+        let bleedDmg = Math.max(
+          1,
+          Math.ceil(((window.mob.bleedDmgPerSecond || 1) * stacks) / 4),
+        );
+        window.mob.hp = window.mob.hp.sub(bleedDmg);
+        window.mob.flashTimer = 5;
+        for (let i = 0; i < 3; i++) {
+          window.particles.push({
+            x: window.mob.x + window.mob.w / 2 + window.randFloat(-10, 10),
+            y: window.mob.y + window.mob.h / 2 + window.randFloat(-10, 10),
+            vx: window.randFloat(-1.0, 1.0),
+            vy: window.randFloat(-2.5, -0.5),
+            radius: window.randFloat(1.2, 2.5),
+            color: "#960018",
+            alpha: 1,
+            life: window.randInt(10, 18),
+          });
         }
-      }
-    }
+        window.spawnDamageEffect(bleedDmg, "bleed", false);
+        window.damageHistory.push({ time: Date.now(), amount: bleedDmg });
 
-    // --- BIOHAZARD POISON DOT & LIFE-STEAL ---
-    if (window.mob && window.mob.hp.gt(0)) {
-      if (window.mob.poisonTimer && window.mob.poisonTimer > 0) {
-        window.mob.poisonTimer--;
-        window.mob.poisonTickCounter = (window.mob.poisonTickCounter || 0) + 1;
-        if (window.mob.poisonTickCounter >= 15) {
-          window.mob.poisonTickCounter = 0;
-          let pStacks = window.mob.poisonStacks || 1;
-          let poisonDmg = Math.max(
-            1,
-            Math.ceil(((window.mob.poisonDmgPerSecond || 1) * pStacks) / 4),
-          );
-
-          window.mob.hp = window.mob.hp.sub(poisonDmg);
-          window.mob.flashTimer = 5;
-
-          // Spawn toxic green gas particles
-          for (let i = 0; i < 3; i++) {
-            window.particles.push({
-              x: window.mob.x + window.mob.w / 2 + window.randFloat(-10, 10),
-              y: window.mob.y + window.mob.h / 2 + window.randFloat(-10, 10),
-              vx: window.randFloat(-1.0, 1.0),
-              vy: window.randFloat(-2.0, -0.5),
-              radius: window.randFloat(1.2, 2.5),
-              color: "#2ecc71",
-              alpha: 1,
-              life: window.randInt(10, 18),
-            });
-          }
-
-          window.spawnDamageEffect(poisonDmg, "poison", false); // Trigger custom green toxic spore text
-                          window.damageHistory.push({ time: Date.now(), amount: poisonDmg });
-
-          // Life-stealing effect: Heals player for 100% of Poison DoT dealt!
-          let healAmt = poisonDmg;
+        // Sanguine Reaver: Ticks lifesteal with the active bleed damage instead of granting instant flat burst heals!
+        if (window.hasUniquePassive("weapon_sword")) {
+          let bleedHeal = Math.max(1, Math.ceil(bleedDmg * 0.15));
           window.playerStats.currentHp = Math.min(
             p.maxHp,
-            window.playerStats.currentHp + healAmt,
+            window.playerStats.currentHp + bleedHeal,
           );
           window.effects.push({
             type: "regen",
             x: window.hero.x - 20,
             y: window.hero.y - 12,
-            amount: healAmt,
-            color: "#2ecc71",
+            amount: bleedHeal,
+            color: "#e74c3c",
             life: 30,
           });
-
-          if (window.mob.hp.lte(0)) window.handleMobDeath();
         }
+
+        if (window.mob.hp.lte(0)) window.handleMobDeath();
       }
     }
+  }
+
+  // --- BIOHAZARD POISON DOT & LIFE-STEAL ---
+  if (window.mob && window.mob.hp.gt(0)) {
+    if (window.mob.poisonTimer && window.mob.poisonTimer > 0) {
+      window.mob.poisonTimer--;
+      window.mob.poisonTickCounter = (window.mob.poisonTickCounter || 0) + 1;
+      if (window.mob.poisonTickCounter >= 15) {
+        window.mob.poisonTickCounter = 0;
+        let pStacks = window.mob.poisonStacks || 1;
+        let poisonDmg = Math.max(
+          1,
+          Math.ceil(((window.mob.poisonDmgPerSecond || 1) * pStacks) / 4),
+        );
+
+        window.mob.hp = window.mob.hp.sub(poisonDmg);
+        window.mob.flashTimer = 5;
+
+        // Spawn toxic green gas particles
+        for (let i = 0; i < 3; i++) {
+          window.particles.push({
+            x: window.mob.x + window.mob.w / 2 + window.randFloat(-10, 10),
+            y: window.mob.y + window.mob.h / 2 + window.randFloat(-10, 10),
+            vx: window.randFloat(-1.0, 1.0),
+            vy: window.randFloat(-2.0, -0.5),
+            radius: window.randFloat(1.2, 2.5),
+            color: "#2ecc71",
+            alpha: 1,
+            life: window.randInt(10, 18),
+          });
+        }
+
+        window.spawnDamageEffect(poisonDmg, "poison", false); // Trigger custom green toxic spore text
+        window.damageHistory.push({ time: Date.now(), amount: poisonDmg });
+
+        // Life-stealing effect: Heals player for 100% of Poison DoT dealt!
+        let healAmt = poisonDmg;
+        window.playerStats.currentHp = Math.min(
+          p.maxHp,
+          window.playerStats.currentHp + healAmt,
+        );
+        window.effects.push({
+          type: "regen",
+          x: window.hero.x - 20,
+          y: window.hero.y - 12,
+          amount: healAmt,
+          color: "#2ecc71",
+          life: 30,
+        });
+
+        if (window.mob.hp.lte(0)) window.handleMobDeath();
+      }
+    }
+  }
 
   if (window.playerStats.frenzyTimer > 0) window.playerStats.frenzyTimer--;
   if (window.playerStats.adrenalineTimer > 0)
@@ -3274,19 +3306,20 @@ function update() {
   }
 
   window.logicClock++;
-    if (window.logicClock % 60 === 0) {
-      if (typeof window.checkAndResetMissions === "function")
-        window.checkAndResetMissions();
-      if (typeof window.checkAchievements === "function")
-        window.checkAchievements();
+  if (window.logicClock % 60 === 0) {
+    if (typeof window.checkAndResetMissions === "function")
+      window.checkAndResetMissions();
+    if (typeof window.checkAchievements === "function")
+      window.checkAchievements();
 
-      // Dynamic Active-Sigil Spawn Pity Accumulator
-      if (window.activeRiftOrbs && window.activeRiftOrbs.length === 0) {
-        window.secondsSinceLastRiftSpawn = (window.secondsSinceLastRiftSpawn || 0) + 1;
-      }
-      let spawnMult = 1 + (window.secondsSinceLastRiftSpawn || 0) * 0.10; // +10% relative chance per second
+    // Dynamic Active-Sigil Spawn Pity Accumulator
+    if (window.activeRiftOrbs && window.activeRiftOrbs.length === 0) {
+      window.secondsSinceLastRiftSpawn =
+        (window.secondsSinceLastRiftSpawn || 0) + 1;
+    }
+    let spawnMult = 1 + (window.secondsSinceLastRiftSpawn || 0) * 0.1; // +10% relative chance per second
 
-      // Stacking Apathy Decay Damage ticks
+    // Stacking Apathy Decay Damage ticks
     if (
       window.playerStats.apathyDecayStacks > 0 &&
       window.playerStats.currentHp > 0 &&
@@ -3329,18 +3362,18 @@ function update() {
     }
 
     // Roll for Void Rift Rupture (12% chance per second if Void Rupture is active)
-        if (
-          window.isCavernEffectActive("void_rupture") &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.12 * spawnMult &&
-          !(window.playerStats.purifiedAegisTimer > 0) &&
-          !window.isGamePaused
-        ) {
-          window.spawnVoidSuppressionOrbs();
-          window.secondsSinceLastRiftSpawn = 0;
-        }
+    if (
+      window.isCavernEffectActive("void_rupture") &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.12 * spawnMult &&
+      !(window.playerStats.purifiedAegisTimer > 0) &&
+      !window.isGamePaused
+    ) {
+      window.spawnVoidSuppressionOrbs();
+      window.secondsSinceLastRiftSpawn = 0;
+    }
 
-        // Stacking Apathy Distortion HP drain (0.5% Max HP per active shard)
+    // Stacking Apathy Distortion HP drain (0.5% Max HP per active shard)
     let activeShards = window.activeRiftOrbs.filter(
       (orb) => orb.type === "anomalous_shard",
     );
@@ -3376,62 +3409,62 @@ function update() {
     }
 
     // Roll for Anomalous Shard spawn (8% chance per second when idle and no active rifts if rolled on Sigil/Crucible)
-        if (
-          window.isCavernEffectActive("anomalous_shards") &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.08 * spawnMult &&
-          !window.isGamePaused
-        ) {
-          window.spawnAnomalousShard();
-          window.secondsSinceLastRiftSpawn = 0;
-        }
+    if (
+      window.isCavernEffectActive("anomalous_shards") &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.08 * spawnMult &&
+      !window.isGamePaused
+    ) {
+      window.spawnAnomalousShard();
+      window.secondsSinceLastRiftSpawn = 0;
+    }
 
-        // Roll for Perfect Strike Reticle (5% chance per second when combat is active, no active orbs, and rolled on Sigil/Crucible)
-        if (
-          window.isCavernEffectActive("perfect_strike") &&
-          window.mob &&
-          window.mob.hp.gt(0) &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.05 * spawnMult &&
-          !window.isGamePaused
-        ) {
-          window.spawnPerfectStrikeReticle();
-          window.secondsSinceLastRiftSpawn = 0;
-        }
+    // Roll for Perfect Strike Reticle (5% chance per second when combat is active, no active orbs, and rolled on Sigil/Crucible)
+    if (
+      window.isCavernEffectActive("perfect_strike") &&
+      window.mob &&
+      window.mob.hp.gt(0) &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.05 * spawnMult &&
+      !window.isGamePaused
+    ) {
+      window.spawnPerfectStrikeReticle();
+      window.secondsSinceLastRiftSpawn = 0;
+    }
 
-        // Roll for Aetheric Conduit spawn (4% chance per second when no active orbs if rolled on Sigil/Crucible)
-        if (
-          window.isCavernEffectActive("aetheric_conduit") &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.04 * spawnMult &&
-          !window.isGamePaused
-        ) {
-          window.spawnAethericConduit();
-          window.secondsSinceLastRiftSpawn = 0;
-        }
+    // Roll for Aetheric Conduit spawn (4% chance per second when no active orbs if rolled on Sigil/Crucible)
+    if (
+      window.isCavernEffectActive("aetheric_conduit") &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.04 * spawnMult &&
+      !window.isGamePaused
+    ) {
+      window.spawnAethericConduit();
+      window.secondsSinceLastRiftSpawn = 0;
+    }
 
-        // Roll for Aetheric Spark (6% chance per second when no active orbs and not awakened if rolled on Sigil/Crucible)
-        if (
-          window.isCavernEffectActive("aetheric_spark") &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.06 * spawnMult &&
-          !(window.playerStats.astralAwakeningTimer > 0) &&
-          !window.isGamePaused
-        ) {
-          window.spawnAethericSpark(0); // Commences the chain at Index 0
-          window.secondsSinceLastRiftSpawn = 0;
-        }
+    // Roll for Aetheric Spark (6% chance per second when no active orbs and not awakened if rolled on Sigil/Crucible)
+    if (
+      window.isCavernEffectActive("aetheric_spark") &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.06 * spawnMult &&
+      !(window.playerStats.astralAwakeningTimer > 0) &&
+      !window.isGamePaused
+    ) {
+      window.spawnAethericSpark(0); // Commences the chain at Index 0
+      window.secondsSinceLastRiftSpawn = 0;
+    }
 
-        // Roll for Glimmering Pixie (5% chance per second when no active orbs if rolled on Sigil/Crucible)
-        if (
-          window.isCavernEffectActive("glimmering_pixie") &&
-          window.activeRiftOrbs.length === 0 &&
-          Math.random() < 0.05 * spawnMult &&
-          !window.isGamePaused
-        ) {
-          window.spawnGlimmeringPixie();
-          window.secondsSinceLastRiftSpawn = 0;
-        }
+    // Roll for Glimmering Pixie (5% chance per second when no active orbs if rolled on Sigil/Crucible)
+    if (
+      window.isCavernEffectActive("glimmering_pixie") &&
+      window.activeRiftOrbs.length === 0 &&
+      Math.random() < 0.05 * spawnMult &&
+      !window.isGamePaused
+    ) {
+      window.spawnGlimmeringPixie();
+      window.secondsSinceLastRiftSpawn = 0;
+    }
 
     // Active Debuff: Withering Decay (Periodic combat damage drain)
     if (
@@ -3969,26 +4002,26 @@ function update() {
         let isBlocked = Math.random() < p.block;
 
         if (isBlocked) {
-                    window.SoundManager.play("block");
+          window.SoundManager.play("block");
 
-                    // High-Powered Shield Bash Counter-Attack for all Shields!
-                    if (window.mob && window.mob.hp.gt(0)) {
-                      let sub = window.equippedSlots.subweapon;
-                      let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
-                      let bashMult = 1.5;
+          // High-Powered Shield Bash Counter-Attack for all Shields!
+          if (window.mob && window.mob.hp.gt(0)) {
+            let sub = window.equippedSlots.subweapon;
+            let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+            let bashMult = 1.5;
 
-                      if (noun.includes("buckler")) {
-                        bashMult = 1.0;
-                      } else if (noun.includes("tower")) {
-                        bashMult = 2.5;
-                      } else {
-                        bashMult = 1.6;
-                      }
+            if (noun.includes("buckler")) {
+              bashMult = 1.0;
+            } else if (noun.includes("tower")) {
+              bashMult = 2.5;
+            } else {
+              bashMult = 1.6;
+            }
 
-                      let bashDmg = Math.ceil(p.def * bashMult * (1.0 + p.str * 0.002));
-                      let isAegis = window.hasUniquePassive("shield_aegis");
+            let bashDmg = Math.ceil(p.def * bashMult * (1.0 + p.str * 0.002));
+            let isAegis = window.hasUniquePassive("shield_aegis");
 
-                      if (isAegis) {
+            if (isAegis) {
               let shieldLvl = window.equippedSlots.subweapon.stageLevel || 1;
               bashDmg = Math.ceil(
                 p.def * (2.2 + shieldLvl * 0.05) * (1.0 + p.str * 0.003),
@@ -4102,26 +4135,28 @@ function update() {
           let isParried = Math.random() < p.parry;
 
           if (isParried) {
-                      // Mitigate incoming damage by 60% (takes 40% damage)
-                      netDamage = Math.max(1, Math.ceil(netDamage * 0.4));
-                      window.SoundManager.play("parry");
+            // Mitigate incoming damage by 60% (takes 40% damage)
+            netDamage = Math.max(1, Math.ceil(netDamage * 0.4));
+            window.SoundManager.play("parry");
 
-                      // Instant offensive Riposte counter-attack scaling with DEX & ATK!
-                      let sub = window.equippedSlots.subweapon;
-                      let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
-                      let riposteMult = 1.0;
+            // Instant offensive Riposte counter-attack scaling with DEX & ATK!
+            let sub = window.equippedSlots.subweapon;
+            let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+            let riposteMult = 1.0;
 
-                      if (noun.includes("kris") || noun.includes("dirk")) {
-                        riposteMult = 1.3;
-                      } else if (noun.includes("stiletto") || noun.includes("baselard")) {
-                        riposteMult = 0.8;
-                      } else {
-                        riposteMult = 1.0;
-                      }
+            if (noun.includes("kris") || noun.includes("dirk")) {
+              riposteMult = 1.3;
+            } else if (noun.includes("stiletto") || noun.includes("baselard")) {
+              riposteMult = 0.8;
+            } else {
+              riposteMult = 1.0;
+            }
 
-                      let riposteDmg = Math.ceil(p.atk * riposteMult * (1.0 + p.dex * 0.003));
+            let riposteDmg = Math.ceil(
+              p.atk * riposteMult * (1.0 + p.dex * 0.003),
+            );
 
-                      // Active Buff: Echoing Step (Counter strike scaling on parry)
+            // Active Buff: Echoing Step (Counter strike scaling on parry)
             if (
               window.playerStats.isCrucibleMode &&
               window.playerStats.crucibleActiveBuff?.id === "echoing_step"
@@ -4566,69 +4601,82 @@ window.CombatEngine = {
       if (window.playerStats.adrenalineTimer > 0) finalDamage *= 2;
 
       let isCrit = Math.random() < p.critChance;
-            if (isCrit) {
-              finalDamage = Math.ceil(finalDamage * p.critDamage);
-              if (window.playerStats.pendingClanProgress) {
-                window.playerStats.pendingClanProgress.crits =
-                  (window.playerStats.pendingClanProgress.crits || 0) + 1;
-              }
+      if (isCrit) {
+        finalDamage = Math.ceil(finalDamage * p.critDamage);
+        if (window.playerStats.pendingClanProgress) {
+          window.playerStats.pendingClanProgress.crits =
+            (window.playerStats.pendingClanProgress.crits || 0) + 1;
+        }
 
-              // --- WARLORD SET: SHATTERING BLOWS ---
-              if (p.hasShatterSet && Math.random() < 0.25 && window.mob && window.mob.hp.gt(0)) {
-                let shatterDmg = Math.ceil(finalDamage * 0.5); // 50% of Crit Damage
-                // Bypasses enemy defense (Armor Pierce / unblockable)
-                window.mob.hp = window.mob.hp.sub(shatterDmg);
-                window.mob.flashTimer = 4;
-                window.spawnDamageEffect(shatterDmg, "lightning", true); // Trigger unblockable lightning/shatter spark
-                window.effects.push({
-                  x: window.mob.x + window.mob.w / 2 - 20,
-                  y: window.mob.y - 15,
-                  text: "💥 SHATTER!",
-                  color: "#e67e22",
-                  life: 45,
-                });
-                for (let i = 0; i < 8; i++) {
-                  window.particles.push({
-                    x: window.mob.x + window.mob.w / 2,
-                    y: window.mob.y + window.mob.h / 2,
-                    vx: window.randFloat(-4, 4),
-                    vy: window.randFloat(-4, 4),
-                    radius: window.randFloat(1, 2.5),
-                    color: "#e67e22",
-                    alpha: 1,
-                    life: window.randInt(15, 25),
-                  });
-                }
-              }
-            }
+        // --- WARLORD SET: SHATTERING BLOWS ---
+        if (
+          p.hasShatterSet &&
+          Math.random() < 0.25 &&
+          window.mob &&
+          window.mob.hp.gt(0)
+        ) {
+          let shatterDmg = Math.ceil(finalDamage * 0.5); // 50% of Crit Damage
+          // Bypasses enemy defense (Armor Pierce / unblockable)
+          window.mob.hp = window.mob.hp.sub(shatterDmg);
+          window.mob.flashTimer = 4;
+          window.spawnDamageEffect(shatterDmg, "lightning", true); // Trigger unblockable lightning/shatter spark
+          window.effects.push({
+            x: window.mob.x + window.mob.w / 2 - 20,
+            y: window.mob.y - 15,
+            text: "💥 SHATTER!",
+            color: "#e67e22",
+            life: 45,
+          });
+          for (let i = 0; i < 8; i++) {
+            window.particles.push({
+              x: window.mob.x + window.mob.w / 2,
+              y: window.mob.y + window.mob.h / 2,
+              vx: window.randFloat(-4, 4),
+              vy: window.randFloat(-4, 4),
+              radius: window.randFloat(1, 2.5),
+              color: "#e67e22",
+              alpha: 1,
+              life: window.randInt(15, 25),
+            });
+          }
+        }
+      }
 
-            // --- BIOHAZARD SET: CORROSIVE SPORES ---
-            if (p.hasCorrosiveSet && Math.random() < 0.20 && window.mob && window.mob.hp.gt(0)) {
-              window.mob.poisonStacks = Math.min(5, (window.mob.poisonStacks || 0) + 1);
-              window.mob.poisonTimer = 300; // 5-second duration
-              window.mob.poisonDmgPerSecond = Math.max(1, Math.ceil(p.atk * 0.12)); // 12% Attack power per stack per second
-              for (let i = 0; i < 5; i++) {
-                window.particles.push({
-                  x: window.mob.x + window.mob.w / 2,
-                  y: window.mob.y + window.mob.h / 2,
-                  vx: window.randFloat(-2, 2),
-                  vy: window.randFloat(-2, 2),
-                  radius: window.randFloat(1, 2),
-                  color: "#2ecc71",
-                  alpha: 1,
-                  life: window.randInt(10, 20),
-                });
-              }
-              window.effects.push({
-                x: window.mob.x + window.mob.w / 2 - 25,
-                y: window.mob.y - 15,
-                text: `🧪 SPORES! [${window.mob.poisonStacks}/5]`,
-                color: "#2ecc71",
-                life: 35,
-              });
-            }
+      // --- BIOHAZARD SET: CORROSIVE SPORES ---
+      if (
+        p.hasCorrosiveSet &&
+        Math.random() < 0.2 &&
+        window.mob &&
+        window.mob.hp.gt(0)
+      ) {
+        window.mob.poisonStacks = Math.min(
+          5,
+          (window.mob.poisonStacks || 0) + 1,
+        );
+        window.mob.poisonTimer = 300; // 5-second duration
+        window.mob.poisonDmgPerSecond = Math.max(1, Math.ceil(p.atk * 0.12)); // 12% Attack power per stack per second
+        for (let i = 0; i < 5; i++) {
+          window.particles.push({
+            x: window.mob.x + window.mob.w / 2,
+            y: window.mob.y + window.mob.h / 2,
+            vx: window.randFloat(-2, 2),
+            vy: window.randFloat(-2, 2),
+            radius: window.randFloat(1, 2),
+            color: "#2ecc71",
+            alpha: 1,
+            life: window.randInt(10, 20),
+          });
+        }
+        window.effects.push({
+          x: window.mob.x + window.mob.w / 2 - 25,
+          y: window.mob.y - 15,
+          text: `🧪 SPORES! [${window.mob.poisonStacks}/5]`,
+          color: "#2ecc71",
+          life: 35,
+        });
+      }
 
-            // Core mitigation layer filtering final base slash damage against active mob defense
+      // Core mitigation layer filtering final base slash damage against active mob defense
       let mobDef = window.mob.def || 0;
       finalDamage = Math.max(
         1,
@@ -4891,98 +4939,101 @@ window.CombatEngine = {
       }
 
       // Offhand Dagger Multi-Strike (Noun-varying trigger chance and damage scale)
-            const hasDagger =
-              window.equippedSlots.subweapon &&
-              window.equippedSlots.subweapon.subType === "dagger";
-            if (hasDagger) {
-              let sub = window.equippedSlots.subweapon;
-              let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
-              let offhandChance = 1.0;
-              let offhandDmgMult = 0.35;
+      const hasDagger =
+        window.equippedSlots.subweapon &&
+        window.equippedSlots.subweapon.subType === "dagger";
+      if (hasDagger) {
+        let sub = window.equippedSlots.subweapon;
+        let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+        let offhandChance = 1.0;
+        let offhandDmgMult = 0.35;
 
-              if (noun.includes("kris") || noun.includes("dirk")) {
-                offhandChance = 0.25 + p.dex * 0.0005; // 25% base + 0.05% per DEX
-                offhandChance = Math.min(0.75, offhandChance);
-                offhandDmgMult = 0.55;
-              } else if (noun.includes("stiletto") || noun.includes("baselard")) {
-                offhandChance = 0.60 + p.dex * 0.0005; // 60% base + 0.05% per DEX
-                offhandChance = Math.min(0.95, offhandChance);
-                offhandDmgMult = 0.25;
-              } else {
-                offhandChance = 0.40 + p.dex * 0.0005; // 40% base + 0.05% per DEX
-                offhandChance = Math.min(0.85, offhandChance);
-                offhandDmgMult = 0.35;
-              }
+        if (noun.includes("kris") || noun.includes("dirk")) {
+          offhandChance = 0.25 + p.dex * 0.0005; // 25% base + 0.05% per DEX
+          offhandChance = Math.min(0.75, offhandChance);
+          offhandDmgMult = 0.55;
+        } else if (noun.includes("stiletto") || noun.includes("baselard")) {
+          offhandChance = 0.6 + p.dex * 0.0005; // 60% base + 0.05% per DEX
+          offhandChance = Math.min(0.95, offhandChance);
+          offhandDmgMult = 0.25;
+        } else {
+          offhandChance = 0.4 + p.dex * 0.0005; // 40% base + 0.05% per DEX
+          offhandChance = Math.min(0.85, offhandChance);
+          offhandDmgMult = 0.35;
+        }
 
-              if (Math.random() < offhandChance) {
-                let baseDagger = p.atk * offhandDmgMult * (1.0 + p.dex * 0.002);
-                if (window.playerStats.adrenalineTimer > 0) baseDagger *= 2;
-                let daggerDmg = Math.max(1, Math.ceil(baseDagger));
+        if (Math.random() < offhandChance) {
+          let baseDagger = p.atk * offhandDmgMult * (1.0 + p.dex * 0.002);
+          if (window.playerStats.adrenalineTimer > 0) baseDagger *= 2;
+          let daggerDmg = Math.max(1, Math.ceil(baseDagger));
 
-                let isDaggerCrit = Math.random() < p.critChance;
-                if (isDaggerCrit) daggerDmg = Math.ceil(daggerDmg * p.critDamage);
+          let isDaggerCrit = Math.random() < p.critChance;
+          if (isDaggerCrit) daggerDmg = Math.ceil(daggerDmg * p.critDamage);
 
-                // Apply active defense mitigation to offhand dagger strikes
-                let mobDef = window.mob.def || 0;
-                daggerDmg = Math.max(1, Math.ceil(daggerDmg * (100 / (100 + mobDef))));
+          // Apply active defense mitigation to offhand dagger strikes
+          let mobDef = window.mob.def || 0;
+          daggerDmg = Math.max(
+            1,
+            Math.ceil(daggerDmg * (100 / (100 + mobDef))),
+          );
 
-                if (window.playerStats.singularityState === "storing") {
-                  window.playerStats.singularityStoredDmg += daggerDmg;
-                  window.effects.push({
-                    x: window.mob.x + window.mob.w / 2,
-                    y: window.mob.y - 10,
-                    text: `+${window.formatNumber(daggerDmg)} [STORED]`,
-                    color: "#8e44ad",
-                    life: 45,
-                  });
-                } else {
-                  window.mob.hp = window.mob.hp.sub(daggerDmg);
-                  window.spawnDamageEffect(daggerDmg, "dagger", isDaggerCrit);
-                  window.damageHistory.push({ time: Date.now(), amount: daggerDmg });
-                }
-              }
-            }
+          if (window.playerStats.singularityState === "storing") {
+            window.playerStats.singularityStoredDmg += daggerDmg;
+            window.effects.push({
+              x: window.mob.x + window.mob.w / 2,
+              y: window.mob.y - 10,
+              text: `+${window.formatNumber(daggerDmg)} [STORED]`,
+              color: "#8e44ad",
+              life: 45,
+            });
+          } else {
+            window.mob.hp = window.mob.hp.sub(daggerDmg);
+            window.spawnDamageEffect(daggerDmg, "dagger", isDaggerCrit);
+            window.damageHistory.push({ time: Date.now(), amount: daggerDmg });
+          }
+        }
+      }
 
-            // Elemental Tome Spells (Noun-varying trigger chance and damage scale)
-            const hasTome =
-              window.equippedSlots.subweapon &&
-              window.equippedSlots.subweapon.subType === "tome";
-            if (hasTome) {
-              let sub = window.equippedSlots.subweapon;
-              let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
-              let spellChance = 0.15;
-              let spellDmgMult = 1.0;
+      // Elemental Tome Spells (Noun-varying trigger chance and damage scale)
+      const hasTome =
+        window.equippedSlots.subweapon &&
+        window.equippedSlots.subweapon.subType === "tome";
+      if (hasTome) {
+        let sub = window.equippedSlots.subweapon;
+        let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
+        let spellChance = 0.15;
+        let spellDmgMult = 1.0;
 
-              if (sub.isUniqueWatch) {
-                spellChance = 0.20;
-                spellDmgMult = 1.0;
-              } else if (sub.isUniqueChronicle) {
-                spellChance = 0.15;
-                spellDmgMult = 1.2;
-              } else if (noun.includes("grimoire") || noun.includes("chronicle")) {
-                spellChance = 0.10 + p.int * 0.00015; // 10% base + 0.015% per INT
-                spellChance = Math.min(0.30, spellChance);
-                spellDmgMult = 1.8;
-              } else if (noun.includes("spellbook") || noun.includes("codex")) {
-                spellChance = 0.18 + p.int * 0.00015; // 18% base + 0.015% per INT
-                spellChance = Math.min(0.35, spellChance);
-                spellDmgMult = 1.0;
-              } else if (noun.includes("lexicon")) {
-                spellChance = 0.26 + p.int * 0.00015; // 26% base + 0.015% per INT
-                spellChance = Math.min(0.45, spellChance);
-                spellDmgMult = 0.6;
-              }
+        if (sub.isUniqueWatch) {
+          spellChance = 0.2;
+          spellDmgMult = 1.0;
+        } else if (sub.isUniqueChronicle) {
+          spellChance = 0.15;
+          spellDmgMult = 1.2;
+        } else if (noun.includes("grimoire") || noun.includes("chronicle")) {
+          spellChance = 0.1 + p.int * 0.00015; // 10% base + 0.015% per INT
+          spellChance = Math.min(0.3, spellChance);
+          spellDmgMult = 1.8;
+        } else if (noun.includes("spellbook") || noun.includes("codex")) {
+          spellChance = 0.18 + p.int * 0.00015; // 18% base + 0.015% per INT
+          spellChance = Math.min(0.35, spellChance);
+          spellDmgMult = 1.0;
+        } else if (noun.includes("lexicon")) {
+          spellChance = 0.26 + p.int * 0.00015; // 26% base + 0.015% per INT
+          spellChance = Math.min(0.45, spellChance);
+          spellDmgMult = 0.6;
+        }
 
-              spellChance += (p.crucibleSpellChanceBonus || 0.0);
+        spellChance += p.crucibleSpellChanceBonus || 0.0;
 
-              let baseSpell = p.atk * 0.25 * (1.0 + p.int * 0.01) * spellDmgMult;
-              if (window.playerStats.adrenalineTimer > 0) baseSpell *= 2;
-              let spellDmgBase = Math.max(1, Math.ceil(baseSpell));
+        let baseSpell = p.atk * 0.25 * (1.0 + p.int * 0.01) * spellDmgMult;
+        if (window.playerStats.adrenalineTimer > 0) baseSpell *= 2;
+        let spellDmgBase = Math.max(1, Math.ceil(baseSpell));
 
-              let triggeredSpell = false;
-              let lightProc = false,
-                fireProc = false,
-                frostProc = false;
+        let triggeredSpell = false;
+        let lightProc = false,
+          fireProc = false,
+          frostProc = false;
 
         // 1. Lightning Spell Roll
         if (Math.random() < spellChance) {
@@ -5322,17 +5373,17 @@ window.CombatEngine = {
     }
 
     // Highly restricted Monster Card Sack drop rolls
-        let cardSackChance = 0;
-        if (
-          window.playerStats.isDungeonMode &&
-          window.mob.type === "dungeon_boss"
-        ) {
-          cardSackChance = 0.03;
-        } else if (window.playerStats.isUberBoss) {
-          cardSackChance = 0.08;
-        } else if (window.mob.type === "boss") {
-          cardSackChance = 0.01; // Increased to 1.0% to match player pacing expectations
-        }
+    let cardSackChance = 0;
+    if (
+      window.playerStats.isDungeonMode &&
+      window.mob.type === "dungeon_boss"
+    ) {
+      cardSackChance = 0.03;
+    } else if (window.playerStats.isUberBoss) {
+      cardSackChance = 0.08;
+    } else if (window.mob.type === "boss") {
+      cardSackChance = 0.01; // Increased to 1.0% to match player pacing expectations
+    }
 
     if (cardSackChance > 0 && Math.random() < cardSackChance) {
       window.addUseDrop("Monster Card Sack", 1);
@@ -5463,32 +5514,32 @@ window.CombatEngine = {
     if (window.mob.isRare) baseCoin *= 4;
 
     // Natively multiplied through p.gold in resolvePlayerStats
-        let coinYield = Math.ceil(baseCoin * p.gold);
+    let coinYield = Math.ceil(baseCoin * p.gold);
 
     // REDIRECT AND ACCUMULATE INSIDE CRUCIBLE POOLS
-        if (window.playerStats.isCrucibleMode) {
-          window.playerStats.crucibleAccumulatedGold =
-            (window.playerStats.crucibleAccumulatedGold || 0) + coinYield;
-          window.playerStats.crucibleAccumulatedXp =
-            (window.playerStats.crucibleAccumulatedXp || 0) + xpYield;
-        } else {
-          // Normal campaign / dungeon additions
-          window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
-            coinYield,
-          );
-          window.playerStats.totalGoldEarned = BigNum.from(
-            window.playerStats.totalGoldEarned || 0,
-          ).add(coinYield);
-          if (window.playerStats.isDungeonMode) {
-            window.playerStats.dungeonAccumulatedGold =
-              (window.playerStats.dungeonAccumulatedGold || 0) + coinYield;
-            window.playerStats.dungeonAccumulatedXp =
-              (window.playerStats.dungeonAccumulatedXp || 0) + xpYield;
-          }
-          if (typeof window.progressMission === "function")
-            window.progressMission("gold", coinYield);
-          if (typeof window.gainXp === "function") window.gainXp(xpYield);
-        }
+    if (window.playerStats.isCrucibleMode) {
+      window.playerStats.crucibleAccumulatedGold =
+        (window.playerStats.crucibleAccumulatedGold || 0) + coinYield;
+      window.playerStats.crucibleAccumulatedXp =
+        (window.playerStats.crucibleAccumulatedXp || 0) + xpYield;
+    } else {
+      // Normal campaign / dungeon additions
+      window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
+        coinYield,
+      );
+      window.playerStats.totalGoldEarned = BigNum.from(
+        window.playerStats.totalGoldEarned || 0,
+      ).add(coinYield);
+      if (window.playerStats.isDungeonMode) {
+        window.playerStats.dungeonAccumulatedGold =
+          (window.playerStats.dungeonAccumulatedGold || 0) + coinYield;
+        window.playerStats.dungeonAccumulatedXp =
+          (window.playerStats.dungeonAccumulatedXp || 0) + xpYield;
+      }
+      if (typeof window.progressMission === "function")
+        window.progressMission("gold", coinYield);
+      if (typeof window.gainXp === "function") window.gainXp(xpYield);
+    }
 
     // Peak single gold drop check
     window.playerStats.peakSingleGoldDrop = Math.max(
@@ -5711,20 +5762,20 @@ window.CombatEngine = {
           }
 
           // Gated progression scrap drops for Material Cavern Bosses
-                          let sigMult = 1.0;
-                          if (
-                            window.playerStats.isDungeonMode &&
-                            window.playerStats.activeDungeonSigil
-                          ) {
-                            sigMult +=
-                              window.playerStats.activeDungeonSigil.rewardMultiplier || 0;
-                          }
+          let sigMult = 1.0;
+          if (
+            window.playerStats.isDungeonMode &&
+            window.playerStats.activeDungeonSigil
+          ) {
+            sigMult +=
+              window.playerStats.activeDungeonSigil.rewardMultiplier || 0;
+          }
 
-                          // Active Dungeon Boss Soul Jackpot scaling with depth, drop rate, and sigils
-                          let bossSoulAmt = Math.round((50 + dStage * 5) * p.drop * sigMult);
-                          window.addEtcDrop("Monster Soul", bossSoulAmt);
+          // Active Dungeon Boss Soul Jackpot scaling with depth, drop rate, and sigils
+          let bossSoulAmt = Math.round((50 + dStage * 5) * p.drop * sigMult);
+          window.addEtcDrop("Monster Soul", bossSoulAmt);
 
-                          if (dStage < 150) {
+          if (dStage < 150) {
             if (typeof window.addEtcDrop === "function") {
               let scrapAmt = Math.ceil(window.randInt(1, 3) * sigMult);
               window.addEtcDrop("Rare Scrap", scrapAmt);
@@ -5782,63 +5833,69 @@ window.CombatEngine = {
             }
           }
         } else {
-                        // Normal minion drops inside the Material Pit (Additive Redesign)
-                        // 1. Every minion kill guarantees scaled Monster Souls multiplying with Magic Find and active Sigils
-                        let sigMult = 1.0;
-                        if (window.playerStats.isDungeonMode && window.playerStats.activeDungeonSigil) {
-                          sigMult += window.playerStats.activeDungeonSigil.rewardMultiplier || 0;
-                        }
-                        let soulAmt = Math.round((2 + Math.floor(dStage / 20)) * p.drop * sigMult);
-                        window.addEtcDrop("Monster Soul", soulAmt);
-                        // 2. Independent, non-exclusive rolls for material scraps
-            let r = Math.random();
-            if (dStage < 150) {
-              // 15% bonus chance for an early-game Rare Scrap
-              if (r < 0.15) {
-                let scrapAmt = 1 + Math.floor(Math.sqrt(dStage / 150));
-                window.addEtcDrop("Rare Scrap", scrapAmt);
-              }
-            } else if (dStage < 350) {
-              // 25% independent chance for Rare Scrap
-              if (r < 0.25) {
-                let scrapAmt = 1 + Math.floor(Math.sqrt((dStage - 150) / 100));
-                window.addEtcDrop("Rare Scrap", scrapAmt);
-              }
-            } else if (dStage < 600) {
-              // 20% Magic, 40% Rare
-              if (r < 0.2) {
-                let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
-                window.addEtcDrop("Magic Scrap", magicAmt);
-              } else if (r < 0.6) {
-                let rareAmt = 1 + Math.floor(Math.sqrt((dStage - 150) / 100));
-                window.addEtcDrop("Rare Scrap", rareAmt);
-              }
-            } else if (dStage < 850) {
-              // 20% Epic, 40% Magic
-              if (r < 0.2) {
-                let epicAmt = 1 + Math.floor(Math.sqrt((dStage - 600) / 150));
-                window.addEtcDrop("Epic Scrap", epicAmt);
-              } else if (r < 0.6) {
-                let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
-                window.addEtcDrop("Magic Scrap", magicAmt);
-              }
+          // Normal minion drops inside the Material Pit (Additive Redesign)
+          // 1. Every minion kill guarantees scaled Monster Souls multiplying with Magic Find and active Sigils
+          let sigMult = 1.0;
+          if (
+            window.playerStats.isDungeonMode &&
+            window.playerStats.activeDungeonSigil
+          ) {
+            sigMult +=
+              window.playerStats.activeDungeonSigil.rewardMultiplier || 0;
+          }
+          let soulAmt = Math.round(
+            (2 + Math.floor(dStage / 20)) * p.drop * sigMult,
+          );
+          window.addEtcDrop("Monster Soul", soulAmt);
+          // 2. Independent, non-exclusive rolls for material scraps
+          let r = Math.random();
+          if (dStage < 150) {
+            // 15% bonus chance for an early-game Rare Scrap
+            if (r < 0.15) {
+              let scrapAmt = 1 + Math.floor(Math.sqrt(dStage / 150));
+              window.addEtcDrop("Rare Scrap", scrapAmt);
+            }
+          } else if (dStage < 350) {
+            // 25% independent chance for Rare Scrap
+            if (r < 0.25) {
+              let scrapAmt = 1 + Math.floor(Math.sqrt((dStage - 150) / 100));
+              window.addEtcDrop("Rare Scrap", scrapAmt);
+            }
+          } else if (dStage < 600) {
+            // 20% Magic, 40% Rare
+            if (r < 0.2) {
+              let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
+              window.addEtcDrop("Magic Scrap", magicAmt);
+            } else if (r < 0.6) {
+              let rareAmt = 1 + Math.floor(Math.sqrt((dStage - 150) / 100));
+              window.addEtcDrop("Rare Scrap", rareAmt);
+            }
+          } else if (dStage < 850) {
+            // 20% Epic, 40% Magic
+            if (r < 0.2) {
+              let epicAmt = 1 + Math.floor(Math.sqrt((dStage - 600) / 150));
+              window.addEtcDrop("Epic Scrap", epicAmt);
+            } else if (r < 0.6) {
+              let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
+              window.addEtcDrop("Magic Scrap", magicAmt);
+            }
+          } else {
+            // 20% Legendary, 50% Epic, 30% Magic (ReferenceError crash repaired)
+            if (r < 0.2) {
+              let legAmt = 1 + Math.floor(Math.sqrt((dStage - 850) / 200));
+              window.addEtcDrop("Legendary Scrap", legAmt);
+            } else if (r < 0.7) {
+              let epicAmt = 1 + Math.floor(Math.sqrt((dStage - 600) / 150));
+              window.addEtcDrop("Epic Scrap", epicAmt);
             } else {
-              // 20% Legendary, 50% Epic, 30% Magic (ReferenceError crash repaired)
-              if (r < 0.2) {
-                let legAmt = 1 + Math.floor(Math.sqrt((dStage - 850) / 200));
-                window.addEtcDrop("Legendary Scrap", legAmt);
-              } else if (r < 0.7) {
-                let epicAmt = 1 + Math.floor(Math.sqrt((dStage - 600) / 150));
-                window.addEtcDrop("Epic Scrap", epicAmt);
-              } else {
-                              let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
-                              window.addEtcDrop("Magic Scrap", magicAmt);
-                            }
-                          }
-                        }
-                      }
-                  } else {
-                    // Let the single-roll loot function evaluate rates and progress pity natively
+              let magicAmt = 1 + Math.floor(Math.sqrt((dStage - 350) / 120));
+              window.addEtcDrop("Magic Scrap", magicAmt);
+            }
+          }
+        }
+      }
+    } else {
+      // Let the single-roll loot function evaluate rates and progress pity natively
       if (
         typeof window.rollEquipmentDrop === "function" &&
         !window.playerStats.isCrucibleMode
@@ -5929,18 +5986,20 @@ window.CombatEngine = {
       if (typeof window.progressMission === "function")
         window.progressMission("rifts", 1);
     } else if (isBoss) {
-          let activeStage = window.playerStats.stage;
+      let activeStage = window.playerStats.stage;
 
-          // Overhauled Boss-Scale Monster Soul drop: 30% chance with sub-linear logarithmic & Drop Quality scaling
-          if (Math.random() < 0.30) {
-            let baseQty = window.randInt(2, 6);
-            let scaleMultiplier = 1 + Math.log10(activeStage);
-            let finalQty = Math.round(baseQty * scaleMultiplier * Math.sqrt(p.qly || 1.0));
+      // Overhauled Boss-Scale Monster Soul drop: 30% chance with sub-linear logarithmic & Drop Quality scaling
+      if (Math.random() < 0.3) {
+        let baseQty = window.randInt(2, 6);
+        let scaleMultiplier = 1 + Math.log10(activeStage);
+        let finalQty = Math.round(
+          baseQty * scaleMultiplier * Math.sqrt(p.qly || 1.0),
+        );
 
-            if (typeof window.addEtcDrop === "function") {
-              window.addEtcDrop("Monster Soul", finalQty, false); // False triggers the active popup toast
-            }
-          }
+        if (typeof window.addEtcDrop === "function") {
+          window.addEtcDrop("Monster Soul", finalQty, false); // False triggers the active popup toast
+        }
+      }
 
       let peakLimit = Math.floor(
         (window.playerStats.lifetimePeakStage || 1) * 0.8,
@@ -5993,10 +6052,10 @@ window.CombatEngine = {
         let etcItemName = window.mob.isRare ? "Luminous Soul" : "Monster Soul";
 
         let qty = 1;
-                  if (!window.mob.isRare) {
-                    // Normal monster drop quantities scale with a square-root curve to prevent late-game hyper-inflation
-                    qty += Math.floor(Math.sqrt((window.playerStats.stage || 1) / 10));
-                  }
+        if (!window.mob.isRare) {
+          // Normal monster drop quantities scale with a square-root curve to prevent late-game hyper-inflation
+          qty += Math.floor(Math.sqrt((window.playerStats.stage || 1) / 10));
+        }
 
         if (typeof window.addEtcDrop === "function")
           window.addEtcDrop(etcItemName, qty);
@@ -6642,75 +6701,83 @@ window.CombatEngine = {
 
     window.SoundManager.play("defeat");
 
-        if (wasCrucible) {
-          let shards = window.playerStats.crucibleAccumulatedShards || 0;
-          let cores = window.playerStats.crucibleAccumulatedCores || 0;
-          let gold = window.playerStats.crucibleAccumulatedGold || 0;
-          let xp = window.playerStats.crucibleAccumulatedXp || 0;
+    if (wasCrucible) {
+      let shards = window.playerStats.crucibleAccumulatedShards || 0;
+      let cores = window.playerStats.crucibleAccumulatedCores || 0;
+      let gold = window.playerStats.crucibleAccumulatedGold || 0;
+      let xp = window.playerStats.crucibleAccumulatedXp || 0;
 
-          // No defeat penalty; full rewards are preserved!
-          let keptShards = shards;
-          let keptCores = cores;
+      // No defeat penalty; full rewards are preserved!
+      let keptShards = shards;
+      let keptCores = cores;
 
-          // Gold & XP are always kept at 100% since those targets were successfully slayed!
-          window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
-            gold,
-          );
-          window.playerStats.totalGoldEarned = BigNum.from(
-            window.playerStats.totalGoldEarned || 0,
-          ).add(gold);
-          window.gainXp(xp, true);
+      // Gold & XP are always kept at 100% since those targets were successfully slayed!
+      window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
+        gold,
+      );
+      window.playerStats.totalGoldEarned = BigNum.from(
+        window.playerStats.totalGoldEarned || 0,
+      ).add(gold);
+      window.gainXp(xp, true);
 
-          window.playerStats.astralShards =
-            (window.playerStats.astralShards || 0) + keptShards;
-          if (keptCores > 0) {
-            window.addEtcDrop("Catalyst Core", keptCores);
-          }
+      window.playerStats.astralShards =
+        (window.playerStats.astralShards || 0) + keptShards;
+      if (keptCores > 0) {
+        window.addEtcDrop("Catalyst Core", keptCores);
+      }
 
-          // Reset temporary run fields
-                     window.playerStats.crucibleAccumulatedShards = 0;
-                     window.playerStats.crucibleAccumulatedCores = 0;
-                     window.playerStats.crucibleAccumulatedGold = 0;
-                     window.playerStats.crucibleAccumulatedXp = 0;
-                     window.playerStats.crucibleDraftDeck = [];
-                     window.playerStats.crucibleRunActive = false;
+      // Reset temporary run fields
+      window.playerStats.crucibleAccumulatedShards = 0;
+      window.playerStats.crucibleAccumulatedCores = 0;
+      window.playerStats.crucibleAccumulatedGold = 0;
+      window.playerStats.crucibleAccumulatedXp = 0;
+      window.playerStats.crucibleDraftDeck = [];
+      window.playerStats.crucibleRunActive = false;
 
-                     window.showCrucibleSummaryModal(
-                       finalWave,
-                       keptShards,
-                       keptCores,
-                       gold,
-                       xp,
-                       true,
-                     ); // Died
-          return;
-        }
+      window.showCrucibleSummaryModal(
+        finalWave,
+        keptShards,
+        keptCores,
+        gold,
+        xp,
+        true,
+      ); // Died
+      return;
+    }
 
-        if (wasDungeon) {
-          let gold = window.playerStats.dungeonAccumulatedGold || 0;
-          let xp = window.playerStats.dungeonAccumulatedXp || 0;
-          let loot = window.playerStats.dungeonAccumulatedLoot || [];
+    if (wasDungeon) {
+      let gold = window.playerStats.dungeonAccumulatedGold || 0;
+      let xp = window.playerStats.dungeonAccumulatedXp || 0;
+      let loot = window.playerStats.dungeonAccumulatedLoot || [];
 
-          window.playerStats.dungeonAccumulatedGold = 0;
-          window.playerStats.dungeonAccumulatedXp = 0;
-          window.playerStats.dungeonAccumulatedLoot = [];
+      window.playerStats.dungeonAccumulatedGold = 0;
+      window.playerStats.dungeonAccumulatedXp = 0;
+      window.playerStats.dungeonAccumulatedLoot = [];
 
-          // Trigger the gorgeous summary modal!
-                                if (typeof window.showDungeonSummaryModal === "function") {
-                                  window.showDungeonSummaryModal(activeDungeon, dungeonFloor, gold, xp, loot, false);
-                                }
+      // Trigger the gorgeous summary modal!
+      if (typeof window.showDungeonSummaryModal === "function") {
+        window.showDungeonSummaryModal(
+          activeDungeon,
+          dungeonFloor,
+          gold,
+          xp,
+          loot,
+          false,
+        );
+      }
 
-          window.playerStats.runKills = 0;
-          window.playerStats.runGold = 0;
-          window.playerStats.runXp = 0;
-          window.playerStats.killedBy = "Unknown Foe";
-          window.playerStats.killedByMob = null;
+      window.playerStats.runKills = 0;
+      window.playerStats.runGold = 0;
+      window.playerStats.runXp = 0;
+      window.playerStats.killedBy = "Unknown Foe";
+      window.playerStats.killedByMob = null;
 
-          if (typeof window.updateUI === "function") window.updateUI();
-          if (typeof window.renderInventory === "function") window.renderInventory();
-          if (typeof window.saveGame === "function") window.saveGame();
-          return;
-        }
+      if (typeof window.updateUI === "function") window.updateUI();
+      if (typeof window.renderInventory === "function")
+        window.renderInventory();
+      if (typeof window.saveGame === "function") window.saveGame();
+      return;
+    }
 
     let prestigeCount = window.playerStats.prestigeCount || 0;
     let rollbackPercent = 0.8;
@@ -8123,22 +8190,22 @@ window.enterDungeon = function (type) {
   );
 
   window.showCustomConfirm(
-      "Enter Infinite Dungeon",
-      `Spend 1 Key to enter the Infinite ${dNames[type]}? Starting checkpoint: Stage ${checkpoint}`,
-      "Enter Dungeon",
-      "Cancel",
-      "#8e44ad",
-      function () {
-        window.saveCurrentActivityPeak();
-        window.playerStats.dungeonKeys--;
-        if (window.playerStats.dungeonKeys === 4)
-          window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
+    "Enter Infinite Dungeon",
+    `Spend 1 Key to enter the Infinite ${dNames[type]}? Starting checkpoint: Stage ${checkpoint}`,
+    "Enter Dungeon",
+    "Cancel",
+    "#8e44ad",
+    function () {
+      window.saveCurrentActivityPeak();
+      window.playerStats.dungeonKeys--;
+      if (window.playerStats.dungeonKeys === 4)
+        window.playerStats.nextDungeonKeyTime = Date.now() + 14400000; // 4 Hours
 
-        window.playerStats.isDungeonMode = true;
-                window.secondsSinceLastRiftSpawn = 0;
-                window.playerStats.dungeonAccumulatedGold = 0;
-                window.playerStats.dungeonAccumulatedXp = 0;
-                window.playerStats.dungeonAccumulatedLoot = [];
+      window.playerStats.isDungeonMode = true;
+      window.secondsSinceLastRiftSpawn = 0;
+      window.playerStats.dungeonAccumulatedGold = 0;
+      window.playerStats.dungeonAccumulatedXp = 0;
+      window.playerStats.dungeonAccumulatedLoot = [];
       // Consume and Lock Slotted Cavern Sigil
       if (window.state.slottedCavernSigil) {
         let activeSig = window.state.slottedCavernSigil;
@@ -8215,9 +8282,9 @@ window.enterCrucible = function () {
       }
 
       // Initialize clean run accumulators
-            window.secondsSinceLastRiftSpawn = 0;
-            window.playerStats.crucibleAccumulatedGold = 0;
-            window.playerStats.crucibleAccumulatedXp = 0;
+      window.secondsSinceLastRiftSpawn = 0;
+      window.playerStats.crucibleAccumulatedGold = 0;
+      window.playerStats.crucibleAccumulatedXp = 0;
       window.playerStats.crucibleDraftDeck = [];
       window.playerStats.crucibleWavesClearedThisRun = 0; // Local run wave clear tracker
       window.playerStats.crucibleSelfDmgReduction = 1.0;
@@ -8247,11 +8314,11 @@ window.enterCrucible = function () {
       window.playerStats.crucibleLootMult = 1.0;
 
       window.playerStats.crucibleRunActive = true;
-                window.playerStats.crucibleAccumulatedShards = 0;
-                window.playerStats.crucibleAccumulatedCores = 0;
-                window.playerStats.crucibleAccumulatedLoot = [];
+      window.playerStats.crucibleAccumulatedShards = 0;
+      window.playerStats.crucibleAccumulatedCores = 0;
+      window.playerStats.crucibleAccumulatedLoot = [];
 
-                window.invalidatePlayerStats();
+      window.invalidatePlayerStats();
       let p = window.resolvePlayerStats();
       window.playerStats.currentHp = p.maxHp;
 
@@ -8484,28 +8551,28 @@ window.rollEquipmentDrop = function (
   }
 
   if (!silent)
-          window.pushToast(
-            newItem.name,
-            newItem.statsRolled,
-            color,
-            false,
-            1,
-            null,
-            null,
-            isMilestone && !window.playerStats.isDungeonMode,
-            newItem,
-          );
-        if (newItem.type === "artifact") {
-                    window.inventory.ARTIFACT.push(newItem);
-                    if (typeof window.recordRunLoot === "function") {
-                      window.recordRunLoot(newItem.name, 1, "artifact", newItem);
-                    }
-                  } else {
-                    window.inventory.EQUIP.push(newItem);
-                    if (typeof window.recordRunLoot === "function") {
-                      window.recordRunLoot(newItem.name, 1, "equip", newItem);
-                    }
-                  }
+    window.pushToast(
+      newItem.name,
+      newItem.statsRolled,
+      color,
+      false,
+      1,
+      null,
+      null,
+      isMilestone && !window.playerStats.isDungeonMode,
+      newItem,
+    );
+  if (newItem.type === "artifact") {
+    window.inventory.ARTIFACT.push(newItem);
+    if (typeof window.recordRunLoot === "function") {
+      window.recordRunLoot(newItem.name, 1, "artifact", newItem);
+    }
+  } else {
+    window.inventory.EQUIP.push(newItem);
+    if (typeof window.recordRunLoot === "function") {
+      window.recordRunLoot(newItem.name, 1, "equip", newItem);
+    }
+  }
 
   if (
     sourceName === "Gacha" &&
@@ -8565,22 +8632,22 @@ window.generateEquipment = function (
   }
 
   if (!silent)
-          window.pushToast(
-            item.name,
-            item.statsRolled,
-            window.getTierColor(item.statsRolled),
-          );
-        if (item.type === "artifact") {
-                    window.inventory.ARTIFACT.push(item);
-                    if (typeof window.recordRunLoot === "function") {
-                      window.recordRunLoot(item.name, 1, "artifact", item);
-                    }
-                  } else {
-                    window.inventory.EQUIP.push(item);
-                    if (typeof window.recordRunLoot === "function") {
-                      window.recordRunLoot(item.name, 1, "equip", item);
-                    }
-                  }
+    window.pushToast(
+      item.name,
+      item.statsRolled,
+      window.getTierColor(item.statsRolled),
+    );
+  if (item.type === "artifact") {
+    window.inventory.ARTIFACT.push(item);
+    if (typeof window.recordRunLoot === "function") {
+      window.recordRunLoot(item.name, 1, "artifact", item);
+    }
+  } else {
+    window.inventory.EQUIP.push(item);
+    if (typeof window.recordRunLoot === "function") {
+      window.recordRunLoot(item.name, 1, "equip", item);
+    }
+  }
 
   if (
     sourceName === "Gacha" &&
@@ -8865,38 +8932,43 @@ window.showCrucibleSummaryModal = function (
 
   let deckHtml = "";
   if (groupedKeys.length > 0) {
-    deckHtml = groupedKeys.map(cardId => {
-      let card = window.CRUCIBLE_DRAFT_POOL.find((c) => c.id === cardId);
-      if (!card) return "";
-      let count = groupedDeck[cardId];
-      let countBadge = count > 1 ? ` <span style="color:#ffd700; font-family:monospace; font-weight:900;">x${count}</span>` : "";
+    deckHtml = groupedKeys
+      .map((cardId) => {
+        let card = window.CRUCIBLE_DRAFT_POOL.find((c) => c.id === cardId);
+        if (!card) return "";
+        let count = groupedDeck[cardId];
+        let countBadge =
+          count > 1
+            ? ` <span style="color:#ffd700; font-family:monospace; font-weight:900;">x${count}</span>`
+            : "";
 
-      let descText = card.desc;
-      if (count > 1) {
-        if (cardId === "overcharge") {
-          descText = `+${20 * count}% Crit Multiplier, +${2.5 * count}% Crit Chance`;
-        } else if (cardId === "sanguine_tide") {
-          descText = `Heal ${(1.5 * count).toFixed(1)}% Max HP on every Critical Strike hit`;
-        } else if (cardId === "phantom_echo") {
-          descText = `+${15 * count}% chance to trigger secondary Phantom Strike (deals 35% damage)`;
-        } else if (cardId === "titans_wall") {
-          descText = `+${3 * count}% base armor and +${3 * count}% Block/Parry cap limits`;
-        } else if (cardId === "temporal_accel") {
-          descText = `+${15 * count}% Active & Idle Attack Speed multipliers`;
-        } else if (cardId === "astral_attune") {
-          descText = `Earn +${25 * count}% Astral Shards from this run`;
-        } else if (cardId.startsWith("slot_")) {
-          descText = `+${15 * count}% to all stats of the equipped slot for this run`;
+        let descText = card.desc;
+        if (count > 1) {
+          if (cardId === "overcharge") {
+            descText = `+${20 * count}% Crit Multiplier, +${2.5 * count}% Crit Chance`;
+          } else if (cardId === "sanguine_tide") {
+            descText = `Heal ${(1.5 * count).toFixed(1)}% Max HP on every Critical Strike hit`;
+          } else if (cardId === "phantom_echo") {
+            descText = `+${15 * count}% chance to trigger secondary Phantom Strike (deals 35% damage)`;
+          } else if (cardId === "titans_wall") {
+            descText = `+${3 * count}% base armor and +${3 * count}% Block/Parry cap limits`;
+          } else if (cardId === "temporal_accel") {
+            descText = `+${15 * count}% Active & Idle Attack Speed multipliers`;
+          } else if (cardId === "astral_attune") {
+            descText = `Earn +${25 * count}% Astral Shards from this run`;
+          } else if (cardId.startsWith("slot_")) {
+            descText = `+${15 * count}% to all stats of the equipped slot for this run`;
+          }
         }
-      }
 
-      return `
+        return `
         <div style="background:#090610; border:1px solid #9b59b660; border-radius:6px; padding:6px 10px; font-size:10.5px; text-align:left; font-family:sans-serif;">
           <strong style="color:#df9ffb; display:block;">🛠️ ${card.name}${countBadge}</strong>
           <span style="font-size:9.5px; color:#aaa; display:block; margin-top:1px;">${descText}</span>
         </div>
       `;
-    }).join("");
+      })
+      .join("");
   } else {
     deckHtml = `<div style="color:#666; font-style:italic; font-size:11px; padding: 15px 0; text-align:center; width:100%;">No infusions drafted during this run.</div>`;
   }
@@ -8911,20 +8983,32 @@ window.showCrucibleSummaryModal = function (
           Extra Loot Found:
       </h4>
       <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; text-align:left; margin-bottom:12px;">
-        ${extraLoot.map(l => {
-          let color = l.name.includes("Scrap") ? "#3498db" : l.name.includes("Soul") ? "#ffb6c1" : "#9b59b6";
-          if (l.name === "Eridium Shard") color = "#8e44ad";
-          if (l.name.includes("Elixir")) color = "#2ecc71";
+        ${extraLoot
+          .map((l) => {
+            let color = l.name.includes("Scrap")
+              ? "#3498db"
+              : l.name.includes("Soul")
+                ? "#ffb6c1"
+                : "#9b59b6";
+            if (l.name === "Eridium Shard") color = "#8e44ad";
+            if (l.name.includes("Elixir")) color = "#2ecc71";
 
-          let iconHtml = l.type === "use" ? window.getUseIconHtml(l.name, 28) : window.getEtcIconHtml(l.name, 28);
-          iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 4px;");
+            let iconHtml =
+              l.type === "use"
+                ? window.getUseIconHtml(l.name, 28)
+                : window.getEtcIconHtml(l.name, 28);
+            iconHtml = iconHtml.replace(
+              "margin-right: 12px;",
+              "margin-right: 4px;",
+            );
 
-          let escapedName = l.name.replace(/'/g, "\\'");
-          let hoverEvents = l.type === "use"
-            ? `onmouseenter="window.showUseTooltip(event, '${escapedName}')" ontouchstart="window.showUseTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`
-            : `onmouseenter="window.showEtcTooltip(event, '${escapedName}')" ontouchstart="window.showEtcTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`;
+            let escapedName = l.name.replace(/'/g, "\\'");
+            let hoverEvents =
+              l.type === "use"
+                ? `onmouseenter="window.showUseTooltip(event, '${escapedName}')" ontouchstart="window.showUseTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`
+                : `onmouseenter="window.showEtcTooltip(event, '${escapedName}')" ontouchstart="window.showEtcTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`;
 
-          return `
+            return `
             <div style="background:#090a0f; border: 1px solid #222; border-left: 3.5px solid ${color} !important; padding: 6px 10px; border-radius: 4px; font-size: 11px; display:flex; align-items:center; justify-content:space-between; gap:6px; cursor:help; font-family:monospace;" ${hoverEvents}>
               <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
                 <div style="flex-shrink:0;">${iconHtml}</div>
@@ -8933,7 +9017,8 @@ window.showCrucibleSummaryModal = function (
               <strong style="color:${color}; font-size:11px; flex-shrink:0; margin-left:4px;">+${l.qty}</strong>
             </div>
           `;
-        }).join("")}
+          })
+          .join("")}
       </div>
     `;
   }
@@ -9035,88 +9120,92 @@ window.showCrucibleSummaryModal = function (
   };
 };
 
-  window.recordRunLoot = function (name, qty, type, itemObj = null) {
-            let isDungeon = window.playerStats.isDungeonMode;
-            let isCrucible = window.playerStats.isCrucibleMode;
-            if (!isDungeon && !isCrucible) return;
+window.recordRunLoot = function (name, qty, type, itemObj = null) {
+  let isDungeon = window.playerStats.isDungeonMode;
+  let isCrucible = window.playerStats.isCrucibleMode;
+  if (!isDungeon && !isCrucible) return;
 
-            let targetArray = isDungeon
-              ? window.playerStats.dungeonAccumulatedLoot
-              : window.playerStats.crucibleAccumulatedLoot;
+  let targetArray = isDungeon
+    ? window.playerStats.dungeonAccumulatedLoot
+    : window.playerStats.crucibleAccumulatedLoot;
 
-            if (!targetArray) return;
+  if (!targetArray) return;
 
-            if (type === "etc" || type === "use") {
-              let existing = targetArray.find(
-                (l) => l.name === name && l.type === type
-              );
-              if (existing) {
-                existing.qty += qty;
-              } else {
-                targetArray.push({
-                  name: name,
-                  qty: qty,
-                  type: type
-                });
-              }
-            } else {
-              targetArray.push({
-                name: name,
-                qty: qty,
-                type: type,
-                item: itemObj
-              });
-            }
-          };
+  if (type === "etc" || type === "use") {
+    let existing = targetArray.find((l) => l.name === name && l.type === type);
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      targetArray.push({
+        name: name,
+        qty: qty,
+        type: type,
+      });
+    }
+  } else {
+    targetArray.push({
+      name: name,
+      qty: qty,
+      type: type,
+      item: itemObj,
+    });
+  }
+};
 
-          window.showDungeonSummaryModal = function (
-            dungeonType,
-            floorReached,
-            gold,
-            xp,
-            loot,
-            died = false
-          ) {
-            let modal = document.createElement("div");
-            modal.id = "dungeon-summary-modal";
-            modal.style.position = "fixed";
-            modal.style.top = "0";
-            modal.style.left = "0";
-            modal.style.width = "100%";
-            modal.style.height = "100%";
-            modal.style.backgroundColor = "rgba(0,0,0,0.92)";
-            modal.style.display = "flex";
-            modal.style.justifyContent = "center";
-            modal.style.alignItems = "center";
-            modal.style.zIndex = "35000";
-            modal.style.padding = "15px";
+window.showDungeonSummaryModal = function (
+  dungeonType,
+  floorReached,
+  gold,
+  xp,
+  loot,
+  died = false,
+) {
+  let modal = document.createElement("div");
+  modal.id = "dungeon-summary-modal";
+  modal.style.position = "fixed";
+  modal.style.top = "0";
+  modal.style.left = "0";
+  modal.style.width = "100%";
+  modal.style.height = "100%";
+  modal.style.backgroundColor = "rgba(0,0,0,0.92)";
+  modal.style.display = "flex";
+  modal.style.justifyContent = "center";
+  modal.style.alignItems = "center";
+  modal.style.zIndex = "35000";
+  modal.style.padding = "15px";
 
-            let dNames = {
-              equip: "Equipment Vault",
-              gold: "Gold Mine Caverns",
-              mat: "Toxic Material Pit"
-            };
-            let dColors = {
-              equip: "#3498db",
-              gold: "#f1c40f",
-              mat: "#2ecc71"
-            };
-            let dName = dNames[dungeonType] || "Infinite Dungeon";
-            let accentColor = dColors[dungeonType] || "#9b59b6";
+  let dNames = {
+    equip: "Equipment Vault",
+    gold: "Gold Mine Caverns",
+    mat: "Toxic Material Pit",
+  };
+  let dColors = {
+    equip: "#3498db",
+    gold: "#f1c40f",
+    mat: "#2ecc71",
+  };
+  let dName = dNames[dungeonType] || "Infinite Dungeon";
+  let accentColor = dColors[dungeonType] || "#9b59b6";
 
-            let headerText = died ? `💀 ${dName.toUpperCase()} DEFEAT` : `🏰 ${dName.toUpperCase()} SUMMARY`;
+  let headerText = died
+    ? `💀 ${dName.toUpperCase()} DEFEAT`
+    : `🏰 ${dName.toUpperCase()} SUMMARY`;
 
-            let equipLoot = loot.filter(l => l.type === "equip" || l.type === "artifact" || l.type === "sigil");
-            let matLoot = loot.filter(l => l.type === "etc" || l.type === "use");
+  let equipLoot = loot.filter(
+    (l) => l.type === "equip" || l.type === "artifact" || l.type === "sigil",
+  );
+  let matLoot = loot.filter((l) => l.type === "etc" || l.type === "use");
 
-            let equipListHtml = "";
-            if (equipLoot.length > 0) {
-              equipListHtml = equipLoot.map(l => {
-                let item = l.item;
-                if (!item) return "";
-                let color = window.getTierColor(item.statsRolled);
-                let stars = item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★`;
-                return `
+  let equipListHtml = "";
+  if (equipLoot.length > 0) {
+    equipListHtml = equipLoot
+      .map((l) => {
+        let item = l.item;
+        if (!item) return "";
+        let color = window.getTierColor(item.statsRolled);
+        let stars =
+          item.statsRolled === "UNIQUE" ? "UNIQUE" : `${item.statsRolled}★`;
+        return `
                   <div style="background:#13151c; border:1px solid #232833; border-left: 4px solid ${color} !important; padding: 8px 12px; border-radius: 6px; font-size: 11px; margin-bottom: 6px; text-align:left; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor:help;"
                        onmouseenter="window.showInventoryTooltip(event, ${item.id})"
                        ontouchstart="window.showInventoryTooltip(event, ${item.id}); event.stopPropagation();"
@@ -9127,27 +9216,40 @@ window.showCrucibleSummaryModal = function (
                     <span style="color:#888; font-size: 10px; font-family:monospace; font-weight:bold;">${stars}</span>
                   </div>
                 `;
-              }).join("");
-            } else {
-              equipListHtml = `<div style="color:#666; font-style:italic; font-size:11px; padding: 15px 0; text-align:center;">No equipment found in these depths.</div>`;
-            }
+      })
+      .join("");
+  } else {
+    equipListHtml = `<div style="color:#666; font-style:italic; font-size:11px; padding: 15px 0; text-align:center;">No equipment found in these depths.</div>`;
+  }
 
-            let matsListHtml = "";
-            if (matLoot.length > 0) {
-              matsListHtml = matLoot.map(l => {
-                let color = l.name.includes("Scrap") ? "#3498db" : l.name.includes("Soul") ? "#ffb6c1" : "#9b59b6";
-                if (l.name === "Eridium Shard") color = "#8e44ad";
-                if (l.name.includes("Elixir")) color = "#2ecc71";
+  let matsListHtml = "";
+  if (matLoot.length > 0) {
+    matsListHtml = matLoot
+      .map((l) => {
+        let color = l.name.includes("Scrap")
+          ? "#3498db"
+          : l.name.includes("Soul")
+            ? "#ffb6c1"
+            : "#9b59b6";
+        if (l.name === "Eridium Shard") color = "#8e44ad";
+        if (l.name.includes("Elixir")) color = "#2ecc71";
 
-                let iconHtml = l.type === "use" ? window.getUseIconHtml(l.name, 28) : window.getEtcIconHtml(l.name, 28);
-                iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 4px;");
+        let iconHtml =
+          l.type === "use"
+            ? window.getUseIconHtml(l.name, 28)
+            : window.getEtcIconHtml(l.name, 28);
+        iconHtml = iconHtml.replace(
+          "margin-right: 12px;",
+          "margin-right: 4px;",
+        );
 
-                let escapedName = l.name.replace(/'/g, "\\'");
-                let hoverEvents = l.type === "use"
-                  ? `onmouseenter="window.showUseTooltip(event, '${escapedName}')" ontouchstart="window.showUseTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`
-                  : `onmouseenter="window.showEtcTooltip(event, '${escapedName}')" ontouchstart="window.showEtcTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`;
+        let escapedName = l.name.replace(/'/g, "\\'");
+        let hoverEvents =
+          l.type === "use"
+            ? `onmouseenter="window.showUseTooltip(event, '${escapedName}')" ontouchstart="window.showUseTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`
+            : `onmouseenter="window.showEtcTooltip(event, '${escapedName}')" ontouchstart="window.showEtcTooltip(event, '${escapedName}'); event.stopPropagation();" onmouseleave="window.hideTooltip()"`;
 
-                return `
+        return `
                   <div style="background:#090a0f; border: 1.5px solid #222; border-left: 3.5px solid ${color} !important; padding: 6px 10px; border-radius: 6px; font-size: 11px; display:flex; align-items:center; justify-content:space-between; gap:6px; cursor:help; font-family:monospace;" ${hoverEvents}>
                     <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
                       <div style="flex-shrink:0;">${iconHtml}</div>
@@ -9156,12 +9258,13 @@ window.showCrucibleSummaryModal = function (
                     <strong style="color:${color}; font-size:11px; flex-shrink:0; margin-left:4px;">+${l.qty}</strong>
                   </div>
                 `;
-              }).join("");
-            } else {
-              matsListHtml = `<div style="color:#666; font-style:italic; font-size:11px; padding: 5px 0; text-align:center; width:100%;">No materials recovered.</div>`;
-            }
+      })
+      .join("");
+  } else {
+    matsListHtml = `<div style="color:#666; font-style:italic; font-size:11px; padding: 5px 0; text-align:center; width:100%;">No materials recovered.</div>`;
+  }
 
-            modal.innerHTML = `
+  modal.innerHTML = `
               <div style="background:#1a1a1a; border: 2.5px solid ${accentColor}; border-radius: 12px; width:100%; max-width:440px; max-height: 88vh; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 15px 45px rgba(0,0,0,0.95); animation: toastFadeIn 0.3s; border-bottom-width: 5px;">
                   <div style="background:#0b0f12; border-bottom: 1px solid #333; padding:15px; text-align:center;">
                       <h3 style="margin:0; color:${accentColor}; font-size:15px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">${headerText}</h3>
@@ -9198,17 +9301,17 @@ window.showCrucibleSummaryModal = function (
                   </div>
               </div>
             `;
-            document.body.appendChild(modal);
+  document.body.appendChild(modal);
 
-            document.getElementById("close-dungeon-summary").onclick = function () {
-              modal.remove();
-              window.isGamePaused = false;
-              let p = window.resolvePlayerStats();
-              window.playerStats.currentHp = p.maxHp;
-              window.updateUI();
-              window.renderInventory();
-            };
-          };
+  document.getElementById("close-dungeon-summary").onclick = function () {
+    modal.remove();
+    window.isGamePaused = false;
+    let p = window.resolvePlayerStats();
+    window.playerStats.currentHp = p.maxHp;
+    window.updateUI();
+    window.renderInventory();
+  };
+};
 
 // 5-Wave Mid-Run draft Choice portal overlay generator
 window.openCrucibleMidRunDraftModal = function () {
@@ -9234,8 +9337,8 @@ window.openCrucibleMidRunDraftModal = function () {
   document.body.appendChild(overlay);
 
   let cardsHtml = selectedCards
-      .map((card, idx) => {
-        return `
+    .map((card, idx) => {
+      return `
         <div class="market-card" style="
           background: linear-gradient(135deg, #13111c 0%, #06040a 100%);
           border: 2px solid #9b59b6;
@@ -9265,7 +9368,7 @@ window.openCrucibleMidRunDraftModal = function () {
           <button class="btn-action" style="width:100%; font-size:10px; padding:4px 0; background:#9b59b6; font-weight:bold;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.executeMidRunCardSelection('${card.id}')">DRAFT</button>
         </div>
       `;
-      })
+    })
     .join("");
 
   let accShards = window.playerStats.crucibleAccumulatedShards || 0;
