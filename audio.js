@@ -107,20 +107,20 @@ window.SoundManager = {
         this.synthesizeParry(now, dest);
         break;
       case "spell":
-              this.synthesizeSpell(now, dest);
-              break;
-            case "spell_fire":
-              this.synthesizeSpellFire(now, dest);
-              break;
-            case "spell_lightning":
-              this.synthesizeSpellLightning(now, dest);
-              break;
-            case "spell_frost":
-              this.synthesizeSpellFrost(now, dest);
-              break;
-            case "fairy":
-              this.synthesizeFairy(now, dest);
-              break;
+        this.synthesizeSpell(now, dest);
+        break;
+      case "spell_fire":
+        this.synthesizeSpellFire(now, dest);
+        break;
+      case "spell_lightning":
+        this.synthesizeSpellLightning(now, dest);
+        break;
+      case "spell_frost":
+        this.synthesizeSpellFrost(now, dest);
+        break;
+      case "fairy":
+        this.synthesizeFairy(now, dest);
+        break;
       case "death":
         this.synthesizeDeath(now, dest);
         break;
@@ -361,173 +361,176 @@ window.SoundManager = {
     gainNode.connect(dest);
 
     oscillators.forEach((osc) => osc.start(now));
-          noiseSource.start(now);
-          oscillators.forEach((osc) => osc.stop(now + duration));
-          noiseSource.stop(now + duration);
+    noiseSource.start(now);
+    oscillators.forEach((osc) => osc.stop(now + duration));
+    noiseSource.stop(now + duration);
 
-          setTimeout(
-            () =>
-              (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-            duration * 1000 + 40,
-          );
-        },
+    setTimeout(
+      () =>
+        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+      duration * 1000 + 40,
+    );
+  },
 
-        synthesizeSpellFire(now, dest) {
-          const duration = 0.38;
-          const gainNode = this.ctx.createGain();
-          gainNode.gain.setValueAtTime(0, now);
-          gainNode.gain.linearRampToValueAtTime(0.24, now + 0.02);
-          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  synthesizeSpellFire(now, dest) {
+    const duration = 0.38;
+    const gainNode = this.ctx.createGain();
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.24, now + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-          // Low explosion thud
-          const boomOsc = this.ctx.createOscillator();
-          boomOsc.type = "triangle";
-          boomOsc.frequency.setValueAtTime(160, now);
-          boomOsc.frequency.exponentialRampToValueAtTime(30, now + 0.18);
+    // Low explosion thud
+    const boomOsc = this.ctx.createOscillator();
+    boomOsc.type = "triangle";
+    boomOsc.frequency.setValueAtTime(160, now);
+    boomOsc.frequency.exponentialRampToValueAtTime(30, now + 0.18);
 
-          const boomGain = this.ctx.createGain();
-          boomGain.gain.setValueAtTime(0.18, now);
-          boomGain.gain.linearRampToValueAtTime(0, now + 0.22);
-          boomOsc.connect(boomGain);
-          boomGain.connect(gainNode);
+    const boomGain = this.ctx.createGain();
+    boomGain.gain.setValueAtTime(0.18, now);
+    boomGain.gain.linearRampToValueAtTime(0, now + 0.22);
+    boomOsc.connect(boomGain);
+    boomGain.connect(gainNode);
 
-          // Combustion white noise crackle
-          const noiseSource = this.ctx.createBufferSource();
-          noiseSource.buffer = this.cachedNoiseBuffer;
+    // Combustion white noise crackle
+    const noiseSource = this.ctx.createBufferSource();
+    noiseSource.buffer = this.cachedNoiseBuffer;
 
-          const lpFilter = this.ctx.createBiquadFilter();
-          lpFilter.type = "lowpass";
-          lpFilter.frequency.setValueAtTime(800, now);
-          lpFilter.frequency.exponentialRampToValueAtTime(150, now + duration);
+    const lpFilter = this.ctx.createBiquadFilter();
+    lpFilter.type = "lowpass";
+    lpFilter.frequency.setValueAtTime(800, now);
+    lpFilter.frequency.exponentialRampToValueAtTime(150, now + duration);
 
-          const noiseGain = this.ctx.createGain();
-          noiseGain.gain.setValueAtTime(0, now);
-          noiseGain.gain.linearRampToValueAtTime(0.14, now + 0.015);
-          noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    const noiseGain = this.ctx.createGain();
+    noiseGain.gain.setValueAtTime(0, now);
+    noiseGain.gain.linearRampToValueAtTime(0.14, now + 0.015);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-          noiseSource.connect(lpFilter);
-          lpFilter.connect(noiseGain);
-          noiseGain.connect(gainNode);
+    noiseSource.connect(lpFilter);
+    lpFilter.connect(noiseGain);
+    noiseGain.connect(gainNode);
 
-          gainNode.connect(dest);
+    gainNode.connect(dest);
 
-          boomOsc.start(now);
-          noiseSource.start(now);
-          boomOsc.stop(now + duration);
-          noiseSource.stop(now + duration);
+    boomOsc.start(now);
+    noiseSource.start(now);
+    boomOsc.stop(now + duration);
+    noiseSource.stop(now + duration);
 
-          setTimeout(
-            () => (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-            duration * 1000 + 40,
-          );
-        },
+    setTimeout(
+      () =>
+        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+      duration * 1000 + 40,
+    );
+  },
 
-        synthesizeSpellLightning(now, dest) {
-          const duration = 0.22;
-          const gainNode = this.ctx.createGain();
-          gainNode.gain.setValueAtTime(0, now);
-          gainNode.gain.linearRampToValueAtTime(0.22, now + 0.005);
-          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  synthesizeSpellLightning(now, dest) {
+    const duration = 0.22;
+    const gainNode = this.ctx.createGain();
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.22, now + 0.005);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-          // Sharp electrical zap
-          const zapOsc = this.ctx.createOscillator();
-          zapOsc.type = "sawtooth";
-          zapOsc.frequency.setValueAtTime(2200, now);
-          zapOsc.frequency.exponentialRampToValueAtTime(600, now + 0.08);
+    // Sharp electrical zap
+    const zapOsc = this.ctx.createOscillator();
+    zapOsc.type = "sawtooth";
+    zapOsc.frequency.setValueAtTime(2200, now);
+    zapOsc.frequency.exponentialRampToValueAtTime(600, now + 0.08);
 
-          const zapGain = this.ctx.createGain();
-          zapGain.gain.setValueAtTime(0.12, now);
-          zapGain.gain.linearRampToValueAtTime(0, now + 0.12);
-          zapOsc.connect(zapGain);
-          zapGain.connect(gainNode);
+    const zapGain = this.ctx.createGain();
+    zapGain.gain.setValueAtTime(0.12, now);
+    zapGain.gain.linearRampToValueAtTime(0, now + 0.12);
+    zapOsc.connect(zapGain);
+    zapGain.connect(gainNode);
 
-          // Static highpass noise discharge
-          const noiseSource = this.ctx.createBufferSource();
-          noiseSource.buffer = this.cachedNoiseBuffer;
+    // Static highpass noise discharge
+    const noiseSource = this.ctx.createBufferSource();
+    noiseSource.buffer = this.cachedNoiseBuffer;
 
-          const hpFilter = this.ctx.createBiquadFilter();
-          hpFilter.type = "highpass";
-          hpFilter.frequency.setValueAtTime(1500, now);
+    const hpFilter = this.ctx.createBiquadFilter();
+    hpFilter.type = "highpass";
+    hpFilter.frequency.setValueAtTime(1500, now);
 
-          const noiseGain = this.ctx.createGain();
-          noiseGain.gain.setValueAtTime(0, now);
-          noiseGain.gain.linearRampToValueAtTime(0.18, now + 0.005);
-          noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    const noiseGain = this.ctx.createGain();
+    noiseGain.gain.setValueAtTime(0, now);
+    noiseGain.gain.linearRampToValueAtTime(0.18, now + 0.005);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-          noiseSource.connect(hpFilter);
-          hpFilter.connect(noiseGain);
-          noiseGain.connect(gainNode);
+    noiseSource.connect(hpFilter);
+    hpFilter.connect(noiseGain);
+    noiseGain.connect(gainNode);
 
-          gainNode.connect(dest);
+    gainNode.connect(dest);
 
-          zapOsc.start(now);
-          noiseSource.start(now);
-          zapOsc.stop(now + duration);
-          noiseSource.stop(now + duration);
+    zapOsc.start(now);
+    noiseSource.start(now);
+    zapOsc.stop(now + duration);
+    noiseSource.stop(now + duration);
 
-          setTimeout(
-            () => (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-            duration * 1000 + 40,
-          );
-        },
+    setTimeout(
+      () =>
+        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+      duration * 1000 + 40,
+    );
+  },
 
-        synthesizeSpellFrost(now, dest) {
-          const duration = 0.5;
-          const gainNode = this.ctx.createGain();
-          gainNode.gain.setValueAtTime(0, now);
-          gainNode.gain.linearRampToValueAtTime(0.20, now + 0.015);
-          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  synthesizeSpellFrost(now, dest) {
+    const duration = 0.5;
+    const gainNode = this.ctx.createGain();
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.2, now + 0.015);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-          // Crystalline major triad sweep
-          const freqs = [1046.5, 1318.51, 1567.98, 2093.0]; // C6, E6, G6, C7
-          const oscillators = [];
+    // Crystalline major triad sweep
+    const freqs = [1046.5, 1318.51, 1567.98, 2093.0]; // C6, E6, G6, C7
+    const oscillators = [];
 
-          const chimeGain = this.ctx.createGain();
-          chimeGain.gain.setValueAtTime(0.08, now);
-          chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    const chimeGain = this.ctx.createGain();
+    chimeGain.gain.setValueAtTime(0.08, now);
+    chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-          freqs.forEach((f) => {
-            const osc = this.ctx.createOscillator();
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(f, now);
-            osc.frequency.linearRampToValueAtTime(f * 0.98, now + duration);
-            osc.connect(chimeGain);
-            oscillators.push(osc);
-          });
-          chimeGain.connect(gainNode);
+    freqs.forEach((f) => {
+      const osc = this.ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(f, now);
+      osc.frequency.linearRampToValueAtTime(f * 0.98, now + duration);
+      osc.connect(chimeGain);
+      oscillators.push(osc);
+    });
+    chimeGain.connect(gainNode);
 
-          // Glacial frost friction noise
-          const noiseSource = this.ctx.createBufferSource();
-          noiseSource.buffer = this.cachedNoiseBuffer;
+    // Glacial frost friction noise
+    const noiseSource = this.ctx.createBufferSource();
+    noiseSource.buffer = this.cachedNoiseBuffer;
 
-          const bpFilter = this.ctx.createBiquadFilter();
-          bpFilter.type = "bandpass";
-          bpFilter.frequency.setValueAtTime(3200, now);
-          bpFilter.Q.setValueAtTime(5.0, now);
+    const bpFilter = this.ctx.createBiquadFilter();
+    bpFilter.type = "bandpass";
+    bpFilter.frequency.setValueAtTime(3200, now);
+    bpFilter.Q.setValueAtTime(5.0, now);
 
-          const noiseGain = this.ctx.createGain();
-          noiseGain.gain.setValueAtTime(0, now);
-          noiseGain.gain.linearRampToValueAtTime(0.06, now + 0.02);
-          noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.7);
+    const noiseGain = this.ctx.createGain();
+    noiseGain.gain.setValueAtTime(0, now);
+    noiseGain.gain.linearRampToValueAtTime(0.06, now + 0.02);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.7);
 
-          noiseSource.connect(bpFilter);
-          bpFilter.connect(noiseGain);
-          noiseGain.connect(gainNode);
+    noiseSource.connect(bpFilter);
+    bpFilter.connect(noiseGain);
+    noiseGain.connect(gainNode);
 
-          gainNode.connect(dest);
+    gainNode.connect(dest);
 
-          oscillators.forEach((o) => o.start(now));
-          noiseSource.start(now);
-          oscillators.forEach((o) => o.stop(now + duration));
-          noiseSource.stop(now + duration);
+    oscillators.forEach((o) => o.start(now));
+    noiseSource.start(now);
+    oscillators.forEach((o) => o.stop(now + duration));
+    noiseSource.stop(now + duration);
 
-          setTimeout(
-            () => (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
-            duration * 1000 + 40,
-          );
-        },
+    setTimeout(
+      () =>
+        (this.activeChannelCount = Math.max(0, this.activeChannelCount - 1)),
+      duration * 1000 + 40,
+    );
+  },
 
-        synthesizeFairy(now, dest) {
+  synthesizeFairy(now, dest) {
     const notes = [987.77, 1318.51, 1975.53];
     const noteLength = 0.05;
     notes.forEach((freq, idx) => {
@@ -1519,38 +1522,38 @@ window.MusicManager = {
     }
 
     try {
-              // Build DSP Web Audio Graph and route through GainNode for iOS volume compatibility
-              this.source = this.ctx.createMediaElementSource(this.audio);
+      // Build DSP Web Audio Graph and route through GainNode for iOS volume compatibility
+      this.source = this.ctx.createMediaElementSource(this.audio);
 
-              this.filter = this.ctx.createBiquadFilter();
-              this.filter.type = "lowpass";
-              this.filter.frequency.setValueAtTime(20000, this.ctx.currentTime);
+      this.filter = this.ctx.createBiquadFilter();
+      this.filter.type = "lowpass";
+      this.filter.frequency.setValueAtTime(20000, this.ctx.currentTime);
 
-              this.gainNode = this.ctx.createGain();
-              this.gainNode.gain.setValueAtTime(0, this.ctx.currentTime);
+      this.gainNode = this.ctx.createGain();
+      this.gainNode.gain.setValueAtTime(0, this.ctx.currentTime);
 
-              // Create Delay & Feedback Nodes for Echo/Cavernous reverb effect
-              this.delayNode = this.ctx.createDelay(1.0);
-              this.delayGain = this.ctx.createGain();
-              this.delayNode.delayTime.setValueAtTime(0.35, this.ctx.currentTime); // 350ms echo interval
-              this.delayGain.gain.setValueAtTime(0.0, this.ctx.currentTime); // Disabled initially
+      // Create Delay & Feedback Nodes for Echo/Cavernous reverb effect
+      this.delayNode = this.ctx.createDelay(1.0);
+      this.delayGain = this.ctx.createGain();
+      this.delayNode.delayTime.setValueAtTime(0.35, this.ctx.currentTime); // 350ms echo interval
+      this.delayGain.gain.setValueAtTime(0.0, this.ctx.currentTime); // Disabled initially
 
-              // Connections
-              this.source.connect(this.filter);
-              this.filter.connect(this.gainNode); // Dry path
+      // Connections
+      this.source.connect(this.filter);
+      this.filter.connect(this.gainNode); // Dry path
 
-              // Wet path (Echo loop)
-              this.filter.connect(this.delayNode);
-              this.delayNode.connect(this.delayGain);
-              this.delayGain.connect(this.delayNode); // Feedback loop
-              this.delayGain.connect(this.gainNode); // Wet mix output
+      // Wet path (Echo loop)
+      this.filter.connect(this.delayNode);
+      this.delayNode.connect(this.delayGain);
+      this.delayGain.connect(this.delayNode); // Feedback loop
+      this.delayGain.connect(this.gainNode); // Wet mix output
 
-              if (window.SoundManager && window.SoundManager.masterGain) {
-                this.gainNode.connect(window.SoundManager.masterGain);
-              } else {
-                this.gainNode.connect(this.ctx.destination);
-              }
-            } catch (e) {
+      if (window.SoundManager && window.SoundManager.masterGain) {
+        this.gainNode.connect(window.SoundManager.masterGain);
+      } else {
+        this.gainNode.connect(this.ctx.destination);
+      }
+    } catch (e) {
       // If Web Audio routing throws an exception (CORS, suspended, etc.), log it but let the direct speaker path play!
       console.warn(
         "Web Audio BGM routing failed, falling back to direct speaker mode:",
@@ -1562,154 +1565,154 @@ window.MusicManager = {
   },
 
   play() {
-      if (this.audio && this.audio.paused) {
-        this.audio.play().catch(() => {});
+    if (this.audio && this.audio.paused) {
+      this.audio.play().catch(() => {});
+    }
+    this.tick();
+  },
+
+  tick() {
+    if (!this.initialized) return;
+
+    let now = this.ctx ? this.ctx.currentTime : 0;
+    let state = "campaign";
+
+    // Detect Active Game State
+    if (
+      window.deathAnimationTimer > 0 ||
+      (window.playerStats && window.playerStats.currentHp <= 0)
+    ) {
+      state = "death";
+    } else if (
+      window.playerStats &&
+      (window.playerStats.isBossMode ||
+        window.playerStats.isUberBoss ||
+        window.playerStats.isPrestigeBossMode)
+    ) {
+      state = "boss";
+    } else if (
+      window.playerStats &&
+      (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode)
+    ) {
+      state = "dungeon";
+    } else if (
+      document.getElementById("menu-hub-overlay") &&
+      document.getElementById("menu-hub-overlay").style.display === "flex"
+    ) {
+      state = "town";
+    } else if (
+      window.state &&
+      (window.state.currentSubTab === "USE" ||
+        window.state.currentSubTab === "ETC" ||
+        window.state.currentSubTab === "EQUIP")
+    ) {
+      state = "town";
+    }
+
+    let targetFreq = 20000; // Full frequency bypass
+    let volumeScale = 1.0;
+    let targetRate = 1.0; // Tempo & Pitch playback rate (1.0 = normal)
+    let targetQ = 1.0; // Filter resonance/sharpness
+    let targetDelayGain = 0.0; // Echo feedback wet level (0.0 = dry, deactivated)
+
+    // Apply advanced DSP sweeps per State
+    switch (state) {
+      case "death":
+        targetFreq = 250; // Lowpass muffle (cut all highs/mids)
+        volumeScale = 0.15; // Drastically ducked
+        targetRate = 1.0;
+        targetQ = 1.0;
+        targetDelayGain = 0.2; // Haunting slow echo trail
+        break;
+      case "town":
+        targetFreq = 850; // Warm, soft cozy background blanket
+        volumeScale = 0.65; // Slightly lower volume
+        targetRate = 1.0;
+        targetQ = 1.0;
+        targetDelayGain = 0.0;
+        break;
+      case "dungeon":
+        targetFreq = 3000; // Balanced highs, clear cavernous response
+        volumeScale = 0.75;
+        targetRate = 1.0;
+        targetQ = 1.0;
+        targetDelayGain = 0.15; // Subtle spatial room echo
+        break;
+      case "boss":
+        targetFreq = 1200; // Deeper/Echo-y: Heavy lowpass cut (warm sub-bass output)
+        volumeScale = 0.75; // Comfortable output level (prevents piercing volume spike)
+        targetRate = 1.0;
+        targetQ = 3.5; // Resonant bass hump
+        targetDelayGain = 0.45; // High feedback wet echo channel for extreme depth
+        break;
+      case "campaign":
+      default:
+        targetFreq = 20000; // Clean, steady farming output
+        volumeScale = 0.9;
+        targetRate = 1.0;
+        targetQ = 1.0;
+        targetDelayGain = 0.0;
+        break;
+    }
+
+    // Resolve volume levels through settings
+    let isMuted = window.playerStats ? window.playerStats.mute : false;
+    let musicVolSetting =
+      window.playerStats && window.playerStats.volumeMusic !== undefined
+        ? window.playerStats.volumeMusic
+        : 0.5;
+
+    // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
+    let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
+
+    if (this.currentState !== state) {
+      this.currentState = state;
+      console.log(
+        `[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Q: ${targetQ.toFixed(1)}, Echo: ${(targetDelayGain * 100).toFixed(0)}%, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`,
+      );
+    }
+
+    // Apply exponential sweeps
+    if (this.filter && this.filter.frequency && this.ctx) {
+      this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
+    }
+    if (this.filter && this.filter.Q && this.ctx) {
+      this.filter.Q.setTargetAtTime(targetQ, now, 0.25);
+    }
+    if (this.gainNode && this.gainNode.gain && this.ctx) {
+      this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
+    }
+    if (this.delayGain && this.delayGain.gain && this.ctx) {
+      this.delayGain.gain.setTargetAtTime(targetDelayGain, now, 0.25);
+    }
+
+    // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
+    if (this.audio) {
+      // Apply iOS-friendly HTML5 mute state fallback
+      this.audio.muted = isMuted;
+
+      // Setting .volume is blocked/ignored on iOS, but fully supported on Android / Desktop
+      try {
+        this.audio.volume = finalTargetVolume;
+      } catch (e) {}
+
+      if (this.audio.playbackRate !== 1.0) {
+        this.audio.playbackRate = 1.0;
       }
-      this.tick();
-    },
 
-    tick() {
-      if (!this.initialized) return;
-
-      let now = this.ctx ? this.ctx.currentTime : 0;
-        let state = "campaign";
-
-        // Detect Active Game State
-        if (
-          window.deathAnimationTimer > 0 ||
-          (window.playerStats && window.playerStats.currentHp <= 0)
-        ) {
-          state = "death";
-        } else if (
-          window.playerStats &&
-          (window.playerStats.isBossMode ||
-            window.playerStats.isUberBoss ||
-            window.playerStats.isPrestigeBossMode)
-        ) {
-          state = "boss";
-        } else if (
-          window.playerStats &&
-          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode)
-        ) {
-          state = "dungeon";
-        } else if (
-          document.getElementById("menu-hub-overlay") &&
-          document.getElementById("menu-hub-overlay").style.display === "flex"
-        ) {
-          state = "town";
-        } else if (
-          window.state &&
-          (window.state.currentSubTab === "USE" ||
-            window.state.currentSubTab === "ETC" ||
-            window.state.currentSubTab === "EQUIP")
-        ) {
-          state = "town";
+      // Power-Saving Optimization: Suspend streaming and decoding when muted to preserve mobile CPU/battery
+      if (finalTargetVolume <= 0 || isMuted) {
+        if (!this.audio.paused) {
+          this.audio.pause();
         }
-
-        let targetFreq = 20000; // Full frequency bypass
-        let volumeScale = 1.0;
-        let targetRate = 1.0;   // Tempo & Pitch playback rate (1.0 = normal)
-        let targetQ = 1.0;      // Filter resonance/sharpness
-        let targetDelayGain = 0.0; // Echo feedback wet level (0.0 = dry, deactivated)
-
-        // Apply advanced DSP sweeps per State
-        switch (state) {
-          case "death":
-            targetFreq = 250;     // Lowpass muffle (cut all highs/mids)
-            volumeScale = 0.15;   // Drastically ducked
-            targetRate = 1.00;
-            targetQ = 1.0;
-            targetDelayGain = 0.2; // Haunting slow echo trail
-            break;
-          case "town":
-            targetFreq = 850;     // Warm, soft cozy background blanket
-            volumeScale = 0.65;   // Slightly lower volume
-            targetRate = 1.00;
-            targetQ = 1.0;
-            targetDelayGain = 0.0;
-            break;
-          case "dungeon":
-            targetFreq = 3000;    // Balanced highs, clear cavernous response
-            volumeScale = 0.75;
-            targetRate = 1.00;
-            targetQ = 1.0;
-            targetDelayGain = 0.15; // Subtle spatial room echo
-            break;
-          case "boss":
-            targetFreq = 1200;    // Deeper/Echo-y: Heavy lowpass cut (warm sub-bass output)
-            volumeScale = 0.75;   // Comfortable output level (prevents piercing volume spike)
-            targetRate = 1.00;
-            targetQ = 3.5;        // Resonant bass hump
-            targetDelayGain = 0.45; // High feedback wet echo channel for extreme depth
-            break;
-          case "campaign":
-          default:
-            targetFreq = 20000;   // Clean, steady farming output
-            volumeScale = 0.9;
-            targetRate = 1.00;
-            targetQ = 1.0;
-            targetDelayGain = 0.0;
-            break;
+      } else {
+        if (this.audio.paused) {
+          this.audio.play().catch(() => {});
         }
+      }
+    }
 
-        // Resolve volume levels through settings
-        let isMuted = window.playerStats ? window.playerStats.mute : false;
-        let musicVolSetting =
-          window.playerStats && window.playerStats.volumeMusic !== undefined
-            ? window.playerStats.volumeMusic
-            : 0.5;
-
-        // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
-        let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
-
-        if (this.currentState !== state) {
-          this.currentState = state;
-          console.log(
-            `[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Q: ${targetQ.toFixed(1)}, Echo: ${(targetDelayGain * 100).toFixed(0)}%, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`,
-          );
-        }
-
-        // Apply exponential sweeps
-        if (this.filter && this.filter.frequency && this.ctx) {
-          this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
-        }
-        if (this.filter && this.filter.Q && this.ctx) {
-          this.filter.Q.setTargetAtTime(targetQ, now, 0.25);
-        }
-        if (this.gainNode && this.gainNode.gain && this.ctx) {
-          this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
-        }
-        if (this.delayGain && this.delayGain.gain && this.ctx) {
-          this.delayGain.gain.setTargetAtTime(targetDelayGain, now, 0.25);
-        }
-
-        // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
-        if (this.audio) {
-          // Apply iOS-friendly HTML5 mute state fallback
-          this.audio.muted = isMuted;
-
-          // Setting .volume is blocked/ignored on iOS, but fully supported on Android / Desktop
-          try {
-            this.audio.volume = finalTargetVolume;
-          } catch (e) {}
-
-          if (this.audio.playbackRate !== 1.0) {
-            this.audio.playbackRate = 1.0;
-          }
-
-          // Power-Saving Optimization: Suspend streaming and decoding when muted to preserve mobile CPU/battery
-          if (finalTargetVolume <= 0 || isMuted) {
-            if (!this.audio.paused) {
-              this.audio.pause();
-            }
-          } else {
-            if (this.audio.paused) {
-              this.audio.play().catch(() => {});
-            }
-          }
-        }
-
-        // Call next evaluation frame
-        requestAnimationFrame(() => this.tick());
-      },
+    // Call next evaluation frame
+    requestAnimationFrame(() => this.tick());
+  },
 };

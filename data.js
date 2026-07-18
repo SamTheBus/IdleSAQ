@@ -1908,31 +1908,38 @@ window.resolvePlayerStats = function (useDraft = false) {
     p.activeAttackSpeed = 15;
 
   // Hyperbolic soft cap on the Drop Rate bonus to prevent infinite late-game inventory overflow
-    let rawDropBonus = p.drop - 1.0;
-    if (rawDropBonus > 1.0) {
-      let softCapLimit = 4.0; // Absolute maximum bonus is +400% (5.0x drop multiplier)
-      p.drop =
-        1.0 +
-        1.0 +
-        ((rawDropBonus - 1.0) * softCapLimit) /
-          (rawDropBonus - 1.0 + softCapLimit);
-    }
+  let rawDropBonus = p.drop - 1.0;
+  if (rawDropBonus > 1.0) {
+    let softCapLimit = 4.0; // Absolute maximum bonus is +400% (5.0x drop multiplier)
+    p.drop =
+      1.0 +
+      1.0 +
+      ((rawDropBonus - 1.0) * softCapLimit) /
+        (rawDropBonus - 1.0 + softCapLimit);
+  }
 
-    // Hyperbolic soft cap on the Gold Multiplier bonus to prevent massive late-game economy inflation
-    let rawGoldBonus = p.gold - 1.0;
-    if (rawGoldBonus > 4.0) {
-      let softCapLimit = 12.0; // Absolute maximum bonus is +1200% (17.0x gold multiplier total)
-      p.gold = 1.0 + 4.0 + ((rawGoldBonus - 4.0) * softCapLimit) / (rawGoldBonus - 4.0 + softCapLimit);
-    }
+  // Hyperbolic soft cap on the Gold Multiplier bonus to prevent massive late-game economy inflation
+  let rawGoldBonus = p.gold - 1.0;
+  if (rawGoldBonus > 4.0) {
+    let softCapLimit = 12.0; // Absolute maximum bonus is +1200% (17.0x gold multiplier total)
+    p.gold =
+      1.0 +
+      4.0 +
+      ((rawGoldBonus - 4.0) * softCapLimit) /
+        (rawGoldBonus - 4.0 + softCapLimit);
+  }
 
-    // Hyperbolic soft cap on the Drop Quality bonus to prevent 100% Mythic drop rates at endgame
-    let rawQlyBonus = p.qly - 1.0;
-    if (rawQlyBonus > 2.0) {
-      let softCapLimit = 3.0; // Absolute maximum bonus is +300% (6.0x drop quality total)
-      p.qly = 1.0 + 2.0 + ((rawQlyBonus - 2.0) * softCapLimit) / (rawQlyBonus - 2.0 + softCapLimit);
-    }
+  // Hyperbolic soft cap on the Drop Quality bonus to prevent 100% Mythic drop rates at endgame
+  let rawQlyBonus = p.qly - 1.0;
+  if (rawQlyBonus > 2.0) {
+    let softCapLimit = 3.0; // Absolute maximum bonus is +300% (6.0x drop quality total)
+    p.qly =
+      1.0 +
+      2.0 +
+      ((rawQlyBonus - 2.0) * softCapLimit) / (rawQlyBonus - 2.0 + softCapLimit);
+  }
 
-    window.playerStats.crucibleSelfDmgReduction = p.crucibleSelfDmgReduction;
+  window.playerStats.crucibleSelfDmgReduction = p.crucibleSelfDmgReduction;
 
   if (!useDraft) {
     window.cachedPlayerStats = p;
@@ -2340,8 +2347,8 @@ window.playerStats = {
   activeSpectralResonance: null,
   projectSpectralCosmetic: true,
   totalGoldEarned: new BigNum(0, 0),
-    showDpsOverlay: true,
-    dpsOverlayX: null,
+  showDpsOverlay: true,
+  dpsOverlayX: null,
   dpsOverlayY: null,
   chatFloatingMode: false,
   chatX: null,

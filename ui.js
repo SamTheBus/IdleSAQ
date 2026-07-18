@@ -734,25 +734,25 @@ window.renderRiftConsole = function () {
   let levelSelectorHtml = "";
   if (isRiftActive) {
     levelSelectorHtml = `
-            <div style="background:rgba(231,76,60,0.1); border:1px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:center;">
-                <strong style="color:#e74c3c; font-size:11.5px;">⚠️ RIFT ACTIVE (LEVEL ${activeLvl})</strong><br>
-                <span style="font-size:10px; color:#aaa;">The Rift is locked. Slay or Collapse it to adjust level.</span>
-            </div>
-        `;
-  } else {
-    levelSelectorHtml = `
-              <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; cursor:help;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})">
-                  <div>
-                      <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER / LEVEL: ⓘ</strong>
-                      <span style="font-size:10px; color:#aaa;">Max Unlocked: Level ${maxLvl}</span>
-                  </div>
-                  <div style="display:flex; align-items:center; gap:6px;" onclick="event.stopPropagation();">
-                      <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeRiftLevel(-1)">-</button>
-                      <strong style="font-size:14px; font-family:monospace; min-width:30px; text-align:center; color:#fff;" id="rift-console-level-val">${selectedLvl}</strong>
-                      <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeRiftLevel(1)">+</button>
-                  </div>
+              <div style="background:rgba(231,76,60,0.1); border:1px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:center;">
+                  <strong style="color:#e74c3c; font-size:11.5px;">⚠️ RIFT ACTIVE (LEVEL ${activeLvl})</strong><br>
+                  <span style="font-size:10px; color:#aaa;">The Rift is locked. Slay or Collapse it to adjust level.</span>
               </div>
           `;
+  } else {
+    levelSelectorHtml = `
+                <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="flex:1; min-width:0; padding-right:8px; cursor:help; text-align:left;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl}); event.stopPropagation();">
+                        <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER: ⓘ</strong>
+                        <span style="font-size:10px; color:#aaa;">Max Unlocked: Level ${maxLvl}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeRiftLevel(-1)">-</button>
+                        <strong style="font-size:14px; font-family:monospace; min-width:30px; text-align:center; color:#fff;" id="rift-console-level-val">${selectedLvl}</strong>
+                        <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeRiftLevel(1)">+</button>
+                    </div>
+                </div>
+            `;
   }
 
   let slidesHtml = window.riftBossesMetadata
@@ -866,7 +866,7 @@ window.renderRiftConsole = function () {
         </div>
     `;
 
-  // Swipe handler setup
+  // Swipe handler setup (Fixed tap trigger bug by setting currentX to startX initially)
   let track = document.getElementById("rift-carousel-track");
   if (track && !isRiftActive) {
     let startX = 0,
@@ -876,6 +876,7 @@ window.renderRiftConsole = function () {
       "touchstart",
       (e) => {
         startX = e.touches[0].clientX;
+        currentX = startX; // Secure alignment on initial touch down!
         isDragging = true;
       },
       { passive: true },
@@ -1164,59 +1165,63 @@ window.updateUI = function () {
   }
 
   // 1. Hud overlays (Dynamic Activities stage tracking)
-    let displayTitleHtml = "";
-    let activeStageVal = window.playerStats.stage;
-    let peakVal = window.playerStats.lifetimePeakStage || window.playerStats.maxStage || 1;
-    let color = "#3498db"; // Default campaign blue
+  let displayTitleHtml = "";
+  let activeStageVal = window.playerStats.stage;
+  let peakVal =
+    window.playerStats.lifetimePeakStage || window.playerStats.maxStage || 1;
+  let color = "#3498db"; // Default campaign blue
 
-    if (window.playerStats.isDungeonMode) {
-      let dType = window.playerStats.currentDungeon || "gold";
-      let dNames = { equip: "Equip Floor", gold: "Gold Floor", mat: "Mat Floor" };
-      let dColors = { equip: "#3498db", gold: "#f1c40f", mat: "#2ecc71" };
-      color = dColors[dType] || "#2ecc71";
-      displayTitleHtml = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l2 2M11 19l-2 2" /></svg> ${dNames[dType] || "Floor"}`;
-      activeStageVal = window.playerStats.currentDungeonStage[dType] || 1;
-      peakVal = window.playerStats.dungeonPeaks[dType] || 1;
-    } else if (window.playerStats.isCrucibleMode) {
-      color = "#9b59b6"; // Purple
-      displayTitleHtml = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M12 2L2 22h20L12 2z" fill="${color}" fill-opacity="0.15" /></svg> Wave`;
-      activeStageVal = window.playerStats.crucibleWave || 1;
-      peakVal = window.playerStats.cruciblePeak || 1;
-    } else {
-      displayTitleHtml = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="${color}" fill-opacity="0.15" /><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88" /></svg> Stage`;
-      peakVal = window.playerStats.lifetimePeakStage || window.playerStats.maxStage || 1;
-    }
+  if (window.playerStats.isDungeonMode) {
+    let dType = window.playerStats.currentDungeon || "gold";
+    let dNames = { equip: "Equip Floor", gold: "Gold Floor", mat: "Mat Floor" };
+    let dColors = { equip: "#3498db", gold: "#f1c40f", mat: "#2ecc71" };
+    color = dColors[dType] || "#2ecc71";
+    displayTitleHtml = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l2 2M11 19l-2 2" /></svg> ${dNames[dType] || "Floor"}`;
+    activeStageVal = window.playerStats.currentDungeonStage[dType] || 1;
+    peakVal = window.playerStats.dungeonPeaks[dType] || 1;
+  } else if (window.playerStats.isCrucibleMode) {
+    color = "#9b59b6"; // Purple
+    displayTitleHtml = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M12 2L2 22h20L12 2z" fill="${color}" fill-opacity="0.15" /></svg> Wave`;
+    activeStageVal = window.playerStats.crucibleWave || 1;
+    peakVal = window.playerStats.cruciblePeak || 1;
+  } else {
+    displayTitleHtml = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="${color}" fill-opacity="0.15" /><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88" /></svg> Stage`;
+    peakVal =
+      window.playerStats.lifetimePeakStage || window.playerStats.maxStage || 1;
+  }
 
-    let isBoss = window.playerStats.isBossMode || window.playerStats.isUberBoss;
-      let killCount = window.playerStats.killCount;
-      let targetsReq = window.playerStats.targetsRequired;
+  let isBoss = window.playerStats.isBossMode || window.playerStats.isUberBoss;
+  let killCount = window.playerStats.killCount;
+  let targetsReq = window.playerStats.targetsRequired;
 
-      // Apply rich crimson theme to the entire footer container during boss battles
-      let panelStageEl = document.querySelector(".panel-stage");
-      if (panelStageEl) {
-        if (isBoss) {
-          panelStageEl.style.borderColor = "#ff3838";
-          panelStageEl.style.background = "linear-gradient(135deg, #1d0505 0%, #060000 100%)";
-          panelStageEl.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.65), 0 0 10px rgba(255, 56, 56, 0.25)";
+  // Apply rich crimson theme to the entire footer container during boss battles
+  let panelStageEl = document.querySelector(".panel-stage");
+  if (panelStageEl) {
+    if (isBoss) {
+      panelStageEl.style.borderColor = "#ff3838";
+      panelStageEl.style.background =
+        "linear-gradient(135deg, #1d0505 0%, #060000 100%)";
+      panelStageEl.style.boxShadow =
+        "0 4px 15px rgba(0, 0, 0, 0.65), 0 0 10px rgba(255, 56, 56, 0.25)";
 
-          // Ensure no threat scanner line duplicate is injected
-          if (!panelStageEl.querySelector(".threat-scanner-line")) {
-            let scanner = document.createElement("div");
-            scanner.className = "threat-scanner-line";
-            panelStageEl.appendChild(scanner);
-          }
-        } else {
-          panelStageEl.style.borderColor = "";
-          panelStageEl.style.background = "";
-          panelStageEl.style.boxShadow = "";
-          let scanner = panelStageEl.querySelector(".threat-scanner-line");
-          if (scanner) scanner.remove();
-        }
+      // Ensure no threat scanner line duplicate is injected
+      if (!panelStageEl.querySelector(".threat-scanner-line")) {
+        let scanner = document.createElement("div");
+        scanner.className = "threat-scanner-line";
+        panelStageEl.appendChild(scanner);
       }
+    } else {
+      panelStageEl.style.borderColor = "";
+      panelStageEl.style.background = "";
+      panelStageEl.style.boxShadow = "";
+      let scanner = panelStageEl.querySelector(".threat-scanner-line");
+      if (scanner) scanner.remove();
+    }
+  }
 
-      let trackHtml = "";
-      if (isBoss) {
-        trackHtml = `
+  let trackHtml = "";
+  if (isBoss) {
+    trackHtml = `
           <div style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; position: relative; z-index: 2;">
             <!-- Left Wing -->
             <svg class="boss-wing-svg" width="18" height="12" viewBox="0 0 24 16" fill="none" stroke="#ff3b30" stroke-width="2.5" opacity="0.8">
@@ -1231,59 +1236,59 @@ window.updateUI = function () {
             </svg>
           </div>
         `;
-      } else {
-        // 6 Distinct mystical runic glyphs
-        const glyphsList = ["ᚦ", "ᚷ", "ᛉ", "ᛟ", "ᛋ", "ᛏ"];
-        let orbs = [];
-        for (let i = 1; i <= targetsReq; i++) {
-          let isFilled = i <= killCount;
-          let isActiveTarget = i === killCount + 1;
-          let isLast = i === targetsReq;
+  } else {
+    // 6 Distinct mystical runic glyphs
+    const glyphsList = ["ᚦ", "ᚷ", "ᛉ", "ᛟ", "ᛋ", "ᛏ"];
+    let orbs = [];
+    for (let i = 1; i <= targetsReq; i++) {
+      let isFilled = i <= killCount;
+      let isActiveTarget = i === killCount + 1;
+      let isLast = i === targetsReq;
 
-          let borderRadius = isLast ? "3px" : "50%";
-          let transform = isLast ? "rotate(45deg)" : "";
+      let borderRadius = isLast ? "3px" : "50%";
+      let transform = isLast ? "rotate(45deg)" : "";
 
-          let runeGlyph = glyphsList[(i - 1) % glyphsList.length];
+      let runeGlyph = glyphsList[(i - 1) % glyphsList.length];
 
-          let orbHtml = "";
-          if (isFilled) {
-            let orbStyle = `background: radial-gradient(circle, rgba(${window.hexToRgbValues ? window.hexToRgbValues(color) : "52,152,219"}, 0.25) 0%, rgba(0,0,0,0.85) 100%); border: 1.5px solid ${color}; box-shadow: 0 0 12px ${color}, inset 0 0 6px rgba(255,255,255,0.1); ${transform};`;
-            orbHtml = `
+      let orbHtml = "";
+      if (isFilled) {
+        let orbStyle = `background: radial-gradient(circle, rgba(${window.hexToRgbValues ? window.hexToRgbValues(color) : "52,152,219"}, 0.25) 0%, rgba(0,0,0,0.85) 100%); border: 1.5px solid ${color}; box-shadow: 0 0 12px ${color}, inset 0 0 6px rgba(255,255,255,0.1); ${transform};`;
+        orbHtml = `
               <div style="width: 22px; height: 22px; border-radius: ${borderRadius}; ${orbStyle} display: flex; align-items: center; justify-content: center; position: relative; z-index: 2; transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
                 <span style="font-family: 'Times New Roman', serif; font-size: 11.5px; font-weight: 900; line-height: 1; color: ${color}; text-shadow: 0 0 6px ${color}; transform: ${isLast ? "rotate(-45deg)" : "none"};">${runeGlyph}</span>
               </div>
             `;
-          } else if (isActiveTarget) {
-            let orbStyle = `background: rgba(0,0,0,0.65); border: 1.5px solid ${color}; color: ${color}; ${transform};`;
-            orbHtml = `
+      } else if (isActiveTarget) {
+        let orbStyle = `background: rgba(0,0,0,0.65); border: 1.5px solid ${color}; color: ${color}; ${transform};`;
+        orbHtml = `
               <div style="width: 22px; height: 22px; border-radius: ${borderRadius}; ${orbStyle} display: flex; align-items: center; justify-content: center; position: relative; z-index: 2; transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
                 <div class="runic-ripple-node"></div>
                 <div class="runic-spin-border"></div>
                 <span style="font-family: 'Times New Roman', serif; font-size: 11.5px; font-weight: 900; line-height: 1; color: #fff; opacity: 0.85; transform: ${isLast ? "rotate(-45deg)" : "none"};">${runeGlyph}</span>
               </div>
             `;
-          } else {
-            let orbStyle = `background: #090c10; border: 1.5px solid #1c2330; color: #44546a; ${transform};`;
-            orbHtml = `
+      } else {
+        let orbStyle = `background: #090c10; border: 1.5px solid #1c2330; color: #44546a; ${transform};`;
+        orbHtml = `
               <div style="width: 22px; height: 22px; border-radius: ${borderRadius}; ${orbStyle} display: flex; align-items: center; justify-content: center; position: relative; z-index: 2;">
                 <span style="font-family: 'Times New Roman', serif; font-size: 11.5px; font-weight: 900; line-height: 1; opacity: 0.3; transform: ${isLast ? "rotate(-45deg)" : "none"};">${runeGlyph}</span>
               </div>
             `;
-          }
+      }
 
-          orbs.push(orbHtml);
-        }
+      orbs.push(orbHtml);
+    }
 
-        let spacing = 34; // Pixel-perfect node distance
-        let completedOrbsCount = Math.min(killCount, targetsReq - 1);
+    let spacing = 34; // Pixel-perfect node distance
+    let completedOrbsCount = Math.min(killCount, targetsReq - 1);
 
-        let totalLineWidth = (targetsReq - 1) * spacing;
-        let activeLineWidth = completedOrbsCount * spacing;
-        if (killCount >= targetsReq) activeLineWidth = totalLineWidth;
+    let totalLineWidth = (targetsReq - 1) * spacing;
+    let activeLineWidth = completedOrbsCount * spacing;
+    if (killCount >= targetsReq) activeLineWidth = totalLineWidth;
 
-        let containerWidth = totalLineWidth + 22; // Node width compensation
+    let containerWidth = totalLineWidth + 22; // Node width compensation
 
-        trackHtml = `
+    trackHtml = `
                       <div style="display: flex; justify-content: space-between; align-items: center; position: relative; width: ${containerWidth}px; height: 28px; margin: 0 auto; box-sizing: border-box;">
                         <!-- Connecting Thread Backing -->
                         <div style="position: absolute; top: calc(50% - 1px); left: 11px; width: ${totalLineWidth}px; height: 2px; background: #111520; border-bottom: 1px solid rgba(255,255,255,0.04); z-index: 1;"></div>
@@ -1292,9 +1297,9 @@ window.updateUI = function () {
                         ${orbs.join("")}
                       </div>
                     `;
-                  }
+  }
 
-    let stageSubText = `
+  let stageSubText = `
       <div style="display: flex; align-items: center; gap: 10px; width: 100%; justify-content: space-between; min-width: 0;">
         <div style="flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center;">${trackHtml}</div>
         <span style="font-size: 8.5px; color: #7f8c8d; font-family: monospace; white-space: nowrap; flex-shrink: 0;" class="stage-peak-label">
@@ -1303,13 +1308,13 @@ window.updateUI = function () {
       </div>
     `;
 
-    let stageLabelEl = document.getElementById("hud-stage-label");
-    if (stageLabelEl) stageLabelEl.innerHTML = displayTitleHtml;
+  let stageLabelEl = document.getElementById("hud-stage-label");
+  if (stageLabelEl) stageLabelEl.innerHTML = displayTitleHtml;
 
-    let stageSubEl = document.getElementById("hud-stage-sub");
-    if (stageSubEl) stageSubEl.innerHTML = stageSubText;
+  let stageSubEl = document.getElementById("hud-stage-sub");
+  if (stageSubEl) stageSubEl.innerHTML = stageSubText;
 
-    setText("hud-stage", activeStageVal);
+  setText("hud-stage", activeStageVal);
   setText("hud-coins", window.formatNumber(window.playerStats.coins));
 
   // Update real-time DPS in the draggable overlay
@@ -3774,7 +3779,12 @@ window.renderMarketShop = function () {
 };
 
 window.showAstralShopItemTooltip = function (e, index) {
-  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+  if (
+    e &&
+    e.target &&
+    e.target.closest &&
+    (e.target.closest("button") || e.target.closest(".btn-action"))
+  ) {
     return;
   }
   e.stopPropagation();
@@ -4247,7 +4257,9 @@ window.executePrestigeAscension = function () {
   if (hwm < 80) hwm = 80;
 
   let rCurrent = window.calculateCumulativePP(currentStage);
-  let rHwm = window.playerStats.highestPrestigeStageCleared ? window.calculateCumulativePP(hwm) : 0;
+  let rHwm = window.playerStats.highestPrestigeStageCleared
+    ? window.calculateCumulativePP(hwm)
+    : 0;
   let deltaPP = Math.max(0, rCurrent - rHwm);
 
   let message = `Are you sure you want to perform an Ascension? This will soft-reset your current run but award permanent multipliers!<br><br>
@@ -4382,47 +4394,51 @@ window.renderPrestigeTab = function () {
   let fairyPts = upgrades.fairy || 0;
 
   // Model 1 Calculations
-    let currentStage = p.maxStage || 1;
-    let hwm = p.highestPrestigeStageCleared || 80;
-      if (hwm < 80) hwm = 80;
+  let currentStage = p.maxStage || 1;
+  let hwm = p.highestPrestigeStageCleared || 80;
+  if (hwm < 80) hwm = 80;
 
-      let rCurrent = window.calculateCumulativePP(currentStage);
-    let rHwm = p.highestPrestigeStageCleared ? window.calculateCumulativePP(hwm) : 0;
-    let deltaPP = Math.max(0, rCurrent - rHwm);
+  let rCurrent = window.calculateCumulativePP(currentStage);
+  let rHwm = p.highestPrestigeStageCleared
+    ? window.calculateCumulativePP(hwm)
+    : 0;
+  let deltaPP = Math.max(0, rCurrent - rHwm);
 
   let minReqStage = Math.max(80, Math.floor(hwm * 0.8));
   let isEligible = currentStage >= minReqStage;
 
   let getUpgradeCardHtml = (
-      type,
-      label,
-      icon,
-      currentText,
-      bonusDesc,
-      pts,
-      color,
-    ) => {
-      let cost = window.getPrestigeUpgradeCost(type, pts);
-      let canAfford = p.prestigePoints >= cost;
-      let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-      let bgStyle = window.hexToRgba(color, 0.04);
-      let fontColor =
-        color === "#f1c40f" || color === "#ffb6c1" ? "#111" : "#fff";
+    type,
+    label,
+    icon,
+    currentText,
+    bonusDesc,
+    pts,
+    color,
+  ) => {
+    let cost = window.getPrestigeUpgradeCost(type, pts);
+    let canAfford = p.prestigePoints >= cost;
+    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+    let bgStyle = window.hexToRgba(color, 0.04);
+    let fontColor =
+      color === "#f1c40f" || color === "#ffb6c1" ? "#111" : "#fff";
 
-      const maxLevels = {
-        gold: 30,
-        drop: 30,
-        exp: 50,
-        fairy: 100
-      };
-      let isMaxed = maxLevels[type] !== undefined && pts >= maxLevels[type];
+    const maxLevels = {
+      gold: 30,
+      drop: 30,
+      exp: 50,
+      fairy: 100,
+    };
+    let isMaxed = maxLevels[type] !== undefined && pts >= maxLevels[type];
 
-      let costLabel = isMaxed ? `<span style="color:#2ecc71; font-weight:bold; font-size:11px;">MAXED</span>` : `<span style="color:${costColor}; font-weight:bold; font-size:11px;">${cost} PP</span>`;
-      let btnHtml = isMaxed
-        ? `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-weight:bold; font-size:10px; padding:4px; cursor:not-allowed;" disabled>MAXED</button>`
-        : `<button class="btn-action" style="background:${color}; color:${fontColor}; font-weight:bold; font-size:10px; padding:4px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.buyPrestigeUpgrade('${type}')">Upgrade</button>`;
+    let costLabel = isMaxed
+      ? `<span style="color:#2ecc71; font-weight:bold; font-size:11px;">MAXED</span>`
+      : `<span style="color:${costColor}; font-weight:bold; font-size:11px;">${cost} PP</span>`;
+    let btnHtml = isMaxed
+      ? `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-weight:bold; font-size:10px; padding:4px; cursor:not-allowed;" disabled>MAXED</button>`
+      : `<button class="btn-action" style="background:${color}; color:${fontColor}; font-weight:bold; font-size:10px; padding:4px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.buyPrestigeUpgrade('${type}')">Upgrade</button>`;
 
-      return `
+    return `
           <div class="shop-row" style="border-color:${color}; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:4px; padding:10px; margin-bottom:0; cursor:help;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
                   <strong style="color:${color}; font-size:11.5px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${pts})</span></strong>
@@ -4432,7 +4448,7 @@ window.renderPrestigeTab = function () {
               ${btnHtml}
           </div>
         `;
-    };
+  };
 
   // Paragon Cost
   let parLevel = p.paragonLevel || 0;
@@ -4593,7 +4609,7 @@ window.buyPrestigeUpgrade = function (type) {
     gold: 30,
     drop: 30,
     exp: 50,
-    fairy: 100 // Cap at 500% (100 * 5% = 500%)
+    fairy: 100, // Cap at 500% (100 * 5% = 500%)
   };
   if (maxLevels[type] !== undefined && currentLevel >= maxLevels[type]) {
     if (typeof window.pushHeaderToast === "function")
@@ -4829,7 +4845,12 @@ window.triggerPrestigeAscension = function () {
 };
 
 window.showMarketTooltip = function (e, index) {
-  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+  if (
+    e &&
+    e.target &&
+    e.target.closest &&
+    (e.target.closest("button") || e.target.closest(".btn-action"))
+  ) {
     return;
   }
   let item = window.playerStats.shopItems[index];
@@ -4854,7 +4875,12 @@ window.showMarketTooltip = function (e, index) {
 };
 
 window.showMysticalShopTooltip = function (e, index) {
-  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+  if (
+    e &&
+    e.target &&
+    e.target.closest &&
+    (e.target.closest("button") || e.target.closest(".btn-action"))
+  ) {
     return;
   }
   e.stopPropagation();
@@ -4921,7 +4947,12 @@ window.showMysticalShopTooltip = function (e, index) {
 };
 
 window.showTransmuteTooltip = function (e, index) {
-  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+  if (
+    e &&
+    e.target &&
+    e.target.closest &&
+    (e.target.closest("button") || e.target.closest(".btn-action"))
+  ) {
     return;
   }
   e.stopPropagation();
@@ -4952,7 +4983,12 @@ window.showTransmuteTooltip = function (e, index) {
 };
 
 window.showGoldUpgradeTooltip = function (e, upId) {
-  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+  if (
+    e &&
+    e.target &&
+    e.target.closest &&
+    (e.target.closest("button") || e.target.closest(".btn-action"))
+  ) {
     return;
   }
   e.stopPropagation();
@@ -5791,7 +5827,12 @@ Object.assign(window.UIManager, {
 window.positionTooltip = (e, tt) => window.UIManager.positionTooltip(e, tt);
 
 window.showInventoryTooltip = function (e, itemId) {
-  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+  if (
+    e &&
+    e.target &&
+    e.target.closest &&
+    (e.target.closest("button") || e.target.closest(".btn-action"))
+  ) {
     return;
   }
   if (window.isSimulatedMouseEvent && window.isSimulatedMouseEvent(e)) return;
@@ -5817,7 +5858,12 @@ window.showLogTooltip = function (e, itemId) {
 
 // Generates and positions item comparison tooltips inside the Blacksmith Forge interface
 window.showForgeTooltip = function (e, itemId) {
-  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+  if (
+    e &&
+    e.target &&
+    e.target.closest &&
+    (e.target.closest("button") || e.target.closest(".btn-action"))
+  ) {
     return;
   }
   e.stopPropagation();
@@ -6762,11 +6808,19 @@ window.refreshMarketShopIfNeeded = function () {
     window.playerStats.shopItems = [];
 
     let peakRunStage = Math.max(
-          window.playerStats.stage,
-          window.playerStats.maxStage || 1,
-        );
-        let stageScale = Math.floor((peakRunStage - 1) / 5) + 1;
-        let types = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
+      window.playerStats.stage,
+      window.playerStats.maxStage || 1,
+    );
+    let stageScale = Math.floor((peakRunStage - 1) / 5) + 1;
+    let types = [
+      "weapon",
+      "subweapon",
+      "helmet",
+      "chest",
+      "leggings",
+      "overall",
+      "boots",
+    ];
 
     for (let i = 0; i < 5; i++) {
       let isIOTD = i === 4;
@@ -6794,23 +6848,23 @@ window.refreshMarketShopIfNeeded = function () {
       let chosenType = types[Math.floor(Math.random() * types.length)];
 
       // Resolve base boss gold drops matching this item's specific Level/Stage Scale
-                          let itemStage = stageScale * 5;
-                          let effStage = window.getEffectiveStage(itemStage);
-                          let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-                          // Mapped on 5-stage scale to prevent purchase costs from out-inflating combat value
-                          let scale = Math.pow(growthRate, effStage * 0.95);
-                          let baseBossGold = Math.floor(15 * scale);
+      let itemStage = stageScale * 5;
+      let effStage = window.getEffectiveStage(itemStage);
+      let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+      // Mapped on 5-stage scale to prevent purchase costs from out-inflating combat value
+      let scale = Math.pow(growthRate, effStage * 0.95);
+      let baseBossGold = Math.floor(15 * scale);
 
       // Balanced Rarity Cost multipliers (expressed as equivalent boss kills of that item's level)
-            const rarityCostMultipliers = [
-              15, // 0★ Common
-              45, // 1★ Rare
-              120, // 2★ Magic
-              400, // 3★ Epic
-              1500, // 4★ Legendary
-              6000, // 5★ Mythic
-            ];
-            let itemRarityFactor = rarityCostMultipliers[statLinesCount] || 15;
+      const rarityCostMultipliers = [
+        15, // 0★ Common
+        45, // 1★ Rare
+        120, // 2★ Magic
+        400, // 3★ Epic
+        1500, // 4★ Legendary
+        6000, // 5★ Mythic
+      ];
+      let itemRarityFactor = rarityCostMultipliers[statLinesCount] || 15;
 
       // Final Level-Anchored shop cost calculation
       let cost = Math.floor(baseBossGold * itemRarityFactor);
@@ -7532,6 +7586,60 @@ window.submitConsoleCommand = function () {
     mainCmd === "/resetquests"
   ) {
     window.devRefreshQuests();
+  } else if (mainCmd === "/adminmail") {
+    // Structural layout: /adminmail hours min_lvl | Title | Message | {"etc":{"Catalyst Core":3}}
+    let remainingParts = args.slice(1).join(" ");
+    let splitPipe = remainingParts.split("|");
+    if (splitPipe.length < 4) {
+      if (typeof window.pushLog === "function") {
+        window.pushLog(
+          "<span style='color:#e74c3c;'>Usage: /adminmail [hours] [min_lvl] | [title] | [message] | [rewards_json]</span>",
+        );
+      }
+      return;
+    }
+    let configArgs = splitPipe[0].trim().split(" ");
+    let durationHours = parseInt(configArgs[0], 10) || 24;
+    let minLevel = parseInt(configArgs[1], 10) || 1;
+    let title = splitPipe[1].trim();
+    let message = splitPipe[2].trim();
+    let rewardsJson = splitPipe[3].trim();
+
+    try {
+      let rewards = JSON.parse(rewardsJson);
+      let userId = window.getGameUserId();
+      fetch(`${window.GAME_SERVER_URL}/api/admin/send-global-mail`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          title,
+          message,
+          rewards,
+          durationHours,
+          minLevel,
+        }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success) {
+            window.pushHeaderToast("[!] Global Mail Broadcasted!", "#2ecc71");
+            window.pushLog(
+              `<span style='color:#2ecc71;'>[ADMIN] Broadcasted Global Mail: "${title}" expiring in ${durationHours} hours.</span>`,
+            );
+          } else {
+            window.pushLog(
+              `<span style='color:#e74c3c;'>[ERROR] ${data.error}</span>`,
+            );
+          }
+        });
+    } catch (err) {
+      if (typeof window.pushLog === "function") {
+        window.pushLog(
+          `<span style='color:#e74c3c;'>[ERROR] Invalid rewards JSON structure.</span>`,
+        );
+      }
+    }
   } else if (mainCmd === "/clear") {
     window.logsHistory = [];
     let logBox = document.getElementById("log-box");
@@ -7541,7 +7649,7 @@ window.submitConsoleCommand = function () {
   } else {
     if (typeof window.pushLog === "function") {
       window.pushLog(
-        `<span style="color:#e74c3c;">Unknown command. Type /dev to open full Debug GUI panel, or try: /gold, /level, /sp, /prestige, /keys, /tokens, /mup, /clear</span>`,
+        `<span style="color:#e74c3c;">Unknown command. Type /dev to open full Debug GUI panel, or try: /gold, /level, /sp, /prestige, /keys, /tokens, /mup, /adminmail, /clear</span>`,
       );
     }
   }
@@ -8947,7 +9055,12 @@ window.showRatesLockTooltip = function (e, lockType) {
 };
 
 window.showMissionTooltip = function (e, missionId, isWeekly) {
-  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+  if (
+    e &&
+    e.target &&
+    e.target.closest &&
+    (e.target.closest("button") || e.target.closest(".btn-action"))
+  ) {
     return;
   }
   if (e && e.stopPropagation) e.stopPropagation();
@@ -9233,9 +9346,15 @@ window.renderCrucibleTab = function () {
           groupedDeck[cardId] = (groupedDeck[cardId] || 0) + 1;
         });
         let groupedKeys = Object.keys(groupedDeck);
-        let currentChildCount = deckListEl.children.length;
 
-        if (currentChildCount !== groupedKeys.length) {
+        let currentTotalPicks = deck.length;
+        let renderedPicks = parseInt(
+          deckListEl.getAttribute("data-rendered-picks") || "0",
+          10,
+        );
+
+        if (renderedPicks !== currentTotalPicks) {
+          deckListEl.setAttribute("data-rendered-picks", currentTotalPicks);
           deckListEl.innerHTML = groupedKeys
             .map((cardId) => {
               let card = window.CRUCIBLE_DRAFT_POOL.find(
@@ -9324,29 +9443,53 @@ window.renderCrucibleTab = function () {
       })
       .join("");
 
-    sec.innerHTML = `
-      <div id="crucible-active-run-panel" style="
-        background: radial-gradient(
-          circle at 50% 25%,
-          rgba(155, 89, 182, 0.15) 0%,
-          #0c0812 100%
-        );
-        border: 2px solid #9b59b6;
-        border-radius: 12px;
-        padding: 16px;
-        text-align: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
-        position: relative;
-        max-width: 580px;
-        margin: 6px auto;
-      ">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #9b59b644; padding-bottom:6px; margin-bottom:10px;">
-          <strong style="color:#df9ffb; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">🔮 Crucible Active Run</strong>
-          <span id="crucible-run-wave-badge" style="background:rgba(155,89,182,0.15); border:1px solid #9b59b6; color:#df9ffb; font-size:10px; font-weight:bold; padding:2px 10px; border-radius:10px; font-family:monospace;">Wave ${wave}</span>
-        </div>
+    let activeBuff = window.playerStats.crucibleActiveBuff;
+    let activeDebuff =
+      window.playerStats.purifiedAegisTimer > 0
+        ? null
+        : window.playerStats.crucibleActiveDebuff;
 
-        <!-- Run Rewards Accumulated Panel -->
-        <div style="background: rgba(0,0,0,0.55); border: 1.5px solid #9b59b680; border-radius: 8px; padding: 10px; margin: 0 auto 12px auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-family: monospace; font-size: 10px; text-align: center; box-shadow: inset 0 0 10px #000;">
+    let buffInfoHtml = activeBuff
+      ? `<span style="color:#2ecc71; font-weight:bold;">☀️ Mutation: ${activeBuff.name} (${activeBuff.desc})</span>`
+      : `<span style="color:#7f8c8d; font-style:italic;">No active mutation buff</span>`;
+    let debuffInfoHtml = activeDebuff
+      ? `<span style="color:#e74c3c; font-weight:bold;">🌑 Anomaly: ${activeDebuff.name} (${activeDebuff.desc})</span>`
+      : window.playerStats.purifiedAegisTimer > 0
+        ? `<span style="color:#00ffff; font-weight:bold;">🛡️ Anomaly Suppressed (Purified Aegis Active)</span>`
+        : `<span style="color:#7f8c8d; font-style:italic;">No active anomaly debuff</span>`;
+
+    sec.innerHTML = `
+          <div id="crucible-active-run-panel" style="
+            background: radial-gradient(
+              circle at 50% 25%,
+              rgba(155, 89, 182, 0.15) 0%,
+              #0c0812 100%
+            );
+            border: 2px solid #9b59b6;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+            position: relative;
+            max-width: 580px;
+            margin: 6px auto;
+          ">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #9b59b644; padding-bottom:6px; margin-bottom:10px;">
+              <strong style="color:#df9ffb; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">🔮 Crucible Active Run</strong>
+              <span id="crucible-run-wave-badge" style="background:rgba(155,89,182,0.15); border:1px solid #9b59b6; color:#df9ffb; font-size:10px; font-weight:bold; padding:2px 10px; border-radius:10px; font-family:monospace;">Wave ${wave}</span>
+            </div>
+
+            <!-- Active Environmental Modifiers -->
+            <div style="background:rgba(0,0,0,0.5); border:1px solid #9b59b644; border-radius:8px; padding:8px 10px; margin-bottom:10px; text-align:left; font-size:10px;">
+              <strong style="color:#df9ffb; display:block; font-size:9px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">🌀 Environmental Conditions:</strong>
+              <div style="display:flex; flex-direction:column; gap:4px; line-height:1.35;">
+                ${buffInfoHtml}
+                ${debuffInfoHtml}
+              </div>
+            </div>
+
+            <!-- Run Rewards Accumulated Panel -->
+            <div style="background: rgba(0,0,0,0.55); border: 1.5px solid #9b59b680; border-radius: 8px; padding: 10px; margin: 0 auto 12px auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-family: monospace; font-size: 10px; text-align: center; box-shadow: inset 0 0 10px #000;">
           <div style="background:#07030b; padding:4px; border-radius:4px; border:1px solid #222;">
             <span style="color:#888; display:block; font-size:8px; text-transform:uppercase;">Shards</span>
             <strong id="crucible-run-shards" style="color:#df9ffb; font-size:11px;">+${shards}</strong>
@@ -9374,12 +9517,12 @@ window.renderCrucibleTab = function () {
         </div>
 
         <!-- Retreat / Safe Claim Control -->
-        <div style="border-top: 1px dashed #4a154b; padding-top:12px; margin-top:6px;">
-          <button class="btn-action un" style="width:100%; font-weight:bold; padding:10px; font-size:11.5px; letter-spacing:0.5px; background:linear-gradient(135deg, #c0392b, #962d22);" onclick="window.leaveActivity()">
-              🛡️ Safe Retreat & Claim (100% Rewards)
-          </button>
-          <span style="font-size:9px; color:#aaa; display:block; margin-top:5px; line-height:1.3;">Retreating now secures 100% of all accumulated Shards, Cores, Gold, and XP. Suffer defeat and only 20% of Shards/Cores are salvaged!</span>
-        </div>
+                <div style="border-top: 1px dashed #4a154b; padding-top:12px; margin-top:6px;">
+                  <button class="btn-action un" style="width:100%; font-weight:bold; padding:10px; font-size:11.5px; letter-spacing:0.5px; background:linear-gradient(135deg, #c0392b, #962d22);" onclick="window.leaveActivity()">
+                      🛡️ Safe Retreat & Claim (100% Rewards)
+                  </button>
+                  <span style="font-size:9px; color:#aaa; display:block; margin-top:5px; line-height:1.3;">Conforming your run now safely concludes the breach and secures 100% of your accumulated Shards, Cores, Gold, and XP. You can continue fighting; even if you fall in battle, your soul's anchor preserves 100% of your rewards!</span>
+                </div>
       </div>
     `;
   } else {
@@ -9388,6 +9531,7 @@ window.renderCrucibleTab = function () {
     let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
     let peakLvl = window.playerStats.lifetimePeakStage || 1;
     let startingStageOffset = Math.max(1, Math.floor(peakLvl * 0.75));
+    let entryCost = 100 + Math.floor(peakLvl * 0.5);
 
     sec.innerHTML = `
       <div style="
@@ -9432,11 +9576,11 @@ window.renderCrucibleTab = function () {
         </div>
 
         <div style="border-top: 1px dashed #4a154b; max-width: 400px; margin: 0 auto; padding-top: 14px;">
-          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #bdc3c7; font-family: monospace; max-width: 280px; margin: 0 auto 12px auto;">
-            <span>Monster Souls: <strong style="color: #9b59b6" id="tab-etc-souls">${soulsOwned.toLocaleString()}</strong></span>
-            <span>Entry Cost: <strong style="color: #f1c40f">100 Souls</strong></span>
-          </div>
-          <button onclick="window.enterCrucible()" class="btn-action btn-pulse" style="background: linear-gradient(135deg, #9b59b6, #8e44ad); width: 100%; max-width: 280px; padding: 11px; font-size: 12px; font-weight: bold; border-radius: 8px; border: 1px solid #fff; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4); text-transform: uppercase; letter-spacing: 0.5px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; color: #bdc3c7; font-family: monospace; max-width: 280px; margin: 0 auto 12px auto;">
+                    <span>Monster Souls: <strong style="color: #9b59b6" id="tab-etc-souls">${soulsOwned.toLocaleString()}</strong></span>
+                    <span>Entry Cost: <strong style="color: #f1c40f">${entryCost.toLocaleString()} Souls</strong></span>
+                  </div>
+                  <button onclick="window.enterCrucible()" class="btn-action btn-pulse" style="background: linear-gradient(135deg, #9b59b6, #8e44ad); width: 100%; max-width: 280px; padding: 11px; font-size: 12px; font-weight: bold; border-radius: 8px; border: 1px solid #fff; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4); text-transform: uppercase; letter-spacing: 0.5px;">
             COMMENCE PURGE
           </button>
         </div>
@@ -9458,25 +9602,25 @@ window.renderAltarTab = function () {
   let lvlSelectorHtml = "";
   if (isRiftActive) {
     lvlSelectorHtml = `
-                            <div style="background:rgba(231,76,60,0.1); border:1px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:center;">
-                                <strong style="color:#e74c3c; font-size:11.5px;">⚠️ RIFT ACTIVE (LEVEL ${activeLvl})</strong><br>
-                                <span style="font-size:10px; color:#aaa;">The Rift is locked. Slay or Collapse it to adjust level.</span>
-                            </div>
-                        `;
-  } else {
-    lvlSelectorHtml = `
-                              <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; cursor:help;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})">
-                                  <div>
-                                      <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER / LEVEL: ⓘ</strong>
-                                      <span style="font-size:10px; color:#aaa;">Max Unlocked: Level ${maxLvl}</span>
-                                  </div>
-                                  <div style="display:flex; align-items:center; gap:6px;" onclick="event.stopPropagation();">
-                                      <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeAltarRiftLevel(-1)">-</button>
-                                      <strong style="font-size:14px; font-family:monospace; min-width:30px; text-align:center; color:#fff;">${selectedLvl}</strong>
-                                      <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeAltarRiftLevel(1)">+</button>
-                                  </div>
+                              <div style="background:rgba(231,76,60,0.1); border:1px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:center;">
+                                  <strong style="color:#e74c3c; font-size:11.5px;">⚠️ RIFT ACTIVE (LEVEL ${activeLvl})</strong><br>
+                                  <span style="font-size:10px; color:#aaa;">The Rift is locked. Slay or Collapse it to adjust level.</span>
                               </div>
                           `;
+  } else {
+    lvlSelectorHtml = `
+                                <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                                    <div style="flex:1; min-width:0; padding-right:8px; cursor:help; text-align:left;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl}); event.stopPropagation();">
+                                        <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER: ⓘ</strong>
+                                        <span style="font-size:10px; color:#aaa;">Max Unlocked: Level ${maxLvl}</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeAltarRiftLevel(-1)">-</button>
+                                        <strong style="font-size:14px; font-family:monospace; min-width:30px; text-align:center; color:#fff;">${selectedLvl}</strong>
+                                        <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeAltarRiftLevel(1)">+</button>
+                                    </div>
+                                </div>
+                            `;
   }
 
   let slidesHtml = window.riftBossesMetadata
@@ -9600,7 +9744,7 @@ window.renderAltarTab = function () {
                         </div>
                     `;
 
-  // Configure Touch Drag Swipe handlers for the newly isolated Altar sub-tab
+  // Configure Touch Drag Swipe handlers for the newly isolated Altar sub-tab (Fixed tap trigger bug)
   let track = document.getElementById("altar-carousel-track");
   if (track && !isRiftActive) {
     let startX = 0,
@@ -9610,6 +9754,7 @@ window.renderAltarTab = function () {
       "touchstart",
       (e) => {
         startX = e.touches[0].clientX;
+        currentX = startX; // Secure alignment on initial touch down!
         isDragging = true;
       },
       { passive: true },
@@ -10106,9 +10251,12 @@ window.buyMissionUpgrade = function (type) {
 
   const maxMissionLevels = {
     gold: 30,
-    bag: 10
+    bag: 10,
   };
-  if (maxMissionLevels[type] !== undefined && curLevel >= maxMissionLevels[type]) {
+  if (
+    maxMissionLevels[type] !== undefined &&
+    curLevel >= maxMissionLevels[type]
+  ) {
     window.pushHeaderToast("❌ Already at maximum level!", "#e74c3c");
     return;
   }
@@ -10324,17 +10472,17 @@ window.claimMissionReward = function (missionId, isWeekly = false) {
         window.playerStats.totalGoldEarned || 0,
       ).add(m.treatQty);
     } else if (m.treat === "Epic Gear Piece") {
-          let activeStage = window.playerStats.stage || 1;
-          let scale = Math.floor((activeStage - 1) / 5) + 1;
-          let types = [
-            "weapon",
-            "subweapon",
-            "helmet",
-            "chest",
-            "leggings",
-            "overall",
-            "boots",
-          ];
+      let activeStage = window.playerStats.stage || 1;
+      let scale = Math.floor((activeStage - 1) / 5) + 1;
+      let types = [
+        "weapon",
+        "subweapon",
+        "helmet",
+        "chest",
+        "leggings",
+        "overall",
+        "boots",
+      ];
       let chosenType = types[Math.floor(Math.random() * types.length)];
       let newItem = window.createItemObject(chosenType, 3, scale, 3);
       window.inventory.EQUIP.push(newItem);
@@ -10772,60 +10920,62 @@ window.renderMissionsWindow = function () {
     p.missionUpgrades = p.missionUpgrades || { gold: 0, atk: 0, hp: 0, bag: 0 };
 
     let lvlGold = p.missionUpgrades.gold || 0;
-        let costGold = 5;
-        let canAffordGold = tokenBalance >= costGold;
+    let costGold = 5;
+    let canAffordGold = tokenBalance >= costGold;
 
-        let lvlAtk = p.missionUpgrades.atk || 0;
-        let costAtk = 5;
-        let canAffordAtk = tokenBalance >= costAtk;
+    let lvlAtk = p.missionUpgrades.atk || 0;
+    let costAtk = 5;
+    let canAffordAtk = tokenBalance >= costAtk;
 
-        let lvlHp = p.missionUpgrades.hp || 0;
-        let costHp = 5;
-        let canAffordHp = tokenBalance >= costHp;
+    let lvlHp = p.missionUpgrades.hp || 0;
+    let costHp = 5;
+    let canAffordHp = tokenBalance >= costHp;
 
-        let lvlBag = p.missionUpgrades.bag || 0;
-        let costBag = 4 + lvlBag * 3;
-        let canAffordBag = tokenBalance >= costBag;
+    let lvlBag = p.missionUpgrades.bag || 0;
+    let costBag = 4 + lvlBag * 3;
+    let canAffordBag = tokenBalance >= costBag;
 
-        // Mini vector SVGs for Permanent Upgrade Icons
-        let satchelSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M16 16v1a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-1"/><rect x="4" y="6" width="16" height="10" rx="2"/><path d="M9 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
-        let midasSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #f1c40f);"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h6M9 13h6"/></svg>`;
-        let gladiatorSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #e74c3c);"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/></svg>`;
-        let constitutionSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+    // Mini vector SVGs for Permanent Upgrade Icons
+    let satchelSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M16 16v1a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-1"/><rect x="4" y="6" width="16" height="10" rx="2"/><path d="M9 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
+    let midasSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #f1c40f);"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h6M9 13h6"/></svg>`;
+    let gladiatorSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #e74c3c);"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/></svg>`;
+    let constitutionSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
 
-        let bagBtnHtml = "";
-        if (lvlBag >= 10) {
-          bagBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed;" disabled>MAXED</button>`;
-        } else {
-          bagBtnHtml = canAffordBag
-            ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('bag')">Upgrade (${costBag} QP)</button>`
-            : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (${costBag})</button>`;
-        }
+    let bagBtnHtml = "";
+    if (lvlBag >= 10) {
+      bagBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed;" disabled>MAXED</button>`;
+    } else {
+      bagBtnHtml = canAffordBag
+        ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('bag')">Upgrade (${costBag} QP)</button>`
+        : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (${costBag})</button>`;
+    }
 
-        let goldBtnHtml = "";
-        if (lvlGold >= 30) {
-          goldBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed;" disabled>MAXED</button>`;
-        } else {
-          goldBtnHtml = canAffordGold
-            ? `<button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('gold')">Upgrade (5 QP)</button>`
-            : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
-        }
+    let goldBtnHtml = "";
+    if (lvlGold >= 30) {
+      goldBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed;" disabled>MAXED</button>`;
+    } else {
+      goldBtnHtml = canAffordGold
+        ? `<button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('gold')">Upgrade (5 QP)</button>`
+        : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
+    }
 
-        let atkBtnHtml = canAffordAtk
-          ? `<button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('atk')">Upgrade (5 QP)</button>`
-          : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
+    let atkBtnHtml = canAffordAtk
+      ? `<button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('atk')">Upgrade (5 QP)</button>`
+      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
 
-        let hpBtnHtml = canAffordHp
-          ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('hp')">Upgrade (5 QP)</button>`
-          : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
+    let hpBtnHtml = canAffordHp
+      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('hp')">Upgrade (5 QP)</button>`
+      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
 
-        let costColorBag = lvlBag >= 10 ? "#2ecc71" : (canAffordBag ? "#2ecc71" : "#e74c3c");
-        let costColorGold = lvlGold >= 30 ? "#2ecc71" : (canAffordGold ? "#2ecc71" : "#e74c3c");
-        let costColorAtk = canAffordAtk ? "#2ecc71" : "#e74c3c";
-        let costColorHp = canAffordHp ? "#2ecc71" : "#e74c3c";
+    let costColorBag =
+      lvlBag >= 10 ? "#2ecc71" : canAffordBag ? "#2ecc71" : "#e74c3c";
+    let costColorGold =
+      lvlGold >= 30 ? "#2ecc71" : canAffordGold ? "#2ecc71" : "#e74c3c";
+    let costColorAtk = canAffordAtk ? "#2ecc71" : "#e74c3c";
+    let costColorHp = canAffordHp ? "#2ecc71" : "#e74c3c";
 
-        let costBagLabel = lvlBag >= 10 ? "MAXED" : `${costBag} QP`;
-        let costGoldLabel = lvlGold >= 30 ? "MAXED" : `5 QP`;
+    let costBagLabel = lvlBag >= 10 ? "MAXED" : `${costBag} QP`;
+    let costGoldLabel = lvlGold >= 30 ? "MAXED" : `5 QP`;
 
     let reagents = [
       {
@@ -11092,8 +11242,8 @@ window.initGachaShowcase = function () {
   if (window.gachaShowcaseItems.length > 0) return;
 
   let stageScale =
-      Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) + 1;
-    if (stageScale < 12) stageScale = 12; // High levels to showcase cool stat-lines
+    Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) + 1;
+  if (stageScale < 12) stageScale = 12; // High levels to showcase cool stat-lines
 
   let types = [
     "weapon",
@@ -11446,15 +11596,15 @@ window.openDailyRewardSack = function (specificName) {
   else statLinesCount = 0;
 
   let stageLvl = Math.max(
-      1,
-      Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) + 1,
-    );
-    let newEquip = window.createItemObject(
-      chosenType,
-      statLinesCount,
-      stageLvl,
-      0,
-    );
+    1,
+    Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) + 1,
+  );
+  let newEquip = window.createItemObject(
+    chosenType,
+    statLinesCount,
+    stageLvl,
+    0,
+  );
 
   window.inventory.EQUIP.push(newEquip);
   window.frozenItemDb[newEquip.id] = JSON.parse(JSON.stringify(newEquip));
@@ -11895,10 +12045,10 @@ window.openWeeklyRewardSack = function (specificName) {
   }
 
   // 5% chance for a random Artifact
-    if (Math.random() < 0.05) {
-      let peak = window.playerStats.lifetimePeakStage || 1;
-      let stageLvl = Math.max(1, Math.floor((peak - 1) / 5) + 1);
-      let art = window.createItemObject("artifact", 3, stageLvl, 0);
+  if (Math.random() < 0.05) {
+    let peak = window.playerStats.lifetimePeakStage || 1;
+    let stageLvl = Math.max(1, Math.floor((peak - 1) / 5) + 1);
+    let art = window.createItemObject("artifact", 3, stageLvl, 0);
     window.inventory.ARTIFACT.push(art);
     window.frozenItemDb[art.id] = JSON.parse(JSON.stringify(art));
     receivedRewards.push({
@@ -12156,17 +12306,7 @@ window.fetchMailboxData = function () {
   const claimedMailIds = window.playerStats.claimedMailIds || [];
 
   if (!window.GAME_SERVER_URL) {
-    // Local / Offline fallback allows players to still receive their Weekly Clan Supply Crate!
-    let localMail =
-      typeof window.getWeeklyClanMail === "function"
-        ? window.getWeeklyClanMail()
-        : null;
-    if (localMail) {
-      window.renderMailboxItems([localMail]);
-      window.updateMailboxBadge(!localMail.claimed);
-    } else {
-      listEl.innerHTML = `<div style="color:#666; text-align:center; padding: 20px 0; font-size:11px; font-style:italic;">Mailbox empty (Offline mode).</div>`;
-    }
+    listEl.innerHTML = `<div style="color:#666; text-align:center; padding: 20px 0; font-size:11px; font-style:italic;">Mailbox empty (Offline mode).</div>`;
     return;
   }
 
@@ -12178,34 +12318,15 @@ window.fetchMailboxData = function () {
     .then((response) => response.json())
     .then((data) => {
       if (data.success && data.mailbox) {
-        let mailList = [...data.mailbox];
-        let localMail = window.getWeeklyClanMail();
-        if (localMail) {
-          if (!mailList.some((m) => m.id === localMail.id)) {
-            mailList.unshift(localMail);
-          }
-        }
-        window.renderMailboxItems(mailList);
-        const hasUnclaimed = mailList.some((m) => !m.claimed);
+        window.renderMailboxItems(data.mailbox);
+        const hasUnclaimed = data.mailbox.some((m) => !m.claimed);
         window.updateMailboxBadge(hasUnclaimed);
       } else {
-        let localMail = window.getWeeklyClanMail();
-        if (localMail) {
-          window.renderMailboxItems([localMail]);
-          window.updateMailboxBadge(!localMail.claimed);
-        } else {
-          listEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Error loading mailbox data.</div>`;
-        }
+        listEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Error loading mailbox data.</div>`;
       }
     })
     .catch((err) => {
-      let localMail = window.getWeeklyClanMail();
-      if (localMail) {
-        window.renderMailboxItems([localMail]);
-        window.updateMailboxBadge(!localMail.claimed);
-      } else {
-        listEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Could not connect to the mail server.</div>`;
-      }
+      listEl.innerHTML = `<div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Could not connect to the mail server.</div>`;
     });
 };
 
@@ -12336,33 +12457,6 @@ window.renderMailboxItems = function (mailbox) {
 window.claimMailReward = function (mailId) {
   window.justClaimedMailIds = window.justClaimedMailIds || new Set();
   window.justClaimedMailIds.add(mailId);
-
-  // Catch client-side weekly clan mail claim
-  if (mailId.startsWith("clan_weekly_mail_")) {
-    let localMail = window.getWeeklyClanMail();
-    if (localMail && !localMail.claimed) {
-      window.addUseDrop("Weekly Clan Supply Crate", 1);
-
-      // Mark as claimed in playerStats
-      window.playerStats.weeklyClanCrateClaimed = true;
-
-      window.playerStats.claimedMailIds =
-        window.playerStats.claimedMailIds || [];
-      if (!window.playerStats.claimedMailIds.includes(mailId)) {
-        window.playerStats.claimedMailIds.push(mailId);
-      }
-      if (typeof window.spawnPurchaseCelebration === "function") {
-        window.spawnPurchaseCelebration("gacha", "#ffaa00", 5);
-      }
-      if (window.SoundManager) window.SoundManager.play("revive");
-      window.pushHeaderToast("🎁 Weekly Clan Supply Crate Claimed!", "#2ecc71");
-      window.updateUI();
-      window.renderInventory();
-      window.saveGame();
-      window.fetchMailboxData();
-    }
-    return;
-  }
 
   if (!window.GAME_SERVER_URL) return;
   const userId = window.getGameUserId();
@@ -12498,18 +12592,36 @@ window.selectCustomForgeStation = function (val) {
 window.switchForgeStation = function (val) {
   let blacksmithModes = document.getElementById("blacksmith-modes");
   let enchanterModes = document.getElementById("enchanter-modes");
+
+  let btnBlacksmith = document.getElementById("btn-forge-station-blacksmith");
+  let btnEnchanter = document.getElementById("btn-forge-station-enchanter");
+
   if (val === "blacksmith") {
-    if (blacksmithModes)
-      blacksmithModes.style.setProperty("display", "flex", "important");
-    if (enchanterModes)
-      enchanterModes.style.setProperty("display", "none", "important");
+    if (btnBlacksmith) btnBlacksmith.classList.add("active");
+    if (btnEnchanter) btnEnchanter.classList.remove("active");
+
+    if (blacksmithModes) {
+      blacksmithModes.classList.remove("hidden");
+      blacksmithModes.style.removeProperty("display");
+    }
+    if (enchanterModes) {
+      enchanterModes.classList.add("hidden");
+      enchanterModes.style.removeProperty("display");
+    }
     if (typeof window.setForgeMode === "function")
       window.setForgeMode("temper");
   } else if (val === "enchanter") {
-    if (blacksmithModes)
-      blacksmithModes.style.setProperty("display", "none", "important");
-    if (enchanterModes)
-      enchanterModes.style.setProperty("display", "flex", "important");
+    if (btnBlacksmith) btnBlacksmith.classList.remove("active");
+    if (btnEnchanter) btnEnchanter.classList.add("active");
+
+    if (blacksmithModes) {
+      blacksmithModes.classList.add("hidden");
+      blacksmithModes.style.removeProperty("display");
+    }
+    if (enchanterModes) {
+      enchanterModes.classList.remove("hidden");
+      enchanterModes.style.removeProperty("display");
+    }
     if (typeof window.setForgeMode === "function")
       window.setForgeMode("enchant");
   }
@@ -13107,17 +13219,16 @@ window.checkDailyCalendar = function () {
       : "inline-block";
   }
 };
+window.getWeeklyClanMail = () => null; // Graceful stub
 
 window.toggleDailyCalendar = function () {
   let modal = document.getElementById("calendar-draggable-window");
   if (modal) {
     modal.remove();
     window.hideTooltip();
-    window.setPauseState(false);
   } else {
     window.hideTooltip();
     window.checkDailyCalendar();
-    window.setPauseState(true);
 
     let win = document.createElement("div");
     win.id = "calendar-draggable-window";
@@ -13326,7 +13437,6 @@ window.claimDailyCalendarReward = function () {
 
   let win = document.getElementById("calendar-draggable-window");
   if (win) win.remove();
-  window.setPauseState(false); // RESUME GAME LOOP
   window.hideTooltip();
 
   window.updateUI();
@@ -15212,7 +15322,6 @@ window.toggleBestiaryAlbum = function () {
     window.hideTooltip();
     window.renderBestiaryAlbum();
     modal.style.display = "block";
-    window.setPauseState(true);
 
     // Launch the live card breathing/animation loop
     if (typeof window.animateBestiaryCards === "function") {
@@ -15221,7 +15330,6 @@ window.toggleBestiaryAlbum = function () {
   } else {
     modal.style.display = "none";
     window.hideTooltip();
-    window.setPauseState(false);
 
     // Stop the loop to conserve battery/CPU
     if (window.bestiaryAnimFrameId) {
@@ -16753,7 +16861,7 @@ window.openSubweaponOfChoiceModal = function () {
                     </div>
                   `;
 
-    let daggerCardHtml = `
+  let daggerCardHtml = `
                     <div id="choice-card-dagger" class="market-card" style="${cardStyles} border: 2px solid #e74c3c;"
                          onclick="window.selectChoiceSubweapon('dagger')"
                          onmouseenter="window.showInventoryTooltip(event, ${dagger.id})"
@@ -16771,7 +16879,7 @@ window.openSubweaponOfChoiceModal = function () {
                     </div>
                   `;
 
-    let tomeCardHtml = `
+  let tomeCardHtml = `
                     <div id="choice-card-tome" class="market-card" style="${cardStyles} border: 2px solid #9b59b6;"
                          onclick="window.selectChoiceSubweapon('tome')"
                          onmouseenter="window.showInventoryTooltip(event, ${tome.id})"
@@ -16848,7 +16956,8 @@ window.openSubweaponOfChoiceModal = function () {
 window.logHighTierPull = function (item) {
   if (!window.GAME_SERVER_URL) return;
   const userId = window.getGameUserId ? window.getGameUserId() : null;
-  const playerName = (window.playerStats && window.playerStats.playerName) || "Guest";
+  const playerName =
+    (window.playerStats && window.playerStats.playerName) || "Guest";
   if (!userId) return;
 
   fetch(`${window.GAME_SERVER_URL}/api/gacha/log-pull`, {
@@ -16888,13 +16997,19 @@ window.ChatManager = {
       this.renderLocalWelcome();
       return;
     }
-    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+    if (
+      this.socket &&
+      (this.socket.readyState === WebSocket.OPEN ||
+        this.socket.readyState === WebSocket.CONNECTING)
+    ) {
       return;
     }
 
     this.isConnecting = true;
     let wsUrl = window.GAME_SERVER_URL.replace(/^http/, "ws") + "/ws/chat";
-    const userId = window.getGameUserId ? window.getGameUserId() : "guest_local";
+    const userId = window.getGameUserId
+      ? window.getGameUserId()
+      : "guest_local";
     wsUrl += `?userId=${encodeURIComponent(userId)}`;
 
     try {
@@ -16904,7 +17019,10 @@ window.ChatManager = {
         console.log("🔌 Connected to Chat Server!");
         this.reconnectAttempts = 0;
         this.isConnecting = false;
-        this.renderSystemMessage("🔌 Connected to real-time chat network.", "#2ecc71");
+        this.renderSystemMessage(
+          "🔌 Connected to real-time chat network.",
+          "#2ecc71",
+        );
       };
 
       this.socket.onmessage = (event) => {
@@ -16942,11 +17060,16 @@ window.ChatManager = {
 
   attemptReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      this.renderSystemMessage("🔌 Connection lost. Falling back to local offline mode.", "#7f8c8d");
+      this.renderSystemMessage(
+        "🔌 Connection lost. Falling back to local offline mode.",
+        "#7f8c8d",
+      );
       return;
     }
     this.reconnectAttempts++;
-    console.log(`🔌 Attempting chat reconnect in ${this.reconnectDelay}ms (Attempt ${this.reconnectAttempts})...`);
+    console.log(
+      `🔌 Attempting chat reconnect in ${this.reconnectDelay}ms (Attempt ${this.reconnectAttempts})...`,
+    );
     setTimeout(() => this.connect(), this.reconnectDelay);
   },
 
@@ -16955,7 +17078,8 @@ window.ChatManager = {
     let btn = document.getElementById("btn-chat-toggle");
     if (!drawer) return;
 
-    let isHidden = drawer.style.display === "none" || drawer.style.display === "";
+    let isHidden =
+      drawer.style.display === "none" || drawer.style.display === "";
     if (isHidden) {
       drawer.style.display = "flex";
       if (btn) btn.style.borderColor = "#ff007f";
@@ -16983,7 +17107,9 @@ window.ChatManager = {
 
   switchChannel(chan) {
     this.channel = chan;
-    document.querySelectorAll(".chat-sub-tab").forEach((btn) => btn.classList.remove("active"));
+    document
+      .querySelectorAll(".chat-sub-tab")
+      .forEach((btn) => btn.classList.remove("active"));
     let activeBtn = document.getElementById("chat-tab-" + chan.toLowerCase());
     if (activeBtn) {
       activeBtn.classList.add("active");
@@ -17006,15 +17132,21 @@ window.ChatManager = {
     input.value = "";
 
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({
-        type: "MESSAGE",
-        channel: this.channel,
-        text: msg
-      }));
+      this.socket.send(
+        JSON.stringify({
+          type: "MESSAGE",
+          channel: this.channel,
+          text: msg,
+        }),
+      );
     } else {
       // Local Offline Fallback
-      let name = (window.playerStats && window.playerStats.playerName) || "Guest";
-      let color = window.playerStats && window.playerStats.playerName === "Guest" ? "#7f8c8d" : "#ffd700";
+      let name =
+        (window.playerStats && window.playerStats.playerName) || "Guest";
+      let color =
+        window.playerStats && window.playerStats.playerName === "Guest"
+          ? "#7f8c8d"
+          : "#ffd700";
       this.pushLocalMessage(name, msg, color);
     }
   },
@@ -17022,18 +17154,18 @@ window.ChatManager = {
   // Cache messages locally per channel to render during channel swaps
   channelsCache: {
     GLOBAL: [],
-    CLAN: []
+    CLAN: [],
   },
 
   renderHistory(channel, messages) {
-    this.channelsCache[channel] = messages.map(m => ({
+    this.channelsCache[channel] = messages.map((m) => ({
       senderId: m.senderId,
       senderName: m.senderName,
       title: m.title,
       level: m.level,
       prestige: m.prestige,
       text: m.text,
-      time: m.time
+      time: m.time,
     }));
     if (this.channel === channel) {
       this.refreshDisplayedMessages();
@@ -17051,7 +17183,10 @@ window.ChatManager = {
 
       // Handle unread badges if the chat window is closed
       let drawer = document.getElementById("premium-chat-drawer");
-      let isClosed = !drawer || drawer.style.display === "none" || drawer.style.display === "";
+      let isClosed =
+        !drawer ||
+        drawer.style.display === "none" ||
+        drawer.style.display === "";
       if (isClosed) {
         let unreadDot = document.getElementById("chat-unread-dot");
         if (unreadDot) {
@@ -17067,7 +17202,7 @@ window.ChatManager = {
     if (!container) return;
     container.innerHTML = "";
     let list = this.channelsCache[this.channel] || [];
-    list.forEach(msg => this.renderMessageRow(msg));
+    list.forEach((msg) => this.renderMessageRow(msg));
   },
 
   renderMessageRow(msg) {
@@ -17091,7 +17226,10 @@ window.ChatManager = {
       titleHtml = `<span class="chat-badge-title" style="background:${tData.color || "#ff007f"}20; color:${tData.color || "#ff007f"}; border:1px solid ${tData.color || "#ff007f"};">${tData.icon || ""} ${tData.name}</span>`;
     }
 
-    let prestigeHtml = msg.prestige > 0 ? `<span style="color:#e67e22; font-weight:800;">⚜${msg.prestige}</span>` : "";
+    let prestigeHtml =
+      msg.prestige > 0
+        ? `<span style="color:#e67e22; font-weight:800;">⚜${msg.prestige}</span>`
+        : "";
     let levelHtml = `<span class="chat-badge-lvl">Lv.${msg.level}${prestigeHtml}</span>`;
 
     let senderColor = msg.senderName === "Guest" ? "#7f8c8d" : "#ffd700";
@@ -17099,8 +17237,11 @@ window.ChatManager = {
       senderColor = "#ff2200";
     }
 
-    let isMe = msg.senderId === (window.getGameUserId ? window.getGameUserId() : null);
-    let inspectEvent = !isMe ? `onclick="window.inspectPlayer('${msg.senderId}')" style="cursor:pointer;" title="Click to Inspect"` : "";
+    let isMe =
+      msg.senderId === (window.getGameUserId ? window.getGameUserId() : null);
+    let inspectEvent = !isMe
+      ? `onclick="window.inspectPlayer('${msg.senderId}')" style="cursor:pointer;" title="Click to Inspect"`
+      : "";
 
     msgEl.innerHTML = `
       ${timeStr}
@@ -17122,7 +17263,7 @@ window.ChatManager = {
       level: (window.playerStats && window.playerStats.level) || 1,
       prestige: (window.playerStats && window.playerStats.prestigeCount) || 0,
       text: text,
-      time: Date.now()
+      time: Date.now(),
     };
     this.pushIncomingMessage(this.channel, msg);
   },
@@ -17140,7 +17281,7 @@ window.ChatManager = {
 
   renderLocalWelcome() {
     this.renderSystemMessage("🔌 Offline Mode: Local chat only.", "#7f8c8d");
-  }
+  },
 };
 
 // --- HIGH-FIDELITY FORGE LIVE PREVIEW GENERATOR ---

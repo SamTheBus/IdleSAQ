@@ -529,6 +529,46 @@ window.renderClanDashboard = function (clan, members, invitations) {
         : clan.leader_id.charCodeAt(0) || 0;
     let emblem = window.getClanEmblemHtml(emblemSeed, 32, clan.level);
 
+    // --- COOPERATIVE CLAN WEEKLY CRATE CLAIMS SEGMENT ---
+    let crateSectionHtml = "";
+    let myMember = members.find((x) => x.userId === userId);
+    let weeklyContribution = (myMember && myMember.weekly_contribution) || 0;
+    let lastClaimedWeek =
+      (window.playerStats && window.playerStats.lastClaimedCrateWeek) || "";
+    let currentWeek = clan.currentWeekId || "";
+
+    if (lastClaimedWeek === currentWeek) {
+      crateSectionHtml = `
+                  <div style="background:rgba(0,0,0,0.45); border:1.5px solid #2d3748; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                      <strong style="color:#7f8c8d; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Weekly Clan Crate</strong>
+                      <span style="font-size:9.5px; color:#666; display:block; margin-top:2px;">Crate already claimed for this week. Great work!</span>
+                    </div>
+                    <span style="color:#7f8c8d; font-weight:bold; font-size:11px;">Claimed [✓]</span>
+                  </div>
+                `;
+    } else if (weeklyContribution < 100) {
+      crateSectionHtml = `
+                  <div style="background:rgba(231,76,60,0.03); border:1.5px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                      <strong style="color:#e74c3c; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Weekly Clan Crate</strong>
+                      <span style="font-size:9.5px; color:#aaa; display:block; margin-top:2px;">Requires at least 100 Renown contribution (Current: ${weeklyContribution}/100)</span>
+                    </div>
+                    <button class="btn-action" style="background:#333; border-color:#333; color:#666; cursor:not-allowed;" disabled>Locked</button>
+                  </div>
+                `;
+    } else {
+      crateSectionHtml = `
+                  <div style="background:rgba(46,204,113,0.03); border:1.5px solid #2ecc71; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; display:flex; justify-content:space-between; align-items:center; animation: pulseGlow 1.8s infinite;">
+                    <div>
+                      <strong style="color:#2ecc71; font-size:11.5px; text-transform:uppercase; letter-spacing:0.5px;">Weekly Clan Crate Ready!</strong>
+                      <span style="font-size:9.5px; color:#fff; display:block; margin-top:2px;">Contribution goal met! Click to claim and unbox your supplies instantly.</span>
+                    </div>
+                    <button class="btn-action btn-pulse-teal" style="background:#2ecc71; color:#fff; font-size:11px; padding:6px 12px;" onclick="window.claimWeeklyClanCrate(event)">Claim Crate</button>
+                  </div>
+                `;
+    }
+
     // Guild Hearth Vectors (Flame changes color based on Level thresholds)
     let hearthGlow = "#ff5500";
     let hearthLabel = "Warm Embers";
@@ -607,17 +647,23 @@ window.renderClanDashboard = function (clan, members, invitations) {
               </div>
           </div>
 
-          <!-- Mini Vault Overview -->
-          <div style="background:rgba(0,0,0,0.55); border:1.5px solid #2d3748; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; box-shadow: inset 0 0 10px #000;">
-              <div style="color:#f1c40f; font-weight:bold; border-bottom:1px dashed #222; padding-bottom:4px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace; font-size:10px;">✦ Shared Vault Assets:</div>
-              <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; text-align:center; font-family:monospace; font-size:11px;">
-                  <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">GOLD</span><strong style="color:#f1c40f; display:block;">${window.formatNumber(clan.gold_bank)}</strong></div>
-                  <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">SOULS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.souls_bank)}</strong></div>
-                  <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">LUMINOUS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.luminous_bank)}</strong></div>
-              </div>
-          </div>
-      </div>
-    `;
+          <!-- Crate claims trigger injected right above Vault assets -->
+                    ${crateSectionHtml}
+
+                    <!-- Crate claims trigger injected right above Vault assets -->
+                              ${crateSectionHtml}
+
+                              <!-- Mini Vault Overview -->
+                              <div style="background:rgba(0,0,0,0.55); border:1.5px solid #2d3748; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; box-shadow: inset 0 0 10px #000;">
+                                  <div style="color:#f1c40f; font-weight:bold; border-bottom:1px dashed #222; padding-bottom:4px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace; font-size:10px;">✦ Shared Vault Assets:</div>
+                                  <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; text-align:center; font-family:monospace; font-size:11px;">
+                                      <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">GOLD</span><strong style="color:#f1c40f; display:block;">${window.formatNumber(clan.gold_bank)}</strong></div>
+                                      <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">SOULS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.souls_bank)}</strong></div>
+                                      <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">LUMINOUS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.luminous_bank)}</strong></div>
+                                  </div>
+                              </div>
+                          </div>
+                        `;
   } else if (currentTab === "MEMBERS") {
     // Segregate members list into structured rank groupings
     let groups = { founder: [], officer: [], vanguard: [], recruit: [] };
@@ -788,17 +834,17 @@ window.renderClanDashboard = function (clan, members, invitations) {
     let listHtml = "";
 
     if (
-          !questsData ||
-          !questsData.activeList ||
-          questsData.activeList.length === 0
-        ) {
-          listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
-        } else {
-                              let stgScale = Math.max(
-                                1,
-                                Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) + 1,
-                              );
-                              let calculatedGoldMult = 1.0 + Math.pow(stgScale, 1.5) * 1.2;
+      !questsData ||
+      !questsData.activeList ||
+      questsData.activeList.length === 0
+    ) {
+      listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
+    } else {
+      let stgScale = Math.max(
+        1,
+        Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) + 1,
+      );
+      let calculatedGoldMult = 1.0 + Math.pow(stgScale, 1.5) * 1.2;
 
       // Define inline micro vector icons to completely eradicate emojis
       const keyIcon =
@@ -1445,15 +1491,15 @@ window.executeClaimClanQuestReward = function (questId) {
           window.addUseDrop("Clan Reward Sack", r.sacks);
           claimsReport.push(`+${r.sacks}x Clan Sacks`);
         } else if (r.goldBase > 0) {
-                  let stgScale = Math.max(
-                    1,
-                    Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) +
-                      1,
-                  );
-                  // Replaced hyper-exponential growth with balanced polynomial curve scaling
-                  let calculatedGold = Math.ceil(
-                    r.goldBase * (1.0 + Math.pow(stgScale, 1.5) * 1.2),
-                  );
+          let stgScale = Math.max(
+            1,
+            Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) +
+              1,
+          );
+          // Replaced hyper-exponential growth with balanced polynomial curve scaling
+          let calculatedGold = Math.ceil(
+            r.goldBase * (1.0 + Math.pow(stgScale, 1.5) * 1.2),
+          );
           window.addCoins(calculatedGold);
           claimsReport.push(`+${window.formatNumber(calculatedGold)} Gold`);
         }
@@ -1850,36 +1896,6 @@ window.executeClanDonate = function (type, amount) {
       window.updateUI();
       window.saveGame();
     });
-};
-
-window.getWeeklyClanMail = function () {
-  // 1. Must be in a clan to receive the crate
-  if (!window.playerStats.clanId) return null;
-
-  // 2. Must not have already claimed this week's crate
-  if (window.playerStats.weeklyClanCrateClaimed) return null;
-
-  // 3. Ensure we have a valid weekly reset identifier or initialize it
-  const ptNow = new Date();
-  const dayOfWeek = ptNow.getDay();
-  const daysToMonday = (dayOfWeek + 6) % 7;
-  const lastMondayDate = new Date(ptNow);
-  lastMondayDate.setDate(ptNow.getDate() - daysToMonday);
-  const mondayStr = lastMondayDate.toLocaleDateString("en-US");
-
-  if (!window.playerStats.lastWeeklyResetMondayStr) {
-    window.playerStats.lastWeeklyResetMondayStr = mondayStr;
-    window.saveGame();
-  }
-
-  return {
-    id: "clan_weekly_mail_" + mondayStr,
-    title: "Weekly Clan Supply Crate",
-    message:
-      "Your weekly contribution has been processed. Here is your supply crate based on current Clan level.",
-    claimed: false,
-    rewards: { use: { "Weekly Clan Supply Crate": 1 } },
-  };
 };
 
 // Granular Auto-Deposit Bridge Controller to reduce guild screen friction
@@ -2709,5 +2725,50 @@ window.executeClanVaultAllocate = function (skillKey, resType, amount) {
         err,
       );
       runLocalSimulation();
+    });
+};
+
+// Claim weekly clan crate & trigger instant high-fidelity unboxing animation
+window.claimWeeklyClanCrate = function (e) {
+  if (e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  if (!window.GAME_SERVER_URL) return;
+
+  const userId = window.getGameUserId();
+  fetch(`${window.GAME_SERVER_URL}/api/clan/claim-crate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success && data.weekId) {
+        window.playerStats.lastClaimedCrateWeek = data.weekId;
+        window.playerStats.weeklyClanCrateClaimed = true; // Sync legacy variable
+
+        // Auto-opens the Weekly Clan Supply Crate on the client instantly!
+        if (typeof window.openWeeklyRewardSack === "function") {
+          window.openWeeklyRewardSack("Weekly Clan Supply Crate");
+        }
+
+        window.fetchClanData();
+        window.updateUI();
+        window.saveGame();
+      } else {
+        window.pushHeaderToast(
+          `[ERROR] ${data.error || "Could not claim."}`,
+          "#e74c3c",
+        );
+      }
+    })
+    .catch((err) => {
+      console.error("Crate claim failed:", err);
+      window.pushHeaderToast(
+        "[ERROR] Connection error claiming rewards.",
+        "#e74c3c",
+      );
     });
 };

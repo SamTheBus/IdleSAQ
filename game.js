@@ -231,23 +231,23 @@ window.SaveManager = {
     }
 
     // Enrich equippedSlots with cosmetic data during serialization to allow seamless leaderboard & clan roster syncs
-        let enrichedEquippedSlots = {
-          ...window.equippedSlots,
-          equippedCostume: window.playerStats.equippedCostume,
-          cosmeticSkin: window.playerStats.cosmeticSkin,
-        };
+    let enrichedEquippedSlots = {
+      ...window.equippedSlots,
+      equippedCostume: window.playerStats.equippedCostume,
+      cosmeticSkin: window.playerStats.cosmeticSkin,
+    };
 
-        let saveData = {
-          playerStats: window.playerStats,
-          equippedSlots: enrichedEquippedSlots,
-          inventory: window.inventory,
-          idCounter: window.idCounter,
-          logsHistory: window.logsHistory,
-          frozenItemDb: window.frozenItemDb,
-          lastSaveTime: window.lastUpdateTime,
-        };
+    let saveData = {
+      playerStats: window.playerStats,
+      equippedSlots: enrichedEquippedSlots,
+      inventory: window.inventory,
+      idCounter: window.idCounter,
+      logsHistory: window.logsHistory,
+      frozenItemDb: window.frozenItemDb,
+      lastSaveTime: window.lastUpdateTime,
+    };
 
-        const serializedData = JSON.stringify(saveData);
+    const serializedData = JSON.stringify(saveData);
 
     // Save locally instantly using the new unified baseline key
     localStorage.setItem("idle_saq_save", serializedData);
@@ -741,10 +741,10 @@ window.SaveManager = {
         window.playerStats.crucibleKills = 0;
 
       if (!window.playerStats.level) {
-              window.playerStats.level = 1;
-              window.playerStats.xp = new BigNum(0, 0);
-              window.playerStats.sp = 0;
-            }
+        window.playerStats.level = 1;
+        window.playerStats.xp = new BigNum(0, 0);
+        window.playerStats.sp = 0;
+      }
       window.playerStats.maxLevel = Math.max(
         window.playerStats.maxLevel || 1,
         window.playerStats.level || 1,
@@ -843,31 +843,31 @@ window.SaveManager = {
         window.playerStats.frenzyKillCount = 0;
 
       if (typeof window.recalculateItemStats === "function") {
-              for (let key in window.equippedSlots) {
-                if (window.equippedSlots[key])
-                  window.recalculateItemStats(window.equippedSlots[key]);
-              }
-              if (window.inventory.EQUIP) {
-                window.inventory.EQUIP.forEach((item) => {
-                  if (item) window.recalculateItemStats(item);
-                });
-              }
-              if (window.inventory.ARTIFACT) {
-                window.inventory.ARTIFACT.forEach((item) => {
-                  if (item) window.recalculateItemStats(item);
-                });
-              }
-              if (window.playerStats.gachaHistory) {
-                window.playerStats.gachaHistory.forEach((item) => {
-                  if (item) window.recalculateItemStats(item);
-                });
-              }
-              if (window.playerStats.shopItems) {
-                window.playerStats.shopItems.forEach((item) => {
-                  if (item) window.recalculateItemStats(item);
-                });
-              }
-            }
+        for (let key in window.equippedSlots) {
+          if (window.equippedSlots[key])
+            window.recalculateItemStats(window.equippedSlots[key]);
+        }
+        if (window.inventory.EQUIP) {
+          window.inventory.EQUIP.forEach((item) => {
+            if (item) window.recalculateItemStats(item);
+          });
+        }
+        if (window.inventory.ARTIFACT) {
+          window.inventory.ARTIFACT.forEach((item) => {
+            if (item) window.recalculateItemStats(item);
+          });
+        }
+        if (window.playerStats.gachaHistory) {
+          window.playerStats.gachaHistory.forEach((item) => {
+            if (item) window.recalculateItemStats(item);
+          });
+        }
+        if (window.playerStats.shopItems) {
+          window.playerStats.shopItems.forEach((item) => {
+            if (item) window.recalculateItemStats(item);
+          });
+        }
+      }
       if (window.playerStats.atkPotionTimer === undefined)
         window.playerStats.atkPotionTimer = 0;
       if (window.playerStats.hpPotionTimer === undefined)
@@ -1167,11 +1167,11 @@ window.SaveManager = {
       if (window.playerStats.maxCanvasClicksInWindow === undefined)
         window.playerStats.maxCanvasClicksInWindow = 0;
       if (window.playerStats.sessionPlaytime === undefined)
-              window.playerStats.sessionPlaytime = 0;
-            if (window.playerStats.activityTimer === undefined)
-              window.playerStats.activityTimer = 0;
-            if (window.playerStats.showDpsOverlay === undefined)
-              window.playerStats.showDpsOverlay = true;
+        window.playerStats.sessionPlaytime = 0;
+      if (window.playerStats.activityTimer === undefined)
+        window.playerStats.activityTimer = 0;
+      if (window.playerStats.showDpsOverlay === undefined)
+        window.playerStats.showDpsOverlay = true;
 
       window.playerStats.fairyClicksWindow =
         window.playerStats.fairyClicksWindow || [];
@@ -1370,12 +1370,12 @@ window.SaveManager = {
       else if (rollVal < 15.0 * luckMultiplier) statLinesCount = 1;
 
       let stageScale = Math.floor((stageNum - 1) / 5) + 1;
-            let newItem = window.createItemObject(
-              chosenType,
-              statLinesCount,
-              stageScale,
-              0,
-            );
+      let newItem = window.createItemObject(
+        chosenType,
+        statLinesCount,
+        stageScale,
+        0,
+      );
 
       if (
         newItem.type !== "artifact" &&
@@ -1866,6 +1866,7 @@ window.applyOfflineGains = (ms) => window.SaveManager.applyOfflineGains(ms);
 window.applySaveStatePayload = (parsed, skip) =>
   window.SaveManager.applyPayload(parsed, skip);
 window.hardResetGame = () => window.SaveManager.hardReset();
+window.getWeeklyClanMail = () => null; // Graceful stub
 
 // Global Abort Controller references for manual play offline bypass
 window.cloudSyncAbortController = null;
@@ -2698,11 +2699,11 @@ window.onload = function () {
       return;
     }
     if (e.code === "Space" && !window.spacePressed) {
-              e.preventDefault();
-              window.spacePressed = true;
-              window.registerMaelstromTap();
-              window.triggerPlayerSlash(true);
-            }
+      e.preventDefault();
+      window.spacePressed = true;
+      window.registerMaelstromTap();
+      window.triggerPlayerSlash(true);
+    }
   });
   window.addEventListener("keyup", function (e) {
     if (e.code === "Space") {
@@ -2848,10 +2849,10 @@ window.onload = function () {
     }
 
     window.activeCanvasPointers.add(e.pointerId);
-        window.isCanvasPressed = true;
-        window.registerMaelstromTap();
-        window.triggerPlayerSlash(true);
-        if (typeof window.progressMission === "function") {
+    window.isCanvasPressed = true;
+    window.registerMaelstromTap();
+    window.triggerPlayerSlash(true);
+    if (typeof window.progressMission === "function") {
       window.progressMission("active_clicks", 1);
     }
   });
@@ -3015,7 +3016,6 @@ window.onload = function () {
       ) {
         bestiaryModal.style.display = "none";
         window.hideTooltip();
-        window.setPauseState(false);
         window.updateUI();
       }
     }
@@ -3191,23 +3191,26 @@ function update() {
           gp.vy += 0.25; // Apply standard gravity in spew phase
         } else {
           let dx = targetX - gp.x;
-                          let dy = targetY - gp.y;
-                          let dist = Math.hypot(dx, dy);
-                          if (dist < 15 || gp.y < -5) {
-                            if (typeof window.triggerGoldPanelReaction === "function") {
-                              window.triggerGoldPanelReaction();
-                            }
-                            if (
-                              window.SoundManager &&
-                              typeof window.SoundManager.playCoinCollect === "function"
-                            ) {
-                              window.SoundManager.playCoinCollect();
-                            }
-                            if (typeof window.absorbGoldParticle === "function" && gp.amount !== undefined) {
-                              window.absorbGoldParticle(gp.amount, gp.isDungeon, gp.isCrucible);
-                            }
-                            continue; // Reached target, let it die
-                          }
+          let dy = targetY - gp.y;
+          let dist = Math.hypot(dx, dy);
+          if (dist < 15 || gp.y < -5) {
+            if (typeof window.triggerGoldPanelReaction === "function") {
+              window.triggerGoldPanelReaction();
+            }
+            if (
+              window.SoundManager &&
+              typeof window.SoundManager.playCoinCollect === "function"
+            ) {
+              window.SoundManager.playCoinCollect();
+            }
+            if (
+              typeof window.absorbGoldParticle === "function" &&
+              gp.amount !== undefined
+            ) {
+              window.absorbGoldParticle(gp.amount, gp.isDungeon, gp.isCrucible);
+            }
+            continue; // Reached target, let it die
+          }
           let pull = 0.85;
           gp.vx += (dx / dist) * pull;
           gp.vy += (dy / dist) * pull;
@@ -3392,8 +3395,8 @@ function update() {
   let scrollSpeed = 2 + p.moveSpeed * 0.05;
 
   if (window.spacePressed || window.isCanvasPressed) {
-      window.triggerPlayerSlash(false);
-    }
+    window.triggerPlayerSlash(false);
+  }
   if (window.mob && window.mob.hp.lte(0)) window.handleMobDeath();
   if (window.mob && window.mob.flashTimer > 0) window.mob.flashTimer--;
   if (window.mob && window.mob.funnyTextTimer > 0) window.mob.funnyTextTimer--;
@@ -3952,75 +3955,75 @@ function update() {
         proj.hitMobs.push(window.mob.id);
         let mobDef = window.mob.def || 0;
         if (proj.isMaelstromCrescent) {
-                  let windDmg = Math.max(
-                    1,
-                    Math.ceil(p.atk * 0.5 * (1.0 + p.dex * 0.0015)),
-                  );
-                  windDmg = Math.max(1, Math.ceil(windDmg * (100 / (100 + mobDef))));
+          let windDmg = Math.max(
+            1,
+            Math.ceil(p.atk * 0.5 * (1.0 + p.dex * 0.0015)),
+          );
+          windDmg = Math.max(1, Math.ceil(windDmg * (100 / (100 + mobDef))));
 
-                  if (window.playerStats.singularityState === "storing") {
-                    window.playerStats.singularityStoredDmg += windDmg;
-                    window.effects.push({
-                      x: window.mob.x + window.mob.w / 2,
-                      y: window.mob.y - 10,
-                      text: `+${window.formatNumber(windDmg)} [STORED]`,
-                      color: "#8e44ad",
-                      life: 45,
-                    });
-                  } else {
-                    window.mob.hp = window.mob.hp.sub(windDmg);
-                    window.mob.flashTimer = 5;
-                    window.spawnDamageEffect(windDmg, "echo", false);
-                    window.damageHistory.push({ time: Date.now(), amount: windDmg });
-                    window.SoundManager.play("spell_frost");
-                    if (
-                      !window.playerStats.isDungeonMode &&
-                      !window.playerStats.isCrucibleMode &&
-                      !window.playerStats.isBossMode &&
-                      !window.playerStats.isFarmingLoop
-                    ) {
-                      window.playerStats.killCount = Math.min(
-                        window.playerStats.targetsRequired,
-                        window.playerStats.killCount + 1,
-                      );
-                      window.effects.push({
-                        x: window.hero.x + 12,
-                        y: window.hero.y - 12,
-                        text: "⏩ PROGRESS SKIP!",
-                        color: "#2ecc71",
-                        life: 55,
-                      });
-                      if (
-                        window.playerStats.killCount >=
-                        window.playerStats.targetsRequired
-                      )
-                        window.playerStats.isBossMode = true;
-                    }
-                  }
-                } else {
-                  let flameDmg = Math.max(
-                    1,
-                    Math.ceil(p.atk * 0.25 * (1.0 + p.int * 0.002)),
-                  );
-                  flameDmg = Math.max(1, Math.ceil(flameDmg * (100 / (100 + mobDef))));
+          if (window.playerStats.singularityState === "storing") {
+            window.playerStats.singularityStoredDmg += windDmg;
+            window.effects.push({
+              x: window.mob.x + window.mob.w / 2,
+              y: window.mob.y - 10,
+              text: `+${window.formatNumber(windDmg)} [STORED]`,
+              color: "#8e44ad",
+              life: 45,
+            });
+          } else {
+            window.mob.hp = window.mob.hp.sub(windDmg);
+            window.mob.flashTimer = 5;
+            window.spawnDamageEffect(windDmg, "echo", false);
+            window.damageHistory.push({ time: Date.now(), amount: windDmg });
+            window.SoundManager.play("spell_frost");
+            if (
+              !window.playerStats.isDungeonMode &&
+              !window.playerStats.isCrucibleMode &&
+              !window.playerStats.isBossMode &&
+              !window.playerStats.isFarmingLoop
+            ) {
+              window.playerStats.killCount = Math.min(
+                window.playerStats.targetsRequired,
+                window.playerStats.killCount + 1,
+              );
+              window.effects.push({
+                x: window.hero.x + 12,
+                y: window.hero.y - 12,
+                text: "⏩ PROGRESS SKIP!",
+                color: "#2ecc71",
+                life: 55,
+              });
+              if (
+                window.playerStats.killCount >=
+                window.playerStats.targetsRequired
+              )
+                window.playerStats.isBossMode = true;
+            }
+          }
+        } else {
+          let flameDmg = Math.max(
+            1,
+            Math.ceil(p.atk * 0.25 * (1.0 + p.int * 0.002)),
+          );
+          flameDmg = Math.max(1, Math.ceil(flameDmg * (100 / (100 + mobDef))));
 
-                  if (window.playerStats.singularityState === "storing") {
-                    window.playerStats.singularityStoredDmg += flameDmg;
-                    window.effects.push({
-                      x: window.mob.x + window.mob.w / 2,
-                      y: window.mob.y - 10,
-                      text: `+${window.formatNumber(flameDmg)} [STORED]`,
-                      color: "#8e44ad",
-                      life: 45,
-                    });
-                  } else {
-                    window.mob.hp = window.mob.hp.sub(flameDmg);
-                    window.mob.flashTimer = 5;
-                    window.spawnDamageEffect(flameDmg, "fire", false);
-                    window.damageHistory.push({ time: Date.now(), amount: flameDmg });
-                    window.SoundManager.play("spell_fire");
-                  }
-                }
+          if (window.playerStats.singularityState === "storing") {
+            window.playerStats.singularityStoredDmg += flameDmg;
+            window.effects.push({
+              x: window.mob.x + window.mob.w / 2,
+              y: window.mob.y - 10,
+              text: `+${window.formatNumber(flameDmg)} [STORED]`,
+              color: "#8e44ad",
+              life: 45,
+            });
+          } else {
+            window.mob.hp = window.mob.hp.sub(flameDmg);
+            window.mob.flashTimer = 5;
+            window.spawnDamageEffect(flameDmg, "fire", false);
+            window.damageHistory.push({ time: Date.now(), amount: flameDmg });
+            window.SoundManager.play("spell_fire");
+          }
+        }
         for (let pIdx = 0; pIdx < 6; pIdx++) {
           window.particles.push({
             x: proj.x,
@@ -4792,37 +4795,40 @@ window.detonateGaleFlurry = function () {
 
 window.CombatEngine = {
   triggerPlayerSlash(isManual = false) {
-      if (window.isGamePaused) return;
-      let p = window.resolvePlayerStats();
-      let cooldownCap =
-        window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
+    if (window.isGamePaused) return;
+    let p = window.resolvePlayerStats();
+    let cooldownCap =
+      window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
 
-      // Manual Click Cooldown Acceleration:
-      // Physical tapping actively reduces the remaining cooldown, giving active players
-      // an early-game advantage over lazy holding.
-      if (isManual && window.hero.attackTimer > 0) {
-        let reduction = Math.max(2, Math.round(cooldownCap * 0.25));
-        window.hero.attackTimer = Math.max(0, window.hero.attackTimer - reduction);
+    // Manual Click Cooldown Acceleration:
+    // Physical tapping actively reduces the remaining cooldown, giving active players
+    // an early-game advantage over lazy holding.
+    if (isManual && window.hero.attackTimer > 0) {
+      let reduction = Math.max(2, Math.round(cooldownCap * 0.25));
+      window.hero.attackTimer = Math.max(
+        0,
+        window.hero.attackTimer - reduction,
+      );
 
-        if (window.hero.attackTimer > 0) {
-          // Spawn subtle wind swipe particles around the hero to indicate active acceleration
-          for (let i = 0; i < 3; i++) {
-            window.particles.push({
-              x: window.hero.x + 25,
-              y: window.hero.y + 15 + window.randFloat(-10, 10),
-              vx: window.randFloat(2, 4),
-              vy: window.randFloat(-1, 1),
-              radius: window.randFloat(1, 2),
-              color: "rgba(255, 255, 255, 0.45)",
-              alpha: 1,
-              life: 15,
-            });
-          }
-          return;
+      if (window.hero.attackTimer > 0) {
+        // Spawn subtle wind swipe particles around the hero to indicate active acceleration
+        for (let i = 0; i < 3; i++) {
+          window.particles.push({
+            x: window.hero.x + 25,
+            y: window.hero.y + 15 + window.randFloat(-10, 10),
+            vx: window.randFloat(2, 4),
+            vy: window.randFloat(-1, 1),
+            radius: window.randFloat(1, 2),
+            color: "rgba(255, 255, 255, 0.45)",
+            alpha: 1,
+            life: 15,
+          });
         }
+        return;
       }
+    }
 
-      if (window.hero.attackTimer > 0) return;
+    if (window.hero.attackTimer > 0) return;
 
     // Anti-Cheese Check: Apply Static Feedback debuff on any active attack (including held inputs)
     let isActivelyAttacking = window.spacePressed || window.isCanvasPressed;
@@ -5352,146 +5358,146 @@ window.CombatEngine = {
           frostProc = false;
 
         // 1. Lightning Spell Roll
-                    if (Math.random() < spellChance) {
-                      lightProc = true;
-                      triggeredSpell = true;
-                      let lightningDmg = spellDmgBase;
-                      let isSpellCrit = Math.random() < p.critChance;
-                      if (isSpellCrit)
-                        lightningDmg = Math.ceil(lightningDmg * p.critDamage);
+        if (Math.random() < spellChance) {
+          lightProc = true;
+          triggeredSpell = true;
+          let lightningDmg = spellDmgBase;
+          let isSpellCrit = Math.random() < p.critChance;
+          if (isSpellCrit)
+            lightningDmg = Math.ceil(lightningDmg * p.critDamage);
 
-                      // Apply active defense mitigation to lightning spells
-                      let mobDef = window.mob.def || 0;
-                      lightningDmg = Math.max(
-                        1,
-                        Math.ceil(lightningDmg * (100 / (100 + mobDef))),
-                      );
+          // Apply active defense mitigation to lightning spells
+          let mobDef = window.mob.def || 0;
+          lightningDmg = Math.max(
+            1,
+            Math.ceil(lightningDmg * (100 / (100 + mobDef))),
+          );
 
-                      if (window.playerStats.singularityState === "storing") {
-                        window.playerStats.singularityStoredDmg += lightningDmg;
-                        window.effects.push({
-                          x: window.mob.x + window.mob.w / 2,
-                          y: window.mob.y - 10,
-                          text: `+${window.formatNumber(lightningDmg)} [STORED]`,
-                          color: "#8e44ad",
-                          life: 45,
-                        });
-                      } else {
-                        window.mob.hp = window.mob.hp.sub(lightningDmg);
-                        window.spawnDamageEffect(lightningDmg, "lightning", isSpellCrit);
-                        window.damageHistory.push({
-                          time: Date.now(),
-                          amount: lightningDmg,
-                        });
-                        window.SoundManager.play("spell_lightning");
-                      }
+          if (window.playerStats.singularityState === "storing") {
+            window.playerStats.singularityStoredDmg += lightningDmg;
+            window.effects.push({
+              x: window.mob.x + window.mob.w / 2,
+              y: window.mob.y - 10,
+              text: `+${window.formatNumber(lightningDmg)} [STORED]`,
+              color: "#8e44ad",
+              life: 45,
+            });
+          } else {
+            window.mob.hp = window.mob.hp.sub(lightningDmg);
+            window.spawnDamageEffect(lightningDmg, "lightning", isSpellCrit);
+            window.damageHistory.push({
+              time: Date.now(),
+              amount: lightningDmg,
+            });
+            window.SoundManager.play("spell_lightning");
+          }
 
-                      // Descending crackling lightning bolt particles
-                      for (let i = 0; i < 15; i++) {
-                        window.particles.push({
-                          x: window.mob.x + window.mob.w / 2 + window.randFloat(-6, 6),
-                          y: window.mob.y - 40 + (i * (window.mob.h + 40)) / 15,
-                          vx: window.randFloat(-2.5, 2.5),
-                          vy: window.randFloat(-1, 1),
-                          radius: window.randFloat(1.5, 3),
-                          color: Math.random() > 0.3 ? "#f1c40f" : "#fff",
-                          alpha: 1,
-                          life: window.randInt(10, 18),
-                        });
-                      }
-                    }
+          // Descending crackling lightning bolt particles
+          for (let i = 0; i < 15; i++) {
+            window.particles.push({
+              x: window.mob.x + window.mob.w / 2 + window.randFloat(-6, 6),
+              y: window.mob.y - 40 + (i * (window.mob.h + 40)) / 15,
+              vx: window.randFloat(-2.5, 2.5),
+              vy: window.randFloat(-1, 1),
+              radius: window.randFloat(1.5, 3),
+              color: Math.random() > 0.3 ? "#f1c40f" : "#fff",
+              alpha: 1,
+              life: window.randInt(10, 18),
+            });
+          }
+        }
 
-                    // 2. Fire Spell Roll
-                    if (Math.random() < spellChance) {
-                      fireProc = true;
-                      triggeredSpell = true;
-                      let fireDmg = spellDmgBase;
-                      let isSpellCrit = Math.random() < p.critChance;
-                      if (isSpellCrit) fireDmg = Math.ceil(fireDmg * p.critDamage);
+        // 2. Fire Spell Roll
+        if (Math.random() < spellChance) {
+          fireProc = true;
+          triggeredSpell = true;
+          let fireDmg = spellDmgBase;
+          let isSpellCrit = Math.random() < p.critChance;
+          if (isSpellCrit) fireDmg = Math.ceil(fireDmg * p.critDamage);
 
-                      // Apply active defense mitigation to fire spells
-                      let mobDef = window.mob.def || 0;
-                      fireDmg = Math.max(1, Math.ceil(fireDmg * (100 / (100 + mobDef))));
+          // Apply active defense mitigation to fire spells
+          let mobDef = window.mob.def || 0;
+          fireDmg = Math.max(1, Math.ceil(fireDmg * (100 / (100 + mobDef))));
 
-                      if (window.playerStats.singularityState === "storing") {
-                        window.playerStats.singularityStoredDmg += fireDmg;
-                        window.effects.push({
-                          x: window.mob.x + window.mob.w / 2,
-                          y: window.mob.y - 10,
-                          text: `+${window.formatNumber(fireDmg)} [STORED]`,
-                          color: "#8e44ad",
-                          life: 45,
-                        });
-                      } else {
-                        window.mob.hp = window.mob.hp.sub(fireDmg);
-                        window.spawnDamageEffect(fireDmg, "fire", isSpellCrit);
-                        window.damageHistory.push({ time: Date.now(), amount: fireDmg });
-                        window.SoundManager.play("spell_fire");
-                      }
+          if (window.playerStats.singularityState === "storing") {
+            window.playerStats.singularityStoredDmg += fireDmg;
+            window.effects.push({
+              x: window.mob.x + window.mob.w / 2,
+              y: window.mob.y - 10,
+              text: `+${window.formatNumber(fireDmg)} [STORED]`,
+              color: "#8e44ad",
+              life: 45,
+            });
+          } else {
+            window.mob.hp = window.mob.hp.sub(fireDmg);
+            window.spawnDamageEffect(fireDmg, "fire", isSpellCrit);
+            window.damageHistory.push({ time: Date.now(), amount: fireDmg });
+            window.SoundManager.play("spell_fire");
+          }
 
-                      // Rising flame embers
-                      for (let i = 0; i < 15; i++) {
-                        window.particles.push({
-                          x: window.mob.x + window.randFloat(0, window.mob.w),
-                          y: window.mob.y + window.mob.h - 5,
-                          vx: window.randFloat(-1.2, 1.2),
-                          vy: window.randFloat(-4.5, -2),
-                          radius: window.randFloat(2, 4),
-                          color: Math.random() > 0.4 ? "#e67e22" : "#e74c3c",
-                          alpha: 1,
-                          life: window.randInt(18, 32),
-                        });
-                      }
-                    }
+          // Rising flame embers
+          for (let i = 0; i < 15; i++) {
+            window.particles.push({
+              x: window.mob.x + window.randFloat(0, window.mob.w),
+              y: window.mob.y + window.mob.h - 5,
+              vx: window.randFloat(-1.2, 1.2),
+              vy: window.randFloat(-4.5, -2),
+              radius: window.randFloat(2, 4),
+              color: Math.random() > 0.4 ? "#e67e22" : "#e74c3c",
+              alpha: 1,
+              life: window.randInt(18, 32),
+            });
+          }
+        }
 
-                    // 3. Frost Spell Roll
-                    if (Math.random() < spellChance) {
-                      frostProc = true;
-                      triggeredSpell = true;
-                      let frostDmg = spellDmgBase;
-                      let isSpellCrit = Math.random() < p.critChance;
-                      if (isSpellCrit) frostDmg = Math.ceil(frostDmg * p.critDamage);
+        // 3. Frost Spell Roll
+        if (Math.random() < spellChance) {
+          frostProc = true;
+          triggeredSpell = true;
+          let frostDmg = spellDmgBase;
+          let isSpellCrit = Math.random() < p.critChance;
+          if (isSpellCrit) frostDmg = Math.ceil(frostDmg * p.critDamage);
 
-                      // Apply active defense mitigation to frost spells
-                      let mobDef = window.mob.def || 0;
-                      frostDmg = Math.max(1, Math.ceil(frostDmg * (100 / (100 + mobDef))));
+          // Apply active defense mitigation to frost spells
+          let mobDef = window.mob.def || 0;
+          frostDmg = Math.max(1, Math.ceil(frostDmg * (100 / (100 + mobDef))));
 
-                      if (window.playerStats.singularityState === "storing") {
-                        window.playerStats.singularityStoredDmg += frostDmg;
-                        window.effects.push({
-                          x: window.mob.x + window.mob.w / 2,
-                          y: window.mob.y - 10,
-                          text: `+${window.formatNumber(frostDmg)} [STORED]`,
-                          color: "#8e44ad",
-                          life: 45,
-                        });
-                      } else {
-                        window.mob.hp = window.mob.hp.sub(frostDmg);
-                        window.spawnDamageEffect(frostDmg, "frost", isSpellCrit);
-                        window.damageHistory.push({ time: Date.now(), amount: frostDmg });
-                        window.SoundManager.play("spell_frost");
-                      }
+          if (window.playerStats.singularityState === "storing") {
+            window.playerStats.singularityStoredDmg += frostDmg;
+            window.effects.push({
+              x: window.mob.x + window.mob.w / 2,
+              y: window.mob.y - 10,
+              text: `+${window.formatNumber(frostDmg)} [STORED]`,
+              color: "#8e44ad",
+              life: 45,
+            });
+          } else {
+            window.mob.hp = window.mob.hp.sub(frostDmg);
+            window.spawnDamageEffect(frostDmg, "frost", isSpellCrit);
+            window.damageHistory.push({ time: Date.now(), amount: frostDmg });
+            window.SoundManager.play("spell_frost");
+          }
 
-                      // Radial ice shard burst
-                      for (let i = 0; i < 15; i++) {
-                        window.particles.push({
-                          x: window.mob.x + window.mob.w / 2,
-                          y: window.mob.y + window.mob.h / 2,
-                          vx: window.randFloat(-3.5, 3.5),
-                          vy: window.randFloat(-2.5, 2.5),
-                          radius: window.randFloat(1.5, 3),
-                          color: Math.random() > 0.5 ? "#3498db" : "#ffffff",
-                          alpha: 1,
-                          life: window.randInt(15, 28),
-                        });
-                      }
-                    }
+          // Radial ice shard burst
+          for (let i = 0; i < 15; i++) {
+            window.particles.push({
+              x: window.mob.x + window.mob.w / 2,
+              y: window.mob.y + window.mob.h / 2,
+              vx: window.randFloat(-3.5, 3.5),
+              vy: window.randFloat(-2.5, 2.5),
+              radius: window.randFloat(1.5, 3),
+              color: Math.random() > 0.5 ? "#3498db" : "#ffffff",
+              alpha: 1,
+              life: window.randInt(15, 28),
+            });
+          }
+        }
 
-                    if (triggeredSpell) {
-                      if (lightProc && fireProc && frostProc) {
-                        window.playerStats.hasTriggeredElementalConvergence = true;
-                      }
-                    }
+        if (triggeredSpell) {
+          if (lightProc && fireProc && frostProc) {
+            window.playerStats.hasTriggeredElementalConvergence = true;
+          }
+        }
       }
 
       if (window.checkArtifactTrait("echo_strike") && Math.random() < 0.3) {
@@ -5838,22 +5844,22 @@ window.CombatEngine = {
     let coinYield = Math.ceil(baseCoin * p.gold);
 
     // REDIRECT AND ACCUMULATE INSIDE CRUCIBLE POOLS (XP IS STILL IMMEDIATE, GOLD IS DEFERRED TO PARTICLE ABSORPTION)
-        if (window.playerStats.isCrucibleMode) {
-          window.playerStats.crucibleAccumulatedXp =
-            (window.playerStats.crucibleAccumulatedXp || 0) + xpYield;
-        } else {
-          if (window.playerStats.isDungeonMode) {
-            window.playerStats.dungeonAccumulatedXp =
-              (window.playerStats.dungeonAccumulatedXp || 0) + xpYield;
-          }
-          if (typeof window.gainXp === "function") window.gainXp(xpYield);
-        }
+    if (window.playerStats.isCrucibleMode) {
+      window.playerStats.crucibleAccumulatedXp =
+        (window.playerStats.crucibleAccumulatedXp || 0) + xpYield;
+    } else {
+      if (window.playerStats.isDungeonMode) {
+        window.playerStats.dungeonAccumulatedXp =
+          (window.playerStats.dungeonAccumulatedXp || 0) + xpYield;
+      }
+      if (typeof window.gainXp === "function") window.gainXp(xpYield);
+    }
 
-        // Peak single gold drop check
-        window.playerStats.peakSingleGoldDrop = Math.max(
-          window.playerStats.peakSingleGoldDrop || 0,
-          coinYield,
-        );
+    // Peak single gold drop check
+    window.playerStats.peakSingleGoldDrop = Math.max(
+      window.playerStats.peakSingleGoldDrop || 0,
+      coinYield,
+    );
 
     if (typeof window.spawnDeathParticles === "function") {
       window.spawnDeathParticles(
@@ -5875,44 +5881,44 @@ window.CombatEngine = {
     }
 
     // Spawn homing gold coin particles to fly to top-right HUD panel (Larger bursts on Bosses)
-        if (coinYield > 0 && window.goldParticles && window.mob) {
-          let startX = window.mob.x + window.mob.w / 2;
-          let startY = window.mob.y + window.mob.h / 2;
-          let isBossType = [
-            "boss",
-            "dungeon_boss",
-            "prestige_boss",
-            "rift_guardian",
-            "aegis_goliath",
-            "chronos_arbitrator",
-            "nexus_overseer",
-          ].includes(window.mob.type);
+    if (coinYield > 0 && window.goldParticles && window.mob) {
+      let startX = window.mob.x + window.mob.w / 2;
+      let startY = window.mob.y + window.mob.h / 2;
+      let isBossType = [
+        "boss",
+        "dungeon_boss",
+        "prestige_boss",
+        "rift_guardian",
+        "aegis_goliath",
+        "chronos_arbitrator",
+        "nexus_overseer",
+      ].includes(window.mob.type);
 
-          let particleCount = isBossType
-            ? Math.min(
-                30,
-                Math.max(16, Math.floor(Math.log10(coinYield + 1) * 6.5)),
-              )
-            : Math.min(12, Math.max(4, Math.floor(Math.log10(coinYield + 1) * 3)));
+      let particleCount = isBossType
+        ? Math.min(
+            30,
+            Math.max(16, Math.floor(Math.log10(coinYield + 1) * 6.5)),
+          )
+        : Math.min(12, Math.max(4, Math.floor(Math.log10(coinYield + 1) * 3)));
 
-          let baseAmt = Math.floor(coinYield / particleCount);
-          let remainder = coinYield % particleCount;
+      let baseAmt = Math.floor(coinYield / particleCount);
+      let remainder = coinYield % particleCount;
 
-          for (let i = 0; i < particleCount; i++) {
-            let pAmt = baseAmt + (i < remainder ? 1 : 0);
-            window.goldParticles.push({
-              x: startX,
-              y: startY,
-              vx: window.randFloat(-4, 4),
-              vy: window.randFloat(-7, -3),
-              life: 120,
-              delay: i * 2, // Staggered delays create a beautiful serpent-style stream
-              amount: pAmt,
-              isDungeon: window.playerStats.isDungeonMode,
-              isCrucible: window.playerStats.isCrucibleMode,
-            });
-          }
-        }
+      for (let i = 0; i < particleCount; i++) {
+        let pAmt = baseAmt + (i < remainder ? 1 : 0);
+        window.goldParticles.push({
+          x: startX,
+          y: startY,
+          vx: window.randFloat(-4, 4),
+          vy: window.randFloat(-7, -3),
+          life: 120,
+          delay: i * 2, // Staggered delays create a beautiful serpent-style stream
+          amount: pAmt,
+          isDungeon: window.playerStats.isDungeonMode,
+          isCrucible: window.playerStats.isCrucibleMode,
+        });
+      }
+    }
 
     if (window.playerStats.isCrucibleMode) {
       // Active Debuff: Volatile Sparks (On-death mitigatable explosions)
@@ -6115,8 +6121,9 @@ window.CombatEngine = {
               window.playerStats.activeDungeonSigil.rewardMultiplier || 0;
           }
 
-          // Active Dungeon Boss Soul Jackpot scaling with depth, drop rate, and sigils
-          let bossSoulAmt = Math.round((50 + dStage * 5) * p.drop * sigMult);
+          // Active Dungeon Boss Soul Jackpot scaling with depth, drop rate, and sigils (Fixed double-dipping and sub-linearized)
+          let baseSouls = 30 + Math.floor(Math.pow(dStage, 0.6) * 6);
+          let bossSoulAmt = Math.round(baseSouls * p.drop);
           window.addEtcDrop("Monster Soul", bossSoulAmt);
 
           if (dStage < 150) {
@@ -6187,9 +6194,9 @@ window.CombatEngine = {
             sigMult +=
               window.playerStats.activeDungeonSigil.rewardMultiplier || 0;
           }
-          let soulAmt = Math.round(
-            (2 + Math.floor(dStage / 20)) * p.drop * sigMult,
-          );
+          // Fixed double-dipping and sub-linearized minion soul drops
+          let baseMinionSouls = 2 + Math.floor(Math.pow(dStage, 0.4));
+          let soulAmt = Math.round(baseMinionSouls * p.drop);
           window.addEtcDrop("Monster Soul", soulAmt);
           // 2. Independent, non-exclusive rolls for material scraps
           let r = Math.random();
@@ -7366,7 +7373,8 @@ window.CombatEngine = {
   },
 };
 
-window.triggerPlayerSlash = (isManual) => window.CombatEngine.triggerPlayerSlash(isManual);
+window.triggerPlayerSlash = (isManual) =>
+  window.CombatEngine.triggerPlayerSlash(isManual);
 window.executeHitCalculations = () =>
   window.CombatEngine.executeHitCalculations();
 window.handleMobDeath = () => window.CombatEngine.handleMobDeath();
@@ -7404,8 +7412,8 @@ window.useItem = function (itemName) {
       window.playerStats.clanSkills.clan_supply_depot) ||
       0;
     let stage = window.playerStats.stage || 1;
-        let stgScale = Math.max(1, Math.floor((stage - 1) / 5) + 1);
-        let itemLvlMultiplier = Math.pow(1.08, stage);
+    let stgScale = Math.max(1, Math.floor((stage - 1) / 5) + 1);
+    let itemLvlMultiplier = Math.pow(1.08, stage);
 
     // Scaling yields based on Depot Level research
     let baseGold = Math.floor(
@@ -8397,36 +8405,39 @@ window.triggerFairyLoot = function (targetFairy) {
   }
 
   if (Math.random() < 0.2) {
-      let goldYield = Math.floor((100 + window.playerStats.stage * 35) * p.gold);
-      if (goldYield > 0 && window.goldParticles) {
-        let particleCount = Math.min(12, Math.max(4, Math.floor(Math.log10(goldYield + 1) * 3)));
-        let baseAmt = Math.floor(goldYield / particleCount);
-        let remainder = goldYield % particleCount;
+    let goldYield = Math.floor((100 + window.playerStats.stage * 35) * p.gold);
+    if (goldYield > 0 && window.goldParticles) {
+      let particleCount = Math.min(
+        12,
+        Math.max(4, Math.floor(Math.log10(goldYield + 1) * 3)),
+      );
+      let baseAmt = Math.floor(goldYield / particleCount);
+      let remainder = goldYield % particleCount;
 
-        for (let i = 0; i < particleCount; i++) {
-          let pAmt = baseAmt + (i < remainder ? 1 : 0);
-          window.goldParticles.push({
-            x: spawnX,
-            y: spawnY,
-            vx: window.randFloat(-4, 4),
-            vy: window.randFloat(-6, -2),
-            life: 120,
-            delay: i * 2,
-            amount: pAmt,
-            isDungeon: window.playerStats.isDungeonMode,
-            isCrucible: window.playerStats.isCrucibleMode,
-          });
-        }
+      for (let i = 0; i < particleCount; i++) {
+        let pAmt = baseAmt + (i < remainder ? 1 : 0);
+        window.goldParticles.push({
+          x: spawnX,
+          y: spawnY,
+          vx: window.randFloat(-4, 4),
+          vy: window.randFloat(-6, -2),
+          life: 120,
+          delay: i * 2,
+          amount: pAmt,
+          isDungeon: window.playerStats.isDungeonMode,
+          isCrucible: window.playerStats.isCrucibleMode,
+        });
       }
-      window.effects.push({
-        x: spawnX,
-        y: spawnY - 10,
-        text: `+${goldYield} Gold!`,
-        color: "#f1c40f",
-        life: 80,
-      });
-      return;
     }
+    window.effects.push({
+      x: spawnX,
+      y: spawnY - 10,
+      text: `+${goldYield} Gold!`,
+      color: "#f1c40f",
+      life: 80,
+    });
+    return;
+  }
 
   let types = [
     "weapon",
@@ -8450,23 +8461,23 @@ window.triggerFairyLoot = function (targetFairy) {
   else statLinesCount = 0;
 
   let activeStage =
-      window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-    if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
-      activeStage =
-        window.playerStats.currentDungeonStage[
-          window.playerStats.currentDungeon
-        ] || 1;
-    } else if (window.playerStats.isUberBoss) {
-      let riftLvl = window.playerStats.activeRiftLevel || 1;
-      activeStage = 50 + riftLvl * 10;
-    }
-    let stageScale = Math.floor((activeStage - 1) / 5) + 1;
-    let newItem = window.createItemObject(
-      chosenType,
-      statLinesCount,
-      stageScale,
-      0,
-    );
+    window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+  if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
+    activeStage =
+      window.playerStats.currentDungeonStage[
+        window.playerStats.currentDungeon
+      ] || 1;
+  } else if (window.playerStats.isUberBoss) {
+    let riftLvl = window.playerStats.activeRiftLevel || 1;
+    activeStage = 50 + riftLvl * 10;
+  }
+  let stageScale = Math.floor((activeStage - 1) / 5) + 1;
+  let newItem = window.createItemObject(
+    chosenType,
+    statLinesCount,
+    stageScale,
+    0,
+  );
 
   if (window.checkAutoSalvage(newItem, false)) {
     window.beams.push({
@@ -8631,24 +8642,29 @@ window.enterCrucible = function () {
     );
     return;
   }
+  let peak =
+    window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+  let entryCost = 100 + Math.floor(peak * 0.5);
   let souls = window.inventory.ETC["Monster Soul"] || 0;
-  if (souls < 100) {
-    window.pushHeaderToast("Requires 100 Monster Souls!", "#e74c3c");
+  if (souls < entryCost) {
+    window.pushHeaderToast(
+      `Requires ${entryCost.toLocaleString()} Monster Souls!`,
+      "#e74c3c",
+    );
     return;
   }
 
-  let peak = window.playerStats.lifetimePeakStage || 1;
   let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
 
   window.showCustomConfirm(
     "Enter Astral Crucible",
-    `Spend 100 Monster Souls to enter the Astral Crucible? (Starts at Wave 1 with enemy stats scaled to Stage ${startingStageOffset})`,
+    `Spend ${entryCost.toLocaleString()} Monster Souls to enter the Astral Crucible? (Starts at Wave 1 with enemy stats scaled to Stage ${startingStageOffset})`,
     "Enter Crucible",
     "Cancel",
     "#9b59b6",
     function () {
       window.saveCurrentActivityPeak();
-      window.inventory.ETC["Monster Soul"] -= 100;
+      window.inventory.ETC["Monster Soul"] -= entryCost;
       if (window.inventory.ETC["Monster Soul"] === 0) {
         delete window.inventory.ETC["Monster Soul"];
       }
@@ -8833,23 +8849,23 @@ window.rollEquipmentDrop = function (
   else statLinesCount = 0;
 
   let activeStage = window.playerStats.stage;
-    if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
-      // Scales gear towards the highest floor reached (Peak) to prevent low-level gear spam
-      let peakFloor =
-        window.playerStats.dungeonPeaks[window.playerStats.currentDungeon] || 1;
-      activeStage = peakFloor;
-    } else if (window.playerStats.isUberBoss) {
-      let runPeak = Math.max(
-        window.playerStats.stage,
-        window.playerStats.maxStage || 1,
-      );
-      let allTime90 = Math.floor(
-        (window.playerStats.lifetimePeakStage || 1) * 0.9,
-      );
-      activeStage = Math.max(runPeak, allTime90);
-    }
-    let stageScale = Math.floor((activeStage - 1) / 5) + 1;
-    let sourceName = isBossKill ? "Boss" : isRareMob ? "Rare" : "Route";
+  if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
+    // Scales gear towards the highest floor reached (Peak) to prevent low-level gear spam
+    let peakFloor =
+      window.playerStats.dungeonPeaks[window.playerStats.currentDungeon] || 1;
+    activeStage = peakFloor;
+  } else if (window.playerStats.isUberBoss) {
+    let runPeak = Math.max(
+      window.playerStats.stage,
+      window.playerStats.maxStage || 1,
+    );
+    let allTime90 = Math.floor(
+      (window.playerStats.lifetimePeakStage || 1) * 0.9,
+    );
+    activeStage = Math.max(runPeak, allTime90);
+  }
+  let stageScale = Math.floor((activeStage - 1) / 5) + 1;
+  let sourceName = isBossKill ? "Boss" : isRareMob ? "Rare" : "Route";
 
   if (
     !isBossKill &&
@@ -9080,8 +9096,8 @@ window.rollGachaDrop = function () {
   else statLinesCount = 1;
 
   let peakRunStage = window.playerStats.lifetimePeakStage || 1;
-    let stageScale = Math.floor((peakRunStage - 1) / 5) + 1;
-    window.generateEquipment(chosenType, statLinesCount, stageScale, "Gacha");
+  let stageScale = Math.floor((peakRunStage - 1) / 5) + 1;
+  window.generateEquipment(chosenType, statLinesCount, stageScale, "Gacha");
 };
 
 window.rollPotionDrop = function (isBoss, isRare, silent = false) {
@@ -9769,16 +9785,22 @@ window.openCrucibleMidRunDraftModal = function () {
       </div>
     `;
 
+  let canReroll = accShards >= 5;
+  let rerollBtnHtml = canReroll
+    ? `<button class="btn-action" style="background:#8e44ad; border-color:#fff; font-size:10px; padding:6px 16px; margin-bottom:15px; font-weight:bold; box-shadow:0 0 10px rgba(142,68,173,0.3);" onclick="window.rerollCrucibleMidRunDraft()">🔄 Reroll Options (Cost: 5 Shards)</button>`
+    : `<button class="btn-action" style="background:#222; border-color:#333; color:#555; font-size:10px; padding:6px 12px; margin-bottom:15px; cursor:not-allowed;" disabled>🔄 Reroll Options (Requires 5 Shards)</button>`;
+
   overlay.innerHTML = `
-      <div style="text-align:center; color:white; animation: toastFadeIn 0.3s ease-out; max-width:580px; width:95%;">
-        <div style="font-size: 16px; font-weight: 950; color:#df9ffb; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 8px rgba(155,89,182,0.5); margin-bottom:4px;">✨ SELECT AN AETHER INFUSION ✨</div>
-        <div style="font-size:10px; color:#aaa; margin-bottom:12px;">Wave ${window.playerStats.crucibleWave - 1} Clear! Choose a temporary card modifier to empower your run.</div>
-        ${accumulatedPanelHtml}
-        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
-          ${cardsHtml}
+        <div style="text-align:center; color:white; animation: toastFadeIn 0.3s ease-out; max-width:580px; width:95%;">
+          <div style="font-size: 16px; font-weight: 950; color:#df9ffb; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 8px rgba(155,89,182,0.5); margin-bottom:4px;">✨ SELECT AN AETHER INFUSION ✨</div>
+          <div style="font-size:10px; color:#aaa; margin-bottom:12px;">Wave ${window.playerStats.crucibleWave - 1} Clear! Choose a temporary card modifier to empower your run.</div>
+          ${accumulatedPanelHtml}
+          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;">
+            ${cardsHtml}
+          </div>
+          ${rerollBtnHtml}
         </div>
-      </div>
-    `;
+      `;
 };
 
 window.executeMidRunCardSelection = function (cardId) {
@@ -9816,6 +9838,13 @@ window.executeMidRunCardSelection = function (cardId) {
   window.saveGame();
 };
 
+window.rerollCrucibleMidRunDraft = function () {
+  if ((window.playerStats.crucibleAccumulatedShards || 0) < 5) return;
+  window.playerStats.crucibleAccumulatedShards -= 5;
+  if (window.SoundManager) window.SoundManager.play("swing");
+  window.openCrucibleMidRunDraftModal();
+};
+
 window.migrateLegacyTempersToRefund = function () {
   window.playerStats.slotUpgrades = window.playerStats.slotUpgrades || {
     weapon: 0,
@@ -9836,20 +9865,20 @@ window.migrateLegacyTempersToRefund = function () {
   let materialsRefunded = {};
 
   let refundItem = (item) => {
-      if (
-        !item ||
-        item.type === "artifact" ||
-        !item.temperLevel ||
-        item.temperLevel <= 0
-      )
-        return;
+    if (
+      !item ||
+      item.type === "artifact" ||
+      !item.temperLevel ||
+      item.temperLevel <= 0
+    )
+      return;
 
-      let tempers = item.temperLevel;
-      let baseCost = 100;
-      let itemLvlMultiplier = Math.pow(
-        1.045,
-        Math.max(0, ((item.stageLevel || 1) - 1) * 2.5),
-      );
+    let tempers = item.temperLevel;
+    let baseCost = 100;
+    let itemLvlMultiplier = Math.pow(
+      1.045,
+      Math.max(0, ((item.stageLevel || 1) - 1) * 2.5),
+    );
 
     for (let t = 0; t < tempers; t++) {
       let stepGold = Math.floor(
@@ -10675,22 +10704,22 @@ window.executeConduitDischarge = function (orb, index) {
     );
 
     // 1. Detonate FIRE Tome Spell
-        window.mob.hp = window.mob.hp.sub(finalSpellDmg);
-        window.spawnDamageEffect(finalSpellDmg, "fire", false);
-        window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
-        window.SoundManager.play("spell_fire");
+    window.mob.hp = window.mob.hp.sub(finalSpellDmg);
+    window.spawnDamageEffect(finalSpellDmg, "fire", false);
+    window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
+    window.SoundManager.play("spell_fire");
 
-        // 2. Detonate LIGHTNING Tome Spell
-        window.mob.hp = window.mob.hp.sub(finalSpellDmg);
-        window.spawnDamageEffect(finalSpellDmg, "lightning", false);
-        window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
-        window.SoundManager.play("spell_lightning");
+    // 2. Detonate LIGHTNING Tome Spell
+    window.mob.hp = window.mob.hp.sub(finalSpellDmg);
+    window.spawnDamageEffect(finalSpellDmg, "lightning", false);
+    window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
+    window.SoundManager.play("spell_lightning");
 
-        // 3. Detonate FROST Tome Spell
-        window.mob.hp = window.mob.hp.sub(finalSpellDmg);
-        window.spawnDamageEffect(finalSpellDmg, "frost", false);
-        window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
-        window.SoundManager.play("spell_frost");
+    // 3. Detonate FROST Tome Spell
+    window.mob.hp = window.mob.hp.sub(finalSpellDmg);
+    window.spawnDamageEffect(finalSpellDmg, "frost", false);
+    window.damageHistory.push({ time: Date.now(), amount: finalSpellDmg });
+    window.SoundManager.play("spell_frost");
 
     // Spawn rich tri-color elements particles
     let colors = ["#f1c40f", "#e67e22", "#3498db", "#ffffff"];

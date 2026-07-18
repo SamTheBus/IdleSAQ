@@ -1830,89 +1830,89 @@
           );
           c.stroke();
           c.fillStyle = "#ff007f";
-                    c.beginPath();
-                    c.arc(hX - 5, hY - 3, 1.5, 0, Math.PI * 2);
-                    c.arc(hX - 2, hY - 1, 1.2, 0, Math.PI * 2);
-                    c.arc(hX - 5, hY + 1, 1.2, 0, Math.PI * 2);
-                    c.fill();
-                  }
-                } else if (vType === "void_spectre") {
-                  // Render a floating ethereal void phantom cloaked in cosmic energy
-                  let hover = Math.sin(Date.now() / 150) * 5;
-                  let cx = m.x + m.w / 2;
-                  let cy = m.y + m.h / 2 + hover;
+          c.beginPath();
+          c.arc(hX - 5, hY - 3, 1.5, 0, Math.PI * 2);
+          c.arc(hX - 2, hY - 1, 1.2, 0, Math.PI * 2);
+          c.arc(hX - 5, hY + 1, 1.2, 0, Math.PI * 2);
+          c.fill();
+        }
+      } else if (vType === "void_spectre") {
+        // Render a floating ethereal void phantom cloaked in cosmic energy
+        let hover = Math.sin(Date.now() / 150) * 5;
+        let cx = m.x + m.w / 2;
+        let cy = m.y + m.h / 2 + hover;
 
-                  c.save();
-                  // Swirling Void Aura Backplate (Translucent glowing trail)
-                  let trailGrad = c.createLinearGradient(cx, cy - 14, cx, cy + 24);
-                  if (m.flashTimer > 0) {
-                    trailGrad.addColorStop(0, "#ffffff");
-                    trailGrad.addColorStop(1, "rgba(255,255,255,0)");
-                  } else {
-                    trailGrad.addColorStop(0, "rgba(142, 68, 173, 0.75)"); // Deep void purple
-                    trailGrad.addColorStop(0.5, "rgba(232, 67, 147, 0.4)"); // Hot magenta pink
-                    trailGrad.addColorStop(1, "rgba(0,0,0,0)");
-                  }
+        c.save();
+        // Swirling Void Aura Backplate (Translucent glowing trail)
+        let trailGrad = c.createLinearGradient(cx, cy - 14, cx, cy + 24);
+        if (m.flashTimer > 0) {
+          trailGrad.addColorStop(0, "#ffffff");
+          trailGrad.addColorStop(1, "rgba(255,255,255,0)");
+        } else {
+          trailGrad.addColorStop(0, "rgba(142, 68, 173, 0.75)"); // Deep void purple
+          trailGrad.addColorStop(0.5, "rgba(232, 67, 147, 0.4)"); // Hot magenta pink
+          trailGrad.addColorStop(1, "rgba(0,0,0,0)");
+        }
 
-                  c.fillStyle = trailGrad;
-                  c.beginPath();
-                  c.moveTo(cx - 14, cy - 5);
-                  c.quadraticCurveTo(cx - 18, cy + 10, cx - 5, cy + 24);
-                  c.lineTo(cx + 5, cy + 24);
-                  c.quadraticCurveTo(cx + 18, cy + 10, cx + 14, cy - 5);
-                  c.closePath();
-                  c.fill();
+        c.fillStyle = trailGrad;
+        c.beginPath();
+        c.moveTo(cx - 14, cy - 5);
+        c.quadraticCurveTo(cx - 18, cy + 10, cx - 5, cy + 24);
+        c.lineTo(cx + 5, cy + 24);
+        c.quadraticCurveTo(cx + 18, cy + 10, cx + 14, cy - 5);
+        c.closePath();
+        c.fill();
 
-                  // Main cloaked phantom torso (Wispy obsidian hood/robes)
-                  c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#0d011a"; // Pitch void black
-                  c.strokeStyle = "#000000";
-                  c.lineWidth = 1.8;
-                  c.beginPath();
-                  c.arc(cx, cy - 11, 8.5, Math.PI, 0); // Hood crown
-                  c.lineTo(cx + 8.5, cy + 4);
-                  c.quadraticCurveTo(cx + 5, cy + 12, cx, cy + 16); // Robe trail point
-                  c.quadraticCurveTo(cx - 5, cy + 12, cx - 8.5, cy + 4);
-                  c.closePath();
-                  c.fill();
-                  c.stroke();
+        // Main cloaked phantom torso (Wispy obsidian hood/robes)
+        c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#0d011a"; // Pitch void black
+        c.strokeStyle = "#000000";
+        c.lineWidth = 1.8;
+        c.beginPath();
+        c.arc(cx, cy - 11, 8.5, Math.PI, 0); // Hood crown
+        c.lineTo(cx + 8.5, cy + 4);
+        c.quadraticCurveTo(cx + 5, cy + 12, cx, cy + 16); // Robe trail point
+        c.quadraticCurveTo(cx - 5, cy + 12, cx - 8.5, cy + 4);
+        c.closePath();
+        c.fill();
+        c.stroke();
 
-                  // Spooky glowing eyes inside the dark hood
-                  if (m.flashTimer === 0) {
-                    c.fillStyle = "#e84393"; // Intense magenta neon
-                    c.shadowBlur = 8;
-                    c.shadowColor = "#e84393";
-                    c.beginPath();
-                    // Slanted sinister phantom slits
-                    c.ellipse(cx - 3, cy - 10, 1.2, 3, Math.PI / 12, 0, Math.PI * 2);
-                    c.ellipse(cx + 3, cy - 10, 1.2, 3, -Math.PI / 12, 0, Math.PI * 2);
-                    c.fill();
-                    c.shadowBlur = 0; // Reset
-                  }
+        // Spooky glowing eyes inside the dark hood
+        if (m.flashTimer === 0) {
+          c.fillStyle = "#e84393"; // Intense magenta neon
+          c.shadowBlur = 8;
+          c.shadowColor = "#e84393";
+          c.beginPath();
+          // Slanted sinister phantom slits
+          c.ellipse(cx - 3, cy - 10, 1.2, 3, Math.PI / 12, 0, Math.PI * 2);
+          c.ellipse(cx + 3, cy - 10, 1.2, 3, -Math.PI / 12, 0, Math.PI * 2);
+          c.fill();
+          c.shadowBlur = 0; // Reset
+        }
 
-                  // Claws of the Spectre (Floating segmented dark arms on sides)
-                  if (m.flashTimer === 0) {
-                    c.strokeStyle = "#8e44ad";
-                    c.lineWidth = 2.0;
-                    let clawSwing = Math.sin(Date.now() / 110) * 3;
-                    // Left Claw
-                    c.beginPath();
-                    c.moveTo(cx - 8, cy - 3);
-                    c.lineTo(cx - 16 + clawSwing, cy - 1);
-                    c.lineTo(cx - 19 + clawSwing, cy - 4);
-                    c.moveTo(cx - 8, cy - 3);
-                    c.lineTo(cx - 17 + clawSwing, cy + 3);
-                    c.stroke();
-                    // Right Claw
-                    c.beginPath();
-                    c.moveTo(cx + 8, cy - 3);
-                    c.lineTo(cx + 16 - clawSwing, cy - 1);
-                    c.lineTo(cx + 19 - clawSwing, cy - 4);
-                    c.moveTo(cx + 8, cy - 3);
-                    c.lineTo(cx + 17 - clawSwing, cy + 3);
-                    c.stroke();
-                  }
-                  c.restore();
-                } else if (vType === "clockwork_scarab") {
+        // Claws of the Spectre (Floating segmented dark arms on sides)
+        if (m.flashTimer === 0) {
+          c.strokeStyle = "#8e44ad";
+          c.lineWidth = 2.0;
+          let clawSwing = Math.sin(Date.now() / 110) * 3;
+          // Left Claw
+          c.beginPath();
+          c.moveTo(cx - 8, cy - 3);
+          c.lineTo(cx - 16 + clawSwing, cy - 1);
+          c.lineTo(cx - 19 + clawSwing, cy - 4);
+          c.moveTo(cx - 8, cy - 3);
+          c.lineTo(cx - 17 + clawSwing, cy + 3);
+          c.stroke();
+          // Right Claw
+          c.beginPath();
+          c.moveTo(cx + 8, cy - 3);
+          c.lineTo(cx + 16 - clawSwing, cy - 1);
+          c.lineTo(cx + 19 - clawSwing, cy - 4);
+          c.moveTo(cx + 8, cy - 3);
+          c.lineTo(cx + 17 - clawSwing, cy + 3);
+          c.stroke();
+        }
+        c.restore();
+      } else if (vType === "clockwork_scarab") {
         let cx = m.x + m.w / 2;
         let cy = m.y + m.h / 2 + Math.sin(Date.now() / 100) * 3;
         c.fillStyle = m.flashTimer > 0 ? "#ffffff" : "#dca04c";
@@ -4872,11 +4872,15 @@
     }
 
     // Custom visual skin color profiles for future cosmetic extensibility (with fallback mapping for leaderboards & clan rosters)
-        let skin = stats.cosmeticSkin || stats.cosmetic_skin || (equipped && (equipped.cosmeticSkin || equipped.cosmetic_skin)) || "default";
-        let bodyColor = "#95a5a6";
-        let armorColor = "#bdc3c7";
-        let capeColor = "#c0392b";
-        let eyeColor = stats.frenzyTimer > 0 ? "#f1c40f" : "#e74c3c";
+    let skin =
+      stats.cosmeticSkin ||
+      stats.cosmetic_skin ||
+      (equipped && (equipped.cosmeticSkin || equipped.cosmetic_skin)) ||
+      "default";
+    let bodyColor = "#95a5a6";
+    let armorColor = "#bdc3c7";
+    let capeColor = "#c0392b";
+    let eyeColor = stats.frenzyTimer > 0 ? "#f1c40f" : "#e74c3c";
 
     if (skin === "void") {
       bodyColor = "#2c1130";
@@ -5457,10 +5461,14 @@
     }
 
     // Cascading, safe fallbacks to pull cosmetics from flat/nested tables and JSON structures on leaderboard/clan renders
-        let costume = stats.equippedCostume || stats.equipped_costume || (equipped && (equipped.equippedCostume || equipped.equipped_costume)) || "knight";
+    let costume =
+      stats.equippedCostume ||
+      stats.equipped_costume ||
+      (equipped && (equipped.equippedCostume || equipped.equipped_costume)) ||
+      "knight";
 
-        // Decoupled Multi-Axis Visual Render Matrix
-        switch (costume) {
+    // Decoupled Multi-Axis Visual Render Matrix
+    switch (costume) {
       case "shinobi":
         {
           let shinobiGiColor = skin === "default" ? "#15151c" : bodyColor;

@@ -3,6 +3,10 @@
    Responsive Fluid Grids, and Canvas Alignment.
    ========================================================================= */
 
+.hidden {
+  display: none !important;
+}
+
 /* --- CSS VARIABLES & PALETTE --- */
 :root {
   --bg-main: #121212;
@@ -1820,8 +1824,8 @@ summary {
   }
 
   /* Forge mode sub-tabs wrap to 2-column grid to prevent horizontal bleed */
-  #blacksmith-modes,
-  #enchanter-modes {
+  #blacksmith-modes:not(.hidden),
+  #enchanter-modes:not(.hidden) {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 4px !important;
@@ -2031,13 +2035,13 @@ summary {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(15, 7, 25, 0.8);
-  border: 1px solid #9b59b6;
+  background: rgba(15, 7, 25, 0.85);
+  border: 1.5px solid #9b59b6;
   color: #fff;
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  font-size: 13px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2046,6 +2050,7 @@ summary {
   transition: all 0.15s ease;
   user-select: none;
   -webkit-user-select: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 .carousel-arrow:hover {
@@ -2702,7 +2707,10 @@ summary {
     flex: 1 !important;
     padding: 6px 12px !important;
     box-sizing: border-box !important;
-    transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease !important;
+    transition:
+      border-color 0.3s ease,
+      background 0.3s ease,
+      box-shadow 0.3s ease !important;
   }
 
   #control-bar .chip-value-row {
@@ -2736,7 +2744,10 @@ summary {
 
   .runic-ripple-node {
     position: absolute;
-    top: -1.5px; left: -1.5px; right: -1.5px; bottom: -1.5px;
+    top: -1.5px;
+    left: -1.5px;
+    right: -1.5px;
+    bottom: -1.5px;
     border-radius: inherit;
     border: 1px solid currentColor;
     animation: runicRipple 1.4s infinite cubic-bezier(0.25, 0, 0, 1);
@@ -2744,13 +2755,20 @@ summary {
   }
 
   @keyframes runicSpin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 
   .runic-spin-border {
     position: absolute;
-    top: -3.5px; left: -3.5px; right: -3.5px; bottom: -3.5px;
+    top: -3.5px;
+    left: -3.5px;
+    right: -3.5px;
+    bottom: -3.5px;
     border: 1.2px dashed currentColor;
     border-radius: 50%;
     animation: runicSpin 12s linear infinite;
@@ -2759,15 +2777,28 @@ summary {
   }
 
   @keyframes threatSweep {
-    0% { left: -100%; }
-    50% { left: 100%; }
-    100% { left: -100%; }
+    0% {
+      left: -100%;
+    }
+    50% {
+      left: 100%;
+    }
+    100% {
+      left: -100%;
+    }
   }
 
   .threat-scanner-line {
     position: absolute;
-    top: 0; bottom: 0; width: 40%;
-    background: linear-gradient(90deg, transparent 0%, rgba(255, 56, 56, 0.12) 50%, transparent 100%);
+    top: 0;
+    bottom: 0;
+    width: 40%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 56, 56, 0.12) 50%,
+      transparent 100%
+    );
     animation: threatSweep 4s infinite ease-in-out;
     pointer-events: none;
     z-index: 1;
@@ -2802,8 +2833,8 @@ summary {
   }
 
   /* --- COMPACT HIGH-YIELD TOOLTIPS --- */
-    .tooltip-base {
-      max-width: 95vw !important;
+  .tooltip-base {
+    max-width: 95vw !important;
     max-height: 75vh !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
@@ -3653,47 +3684,113 @@ summary {
   transform: translateY(0);
 }
 
-/* --- FORGE TAB BUTTON DOUBLE STRIKE --- */
-.tab-btn .tab-anvil-hammer {
+/* --- FORGE RUNIC CRUCIBLE ANIMATIONS --- */
+@keyframes tabCrucibleSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes tabCrucibleBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 2px #ff4757);
+  }
+  50% {
+    transform: scale(1.08);
+    filter: brightness(1.25) drop-shadow(0 0 6px #ffd700);
+  }
+}
+@keyframes tabCrucibleSparkDrift {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-8px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.tab-btn .tab-crucible-aura {
+  transition: stroke 0.3s ease;
+}
+.tab-btn.active .tab-crucible-aura {
+  animation: tabCrucibleSpin 12s linear infinite;
+  stroke: #e84393;
+  filter: drop-shadow(0 0 3px #e84393);
+}
+.tab-btn .tab-crucible-core {
+  transform-origin: 16px 8.5px;
+}
+.tab-btn.active .tab-crucible-core {
+  animation: tabCrucibleBreathe 1.8s ease-in-out infinite;
+}
+.tab-btn .tab-crucible-spark {
+  transform-origin: 16px 16px;
+  opacity: 0;
+}
+.tab-btn.active .tab-crucible-spark {
+  animation: tabCrucibleSparkDrift 2.2s ease-in-out infinite;
+}
+
+/* --- BLACKSMITH SUBTAB ANVIL & HAMMER --- */
+.sub-tab-btn .tab-anvil-hammer {
   transform: rotate(-35deg);
   transition: transform 0.25s ease-out;
 }
-
-/* Double strike triggers on active transition */
-.tab-btn.active .tab-anvil-hammer {
+.sub-tab-btn.active .tab-anvil-hammer {
   animation: tabHammerDoubleStrike 1.2s cubic-bezier(0.25, 0.8, 0.25, 1.15)
     forwards;
 }
-
-@keyframes tabHammerDoubleStrike {
-  0% {
-    transform: rotate(-35deg);
-  }
-  22% {
-    transform: rotate(7deg); /* Strike 1! */
-  }
-  38% {
-    transform: rotate(-18deg); /* Rebound 1 */
-  }
-  60% {
-    transform: rotate(7deg); /* Strike 2! */
-  }
-  75% {
-    transform: rotate(-8deg); /* Rebound 2 */
-  }
-  100% {
-    transform: rotate(-35deg); /* Return to resting pose */
-  }
-}
-
-/* Hot ember flash sync */
-.tab-btn .tab-anvil-ember {
+.sub-tab-btn .tab-anvil-ember {
   fill: #ff5500;
   filter: drop-shadow(0 0 2px #ff3300);
 }
-
-.tab-btn.active .tab-anvil-ember {
+.sub-tab-btn.active .tab-anvil-ember {
   animation: tabEmberFlash 1.2s ease-out forwards;
+}
+
+/* --- ENCHANTER SUBTAB CRYSTAL & AURA --- */
+@keyframes tabEnchanterHover {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+    filter: drop-shadow(0 0 2px rgba(155, 89, 182, 0.3));
+  }
+  50% {
+    transform: translateY(-2.2px) scaleY(1.03);
+    filter: drop-shadow(0 0 5px rgba(223, 159, 251, 0.7));
+  }
+}
+@keyframes tabEnchanterSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+.sub-tab-btn .tab-enchanter-crystal {
+  transition: transform 0.3s ease-out;
+}
+.sub-tab-btn.active .tab-enchanter-crystal {
+  animation: tabEnchanterHover 2s ease-in-out infinite;
+}
+.sub-tab-btn .tab-enchanter-aura {
+  transition: stroke 0.3s ease;
+}
+.sub-tab-btn.active .tab-enchanter-aura {
+  animation: tabEnchanterSpin 14s linear infinite;
+  stroke: #df9ffb;
+  filter: drop-shadow(0 0 2px #df9ffb);
 }
 
 @keyframes tabEmberFlash {
