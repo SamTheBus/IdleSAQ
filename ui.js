@@ -1284,15 +1284,15 @@ window.updateUI = function () {
         let containerWidth = totalLineWidth + 22; // Node width compensation
 
         trackHtml = `
-          <div style="display: flex; justify-content: space-between; align-items: center; position: relative; width: ${containerWidth}px; height: 28px; margin: 0 auto; box-sizing: border-box;">
-            <!-- Connecting Thread Backing -->
-            <div style="position: absolute; top: calc(50% - 1px); left: 11px; width: ${totalLineWidth}px; height: 2px; background: #111520; border-bottom: 1px solid rgba(255,255,255,0.04); z-index: 1;"></div>
-            <!-- Glowing Active Thread -->
-            <div style="position: absolute; top: calc(50% - 1px); left: 11px; width: ${activeLineWidth}px; height: 2px; background: ${color}; box-shadow: 0 0 6px ${color}; z-index: 1; transition: width 0.35s ease-out;"></div>
-            ${orbs.join("")}
-          </div>
-        `;
-      }b
+                      <div style="display: flex; justify-content: space-between; align-items: center; position: relative; width: ${containerWidth}px; height: 28px; margin: 0 auto; box-sizing: border-box;">
+                        <!-- Connecting Thread Backing -->
+                        <div style="position: absolute; top: calc(50% - 1px); left: 11px; width: ${totalLineWidth}px; height: 2px; background: #111520; border-bottom: 1px solid rgba(255,255,255,0.04); z-index: 1;"></div>
+                        <!-- Glowing Active Thread -->
+                        <div style="position: absolute; top: calc(50% - 1px); left: 11px; width: ${activeLineWidth}px; height: 2px; background: ${color}; box-shadow: 0 0 6px ${color}; z-index: 1; transition: width 0.35s ease-out;"></div>
+                        ${orbs.join("")}
+                      </div>
+                    `;
+                  }
 
     let stageSubText = `
       <div style="display: flex; align-items: center; gap: 10px; width: 100%; justify-content: space-between; min-width: 0;">
