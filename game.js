@@ -836,21 +836,31 @@ window.SaveManager = {
         window.playerStats.frenzyKillCount = 0;
 
       if (typeof window.recalculateItemStats === "function") {
-        for (let key in window.equippedSlots) {
-          if (window.equippedSlots[key])
-            window.recalculateItemStats(window.equippedSlots[key]);
-        }
-        if (window.inventory.EQUIP) {
-          window.inventory.EQUIP.forEach((item) => {
-            if (item) window.recalculateItemStats(item);
-          });
-        }
-        if (window.inventory.ARTIFACT) {
-          window.inventory.ARTIFACT.forEach((item) => {
-            if (item) window.recalculateItemStats(item);
-          });
-        }
-      }
+              for (let key in window.equippedSlots) {
+                if (window.equippedSlots[key])
+                  window.recalculateItemStats(window.equippedSlots[key]);
+              }
+              if (window.inventory.EQUIP) {
+                window.inventory.EQUIP.forEach((item) => {
+                  if (item) window.recalculateItemStats(item);
+                });
+              }
+              if (window.inventory.ARTIFACT) {
+                window.inventory.ARTIFACT.forEach((item) => {
+                  if (item) window.recalculateItemStats(item);
+                });
+              }
+              if (window.playerStats.gachaHistory) {
+                window.playerStats.gachaHistory.forEach((item) => {
+                  if (item) window.recalculateItemStats(item);
+                });
+              }
+              if (window.playerStats.shopItems) {
+                window.playerStats.shopItems.forEach((item) => {
+                  if (item) window.recalculateItemStats(item);
+                });
+              }
+            }
       if (window.playerStats.atkPotionTimer === undefined)
         window.playerStats.atkPotionTimer = 0;
       if (window.playerStats.hpPotionTimer === undefined)
