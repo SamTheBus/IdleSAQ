@@ -2692,9 +2692,118 @@ summary {
     min-height: 24px !important;
   }
 
+  #control-bar .panel-stage {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+    padding: 6px 12px !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease !important;
+  }
+
+  #control-bar .chip-value-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  #control-bar #hud-stage-sub {
+    flex: 1 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  @keyframes runicRipple {
+    0% {
+      transform: scale(0.9);
+      box-shadow: 0 0 0 0px currentColor;
+      opacity: 0.95;
+    }
+    100% {
+      transform: scale(1.6);
+      box-shadow: 0 0 0 6px transparent;
+      opacity: 0;
+    }
+  }
+
+  .runic-ripple-node {
+    position: absolute;
+    top: -1.5px; left: -1.5px; right: -1.5px; bottom: -1.5px;
+    border-radius: inherit;
+    border: 1px solid currentColor;
+    animation: runicRipple 1.4s infinite cubic-bezier(0.25, 0, 0, 1);
+    pointer-events: none;
+  }
+
+  @keyframes runicSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .runic-spin-border {
+    position: absolute;
+    top: -3.5px; left: -3.5px; right: -3.5px; bottom: -3.5px;
+    border: 1.2px dashed currentColor;
+    border-radius: 50%;
+    animation: runicSpin 12s linear infinite;
+    pointer-events: none;
+    opacity: 0.65;
+  }
+
+  @keyframes threatSweep {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: -100%; }
+  }
+
+  .threat-scanner-line {
+    position: absolute;
+    top: 0; bottom: 0; width: 40%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 56, 56, 0.12) 50%, transparent 100%);
+    animation: threatSweep 4s infinite ease-in-out;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @media (max-width: 480px) {
+    #control-bar .stage-peak-label,
+    #control-bar .boss-wing-svg {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 420px) {
+    #control-bar .chip-label-prefix {
+      font-size: 8px !important;
+      letter-spacing: 0px !important;
+    }
+    #control-bar #hud-stage {
+      font-size: 11px !important;
+    }
+    #control-bar .panel-stage {
+      gap: 6px !important;
+      padding: 4px 8px !important;
+    }
+  }
+
+  @media (orientation: landscape) and (max-height: 550px) {
+    #control-bar .stage-peak-label,
+    #control-bar .boss-wing-svg {
+      display: none !important;
+    }
+  }
+
   /* --- COMPACT HIGH-YIELD TOOLTIPS --- */
-  .tooltip-base {
-    max-width: 95vw !important;
+    .tooltip-base {
+      max-width: 95vw !important;
     max-height: 75vh !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;

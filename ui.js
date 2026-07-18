@@ -1164,37 +1164,152 @@ window.updateUI = function () {
   }
 
   // 1. Hud overlays (Dynamic Activities stage tracking)
-  let displayTitleHtml = "";
-  let activeStageVal = window.playerStats.stage;
-  let stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.maxStage || 1}`;
+    let displayTitleHtml = "";
+    let activeStageVal = window.playerStats.stage;
+    let peakVal = window.playerStats.lifetimePeakStage || window.playerStats.maxStage || 1;
+    let color = "#3498db"; // Default campaign blue
 
-  if (window.playerStats.isDungeonMode) {
-    let dType = window.playerStats.currentDungeon || "gold";
-    let dNames = { equip: "Equip Floor", gold: "Gold Floor", mat: "Mat Floor" };
-    let dIcons = {
-      equip: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l2 2M11 19l-2 2" /></svg>`,
-      gold: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="#f1c40f" fill-opacity="0.15" /><path d="M12 8v8M9 10h6M9 13h6" /></svg>`,
-      mat: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77" /></svg>`,
-    };
-    displayTitleHtml = `${dIcons[dType] || ""} ${dNames[dType] || "Floor"}`;
-    activeStageVal = window.playerStats.currentDungeonStage[dType] || 1;
-    stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.dungeonPeaks[dType] || 1}`;
-  } else if (window.playerStats.isCrucibleMode) {
-    displayTitleHtml = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M12 2L2 22h20L12 2z" fill="#9b59b6" fill-opacity="0.15" /></svg> Wave`;
-    activeStageVal = window.playerStats.crucibleWave || 1;
-    stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.cruciblePeak || 1}`;
-  } else {
-    displayTitleHtml = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="#3498db" fill-opacity="0.15" /><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88" /></svg> Stage`;
-    stageSubText = `(${window.playerStats.killCount}/${window.playerStats.targetsRequired}) • Peak ${window.playerStats.lifetimePeakStage || window.playerStats.maxStage || 1}`;
-  }
+    if (window.playerStats.isDungeonMode) {
+      let dType = window.playerStats.currentDungeon || "gold";
+      let dNames = { equip: "Equip Floor", gold: "Gold Floor", mat: "Mat Floor" };
+      let dColors = { equip: "#3498db", gold: "#f1c40f", mat: "#2ecc71" };
+      color = dColors[dType] || "#2ecc71";
+      displayTitleHtml = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l2 2M11 19l-2 2" /></svg> ${dNames[dType] || "Floor"}`;
+      activeStageVal = window.playerStats.currentDungeonStage[dType] || 1;
+      peakVal = window.playerStats.dungeonPeaks[dType] || 1;
+    } else if (window.playerStats.isCrucibleMode) {
+      color = "#9b59b6"; // Purple
+      displayTitleHtml = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M12 2L2 22h20L12 2z" fill="${color}" fill-opacity="0.15" /></svg> Wave`;
+      activeStageVal = window.playerStats.crucibleWave || 1;
+      peakVal = window.playerStats.cruciblePeak || 1;
+    } else {
+      displayTitleHtml = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10" fill="${color}" fill-opacity="0.15" /><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88" /></svg> Stage`;
+      peakVal = window.playerStats.lifetimePeakStage || window.playerStats.maxStage || 1;
+    }
 
-  let stageLabelEl = document.getElementById("hud-stage-label");
-  if (stageLabelEl) stageLabelEl.innerHTML = displayTitleHtml;
+    let isBoss = window.playerStats.isBossMode || window.playerStats.isUberBoss;
+      let killCount = window.playerStats.killCount;
+      let targetsReq = window.playerStats.targetsRequired;
 
-  let stageSubEl = document.getElementById("hud-stage-sub");
-  if (stageSubEl) stageSubEl.innerText = stageSubText;
+      // Apply rich crimson theme to the entire footer container during boss battles
+      let panelStageEl = document.querySelector(".panel-stage");
+      if (panelStageEl) {
+        if (isBoss) {
+          panelStageEl.style.borderColor = "#ff3838";
+          panelStageEl.style.background = "linear-gradient(135deg, #1d0505 0%, #060000 100%)";
+          panelStageEl.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.65), 0 0 10px rgba(255, 56, 56, 0.25)";
 
-  setText("hud-stage", activeStageVal);
+          // Ensure no threat scanner line duplicate is injected
+          if (!panelStageEl.querySelector(".threat-scanner-line")) {
+            let scanner = document.createElement("div");
+            scanner.className = "threat-scanner-line";
+            panelStageEl.appendChild(scanner);
+          }
+        } else {
+          panelStageEl.style.borderColor = "";
+          panelStageEl.style.background = "";
+          panelStageEl.style.boxShadow = "";
+          let scanner = panelStageEl.querySelector(".threat-scanner-line");
+          if (scanner) scanner.remove();
+        }
+      }
+
+      let trackHtml = "";
+      if (isBoss) {
+        trackHtml = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; position: relative; z-index: 2;">
+            <!-- Left Wing -->
+            <svg class="boss-wing-svg" width="18" height="12" viewBox="0 0 24 16" fill="none" stroke="#ff3b30" stroke-width="2.5" opacity="0.8">
+              <path d="M2 8 Q12 2, 22 14 M2 8 L8 14" />
+            </svg>
+            <span style="font-size: 8.5px; font-weight: 900; color: #ff3b30; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 8px rgba(255, 59, 48, 0.6); white-space: nowrap;">
+              WARDEN CONFRONTED
+            </span>
+            <!-- Right Wing -->
+            <svg class="boss-wing-svg" width="18" height="12" viewBox="0 0 24 16" fill="none" stroke="#ff3b30" stroke-width="2.5" opacity="0.8" style="transform: scaleX(-1);">
+              <path d="M2 8 Q12 2, 22 14 M2 8 L8 14" />
+            </svg>
+          </div>
+        `;
+      } else {
+        // 6 Distinct mystical runic glyphs
+        const glyphsList = ["ᚦ", "ᚷ", "ᛉ", "ᛟ", "ᛋ", "ᛏ"];
+        let orbs = [];
+        for (let i = 1; i <= targetsReq; i++) {
+          let isFilled = i <= killCount;
+          let isActiveTarget = i === killCount + 1;
+          let isLast = i === targetsReq;
+
+          let borderRadius = isLast ? "3px" : "50%";
+          let transform = isLast ? "rotate(45deg)" : "";
+
+          let runeGlyph = glyphsList[(i - 1) % glyphsList.length];
+
+          let orbHtml = "";
+          if (isFilled) {
+            let orbStyle = `background: radial-gradient(circle, rgba(${window.hexToRgbValues ? window.hexToRgbValues(color) : "52,152,219"}, 0.25) 0%, rgba(0,0,0,0.85) 100%); border: 1.5px solid ${color}; box-shadow: 0 0 12px ${color}, inset 0 0 6px rgba(255,255,255,0.1); ${transform};`;
+            orbHtml = `
+              <div style="width: 22px; height: 22px; border-radius: ${borderRadius}; ${orbStyle} display: flex; align-items: center; justify-content: center; position: relative; z-index: 2; transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                <span style="font-family: 'Times New Roman', serif; font-size: 11.5px; font-weight: 900; line-height: 1; color: ${color}; text-shadow: 0 0 6px ${color}; transform: ${isLast ? "rotate(-45deg)" : "none"};">${runeGlyph}</span>
+              </div>
+            `;
+          } else if (isActiveTarget) {
+            let orbStyle = `background: rgba(0,0,0,0.65); border: 1.5px solid ${color}; color: ${color}; ${transform};`;
+            orbHtml = `
+              <div style="width: 22px; height: 22px; border-radius: ${borderRadius}; ${orbStyle} display: flex; align-items: center; justify-content: center; position: relative; z-index: 2; transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                <div class="runic-ripple-node"></div>
+                <div class="runic-spin-border"></div>
+                <span style="font-family: 'Times New Roman', serif; font-size: 11.5px; font-weight: 900; line-height: 1; color: #fff; opacity: 0.85; transform: ${isLast ? "rotate(-45deg)" : "none"};">${runeGlyph}</span>
+              </div>
+            `;
+          } else {
+            let orbStyle = `background: #090c10; border: 1.5px solid #1c2330; color: #44546a; ${transform};`;
+            orbHtml = `
+              <div style="width: 22px; height: 22px; border-radius: ${borderRadius}; ${orbStyle} display: flex; align-items: center; justify-content: center; position: relative; z-index: 2;">
+                <span style="font-family: 'Times New Roman', serif; font-size: 11.5px; font-weight: 900; line-height: 1; opacity: 0.3; transform: ${isLast ? "rotate(-45deg)" : "none"};">${runeGlyph}</span>
+              </div>
+            `;
+          }
+
+          orbs.push(orbHtml);
+        }
+
+        let spacing = 34; // Pixel-perfect node distance
+        let completedOrbsCount = Math.min(killCount, targetsReq - 1);
+
+        let totalLineWidth = (targetsReq - 1) * spacing;
+        let activeLineWidth = completedOrbsCount * spacing;
+        if (killCount >= targetsReq) activeLineWidth = totalLineWidth;
+
+        let containerWidth = totalLineWidth + 22; // Node width compensation
+
+        trackHtml = `
+          <div style="display: flex; justify-content: space-between; align-items: center; position: relative; width: ${containerWidth}px; height: 28px; margin: 0 auto; box-sizing: border-box;">
+            <!-- Connecting Thread Backing -->
+            <div style="position: absolute; top: calc(50% - 1px); left: 11px; width: ${totalLineWidth}px; height: 2px; background: #111520; border-bottom: 1px solid rgba(255,255,255,0.04); z-index: 1;"></div>
+            <!-- Glowing Active Thread -->
+            <div style="position: absolute; top: calc(50% - 1px); left: 11px; width: ${activeLineWidth}px; height: 2px; background: ${color}; box-shadow: 0 0 6px ${color}; z-index: 1; transition: width 0.35s ease-out;"></div>
+            ${orbs.join("")}
+          </div>
+        `;
+      }b
+
+    let stageSubText = `
+      <div style="display: flex; align-items: center; gap: 10px; width: 100%; justify-content: space-between; min-width: 0;">
+        <div style="flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center;">${trackHtml}</div>
+        <span style="font-size: 8.5px; color: #7f8c8d; font-family: monospace; white-space: nowrap; flex-shrink: 0;" class="stage-peak-label">
+          Peak: ${peakVal}
+        </span>
+      </div>
+    `;
+
+    let stageLabelEl = document.getElementById("hud-stage-label");
+    if (stageLabelEl) stageLabelEl.innerHTML = displayTitleHtml;
+
+    let stageSubEl = document.getElementById("hud-stage-sub");
+    if (stageSubEl) stageSubEl.innerHTML = stageSubText;
+
+    setText("hud-stage", activeStageVal);
   setText("hud-coins", window.formatNumber(window.playerStats.coins));
 
   // Update real-time DPS in the draggable overlay
@@ -4128,7 +4243,7 @@ window.executePrestigeAscension = function () {
   if (hwm < 80) hwm = 80;
 
   let rCurrent = window.calculateCumulativePP(currentStage);
-  let rHwm = window.calculateCumulativePP(hwm);
+  let rHwm = window.playerStats.highestPrestigeStageCleared ? window.calculateCumulativePP(hwm) : 0;
   let deltaPP = Math.max(0, rCurrent - rHwm);
 
   let message = `Are you sure you want to perform an Ascension? This will soft-reset your current run but award permanent multipliers!<br><br>
@@ -4268,12 +4383,11 @@ window.renderPrestigeTab = function () {
 
   // Model 1 Calculations
   let hwm = p.highestPrestigeStageCleared || 80;
-  if (hwm < 80) hwm = 80;
-  let currentStage = p.maxStage || 1;
+    if (hwm < 80) hwm = 80;
 
-  let rCurrent = window.calculateCumulativePP(currentStage);
-  let rHwm = window.calculateCumulativePP(hwm);
-  let deltaPP = Math.max(0, rCurrent - rHwm);
+    let rCurrent = window.calculateCumulativePP(currentStage);
+    let rHwm = p.highestPrestigeStageCleared ? window.calculateCumulativePP(hwm) : 0;
+    let deltaPP = Math.max(0, rCurrent - rHwm);
 
   let minReqStage = Math.max(80, Math.floor(hwm * 0.8));
   let isEligible = currentStage >= minReqStage;
