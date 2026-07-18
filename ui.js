@@ -4382,10 +4382,11 @@ window.renderPrestigeTab = function () {
   let fairyPts = upgrades.fairy || 0;
 
   // Model 1 Calculations
-  let hwm = p.highestPrestigeStageCleared || 80;
-    if (hwm < 80) hwm = 80;
+    let currentStage = p.maxStage || 1;
+    let hwm = p.highestPrestigeStageCleared || 80;
+      if (hwm < 80) hwm = 80;
 
-    let rCurrent = window.calculateCumulativePP(currentStage);
+      let rCurrent = window.calculateCumulativePP(currentStage);
     let rHwm = p.highestPrestigeStageCleared ? window.calculateCumulativePP(hwm) : 0;
     let deltaPP = Math.max(0, rCurrent - rHwm);
 
