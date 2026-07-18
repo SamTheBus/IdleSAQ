@@ -8261,82 +8261,109 @@ window.submitConsoleCommand = function () {
   // --- NEW: DIRECT DEV PANEL MAILROOM CONSOLE ACTUATOR ---
 
   window.devSendMail = function () {
-    if (window.playerStats.playerName !== "Admin") {
-      window.pushHeaderToast("❌ Unauthorized Access!", "#e74c3c");
-      return;
-    }
-
-    let title = document.getElementById("dev-mail-title").value.trim();
-    let message = document.getElementById("dev-mail-msg").value.trim();
-    let distType = document.getElementById("dev-mail-dist").value;
-    let hours = parseInt(document.getElementById("dev-mail-hours").value, 10) || 168;
-
-    let gold = parseInt(document.getElementById("dev-mail-gold").value, 10) || 0;
-    let keys = parseInt(document.getElementById("dev-mail-keys").value, 10) || 0;
-    let luminous = parseInt(document.getElementById("dev-mail-luminous").value, 10) || 0;
-    let attachGear = document.getElementById("dev-mail-onlevel").checked;
-
-    if (!title || !message) {
-      window.pushHeaderToast("❌ Missing title or message!", "#e74c3c");
-      return;
-    }
-
-    let rewards = {};
-    if (gold > 0) rewards.coins = gold;
-    if (keys > 0) {
-      rewards.etc = rewards.etc || {};
-      rewards.etc["Gacha Key"] = keys;
-    }
-    if (luminous > 0) {
-      rewards.etc = rewards.etc || {};
-      rewards.etc["Luminous Soul"] = luminous;
-    }
-    if (attachGear) {
-      rewards.on_level_gear = true;
-    }
-
-    let userId = window.getGameUserId();
-    let url = distType === "global"
-      ? `${window.GAME_SERVER_URL}/api/admin/send-global-mail`
-      : `${window.GAME_SERVER_URL}/api/admin/send-targeted-mail`;
-
-    let body = {
-      userId,
-      title,
-      message,
-      rewards
-    };
-
-    if (distType === "global") {
-      body.durationHours = hours;
-      body.minLevel = 1;
-    }
-
-    fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.success) {
-        window.pushHeaderToast(`✓ Mail dispatched to ${distType} channel!`, "#2ecc71");
-        document.getElementById("dev-mail-title").value = "";
-        document.getElementById("dev-mail-msg").value = "";
-        document.getElementById("dev-mail-onlevel").checked = false;
-        document.getElementById("dev-mail-gold").value = 0;
-        document.getElementById("dev-mail-keys").value = 0;
-        document.getElementById("dev-mail-luminous").value = 0;
-        if (typeof window.fetchMailboxData === "function") window.fetchMailboxData();
-      } else {
-        window.pushHeaderToast(`❌ Error: ${data.error}`, "#e74c3c");
+      if (window.playerStats.playerName !== "Admin") {
+        window.pushHeaderToast("❌ Unauthorized Access!", "#e74c3c");
+        return;
       }
-    })
-    .catch(err => {
-      console.error("Dev mail dispatch failed:", err);
-      window.pushHeaderToast("❌ Network error dispatching mail.", "#e74c3c");
-    });
-  };
+
+      let title = document.getElementById("dev-mail-title").value.trim();
+      let message = document.getElementById("dev-mail-msg").value.trim();
+      let distType = document.getElementById("dev-mail-dist").value;
+      let hours = parseInt(document.getElementById("dev-mail-hours").value, 10) || 168;
+
+      let gold = parseInt(document.getElementById("dev-mail-gold").value, 10) || 0;
+      let keys = parseInt(document.getElementById("dev-mail-keys").value, 10) || 0;
+      let luminous = parseInt(document.getElementById("dev-mail-luminous").value, 10) || 0;
+
+      if (!title || !message) {
+        window.pushHeaderToast("❌ Missing title or message!", "#e74c3c");
+        return;
+      }
+
+      let rewards = {};
+      if (gold > 0) rewards.coins = gold;
+
+      let etcRewards = {};
+      if (keys > 0) etcRewards["Gacha Key"] = keys;
+      if (luminous > 0) etcRewards["Luminous Soul"] = luminous;
+
+      let titleBadge = document.getElementById("dev-mail-title-badge").value;
+      if (titleBadge) {
+        rewards.title = titleBadge;
+      }
+
+      let gearSlot = document.getElementById("dev-mail-gear-slot").value;
+      if (gearSlot) {
+        let gearRarity = parseInt(document.getElementById("dev-mail-gear-rarity").value, 10) || 0;
+        rewards.custom_gear = {
+          slot: gearSlot,
+          stars: gearRarity
+        };
+      }
+
+      let itemTypeVal = document.getElementById("dev-mail-item-type").value;
+      if (itemTypeVal) {
+        let itemQty = parseInt(document.getElementById("dev-mail-item-qty").value, 10) || 1;
+        let parts = itemTypeVal.split(":");
+        let category = parts[0];
+        let itemName = parts[1];
+        if (category === "use") {
+          rewards.use = rewards.use || {};
+          rewards.use[itemName] = itemQty;
+        } else if (category === "etc") {
+          etcRewards[itemName] = (etcRewards[itemName] || 0) + itemQty;
+        }
+      }
+
+      if (Object.keys(etcRewards).length > 0) {
+        rewards.etc = etcRewards;
+      }
+
+      let userId = window.getGameUserId();
+      let url = distType === "global"
+        ? `${window.GAME_SERVER_URL}/api/admin/send-global-mail`
+        : `${window.GAME_SERVER_URL}/api/admin/send-targeted-mail`;
+
+      let body = {
+        userId,
+        title,
+        message,
+        rewards
+      };
+
+      if (distType === "global") {
+        body.durationHours = hours;
+        body.minLevel = 1;
+      }
+
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          window.pushHeaderToast(`✓ Mail dispatched to ${distType} channel!`, "#2ecc71");
+          document.getElementById("dev-mail-title").value = "";
+          document.getElementById("dev-mail-msg").value = "";
+          document.getElementById("dev-mail-gold").value = 0;
+          document.getElementById("dev-mail-keys").value = 0;
+          document.getElementById("dev-mail-luminous").value = 0;
+          document.getElementById("dev-mail-title-badge").value = "";
+          document.getElementById("dev-mail-gear-slot").value = "";
+          document.getElementById("dev-mail-item-type").value = "";
+          document.getElementById("dev-mail-item-qty").value = 1;
+          if (typeof window.fetchMailboxData === "function") window.fetchMailboxData();
+        } else {
+          window.pushHeaderToast(`❌ Error: ${data.error}`, "#e74c3c");
+        }
+      })
+      .catch(err => {
+        console.error("Dev mail dispatch failed:", err);
+        window.pushHeaderToast("❌ Network error dispatching mail.", "#e74c3c");
+      });
+    };
 
 // --- TROPHY / ACHIEVEMENT NAVIGATION ---
 
@@ -13121,12 +13148,24 @@ window.renderMailboxItems = function (mailbox) {
       }
 
       if (mail.rewards.on_level_gear) {
-        rewardsHtml += `
-          <div style="display:inline-flex; align-items:center; background:rgba(230,126,34,0.06); border:1px solid #e67e22; padding:3px 8px; border-radius:4px; font-family:monospace; font-size:10px; color:#fff; font-weight:bold; box-shadow:0 0 6px rgba(230,126,34,0.15);">
-              <span>🛡️ Epic Gear Set (On-Level)</span>
-          </div>
-        `;
-      }
+              rewardsHtml += `
+                <div style="display:inline-flex; align-items:center; background:rgba(230,126,34,0.06); border:1px solid #e67e22; padding:3px 8px; border-radius:4px; font-family:monospace; font-size:10px; color:#fff; font-weight:bold; box-shadow:0 0 6px rgba(230,126,34,0.15);">
+                    <span>🛡️ Epic Gear Set (On-Level)</span>
+                </div>
+              `;
+            }
+
+            if (mail.rewards.custom_gear) {
+              let slot = mail.rewards.custom_gear.slot;
+              let stars = mail.rewards.custom_gear.stars;
+              let displayName = slot === "full_set" ? "Full Set" : slot.charAt(0).toUpperCase() + slot.slice(1).replace("_", " ");
+              let tierColor = window.getTierColor(stars);
+              rewardsHtml += `
+                <div style="display:inline-flex; align-items:center; background:rgba(230,126,34,0.06); border:1px solid ${tierColor}; padding:3px 8px; border-radius:4px; font-family:monospace; font-size:10px; color:#fff; font-weight:bold; box-shadow:0 0 6px rgba(230,126,34,0.15);">
+                    <span>🛡️ On-Level ${displayName} (${stars}★)</span>
+                </div>
+              `;
+            }
 
       return `
             <div class="bag-item" style="position:relative; border-left: 3px solid #e74c3c; background:#181c22; padding:8px 12px; margin-bottom:0; display:flex; flex-direction:column; gap:4px; text-align:left; cursor:default;">
@@ -13198,29 +13237,74 @@ window.claimMailReward = function (mailId) {
         }
 
         // 5. Claim On-Level Gear Set (Epic 3★)
-        if (rewards.on_level_gear) {
-          const slots = ["weapon", "helmet", "chest", "leggings", "boots"];
-          let stageScale = Math.max(
-            1,
-            Math.floor(
-              ((window.playerStats.lifetimePeakStage ||
-                window.playerStats.stage ||
-                1) -
-                1) /
-                5,
-            ) + 1,
-          );
-          slots.forEach((slot) => {
-            let item = window.createItemObject(slot, 3, stageScale, 3); // Spawns Epic 3★
-            window.inventory.EQUIP.push(item);
-            window.frozenItemDb[item.id] = window.cloneItemForTooltip(item);
-          });
-          if (typeof window.pushLog === "function") {
-            window.pushLog(
-              "<span style='color:#e67e22; font-weight:bold;'>[MAIL] Gained a full set of 3★ Epic on-level gear!</span>",
-            );
-          }
-        }
+                if (rewards.on_level_gear) {
+                  const slots = ["weapon", "helmet", "chest", "leggings", "boots"];
+                  let stageScale = Math.max(
+                    1,
+                    Math.floor(
+                      ((window.playerStats.lifetimePeakStage ||
+                        window.playerStats.stage ||
+                        1) -
+                        1) /
+                        5,
+                    ) + 1,
+                  );
+                  slots.forEach((slot) => {
+                    let item = window.createItemObject(slot, 3, stageScale, 3); // Spawns Epic 3★
+                    window.inventory.EQUIP.push(item);
+                    window.frozenItemDb[item.id] = window.cloneItemForTooltip(item);
+                  });
+                  if (typeof window.pushLog === "function") {
+                    window.pushLog(
+                      "<span style='color:#e67e22; font-weight:bold;'>[MAIL] Gained a full set of 3★ Epic on-level gear!</span>",
+                    );
+                  }
+                }
+
+                // 6. Claim Custom On-Level Gear
+                if (rewards.custom_gear) {
+                  const slotType = rewards.custom_gear.slot;
+                  const stars = parseInt(rewards.custom_gear.stars, 10) || 0;
+                  let stageScale = Math.max(
+                    1,
+                    Math.floor(
+                      ((window.playerStats.lifetimePeakStage ||
+                        window.playerStats.stage ||
+                        1) -
+                        1) /
+                        5,
+                    ) + 1,
+                  );
+
+                  const spawnAndAddGear = (slot) => {
+                    let item = window.createItemObject(slot, stars, stageScale, stars);
+                    window.inventory.EQUIP.push(item);
+                    window.frozenItemDb[item.id] = window.cloneItemForTooltip(item);
+                    return item;
+                  };
+
+                  if (slotType === "full_set") {
+                    const slots = ["weapon", "helmet", "chest", "leggings", "boots"];
+                    slots.forEach((s) => spawnAndAddGear(s));
+                    if (typeof window.pushLog === "function") {
+                      window.pushLog(
+                        `<span style='color:#e67e22; font-weight:bold;'>[MAIL] Gained a full set of ${stars}★ ${window.getTierName(stars)} on-level gear!</span>`,
+                      );
+                    }
+                  } else {
+                    let slotArg = slotType;
+                    if (slotType === "subweapon_shield") slotArg = "shield";
+                    else if (slotType === "subweapon_dagger") slotArg = "dagger";
+                    else if (slotType === "subweapon_tome") slotArg = "tome";
+
+                    let item = spawnAndAddGear(slotArg);
+                    if (typeof window.pushLog === "function") {
+                      window.pushLog(
+                        `<span style='color:#e67e22; font-weight:bold;'>[MAIL] Gained ${item.name}!</span>`,
+                      );
+                    }
+                  }
+                }
 
         // Register the claimed ID locally on success to prevent double claims if the server restarts
         window.playerStats.claimedMailIds =

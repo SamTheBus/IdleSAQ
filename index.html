@@ -3349,19 +3349,96 @@
                     </div>
                 </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:12px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:8px;">
                     <div>
                         <label style="display:block; font-size:9.5px; color:#aaa; margin-bottom:2px;">Luminous
                             Souls</label>
                         <input type="number" id="dev-mail-luminous" value="0"
                                style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:4px; font-size:11px; border-radius:3px;">
                     </div>
-                    <div style="display:flex; align-items:center; height:100%; padding-top:14px;">
-                        <input type="checkbox" id="dev-mail-onlevel"
-                               style="margin-right:6px; cursor:pointer;"/>
-                        <label for="dev-mail-onlevel"
-                               style="font-size:11px; color:#fff; font-weight:bold; cursor:pointer;">Attach
-                            Epic Gear Set</label>
+                    <div>
+                        <label style="display:block; font-size:9.5px; color:#aaa; margin-bottom:2px;">Attach
+                            Custom Title</label>
+                        <select id="dev-mail-title-badge"
+                                style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:4px; font-size:10.5px; border-radius:3px;">
+                            <option value="">[None]</option>
+                            <option value="hoors_beta_boi">🏅 Hoor's Beta Boi</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- On-Level Gear Attachment -->
+                <div style="border: 1px solid #333; padding: 6px; border-radius: 4px; margin-bottom: 8px; background: rgba(0,0,0,0.15);">
+                    <span style="font-size: 10px; color: #00d2ff; font-weight: bold; display: block; margin-bottom: 4px;">🛡️ Attach On-Level Gear</span>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                        <div>
+                            <label style="display:block; font-size:9px; color:#999; margin-bottom:2px;">Slot</label>
+                            <select id="dev-mail-gear-slot"
+                                    style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:4px; font-size:10px; border-radius:3px;">
+                                <option value="">[None]</option>
+                                <option value="full_set">📦 Full Set (5 Slots)</option>
+                                <option value="weapon">⚔️ Weapon</option>
+                                <option value="subweapon_shield">🛡️ Shield (Sub)</option>
+                                <option value="subweapon_dagger">🗡️ Dagger (Sub)</option>
+                                <option value="subweapon_tome">📖 Tome (Sub)</option>
+                                <option value="helmet">🪖 Helmet</option>
+                                <option value="chest">👕 Chest</option>
+                                <option value="leggings">👖 Leggings</option>
+                                <option value="overall">🥋 Overall</option>
+                                <option value="boots">🥾 Boots</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:9px; color:#999; margin-bottom:2px;">Rarity</label>
+                            <select id="dev-mail-gear-rarity"
+                                    style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:4px; font-size:10px; border-radius:3px;">
+                                <option value="0">Common (0★)</option>
+                                <option value="1">Rare (1★)</option>
+                                <option value="2">Magic (2★)</option>
+                                <option value="3" selected>Epic (3★)</option>
+                                <option value="4">Legendary (4★)</option>
+                                <option value="5">Mythic (5★)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generic Item / Sack Attachment -->
+                <div style="border: 1px solid #333; padding: 6px; border-radius: 4px; margin-bottom: 12px; background: rgba(0,0,0,0.15);">
+                    <span style="font-size: 10px; color: #ffd700; font-weight: bold; display: block; margin-bottom: 4px;">🎒 Attach Sacks & Resources</span>
+                    <div style="display:grid; grid-template-columns: 1.3fr 1fr; gap:6px;">
+                        <div>
+                            <label style="display:block; font-size:9px; color:#999; margin-bottom:2px;">Item
+                                / Sack Type</label>
+                            <select id="dev-mail-item-type"
+                                    style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:4px; font-size:10px; border-radius:3px;">
+                                <option value="">[None]</option>
+                                <option value="use:Daily Reward Sack">🎒 Daily Reward Sack</option>
+                                <option value="use:Weekly Reward Sack">🎁 Weekly Reward Sack</option>
+                                <option value="use:Cavern Sigil Sack">🔮 Cavern Sigil Sack</option>
+                                <option value="use:Monster Card Sack">🃏 Monster Card Sack</option>
+                                <option value="use:Weekly Clan Supply Crate">📦 Weekly Clan Supply
+                                    Crate
+                                </option>
+                                <option value="use:SP Reset Scroll">📜 SP Reset Scroll</option>
+                                <option value="use:PP Reset Scroll">📜 PP Reset Scroll</option>
+                                <option value="etc:Ancient Core">🔴 Ancient Core</option>
+                                <option value="etc:Catalyst Core">🟢 Catalyst Core</option>
+                                <option value="etc:Overlord's Sigil">🔱 Overlord's Sigil</option>
+                                <option value="etc:Astral Essence">🌌 Astral Essence</option>
+                                <option value="etc:Eridium Shard">🔮 Eridium Shard</option>
+                                <option value="etc:Mythic Scrap">🟥 Mythic Scrap</option>
+                                <option value="etc:Legendary Scrap">🟨 Legendary Scrap</option>
+                                <option value="etc:Epic Scrap">🟧 Epic Scrap</option>
+                                <option value="etc:Magic Scrap">🟪 Magic Scrap</option>
+                                <option value="etc:Rare Scrap">🟦 Rare Scrap</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:9px; color:#999; margin-bottom:2px;">Quantity</label>
+                            <input type="number" id="dev-mail-item-qty" value="1" min="1"
+                                   style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:4px; font-size:10px; border-radius:3px;">
+                        </div>
                     </div>
                 </div>
 
