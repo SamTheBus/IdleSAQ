@@ -1435,6 +1435,37 @@
             </button>
         </div>
 
+        <!-- DPS Overlay -->
+        <div
+                style="
+            background: #151515;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+            <div style="text-align: left">
+            <span style="font-size: 12px; font-weight: bold; color: #fff"
+            >📊 Real-Time DPS Overlay</span
+            >
+                <span style="font-size: 9.5px; color: #aaa; display: block"
+                >Draggable widget displaying current active DPS</span
+                >
+            </div>
+            <button
+                    id="settings-toggle-dps-overlay"
+                    class="btn-action"
+                    style="font-size: 11px"
+                    onclick="window.toggleDpsOverlay()"
+            >
+                Overlay: ON
+            </button>
+        </div>
+
         <!-- Audio Section -->
         <div
                 style="

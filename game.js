@@ -1160,9 +1160,11 @@ window.SaveManager = {
       if (window.playerStats.maxCanvasClicksInWindow === undefined)
         window.playerStats.maxCanvasClicksInWindow = 0;
       if (window.playerStats.sessionPlaytime === undefined)
-        window.playerStats.sessionPlaytime = 0;
-      if (window.playerStats.activityTimer === undefined)
-        window.playerStats.activityTimer = 0;
+              window.playerStats.sessionPlaytime = 0;
+            if (window.playerStats.activityTimer === undefined)
+              window.playerStats.activityTimer = 0;
+            if (window.playerStats.showDpsOverlay === undefined)
+              window.playerStats.showDpsOverlay = true;
 
       window.playerStats.fairyClicksWindow =
         window.playerStats.fairyClicksWindow || [];
