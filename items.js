@@ -3,8 +3,8 @@
    Sack Management, Forge/Crafting, and Shop Transaction Logic.
    ========================================================================= */
 window.getRarityMultiplier = function (stars) {
-  if (stars === "UNIQUE" || stars === "unique") return 75.0;
-  const multipliers = [1.0, 1.8, 3.5, 8.0, 20.0, 50.0];
+  if (stars === "UNIQUE" || stars === "unique") return 180.0;
+  const multipliers = [1.0, 2.5, 6.0, 18.0, 50.0, 150.0];
   return multipliers[stars] || 1.0;
 };
 
@@ -1530,11 +1530,11 @@ Object.assign(window.ItemFactory, {
 
     let prestigeMult = 1.0;
 
-    // Direct-Alignment Scaling Model: Maps item creation baselines exactly to enemy exponential scale curves
-        let repStage = window.getEffectiveStage(stageScale * 10);
-        let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-        // Dampened exponent (0.95) to smooth out the level-to-level transition so a single level gap isn't a massive cliff
-        let repScale = Math.pow(repGrowth, repStage * 0.95);
+    // Direct-Alignment Scaling Model: Mapped on 5-stage increments
+            let repStage = window.getEffectiveStage(stageScale * 5);
+            let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+            // Mapped on 5-stage scale to align with the standard campaign progression curve
+            let repScale = Math.pow(repGrowth, repStage * 0.95);
 
         let expScale = repScale;
         let hpDefExpScale = repScale;
@@ -2038,10 +2038,10 @@ Object.assign(window.ItemFactory, {
     let isArt = item.type === "artifact";
     let rarityMult = isArt ? 1.45 : 1 + (item.statsRolled || 0) * 0.15;
 
-    // Direct-Alignment Scaling Model: Maps base card ranges exactly to enemy exponential scale curves
-    let repStage = stageLevel * 10;
-    let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-    let repScale = Math.pow(repGrowth, repStage);
+    // Direct-Alignment Scaling Model: Mapped on 5-stage increments
+        let repStage = stageLevel * 5;
+        let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+        let repScale = Math.pow(repGrowth, repStage);
 
     let expScale = repScale;
     let hpDefExpScale = repScale;
@@ -2364,11 +2364,11 @@ Object.assign(window.ItemFactory, {
     item.bonusDex = item.bonusDex || 0;
     item.bonusInt = item.bonusInt || 0;
 
-    // Direct-Alignment Scaling Model: Maps recalculations exactly to enemy exponential scale curves
-        let repStage = window.getEffectiveStage((item.stageLevel || 1) * 10);
-        let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
-        // Dampened exponent (0.95) to smooth out the level-to-level transition so a single level gap isn't a massive cliff
-        let repScale = Math.pow(repGrowth, repStage * 0.95);
+    // Direct-Alignment Scaling Model: Mapped on 5-stage increments
+            let repStage = window.getEffectiveStage((item.stageLevel || 1) * 5);
+            let repGrowth = 1.045 + (repStage * 0.04) / (repStage + 200);
+            // Mapped on 5-stage scale to align with the standard campaign progression curve
+            let repScale = Math.pow(repGrowth, repStage * 0.95);
 
         let expScale = repScale;
         let hpDefExpScale = repScale;
@@ -2683,12 +2683,12 @@ Object.assign(window.ItemFactory, {
     }
 
     let selectedStat = pool[Math.floor(Math.random() * pool.length)];
-    let stageScale = item.stageLevel || 1;
-    let effStageScale = window.getEffectiveStage(stageScale * 10) / 10;
-    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-    let expScale = Math.pow(1.18, effStageScale) * Math.pow(effStageScale, 2.2);
-    let hpDefExpScale =
-      Math.pow(1.16, effStageScale) * Math.pow(effStageScale, 2.2);
+        let stageScale = item.stageLevel || 1;
+        let effStageScale = window.getEffectiveStage(stageScale * 5) / 10;
+        // Mapped on 5-stage scale to align with the standard campaign progression curve
+        let expScale = Math.pow(1.18, effStageScale) * Math.pow(effStageScale, 2.2);
+        let hpDefExpScale =
+          Math.pow(1.16, effStageScale) * Math.pow(effStageScale, 2.2);
     let rarityMult = 1 + item.statsRolled * 0.15;
     let prestigeMult = Math.pow(1.08, window.playerStats.prestigeCount || 0);
 
@@ -4210,11 +4210,11 @@ Object.assign(window.ForgeManager, {
     if (eligiblePool.length === 0) eligiblePool = possiblePool;
 
     let newProp = eligiblePool[Math.floor(Math.random() * eligiblePool.length)];
-    let stageScale = item.stageLevel || 1;
-    let effStageScale = window.getEffectiveStage(stageScale * 10) / 10;
-    // Re-balanced from polynomial to exponential curves to match exponential enemy scaling
-    let expScale = Math.pow(1.58, effStageScale);
-    let hpDefExpScale = Math.pow(1.56, effStageScale);
+        let stageScale = item.stageLevel || 1;
+        let effStageScale = window.getEffectiveStage(stageScale * 5) / 10;
+        // Mapped on 5-stage scale to align with the standard campaign progression curve
+        let expScale = Math.pow(1.58, effStageScale);
+        let hpDefExpScale = Math.pow(1.56, effStageScale);
     let rarityMult = 1 + item.statsRolled * 0.15;
     let rolledValue = 0;
 
@@ -4409,14 +4409,13 @@ window.rollGachaCrateItem = function (
   }
 
   let peakRunStage = window.playerStats.lifetimePeakStage || 1;
-  let stageScale = Math.floor((peakRunStage - 1) / 10) + 1;
-
-  let newItem = window.createItemObject(
-    chosenType,
-    statLinesCount,
-    stageScale,
-    0,
-  );
+    let stageScale = Math.floor((peakRunStage - 1) / 5) + 1;
+    let newItem = window.createItemObject(
+      chosenType,
+      statLinesCount,
+      stageScale,
+      0,
+    );
 
   if (newItem.type === "artifact") {
     window.inventory.ARTIFACT.push(newItem);

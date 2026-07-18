@@ -788,17 +788,17 @@ window.renderClanDashboard = function (clan, members, invitations) {
     let listHtml = "";
 
     if (
-      !questsData ||
-      !questsData.activeList ||
-      questsData.activeList.length === 0
-    ) {
-      listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
-    } else {
-      let stgScale = Math.max(
-        1,
-        Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1,
-      );
-      let calculatedGoldMult = 1.0 + Math.pow(stgScale, 1.5) * 1.2;
+          !questsData ||
+          !questsData.activeList ||
+          questsData.activeList.length === 0
+        ) {
+          listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
+        } else {
+                              let stgScale = Math.max(
+                                1,
+                                Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) + 1,
+                              );
+                              let calculatedGoldMult = 1.0 + Math.pow(stgScale, 1.5) * 1.2;
 
       // Define inline micro vector icons to completely eradicate emojis
       const keyIcon =
@@ -1445,15 +1445,15 @@ window.executeClaimClanQuestReward = function (questId) {
           window.addUseDrop("Clan Reward Sack", r.sacks);
           claimsReport.push(`+${r.sacks}x Clan Sacks`);
         } else if (r.goldBase > 0) {
-          let stgScale = Math.max(
-            1,
-            Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) +
-              1,
-          );
-          // Replaced hyper-exponential growth with balanced polynomial curve scaling
-          let calculatedGold = Math.ceil(
-            r.goldBase * (1.0 + Math.pow(stgScale, 1.5) * 1.2),
-          );
+                  let stgScale = Math.max(
+                    1,
+                    Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) +
+                      1,
+                  );
+                  // Replaced hyper-exponential growth with balanced polynomial curve scaling
+                  let calculatedGold = Math.ceil(
+                    r.goldBase * (1.0 + Math.pow(stgScale, 1.5) * 1.2),
+                  );
           window.addCoins(calculatedGold);
           claimsReport.push(`+${window.formatNumber(calculatedGold)} Gold`);
         }

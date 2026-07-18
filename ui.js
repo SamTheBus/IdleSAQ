@@ -3702,9 +3702,9 @@ window.renderMarketShop = function () {
                                                         <span style="font-size:9.5px; color:#888; display:block; text-align:left;">MERCHANT COST</span>
                                                         <strong style="color:${costColor}; font-size:14px; font-family:monospace;">${window.formatNumber(iotdItem.cost)} Gold</strong>
                                                     </div>
-                                                    <button class="btn-action" style="${btnStyle} padding:8px 16px; font-size:11px;" ontouchstart="event.stopPropagation();" onclick="window.buyShopItem(${window.playerStats.shopItems.indexOf(iotdItem)})">
-                                                        ${isSold ? "SOLD" : "ACQUIRE"}
-                                                    </button>
+                                                    <button class="btn-action" style="${btnStyle} padding:8px 16px; font-size:11px;" onmouseenter="window.hideTooltip();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="window.buyShopItem(${window.playerStats.shopItems.indexOf(iotdItem)})">
+                                                                                                            ${isSold ? "SOLD" : "ACQUIRE"}
+                                                                                                        </button>
                                                 </div>
                     </div>
                   `;
@@ -3761,9 +3761,9 @@ window.renderMarketShop = function () {
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:4; border-top:1px dashed rgba(255,255,255,0.06); padding-top:6px; margin-top:2px;">
                                             <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(shopItem.cost)} Gold</span>
-                                            <button class="btn-action" style="${btnStyle} font-size:10px; padding:4px 8px; border-radius:4px;" ontouchstart="event.stopPropagation();" onclick="window.buyShopItem(${idx})">
-                                                ${isSold ? "SOLD" : "BUY"}
-                                            </button>
+                                            <button class="btn-action" style="${btnStyle} font-size:10px; padding:4px 8px; border-radius:4px;" onmouseenter="window.hideTooltip();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="window.buyShopItem(${idx})">
+                                                                                            ${isSold ? "SOLD" : "BUY"}
+                                                                                        </button>
                                         </div>
             </div>
           `;
@@ -3774,6 +3774,9 @@ window.renderMarketShop = function () {
 };
 
 window.showAstralShopItemTooltip = function (e, index) {
+  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+    return;
+  }
   e.stopPropagation();
   let item = window.ASTRAL_SHOP_STOCK[index];
   if (!item) return;
@@ -3968,12 +3971,13 @@ window.renderGoldUpgrades = function () {
       if (canAfford) {
         btnHtml = `
                       <button class="btn-action"
-                              style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
-                              onpointerdown="event.stopPropagation();"
-                              ontouchstart="event.stopPropagation();"
-                              onclick="event.stopPropagation(); window.buyGoldUpgrade('${u.id}')">
-                          Upgrade Sink
-                      </button>
+                                                    style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
+                                                    onmouseenter="window.hideTooltip();"
+                                                    onpointerdown="event.stopPropagation();"
+                                                    ontouchstart="window.hideTooltip(); event.stopPropagation();"
+                                                    onclick="event.stopPropagation(); window.buyGoldUpgrade('${u.id}')">
+                                                Upgrade Sink
+                                            </button>
                     `;
       } else {
         btnHtml = `
@@ -4115,7 +4119,7 @@ window.renderMysticalShop = function () {
                                   </div>
                                   <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
                                                <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${window.formatNumber(displayCost)} ${currencyLabel}</span>
-                                               <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px; box-shadow:0 0 6px ${item.color}33;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMysticalItem(${index})">Purchase</button>
+                                               <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px; box-shadow:0 0 6px ${item.color}33;" onmouseenter="window.hideTooltip();" onpointerdown="event.stopPropagation();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="event.stopPropagation(); window.buyMysticalItem(${index})">Purchase</button>
                                            </div>
                 </div>
               `;
@@ -4170,7 +4174,7 @@ window.renderMysticalShop = function () {
 
                      <div style="border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px; display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
                                                           <span style="color:${costColor}; font-weight:bold; font-size:11px; font-family:monospace;">${recipe.amount}x Ingredients</span>
-                                                          <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px;" ${canAfford ? "" : "disabled"} onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.transmutePotion(${index})">Transmute</button>
+                                                          <button class="btn-action" style="${btnStyle} font-size:10.5px; padding:4px 12px; border-radius:4px;" ${canAfford ? "" : "disabled"} onmouseenter="window.hideTooltip();" onpointerdown="event.stopPropagation();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="event.stopPropagation(); window.transmutePotion(${index})">Transmute</button>
                                                       </div>
                  </div>
                `;
@@ -4218,7 +4222,7 @@ window.renderAstralShop = function () {
             </div>
 
             <div style="position:relative; z-index:2; border-top: 1px dashed rgba(255,255,255,0.08); padding-top:8px; margin-top:6px;">
-                                              <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyAstralShopItem(${index})">Infuse Shards</button>
+                                              <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onmouseenter="window.hideTooltip();" onpointerdown="event.stopPropagation();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="event.stopPropagation(); window.buyAstralShopItem(${index})">Infuse Shards</button>
                                           </div>
         </div>
       `;
@@ -4390,32 +4394,45 @@ window.renderPrestigeTab = function () {
   let isEligible = currentStage >= minReqStage;
 
   let getUpgradeCardHtml = (
-    type,
-    label,
-    icon,
-    currentText,
-    bonusDesc,
-    pts,
-    color,
-  ) => {
-    let cost = window.getPrestigeUpgradeCost(type, pts);
-    let canAfford = p.prestigePoints >= cost;
-    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-    let bgStyle = window.hexToRgba(color, 0.04);
-    let fontColor =
-      color === "#f1c40f" || color === "#ffb6c1" ? "#111" : "#fff";
+      type,
+      label,
+      icon,
+      currentText,
+      bonusDesc,
+      pts,
+      color,
+    ) => {
+      let cost = window.getPrestigeUpgradeCost(type, pts);
+      let canAfford = p.prestigePoints >= cost;
+      let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+      let bgStyle = window.hexToRgba(color, 0.04);
+      let fontColor =
+        color === "#f1c40f" || color === "#ffb6c1" ? "#111" : "#fff";
 
-    return `
-        <div class="shop-row" style="border-color:${color}; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:4px; padding:10px; margin-bottom:0; cursor:help;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <strong style="color:${color}; font-size:11.5px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${pts})</span></strong>
-                <span style="color:${costColor}; font-weight:bold; font-size:11px;">${cost} PP</span>
-            </div>
-            <div style="font-size:9.5px; color:#aaa; line-height:1.35; margin-bottom:6px;">${bonusDesc} <br>Currently: <span style="color:#fff; font-weight:bold;">${currentText}</span></div>
-            <button class="btn-action" style="background:${color}; color:${fontColor}; font-weight:bold; font-size:10px; padding:4px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.buyPrestigeUpgrade('${type}')">Upgrade</button>
-        </div>
-      `;
-  };
+      const maxLevels = {
+        gold: 30,
+        drop: 30,
+        exp: 50,
+        fairy: 100
+      };
+      let isMaxed = maxLevels[type] !== undefined && pts >= maxLevels[type];
+
+      let costLabel = isMaxed ? `<span style="color:#2ecc71; font-weight:bold; font-size:11px;">MAXED</span>` : `<span style="color:${costColor}; font-weight:bold; font-size:11px;">${cost} PP</span>`;
+      let btnHtml = isMaxed
+        ? `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-weight:bold; font-size:10px; padding:4px; cursor:not-allowed;" disabled>MAXED</button>`
+        : `<button class="btn-action" style="background:${color}; color:${fontColor}; font-weight:bold; font-size:10px; padding:4px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.buyPrestigeUpgrade('${type}')">Upgrade</button>`;
+
+      return `
+          <div class="shop-row" style="border-color:${color}; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:4px; padding:10px; margin-bottom:0; cursor:help;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong style="color:${color}; font-size:11.5px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${pts})</span></strong>
+                  ${costLabel}
+              </div>
+              <div style="font-size:9.5px; color:#aaa; line-height:1.35; margin-bottom:6px;">${bonusDesc} <br>Currently: <span style="color:#fff; font-weight:bold;">${currentText}</span></div>
+              ${btnHtml}
+          </div>
+        `;
+    };
 
   // Paragon Cost
   let parLevel = p.paragonLevel || 0;
@@ -4571,6 +4588,18 @@ window.renderPrestigeTab = function () {
 window.buyPrestigeUpgrade = function (type) {
   let currentLevel = window.playerStats.prestigeUpgrades[type] || 0;
   let cost = window.getPrestigeUpgradeCost(type, currentLevel);
+
+  const maxLevels = {
+    gold: 30,
+    drop: 30,
+    exp: 50,
+    fairy: 100 // Cap at 500% (100 * 5% = 500%)
+  };
+  if (maxLevels[type] !== undefined && currentLevel >= maxLevels[type]) {
+    if (typeof window.pushHeaderToast === "function")
+      window.pushHeaderToast("❌ Already at maximum level!", "#e74c3c");
+    return;
+  }
 
   if (window.playerStats.prestigePoints < cost) {
     if (typeof window.pushHeaderToast === "function")
@@ -4800,6 +4829,9 @@ window.triggerPrestigeAscension = function () {
 };
 
 window.showMarketTooltip = function (e, index) {
+  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+    return;
+  }
   let item = window.playerStats.shopItems[index];
   if (!item || item.purchased) return;
   let tt = document.getElementById("game-tooltip");
@@ -4822,6 +4854,9 @@ window.showMarketTooltip = function (e, index) {
 };
 
 window.showMysticalShopTooltip = function (e, index) {
+  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+    return;
+  }
   e.stopPropagation();
   let tt = document.getElementById("etc-tooltip");
   let item = window.MYSTICAL_STOCK[index];
@@ -4886,6 +4921,9 @@ window.showMysticalShopTooltip = function (e, index) {
 };
 
 window.showTransmuteTooltip = function (e, index) {
+  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+    return;
+  }
   e.stopPropagation();
   let recipe = window.POTION_TRANSMUTATIONS[index];
   if (!recipe) return;
@@ -4914,6 +4952,9 @@ window.showTransmuteTooltip = function (e, index) {
 };
 
 window.showGoldUpgradeTooltip = function (e, upId) {
+  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+    return;
+  }
   e.stopPropagation();
   let p = window.playerStats;
   let up;
@@ -5370,10 +5411,10 @@ window.renderInventory = function () {
                                                                           </div>
                                                                       </div>
                                                       <div class="bag-item-actions" style="position:relative; z-index:10; display:inline-flex; gap:3px; margin-left: 8px; flex-shrink:0;">
-                                                                                                    <button class="btn-action" style="padding:4px 8px; font-size:10px;" onclick="window.equipItem(${item.id})">Equip</button>
-                                                                                                    <button class="btn-action" style="background:${lockBg}; padding:4px 6px; font-size:10px;" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
-                                                                                                    <button class="btn-action un" style="padding:4px 8px; font-size:10px;" onclick="window.salvageItem(${item.id})">Salvage</button>
-                                                                                                </div>
+                                                                                                                                                          <button class="btn-action" style="padding:4px 8px; font-size:10px;" onmouseenter="window.hideTooltip();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="window.equipItem(${item.id})">Equip</button>
+                                                                                                                                                          <button class="btn-action" style="background:${lockBg}; padding:4px 6px; font-size:10px;" onmouseenter="window.hideTooltip();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
+                                                                                                                                                          <button class="btn-action un" style="padding:4px 8px; font-size:10px;" onmouseenter="window.hideTooltip();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="window.salvageItem(${item.id})">Salvage</button>
+                                                                                                                                                      </div>
                                                   </div>`;
         }).join("");
       }
@@ -5407,10 +5448,10 @@ window.renderInventory = function () {
                                                           </div>
                                                       </div>
                                           <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
-                                                                            <button class="btn-action" onclick="window.equipItem(${item.id})">Equip</button>
-                                                                            <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
-                                                                            <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})">Salvage</button>
-                                                                          </div>
+                                                                                                                      <button class="btn-action" onmouseenter="window.hideTooltip();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="window.equipItem(${item.id})">Equip</button>
+                                                                                                                      <button class="btn-action" style="background:${lockBg}; margin-left:2px;" onmouseenter="window.hideTooltip();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
+                                                                                                                      <button class="btn-action un" style="margin-left:12px;" onmouseenter="window.hideTooltip();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="window.salvageItem(${item.id})">Salvage</button>
+                                                                                                                    </div>
                                       </div>`;
         }).join("");
       }
@@ -5449,9 +5490,9 @@ window.renderInventory = function () {
                                     </div>
                                 </div>
                                 <div style="position:relative; z-index:10; white-space:nowrap; margin-left: 10px;">
-                                                                              <button class="btn-action" style="background:${lockBg};" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
-                                                                              <button class="btn-action un" style="margin-left:12px;" onclick="window.salvageItem(${item.id})">Salvage</button>
-                                                                          </div>
+                                                                                                              <button class="btn-action" style="background:${lockBg};" onmouseenter="window.hideTooltip();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="window.toggleLock(${item.id})">${lockIcon}</button>
+                                                                                                              <button class="btn-action un" style="margin-left:12px;" onmouseenter="window.hideTooltip();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="window.salvageItem(${item.id})">Salvage</button>
+                                                                                                          </div>
                             </div>`;
         }).join("");
       }
@@ -5750,6 +5791,9 @@ Object.assign(window.UIManager, {
 window.positionTooltip = (e, tt) => window.UIManager.positionTooltip(e, tt);
 
 window.showInventoryTooltip = function (e, itemId) {
+  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+    return;
+  }
   if (window.isSimulatedMouseEvent && window.isSimulatedMouseEvent(e)) return;
   e.stopPropagation();
   let item =
@@ -5773,6 +5817,9 @@ window.showLogTooltip = function (e, itemId) {
 
 // Generates and positions item comparison tooltips inside the Blacksmith Forge interface
 window.showForgeTooltip = function (e, itemId) {
+  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+    return;
+  }
   e.stopPropagation();
   let item =
     window.inventory.EQUIP.find((i) => i.id === itemId) ||
@@ -6715,11 +6762,11 @@ window.refreshMarketShopIfNeeded = function () {
     window.playerStats.shopItems = [];
 
     let peakRunStage = Math.max(
-      window.playerStats.stage,
-      window.playerStats.maxStage || 1,
-    );
-    let stageScale = Math.floor((peakRunStage - 1) / 10) + 1;
-    let types = ["weapon", "subweapon", "helmet", "chest", "leggings", "boots"];
+          window.playerStats.stage,
+          window.playerStats.maxStage || 1,
+        );
+        let stageScale = Math.floor((peakRunStage - 1) / 5) + 1;
+        let types = ["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots"];
 
     for (let i = 0; i < 5; i++) {
       let isIOTD = i === 4;
@@ -6747,23 +6794,23 @@ window.refreshMarketShopIfNeeded = function () {
       let chosenType = types[Math.floor(Math.random() * types.length)];
 
       // Resolve base boss gold drops matching this item's specific Level/Stage Scale
-                    let itemStage = stageScale * 10;
-                    let effStage = window.getEffectiveStage(itemStage);
-                    let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-                    // Dampened exponent (0.95) to match the item stats curve and prevent purchase costs from out-inflating combat value
-                    let scale = Math.pow(growthRate, effStage * 0.95);
-                    let baseBossGold = Math.floor(15 * scale);
+                          let itemStage = stageScale * 5;
+                          let effStage = window.getEffectiveStage(itemStage);
+                          let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+                          // Mapped on 5-stage scale to prevent purchase costs from out-inflating combat value
+                          let scale = Math.pow(growthRate, effStage * 0.95);
+                          let baseBossGold = Math.floor(15 * scale);
 
       // Balanced Rarity Cost multipliers (expressed as equivalent boss kills of that item's level)
-      const rarityCostMultipliers = [
-        15, // 0★ Common
-        35, // 1★ Rare
-        90, // 2★ Magic
-        250, // 3★ Epic
-        800, // 4★ Legendary
-        2500, // 5★ Mythic
-      ];
-      let itemRarityFactor = rarityCostMultipliers[statLinesCount] || 15;
+            const rarityCostMultipliers = [
+              15, // 0★ Common
+              45, // 1★ Rare
+              120, // 2★ Magic
+              400, // 3★ Epic
+              1500, // 4★ Legendary
+              6000, // 5★ Mythic
+            ];
+            let itemRarityFactor = rarityCostMultipliers[statLinesCount] || 15;
 
       // Final Level-Anchored shop cost calculation
       let cost = Math.floor(baseBossGold * itemRarityFactor);
@@ -8900,6 +8947,9 @@ window.showRatesLockTooltip = function (e, lockType) {
 };
 
 window.showMissionTooltip = function (e, missionId, isWeekly) {
+  if (e && e.target && e.target.closest && (e.target.closest("button") || e.target.closest(".btn-action"))) {
+    return;
+  }
   if (e && e.stopPropagation) e.stopPropagation();
   let tt = document.getElementById("game-tooltip");
   if (!tt) return;
@@ -10053,6 +10103,16 @@ window.buyMissionUpgrade = function (type) {
   let p = window.playerStats;
   p.missionUpgrades = p.missionUpgrades || { gold: 0, atk: 0, hp: 0, bag: 0 };
   let curLevel = p.missionUpgrades[type] || 0;
+
+  const maxMissionLevels = {
+    gold: 30,
+    bag: 10
+  };
+  if (maxMissionLevels[type] !== undefined && curLevel >= maxMissionLevels[type]) {
+    window.pushHeaderToast("❌ Already at maximum level!", "#e74c3c");
+    return;
+  }
+
   let cost = 5; // Flat cost of 5 for gold, atk, and hp
   if (type === "bag") {
     cost = 4 + curLevel * 3; // Scales: Lvl 0 costs 4, Lvl 1 costs 7, Lvl 2 costs 10...
@@ -10264,17 +10324,17 @@ window.claimMissionReward = function (missionId, isWeekly = false) {
         window.playerStats.totalGoldEarned || 0,
       ).add(m.treatQty);
     } else if (m.treat === "Epic Gear Piece") {
-      let activeStage = window.playerStats.stage || 1;
-      let scale = Math.floor((activeStage - 1) / 10) + 1;
-      let types = [
-        "weapon",
-        "subweapon",
-        "helmet",
-        "chest",
-        "leggings",
-        "overall",
-        "boots",
-      ];
+          let activeStage = window.playerStats.stage || 1;
+          let scale = Math.floor((activeStage - 1) / 5) + 1;
+          let types = [
+            "weapon",
+            "subweapon",
+            "helmet",
+            "chest",
+            "leggings",
+            "overall",
+            "boots",
+          ];
       let chosenType = types[Math.floor(Math.random() * types.length)];
       let newItem = window.createItemObject(chosenType, 3, scale, 3);
       window.inventory.EQUIP.push(newItem);
@@ -10712,47 +10772,60 @@ window.renderMissionsWindow = function () {
     p.missionUpgrades = p.missionUpgrades || { gold: 0, atk: 0, hp: 0, bag: 0 };
 
     let lvlGold = p.missionUpgrades.gold || 0;
-    let costGold = 5;
-    let canAffordGold = tokenBalance >= costGold;
+        let costGold = 5;
+        let canAffordGold = tokenBalance >= costGold;
 
-    let lvlAtk = p.missionUpgrades.atk || 0;
-    let costAtk = 5;
-    let canAffordAtk = tokenBalance >= costAtk;
+        let lvlAtk = p.missionUpgrades.atk || 0;
+        let costAtk = 5;
+        let canAffordAtk = tokenBalance >= costAtk;
 
-    let lvlHp = p.missionUpgrades.hp || 0;
-    let costHp = 5;
-    let canAffordHp = tokenBalance >= costHp;
+        let lvlHp = p.missionUpgrades.hp || 0;
+        let costHp = 5;
+        let canAffordHp = tokenBalance >= costHp;
 
-    let lvlBag = p.missionUpgrades.bag || 0;
-    let costBag = 4 + lvlBag * 3;
-    let canAffordBag = tokenBalance >= costBag;
+        let lvlBag = p.missionUpgrades.bag || 0;
+        let costBag = 4 + lvlBag * 3;
+        let canAffordBag = tokenBalance >= costBag;
 
-    // Mini vector SVGs for Permanent Upgrade Icons
-    let satchelSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M16 16v1a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-1"/><rect x="4" y="6" width="16" height="10" rx="2"/><path d="M9 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
-    let midasSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #f1c40f);"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h6M9 13h6"/></svg>`;
-    let gladiatorSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #e74c3c);"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/></svg>`;
-    let constitutionSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+        // Mini vector SVGs for Permanent Upgrade Icons
+        let satchelSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M16 16v1a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-1"/><rect x="4" y="6" width="16" height="10" rx="2"/><path d="M9 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
+        let midasSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #f1c40f);"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h6M9 13h6"/></svg>`;
+        let gladiatorSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #e74c3c);"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/></svg>`;
+        let constitutionSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px #3498db);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
 
-    let bagBtnHtml = canAffordBag
-      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('bag')">Upgrade (${costBag} QP)</button>`
-      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (${costBag})</button>`;
+        let bagBtnHtml = "";
+        if (lvlBag >= 10) {
+          bagBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed;" disabled>MAXED</button>`;
+        } else {
+          bagBtnHtml = canAffordBag
+            ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('bag')">Upgrade (${costBag} QP)</button>`
+            : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (${costBag})</button>`;
+        }
 
-    let goldBtnHtml = canAffordGold
-      ? `<button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('gold')">Upgrade (5 QP)</button>`
-      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
+        let goldBtnHtml = "";
+        if (lvlGold >= 30) {
+          goldBtnHtml = `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed;" disabled>MAXED</button>`;
+        } else {
+          goldBtnHtml = canAffordGold
+            ? `<button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('gold')">Upgrade (5 QP)</button>`
+            : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
+        }
 
-    let atkBtnHtml = canAffordAtk
-      ? `<button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('atk')">Upgrade (5 QP)</button>`
-      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
+        let atkBtnHtml = canAffordAtk
+          ? `<button class="btn-action" style="background:#e74c3c; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('atk')">Upgrade (5 QP)</button>`
+          : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
 
-    let hpBtnHtml = canAffordHp
-      ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('hp')">Upgrade (5 QP)</button>`
-      : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
+        let hpBtnHtml = canAffordHp
+          ? `<button class="btn-action" style="background:#3498db; color:#fff; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; border: 1px solid #fff;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.buyMissionUpgrade('hp')">Upgrade (5 QP)</button>`
+          : `<button class="btn-action" style="background:#242933; color:#5c6370; font-size:10px; padding:6px; width:100%; border-radius:4px; font-weight:bold; cursor:not-allowed; border: 1px solid #2d3139; opacity: 0.7;" disabled>Lacking QP (5)</button>`;
 
-    let costColorBag = canAffordBag ? "#2ecc71" : "#e74c3c";
-    let costColorGold = canAffordGold ? "#2ecc71" : "#e74c3c";
-    let costColorAtk = canAffordAtk ? "#2ecc71" : "#e74c3c";
-    let costColorHp = canAffordHp ? "#2ecc71" : "#e74c3c";
+        let costColorBag = lvlBag >= 10 ? "#2ecc71" : (canAffordBag ? "#2ecc71" : "#e74c3c");
+        let costColorGold = lvlGold >= 30 ? "#2ecc71" : (canAffordGold ? "#2ecc71" : "#e74c3c");
+        let costColorAtk = canAffordAtk ? "#2ecc71" : "#e74c3c";
+        let costColorHp = canAffordHp ? "#2ecc71" : "#e74c3c";
+
+        let costBagLabel = lvlBag >= 10 ? "MAXED" : `${costBag} QP`;
+        let costGoldLabel = lvlGold >= 30 ? "MAXED" : `5 QP`;
 
     let reagents = [
       {
@@ -10864,9 +10937,9 @@ window.renderMissionsWindow = function () {
 
               <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:8px;">
                                 <!-- Satchel -->
-                                <div class="sink-slate-panel" style="border: 1.5px solid #3498db50; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px; position:relative;">
-                                    <!-- Price Badge -->
-                                    <span style="position: absolute; top: 6px; right: 36px; background: rgba(52, 152, 219, 0.15); border: 1px solid #3498db80; color: ${costColorBag}; font-family: monospace; font-size: 9.5px; font-weight: bold; padding: 2px 6px; border-radius: 4px; box-shadow: 0 0 6px rgba(52, 152, 219, 0.2); z-index: 2;">${costBag} QP</span>
+                                                                <div class="sink-slate-panel" style="border: 1.5px solid #3498db50; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px; position:relative;">
+                                                                    <!-- Price Badge -->
+                                                                    <span style="position: absolute; top: 6px; right: 36px; background: rgba(52, 152, 219, 0.15); border: 1px solid #3498db80; color: ${costColorBag}; font-family: monospace; font-size: 9.5px; font-weight: bold; padding: 2px 6px; border-radius: 4px; box-shadow: 0 0 6px rgba(52, 152, 219, 0.2); z-index: 2;">${costBagLabel}</span>
                                     <div>
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding-right:45px;">
                                             <strong style="color:#3498db; font-size:11px;">Dimensional Satchel</strong>
@@ -10884,9 +10957,9 @@ window.renderMissionsWindow = function () {
                                 </div>
 
                                 <!-- Midas -->
-                                <div class="sink-slate-panel" style="border: 1.5px solid #f1c40f50; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px; position:relative;">
-                                    <!-- Price Badge -->
-                                    <span style="position: absolute; top: 6px; right: 36px; background: rgba(241, 196, 15, 0.15); border: 1px solid #f1c40f80; color: ${costColorGold}; font-family: monospace; font-size: 9.5px; font-weight: bold; padding: 2px 6px; border-radius: 4px; box-shadow: 0 0 6px rgba(241, 196, 15, 0.2); z-index: 2;">5 QP</span>
+                                                                <div class="sink-slate-panel" style="border: 1.5px solid #f1c40f50; border-radius:8px; padding:10px; background:linear-gradient(180deg, #131720 0%, #0b0e14 100%); display:flex; flex-direction:column; justify-content:space-between; min-height:175px; position:relative;">
+                                                                    <!-- Price Badge -->
+                                                                    <span style="position: absolute; top: 6px; right: 36px; background: rgba(241, 196, 15, 0.15); border: 1px solid #f1c40f80; color: ${costColorGold}; font-family: monospace; font-size: 9.5px; font-weight: bold; padding: 2px 6px; border-radius: 4px; box-shadow: 0 0 6px rgba(241, 196, 15, 0.2); z-index: 2;">${costGoldLabel}</span>
                                     <div>
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding-right:45px;">
                                             <strong style="color:#f1c40f; font-size:11px;">Midas Training</strong>
@@ -11019,8 +11092,8 @@ window.initGachaShowcase = function () {
   if (window.gachaShowcaseItems.length > 0) return;
 
   let stageScale =
-    Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1;
-  if (stageScale < 6) stageScale = 6; // High levels to showcase cool stat-lines
+      Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) + 1;
+    if (stageScale < 12) stageScale = 12; // High levels to showcase cool stat-lines
 
   let types = [
     "weapon",
@@ -11373,15 +11446,15 @@ window.openDailyRewardSack = function (specificName) {
   else statLinesCount = 0;
 
   let stageLvl = Math.max(
-    1,
-    Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 10) + 1,
-  );
-  let newEquip = window.createItemObject(
-    chosenType,
-    statLinesCount,
-    stageLvl,
-    0,
-  );
+      1,
+      Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) + 1,
+    );
+    let newEquip = window.createItemObject(
+      chosenType,
+      statLinesCount,
+      stageLvl,
+      0,
+    );
 
   window.inventory.EQUIP.push(newEquip);
   window.frozenItemDb[newEquip.id] = JSON.parse(JSON.stringify(newEquip));
@@ -11822,10 +11895,10 @@ window.openWeeklyRewardSack = function (specificName) {
   }
 
   // 5% chance for a random Artifact
-  if (Math.random() < 0.05) {
-    let peak = window.playerStats.lifetimePeakStage || 1;
-    let stageLvl = Math.max(1, Math.floor((peak - 1) / 10) + 1);
-    let art = window.createItemObject("artifact", 3, stageLvl, 0);
+    if (Math.random() < 0.05) {
+      let peak = window.playerStats.lifetimePeakStage || 1;
+      let stageLvl = Math.max(1, Math.floor((peak - 1) / 5) + 1);
+      let art = window.createItemObject("artifact", 3, stageLvl, 0);
     window.inventory.ARTIFACT.push(art);
     window.frozenItemDb[art.id] = JSON.parse(JSON.stringify(art));
     receivedRewards.push({
@@ -16505,7 +16578,7 @@ window.executeEquipSpectralResonance = function (key) {
 window.openSubweaponOfChoiceModal = function () {
   window.setPauseState(true);
 
-  // Generate three specialized sub-weapons at level 11 (StageScale 2) rolling their respective stats
+  // Generate three specialized sub-weapons at level 11 (StageScale 3) rolling their respective stats
   let shield = {
     id: window.idCounter++,
     name: `Kite Shield of Might (Lv. 11)`,
@@ -16513,7 +16586,7 @@ window.openSubweaponOfChoiceModal = function () {
     subType: "shield",
     statsRolled: 1, // Rare (1★)
     temperLevel: 0,
-    stageLevel: 2, // Map precisely to StageScale 2 (Levels 11-20)
+    stageLevel: 3, // Map precisely to StageScale 3 (Levels 11-15) under the new 5-stage increments model
     atk: 0,
     maxHp: 0,
     def: 0,
@@ -16663,58 +16736,58 @@ window.openSubweaponOfChoiceModal = function () {
   `;
 
   let shieldCardHtml = `
-                  <div id="choice-card-shield" class="market-card" style="${cardStyles} border: 2px solid #3498db;"
-                       onclick="window.selectChoiceSubweapon('shield')"
-                       onmouseenter="window.showInventoryTooltip(event, ${shield.id})"
-                       ontouchstart="window.showInventoryTooltip(event, ${shield.id})"
-                       onmouseleave="window.hideTooltip()">
-                    <div style="text-align:center; width:100%;">
-                      <strong style="color:#3498db; font-size:12px; display:block; margin-bottom:2px;">Bulwark</strong>
-                      <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Kite Shield</span>
+                    <div id="choice-card-shield" class="market-card" style="${cardStyles} border: 2px solid #3498db;"
+                         onclick="window.selectChoiceSubweapon('shield')"
+                         onmouseenter="window.showInventoryTooltip(event, ${shield.id})"
+                         ontouchstart="window.showInventoryTooltip(event, ${shield.id})"
+                         onmouseleave="window.hideTooltip()">
+                      <div style="text-align:center; width:100%;">
+                        <strong style="color:#3498db; font-size:12px; display:block; margin-bottom:2px;">Bulwark</strong>
+                        <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Kite Shield</span>
+                      </div>
+                      <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #3498db;">${window.getEquipIconHtml(shield, 32)}</div>
+                      <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
+                        Focuses on <strong>STR & Defense</strong>. Unlocks Block Rate and Shield Bash counters.
+                      </div>
+                      <button class="btn-action" style="width:100%; font-size:10px; background:#3498db;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(shield).replace(/"/g, "&quot;")})">CLAIM SHIELD</button>
                     </div>
-                    <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #3498db;">${window.getEquipIconHtml(shield, 32)}</div>
-                    <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
-                      Focuses on <strong>STR & Defense</strong>. Unlocks Block Rate and Shield Bash counters.
-                    </div>
-                    <button class="btn-action" style="width:100%; font-size:10px; background:#3498db;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(shield).replace(/"/g, "&quot;")})">CLAIM SHIELD</button>
-                  </div>
-                `;
+                  `;
 
-  let daggerCardHtml = `
-                  <div id="choice-card-dagger" class="market-card" style="${cardStyles} border: 2px solid #e74c3c;"
-                       onclick="window.selectChoiceSubweapon('dagger')"
-                       onmouseenter="window.showInventoryTooltip(event, ${dagger.id})"
-                       ontouchstart="window.showInventoryTooltip(event, ${dagger.id})"
-                       onmouseleave="window.hideTooltip()">
-                    <div style="text-align:center; width:100%;">
-                      <strong style="color:#e74c3c; font-size:12px; display:block; margin-bottom:2px;">Riposte</strong>
-                      <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Kris Dagger</span>
+    let daggerCardHtml = `
+                    <div id="choice-card-dagger" class="market-card" style="${cardStyles} border: 2px solid #e74c3c;"
+                         onclick="window.selectChoiceSubweapon('dagger')"
+                         onmouseenter="window.showInventoryTooltip(event, ${dagger.id})"
+                         ontouchstart="window.showInventoryTooltip(event, ${dagger.id})"
+                         onmouseleave="window.hideTooltip()">
+                      <div style="text-align:center; width:100%;">
+                        <strong style="color:#e74c3c; font-size:12px; display:block; margin-bottom:2px;">Riposte</strong>
+                        <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Kris Dagger</span>
+                      </div>
+                      <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #e74c3c;">${window.getEquipIconHtml(dagger, 32)}</div>
+                      <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
+                        Focuses on <strong>DEX & Speed</strong>. Unlocks Parry Rate and Riposte counter strikes.
+                      </div>
+                      <button class="btn-action" style="width:100%; font-size:10px; background:#e74c3c;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(dagger).replace(/"/g, "&quot;")})">CLAIM DAGGER</button>
                     </div>
-                    <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #e74c3c;">${window.getEquipIconHtml(dagger, 32)}</div>
-                    <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
-                      Focuses on <strong>DEX & Speed</strong>. Unlocks Parry Rate and Riposte counter strikes.
-                    </div>
-                    <button class="btn-action" style="width:100%; font-size:10px; background:#e74c3c;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(dagger).replace(/"/g, "&quot;")})">CLAIM DAGGER</button>
-                  </div>
-                `;
+                  `;
 
-  let tomeCardHtml = `
-                  <div id="choice-card-tome" class="market-card" style="${cardStyles} border: 2px solid #9b59b6;"
-                       onclick="window.selectChoiceSubweapon('tome')"
-                       onmouseenter="window.showInventoryTooltip(event, ${tome.id})"
-                       ontouchstart="window.showInventoryTooltip(event, ${tome.id})"
-                       onmouseleave="window.hideTooltip()">
-                    <div style="text-align:center; width:100%;">
-                      <strong style="color:#9b59b6; font-size:12px; display:block; margin-bottom:2px;">Arcane</strong>
-                      <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Grimoire</span>
+    let tomeCardHtml = `
+                    <div id="choice-card-tome" class="market-card" style="${cardStyles} border: 2px solid #9b59b6;"
+                         onclick="window.selectChoiceSubweapon('tome')"
+                         onmouseenter="window.showInventoryTooltip(event, ${tome.id})"
+                         ontouchstart="window.showInventoryTooltip(event, ${tome.id})"
+                         onmouseleave="window.hideTooltip()">
+                      <div style="text-align:center; width:100%;">
+                        <strong style="color:#9b59b6; font-size:12px; display:block; margin-bottom:2px;">Arcane</strong>
+                        <span style="font-size:8px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px;">Grimoire</span>
+                      </div>
+                      <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #9b59b6;">${window.getEquipIconHtml(tome, 32)}</div>
+                      <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
+                        Focuses on <strong>INT & Spells</strong>. Unlocks Arcane Barrier and Tome Spell triggers.
+                      </div>
+                      <button class="btn-action" style="width:100%; font-size:10px; background:#9b59b6;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(tome).replace(/"/g, "&quot;")})">CLAIM TOME</button>
                     </div>
-                    <div style="margin: 8px 0; display:flex; align-items:center; justify-content:center; width:48px; height:48px; background:rgba(0,0,0,0.4); border-radius:6px; border:1px solid #9b59b6;">${window.getEquipIconHtml(tome, 32)}</div>
-                    <div style="font-size:9.5px; color:#ccc; text-align:center; line-height:1.35; min-height:60px; white-space:normal;">
-                      Focuses on <strong>INT & Spells</strong>. Unlocks Arcane Barrier and Tome Spell triggers.
-                    </div>
-                    <button class="btn-action" style="width:100%; font-size:10px; background:#9b59b6;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); window.claimChoiceSubweapon(${JSON.stringify(tome).replace(/"/g, "&quot;")})">CLAIM TOME</button>
-                  </div>
-                `;
+                  `;
 
   let medalHeaderSvg = window.getUiIconSvg("rareSpawn", 14);
   overlay.innerHTML = `

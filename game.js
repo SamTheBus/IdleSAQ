@@ -1369,13 +1369,13 @@ window.SaveManager = {
       else if (rollVal < 4.0 * luckMultiplier) statLinesCount = 2;
       else if (rollVal < 15.0 * luckMultiplier) statLinesCount = 1;
 
-      let stageScale = Math.floor((stageNum - 1) / 10) + 1;
-      let newItem = window.createItemObject(
-        chosenType,
-        statLinesCount,
-        stageScale,
-        0,
-      );
+      let stageScale = Math.floor((stageNum - 1) / 5) + 1;
+            let newItem = window.createItemObject(
+              chosenType,
+              statLinesCount,
+              stageScale,
+              0,
+            );
 
       if (
         newItem.type !== "artifact" &&
@@ -2698,11 +2698,11 @@ window.onload = function () {
       return;
     }
     if (e.code === "Space" && !window.spacePressed) {
-      e.preventDefault();
-      window.spacePressed = true;
-      window.registerMaelstromTap();
-      window.triggerPlayerSlash();
-    }
+              e.preventDefault();
+              window.spacePressed = true;
+              window.registerMaelstromTap();
+              window.triggerPlayerSlash(true);
+            }
   });
   window.addEventListener("keyup", function (e) {
     if (e.code === "Space") {
@@ -2848,10 +2848,10 @@ window.onload = function () {
     }
 
     window.activeCanvasPointers.add(e.pointerId);
-    window.isCanvasPressed = true;
-    window.registerMaelstromTap();
-    window.triggerPlayerSlash();
-    if (typeof window.progressMission === "function") {
+        window.isCanvasPressed = true;
+        window.registerMaelstromTap();
+        window.triggerPlayerSlash(true);
+        if (typeof window.progressMission === "function") {
       window.progressMission("active_clicks", 1);
     }
   });
@@ -3392,8 +3392,8 @@ function update() {
   let scrollSpeed = 2 + p.moveSpeed * 0.05;
 
   if (window.spacePressed || window.isCanvasPressed) {
-    window.triggerPlayerSlash();
-  }
+      window.triggerPlayerSlash(false);
+    }
   if (window.mob && window.mob.hp.lte(0)) window.handleMobDeath();
   if (window.mob && window.mob.flashTimer > 0) window.mob.flashTimer--;
   if (window.mob && window.mob.funnyTextTimer > 0) window.mob.funnyTextTimer--;
@@ -4791,12 +4791,38 @@ window.detonateGaleFlurry = function () {
 };
 
 window.CombatEngine = {
-  triggerPlayerSlash() {
-    if (window.isGamePaused) return;
-    let p = window.resolvePlayerStats();
-    let cooldownCap =
-      window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
-    if (window.hero.attackTimer > 0) return;
+  triggerPlayerSlash(isManual = false) {
+      if (window.isGamePaused) return;
+      let p = window.resolvePlayerStats();
+      let cooldownCap =
+        window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
+
+      // Manual Click Cooldown Acceleration:
+      // Physical tapping actively reduces the remaining cooldown, giving active players
+      // an early-game advantage over lazy holding.
+      if (isManual && window.hero.attackTimer > 0) {
+        let reduction = Math.max(2, Math.round(cooldownCap * 0.25));
+        window.hero.attackTimer = Math.max(0, window.hero.attackTimer - reduction);
+
+        if (window.hero.attackTimer > 0) {
+          // Spawn subtle wind swipe particles around the hero to indicate active acceleration
+          for (let i = 0; i < 3; i++) {
+            window.particles.push({
+              x: window.hero.x + 25,
+              y: window.hero.y + 15 + window.randFloat(-10, 10),
+              vx: window.randFloat(2, 4),
+              vy: window.randFloat(-1, 1),
+              radius: window.randFloat(1, 2),
+              color: "rgba(255, 255, 255, 0.45)",
+              alpha: 1,
+              life: 15,
+            });
+          }
+          return;
+        }
+      }
+
+      if (window.hero.attackTimer > 0) return;
 
     // Anti-Cheese Check: Apply Static Feedback debuff on any active attack (including held inputs)
     let isActivelyAttacking = window.spacePressed || window.isCanvasPressed;
@@ -7340,7 +7366,7 @@ window.CombatEngine = {
   },
 };
 
-window.triggerPlayerSlash = () => window.CombatEngine.triggerPlayerSlash();
+window.triggerPlayerSlash = (isManual) => window.CombatEngine.triggerPlayerSlash(isManual);
 window.executeHitCalculations = () =>
   window.CombatEngine.executeHitCalculations();
 window.handleMobDeath = () => window.CombatEngine.handleMobDeath();
@@ -7378,8 +7404,8 @@ window.useItem = function (itemName) {
       window.playerStats.clanSkills.clan_supply_depot) ||
       0;
     let stage = window.playerStats.stage || 1;
-    let stgScale = Math.max(1, Math.floor((stage - 1) / 10) + 1);
-    let itemLvlMultiplier = Math.pow(1.08, stage);
+        let stgScale = Math.max(1, Math.floor((stage - 1) / 5) + 1);
+        let itemLvlMultiplier = Math.pow(1.08, stage);
 
     // Scaling yields based on Depot Level research
     let baseGold = Math.floor(
@@ -8424,23 +8450,23 @@ window.triggerFairyLoot = function (targetFairy) {
   else statLinesCount = 0;
 
   let activeStage =
-    window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-  if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
-    activeStage =
-      window.playerStats.currentDungeonStage[
-        window.playerStats.currentDungeon
-      ] || 1;
-  } else if (window.playerStats.isUberBoss) {
-    let riftLvl = window.playerStats.activeRiftLevel || 1;
-    activeStage = 50 + riftLvl * 10;
-  }
-  let stageScale = Math.floor((activeStage - 1) / 10) + 1;
-  let newItem = window.createItemObject(
-    chosenType,
-    statLinesCount,
-    stageScale,
-    0,
-  );
+      window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+    if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
+      activeStage =
+        window.playerStats.currentDungeonStage[
+          window.playerStats.currentDungeon
+        ] || 1;
+    } else if (window.playerStats.isUberBoss) {
+      let riftLvl = window.playerStats.activeRiftLevel || 1;
+      activeStage = 50 + riftLvl * 10;
+    }
+    let stageScale = Math.floor((activeStage - 1) / 5) + 1;
+    let newItem = window.createItemObject(
+      chosenType,
+      statLinesCount,
+      stageScale,
+      0,
+    );
 
   if (window.checkAutoSalvage(newItem, false)) {
     window.beams.push({
@@ -8807,23 +8833,23 @@ window.rollEquipmentDrop = function (
   else statLinesCount = 0;
 
   let activeStage = window.playerStats.stage;
-  if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
-    // Scales gear towards the highest floor reached (Peak) to prevent low-level gear spam
-    let peakFloor =
-      window.playerStats.dungeonPeaks[window.playerStats.currentDungeon] || 1;
-    activeStage = peakFloor;
-  } else if (window.playerStats.isUberBoss) {
-    let runPeak = Math.max(
-      window.playerStats.stage,
-      window.playerStats.maxStage || 1,
-    );
-    let allTime90 = Math.floor(
-      (window.playerStats.lifetimePeakStage || 1) * 0.9,
-    );
-    activeStage = Math.max(runPeak, allTime90);
-  }
-  let stageScale = Math.floor((activeStage - 1) / 10) + 1;
-  let sourceName = isBossKill ? "Boss" : isRareMob ? "Rare" : "Route";
+    if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
+      // Scales gear towards the highest floor reached (Peak) to prevent low-level gear spam
+      let peakFloor =
+        window.playerStats.dungeonPeaks[window.playerStats.currentDungeon] || 1;
+      activeStage = peakFloor;
+    } else if (window.playerStats.isUberBoss) {
+      let runPeak = Math.max(
+        window.playerStats.stage,
+        window.playerStats.maxStage || 1,
+      );
+      let allTime90 = Math.floor(
+        (window.playerStats.lifetimePeakStage || 1) * 0.9,
+      );
+      activeStage = Math.max(runPeak, allTime90);
+    }
+    let stageScale = Math.floor((activeStage - 1) / 5) + 1;
+    let sourceName = isBossKill ? "Boss" : isRareMob ? "Rare" : "Route";
 
   if (
     !isBossKill &&
@@ -9054,8 +9080,8 @@ window.rollGachaDrop = function () {
   else statLinesCount = 1;
 
   let peakRunStage = window.playerStats.lifetimePeakStage || 1;
-  let stageScale = Math.floor((peakRunStage - 1) / 10) + 1;
-  window.generateEquipment(chosenType, statLinesCount, stageScale, "Gacha");
+    let stageScale = Math.floor((peakRunStage - 1) / 5) + 1;
+    window.generateEquipment(chosenType, statLinesCount, stageScale, "Gacha");
 };
 
 window.rollPotionDrop = function (isBoss, isRare, silent = false) {
@@ -9810,20 +9836,20 @@ window.migrateLegacyTempersToRefund = function () {
   let materialsRefunded = {};
 
   let refundItem = (item) => {
-    if (
-      !item ||
-      item.type === "artifact" ||
-      !item.temperLevel ||
-      item.temperLevel <= 0
-    )
-      return;
+      if (
+        !item ||
+        item.type === "artifact" ||
+        !item.temperLevel ||
+        item.temperLevel <= 0
+      )
+        return;
 
-    let tempers = item.temperLevel;
-    let baseCost = 100;
-    let itemLvlMultiplier = Math.pow(
-      1.045,
-      Math.max(0, ((item.stageLevel || 1) - 1) * 5),
-    );
+      let tempers = item.temperLevel;
+      let baseCost = 100;
+      let itemLvlMultiplier = Math.pow(
+        1.045,
+        Math.max(0, ((item.stageLevel || 1) - 1) * 2.5),
+      );
 
     for (let t = 0; t < tempers; t++) {
       let stepGold = Math.floor(
