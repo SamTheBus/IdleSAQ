@@ -3,8 +3,8 @@
    Sack Management, Forge/Crafting, and Shop Transaction Logic.
    ========================================================================= */
 window.getRarityMultiplier = function (stars) {
-  if (stars === "UNIQUE" || stars === "unique") return 140.0;
-  const multipliers = [1.0, 2.5, 6.0, 15.0, 40.0, 100.0];
+  if (stars === "UNIQUE" || stars === "unique") return 75.0;
+  const multipliers = [1.0, 1.8, 3.5, 8.0, 20.0, 50.0];
   return multipliers[stars] || 1.0;
 };
 
@@ -2448,24 +2448,24 @@ Object.assign(window.ItemFactory, {
         } else if (item.type === "artifact") {
           // Artifact parameters are managed statically on drop; preserve them as is
         } else {
-          // Recalculate unique item specific base structures (Proportionally scaled up to match standard Mythic buffs)
-          if (item.isUniqueSingularity || item.isUniqueMaelstrom || item.isUniqueStaff || item.isUniqueSword) {
-            item.baseAtk = Math.ceil(210.0 * expScale * prestigeMult);
-          } else if (item.isUniqueAegis) {
-            item.baseDef = Math.ceil(400.0 * hpDefExpScale * prestigeMult);
-            item.baseBlock = 0.05 * (item.stageLevel || 1);
-          } else if (item.isUniqueWatch || item.isUniqueChronicle) {
-            // Corrected unique tomes to scale exponentially with level, matching standard Tomes and maintaining endgame viability
-            item.baseInt = Math.ceil(210.0 * expScale * prestigeMult);
-          } else if (item.isUniqueWarpCore) {
-            item.baseMoveSpeed = Math.ceil(
-              3 * (item.stageLevel || 1) * prestigeMult,
-            );
-          } else if (item.isUniqueTempest) {
-            item.baseMaxHp = Math.ceil(480.0 * hpDefExpScale * prestigeMult);
-            item.baseDef = Math.ceil(160.0 * hpDefExpScale * prestigeMult);
-          }
-        }
+              // Recalculate unique item specific base structures (Proportionally scaled up to match standard Mythic buffs)
+              if (item.isUniqueSingularity || item.isUniqueMaelstrom || item.isUniqueStaff || item.isUniqueSword) {
+                item.baseAtk = Math.ceil(112.5 * expScale * prestigeMult);
+              } else if (item.isUniqueAegis) {
+                item.baseDef = Math.ceil(200.0 * hpDefExpScale * prestigeMult);
+                item.baseBlock = 0.05 * (item.stageLevel || 1);
+              } else if (item.isUniqueWatch || item.isUniqueChronicle) {
+                // Corrected unique tomes to scale exponentially with level, matching standard Tomes and maintaining endgame viability
+                item.baseInt = Math.ceil(112.5 * expScale * prestigeMult);
+              } else if (item.isUniqueWarpCore) {
+                item.baseMoveSpeed = Math.ceil(
+                  3 * (item.stageLevel || 1) * prestigeMult,
+                );
+              } else if (item.isUniqueTempest) {
+                item.baseMaxHp = Math.ceil(240.0 * hpDefExpScale * prestigeMult);
+                item.baseDef = Math.ceil(80.0 * hpDefExpScale * prestigeMult);
+              }
+            }
 
     // Sum combined totals using standard base values
     item.atk = (item.baseAtk || 0) + item.bonusAtk;

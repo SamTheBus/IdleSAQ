@@ -6747,11 +6747,12 @@ window.refreshMarketShopIfNeeded = function () {
       let chosenType = types[Math.floor(Math.random() * types.length)];
 
       // Resolve base boss gold drops matching this item's specific Level/Stage Scale
-      let itemStage = stageScale * 10;
-      let effStage = window.getEffectiveStage(itemStage);
-      let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-      let scale = Math.pow(growthRate, effStage);
-      let baseBossGold = Math.floor(15 * scale);
+                    let itemStage = stageScale * 10;
+                    let effStage = window.getEffectiveStage(itemStage);
+                    let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+                    // Dampened exponent (0.95) to match the item stats curve and prevent purchase costs from out-inflating combat value
+                    let scale = Math.pow(growthRate, effStage * 0.95);
+                    let baseBossGold = Math.floor(15 * scale);
 
       // Balanced Rarity Cost multipliers (expressed as equivalent boss kills of that item's level)
       const rarityCostMultipliers = [
