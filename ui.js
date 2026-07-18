@@ -7436,224 +7436,907 @@ window.submitConsoleCommand = function () {
   }
 
   if (cmd === "/dev" || cmd === "/debug" || cmd === "/cheat") {
-    let devMod = document.getElementById("dev-modal");
-    if (devMod) devMod.style.display = "block";
-    if (typeof window.switchDevTab === "function")
-      window.switchDevTab("dev-prog");
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast(
-        "🛠️ Developer Testing Panel Opened!",
-        "var(--accent-orange)",
-      );
-    return;
-  }
-
-  let args = cmd.split(" ");
-  let mainCmd = args[0].toLowerCase();
-
-  if (mainCmd === "/gold") {
-    let amt = parseInt(args[1], 10) || 100000;
-    window.playerStats.coins = BigNum.from(window.playerStats.coins).add(amt);
-    window.playerStats.totalGoldEarned = BigNum.from(
-      window.playerStats.totalGoldEarned || 0,
-    ).add(amt);
-    if (typeof window.pushLog === "function")
-      window.pushLog(
-        `<span style="color:#2ecc71;">[DEV] Granted ${amt.toLocaleString()} Gold!</span>`,
-      );
-    if (typeof window.updateUI === "function") window.updateUI();
-    if (typeof window.saveGame === "function") window.saveGame();
-  } else if (mainCmd === "/level") {
-    let lvl = parseInt(args[1], 10);
-    if (lvl > 0) {
-      let oldLvl = window.playerStats.level || 1;
-      let diff = lvl - oldLvl;
-      window.playerStats.level = lvl;
-      if (diff > 0) {
-        window.playerStats.sp = (window.playerStats.sp || 0) + diff * 6;
+      if (window.playerStats.playerName !== "Admin") {
+        window.pushHeaderToast("❌ Unauthorized Access!", "#e74c3c");
+        return;
       }
-      window.playerStats.xp = 0;
-      window.playerStats.xpReq = Math.floor(
-        100 * Math.pow(1.2, window.playerStats.level - 1),
-      );
-      let p = window.resolvePlayerStats();
-      window.playerStats.currentHp = p.maxHp;
+      let devMod = document.getElementById("dev-modal");
+      if (devMod) devMod.style.display = "block";
+      if (typeof window.switchDevTab === "function")
+        window.switchDevTab("dev-prog");
+      if (typeof window.pushHeaderToast === "function")
+        window.pushHeaderToast(
+          "🛠️ Developer Testing Panel Opened!",
+          "var(--accent-orange)",
+        );
+      return;
+    }
+
+    let args = cmd.split(" ");
+    let mainCmd = args[0].toLowerCase();
+
+    if (mainCmd === "/targetedmail") {
+      if (window.playerStats.playerName !== "Admin") {
+        window.pushHeaderToast("❌ Unauthorized Access!", "#e74c3c");
+        return;
+      }
+      let remainingParts = args.slice(1).join(" ");
+      let splitPipe = remainingParts.split("|");
+      if (splitPipe.length < 4) {
+        if (typeof window.pushLog === "function") {
+          window.pushLog(
+            "<span style='color:#e74c3c;'>Usage: /targetedmail | [title] | [message] | [rewards_json]</span>",
+          );
+        }
+        return;
+      }
+      let title = splitPipe[1].trim();
+      let message = splitPipe[2].trim();
+      let rewardsJson = splitPipe[3].trim();
+
+      try {
+        let rewards = JSON.parse(rewardsJson);
+        let userId = window.getGameUserId();
+        fetch(`${window.GAME_SERVER_URL}/api/admin/send-targeted-mail`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            title,
+            message,
+            rewards,
+          }),
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.success) {
+              window.pushHeaderToast("[!] Targeted Mail Dispatched!", "#ff007f");
+              window.pushLog(
+                `<span style='color:#ff007f;'>[ADMIN] Dispatched Targeted Mail to ${data.recipientCount} players: "${title}".</span>`,
+              );
+            } else {
+              window.pushLog(
+                `<span style='color:#e74c3c;'>[ERROR] ${data.error}</span>`,
+              );
+            }
+          });
+      } catch (err) {
+        if (typeof window.pushLog === "function") {
+          window.pushLog(
+            `<span style='color:#e74c3c;'>[ERROR] Invalid rewards JSON structure.</span>`,
+          );
+        }
+      }
+    } else if (mainCmd === "/adminmail") {
+      if (window.playerStats.playerName !== "Admin") {
+        window.pushHeaderToast("❌ Unauthorized Access!", "#e74c3c");
+        return;
+      }
+      let remainingParts = args.slice(1).join(" ");
+      let splitPipe = remainingParts.split("|");
+      if (splitPipe.length < 4) {
+        if (typeof window.pushLog === "function") {
+          window.pushLog(
+            "<span style='color:#e74c3c;'>Usage: /adminmail [hours] [min_lvl] | [title] | [message] | [rewards_json]</span>",
+          );
+        }
+        return;
+      }
+      let configArgs = splitPipe[0].trim().split(" ");
+      let durationHours = parseInt(configArgs[0], 10) || 24;
+      let minLevel = parseInt(configArgs[1], 10) || 1;
+      let title = splitPipe[1].trim();
+      let message = splitPipe[2].trim();
+      let rewardsJson = splitPipe[3].trim();
+
+      try {
+        let rewards = JSON.parse(rewardsJson);
+        let userId = window.getGameUserId();
+        fetch(`${window.GAME_SERVER_URL}/api/admin/send-global-mail`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            title,
+            message,
+            rewards,
+            durationHours,
+            minLevel,
+          }),
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.success) {
+              window.pushHeaderToast("[!] Global Mail Broadcasted!", "#2ecc71");
+              window.pushLog(
+                `<span style='color:#2ecc71;'>[ADMIN] Broadcasted Global Mail: "${title}" expiring in ${durationHours} hours.</span>`,
+              );
+            } else {
+              window.pushLog(
+                `<span style='color:#e74c3c;'>[ERROR] ${data.error}</span>`,
+              );
+            }
+          });
+      } catch (err) {
+        if (typeof window.pushLog === "function") {
+          window.pushLog(
+            `<span style='color:#e74c3c;'>[ERROR] Invalid rewards JSON structure.</span>`,
+          );
+        }
+      }
+    } else if (mainCmd === "/gold") {
+      if (window.playerStats.playerName !== "Admin") return;
+      let amt = parseInt(args[1], 10) || 100000;
+      window.playerStats.coins = BigNum.from(window.playerStats.coins).add(amt);
+      window.playerStats.totalGoldEarned = BigNum.from(
+        window.playerStats.totalGoldEarned || 0,
+      ).add(amt);
       if (typeof window.pushLog === "function")
         window.pushLog(
-          `<span style="color:#2ecc71;">[DEV] Set Level to ${lvl}! (+${diff > 0 ? diff * 6 : 0} SP)</span>`,
+          `<span style="color:#2ecc71;">[DEV] Granted ${amt.toLocaleString()} Gold!</span>`,
         );
       if (typeof window.updateUI === "function") window.updateUI();
       if (typeof window.saveGame === "function") window.saveGame();
-    }
-  } else if (mainCmd === "/sp") {
-    let amt = parseInt(args[1], 10) || 10;
-    window.playerStats.sp += amt;
-    if (typeof window.pushLog === "function")
-      window.pushLog(
-        `<span style="color:#2ecc71;">[DEV] Granted ${amt} Skill Points (SP)!</span>`,
-      );
-    if (typeof window.updateUI === "function") window.updateUI();
-    if (typeof window.saveGame === "function") window.saveGame();
-  } else if (mainCmd === "/prestige") {
-    let amt = parseInt(args[1], 10) || 1;
-    window.playerStats.prestigeCount += amt;
-    window.playerStats.prestigePoints += amt * 3;
-    if (typeof window.pushLog === "function")
-      window.pushLog(
-        `<span style="color:#2ecc71;">[DEV] Added ${amt} Prestiges & ${amt * 3} PP!</span>`,
-      );
-    if (typeof window.updateUI === "function") window.updateUI();
-    if (typeof window.renderPrestigeTab === "function")
-      window.renderPrestigeTab();
-    if (typeof window.saveGame === "function") window.saveGame();
-  } else if (mainCmd === "/keys") {
-    let amt = parseInt(args[1], 10) || 8;
-    window.playerStats.equipKeys += amt;
-    window.playerStats.goldKeys += amt;
-    window.playerStats.matKeys += amt;
-    if (typeof window.addEtcDrop === "function")
-      window.addEtcDrop("Gacha Key", amt);
-    if (typeof window.pushLog === "function")
-      window.pushLog(
-        `<span style="color:#2ecc71;">[DEV] Granted +${amt} Keys!</span>`,
-      );
-    if (typeof window.updateUI === "function") window.updateUI();
-    if (typeof window.saveGame === "function") window.saveGame();
-  } else if (mainCmd === "/tokens" || mainCmd === "/missiontokens") {
-    let amt = parseInt(args[1], 10) || 10;
-    window.playerStats.missionTokens =
-      (window.playerStats.missionTokens || 0) + amt;
-    if (typeof window.pushLog === "function")
-      window.pushLog(
-        `<span style="color:#2ecc71;">[DEV] Granted +${amt} Quest Points!</span>`,
-      );
-    if (typeof window.updateUI === "function") window.updateUI();
-    if (typeof window.renderMissionsWindow === "function")
-      window.renderMissionsWindow();
-    if (typeof window.saveGame === "function") window.saveGame();
-  } else if (mainCmd === "/mup") {
-    let upType = args[1] ? args[1].toLowerCase() : null;
-    let lvl = parseInt(args[2], 10);
-    if (upType && !isNaN(lvl)) {
-      window.playerStats.missionUpgrades = window.playerStats
-        .missionUpgrades || { gold: 0, atk: 0, hp: 0, bag: 0 };
-      if (window.playerStats.missionUpgrades[upType] !== undefined) {
-        window.playerStats.missionUpgrades[upType] = lvl;
+    } else if (mainCmd === "/level") {
+      if (window.playerStats.playerName !== "Admin") return;
+      let lvl = parseInt(args[1], 10);
+      if (lvl > 0) {
+        let oldLvl = window.playerStats.level || 1;
+        let diff = lvl - oldLvl;
+        window.playerStats.level = lvl;
+        if (diff > 0) {
+          window.playerStats.sp = (window.playerStats.sp || 0) + diff * 6;
+        }
+        window.playerStats.xp = 0;
+        window.playerStats.xpReq = Math.floor(
+          100 * Math.pow(1.2, window.playerStats.level - 1),
+        );
+        let p = window.resolvePlayerStats();
+        window.playerStats.currentHp = p.maxHp;
         if (typeof window.pushLog === "function")
           window.pushLog(
-            `<span style="color:#2ecc71;">[DEV] Set Mission Upgrade ${upType.toUpperCase()} to Level ${lvl}!</span>`,
+            `<span style="color:#2ecc71;">[DEV] Set Level to ${lvl}! (+${diff > 0 ? diff * 6 : 0} SP)</span>`,
           );
         if (typeof window.updateUI === "function") window.updateUI();
-        if (typeof window.renderMissionsWindow === "function")
-          window.renderMissionsWindow();
         if (typeof window.saveGame === "function") window.saveGame();
+      }
+    } else if (mainCmd === "/sp") {
+      if (window.playerStats.playerName !== "Admin") return;
+      let amt = parseInt(args[1], 10) || 10;
+      window.playerStats.sp += amt;
+      if (window.draftAllocations !== null) window.draftSP += amt;
+      if (typeof window.pushLog === "function")
+        window.pushLog(
+          `<span style="color:#2ecc71;">[DEV] Granted ${amt} Skill Points (SP)!</span>`,
+        );
+      if (typeof window.updateUI === "function") window.updateUI();
+      if (typeof window.saveGame === "function") window.saveGame();
+    } else if (mainCmd === "/prestige") {
+      if (window.playerStats.playerName !== "Admin") return;
+      let amt = parseInt(args[1], 10) || 1;
+      window.playerStats.prestigeCount += amt;
+      window.playerStats.prestigePoints += amt * 3;
+      if (typeof window.pushLog === "function")
+        window.pushLog(
+          `<span style="color:#2ecc71;">[DEV] Added ${amt} Prestiges & ${amt * 3} PP!</span>`,
+        );
+      if (typeof window.updateUI === "function") window.updateUI();
+      if (typeof window.renderPrestigeTab === "function")
+        window.renderPrestigeTab();
+      if (typeof window.saveGame === "function") window.saveGame();
+    } else if (mainCmd === "/keys") {
+      if (window.playerStats.playerName !== "Admin") return;
+      let amt = parseInt(args[1], 10) || 8;
+      window.playerStats.equipKeys += amt;
+      window.playerStats.goldKeys += amt;
+      window.playerStats.matKeys += amt;
+      if (typeof window.addEtcDrop === "function")
+        window.addEtcDrop("Gacha Key", amt);
+      if (typeof window.pushLog === "function")
+        window.pushLog(
+          `<span style="color:#2ecc71;">[DEV] Granted +${amt} Keys!</span>`,
+        );
+      if (typeof window.updateUI === "function") window.updateUI();
+      if (typeof window.saveGame === "function") window.saveGame();
+    } else if (mainCmd === "/tokens" || mainCmd === "/missiontokens") {
+      if (window.playerStats.playerName !== "Admin") return;
+      let amt = parseInt(args[1], 10) || 10;
+      window.playerStats.missionTokens =
+        (window.playerStats.missionTokens || 0) + amt;
+      if (typeof window.pushLog === "function")
+        window.pushLog(
+          `<span style="color:#2ecc71;">[DEV] Granted +${amt} Quest Points!</span>`,
+        );
+      if (typeof window.updateUI === "function") window.updateUI();
+      if (typeof window.renderMissionsWindow === "function")
+        window.renderMissionsWindow();
+      if (typeof window.saveGame === "function") window.saveGame();
+    } else if (mainCmd === "/mup") {
+      if (window.playerStats.playerName !== "Admin") return;
+      let upType = args[1] ? args[1].toLowerCase() : null;
+      let lvl = parseInt(args[2], 10);
+      if (upType && !isNaN(lvl)) {
+        window.playerStats.missionUpgrades = window.playerStats
+          .missionUpgrades || { gold: 0, atk: 0, hp: 0, bag: 0 };
+        if (window.playerStats.missionUpgrades[upType] !== undefined) {
+          window.playerStats.missionUpgrades[upType] = lvl;
+          if (typeof window.pushLog === "function")
+            window.pushLog(
+              `<span style="color:#2ecc71;">[DEV] Set Mission Upgrade ${upType.toUpperCase()} to Level ${lvl}!</span>`,
+            );
+          if (typeof window.updateUI === "function") window.updateUI();
+          if (typeof window.renderMissionsWindow === "function")
+            window.renderMissionsWindow();
+          if (typeof window.saveGame === "function") window.saveGame();
+        } else {
+          if (typeof window.pushLog === "function")
+            window.pushLog(
+              `<span style="color:#e74c3c;">[DEV] Unknown upgrade type "${upType}". Eligible: bag, gold, atk, hp</span>`,
+            );
+        }
       } else {
         if (typeof window.pushLog === "function")
           window.pushLog(
-            `<span style="color:#e74c3c;">[DEV] Unknown upgrade type "${upType}". Eligible: bag, gold, atk, hp</span>`,
+            `<span style="color:#e74c3c;">Usage: /mup [bag|gold|atk|hp] [level]</span>`,
           );
       }
-    } else {
-      if (typeof window.pushLog === "function")
+    } else if (mainCmd === "/sack" || mainCmd === "/sacks") {
+      if (window.playerStats.playerName !== "Admin") return;
+      let type = args[1] ? args[1].toLowerCase() : "all";
+      let amt = parseInt(args[2], 10) || 1;
+      if (type === "daily") {
+        window.addUseDrop("Daily Reward Sack", amt);
         window.pushLog(
-          `<span style="color:#e74c3c;">Usage: /mup [bag|gold|atk|hp] [level]</span>`,
+          `<span style="color:#2ecc71;">[DEV] Added +${amt} Daily Reward Sack(s)!</span>`,
         );
-    }
-  } else if (mainCmd === "/sack" || mainCmd === "/sacks") {
-    let type = args[1] ? args[1].toLowerCase() : "all";
-    let amt = parseInt(args[2], 10) || 1;
-    if (type === "daily") {
-      window.addUseDrop("Daily Reward Sack", amt);
-      window.pushLog(
-        `<span style="color:#2ecc71;">[DEV] Added +${amt} Daily Reward Sack(s)!</span>`,
-      );
-    } else if (type === "weekly") {
-      window.addUseDrop("Guild Weekly Sack", amt);
-      window.pushLog(
-        `<span style="color:#2ecc71;">[DEV] Added +${amt} Guild Weekly Sack(s)!</span>`,
-      );
+      } else if (type === "weekly") {
+        window.addUseDrop("Guild Weekly Sack", amt);
+        window.pushLog(
+          `<span style="color:#2ecc71;">[DEV] Added +${amt} Guild Weekly Sack(s)!</span>`,
+        );
+      } else {
+        window.addUseDrop("Daily Reward Sack", amt);
+        window.addUseDrop("Guild Weekly Sack", amt);
+        window.pushLog(
+          `<span style="color:#2ecc71;">[DEV] Added +${amt} of each Guild Sack!</span>`,
+        );
+      }
+      window.updateUI();
+    } else if (
+      mainCmd === "/quests" ||
+      mainCmd === "/refresh" ||
+      mainCmd === "/resetquests"
+    ) {
+      if (window.playerStats.playerName !== "Admin") return;
+      window.devRefreshQuests();
+    } else if (mainCmd === "/clear") {
+      window.logsHistory = [];
+      let logBox = document.getElementById("log-box");
+      if (logBox) logBox.innerHTML = "";
+      if (typeof window.pushLog === "function")
+        window.pushLog("<span style='color:#aaa;'>Logs cleared.</span>");
     } else {
-      window.addUseDrop("Daily Reward Sack", amt);
-      window.addUseDrop("Guild Weekly Sack", amt);
+      if (typeof window.pushLog === "function") {
+        window.pushLog(
+          `<span style="color:#e74c3c;">Unknown command. Type /dev to open full Debug GUI panel, or try: /gold, /level, /sp, /prestige, /keys, /tokens, /mup, /targetedmail, /clear</span>`,
+        );
+      }
+    }
+  };
+
+  // ==========================================================================
+  // --- SECURED DEVELOPER PANEL OPERATIONS (ADMINS ONLY) ---
+  // ==========================================================================
+
+  window.devSetLevel = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    let el = document.getElementById("dev-level-input");
+    if (!el) return;
+    let val = parseInt(el.value, 10);
+    if (isNaN(val) || val < 1) return;
+    window.playerStats.level = val;
+    window.playerStats.xp = 0;
+    window.playerStats.xpReq = Math.floor(250 * Math.pow(1.2, val - 1));
+    let p = window.resolvePlayerStats();
+    window.playerStats.currentHp = p.maxHp;
+    window.pushLog(
+      `<span style='color:#e67e22;'>[DEV] Set level to ${val}</span>`,
+    );
+    window.updateUI();
+  };
+
+  window.devSetSP = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    let el = document.getElementById("dev-sp-input");
+    if (!el) return;
+    let val = parseInt(el.value, 10);
+    if (isNaN(val) || val < 0) return;
+    window.playerStats.sp = val;
+    if (window.draftAllocations !== null) window.draftSP = val;
+    window.pushLog(`<span style='color:#e67e22;'>[DEV] Set SP to ${val}</span>`);
+    window.updateUI();
+  };
+
+  window.devSetStage = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    let el = document.getElementById("dev-stage-input");
+    if (!el) return;
+    let val = parseInt(el.value, 10);
+    if (isNaN(val) || val < 1) return;
+    window.playerStats.stage = val;
+    window.mob = null;
+    window.pushLog(
+      `<span style='color:#e67e22;'>[DEV] Set campaign stage to ${val}</span>`,
+    );
+    window.updateUI();
+  };
+
+  window.devSetMaxStage = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    let el = document.getElementById("dev-maxstage-input");
+    if (!el) return;
+    let val = parseInt(el.value, 10);
+    if (isNaN(val) || val < 1) return;
+    window.playerStats.maxStage = val;
+    window.playerStats.lifetimePeakStage = Math.max(
+      window.playerStats.lifetimePeakStage || 1,
+      val,
+    );
+    window.pushLog(
+      `[DEV] Set max stage to ${val}`,
+    );
+    window.updateUI();
+  };
+
+  window.devSetPrestige = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    let el = document.getElementById("dev-prestige-input");
+    if (!el) return;
+    let val = parseInt(el.value, 10);
+    if (isNaN(val) || val < 0) return;
+    window.playerStats.prestigeCount = val;
+    window.pushLog(
+      `<span style='color:#e67e22;'>[DEV] Set total prestige count to ${val}</span>`,
+    );
+    window.updateUI();
+  };
+
+  window.devSetPP = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    let el = document.getElementById("dev-pp-input");
+    if (!el) return;
+    let val = parseInt(el.value, 10);
+    if (isNaN(val) || val < 0) return;
+    window.playerStats.prestigePoints = val;
+    window.pushLog(
+      `<span style='color:#e67e22;'>[DEV] Set prestige points to ${val}</span>`,
+    );
+    window.updateUI();
+    window.renderPrestigeTab();
+  };
+
+  window.devAddCurrency = function (type) {
+    if (window.playerStats.playerName !== "Admin") return;
+    let val = 0;
+    if (type === "gold") {
+      val = parseInt(document.getElementById("dev-gold-val").value, 10) || 0;
+      window.playerStats.coins += val;
+      window.playerStats.totalGoldEarned += val;
       window.pushLog(
-        `<span style="color:#2ecc71;">[DEV] Added +${amt} of each Guild Sack!</span>`,
+        `<span style='color:#e67e22;'>[DEV] Granted +${val.toLocaleString()} Gold</span>`,
+      );
+    } else if (type === "luminous") {
+      val = parseInt(document.getElementById("dev-luminous-val").value, 10) || 0;
+      window.addEtcDrop("Luminous Soul", val);
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Granted +${val} Luminous Souls</span>`,
+      );
+    } else if (type === "monster") {
+      val = parseInt(document.getElementById("dev-monster-val").value, 10) || 0;
+      window.addEtcDrop("Monster Soul", val);
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Granted +${val} Monster Souls</span>`,
+      );
+    } else if (type === "eridium") {
+      val = parseInt(document.getElementById("dev-eridium-val").value, 10) || 0;
+      window.addEtcDrop("Eridium Shard", val);
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Granted +${val} Eridium Shards</span>`,
+      );
+    } else if (type === "astral") {
+      val = parseInt(document.getElementById("dev-astral-val").value, 10) || 0;
+      window.addEtcDrop("Astral Essence", val);
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Granted +${val} Astral Essence</span>`,
+      );
+    } else if (type === "catalyst") {
+      val = parseInt(document.getElementById("dev-catalyst-val").value, 10) || 0;
+      window.addEtcDrop("Catalyst Core", val);
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Granted +${val} Catalyst Cores</span>`,
+      );
+    } else if (type === "gachakeys") {
+      val = parseInt(document.getElementById("dev-gachakeys-val").value, 10) || 0;
+      window.addEtcDrop("Gacha Key", val);
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Granted +${val} Gacha Keys</span>`,
+      );
+    } else if (type === "glimkeys") {
+      val = parseInt(document.getElementById("dev-glimkeys-val").value, 10) || 0;
+      window.addEtcDrop("Glimmering Gachapon Key", val);
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Granted +${val} Glimmering Keys</span>`,
+      );
+    } else if (type === "pp") {
+      val = parseInt(document.getElementById("dev-pp-val").value, 10) || 0;
+      window.playerStats.prestigePoints += val;
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Granted +${val} Prestige Points (PP)</span>`,
+      );
+      window.renderPrestigeTab();
+    } else if (type === "tokens") {
+      val = parseInt(document.getElementById("dev-tokens-val").value, 10) || 0;
+      window.playerStats.missionTokens =
+        (window.playerStats.missionTokens || 0) + val;
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Granted +${val} Mission Tokens</span>`,
+      );
+      if (typeof window.renderMissionsWindow === "function")
+        window.renderMissionsWindow();
+    } else if (type === "dailysack") {
+      window.addUseDrop("Daily Reward Sack", 1);
+      window.pushLog(`[DEV] Dispatched +1 Daily Reward Sack`);
+    } else if (type === "weeklysack") {
+      window.addUseDrop("Weekly Reward Sack", 1);
+      window.pushLog(`[DEV] Dispatched +1 Weekly Reward Sack`);
+    } else if (type === "sigilsack") {
+      window.addUseDrop("Cavern Sigil Sack", 1);
+      window.pushLog(`[DEV] Dispatched +1 Cavern Sigil Sack`);
+    } else if (type === "cardsack") {
+      window.addUseDrop("Monster Card Sack", 1);
+      window.pushLog(`[DEV] Dispatched +1 Monster Card Sack`);
+    } else if (type === "clancrate") {
+      window.addUseDrop("Weekly Clan Supply Crate", 1);
+      window.pushLog(`[DEV] Dispatched +1 Weekly Clan Supply Crate`);
+    }
+    window.updateUI();
+    window.renderInventory();
+  };
+
+  window.devQuickSpawn = function (stars) {
+    if (window.playerStats.playerName !== "Admin") return;
+    let types = [
+      "weapon",
+      "subweapon",
+      "helmet",
+      "chest",
+      "leggings",
+      "overall",
+      "boots",
+    ];
+    let chosenType =
+      stars === "UNIQUE"
+        ? "artifact"
+        : types[Math.floor(Math.random() * types.length)];
+    let stageScale = Math.floor((window.playerStats.stage - 1) / 10) + 1;
+    let statLines = stars === "UNIQUE" ? 3 : stars;
+    let newItem = window.createItemObject(
+      chosenType,
+      statLines,
+      stageScale,
+      stars === "UNIQUE" ? 0 : stars,
+    );
+
+    if (newItem.type === "artifact") {
+      window.inventory.ARTIFACT.push(newItem);
+    } else {
+      window.inventory.EQUIP.push(newItem);
+    }
+
+    window.pushLog(
+      `<span style='color:#e67e22;'>[DEV] Spawned: ${newItem.name}</span>`,
+      newItem.id,
+    );
+    window.updateUI();
+    window.renderInventory();
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+  };
+
+  window.devSpawnGear = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    let type = document.getElementById("dev-item-type").value;
+    let rarity = parseInt(document.getElementById("dev-item-rarity").value, 10);
+    let lvl = parseInt(document.getElementById("dev-item-lvl").value, 10) || 1;
+    let setOverride = document.getElementById("dev-item-set").value;
+    let prestigeCount =
+      parseInt(document.getElementById("dev-item-prestige").value, 10) || 0;
+
+    let originalPrestige = window.playerStats.prestigeCount || 0;
+    window.playerStats.prestigeCount = prestigeCount;
+
+    let newItem = window.createItemObject(type, rarity, lvl, rarity);
+    window.playerStats.prestigeCount = originalPrestige;
+
+    if (setOverride) {
+      newItem.setName = setOverride;
+      newItem.name = window.buildProceduralName(newItem);
+    }
+
+    window.inventory.EQUIP.push(newItem);
+    window.pushLog(
+      `<span style='color:#e67e22;'>[DEV] Crafted Custom Gear: ${newItem.name}</span>`,
+      newItem.id,
+    );
+
+    window.updateUI();
+    window.renderInventory();
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+  };
+
+  window.devSpawnUnique = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    let uniqueId = document.getElementById("dev-unique-sel").value;
+    let lvl = parseInt(document.getElementById("dev-unique-lvl").value, 10) || 1;
+
+    let parts = uniqueId.split("-");
+    let category = parts[0];
+    let sub = parts[1];
+
+    let newItem;
+    if (category === "art") {
+      newItem = window.createItemObject("artifact", 3, lvl, 0, [sub]);
+    } else {
+      newItem = window.createItemObject(category, 5, lvl, 5);
+      if (sub === "staff") {
+        newItem.isUniqueStaff = true;
+        newItem.noun = "Phoenix Staff";
+        newItem.setName = null;
+        newItem.name = `🔥 Phoenix Ignition Staff (Lv. ${lvl})`;
+        newItem.desc =
+          "Launches penetrating fireballs that deal 25% Attack damage (3s Cooldown).";
+      } else if (sub === "sword") {
+        newItem.isUniqueSword = true;
+        newItem.noun = "Sanguine Reaver";
+        newItem.setName = null;
+        newItem.name = `🩸 Crimson Sanguine Reaver (Lv. ${lvl})`;
+        newItem.desc =
+          "Strikes apply stacking Bleed (Max 5). Strikes at max stacks triggers Rupture, siphoning 10% Max HP.";
+      } else if (sub === "singularity") {
+        newItem.isUniqueSingularity = true;
+        newItem.noun = "Singularity Greatsword";
+        newItem.setName = null;
+        newItem.name = `🌌 Void-Sovereign Greatsword (Lv. ${lvl})`;
+        newItem.desc =
+          "Glows for 7s every 30s. Tap during window to enter 5s Storing state, then detonates spatial collapse.";
+      } else if (sub === "maelstrom") {
+        newItem.isUniqueMaelstrom = true;
+        newItem.noun = "Maelstrom Glaive";
+        newItem.name = `🌪️ Maelstrom Gale-Glaive (Lv. ${lvl})`;
+        newItem.desc =
+          "Overkill damage cleaves on next spawn. Critical strikes have 25% chance to project piercing gales.";
+      } else if (sub === "aegis") {
+        newItem.subType = "shield";
+        newItem.isUniqueAegis = true;
+        newItem.noun = "Void-Warped Aegis";
+        newItem.setName = null;
+        newItem.name = `🛡️ Void-Warped Bulwark (Lv. ${lvl})`;
+        newItem.desc =
+          "Blocks trigger gravity blasts scaling with Defense. Can be absorbed into Singularity vortex.";
+      } else if (sub === "watch") {
+        newItem.subType = "tome";
+        newItem.isUniqueWatch = true;
+        newItem.noun = "Chronos Pocket-Watch";
+        newItem.setName = null;
+        newItem.name = `⏳ Chronos Dial-Watch (Lv. ${lvl})`;
+        newItem.desc =
+          "Triggers 4s Temporal Fracture every 20s. Accelerates attack speeds by 15% and slows enemies by 25%.";
+      } else if (sub === "chronicle") {
+        newItem.subType = "tome";
+        newItem.isUniqueChronicle = true;
+        newItem.noun = "Chronicle of the Ascended";
+        newItem.setName = null;
+        newItem.name = `📖 Chronicle of past Lives (Lv. ${lvl})`;
+        newItem.desc =
+          "Boosts XP gain by +200% and bypasses level locks while below 75% peak level.";
+      } else if (sub === "warpcore") {
+        newItem.isUniqueWarpCore = true;
+        newItem.noun = "Warp-Core Greaves";
+        newItem.name = `⚡ Warp-Core Greaves (Lv. ${lvl})`;
+        newItem.desc =
+          "While below 85% Peak Stage: +150% sprint speed, and kills count as 2.";
+      } else if (sub === "tempest") {
+        newItem.isUniqueTempest = true;
+        newItem.noun = "Crown of Tempests";
+        newItem.setName = null;
+        newItem.name = `👑 Crown of crackling Tempests (Lv. ${lvl})`;
+        newItem.desc =
+          "Taking damage has 15% chance to call thunderbolt dealing 150% Attack power and stuns.";
+      }
+    }
+
+    window.recalculateItemStats(newItem);
+    if (newItem.type === "artifact") window.inventory.ARTIFACT.push(newItem);
+    else window.inventory.EQUIP.push(newItem);
+
+    window.pushLog(
+      `<span style='color:#e67e22;'>[DEV] Spawned Unique/Artifact: ${newItem.name}</span>`,
+      newItem.id,
+    );
+    window.updateUI();
+    window.renderInventory();
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+  };
+
+  window.devSpawnArchitectGear = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    let type = document.getElementById("dev-item-type").value;
+    let rarity = parseInt(document.getElementById("dev-item-rarity").value, 10);
+    let lvl = document.getElementById("dev-item-lvl").value || 1;
+    let setOverride = document.getElementById("dev-item-set").value;
+
+    let newItem = {
+      id: window.idCounter++,
+      name: "",
+      type: type,
+      statsRolled: rarity,
+      temperLevel: 0,
+      stageLevel: lvl,
+      atk: 0,
+      maxHp: 0,
+      def: 0,
+      moveSpeed: 0,
+      critChance: 0,
+      critDamage: 0,
+      block: 0,
+      parry: 0,
+      dropRate: 0,
+      quality: 0,
+      goldMulti: 0,
+      rareSpawn: 0,
+      fairySpawn: 0,
+      activeAttackSpeed: 0,
+      idleAttackSpeed: 0,
+      baseAtk: 0,
+      baseMaxHp: 0,
+      baseDef: 0,
+      baseMoveSpeed: 0,
+      baseBlock: 0,
+      baseParry: 0,
+      baseInt: 0,
+      bonusAtk: 0,
+      bonusMaxHp: 0,
+      bonusDef: 0,
+      bonusMoveSpeed: 0,
+      bonusCritChance: 0,
+      bonusCritDamage: 0,
+      bonusBlock: 0,
+      bonusParry: 0,
+      bonusActiveSpeed: 0,
+      bonusIdleSpeed: 0,
+      bonusStr: 0,
+      bonusDex: 0,
+      bonusInt: 0,
+      str: 0,
+      dex: 0,
+      int: 0,
+      trait: null,
+      desc: "",
+      breakdown: "",
+      noun: "Exo-Plate",
+      setName: setOverride || null,
+    };
+
+    if (type === "subweapon") {
+      newItem.subType = "shield";
+    }
+
+    let nounList = window.slotNouns[type];
+    if (type === "subweapon") nounList = window.slotNouns.subweapon.shield;
+    newItem.noun = nounList ? nounList[0] : "Exo-Plate";
+
+    for (let i = 0; i < 5; i++) {
+      let statKey = document.getElementById(`dev-arch-stat-${i}`).value;
+      let val =
+        parseFloat(document.getElementById(`dev-arch-val-${i}`).value) || 0;
+      if (!statKey) continue;
+
+      let bonusField =
+        "bonus" + statKey.charAt(0).toUpperCase() + statKey.slice(1);
+      if (
+        statKey === "dropRate" ||
+        statKey === "quality" ||
+        statKey === "goldMulti" ||
+        statKey === "rareSpawn" ||
+        statKey === "fairySpawn"
+      ) {
+        newItem[statKey] = val;
+      } else {
+        newItem[bonusField] = val;
+      }
+    }
+
+    window.recalculateItemStats(newItem);
+    newItem.name = window.buildProceduralName(newItem);
+
+    window.inventory.EQUIP.push(newItem);
+    window.pushLog(
+      `<span style='color:#e67e22;'>[DEV] Spawned Architect Gear: ${newItem.name}</span>`,
+      newItem.id,
+    );
+
+    window.updateUI();
+    window.renderInventory();
+    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+  };
+
+  window.devTriggerBuff = function (type) {
+    if (window.playerStats.playerName !== "Admin") return;
+    let duration = 36000; // 10 minutes (600 seconds * 60 frames)
+    if (type === "frenzy") {
+      window.playerStats.frenzyTimer = duration;
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Triggered 10-Minute Frenzy</span>`,
+      );
+    } else if (type === "adrenaline") {
+      window.playerStats.adrenalineTimer = duration;
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Triggered 10-Minute Adrenaline</span>`,
+      );
+    } else if (type === "potions") {
+      window.playerStats.atkPotionTimer = duration;
+      window.playerStats.atkPotionStrength = 0.35;
+      window.playerStats.hpPotionTimer = duration;
+      window.playerStats.hpPotionStrength = 0.35;
+      window.playerStats.defPotionTimer = duration;
+      window.playerStats.defPotionStrength = 0.35;
+      window.playerStats.hastePotionTimer = duration;
+      window.playerStats.hastePotionStrength = 3;
+      window.pushLog(
+        `<span style='color:#e67e22;'>[DEV] Infused all 10-Minute Potions at Max Strength</span>`,
       );
     }
     window.updateUI();
-  } else if (
-    mainCmd === "/quests" ||
-    mainCmd === "/refresh" ||
-    mainCmd === "/resetquests"
-  ) {
-    window.devRefreshQuests();
-  } else if (mainCmd === "/adminmail") {
-    // Structural layout: /adminmail hours min_lvl | Title | Message | {"etc":{"Catalyst Core":3}}
-    let remainingParts = args.slice(1).join(" ");
-    let splitPipe = remainingParts.split("|");
-    if (splitPipe.length < 4) {
-      if (typeof window.pushLog === "function") {
-        window.pushLog(
-          "<span style='color:#e74c3c;'>Usage: /adminmail [hours] [min_lvl] | [title] | [message] | [rewards_json]</span>",
-        );
+  };
+
+  window.devGiveSacks = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    window.addUseDrop("Daily Reward Sack", 5);
+    window.addUseDrop("Weekly Reward Sack", 2);
+    window.addUseDrop("Cavern Sigil Sack", 2);
+    window.addUseDrop("Monster Card Sack", 2);
+    window.pushLog(`[DEV] Granted diagnostic package of sacks!`);
+    window.updateUI();
+    window.renderInventory();
+  };
+
+  window.devHealFull = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    let p = window.resolvePlayerStats();
+    window.playerStats.currentHp = p.maxHp;
+    window.pushLog(
+      `<span style='color:#2ecc71;'>[DEV] Full Healing applied. HP restored.</span>`,
+    );
+    window.updateUI();
+  };
+
+  window.devUnlockAllAchievements = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    if (!window.playerStats.unlockedAchievements)
+      window.playerStats.unlockedAchievements = [];
+    window.AchievementsData.forEach((ach) => {
+      if (!window.playerStats.unlockedAchievements.includes(ach.id)) {
+        window.playerStats.unlockedAchievements.push(ach.id);
       }
+    });
+    window.recalculateAchievementTotals();
+    let p = window.resolvePlayerStats();
+    window.playerStats.currentHp = p.maxHp;
+    window.pushLog(
+      `<span style='color:#e67e22;'>[DEV] All achievements unlocked! Stat bonuses compounded.</span>`,
+    );
+    window.updateUI();
+    window.renderInventory();
+  };
+
+  window.devToggleGodMode = function () {
+    if (window.playerStats.playerName !== "Admin") return;
+    window.playerStats.godMode = !window.playerStats.godMode;
+    let btn = document.getElementById("btn-dev-godmode");
+    if (btn) {
+      if (window.playerStats.godMode) {
+        btn.innerText = "🛡️ God Mode (Invulnerability): ON";
+        btn.style.background = "#2ecc71";
+        btn.style.color = "#fff";
+      } else {
+        btn.innerText = "🛡️ God Mode (Invulnerability): OFF";
+        btn.style.background = "#333";
+        btn.style.color = "#aaa";
+      }
+    }
+    window.pushLog(
+      `<span style='color:#e67e22;'>[DEV] God Mode (Invulnerability) ${window.playerStats.godMode ? "ON" : "OFF"}</span>`,
+    );
+  };
+
+  // --- NEW: DIRECT DEV PANEL MAILROOM CONSOLE ACTUATOR ---
+
+  window.devSendMail = function () {
+    if (window.playerStats.playerName !== "Admin") {
+      window.pushHeaderToast("❌ Unauthorized Access!", "#e74c3c");
       return;
     }
-    let configArgs = splitPipe[0].trim().split(" ");
-    let durationHours = parseInt(configArgs[0], 10) || 24;
-    let minLevel = parseInt(configArgs[1], 10) || 1;
-    let title = splitPipe[1].trim();
-    let message = splitPipe[2].trim();
-    let rewardsJson = splitPipe[3].trim();
 
-    try {
-      let rewards = JSON.parse(rewardsJson);
-      let userId = window.getGameUserId();
-      fetch(`${window.GAME_SERVER_URL}/api/admin/send-global-mail`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          title,
-          message,
-          rewards,
-          durationHours,
-          minLevel,
-        }),
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.success) {
-            window.pushHeaderToast("[!] Global Mail Broadcasted!", "#2ecc71");
-            window.pushLog(
-              `<span style='color:#2ecc71;'>[ADMIN] Broadcasted Global Mail: "${title}" expiring in ${durationHours} hours.</span>`,
-            );
-          } else {
-            window.pushLog(
-              `<span style='color:#e74c3c;'>[ERROR] ${data.error}</span>`,
-            );
-          }
-        });
-    } catch (err) {
-      if (typeof window.pushLog === "function") {
-        window.pushLog(
-          `<span style='color:#e74c3c;'>[ERROR] Invalid rewards JSON structure.</span>`,
-        );
+    let title = document.getElementById("dev-mail-title").value.trim();
+    let message = document.getElementById("dev-mail-msg").value.trim();
+    let distType = document.getElementById("dev-mail-dist").value;
+    let hours = parseInt(document.getElementById("dev-mail-hours").value, 10) || 168;
+
+    let gold = parseInt(document.getElementById("dev-mail-gold").value, 10) || 0;
+    let keys = parseInt(document.getElementById("dev-mail-keys").value, 10) || 0;
+    let luminous = parseInt(document.getElementById("dev-mail-luminous").value, 10) || 0;
+    let attachGear = document.getElementById("dev-mail-onlevel").checked;
+
+    if (!title || !message) {
+      window.pushHeaderToast("❌ Missing title or message!", "#e74c3c");
+      return;
+    }
+
+    let rewards = {};
+    if (gold > 0) rewards.coins = gold;
+    if (keys > 0) {
+      rewards.etc = rewards.etc || {};
+      rewards.etc["Gacha Key"] = keys;
+    }
+    if (luminous > 0) {
+      rewards.etc = rewards.etc || {};
+      rewards.etc["Luminous Soul"] = luminous;
+    }
+    if (attachGear) {
+      rewards.on_level_gear = true;
+    }
+
+    let userId = window.getGameUserId();
+    let url = distType === "global"
+      ? `${window.GAME_SERVER_URL}/api/admin/send-global-mail`
+      : `${window.GAME_SERVER_URL}/api/admin/send-targeted-mail`;
+
+    let body = {
+      userId,
+      title,
+      message,
+      rewards
+    };
+
+    if (distType === "global") {
+      body.durationHours = hours;
+      body.minLevel = 1;
+    }
+
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        window.pushHeaderToast(`✓ Mail dispatched to ${distType} channel!`, "#2ecc71");
+        document.getElementById("dev-mail-title").value = "";
+        document.getElementById("dev-mail-msg").value = "";
+        document.getElementById("dev-mail-onlevel").checked = false;
+        document.getElementById("dev-mail-gold").value = 0;
+        document.getElementById("dev-mail-keys").value = 0;
+        document.getElementById("dev-mail-luminous").value = 0;
+        if (typeof window.fetchMailboxData === "function") window.fetchMailboxData();
+      } else {
+        window.pushHeaderToast(`❌ Error: ${data.error}`, "#e74c3c");
       }
-    }
-  } else if (mainCmd === "/clear") {
-    window.logsHistory = [];
-    let logBox = document.getElementById("log-box");
-    if (logBox) logBox.innerHTML = "";
-    if (typeof window.pushLog === "function")
-      window.pushLog("<span style='color:#aaa;'>Logs cleared.</span>");
-  } else {
-    if (typeof window.pushLog === "function") {
-      window.pushLog(
-        `<span style="color:#e74c3c;">Unknown command. Type /dev to open full Debug GUI panel, or try: /gold, /level, /sp, /prestige, /keys, /tokens, /mup, /adminmail, /clear</span>`,
-      );
-    }
-  }
-};
+    })
+    .catch(err => {
+      console.error("Dev mail dispatch failed:", err);
+      window.pushHeaderToast("❌ Network error dispatching mail.", "#e74c3c");
+    });
+  };
 
 // --- TROPHY / ACHIEVEMENT NAVIGATION ---
 
@@ -12437,6 +13120,14 @@ window.renderMailboxItems = function (mailbox) {
         }
       }
 
+      if (mail.rewards.on_level_gear) {
+        rewardsHtml += `
+          <div style="display:inline-flex; align-items:center; background:rgba(230,126,34,0.06); border:1px solid #e67e22; padding:3px 8px; border-radius:4px; font-family:monospace; font-size:10px; color:#fff; font-weight:bold; box-shadow:0 0 6px rgba(230,126,34,0.15);">
+              <span>🛡️ Epic Gear Set (On-Level)</span>
+          </div>
+        `;
+      }
+
       return `
             <div class="bag-item" style="position:relative; border-left: 3px solid #e74c3c; background:#181c22; padding:8px 12px; margin-bottom:0; display:flex; flex-direction:column; gap:4px; text-align:left; cursor:default;">
                 ${claimedOverlay}
@@ -12504,6 +13195,31 @@ window.claimMailReward = function (mailId) {
             window.playerStats.unlockedTitles.push(tKey);
           }
           window.playerStats.equippedTitle = tKey; // Auto-equip it!
+        }
+
+        // 5. Claim On-Level Gear Set (Epic 3★)
+        if (rewards.on_level_gear) {
+          const slots = ["weapon", "helmet", "chest", "leggings", "boots"];
+          let stageScale = Math.max(
+            1,
+            Math.floor(
+              ((window.playerStats.lifetimePeakStage ||
+                window.playerStats.stage ||
+                1) -
+                1) /
+                5,
+            ) + 1,
+          );
+          slots.forEach((slot) => {
+            let item = window.createItemObject(slot, 3, stageScale, 3); // Spawns Epic 3★
+            window.inventory.EQUIP.push(item);
+            window.frozenItemDb[item.id] = window.cloneItemForTooltip(item);
+          });
+          if (typeof window.pushLog === "function") {
+            window.pushLog(
+              "<span style='color:#e67e22; font-weight:bold;'>[MAIL] Gained a full set of 3★ Epic on-level gear!</span>",
+            );
+          }
         }
 
         // Register the claimed ID locally on success to prevent double claims if the server restarts

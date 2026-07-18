@@ -212,7 +212,7 @@ body.scroll-lock .draggable-content {
   background: #0c0f12;
   width: 100%;
   height: auto;
-  touch-action: manipulation;
+  touch-action: none;
 }
 
 /* --- TOP NAVIGATION BAR --- */
@@ -253,7 +253,7 @@ body.scroll-lock .draggable-content {
 }
 
 /* --- INTERACTIVE CANVAS --- */
-canvas {
+#gameCanvas {
   display: block;
   background: #0c0f12;
   width: 100%;
@@ -261,7 +261,7 @@ canvas {
   border-bottom: 2px solid #1f242d;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
-  touch-action: manipulation; /* Removes double-tap delay while maintaining multi-touch inputs */
+  touch-action: none; /* Instantly dispatches multi-touch taps without gesture delays */
 }
 
 /* --- STATS HUD OVERLAY --- */
