@@ -16664,85 +16664,303 @@ window.openSubweaponOfChoiceModal = function () {
   };
 };
 
-// --- RESILIENT CHAT FALLBACK ROUTINES ---
-if (!window.ChatManager) {
-  window.ChatManager = {
-    channel: "GLOBAL",
-    isExpanded: false,
-    init() {
-      console.log("💬 ChatManager Fallback Initialized.");
-      this.renderWelcome();
-    },
-    toggleChat() {
-      let drawer = document.getElementById("premium-chat-drawer");
-      let btn = document.getElementById("btn-chat-toggle");
-      if (!drawer) return;
+window.logHighTierPull = function (item) {
+  if (!window.GAME_SERVER_URL) return;
+  const userId = window.getGameUserId ? window.getGameUserId() : null;
+  const playerName = (window.playerStats && window.playerStats.playerName) || "Guest";
+  if (!userId) return;
 
-      let isHidden =
-        drawer.style.display === "none" || drawer.style.display === "";
-      if (isHidden) {
-        drawer.style.display = "flex";
-        if (btn) btn.style.borderColor = "#ff007f";
-        if (typeof window.updateChatStyle === "function") {
-          window.updateChatStyle();
+  fetch(`${window.GAME_SERVER_URL}/api/gacha/log-pull`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, playerName, item }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.success && data.logged) {
+        console.log("🏆 High-tier pull logged to server!");
+        if (typeof window.updateGachaRecentList === "function") {
+          window.updateGachaRecentList();
         }
-      } else {
-        drawer.style.display = "none";
-        if (btn) btn.style.borderColor = "#a855f7";
       }
-    },
-    switchChannel(chan) {
-      this.channel = chan;
-      document
-        .querySelectorAll(".chat-sub-tab")
-        .forEach((btn) => btn.classList.remove("active"));
-      let activeBtn = document.getElementById("chat-tab-" + chan.toLowerCase());
-      if (activeBtn) {
-        activeBtn.classList.add("active");
-      }
-    },
-    handleInputKeydown(e) {
-      if (e.key === "Enter") {
-        this.sendCurrentMessage();
-      }
-    },
-    sendCurrentMessage() {
-      let input = document.getElementById("chat-message-input");
-      if (!input) return;
-      let msg = input.value.trim();
-      if (!msg) return;
+    })
+    .catch((err) => {
+      console.warn("Failed to log high-tier pull:", err);
+    });
+};
 
-      input.value = "";
-      let name =
-        (window.playerStats && window.playerStats.playerName) || "Guest";
-      let color =
-        window.playerStats && window.playerStats.playerName === "Guest"
-          ? "#7f8c8d"
-          : "#ffd700";
+window.ChatManager = {
+  channel: "GLOBAL",
+  socket: null,
+  reconnectAttempts: 0,
+  maxReconnectAttempts: 5,
+  reconnectDelay: 2000,
+  isConnecting: false,
 
-      this.pushMessage(name, msg, color);
-    },
-    pushMessage(sender, text, color) {
+  init() {
+    console.log("💬 Initializing Real-time Chat Engine...");
+    this.connect();
+  },
+
+  connect() {
+    if (!window.GAME_SERVER_URL) {
+      this.renderLocalWelcome();
+      return;
+    }
+    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
+
+    this.isConnecting = true;
+    let wsUrl = window.GAME_SERVER_URL.replace(/^http/, "ws") + "/ws/chat";
+    const userId = window.getGameUserId ? window.getGameUserId() : "guest_local";
+    wsUrl += `?userId=${encodeURIComponent(userId)}`;
+
+    try {
+      this.socket = new WebSocket(wsUrl);
+
+      this.socket.onopen = () => {
+        console.log("🔌 Connected to Chat Server!");
+        this.reconnectAttempts = 0;
+        this.isConnecting = false;
+        this.renderSystemMessage("🔌 Connected to real-time chat network.", "#2ecc71");
+      };
+
+      this.socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "HISTORY") {
+            this.renderHistory(data.channel, data.messages);
+          } else if (data.type === "MESSAGE") {
+            this.pushIncomingMessage(data.channel, data.message);
+          } else if (data.type === "SYSTEM") {
+            this.renderSystemMessage(data.text, "#e74c3c", data.channel);
+          }
+        } catch (e) {
+          console.error("Failed to parse websocket message:", e);
+        }
+      };
+
+      this.socket.onclose = (event) => {
+        console.warn("🔌 Chat connection closed:", event.reason);
+        this.isConnecting = false;
+        this.socket = null;
+        this.attemptReconnect();
+      };
+
+      this.socket.onerror = (err) => {
+        console.error("🔌 Chat socket error:", err);
+        this.isConnecting = false;
+      };
+    } catch (e) {
+      console.error("Failed to create WebSocket:", e);
+      this.isConnecting = false;
+      this.attemptReconnect();
+    }
+  },
+
+  attemptReconnect() {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      this.renderSystemMessage("🔌 Connection lost. Falling back to local offline mode.", "#7f8c8d");
+      return;
+    }
+    this.reconnectAttempts++;
+    console.log(`🔌 Attempting chat reconnect in ${this.reconnectDelay}ms (Attempt ${this.reconnectAttempts})...`);
+    setTimeout(() => this.connect(), this.reconnectDelay);
+  },
+
+  toggleChat() {
+    let drawer = document.getElementById("premium-chat-drawer");
+    let btn = document.getElementById("btn-chat-toggle");
+    if (!drawer) return;
+
+    let isHidden = drawer.style.display === "none" || drawer.style.display === "";
+    if (isHidden) {
+      drawer.style.display = "flex";
+      if (btn) btn.style.borderColor = "#ff007f";
+
+      // Clear unread badge
+      let unreadDot = document.getElementById("chat-unread-dot");
+      if (unreadDot) {
+        unreadDot.className = "chat-unread-dot-hidden";
+      }
+      window.updateHubAlerts();
+
+      if (typeof window.updateChatStyle === "function") {
+        window.updateChatStyle();
+      }
+      // Force scroll to bottom on open
       let container = document.getElementById("chat-messages-container");
-      if (!container) return;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    } else {
+      drawer.style.display = "none";
+      if (btn) btn.style.borderColor = "#a855f7";
+    }
+  },
 
-      let msgEl = document.createElement("div");
-      msgEl.style.cssText =
-        "margin-bottom: 6px; font-size: 11px; line-height: 1.35; text-align: left; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 4px;";
-      msgEl.innerHTML = `<strong style="color: ${color};">${sender}:</strong> <span style="color: #fff; white-space: normal; word-break: break-word;">${window.escapeHTML(text)}</span>`;
+  switchChannel(chan) {
+    this.channel = chan;
+    document.querySelectorAll(".chat-sub-tab").forEach((btn) => btn.classList.remove("active"));
+    let activeBtn = document.getElementById("chat-tab-" + chan.toLowerCase());
+    if (activeBtn) {
+      activeBtn.classList.add("active");
+    }
+    this.refreshDisplayedMessages();
+  },
 
-      container.appendChild(msgEl);
-      container.scrollTop = container.scrollHeight;
-    },
-    renderWelcome() {
-      this.pushMessage(
-        "System",
-        "Welcome to the real-time chat network! Synchronizing channels...",
-        "#e67e22",
-      );
-    },
-  };
-}
+  handleInputKeydown(e) {
+    if (e.key === "Enter") {
+      this.sendCurrentMessage();
+    }
+  },
+
+  sendCurrentMessage() {
+    let input = document.getElementById("chat-message-input");
+    if (!input) return;
+    let msg = input.value.trim();
+    if (!msg) return;
+
+    input.value = "";
+
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify({
+        type: "MESSAGE",
+        channel: this.channel,
+        text: msg
+      }));
+    } else {
+      // Local Offline Fallback
+      let name = (window.playerStats && window.playerStats.playerName) || "Guest";
+      let color = window.playerStats && window.playerStats.playerName === "Guest" ? "#7f8c8d" : "#ffd700";
+      this.pushLocalMessage(name, msg, color);
+    }
+  },
+
+  // Cache messages locally per channel to render during channel swaps
+  channelsCache: {
+    GLOBAL: [],
+    CLAN: []
+  },
+
+  renderHistory(channel, messages) {
+    this.channelsCache[channel] = messages.map(m => ({
+      senderId: m.senderId,
+      senderName: m.senderName,
+      title: m.title,
+      level: m.level,
+      prestige: m.prestige,
+      text: m.text,
+      time: m.time
+    }));
+    if (this.channel === channel) {
+      this.refreshDisplayedMessages();
+    }
+  },
+
+  pushIncomingMessage(channel, msg) {
+    this.channelsCache[channel].push(msg);
+    if (this.channelsCache[channel].length > 50) {
+      this.channelsCache[channel].shift();
+    }
+
+    if (this.channel === channel) {
+      this.renderMessageRow(msg);
+
+      // Handle unread badges if the chat window is closed
+      let drawer = document.getElementById("premium-chat-drawer");
+      let isClosed = !drawer || drawer.style.display === "none" || drawer.style.display === "";
+      if (isClosed) {
+        let unreadDot = document.getElementById("chat-unread-dot");
+        if (unreadDot) {
+          unreadDot.className = "chat-unread-dot-visible";
+        }
+        window.updateHubAlerts();
+      }
+    }
+  },
+
+  refreshDisplayedMessages() {
+    let container = document.getElementById("chat-messages-container");
+    if (!container) return;
+    container.innerHTML = "";
+    let list = this.channelsCache[this.channel] || [];
+    list.forEach(msg => this.renderMessageRow(msg));
+  },
+
+  renderMessageRow(msg) {
+    let container = document.getElementById("chat-messages-container");
+    if (!container) return;
+
+    let msgEl = document.createElement("div");
+    msgEl.className = "chat-message-row";
+
+    let timeStr = "";
+    if (msg.time) {
+      let date = new Date(Number(msg.time));
+      let hrs = date.getHours().toString().padStart(2, "0");
+      let mins = date.getMinutes().toString().padStart(2, "0");
+      timeStr = `<span class="chat-message-time">[${hrs}:${mins}]</span>`;
+    }
+
+    let titleHtml = "";
+    if (msg.title && window.TITLES_DATA[msg.title]) {
+      let tData = window.TITLES_DATA[msg.title];
+      titleHtml = `<span class="chat-badge-title" style="background:${tData.color || "#ff007f"}20; color:${tData.color || "#ff007f"}; border:1px solid ${tData.color || "#ff007f"};">${tData.icon || ""} ${tData.name}</span>`;
+    }
+
+    let prestigeHtml = msg.prestige > 0 ? `<span style="color:#e67e22; font-weight:800;">⚜${msg.prestige}</span>` : "";
+    let levelHtml = `<span class="chat-badge-lvl">Lv.${msg.level}${prestigeHtml}</span>`;
+
+    let senderColor = msg.senderName === "Guest" ? "#7f8c8d" : "#ffd700";
+    if (msg.senderName === "Admin") {
+      senderColor = "#ff2200";
+    }
+
+    let isMe = msg.senderId === (window.getGameUserId ? window.getGameUserId() : null);
+    let inspectEvent = !isMe ? `onclick="window.inspectPlayer('${msg.senderId}')" style="cursor:pointer;" title="Click to Inspect"` : "";
+
+    msgEl.innerHTML = `
+      ${timeStr}
+      ${titleHtml}
+      ${levelHtml}
+      <span class="chat-message-sender" style="color:${senderColor};" ${inspectEvent}>${window.escapeHTML(msg.senderName)}:</span>
+      <span class="chat-message-text">${window.escapeHTML(msg.text)}</span>
+    `;
+
+    container.appendChild(msgEl);
+    container.scrollTop = container.scrollHeight;
+  },
+
+  pushLocalMessage(sender, text, color) {
+    let msg = {
+      senderId: "local",
+      senderName: sender,
+      title: (window.playerStats && window.playerStats.equippedTitle) || null,
+      level: (window.playerStats && window.playerStats.level) || 1,
+      prestige: (window.playerStats && window.playerStats.prestigeCount) || 0,
+      text: text,
+      time: Date.now()
+    };
+    this.pushIncomingMessage(this.channel, msg);
+  },
+
+  renderSystemMessage(text, color, channel = "GLOBAL") {
+    let container = document.getElementById("chat-messages-container");
+    if (!container || this.channel !== channel) return;
+
+    let msgEl = document.createElement("div");
+    msgEl.className = "chat-message-row";
+    msgEl.innerHTML = `<span style="color:${color}; font-weight:bold;">[SYSTEM]: ${window.escapeHTML(text)}</span>`;
+    container.appendChild(msgEl);
+    container.scrollTop = container.scrollHeight;
+  },
+
+  renderLocalWelcome() {
+    this.renderSystemMessage("🔌 Offline Mode: Local chat only.", "#7f8c8d");
+  }
+};
 
 // --- HIGH-FIDELITY FORGE LIVE PREVIEW GENERATOR ---
 window.generateForgePreviewHtml = function (item, currentLvl, nextLvl) {

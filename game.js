@@ -3172,20 +3172,23 @@ function update() {
           gp.vy += 0.25; // Apply standard gravity in spew phase
         } else {
           let dx = targetX - gp.x;
-          let dy = targetY - gp.y;
-          let dist = Math.hypot(dx, dy);
-          if (dist < 15 || gp.y < -5) {
-            if (typeof window.triggerGoldPanelReaction === "function") {
-              window.triggerGoldPanelReaction();
-            }
-            if (
-              window.SoundManager &&
-              typeof window.SoundManager.playCoinCollect === "function"
-            ) {
-              window.SoundManager.playCoinCollect();
-            }
-            continue; // Reached target, let it die
-          }
+                          let dy = targetY - gp.y;
+                          let dist = Math.hypot(dx, dy);
+                          if (dist < 15 || gp.y < -5) {
+                            if (typeof window.triggerGoldPanelReaction === "function") {
+                              window.triggerGoldPanelReaction();
+                            }
+                            if (
+                              window.SoundManager &&
+                              typeof window.SoundManager.playCoinCollect === "function"
+                            ) {
+                              window.SoundManager.playCoinCollect();
+                            }
+                            if (typeof window.absorbGoldParticle === "function" && gp.amount !== undefined) {
+                              window.absorbGoldParticle(gp.amount, gp.isDungeon, gp.isCrucible);
+                            }
+                            continue; // Reached target, let it die
+                          }
           let pull = 0.85;
           gp.vx += (dx / dist) * pull;
           gp.vy += (dy / dist) * pull;
@@ -5789,40 +5792,23 @@ window.CombatEngine = {
     // Natively multiplied through p.gold in resolvePlayerStats
     let coinYield = Math.ceil(baseCoin * p.gold);
 
-    // REDIRECT AND ACCUMULATE INSIDE CRUCIBLE POOLS
-    if (window.playerStats.isCrucibleMode) {
-      window.playerStats.crucibleAccumulatedGold =
-        (window.playerStats.crucibleAccumulatedGold || 0) + coinYield;
-      window.playerStats.crucibleAccumulatedXp =
-        (window.playerStats.crucibleAccumulatedXp || 0) + xpYield;
-    } else {
-      // Normal campaign / dungeon additions
-      window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
-        coinYield,
-      );
-      window.playerStats.totalGoldEarned = BigNum.from(
-        window.playerStats.totalGoldEarned || 0,
-      ).add(coinYield);
-      if (window.playerStats.isDungeonMode) {
-        window.playerStats.dungeonAccumulatedGold =
-          (window.playerStats.dungeonAccumulatedGold || 0) + coinYield;
-        window.playerStats.dungeonAccumulatedXp =
-          (window.playerStats.dungeonAccumulatedXp || 0) + xpYield;
-      }
-      if (typeof window.progressMission === "function")
-        window.progressMission("gold", coinYield);
-      if (typeof window.gainXp === "function") window.gainXp(xpYield);
-    }
+    // REDIRECT AND ACCUMULATE INSIDE CRUCIBLE POOLS (XP IS STILL IMMEDIATE, GOLD IS DEFERRED TO PARTICLE ABSORPTION)
+        if (window.playerStats.isCrucibleMode) {
+          window.playerStats.crucibleAccumulatedXp =
+            (window.playerStats.crucibleAccumulatedXp || 0) + xpYield;
+        } else {
+          if (window.playerStats.isDungeonMode) {
+            window.playerStats.dungeonAccumulatedXp =
+              (window.playerStats.dungeonAccumulatedXp || 0) + xpYield;
+          }
+          if (typeof window.gainXp === "function") window.gainXp(xpYield);
+        }
 
-    // Peak single gold drop check
-    window.playerStats.peakSingleGoldDrop = Math.max(
-      window.playerStats.peakSingleGoldDrop || 0,
-      coinYield,
-    );
-
-    if (window.playerStats.runGold !== undefined) {
-      window.playerStats.runGold += coinYield;
-    }
+        // Peak single gold drop check
+        window.playerStats.peakSingleGoldDrop = Math.max(
+          window.playerStats.peakSingleGoldDrop || 0,
+          coinYield,
+        );
 
     if (typeof window.spawnDeathParticles === "function") {
       window.spawnDeathParticles(
@@ -5844,37 +5830,44 @@ window.CombatEngine = {
     }
 
     // Spawn homing gold coin particles to fly to top-right HUD panel (Larger bursts on Bosses)
-    if (coinYield > 0 && window.goldParticles && window.mob) {
-      let startX = window.mob.x + window.mob.w / 2;
-      let startY = window.mob.y + window.mob.h / 2;
-      let isBossType = [
-        "boss",
-        "dungeon_boss",
-        "prestige_boss",
-        "rift_guardian",
-        "aegis_goliath",
-        "chronos_arbitrator",
-        "nexus_overseer",
-      ].includes(window.mob.type);
+        if (coinYield > 0 && window.goldParticles && window.mob) {
+          let startX = window.mob.x + window.mob.w / 2;
+          let startY = window.mob.y + window.mob.h / 2;
+          let isBossType = [
+            "boss",
+            "dungeon_boss",
+            "prestige_boss",
+            "rift_guardian",
+            "aegis_goliath",
+            "chronos_arbitrator",
+            "nexus_overseer",
+          ].includes(window.mob.type);
 
-      let particleCount = isBossType
-        ? Math.min(
-            30,
-            Math.max(16, Math.floor(Math.log10(coinYield + 1) * 6.5)),
-          )
-        : Math.min(12, Math.max(4, Math.floor(Math.log10(coinYield + 1) * 3)));
+          let particleCount = isBossType
+            ? Math.min(
+                30,
+                Math.max(16, Math.floor(Math.log10(coinYield + 1) * 6.5)),
+              )
+            : Math.min(12, Math.max(4, Math.floor(Math.log10(coinYield + 1) * 3)));
 
-      for (let i = 0; i < particleCount; i++) {
-        window.goldParticles.push({
-          x: startX,
-          y: startY,
-          vx: window.randFloat(-4, 4),
-          vy: window.randFloat(-7, -3),
-          life: 120,
-          delay: i * 2, // Staggered delays create a beautiful serpent-style stream
-        });
-      }
-    }
+          let baseAmt = Math.floor(coinYield / particleCount);
+          let remainder = coinYield % particleCount;
+
+          for (let i = 0; i < particleCount; i++) {
+            let pAmt = baseAmt + (i < remainder ? 1 : 0);
+            window.goldParticles.push({
+              x: startX,
+              y: startY,
+              vx: window.randFloat(-4, 4),
+              vy: window.randFloat(-7, -3),
+              life: 120,
+              delay: i * 2, // Staggered delays create a beautiful serpent-style stream
+              amount: pAmt,
+              isDungeon: window.playerStats.isDungeonMode,
+              isCrucible: window.playerStats.isCrucibleMode,
+            });
+          }
+        }
 
     if (window.playerStats.isCrucibleMode) {
       // Active Debuff: Volatile Sparks (On-death mitigatable explosions)
@@ -8359,27 +8352,36 @@ window.triggerFairyLoot = function (targetFairy) {
   }
 
   if (Math.random() < 0.2) {
-    let goldYield = Math.floor((100 + window.playerStats.stage * 35) * p.gold);
-    window.playerStats.coins = BigNum.from(window.playerStats.coins).add(
-      goldYield,
-    );
-    window.playerStats.totalGoldEarned = BigNum.from(
-      window.playerStats.totalGoldEarned || 0,
-    ).add(goldYield);
-    if (window.playerStats.runGold !== undefined)
-      window.playerStats.runGold += goldYield;
-    else window.playerStats.runGold = goldYield;
-    if (typeof window.progressMission === "function")
-      window.progressMission("gold", goldYield);
-    window.effects.push({
-      x: spawnX,
-      y: spawnY - 10,
-      text: `+${goldYield} Gold!`,
-      color: "#f1c40f",
-      life: 80,
-    });
-    return;
-  }
+      let goldYield = Math.floor((100 + window.playerStats.stage * 35) * p.gold);
+      if (goldYield > 0 && window.goldParticles) {
+        let particleCount = Math.min(12, Math.max(4, Math.floor(Math.log10(goldYield + 1) * 3)));
+        let baseAmt = Math.floor(goldYield / particleCount);
+        let remainder = goldYield % particleCount;
+
+        for (let i = 0; i < particleCount; i++) {
+          let pAmt = baseAmt + (i < remainder ? 1 : 0);
+          window.goldParticles.push({
+            x: spawnX,
+            y: spawnY,
+            vx: window.randFloat(-4, 4),
+            vy: window.randFloat(-6, -2),
+            life: 120,
+            delay: i * 2,
+            amount: pAmt,
+            isDungeon: window.playerStats.isDungeonMode,
+            isCrucible: window.playerStats.isCrucibleMode,
+          });
+        }
+      }
+      window.effects.push({
+        x: spawnX,
+        y: spawnY - 10,
+        text: `+${goldYield} Gold!`,
+        color: "#f1c40f",
+        life: 80,
+      });
+      return;
+    }
 
   let types = [
     "weapon",

@@ -1519,25 +1519,38 @@ window.MusicManager = {
     }
 
     try {
-          // Build DSP Web Audio Graph and route through GainNode for iOS volume compatibility
-          this.source = this.ctx.createMediaElementSource(this.audio);
+              // Build DSP Web Audio Graph and route through GainNode for iOS volume compatibility
+              this.source = this.ctx.createMediaElementSource(this.audio);
 
-      this.filter = this.ctx.createBiquadFilter();
-      this.filter.type = "lowpass";
-      this.filter.frequency.setValueAtTime(20000, this.ctx.currentTime);
+              this.filter = this.ctx.createBiquadFilter();
+              this.filter.type = "lowpass";
+              this.filter.frequency.setValueAtTime(20000, this.ctx.currentTime);
 
-      this.gainNode = this.ctx.createGain();
-      this.gainNode.gain.setValueAtTime(0, this.ctx.currentTime);
+              this.gainNode = this.ctx.createGain();
+              this.gainNode.gain.setValueAtTime(0, this.ctx.currentTime);
 
-      this.source.connect(this.filter);
-      this.filter.connect(this.gainNode);
+              // Create Delay & Feedback Nodes for Echo/Cavernous reverb effect
+              this.delayNode = this.ctx.createDelay(1.0);
+              this.delayGain = this.ctx.createGain();
+              this.delayNode.delayTime.setValueAtTime(0.35, this.ctx.currentTime); // 350ms echo interval
+              this.delayGain.gain.setValueAtTime(0.0, this.ctx.currentTime); // Disabled initially
 
-      if (window.SoundManager && window.SoundManager.masterGain) {
-        this.gainNode.connect(window.SoundManager.masterGain);
-      } else {
-        this.gainNode.connect(this.ctx.destination);
-      }
-    } catch (e) {
+              // Connections
+              this.source.connect(this.filter);
+              this.filter.connect(this.gainNode); // Dry path
+
+              // Wet path (Echo loop)
+              this.filter.connect(this.delayNode);
+              this.delayNode.connect(this.delayGain);
+              this.delayGain.connect(this.delayNode); // Feedback loop
+              this.delayGain.connect(this.gainNode); // Wet mix output
+
+              if (window.SoundManager && window.SoundManager.masterGain) {
+                this.gainNode.connect(window.SoundManager.masterGain);
+              } else {
+                this.gainNode.connect(this.ctx.destination);
+              }
+            } catch (e) {
       // If Web Audio routing throws an exception (CORS, suspended, etc.), log it but let the direct speaker path play!
       console.warn(
         "Web Audio BGM routing failed, falling back to direct speaker mode:",
@@ -1549,149 +1562,154 @@ window.MusicManager = {
   },
 
   play() {
-    if (!this.initialized) return;
-    if (this.ctx && this.ctx.state === "suspended") {
-      this.ctx.resume().catch(() => {});
-    }
-    this.audio.play().catch((err) => {
-      console.warn("BGM playback postponed (waiting for user gesture).");
-    });
-    this.tick();
-  },
+      if (this.audio && this.audio.paused) {
+        this.audio.play().catch(() => {});
+      }
+      this.tick();
+    },
 
-  tick() {
-    if (!this.initialized) return;
+    tick() {
+      if (!this.initialized) return;
 
-    let now = this.ctx ? this.ctx.currentTime : 0;
-    let state = "campaign";
+      let now = this.ctx ? this.ctx.currentTime : 0;
+        let state = "campaign";
 
-    // Detect Active Game State
-    if (
-      window.deathAnimationTimer > 0 ||
-      (window.playerStats && window.playerStats.currentHp <= 0)
-    ) {
-      state = "death";
-    } else if (
-      window.playerStats &&
-      (window.playerStats.isBossMode ||
-        window.playerStats.isUberBoss ||
-        window.playerStats.isPrestigeBossMode)
-    ) {
-      state = "boss";
-    } else if (
-      window.playerStats &&
-      (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode)
-    ) {
-      state = "dungeon";
-    } else if (
-      document.getElementById("menu-hub-overlay") &&
-      document.getElementById("menu-hub-overlay").style.display === "flex"
-    ) {
-      state = "town";
-    } else if (
-      window.state &&
-      (window.state.currentSubTab === "USE" ||
-        window.state.currentSubTab === "ETC" ||
-        window.state.currentSubTab === "EQUIP")
-    ) {
-      state = "town";
-    }
+        // Detect Active Game State
+        if (
+          window.deathAnimationTimer > 0 ||
+          (window.playerStats && window.playerStats.currentHp <= 0)
+        ) {
+          state = "death";
+        } else if (
+          window.playerStats &&
+          (window.playerStats.isBossMode ||
+            window.playerStats.isUberBoss ||
+            window.playerStats.isPrestigeBossMode)
+        ) {
+          state = "boss";
+        } else if (
+          window.playerStats &&
+          (window.playerStats.isDungeonMode || window.playerStats.isCrucibleMode)
+        ) {
+          state = "dungeon";
+        } else if (
+          document.getElementById("menu-hub-overlay") &&
+          document.getElementById("menu-hub-overlay").style.display === "flex"
+        ) {
+          state = "town";
+        } else if (
+          window.state &&
+          (window.state.currentSubTab === "USE" ||
+            window.state.currentSubTab === "ETC" ||
+            window.state.currentSubTab === "EQUIP")
+        ) {
+          state = "town";
+        }
 
-    let targetFreq = 20000; // Full frequency bypass
-          let volumeScale = 1.0;
-          let targetRate = 1.0;   // Tempo & Pitch playback rate (1.0 = normal)
-          let targetQ = 1.0;      // Filter resonance/sharpness
+        let targetFreq = 20000; // Full frequency bypass
+        let volumeScale = 1.0;
+        let targetRate = 1.0;   // Tempo & Pitch playback rate (1.0 = normal)
+        let targetQ = 1.0;      // Filter resonance/sharpness
+        let targetDelayGain = 0.0; // Echo feedback wet level (0.0 = dry, deactivated)
 
-          // Apply advanced DSP sweeps per State
-          switch (state) {
-            case "death":
-              targetFreq = 300;     // Extremely muffled, dark, distant
-              volumeScale = 0.15;   // Drastically ducked
-              targetRate = 1.00;    // Keep stable at 1.00 to prevent buffer drops
-              targetQ = 1.0;
-              break;
-            case "town":
-              targetFreq = 850;     // Warm, soft cozy background blanket
-              volumeScale = 0.65;   // Slightly lower volume
-              targetRate = 1.00;    // Keep stable at 1.00 to prevent buffer drops
-              targetQ = 1.0;
-              break;
-            case "dungeon":
-              targetFreq = 4000;    // Balanced highs, clear echo clarity
-              volumeScale = 0.85;   // Good room for cavern SFX
-              targetRate = 1.00;
-              targetQ = 1.0;        // Flat resonance to prevent filter blowout
-              break;
-            case "boss":
-              targetFreq = 20000;   // Bright, intense, dramatic
-              volumeScale = 1.0;    // Max presence
-              targetRate = 1.00;    // Stable rate prevents chipmunk speedup node crashes
-              targetQ = 1.0;        // Flat resonance prevents mathematical instability at Nyquist edge
-              break;
-            case "campaign":
-            default:
-              targetFreq = 20000;   // Clean, steady farming output
-              volumeScale = 0.9;
-              targetRate = 1.00;
-              targetQ = 1.0;
-              break;
+        // Apply advanced DSP sweeps per State
+        switch (state) {
+          case "death":
+            targetFreq = 250;     // Lowpass muffle (cut all highs/mids)
+            volumeScale = 0.15;   // Drastically ducked
+            targetRate = 1.00;
+            targetQ = 1.0;
+            targetDelayGain = 0.2; // Haunting slow echo trail
+            break;
+          case "town":
+            targetFreq = 850;     // Warm, soft cozy background blanket
+            volumeScale = 0.65;   // Slightly lower volume
+            targetRate = 1.00;
+            targetQ = 1.0;
+            targetDelayGain = 0.0;
+            break;
+          case "dungeon":
+            targetFreq = 3000;    // Balanced highs, clear cavernous response
+            volumeScale = 0.75;
+            targetRate = 1.00;
+            targetQ = 1.0;
+            targetDelayGain = 0.15; // Subtle spatial room echo
+            break;
+          case "boss":
+            targetFreq = 1200;    // Deeper/Echo-y: Heavy lowpass cut (warm sub-bass output)
+            volumeScale = 0.75;   // Comfortable output level (prevents piercing volume spike)
+            targetRate = 1.00;
+            targetQ = 3.5;        // Resonant bass hump
+            targetDelayGain = 0.45; // High feedback wet echo channel for extreme depth
+            break;
+          case "campaign":
+          default:
+            targetFreq = 20000;   // Clean, steady farming output
+            volumeScale = 0.9;
+            targetRate = 1.00;
+            targetQ = 1.0;
+            targetDelayGain = 0.0;
+            break;
+        }
+
+        // Resolve volume levels through settings
+        let isMuted = window.playerStats ? window.playerStats.mute : false;
+        let musicVolSetting =
+          window.playerStats && window.playerStats.volumeMusic !== undefined
+            ? window.playerStats.volumeMusic
+            : 0.5;
+
+        // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
+        let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
+
+        if (this.currentState !== state) {
+          this.currentState = state;
+          console.log(
+            `[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Q: ${targetQ.toFixed(1)}, Echo: ${(targetDelayGain * 100).toFixed(0)}%, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`,
+          );
+        }
+
+        // Apply exponential sweeps
+        if (this.filter && this.filter.frequency && this.ctx) {
+          this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
+        }
+        if (this.filter && this.filter.Q && this.ctx) {
+          this.filter.Q.setTargetAtTime(targetQ, now, 0.25);
+        }
+        if (this.gainNode && this.gainNode.gain && this.ctx) {
+          this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
+        }
+        if (this.delayGain && this.delayGain.gain && this.ctx) {
+          this.delayGain.gain.setTargetAtTime(targetDelayGain, now, 0.25);
+        }
+
+        // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
+        if (this.audio) {
+          // Apply iOS-friendly HTML5 mute state fallback
+          this.audio.muted = isMuted;
+
+          // Setting .volume is blocked/ignored on iOS, but fully supported on Android / Desktop
+          try {
+            this.audio.volume = finalTargetVolume;
+          } catch (e) {}
+
+          if (this.audio.playbackRate !== 1.0) {
+            this.audio.playbackRate = 1.0;
           }
 
-    // Resolve volume levels through settings
-    let isMuted = window.playerStats ? window.playerStats.mute : false;
-    let musicVolSetting =
-      window.playerStats && window.playerStats.volumeMusic !== undefined
-        ? window.playerStats.volumeMusic
-        : 0.5;
+          // Power-Saving Optimization: Suspend streaming and decoding when muted to preserve mobile CPU/battery
+          if (finalTargetVolume <= 0 || isMuted) {
+            if (!this.audio.paused) {
+              this.audio.pause();
+            }
+          } else {
+            if (this.audio.paused) {
+              this.audio.play().catch(() => {});
+            }
+          }
+        }
 
-    // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
-    let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
-
-    if (this.currentState !== state) {
-      this.currentState = state;
-      console.log(
-        `[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Q: ${targetQ.toFixed(1)}, Rate: ${targetRate.toFixed(2)}x, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`,
-      );
-    }
-
-    // Apply exponential sweeps
-    if (this.filter && this.filter.frequency && this.ctx) {
-      this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
-    }
-    if (this.filter && this.filter.Q && this.ctx) {
-      this.filter.Q.setTargetAtTime(targetQ, now, 0.25);
-    }
-    if (this.gainNode && this.gainNode.gain && this.ctx) {
-      this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
-    }
-
-    // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
-                  if (this.audio) {
-                    // Apply iOS-friendly HTML5 mute state fallback
-                    this.audio.muted = isMuted;
-
-                    // Setting .volume is blocked/ignored on iOS, but fully supported on Android / Desktop
-                    try {
-                      this.audio.volume = finalTargetVolume;
-                    } catch (e) {}
-
-                    if (this.audio.playbackRate !== 1.0) {
-                      this.audio.playbackRate = 1.0;
-                    }
-
-                    // Power-Saving Optimization: Suspend streaming and decoding when muted to preserve mobile CPU/battery
-                    if (finalTargetVolume <= 0 || isMuted) {
-                      if (!this.audio.paused) {
-                        this.audio.pause();
-                      }
-                    } else {
-                      if (this.audio.paused) {
-                        this.audio.play().catch(() => {});
-                      }
-                    }
-                  }
-
-    // Call next evaluation frame
-    requestAnimationFrame(() => this.tick());
-  },
+        // Call next evaluation frame
+        requestAnimationFrame(() => this.tick());
+      },
 };

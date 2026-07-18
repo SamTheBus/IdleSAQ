@@ -3194,39 +3194,7 @@ Object.assign(window.GameState, {
 // Legacy Compatibility Aliases to protect references
 window.unequipItem = (slotKey) => window.GameState.unequipItem(slotKey);
 
-window.salvageItem = function (id) {
-  if (typeof window.hideTooltip === "function") window.hideTooltip();
-  let item = window.inventory.EQUIP.find((i) => i.id === id);
-  let isEquipped = false;
-  let slotToClear = null;
-  let isArtifactSack = false;
-  let isSigilSack = false;
-
-  if (!item && window.inventory.ARTIFACT) {
-    item = window.inventory.ARTIFACT.find((i) => i.id === id);
-    if (item) isArtifactSack = true;
-  }
-  if (!item && window.inventory.SIGIL) {
-    item = window.inventory.SIGIL.find((i) => i.id === id);
-    if (item) isSigilSack = true;
-  }
-  if (!item) {
-    for (let k in window.equippedSlots) {
-      if (window.equippedSlots[k] && window.equippedSlots[k].id === id) {
-        item = window.equippedSlots[k];
-        isEquipped = true;
-        slotToClear = k;
-        break;
-      }
-    }
-  }
-  if (!item) return;
-
-  if (item.locked) {
-    if (typeof window.pushHeaderToast === "function")
-      window.pushHeaderToast("🔒 Cannot salvage a Locked item!", "#e74c3c");
-    return;
-  }
+window.executeSalvageItemLogic = function (item, id, isEquipped, slotToClear, isArtifactSack, isSigilSack) {
   if (window.playerStats.pendingClanProgress) {
     window.playerStats.pendingClanProgress.salvage =
       (window.playerStats.pendingClanProgress.salvage || 0) + 1;
@@ -3321,6 +3289,63 @@ window.salvageItem = function (id) {
   if (typeof window.updateUI === "function") window.updateUI();
   if (typeof window.renderInventory === "function") window.renderInventory();
   if (typeof window.saveGame === "function") window.saveGame();
+};
+
+window.salvageItem = function (id) {
+  if (typeof window.hideTooltip === "function") window.hideTooltip();
+  let item = window.inventory.EQUIP.find((i) => i.id === id);
+  let isEquipped = false;
+  let slotToClear = null;
+  let isArtifactSack = false;
+  let isSigilSack = false;
+
+  if (!item && window.inventory.ARTIFACT) {
+    item = window.inventory.ARTIFACT.find((i) => i.id === id);
+    if (item) isArtifactSack = true;
+  }
+  if (!item && window.inventory.SIGIL) {
+    item = window.inventory.SIGIL.find((i) => i.id === id);
+    if (item) isSigilSack = true;
+  }
+  if (!item) {
+    for (let k in window.equippedSlots) {
+      if (window.equippedSlots[k] && window.equippedSlots[k].id === id) {
+        item = window.equippedSlots[k];
+        isEquipped = true;
+        slotToClear = k;
+        break;
+      }
+    }
+  }
+  if (!item) return;
+
+  if (item.locked) {
+    if (typeof window.pushHeaderToast === "function")
+      window.pushHeaderToast("🔒 Cannot salvage a Locked item!", "#e74c3c");
+    return;
+  }
+
+  // Check if item is Unique and not yet unlocked in Spectral Codex
+  if (typeof window.isItemUnique === "function" && window.isItemUnique(item)) {
+    let uniqueKey = window.getUniqueKey(item);
+    let isUnlocked = window.playerStats.spectralCodex && window.playerStats.spectralCodex.includes(uniqueKey);
+
+    if (!isUnlocked && typeof window.showCustomConfirm === "function") {
+      window.showCustomConfirm(
+        "⚠️ Unique Not in Codex",
+        `This Unique item (<strong>${item.name}</strong>) is not yet unlocked in your Spectral Codex.<br><br>Salvaging it now will forfeit its active passive in your Codex. Are you sure you want to salvage it for materials instead?`,
+        "Yes, Salvage",
+        "Cancel",
+        "#e74c3c",
+        () => {
+          window.executeSalvageItemLogic(item, id, isEquipped, slotToClear, isArtifactSack, isSigilSack);
+        }
+      );
+      return;
+    }
+  }
+
+  window.executeSalvageItemLogic(item, id, isEquipped, slotToClear, isArtifactSack, isSigilSack);
 };
 
 // Append checkAutoSalvage inside window.GameState namespace

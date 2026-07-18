@@ -482,6 +482,38 @@ window.gainXp = (amount, isOffline) =>
 window.addCoins = (amount) => window.GameState.addCoins(amount);
 window.spendCoins = (amount) => window.GameState.spendCoins(amount);
 
+window.absorbGoldParticle = function (amount, isDungeon, isCrucible) {
+  let amt = BigNum.from(amount);
+  if (amt.lte(0)) return;
+
+  if (isCrucible) {
+    window.playerStats.crucibleAccumulatedGold =
+      (window.playerStats.crucibleAccumulatedGold || 0) + amount;
+  } else {
+    window.playerStats.coins = BigNum.from(window.playerStats.coins).add(amt);
+    window.playerStats.totalGoldEarned = BigNum.from(
+      window.playerStats.totalGoldEarned || 0,
+    ).add(amt);
+
+    if (isDungeon) {
+      window.playerStats.dungeonAccumulatedGold =
+        (window.playerStats.dungeonAccumulatedGold || 0) + amount;
+    }
+
+    if (window.playerStats.runGold !== undefined) {
+      window.playerStats.runGold += amount;
+    }
+
+    if (typeof window.progressMission === "function") {
+      window.progressMission("gold", amount);
+    }
+  }
+
+  if (typeof window.updateUI === "function") {
+    window.updateUI();
+  }
+};
+
 window.getAchievementProgress = function (ach) {
   if (ach.reqType === "kills")
     return window.playerStats.totalLifetimeKills || 0;
