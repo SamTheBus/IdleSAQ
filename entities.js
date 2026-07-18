@@ -4871,12 +4871,12 @@
       }
     }
 
-    // Custom visual skin color profiles for future cosmetic extensibility
-    let skin = stats.cosmeticSkin || "default";
-    let bodyColor = "#95a5a6";
-    let armorColor = "#bdc3c7";
-    let capeColor = "#c0392b";
-    let eyeColor = stats.frenzyTimer > 0 ? "#f1c40f" : "#e74c3c";
+    // Custom visual skin color profiles for future cosmetic extensibility (with fallback mapping for leaderboards & clan rosters)
+        let skin = stats.cosmeticSkin || stats.cosmetic_skin || (equipped && (equipped.cosmeticSkin || equipped.cosmetic_skin)) || "default";
+        let bodyColor = "#95a5a6";
+        let armorColor = "#bdc3c7";
+        let capeColor = "#c0392b";
+        let eyeColor = stats.frenzyTimer > 0 ? "#f1c40f" : "#e74c3c";
 
     if (skin === "void") {
       bodyColor = "#2c1130";
@@ -5456,10 +5456,11 @@
       }
     }
 
-    let costume = stats.equippedCostume || "knight";
+    // Cascading, safe fallbacks to pull cosmetics from flat/nested tables and JSON structures on leaderboard/clan renders
+        let costume = stats.equippedCostume || stats.equipped_costume || (equipped && (equipped.equippedCostume || equipped.equipped_costume)) || "knight";
 
-    // Decoupled Multi-Axis Visual Render Matrix
-    switch (costume) {
+        // Decoupled Multi-Axis Visual Render Matrix
+        switch (costume) {
       case "shinobi":
         {
           let shinobiGiColor = skin === "default" ? "#15151c" : bodyColor;

@@ -230,17 +230,24 @@ window.SaveManager = {
       }
     }
 
-    let saveData = {
-      playerStats: window.playerStats,
-      equippedSlots: window.equippedSlots,
-      inventory: window.inventory,
-      idCounter: window.idCounter,
-      logsHistory: window.logsHistory,
-      frozenItemDb: window.frozenItemDb,
-      lastSaveTime: window.lastUpdateTime,
-    };
+    // Enrich equippedSlots with cosmetic data during serialization to allow seamless leaderboard & clan roster syncs
+        let enrichedEquippedSlots = {
+          ...window.equippedSlots,
+          equippedCostume: window.playerStats.equippedCostume,
+          cosmeticSkin: window.playerStats.cosmeticSkin,
+        };
 
-    const serializedData = JSON.stringify(saveData);
+        let saveData = {
+          playerStats: window.playerStats,
+          equippedSlots: enrichedEquippedSlots,
+          inventory: window.inventory,
+          idCounter: window.idCounter,
+          logsHistory: window.logsHistory,
+          frozenItemDb: window.frozenItemDb,
+          lastSaveTime: window.lastUpdateTime,
+        };
+
+        const serializedData = JSON.stringify(saveData);
 
     // Save locally instantly using the new unified baseline key
     localStorage.setItem("idle_saq_save", serializedData);
