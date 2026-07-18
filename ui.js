@@ -4268,10 +4268,6 @@ window.executePrestigeAscension = function () {
         currentStage,
       );
 
-      window.playerStats.level = 1;
-      window.playerStats.xp = 0;
-      window.playerStats.xpReq = 100;
-
       let peak = window.playerStats.lifetimePeakStage || 1;
       let advancedStart = Math.max(1, Math.floor(peak * 0.5));
       window.playerStats.stage = advancedStart;
@@ -4731,10 +4727,6 @@ window.triggerPrestigeAscension = function () {
   );
 
   // Removed unequip loop: Gear now remains fully equipped across prestige resets as a quality-of-life improvement.
-
-  window.playerStats.level = 1;
-  window.playerStats.xp = 0;
-  window.playerStats.xpReq = 100;
 
   // Advanced Start (50% of peak Stage, with floor of 1) [1]
   let peak = window.playerStats.lifetimePeakStage || 1;

@@ -734,10 +734,10 @@ window.SaveManager = {
         window.playerStats.crucibleKills = 0;
 
       if (!window.playerStats.level) {
-        window.playerStats.level = 1;
-        window.playerStats.xp = 0;
-        window.playerStats.sp = 0;
-      }
+              window.playerStats.level = 1;
+              window.playerStats.xp = new BigNum(0, 0);
+              window.playerStats.sp = 0;
+            }
       window.playerStats.maxLevel = Math.max(
         window.playerStats.maxLevel || 1,
         window.playerStats.level || 1,
