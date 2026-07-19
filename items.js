@@ -1777,12 +1777,15 @@ Object.assign(window.ItemFactory, {
             let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
             item.bonusIdleSpeed += parseFloat((window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4));
           } else if (selectedStat === "str") {
-            item.bonusStr += Math.ceil(window.randInt(1, 3) * Math.pow(stageScale, 1.2) * rarityMult * prestigeMult);
-          } else if (selectedStat === "dex") {
-            item.bonusDex += Math.ceil(window.randInt(1, 3) * Math.pow(stageScale, 1.2) * rarityMult * prestigeMult);
-          } else if (selectedStat === "int") {
-            item.bonusInt += Math.ceil(window.randInt(1, 3) * Math.pow(stageScale, 1.2) * rarityMult * prestigeMult);
-          } else if (selectedStat === "dropRate") {
+                      let flatStatRarityMult = 1 + (statLinesCount * 0.25);
+                      item.bonusStr += Math.ceil(window.randInt(1, 3) * Math.pow(stageScale, 1.1) * flatStatRarityMult * prestigeMult);
+                    } else if (selectedStat === "dex") {
+                      let flatStatRarityMult = 1 + (statLinesCount * 0.25);
+                      item.bonusDex += Math.ceil(window.randInt(1, 3) * Math.pow(stageScale, 1.1) * flatStatRarityMult * prestigeMult);
+                    } else if (selectedStat === "int") {
+                      let flatStatRarityMult = 1 + (statLinesCount * 0.25);
+                      item.bonusInt += Math.ceil(window.randInt(1, 3) * Math.pow(stageScale, 1.1) * flatStatRarityMult * prestigeMult);
+                    } else if (selectedStat === "dropRate") {
             let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
             item.dropRate += parseFloat((window.randFloat(0.02, 0.05) * pctRarityMult * prestigeMult * utilityScale).toFixed(4));
           } else if (selectedStat === "quality") {
