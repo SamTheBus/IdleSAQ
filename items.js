@@ -1592,55 +1592,9 @@ Object.assign(window.ItemFactory, {
                 } else {
                   item.intPct = parseFloat((0.04 * scaleFactor).toFixed(4));
                 }
-              } else if (chosenType === "subweapon") {
-                        let subOptions = ["aegis", "watch", "chronicle"];
-                        if (item.subType === "dagger") {
-                          subOptions = ["viper"];
-                        } else if (item.subType === "shield") {
-                          subOptions = ["aegis"];
-                        } else if (item.subType === "tome") {
-                          subOptions = ["watch", "chronicle", "conduit"];
-                        }
-                        let selected =
-                          subOptions[Math.floor(Math.random() * subOptions.length)];
-                        item.setName = null;
-                        if (selected === "aegis") {
-                          item.subType = "shield";
-                          item.isUniqueAegis = true;
-                          item.noun = "Void-Warped Aegis";
-                          item.name = `🛡️ Void-Warped Bulwark (Lv. ${stageScale})`;
-                          item.desc =
-                            "Blocks trigger gravity blasts scaling with Defense. Can be absorbed into Singularity vortex.";
-                        } else if (selected === "watch") {
-                          item.subType = "tome";
-                          item.isUniqueWatch = true;
-                          item.noun = "Chronos Pocket-Watch";
-                          item.name = `⏳ Chronos Dial-Watch (Lv. ${stageScale})`;
-                          item.desc =
-                            "Triggers 4s Temporal Fracture every 20s. Accelerates attack speeds by 15% and slows enemies by 25%.";
-                        } else if (selected === "chronicle") {
-                          item.subType = "tome";
-                          item.isUniqueChronicle = true;
-                          item.noun = "Chronicle of the Ascended";
-                          item.name = `📖 Chronicle of past Lives (Lv. ${stageScale})`;
-                          item.desc =
-                            "Boosts XP gain by +200% and bypasses level locks while below 75% peak level.";
-                        } else if (selected === "conduit") {
-                          item.subType = "tome";
-                          item.isUniqueConduit = true;
-                          item.noun = "Conduit Lexicon";
-                          item.name = `📖 Conduit of the Lexicon (Lv. ${stageScale})`;
-                          item.desc =
-                            "Periodically projects an Aetheric Conduit on the field (15s Cooldown). Discharging it casts triple elemental spells & resets cooldowns.";
-                        } else if (selected === "viper") {
-                                                  item.subType = "dagger";
-                                                  item.isUniqueViper = true;
-                                                  item.noun = "Perfect Stiletto";
-                                                  item.name = `✦ Viper's Perfect Stiletto (Lv. ${stageScale})`;
-                                                  item.desc =
-                                                    "Critical strikes have a 25% chance to trigger a Perfect Strike reticle. Tapping it within 2s deals 5x defense-bypassing damage and inflicts a toxic poison sting.";
-                                                }
-                                              }
+              } else if (item.type === "subweapon") {
+                              // Standard subweapon base stats are computed dynamically during recalculation.
+                            }
                             }
 
                             if (chosenType === "artifact") {
@@ -1877,33 +1831,54 @@ Object.assign(window.ItemFactory, {
               "Critical strikes project piercing wind gales. Casting gales grants +10% Active & Idle Attack Speed for 6s (stacks up to 3x).";
           }
         } else if (chosenType === "subweapon") {
-          let subOptions = ["aegis", "watch", "chronicle"];
-          let selected =
-            subOptions[Math.floor(Math.random() * subOptions.length)];
-          item.setName = null;
-          if (selected === "aegis") {
-            item.subType = "shield";
-            item.isUniqueAegis = true;
-            item.noun = "Void-Warped Aegis";
-            item.name = `🛡️ Void-Warped Bulwark (Lv. ${stageScale})`;
-            item.desc =
-              "Blocks trigger gravity blasts scaling with Defense. Can be absorbed into Singularity vortex.";
-          } else if (selected === "watch") {
-            item.subType = "tome";
-            item.isUniqueWatch = true;
-            item.noun = "Chronos Pocket-Watch";
-            item.name = `⏳ Chronos Dial-Watch (Lv. ${stageScale})`;
-            item.desc =
-              "Triggers 4s Temporal Fracture every 20s. Accelerates attack speeds by 15% and slows enemies by 25%.";
-          } else if (selected === "chronicle") {
-            item.subType = "tome";
-            item.isUniqueChronicle = true;
-            item.noun = "Chronicle of the Ascended";
-            item.name = `📖 Chronicle of past Lives (Lv. ${stageScale})`;
-            item.desc =
-              "Boosts XP gain by +200% and bypasses level locks while below 75% peak level.";
-          }
-        } else if (chosenType === "boots") {
+                  let subOptions = ["aegis", "watch", "chronicle"];
+                  if (item.subType === "dagger") {
+                    subOptions = ["viper"];
+                  } else if (item.subType === "shield") {
+                    subOptions = ["aegis"];
+                  } else if (item.subType === "tome") {
+                    subOptions = ["watch", "chronicle", "conduit"];
+                  }
+                  let selected =
+                    subOptions[Math.floor(Math.random() * subOptions.length)];
+                  item.setName = null;
+                  if (selected === "aegis") {
+                    item.subType = "shield";
+                    item.isUniqueAegis = true;
+                    item.noun = "Void-Warped Aegis";
+                    item.name = `🛡️ Void-Warped Bulwark (Lv. ${stageScale})`;
+                    item.desc =
+                      "Blocks trigger gravity blasts scaling with Defense. Can be absorbed into Singularity vortex.";
+                  } else if (selected === "watch") {
+                    item.subType = "tome";
+                    item.isUniqueWatch = true;
+                    item.noun = "Chronos Pocket-Watch";
+                    item.name = `⏳ Chronos Dial-Watch (Lv. ${stageScale})`;
+                    item.desc =
+                      "Triggers 4s Temporal Fracture every 20s. Accelerates attack speeds by 15% and slows enemies by 25%.";
+                  } else if (selected === "chronicle") {
+                    item.subType = "tome";
+                    item.isUniqueChronicle = true;
+                    item.noun = "Chronicle of the Ascended";
+                    item.name = `📖 Chronicle of past Lives (Lv. ${stageScale})`;
+                    item.desc =
+                      "Boosts XP gain by +200% and bypasses level locks while below 75% peak level.";
+                  } else if (selected === "conduit") {
+                    item.subType = "tome";
+                    item.isUniqueConduit = true;
+                    item.noun = "Conduit Lexicon";
+                    item.name = `📖 Conduit of the Lexicon (Lv. ${stageScale})`;
+                    item.desc =
+                      "Periodically projects an Aetheric Conduit on the field (15s Cooldown). Discharging it casts triple elemental spells & resets cooldowns.";
+                  } else if (selected === "viper") {
+                    item.subType = "dagger";
+                    item.isUniqueViper = true;
+                    item.noun = "Perfect Stiletto";
+                    item.name = `✦ Viper's Perfect Stiletto (Lv. ${stageScale})`;
+                    item.desc =
+                      "Critical strikes have a 25% chance to trigger a Perfect Strike reticle. Tapping it within 2s deals 5x defense-bypassing damage and inflicts a toxic poison sting.";
+                  }
+                } else if (chosenType === "boots") {
           item.isUniqueWarpCore = true;
           item.noun = "Warp-Core Greaves";
           item.name = `⚡ Warp-Core Greaves (Lv. ${stageScale})`;
@@ -2503,11 +2478,13 @@ window.scaleItemBonusStats = (item, oldStars, newStars) =>
             if (item.dexPct > 0) item.dexPct = parseFloat((0.04 * scaleFactor).toFixed(4));
             if (item.intPct > 0) item.intPct = parseFloat((0.04 * scaleFactor).toFixed(4));
           } else if (
-            item.type === "subweapon" &&
-            !item.isUniqueAegis &&
-            !item.isUniqueWatch &&
-            !item.isUniqueChronicle
-          ) {
+                      item.type === "subweapon" &&
+                      !item.isUniqueAegis &&
+                      !item.isUniqueWatch &&
+                      !item.isUniqueChronicle &&
+                      !item.isUniqueConduit &&
+                      !item.isUniqueViper
+                    ) {
             if (item.subType === "shield") {
               item.baseDef = Math.ceil(1.0 * stageScale * baseRarityMult);
               if (noun.includes("buckler")) {
@@ -2534,18 +2511,19 @@ window.scaleItemBonusStats = (item, oldStars, newStars) =>
     } else {
       // Recalculate unique item specific base structures (Proportionally scaled up to match standard Mythic buffs)
       if (
-        item.isUniqueSingularity ||
-        item.isUniqueMaelstrom ||
-        item.isUniqueStaff ||
-        item.isUniqueSword
-      ) {
-        item.baseAtk = Math.ceil(112.5 * expScale * prestigeMult);
+              item.isUniqueSingularity ||
+              item.isUniqueMaelstrom ||
+              item.isUniqueStaff ||
+              item.isUniqueSword ||
+              item.isUniqueViper
+            ) {
+              item.baseAtk = Math.ceil(112.5 * expScale * prestigeMult);
       } else if (item.isUniqueAegis) {
         item.baseDef = Math.ceil(200.0 * hpDefExpScale * prestigeMult);
         item.baseBlock = 0.05 * (item.stageLevel || 1);
-      } else if (item.isUniqueWatch || item.isUniqueChronicle) {
-        // Corrected unique tomes to scale exponentially with level, matching standard Tomes and maintaining endgame viability
-        item.baseInt = Math.ceil(112.5 * expScale * prestigeMult);
+      } else if (item.isUniqueWatch || item.isUniqueChronicle || item.isUniqueConduit) {
+              // Corrected unique tomes to scale exponentially with level, matching standard Tomes and maintaining endgame viability
+              item.baseInt = Math.ceil(112.5 * expScale * prestigeMult);
       } else if (item.isUniqueWarpCore) {
         item.baseMoveSpeed = Math.ceil(
           3 * (item.stageLevel || 1) * prestigeMult,
