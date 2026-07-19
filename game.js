@@ -799,9 +799,9 @@ window.SaveManager = {
         }
       }
 
-      window.playerStats.xpReq = BigNum.from(1000).mul(
-              BigNum.from(1.45).pow(window.playerStats.level - 1),
-            );
+      window.playerStats.xpReq = BigNum.from(350).mul(
+                    BigNum.from(1.45).pow(window.playerStats.level - 1),
+                  );
 
       if (window.playerStats.unlockedAchievements) {
         window.playerStats.achievementTimestamps =
@@ -5868,8 +5868,8 @@ window.CombatEngine = {
     }
 
     let baseCoin = isBoss
-      ? Math.floor(15 * expScale)
-      : Math.floor(2 * expScale);
+          ? Math.floor(20 * expScale)
+          : Math.floor(5 * expScale);
     if (window.playerStats.isCrucibleMode) {
       // Scale standard currency values up smoothly for post-run claim
       baseCoin = Math.floor(10 * expScale);
@@ -7091,16 +7091,22 @@ window.CombatEngine = {
     let finalWave = window.playerStats.crucibleWave || 1;
 
     window.playerStats.isBossMode = false;
-    window.playerStats.isFarmingLoop = false;
-    window.playerStats.isUberBoss = false;
-    window.playerStats.isDungeonMode = false;
-    window.playerStats.isCrucibleMode = false;
-    window.playerStats.isPrestigeBossMode = false;
-    window.playerStats.activeDungeonSigil = null; // Clear on death
-    window.playerStats.prestigeApproachTimer = 0;
-    window.mob = null;
-    window.playerStats.usedSecondWind = false;
-    window.hero.x = 40;
+        // Safely shift the player to infinite Farming Mode on campaign defeat so they do not auto-rechallenge the boss
+        if (!wasDungeon && !wasCrucible && !wasUber && !wasPrestige) {
+          window.playerStats.isFarmingLoop = true;
+        } else {
+          window.playerStats.isFarmingLoop = false;
+        }
+        window.playerStats.killCount = 0; // Reset progress count to give a clean sequence on return
+        window.playerStats.isUberBoss = false;
+        window.playerStats.isDungeonMode = false;
+        window.playerStats.isCrucibleMode = false;
+        window.playerStats.isPrestigeBossMode = false;
+        window.playerStats.activeDungeonSigil = null; // Clear on death
+        window.playerStats.prestigeApproachTimer = 0;
+        window.mob = null;
+        window.playerStats.usedSecondWind = false;
+        window.hero.x = 40;
 
     window.SoundManager.play("defeat");
 

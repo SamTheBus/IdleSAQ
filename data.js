@@ -370,9 +370,9 @@ window.GameState = {
       }
 
       // Calculate next xpReq safely using BigNum exponential power scaling
-            xpReq = BigNum.from(1000).mul(
-              BigNum.from(1.45).pow(window.playerStats.level - 1),
-            );
+                  xpReq = BigNum.from(350).mul(
+                    BigNum.from(1.45).pow(window.playerStats.level - 1),
+                  );
       leveledUp = true;
     }
 
@@ -444,13 +444,19 @@ window.GameState = {
         }
       }
       if (typeof window.checkAchievements === "function") {
-        window.checkAchievements();
-      }
-    }
+                  window.checkAchievements();
+                }
+                // Evaluate tutorial triggers immediately after level-up animations/sounds settle
+                setTimeout(() => {
+                  if (window.HoorTutorial) {
+                    window.HoorTutorial.checkTriggers();
+                  }
+                }, 1000);
+              }
 
-    if (typeof window.updateUI === "function") {
-      window.updateUI();
-    }
+              if (typeof window.updateUI === "function") {
+                window.updateUI();
+              }
   },
 
   addCoins(amount) {
@@ -2096,8 +2102,8 @@ window.playerStats = {
   dungeonAccumulatedLoot: [],
   hasRefundedLegacyTempers: false,
   level: 1,
-    xp: new BigNum(0, 0),
-    xpReq: new BigNum(1000, 0),
+      xp: new BigNum(0, 0),
+      xpReq: new BigNum(350, 0),
   sp: 0,
   spAllocations: {
     spHp: 0,
@@ -2661,7 +2667,15 @@ window.lastUpdateTime = Date.now();
 window.sessionStartTime = Date.now();
 window.respawnIntervalId = null;
 window.recalculateXpRequirement = function () {
-  window.playerStats.xpReq = BigNum.from(1000).mul(
+  window.playerStats.xpReq = BigNum.from(350).mul(
     BigNum.from(1.45).pow(window.playerStats.level - 1),
   );
+};
+// Expose the manual boss rechallenge actuator to the DOM window
+window.rechallengeBoss = function () {
+  window.playerStats.isFarmingLoop = false;
+  window.playerStats.isBossMode = true;
+  window.playerStats.killCount = window.playerStats.targetsRequired;
+  window.mob = null;
+  if (typeof window.updateUI === "function") window.updateUI();
 };
