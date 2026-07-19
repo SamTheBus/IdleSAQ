@@ -1699,15 +1699,15 @@ Object.assign(window.ItemFactory, {
             "idleSpd",
           ];
         } else if (chosenType === "chest" || chosenType === "overall") {
-          pool = ["block", "parry"];
-        } else if (chosenType === "helmet") {
-          pool = [
-            "critChance",
-            "activeSpd",
-            "idleSpd",
-          ];
-        } else if (chosenType === "leggings") {
-          pool = ["block", "parry"];
+                  pool = ["maxHp", "def", "str", "dex", "int"];
+                } else if (chosenType === "helmet") {
+                  pool = [
+                    "critChance",
+                    "activeSpd",
+                    "idleSpd",
+                  ];
+                } else if (chosenType === "leggings") {
+                  pool = ["maxHp", "def", "str", "dex", "int"];
         } else if (chosenType === "boots") {
           pool = ["moveSpeed", "idleSpd", "activeSpd"];
         } else if (chosenType === "ring") {
