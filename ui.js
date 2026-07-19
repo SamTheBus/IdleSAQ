@@ -5199,17 +5199,19 @@ window.showStatHoverTooltip = function (e, key) {
 
 window.renderPaperDoll = function () {
   const slots = [
-    "weapon",
-    "subweapon",
-    "helmet",
-    "chest",
-    "leggings",
-    "overall",
-    "boots",
-    "art1",
-    "art2",
-    "art3",
-  ];
+      "weapon",
+      "subweapon",
+      "helmet",
+      "chest",
+      "leggings",
+      "overall",
+      "boots",
+      "ring1",
+      "ring2",
+      "art1",
+      "art2",
+      "art3",
+    ];
   slots.forEach((slot) => {
     let el = document.getElementById(`slot-${slot}`);
     if (!el) return;
@@ -6168,21 +6170,21 @@ window.generateItemCardHtml = function (
 
   // --- BASE STATS SECTION ---
   if (item.id !== "dummy" && item.type !== "artifact") {
-    let baseStats = [];
+      let baseStats = [];
 
-    if (item.baseAtk > 0) {
-      let rawVal = window.formatNumber(item.baseAtk);
-      let attunedVal =
-        slotMult > 1.0
-          ? window.formatNumber(Math.ceil(item.baseAtk * slotMult))
-          : rawVal;
-      baseStats.push({
-        label: "Weapon Damage",
-        raw: rawVal,
-        attuned: attunedVal,
-        icon: window.getUiIconSvg("atk", 14),
-      });
-    }
+      if (item.baseAtk > 0) {
+        let rawVal = window.formatNumber(item.baseAtk);
+        let attunedVal =
+          slotMult > 1.0
+            ? window.formatNumber(Math.ceil(item.baseAtk * slotMult))
+            : rawVal;
+        baseStats.push({
+          label: item.type === "ring" ? "Ring Attack" : "Weapon Damage",
+          raw: rawVal,
+          attuned: attunedVal,
+          icon: window.getUiIconSvg("atk", 14),
+        });
+      }
     if (item.baseDef > 0) {
       let rawVal = window.formatNumber(item.baseDef);
       let attunedVal =
@@ -9280,7 +9282,8 @@ window.openEquipSwapWindow = function (e, slotKey) {
   }
 
   let isArt = slotKey.startsWith("art");
-  let targetType = isArt ? "artifact" : slotKey;
+  let isRing = slotKey.startsWith("ring");
+  let targetType = isArt ? "artifact" : isRing ? "ring" : slotKey;
 
   // Filter unequipped inventory items that fit this exact slot
   let eligibleItems = [];
@@ -9364,6 +9367,7 @@ window.openEquipSwapWindow = function (e, slotKey) {
 
 window.executeSwapItem = function (slotKey, itemId) {
   let isArt = slotKey.startsWith("art");
+  let isRing = slotKey.startsWith("ring");
   if (isArt) {
     let idx = window.inventory.ARTIFACT.findIndex((i) => i.id === itemId);
     if (idx !== -1) {
@@ -9398,6 +9402,36 @@ window.executeSwapItem = function (slotKey, itemId) {
       }
 
       window.inventory.ARTIFACT.splice(idx, 1);
+      window.equippedSlots[slotKey] = item;
+      item.isEquippedSlot = slotKey;
+
+      if (typeof window.resolvePlayerStats === "function") {
+        let newMaxHp = window.resolvePlayerStats().maxHp;
+        window.playerStats.currentHp = Math.max(
+          1,
+          Math.min(
+            newMaxHp,
+            Math.floor((window.playerStats.currentHp / oldMaxHp) * newMaxHp),
+          ),
+        );
+      }
+    }
+  } else if (isRing) {
+    let idx = window.inventory.EQUIP.findIndex((i) => i.id === itemId);
+    if (idx !== -1) {
+      let item = window.inventory.EQUIP[idx];
+
+      let oldMaxHp = 100;
+      if (typeof window.resolvePlayerStats === "function")
+        oldMaxHp = window.resolvePlayerStats().maxHp;
+
+      if (window.equippedSlots[slotKey]) {
+        let oldItem = window.equippedSlots[slotKey];
+        delete oldItem.isEquippedSlot;
+        window.inventory.EQUIP.push(oldItem);
+      }
+
+      window.inventory.EQUIP.splice(idx, 1);
       window.equippedSlots[slotKey] = item;
       item.isEquippedSlot = slotKey;
 
@@ -18484,46 +18518,25 @@ window.HoorTutorial = {
   },
 
   init() {
-    window.playerStats.completedTutorialSteps =
-      window.playerStats.completedTutorialSteps || [];
-    window.playerStats.visitedTabs = window.playerStats.visitedTabs || [];
-    this.checkTriggers();
-  },
+      window.playerStats.completedTutorialSteps =
+        window.playerStats.completedTutorialSteps || [];
+      window.playerStats.visitedTabs = window.playerStats.visitedTabs || [];
+      this.checkTriggers();
+    },
 
-  checkTriggers() {
-    if (window.isGamePaused && this.activeDialog) return;
+    checkTriggers() {
+      if (window.isGamePaused && this.activeDialog) return;
 
-    for (let key in this.steps) {
-      if (window.playerStats.completedTutorialSteps.includes(key)) continue;
+      for (let key in this.steps) {
+        if (window.playerStats.completedTutorialSteps.includes(key)) continue;
 
-      let step = this.steps[key];
-      if (step.trigger()) {
-        this.showDialog(key, step);
-        break;
+        let step = this.steps[key];
+        if (step.trigger()) {
+          this.showDialog(key, step);
+          break;
+        }
       }
-    }
-  },
-
-  init() {
-    window.playerStats.completedTutorialSteps =
-      window.playerStats.completedTutorialSteps || [];
-    window.playerStats.visitedTabs = window.playerStats.visitedTabs || [];
-    this.checkTriggers();
-  },
-
-  checkTriggers() {
-    if (window.isGamePaused && this.activeDialog) return;
-
-    for (let key in this.steps) {
-      if (window.playerStats.completedTutorialSteps.includes(key)) continue;
-
-      let step = this.steps[key];
-      if (step.trigger()) {
-        this.showDialog(key, step);
-        break;
-      }
-    }
-  },
+    },
 
   showDialog(key, step) {
     this.activeDialog = key;

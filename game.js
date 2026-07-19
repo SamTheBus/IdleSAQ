@@ -1068,19 +1068,25 @@ window.SaveManager = {
       window.playerStats.prestigeApproachTimer = 0;
 
       if (!window.playerStats.slotUpgrades) {
-        window.playerStats.slotUpgrades = {
-          weapon: 0,
-          subweapon: 0,
-          helmet: 0,
-          chest: 0,
-          leggings: 0,
-          overall: 0,
-          boots: 0,
-          art1: 0,
-          art2: 0,
-          art3: 0,
-        };
-      }
+              window.playerStats.slotUpgrades = {
+                weapon: 0,
+                subweapon: 0,
+                helmet: 0,
+                chest: 0,
+                leggings: 0,
+                overall: 0,
+                boots: 0,
+                ring1: 0,
+                ring2: 0,
+                art1: 0,
+                art2: 0,
+                art3: 0,
+              };
+            }
+            if (window.playerStats.slotUpgrades.ring1 === undefined) {
+              window.playerStats.slotUpgrades.ring1 = 0;
+              window.playerStats.slotUpgrades.ring2 = 0;
+            }
       if (window.playerStats.slotUpgrades.art1 === undefined) {
         window.playerStats.slotUpgrades.art1 = 0;
         window.playerStats.slotUpgrades.art2 = 0;

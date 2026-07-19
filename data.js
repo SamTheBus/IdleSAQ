@@ -978,9 +978,9 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   let p = {
-    atk: window.playerStats.baseAtk,
-    maxHp: window.playerStats.baseMaxHp,
-    def: window.playerStats.baseDef,
+    atk: 0,
+    maxHp: 0,
+    def: 0,
     moveSpeed: window.playerStats.baseMoveSpeed,
     idleAttackSpeed: window.playerStats.baseIdleSpeed,
     activeAttackSpeed: window.playerStats.baseActiveSpeed,
@@ -1016,6 +1016,8 @@ window.resolvePlayerStats = function (useDraft = false) {
     leggings: 0,
     overall: 0,
     boots: 0,
+    ring1: 0,
+    ring2: 0,
   };
 
   // Passive cumulative title multipliers applied prior to other calculations
@@ -1037,8 +1039,6 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
   let aT = window.playerStats.cachedAchievementBonusTotals;
 
-  p.atk += aT.atk;
-  p.maxHp += aT.maxHp;
   p.def += aT.def;
   p.moveSpeed += aT.moveSpeed;
   p.critChance += aT.critChance;
@@ -1070,22 +1070,6 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.dex += (alloc.spDex || 0) * 3;
   p.int += (alloc.spInt || 0) * 3;
 
-  p.maxHp += alloc.spHp * 50;
-  p.atk += alloc.spAtk * 6;
-  p.def += alloc.spDef * 5;
-  p.critChance += alloc.spCrit * 0.005;
-  p.critDamage += alloc.spCritDmg * 0.02;
-  p.block += alloc.spBlock * 0.005;
-  p.parry += alloc.spParry * 0.005;
-  p.moveSpeed += alloc.spSpd * 1;
-
-  let itemAtkPct = 0;
-  let itemHpPct = 0;
-  let itemDefPct = 0;
-  let itemSpdPct = 0;
-  let idleSpeedPct = 0.0 + (aT.idleSpeedPct || 0);
-  let activeSpeedPct = 0.0 + (aT.activeSpeedPct || 0);
-
   let paragonLevel = window.playerStats.paragonLevel || 0;
   let paragonMult = 1.0 + paragonLevel * 0.005; // Compounding +0.5% attributes per Paragon Level
 
@@ -1104,6 +1088,16 @@ window.resolvePlayerStats = function (useDraft = false) {
     });
   }
 
+  let flatGearAtk = 0;
+  let flatGearHp = 0;
+  let flatGearDef = 0;
+  let itemAtkPct = 0;
+  let itemHpPct = 0;
+  let itemDefPct = 0;
+  let itemSpdPct = 0;
+  let idleSpeedPct = 0.0 + (aT.idleSpeedPct || 0);
+  let activeSpeedPct = 0.0 + (aT.activeSpeedPct || 0);
+
   for (let key in window.equippedSlots) {
     let item = window.equippedSlots[key];
     if (item) {
@@ -1118,8 +1112,24 @@ window.resolvePlayerStats = function (useDraft = false) {
         0;
       let slotMult = 1.0 + slotLvl * 0.01 + runBonus;
 
-      p.atk += (item.atk || 0) * slotMult;
-      p.maxHp += (item.maxHp || 0) * slotMult;
+      // Flat base additions from Forge Slot Attunements (completely level-independent!)
+      if (key === "weapon") flatGearAtk += slotLvl * 15;
+      if (key === "chest" || key === "leggings" || key === "overall") {
+        flatGearHp += slotLvl * 50;
+        flatGearDef += slotLvl * 10;
+      }
+      if (key === "ring1" || key === "ring2") {
+        flatGearAtk += slotLvl * 10;
+        flatGearHp += slotLvl * 30;
+      }
+      if (key === "boots") {
+        p.moveSpeed += slotLvl * 2;
+      }
+
+      // Flat item stats
+      flatGearAtk += (item.atk || 0) * slotMult;
+      flatGearHp += (item.maxHp || 0) * slotMult;
+      flatGearDef += (item.def || 0) * slotMult;
       p.moveSpeed += (item.moveSpeed || 0) * slotMult;
 
       let itemIdleSpeed = item.idleAttackSpeed || 0;
@@ -1148,6 +1158,11 @@ window.resolvePlayerStats = function (useDraft = false) {
       if (item.maxHpPct) itemHpPct += item.maxHpPct * slotMult;
       if (item.defPct) itemDefPct += item.defPct * slotMult;
       if (item.moveSpeedPct) itemSpdPct += item.moveSpeedPct * slotMult;
+
+      // Treat flat affixes (bonusAtk, bonusMaxHp, bonusDef) as percentages under the pure-multiplicative model
+      itemAtkPct += ((item.bonusAtk || 0) / 100) * slotMult;
+      itemHpPct += ((item.bonusMaxHp || 0) / 100) * slotMult;
+      itemDefPct += ((item.bonusDef || 0) / 100) * slotMult;
     }
   }
 
@@ -1312,14 +1327,14 @@ window.resolvePlayerStats = function (useDraft = false) {
     if (minCopiesInSet >= 10 && !anyLocked && minTierInSet >= 0) {
       // Set Level Progression: Unlocked = 20%, Rare = 35%, Magic = 50%, Epic = 65%, Legendary = 80%, Mythic = 100%
       const setMultipliers = [0.2, 0.35, 0.5, 0.65, 0.8, 1.0];
-      let bonusPct = setMultipliers[minTierInSet] || 0.2;
+      let borderPct = setMultipliers[minTierInSet] || 0.2;
 
-      if (sData.statKey === "xpRate") p.xpRate += bonusPct;
-      else if (sData.statKey === "atkPctBonus") achAtkPct += bonusPct;
-      else if (sData.statKey === "defPctBonus") achDefPct += bonusPct;
-      else if (sData.statKey === "maxHpPctBonus") achMaxHpPct += bonusPct;
-      else if (sData.statKey === "qly") p.qly += bonusPct;
-      else if (sData.statKey === "attributesMult") attributesMult += bonusPct;
+      if (sData.statKey === "xpRate") p.xpRate += borderPct;
+      else if (sData.statKey === "atkPctBonus") achAtkPct += borderPct;
+      else if (sData.statKey === "defPctBonus") achDefPct += borderPct;
+      else if (sData.statKey === "maxHpPctBonus") achMaxHpPct += borderPct;
+      else if (sData.statKey === "qly") p.qly += borderPct;
+      else if (sData.statKey === "attributesMult") attributesMult += borderPct;
     }
   }
 
@@ -1343,104 +1358,31 @@ window.resolvePlayerStats = function (useDraft = false) {
   let effectiveDex = Math.max(0, p.dex - 5);
   let effectiveInt = Math.max(0, p.int - 5);
 
-  // Nerfed to 0.1% per point (Option A)
-  itemAtkPct += effectiveStr * 0.001;
-  itemHpPct += effectiveStr * 0.001;
-  // INT scaling defense has been removed
+  // --- CALCULATE SECURE EXPONENTIAL CHARACTER-BOUND BASE STATS ---
+  let levelScale = Math.pow(1.2, window.playerStats.level - 1);
+  let baseCharAtk = (10 + window.playerStats.level * 2 + effectiveStr * 0.4 + effectiveDex * 0.2 + effectiveInt * 0.1) * levelScale;
+  let baseCharHp = (100 + window.playerStats.level * 8 + effectiveStr * 1.2) * levelScale;
+  let baseCharDef = (5 + window.playerStats.level * 1 + effectiveInt * 0.4 + effectiveStr * 0.1) * levelScale;
 
-  // DEX scaling curves brought in line (Crit Chance capped at +10% from stats, Crit damage at 0.1% per point, Speed capped at +5.0)
-  p.critChance += parseFloat(
-    ((effectiveDex * 0.1) / (effectiveDex + 250)).toFixed(4),
-  );
-  p.critDamage += effectiveDex * 0.001;
-  p.moveSpeed += parseFloat(
-    ((effectiveDex * 5.0) / (effectiveDex + 150)).toFixed(1),
-  );
+  p.atk = baseCharAtk + flatGearAtk;
+  p.maxHp = baseCharHp + flatGearHp;
+  let flatTotalDef = baseCharDef + flatGearDef + setCtx.flatDefBonus;
 
-  // INT scaling curves brought in line (Avoidance capped at +5%, Fairy spawn at 0.01% per point)
-  let logInt = Math.log10(effectiveInt + 1);
-  p.block += parseFloat((0.05 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
-  p.parry += parseFloat((0.05 * (1 - 1 / (1 + 0.15 * logInt))).toFixed(4));
-  p.fairySpawn += parseFloat((effectiveInt * 0.0001).toFixed(4));
-
-  let flatDef =
-    window.playerStats.baseDef + alloc.spDef * 4 + aT.def + setCtx.flatDefBonus;
-  let defMultiplier = 1.0 + setCtx.defPctBonus;
-
-  for (let key in window.equippedSlots) {
-    let item = window.equippedSlots[key];
-    if (item) {
-      let slotLvl =
-        (window.playerStats.slotUpgrades &&
-          window.playerStats.slotUpgrades[key]) ||
-        0;
-      let slotMult = 1.0 + slotLvl * 0.01;
-      flatDef += (item.def || 0) * slotMult;
-      if (["chest", "leggings", "overall", "helmet"].includes(item.type)) {
-        let stars = item.statsRolled === "UNIQUE" ? 5 : item.statsRolled || 0;
-        defMultiplier += stars * 0.03 + slotLvl * 0.01;
-      }
-    }
-  }
-
-  const hasSubweapon = !!window.equippedSlots.subweapon;
-  const subType = window.equippedSlots.subweapon
-    ? window.equippedSlots.subweapon.subType
-    : null;
-  let maxBlockCap = 0.0;
-  let maxParryCap = window.checkArtifactTrait("titan_grip") ? 0.18 : 0.15;
-
-  // Apply run-only Block/Parry cap expansions
-  if (p.crucibleCapBonus) {
-    maxParryCap += p.crucibleCapBonus;
-  }
-
-  if (hasSubweapon) {
-    if (subType === "shield") {
-      let shield = window.equippedSlots.subweapon;
-      let shieldStars =
-        shield.statsRolled === "UNIQUE" ? 5 : shield.statsRolled || 0;
-      let subLvl =
-        (window.playerStats.slotUpgrades &&
-          window.playerStats.slotUpgrades.subweapon) ||
-        0;
-      defMultiplier += 0.12 + shieldStars * 0.02 + subLvl * 0.01;
-      maxBlockCap = window.checkArtifactTrait("titan_grip") ? 0.25 : 0.2;
-      if (p.crucibleCapBonus) maxBlockCap += p.crucibleCapBonus;
-      // Removed duplicate p.block flat add; Block is now read directly from Shield Item base stats!
-      p.parry = 0.0; // STRICT: Can't parry with a shield
-    } else if (subType === "tome") {
-      let intScale = Math.max(0, p.int - 5);
-      let logIntScale = Math.log10(intScale + 1);
-      // Caps the Arcane Barrier at 25% max (20% base + 5% scaling limit)
-      p.arcaneBarrier = parseFloat(
-        (0.2 + 0.05 * (1 - 1 / (1 + 0.15 * logIntScale))).toFixed(4),
-      );
-      p.block = 0.0; // STRICT: Can't block with a tome
-      p.parry = 0.0; // STRICT: Can't parry with a tome
-    } else if (subType === "dagger") {
-      let sub = window.equippedSlots.subweapon;
-      let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
-      let baseCap = noun.includes("main-gauche") ? 0.3 : 0.25;
-
-      maxParryCap = window.checkArtifactTrait("titan_grip")
-        ? baseCap + 0.05
-        : baseCap;
-      if (p.crucibleCapBonus) maxParryCap += p.crucibleCapBonus;
-      // Removed duplicate p.parry flat add; Parry is now read directly from Dagger Item base stats!
-      p.block = 0.0; // STRICT: Can't block with a dagger
-    }
-  } else {
-    p.block = 0.0; // STRICT: Can't block without subweapon
-    p.parry = 0.0; // STRICT: Can't parry without subweapon
-  }
-
+  // Suffixes multipliers applied on total flat base
   p.atk = Math.floor(p.atk * (1.0 + itemAtkPct) * achAtkPct);
   p.maxHp = Math.floor(p.maxHp * (1.0 + itemHpPct) * achMaxHpPct);
-  p.def = Math.ceil(flatDef * (defMultiplier + itemDefPct) * achDefPct);
-  p.moveSpeed =
-    p.moveSpeed *
-    (achMoveSpeedPct + itemSpdPct + (setCtx.moveSpeedPctBonus || 0)); // Factored percent speed
+  p.moveSpeed = p.moveSpeed * (achMoveSpeedPct + itemSpdPct + (setCtx.moveSpeedPctBonus || 0));
+
+  let defMultiplier = 1.0 + setCtx.defPctBonus;
+  for (let key in window.equippedSlots) {
+    let item = window.equippedSlots[key];
+    if (item && ["chest", "leggings", "overall", "helmet"].includes(item.type)) {
+      let slotLvl = (window.playerStats.slotUpgrades && window.playerStats.slotUpgrades[key]) || 0;
+      let stars = item.statsRolled === "UNIQUE" ? 5 : item.statsRolled || 0;
+      defMultiplier += stars * 0.03 + slotLvl * 0.01;
+    }
+  }
+  p.def = Math.ceil(flatTotalDef * (defMultiplier + itemDefPct) * achDefPct);
 
   // Apply Cavern Sigil Active Modifiers (Dungeon Mode)
   if (
@@ -1611,19 +1553,40 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   if (window.playerStats.frenzyTimer > 0) {
-    p.critChance = 1.0;
-    p.critDamage += 0.5;
-    p.activeAttackSpeed = 4;
-    p.idleAttackSpeed = 15;
-  }
+      p.critChance = 1.0;
+      p.critDamage += 0.5;
+      p.activeAttackSpeed = 4;
+      p.idleAttackSpeed = 15;
+    }
 
-  p.rawBlock = p.block;
-  p.rawParry = p.parry;
+    let maxBlockCap = 0.20;
+    let maxParryCap = 0.15;
 
-  if (p.block > maxBlockCap) p.block = maxBlockCap;
-  if (p.parry > maxParryCap) p.parry = maxParryCap;
+    let subItem = window.equippedSlots ? window.equippedSlots.subweapon : null;
+    let hasTitanGrip = window.checkArtifactTrait && window.checkArtifactTrait("titan_grip");
 
-  // Apply diminishing returns to raw accumulated Rare Spawn rates to prevent key hyper-inflation
+    if (subItem && subItem.subType === "shield") {
+      maxBlockCap = hasTitanGrip ? 0.25 : 0.20;
+    }
+    if (subItem && subItem.subType === "dagger") {
+      let noun = subItem.noun ? subItem.noun.toLowerCase() : "";
+      if (noun.includes("main-gauche")) {
+        maxParryCap = hasTitanGrip ? 0.35 : 0.30;
+      } else {
+        maxParryCap = hasTitanGrip ? 0.30 : 0.15;
+      }
+    }
+
+    maxBlockCap += (p.crucibleCapBonus || 0);
+    maxParryCap += (p.crucibleCapBonus || 0);
+
+    p.rawBlock = p.block;
+    p.rawParry = p.parry;
+
+    if (p.block > maxBlockCap) p.block = maxBlockCap;
+    if (p.parry > maxParryCap) p.parry = maxParryCap;
+
+    // Apply diminishing returns to raw accumulated Rare Spawn rates to prevent key hyper-inflation
   let rawRare = p.rareSpawn;
   let limit = window.checkArtifactTrait("void_pull") ? 0.1 : 0.075; // 7.5% base cap, 10.0% elevated with Void Core
   let excessRare = Math.max(0, rawRare - 0.01);
@@ -2634,6 +2597,8 @@ window.equippedSlots = {
   leggings: null,
   overall: null,
   boots: null,
+  ring1: null,
+  ring2: null,
   art1: null,
   art2: null,
   art3: null,

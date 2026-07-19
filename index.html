@@ -3386,6 +3386,7 @@
                                 <option value="leggings">👖 Leggings</option>
                                 <option value="overall">🥋 Overall</option>
                                 <option value="boots">🥾 Boots</option>
+                                <option value="ring">💍 Ring</option>
                             </select>
                         </div>
                         <div>
@@ -5835,7 +5836,7 @@
                             <i>[Empty OVERALL]</i>
                         </div>
 
-                        <!-- Row 4: Boots & Artifact 1 -->
+                        <!-- Row 4: Boots & Ring 1 -->
                         <div
                                 id="slot-boots"
                                 class="slots-card"
@@ -5848,6 +5849,34 @@
                                 ontouchstart="window.showSlotTooltip(event, 'boots')"
                         >
                             <i>[Empty BOOTS]</i>
+                        </div>
+                        <div
+                                id="slot-ring1"
+                                class="slots-card"
+                                onpointerdown="window.startSlotLongPress(event, 'ring1')"
+                                onpointerup="window.endSlotLongPress(event)"
+                                onpointerleave="window.endSlotLongPress(event)"
+                                onpointercancel="window.endSlotLongPress(event)"
+                                onmouseenter="window.showSlotTooltip(event, 'ring1')"
+                                onmouseleave="window.hideTooltip()"
+                                ontouchstart="window.showSlotTooltip(event, 'ring1')"
+                        >
+                            <i>[Empty RING 1]</i>
+                        </div>
+
+                        <!-- Row 5: Ring 2 & Artifact 1 -->
+                        <div
+                                id="slot-ring2"
+                                class="slots-card"
+                                onpointerdown="window.startSlotLongPress(event, 'ring2')"
+                                onpointerup="window.endSlotLongPress(event)"
+                                onpointerleave="window.endSlotLongPress(event)"
+                                onpointercancel="window.endSlotLongPress(event)"
+                                onmouseenter="window.showSlotTooltip(event, 'ring2')"
+                                onmouseleave="window.hideTooltip()"
+                                ontouchstart="window.showSlotTooltip(event, 'ring2')"
+                        >
+                            <i>[Empty RING 2]</i>
                         </div>
                         <div
                                 id="slot-art1"
@@ -5863,7 +5892,7 @@
                             <i>[Artifact Slot 1]</i>
                         </div>
 
-                        <!-- Row 5: Artifact 2 & Artifact 3 -->
+                        <!-- Row 6: Artifact 2 & Artifact 3 -->
                         <div
                                 id="slot-art2"
                                 class="slots-card artifact-slot"

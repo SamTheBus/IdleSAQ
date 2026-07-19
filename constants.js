@@ -2961,10 +2961,6 @@ window.slotNouns = {
   helmet: [
     "Greathelm",
     "Armet",
-    "Bascinet",
-    "Coif",
-    "Barbuta",
-    "Circlet",
     "Visor",
   ],
   chest: [
@@ -2978,6 +2974,7 @@ window.slotNouns = {
   leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"],
   boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"],
   overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"],
+  ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"],
 };
 
 window.COSMETIC_SKINS = {
