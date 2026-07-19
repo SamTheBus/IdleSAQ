@@ -7140,6 +7140,7 @@ window.switchTab = function (tabId) {
 
 window.switchSubTab = function (subTabId) {
   window.state.currentSubTab = subTabId;
+  window.state.inventoryDirty = true; // Force rebuilding the newly displayed tab!
   document
     .querySelectorAll(".sub-tabs:not(#tab-market .sub-tabs) .sub-tab-btn")
     .forEach((btn) => btn.classList.remove("active"));

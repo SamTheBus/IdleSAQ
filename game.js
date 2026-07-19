@@ -5937,24 +5937,26 @@ window.CombatEngine = {
     if (window.SoundManager) window.SoundManager.play("death");
 
     let xpYield = 0;
-    let scaleVal = window.playerStats.isDungeonMode
-      ? window.playerStats.currentDungeonStage[
-          window.playerStats.currentDungeon
-        ] || 1
-      : window.playerStats.stage;
+          let scaleVal = window.playerStats.isDungeonMode
+            ? window.playerStats.currentDungeonStage[
+                window.playerStats.currentDungeon
+              ] || 1
+            : window.playerStats.stage;
 
-    if (window.playerStats.isCrucibleMode) {
-      let cWave = window.playerStats.crucibleWave || 1;
-      let peak = window.playerStats.lifetimePeakStage || 1;
-      let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
-      scaleVal = startingStageOffset + cWave - 1;
-    }
-    if (window.playerStats.isUberBoss) {
-      let riftLvl = window.playerStats.activeRiftLevel || 1;
-      scaleVal = 50 + riftLvl * 10;
-    }
+          if (window.playerStats.isCrucibleMode) {
+            let cWave = window.playerStats.crucibleWave || 1;
+            let peak = window.playerStats.lifetimePeakStage || 1;
+            let startingStageOffset = Math.max(1, Math.floor(peak * 0.75));
+            scaleVal = startingStageOffset + cWave - 1;
+          }
+          if (window.playerStats.isUberBoss) {
+            let riftLvl = window.playerStats.activeRiftLevel || 1;
+            scaleVal = 50 + riftLvl * 10;
+          }
 
-    let expScale = Math.pow(1.045, scaleVal);
+          let effScaleVal = window.getEffectiveStage(scaleVal);
+          let growthRate = 1.045 + (effScaleVal * 0.04) / (effScaleVal + 200);
+          let expScale = Math.pow(growthRate, effScaleVal);
 
     if (window.playerStats.isCrucibleMode) {
       xpYield = Math.floor(10 * expScale);

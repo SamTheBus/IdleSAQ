@@ -1306,7 +1306,7 @@ window.resolvePlayerStats = function (useDraft = false) {
   let effectiveInt = Math.max(0, p.int - 5);
 
   // --- CALCULATE SECURE EXPONENTIAL CHARACTER-BOUND BASE STATS ---
-  let levelScale = BigNum.from(1.2).pow(window.playerStats.level - 1);
+  let levelScale = BigNum.from(1.04).pow(window.playerStats.level - 1);
   let baseCharAtk = BigNum.from(10 + window.playerStats.level * 2 + p.str * 0.4 + p.dex * 0.2 + p.int * 0.1).mul(levelScale);
   let baseCharHp = BigNum.from(100 + window.playerStats.level * 8 + p.str * 1.2).mul(levelScale);
   let baseCharDef = BigNum.from(5 + window.playerStats.level * 1 + p.int * 0.4 + p.str * 0.1).mul(levelScale);

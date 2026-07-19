@@ -3,8 +3,8 @@
    Sack Management, Forge/Crafting, and Shop Transaction Logic.
    ========================================================================= */
 window.getRarityMultiplier = function (stars) {
-  if (stars === "UNIQUE" || stars === "unique") return 180.0;
-  const multipliers = [1.0, 2.5, 6.0, 18.0, 50.0, 150.0];
+  if (stars === "UNIQUE" || stars === "unique") return 22.0;
+  const multipliers = [1.0, 1.8, 3.2, 5.5, 10.0, 18.0];
   return multipliers[stars] || 1.0;
 };
 
