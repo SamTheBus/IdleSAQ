@@ -6076,10 +6076,34 @@ window.generateItemCardHtml = function (
       : `${labelDisplay} | <span style="color:${tierColor}; font-weight:bold;">${tierStrDisplay(item)}</span>`;
 
   html += `<div class="tt-title" style="color:${isUnique ? "#1abc9c" : titleColor}; white-space:normal;">${item.name}${temperTag}${lockTag}</div>`;
-  html += runicBadge;
-  html += iconIllustration;
-  html += `<div class="tt-subtitle">${subtitle}</div>`;
+    html += runicBadge;
+    html += iconIllustration;
+    html += `<div class="tt-subtitle">${subtitle}</div>`;
 
+    // --- IMPLICIT MODIFIERS SECTION ---
+        let implicits = [];
+        if (item.type !== "artifact" && item.statsRolled !== "UNIQUE") {
+          if (item.type === "ring") {
+            if (item.baseAtk > 0) implicits.push({ label: "Flat Attack", value: `+${item.baseAtk}`, icon: window.getUiIconSvg("atk", 11) });
+            if (item.baseMaxHp > 0) implicits.push({ label: "Flat Max HP", value: `+${item.baseMaxHp}`, icon: window.getUiIconSvg("maxHp", 11) });
+            if (item.baseDef > 0) implicits.push({ label: "Flat Defense", value: `+${item.baseDef}`, icon: window.getUiIconSvg("def", 11) });
+
+            if (item.atkPct > 0) implicits.push({ label: "Attack", value: `+${(item.atkPct * 100).toFixed(1)}%`, icon: window.getUiIconSvg("atk", 11) });
+            if (item.maxHpPct > 0) implicits.push({ label: "Max HP", value: `+${(item.maxHpPct * 100).toFixed(1)}%`, icon: window.getUiIconSvg("maxHp", 11) });
+            if (item.defPct > 0) implicits.push({ label: "Defense", value: `+${(item.defPct * 100).toFixed(1)}%`, icon: window.getUiIconSvg("def", 11) });
+            if (item.strPct > 0) implicits.push({ label: "Strength", value: `+${(item.strPct * 100).toFixed(1)}%`, icon: window.getUiIconSvg("str", 11) });
+            if (item.dexPct > 0) implicits.push({ label: "Dexterity", value: `+${(item.dexPct * 100).toFixed(1)}%`, icon: window.getUiIconSvg("dex", 11) });
+            if (item.intPct > 0) implicits.push({ label: "Intelligence", value: `+${(item.intPct * 100).toFixed(1)}%`, icon: window.getUiIconSvg("int", 11) });
+          } else {
+            if (item.baseCritChance > 0) implicits.push({ label: "Crit Chance", value: `+${Math.round(item.baseCritChance * 100)}%`, icon: window.getUiIconSvg("critChance", 11) });
+            if (item.baseCritDamage > 0) implicits.push({ label: "Crit Multi", value: `+${Math.round(item.baseCritDamage * 100)}%`, icon: window.getUiIconSvg("critDamage", 11) });
+            if (item.atkPct > 0) implicits.push({ label: "Attack", value: `+${Math.round(item.atkPct * 100)}%`, icon: window.getUiIconSvg("atk", 11) });
+            if (item.defPct > 0) implicits.push({ label: "Defense", value: `+${Math.round(item.defPct * 100)}%`, icon: window.getUiIconSvg("def", 11) });
+            if (item.maxHpPct > 0) implicits.push({ label: "Max HP", value: `+${Math.round(item.maxHpPct * 100)}%`, icon: window.getUiIconSvg("maxHp", 11) });
+            if (item.moveSpeedPct > 0) implicits.push({ label: "Move Speed", value: `+${Math.round(item.moveSpeedPct * 100)}%`, icon: window.getUiIconSvg("moveSpeed", 11) });
+            if (item.baseStr > 0) implicits.push({ label: "Strength", value: `+${item.baseStr}`, icon: window.getUiIconSvg("str", 11) });
+          }
+        }
   // Render Slot Attunement details inside the metadata section instead of a floating top badge
   if (slotMult > 1.0) {
     let pctBonus = Math.round((slotMult - 1.0) * 100);
@@ -6186,18 +6210,18 @@ window.generateItemCardHtml = function (
         });
       }
     if (item.baseDef > 0) {
-      let rawVal = window.formatNumber(item.baseDef);
-      let attunedVal =
-        slotMult > 1.0
-          ? window.formatNumber(Math.ceil(item.baseDef * slotMult))
-          : rawVal;
-      baseStats.push({
-        label: "Armor",
-        raw: rawVal,
-        attuned: attunedVal,
-        icon: window.getUiIconSvg("def", 14),
-      });
-    }
+          let rawVal = window.formatNumber(item.baseDef);
+          let attunedVal =
+            slotMult > 1.0
+              ? window.formatNumber(Math.ceil(item.baseDef * slotMult))
+              : rawVal;
+          baseStats.push({
+            label: "Defense",
+            raw: rawVal,
+            attuned: attunedVal,
+            icon: window.getUiIconSvg("def", 14),
+          });
+        }
     if (item.baseMaxHp > 0) {
       let rawVal = window.formatNumber(item.baseMaxHp);
       let attunedVal =
@@ -6376,21 +6400,41 @@ window.generateItemCardHtml = function (
         let attunedColor = b.raw !== b.attuned ? "#2ecc71" : "#f5f6fa";
 
         html += `
-                      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; min-width: 0;">
-                        <span style="font-size: 7.5px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${shortLabel}</span>
-                        <div style="font-size: 11.5px; font-weight: bold; display: flex; align-items: center; gap: 3px; line-height: 1;">
-                          ${b.icon}
-                          <span class="attuned-val" style="color:${attunedColor}; white-space: nowrap;">${b.attuned}</span>
-                          <span class="raw-val" style="color:#f5f6fa; white-space: nowrap; display:none;">${b.raw}</span>
-                        </div>
-                      </div>
-                    `;
-      });
-      html += `</div>`;
-    }
-  }
+                              <div style="display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; min-width: 0;">
+                                <span style="font-size: 7.5px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${shortLabel}</span>
+                                <div style="font-size: 11.5px; font-weight: bold; display: flex; align-items: center; gap: 3px; line-height: 1;">
+                                  ${b.icon}
+                                  <span class="attuned-val" style="color:${attunedColor}; white-space: nowrap;">${b.attuned}</span>
+                                  <span class="raw-val" style="color:#f5f6fa; white-space: nowrap; display:none;">${b.raw}</span>
+                                </div>
+                              </div>
+                            `;
+              });
+              html += `</div>`;
+            }
 
-  if (item.type === "artifact") {
+            // --- IMPLICIT MODIFIERS SECTION ---
+            if (implicits.length > 0) {
+              html += `<div class="implicit-stats-grid" style="background: rgba(223, 159, 251, 0.015); border: 1px solid rgba(223, 159, 251, 0.18); border-radius: 6px; padding: 6px 4px; margin: 4px 0 8px 0; display: flex; justify-content: space-around; align-items: center; gap: 4px;">`;
+              implicits.forEach((imp, idx) => {
+                if (idx > 0) {
+                  html += `<div style="width: 1px; height: 14px; background: rgba(223, 159, 251, 0.15);"></div>`;
+                }
+                html += `
+                  <div style="display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; min-width: 0;">
+                    <span style="font-size: 7px; color: #a0aec0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${imp.label}</span>
+                    <div style="font-size: 10px; font-weight: bold; display: flex; align-items: center; gap: 3px; line-height: 1; color: #df9ffb;">
+                      ${imp.icon}
+                      <span style="white-space: nowrap;">${imp.value}</span>
+                    </div>
+                  </div>
+                `;
+              });
+              html += `</div><div style="border-top: 1px solid #333; margin: 8px 0;"></div>`;
+            }
+          }
+
+          if (item.type === "artifact") {
     html += `<div class="tt-trait">${item.breakdown}</div>`;
 
     // Only display potential extra rolls on preview (dummy) items to prevent clutter on equipped items
@@ -6428,8 +6472,8 @@ window.generateItemCardHtml = function (
       { key: "str", label: "STR", baseKey: "baseStr" },
       { key: "dex", label: "DEX", baseKey: "baseDex" },
       { key: "int", label: "INT", baseKey: "baseInt" },
-      { key: "critChance", label: "Crit Chance", isPct: true },
-      { key: "critDamage", label: "Crit Multi", isPct: true },
+      { key: "critChance", label: "Crit Chance", isPct: true, baseKey: "baseCritChance" },
+            { key: "critDamage", label: "Crit Multi", isPct: true, baseKey: "baseCritDamage" },
       {
         key: "block",
         label: "Block Rate",

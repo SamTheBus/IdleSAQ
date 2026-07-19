@@ -238,14 +238,15 @@ window.SaveManager = {
     };
 
     let saveData = {
-      playerStats: window.playerStats,
-      equippedSlots: enrichedEquippedSlots,
-      inventory: window.inventory,
-      idCounter: window.idCounter,
-      logsHistory: window.logsHistory,
-      frozenItemDb: window.frozenItemDb,
-      lastSaveTime: window.lastUpdateTime,
-    };
+          saveVersion: window.GAME_VERSION,
+          playerStats: window.playerStats,
+          equippedSlots: enrichedEquippedSlots,
+          inventory: window.inventory,
+          idCounter: window.idCounter,
+          logsHistory: window.logsHistory,
+          frozenItemDb: window.frozenItemDb,
+          lastSaveTime: window.lastUpdateTime,
+        };
 
     const serializedData = JSON.stringify(saveData);
 
@@ -332,16 +333,22 @@ window.SaveManager = {
     let now = Date.now();
 
     if (localDataRaw) {
-      try {
-        localParsed = JSON.parse(localDataRaw);
-        this.applyPayload(localParsed, true);
-        if (localParsed.lastSaveTime) {
-          offlineMsToApply = now - localParsed.lastSaveTime;
+          try {
+            localParsed = JSON.parse(localDataRaw);
+            if (!localParsed.saveVersion || localParsed.saveVersion < window.MIN_COMPATIBLE_VERSION) {
+              console.warn("[WIPE] Outdated local save version detected in SaveManager. Purging state.");
+              localStorage.removeItem("idle_saq_save");
+              localParsed = null;
+            } else {
+              this.applyPayload(localParsed, true);
+              if (localParsed.lastSaveTime) {
+                offlineMsToApply = now - localParsed.lastSaveTime;
+              }
+            }
+          } catch (e) {
+            console.error("Local save load failed", e);
+          }
         }
-      } catch (e) {
-        console.error("Local save load failed", e);
-      }
-    }
 
     if (!this.serverUrl) {
       if (offlineMsToApply > 0) {
@@ -355,29 +362,38 @@ window.SaveManager = {
       window.updateSyncStatus("syncing");
     }
     fetch(`${this.serverUrl}/api/load`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        let resolvedOfflineMs = offlineMsToApply;
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            let resolvedOfflineMs = offlineMsToApply;
 
-        if (data.success && data.saveData) {
-          let cloudTime = data.timestamp || 0;
-          let localTime = (localParsed && localParsed.lastSaveTime) || 0;
+            if (data.success && data.saveData) {
+              if (!data.saveData.saveVersion || data.saveData.saveVersion < window.MIN_COMPATIBLE_VERSION) {
+                console.warn("[WIPE] Outdated cloud save detected in SaveManager. Discarding.");
+                data.saveData = null;
+              }
 
-          if (cloudTime > localTime) {
-            console.log("☁️ Newer Cloud Save found! Syncing state...");
-            window.SaveManager.applyPayload(data.saveData, true);
-            resolvedOfflineMs = now - cloudTime;
-            localStorage.setItem(
-              "idle_saq_save",
-              JSON.stringify(data.saveData),
-            );
-          } else {
-            console.log("📱 Local progress is up to date.");
-          }
+              if (data.saveData) {
+                let cloudTime = data.timestamp || 0;
+                let localTime = (localParsed && localParsed.lastSaveTime) || 0;
+
+                if (cloudTime > localTime) {
+                  console.log("☁️ Newer Cloud Save found! Syncing state...");
+                  window.SaveManager.applyPayload(data.saveData, true);
+                  resolvedOfflineMs = now - cloudTime;
+                  localStorage.setItem(
+                    "idle_saq_save",
+                    JSON.stringify(data.saveData),
+                  );
+                } else {
+                  console.log("📱 Local progress is up to date.");
+                }
+              } else {
+                console.log("☁️ No compatible cloud save available. Staying on local progress.");
+              }
 
           if (data.clan) {
             window.playerStats.clanId = data.clan.id;
@@ -783,9 +799,9 @@ window.SaveManager = {
         }
       }
 
-      window.playerStats.xpReq = BigNum.from(100).mul(
-        BigNum.from(1.2).pow(window.playerStats.level - 1),
-      );
+      window.playerStats.xpReq = BigNum.from(1000).mul(
+              BigNum.from(1.45).pow(window.playerStats.level - 1),
+            );
 
       if (window.playerStats.unlockedAchievements) {
         window.playerStats.achievementTimestamps =
@@ -1068,25 +1084,25 @@ window.SaveManager = {
       window.playerStats.prestigeApproachTimer = 0;
 
       if (!window.playerStats.slotUpgrades) {
-              window.playerStats.slotUpgrades = {
-                weapon: 0,
-                subweapon: 0,
-                helmet: 0,
-                chest: 0,
-                leggings: 0,
-                overall: 0,
-                boots: 0,
-                ring1: 0,
-                ring2: 0,
-                art1: 0,
-                art2: 0,
-                art3: 0,
-              };
-            }
-            if (window.playerStats.slotUpgrades.ring1 === undefined) {
-              window.playerStats.slotUpgrades.ring1 = 0;
-              window.playerStats.slotUpgrades.ring2 = 0;
-            }
+                    window.playerStats.slotUpgrades = {
+                      weapon: 0,
+                      subweapon: 0,
+                      helmet: 0,
+                      chest: 0,
+                      leggings: 0,
+                      overall: 0,
+                      boots: 0,
+                      ring1: 0,
+                      ring2: 0,
+                      art1: 0,
+                      art2: 0,
+                      art3: 0,
+                    };
+                  }
+                  if (window.playerStats.slotUpgrades.ring1 === undefined) {
+                    window.playerStats.slotUpgrades.ring1 = 0;
+                    window.playerStats.slotUpgrades.ring2 = 0;
+                  }
       if (window.playerStats.slotUpgrades.art1 === undefined) {
         window.playerStats.slotUpgrades.art1 = 0;
         window.playerStats.slotUpgrades.art2 = 0;
@@ -1908,10 +1924,16 @@ window.abortCloudSyncAndPlayOffline = function () {
   if (localDataRaw) {
     try {
       localParsed = JSON.parse(localDataRaw);
-      window.applySaveStatePayload(localParsed, true);
-      window.recalculateXpRequirement();
-      if (localParsed.lastSaveTime) {
-        offlineMsToApply = now - localParsed.lastSaveTime;
+      if (!localParsed.saveVersion || localParsed.saveVersion < window.MIN_COMPATIBLE_VERSION) {
+        console.warn("[WIPE] Outdated local save version on offline bypass. Purging state.");
+        localStorage.removeItem("idle_saq_save");
+        localParsed = null;
+      } else {
+        window.applySaveStatePayload(localParsed, true);
+        window.recalculateXpRequirement();
+        if (localParsed.lastSaveTime) {
+          offlineMsToApply = now - localParsed.lastSaveTime;
+        }
       }
     } catch (e) {
       console.error("Local save load failed", e);
@@ -1970,10 +1992,16 @@ window.loadGameAndSyncCloud = function () {
   if (localDataRaw) {
     try {
       localParsed = JSON.parse(localDataRaw);
-      window.applySaveStatePayload(localParsed, true);
-      window.recalculateXpRequirement();
-      if (localParsed.lastSaveTime) {
-        offlineMsToApply = now - localParsed.lastSaveTime;
+      if (!localParsed.saveVersion || localParsed.saveVersion < window.MIN_COMPATIBLE_VERSION) {
+        console.warn("[WIPE] Outdated local save version detected in sync gateway. Purging state.");
+        localStorage.removeItem("idle_saq_save");
+        localParsed = null;
+      } else {
+        window.applySaveStatePayload(localParsed, true);
+        window.recalculateXpRequirement();
+        if (localParsed.lastSaveTime) {
+          offlineMsToApply = now - localParsed.lastSaveTime;
+        }
       }
     } catch (e) {
       console.error("Local save load failed", e);
@@ -2016,31 +2044,40 @@ window.loadGameAndSyncCloud = function () {
   window.cloudSyncAbortController = new AbortController();
 
   fetch(`${window.GAME_SERVER_URL}/api/load`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
-    signal: window.cloudSyncAbortController.signal,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (window.offlineGraceTimeoutId)
-        clearTimeout(window.offlineGraceTimeoutId);
-      window.cloudSyncAbortController = null;
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+      signal: window.cloudSyncAbortController.signal,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (window.offlineGraceTimeoutId)
+          clearTimeout(window.offlineGraceTimeoutId);
+        window.cloudSyncAbortController = null;
 
-      let resolvedOfflineMs = offlineMsToApply;
+        let resolvedOfflineMs = offlineMsToApply;
 
-      if (data.success && data.saveData) {
-        let cloudTime = data.timestamp || 0;
-        let localTime = (localParsed && localParsed.lastSaveTime) || 0;
+        if (data.success && data.saveData) {
+          if (!data.saveData.saveVersion || data.saveData.saveVersion < window.MIN_COMPATIBLE_VERSION) {
+            console.warn("[WIPE] Outdated cloud save detected. Discarding.");
+            data.saveData = null;
+          }
 
-        if (cloudTime > localTime) {
-          console.log("☁️ Newer Cloud Save found! Syncing state...");
-          window.applySaveStatePayload(data.saveData, true);
-          resolvedOfflineMs = now - cloudTime;
-          localStorage.setItem("idle_saq_save", JSON.stringify(data.saveData));
-        } else {
-          console.log("📱 Local progress is up to date.");
-        }
+          if (data.saveData) {
+            let cloudTime = data.timestamp || 0;
+            let localTime = (localParsed && localParsed.lastSaveTime) || 0;
+
+            if (cloudTime > localTime) {
+              console.log("☁️ Newer Cloud Save found! Syncing state...");
+              window.applySaveStatePayload(data.saveData, true);
+              resolvedOfflineMs = now - cloudTime;
+              localStorage.setItem("idle_saq_save", JSON.stringify(data.saveData));
+            } else {
+              console.log("📱 Local progress is up to date.");
+            }
+          } else {
+            console.log("☁️ No compatible cloud save available. Staying on local progress.");
+          }
 
         if (data.clan) {
           window.playerStats.clanId = data.clan.id;
@@ -4049,12 +4086,14 @@ function update() {
   }
 
   if (
-    window.activeFairies.length === 0 &&
-    !window.playerStats.isCrucibleMode &&
-    Math.random() < 0.00005
-  ) {
-    let val = p.fairySpawn;
-    let numToSpawn = 0;
+      window.activeFairies.length === 0 &&
+      !window.playerStats.isCrucibleMode &&
+      Math.random() < 0.00005
+    ) {
+      window.playerStats.fairiesClickedInSet = 0;
+      window.playerStats.fairiesEquipDroppedInSet = 0;
+      let val = p.fairySpawn;
+      let numToSpawn = 0;
     if (val < 1.0) {
       if (Math.random() < val) numToSpawn = 1;
     } else {
@@ -5585,13 +5624,14 @@ window.CombatEngine = {
     }
 
     // Universal Overkill Splash / Stage-Skip Mechanic (Now available in Dungeons!)
-    if (
-      window.mob &&
-      window.mob.hp.lt(0) &&
-      !window.playerStats.isCrucibleMode &&
-      !window.playerStats.isBossMode &&
-      !window.playerStats.isFarmingLoop
-    ) {
+        if (
+          window.mob &&
+          window.mob.hp.lt(0) &&
+          !window.playerStats.isCrucibleMode &&
+          !window.playerStats.isBossMode &&
+          !window.playerStats.isFarmingLoop &&
+          window.playerStats.stage < window.playerStats.maxStage
+        ) {
       let b_absHp = new BigNum(Math.abs(window.mob.hp.m), window.mob.hp.e);
       let b_maxHp = BigNum.from(window.mob.maxHp);
       let ratioNum = b_absHp.div(b_maxHp);
@@ -7166,25 +7206,22 @@ window.CombatEngine = {
       if (peakEl) peakEl.innerText = `${dName} Floor ${dungeonFloor}`;
       if (retreatEl) retreatEl.innerText = `Campaign Stage ${restartStage}`;
     } else {
-      // Campaign only rollback condition (Dungeons, Crucible, Altar Uber Bosses, and Prestige Bosses bypass rollback)
-      let isOutsideCampaign = wasUber || wasPrestige || wasCrucible;
-      if (isOutsideCampaign) {
-        restartStage = window.playerStats.stage;
-        if (peakEl)
-          peakEl.innerText = wasUber ? "Rift Guardian" : "Prestige Boss";
-        if (retreatEl) retreatEl.innerText = `Campaign Stage ${restartStage}`;
-      } else {
-        // Standard campaign death (mobs or stage bosses) -> Rollback applied
-        restartStage = Math.max(
-          1,
-          Math.floor((window.playerStats.maxStage || 1) * rollbackPercent),
-        );
-        window.playerStats.stage = restartStage;
-        if (peakEl)
-          peakEl.innerText = `Stage ${window.playerStats.maxStage || 1}`;
-        if (retreatEl) retreatEl.innerText = `Stage ${restartStage}`;
-      }
-    }
+            // Campaign only rollback condition (Dungeons, Crucible, Altar Uber Bosses, and Prestige Bosses bypass rollback)
+            let isOutsideCampaign = wasUber || wasPrestige || wasCrucible;
+            if (isOutsideCampaign) {
+              restartStage = window.playerStats.stage;
+              if (peakEl)
+                peakEl.innerText = wasUber ? "Rift Guardian" : "Prestige Boss";
+              if (retreatEl) retreatEl.innerText = `Campaign Stage ${restartStage}`;
+            } else {
+              // Standard campaign death (mobs or stage bosses) -> No rollback, stay on current stage
+              restartStage = window.playerStats.stage;
+              window.playerStats.stage = restartStage;
+              if (peakEl)
+                peakEl.innerText = `Stage ${window.playerStats.maxStage || 1}`;
+              if (retreatEl) retreatEl.innerText = `Stage ${restartStage}`;
+            }
+          }
 
     if (killsEl)
       killsEl.innerText = window.formatNumber(window.playerStats.runKills || 0);
@@ -7293,13 +7330,13 @@ window.CombatEngine = {
     window.updateUI();
 
     if (wasDungeon)
-      window.pushLog(
-        `<span style='color:#e74c3c; font-weight:bold;'>[DUNGEON STAGE FAILIURE] Died on Dungeon Floor. Safely returned to Campaign Stage ${restartStage}.</span>`,
-      );
-    else
-      window.pushLog(
-        `<span style='color:#e74c3c; font-weight:bold;'>[DEFEATED] Returned to Stage ${restartStage} (${Math.round(rollbackPercent * 100)}% of Max Stage). No equipment lost!</span>`,
-      );
+          window.pushLog(
+            `<span style='color:#e74c3c; font-weight:bold;'>[DUNGEON STAGE FAILIURE] Died on Dungeon Floor. Safely returned to Campaign Stage ${restartStage}.</span>`,
+          );
+        else
+          window.pushLog(
+            `<span style='color:#e74c3c; font-weight:bold;'>[DEFEATED] Returned to the start of Stage ${restartStage}. No equipment or stage progress lost!</span>`,
+          );
 
     const overlayEl = document.getElementById("death-overlay");
     const canvasContainer = document.getElementById("canvas-container");
@@ -8410,114 +8447,133 @@ window.triggerFairyLoot = function (targetFairy) {
     }
   }
 
-  if (Math.random() < 0.2) {
-    let goldYield = Math.floor((100 + window.playerStats.stage * 35) * p.gold);
-    if (goldYield > 0 && window.goldParticles) {
-      let particleCount = Math.min(
-        12,
-        Math.max(4, Math.floor(Math.log10(goldYield + 1) * 3)),
-      );
-      let baseAmt = Math.floor(goldYield / particleCount);
-      let remainder = goldYield % particleCount;
+  window.playerStats.fairiesClickedInSet = (window.playerStats.fairiesClickedInSet || 0) + 1;
 
-      for (let i = 0; i < particleCount; i++) {
-        let pAmt = baseAmt + (i < remainder ? 1 : 0);
-        window.goldParticles.push({
+      let rollEquip = false;
+      let equipChance = 0.10; // Base 10% chance
+      if (p.fairySpawn > 1.0 && window.playerStats.fairiesClickedInSet > 1) {
+        equipChance = 0.01; // 1% chance for subsequent fairies if spawn rate is > 100%
+      }
+      if ((window.playerStats.fairiesEquipDroppedInSet || 0) >= 2) {
+        equipChance = 0.0; // Max of 2 Equipment per set
+      }
+
+      if (Math.random() < equipChance) {
+        rollEquip = true;
+        window.playerStats.fairiesEquipDroppedInSet = (window.playerStats.fairiesEquipDroppedInSet || 0) + 1;
+      }
+
+      if (rollEquip) {
+        let types = [
+          "weapon",
+          "subweapon",
+          "helmet",
+          "chest",
+          "leggings",
+          "overall",
+          "boots",
+        ];
+        let chosenType = types[Math.floor(Math.random() * types.length)];
+        let statLinesCount = 0;
+        let luckMultiplier = p.qly;
+        let roll = Math.random() * 100;
+
+        if (roll < 0.01 * luckMultiplier) statLinesCount = 5;
+        else if (roll < 0.05 * luckMultiplier) statLinesCount = 4;
+        else if (roll < 0.5 * luckMultiplier) statLinesCount = 3;
+        else if (roll < 2.5 * luckMultiplier) statLinesCount = 2;
+        else if (roll < 10.0 * luckMultiplier) statLinesCount = 1;
+        else statLinesCount = 0;
+
+        let activeStage =
+          window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+        if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
+          activeStage =
+            window.playerStats.currentDungeonStage[
+              window.playerStats.currentDungeon
+            ] || 1;
+        } else if (window.playerStats.isUberBoss) {
+          let riftLvl = window.playerStats.activeRiftLevel || 1;
+          activeStage = 50 + riftLvl * 10;
+        }
+        let stageScale = Math.floor((activeStage - 1) / 5) + 1;
+        let newItem = window.createItemObject(
+          chosenType,
+          statLinesCount,
+          stageScale,
+          0,
+        );
+
+        if (window.checkAutoSalvage(newItem, false)) {
+          window.beams.push({
+            x: spawnX,
+            color: window.getTierColor(newItem.statsRolled),
+            life: 35,
+            maxLife: 35,
+          });
+          window.checkAchievements();
+          window.updateUI();
+          return;
+        }
+
+        if (window.inventory.EQUIP.length >= maxBag) {
+          window.pushHeaderToast(`Bag Full! Soul gained.`, "#e74c3c");
+          window.addEtcDrop("Monster Soul", 5);
+          return;
+        }
+
+        window.inventory.EQUIP.push(newItem);
+        window.pushLog(
+          `<strong style='color:#ffb6c1;'>[FAIRY]</strong> Dropped: <span style='color:${window.getTierColor(newItem.statsRolled)};'>${newItem.name}</span>`,
+          newItem.id,
+        );
+
+        let color = window.getTierColor(newItem.statsRolled);
+        window.beams.push({ x: spawnX, color: color, life: 35, maxLife: 35 });
+
+        window.pushToast(newItem.name, newItem.statsRolled, color);
+        window.checkAchievements();
+        window.updateUI();
+        window.renderInventory();
+        if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+      } else {
+        // Fallback gold drop when equipment rolls fail or are capped
+        let goldYield = Math.floor((100 + window.playerStats.stage * 35) * p.gold);
+        if (goldYield > 0 && window.goldParticles) {
+          let particleCount = Math.min(
+            12,
+            Math.max(4, Math.floor(Math.log10(goldYield + 1) * 3)),
+          );
+          let baseAmt = Math.floor(goldYield / particleCount);
+          let remainder = goldYield % particleCount;
+
+          for (let i = 0; i < particleCount; i++) {
+            let pAmt = baseAmt + (i < remainder ? 1 : 0);
+            window.goldParticles.push({
+              x: spawnX,
+              y: spawnY,
+              vx: window.randFloat(-4, 4),
+              vy: window.randFloat(-6, -2),
+              life: 120,
+              delay: i * 2,
+              amount: pAmt,
+              isDungeon: window.playerStats.isDungeonMode,
+              isCrucible: window.playerStats.isCrucibleMode,
+            });
+          }
+        }
+        window.effects.push({
           x: spawnX,
-          y: spawnY,
-          vx: window.randFloat(-4, 4),
-          vy: window.randFloat(-6, -2),
-          life: 120,
-          delay: i * 2,
-          amount: pAmt,
-          isDungeon: window.playerStats.isDungeonMode,
-          isCrucible: window.playerStats.isCrucibleMode,
+          y: spawnY - 10,
+          text: `+${goldYield} Gold!`,
+          color: "#f1c40f",
+          life: 80,
         });
       }
+    if (typeof window.saveGame === "function") {
+      window.saveGame();
     }
-    window.effects.push({
-      x: spawnX,
-      y: spawnY - 10,
-      text: `+${goldYield} Gold!`,
-      color: "#f1c40f",
-      life: 80,
-    });
-    return;
-  }
-
-  let types = [
-    "weapon",
-    "subweapon",
-    "helmet",
-    "chest",
-    "leggings",
-    "overall",
-    "boots",
-  ];
-  let chosenType = types[Math.floor(Math.random() * types.length)];
-  let statLinesCount = 0;
-  let luckMultiplier = p.qly;
-  let roll = Math.random() * 100;
-
-  if (roll < 0.01 * luckMultiplier) statLinesCount = 5;
-  else if (roll < 0.05 * luckMultiplier) statLinesCount = 4;
-  else if (roll < 0.5 * luckMultiplier) statLinesCount = 3;
-  else if (roll < 2.5 * luckMultiplier) statLinesCount = 2;
-  else if (roll < 10.0 * luckMultiplier) statLinesCount = 1;
-  else statLinesCount = 0;
-
-  let activeStage =
-    window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-  if (window.playerStats.isDungeonMode && window.playerStats.currentDungeon) {
-    activeStage =
-      window.playerStats.currentDungeonStage[
-        window.playerStats.currentDungeon
-      ] || 1;
-  } else if (window.playerStats.isUberBoss) {
-    let riftLvl = window.playerStats.activeRiftLevel || 1;
-    activeStage = 50 + riftLvl * 10;
-  }
-  let stageScale = Math.floor((activeStage - 1) / 5) + 1;
-  let newItem = window.createItemObject(
-    chosenType,
-    statLinesCount,
-    stageScale,
-    0,
-  );
-
-  if (window.checkAutoSalvage(newItem, false)) {
-    window.beams.push({
-      x: spawnX,
-      color: window.getTierColor(newItem.statsRolled),
-      life: 35,
-      maxLife: 35,
-    });
-    window.checkAchievements();
-    window.updateUI();
-    return;
-  }
-
-  if (window.inventory.EQUIP.length >= maxBag) {
-    window.pushHeaderToast(`Sacks Full! Soul gathered.`, "#e74c3c");
-    window.addEtcDrop("Monster Soul", 5);
-    return;
-  }
-
-  window.inventory.EQUIP.push(newItem);
-  window.pushLog(
-    `<strong style='color:#ffb6c1;'>[FAIRY]</strong> Dropped: <span style='color:${window.getTierColor(newItem.statsRolled)};'>${newItem.name}</span>`,
-    newItem.id,
-  );
-
-  let color = window.getTierColor(newItem.statsRolled);
-  window.beams.push({ x: spawnX, color: color, life: 35, maxLife: 35 });
-
-  window.pushToast(newItem.name, newItem.statsRolled, color);
-  window.checkAchievements();
-  window.updateUI();
-  window.renderInventory();
-  if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-};
+  };
 
 window.saveCurrentActivityPeak = function () {
   if (window.playerStats.isCrucibleMode) {
@@ -8979,12 +9035,15 @@ window.rollEquipmentDrop = function (
       newItem.statsRolled,
     );
   if (!silent) {
-    window.checkAchievements();
-    window.renderInventory();
-    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-    window.updateUI();
-  }
-};
+      window.checkAchievements();
+      window.renderInventory();
+      if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+      window.updateUI();
+    }
+    if (typeof window.saveGame === "function") {
+      window.saveGame();
+    }
+  };
 
 window.generateEquipment = function (
   chosenType,
@@ -9054,12 +9113,15 @@ window.generateEquipment = function (
       item.statsRolled,
     );
   if (!silent) {
-    window.checkAchievements();
-    window.renderInventory();
-    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-    window.updateUI();
-  }
-};
+      window.checkAchievements();
+      window.renderInventory();
+      if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+      window.updateUI();
+    }
+    if (typeof window.saveGame === "function") {
+      window.saveGame();
+    }
+  };
 
 window.rollGachaDrop = function () {
   let p = window.resolvePlayerStats();
