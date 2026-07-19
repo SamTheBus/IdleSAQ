@@ -2541,21 +2541,24 @@ window.changeVolume = function (type, val) {
 
 window.toggleMute = function () {
   window.playerStats.mute = !window.playerStats.mute;
+  if ('audioSession' in navigator && window.playerStats) {
+    try {
+      // Revert session type back to ambient to release system playback focus if muted
+      navigator.audioSession.type = window.playerStats.mute ? "ambient" : (window.playerStats.audioSessionMode || "ambient");
+    } catch (err) {
+      console.warn("Failed to set audio session type on mute toggle:", err);
+    }
+  }
   if (!window.playerStats.mute) {
     if (window.SoundManager && typeof window.SoundManager.init === "function") {
       window.SoundManager.init();
     }
-    // Set to configured audio session mode on unmute
-    if ('audioSession' in navigator && window.playerStats) {
-      try {
-        navigator.audioSession.type = window.playerStats.audioSessionMode || 'ambient';
-      } catch (err) {
-        console.warn("Failed to set audio session type on unmute:", err);
-      }
-    }
   }
   window.updateAudioUI();
   window.SoundManager.updateVolumes();
+  if (typeof window.updateMediaSession === "function") {
+    window.updateMediaSession();
+  }
   window.saveGame();
 };
 
@@ -18954,8 +18957,16 @@ window.playGlobalUnlockAnimation = function (
 };
 
 window.updateMediaSession = function () {
-  // Only update Lock Screen / Dynamic Island parameters if game has primary playback focus
-  if ("mediaSession" in navigator && window.playerStats && navigator.audioSession && navigator.audioSession.type === "playback") {
+  if (!("mediaSession" in navigator)) return;
+
+  // Verify whether active audio is configured to take lockscreen priority
+  let isPlaybackActive = window.playerStats &&
+                         !window.playerStats.mute &&
+                         window.playerStats.audioSessionMode === "playback" &&
+                         navigator.audioSession &&
+                         navigator.audioSession.type === "playback";
+
+  if (isPlaybackActive) {
     let p = window.playerStats;
     let titleStr = `Stage ${p.stage} - Level ${p.level}`;
     if (p.isDungeonMode && p.currentDungeon) {
@@ -18977,5 +18988,10 @@ window.updateMediaSession = function () {
         },
       ],
     });
+    navigator.mediaSession.playbackState = "playing";
+  } else {
+    // Explicitly release and clear media metadata to instantly dismantle iOS media player cards
+    navigator.mediaSession.metadata = null;
+    navigator.mediaSession.playbackState = "none";
   }
 };

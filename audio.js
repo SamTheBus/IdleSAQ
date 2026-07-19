@@ -11,16 +11,19 @@ window.SoundManager = {
   sfxGain: null,
   cachedNoiseBuffer: null, // Cached to prevent real-time GC stutters on iOS
 
-  init() {
-    // Force iOS Safari to map Web Audio API output to the system media playback channel
-    // instead of ambient sound, completely ignoring the physical Ring/Silent mute switch.
-    if (navigator.audioSession) {
-      try {
-        navigator.audioSession.type = "playback";
-      } catch (e) {
-        console.warn("Could not set iOS AudioSession category:", e);
-      }
-    }
+      init() {
+          // Map iOS AudioSession category dynamically based on preferred mode & mute state
+          if (navigator.audioSession) {
+            try {
+              let targetType = "ambient";
+              if (window.playerStats && !window.playerStats.mute) {
+                targetType = window.playerStats.audioSessionMode || "ambient";
+              }
+              navigator.audioSession.type = targetType;
+            } catch (e) {
+              console.warn("Could not set iOS AudioSession category:", e);
+            }
+          }
 
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return false;
@@ -1656,14 +1659,15 @@ window.MusicManager = {
     }
 
     // Resolve volume levels through settings
-    let isMuted = window.playerStats ? window.playerStats.mute : false;
-    let musicVolSetting =
-      window.playerStats && window.playerStats.volumeMusic !== undefined
-        ? window.playerStats.volumeMusic
-        : 0.5;
+        let isAmbientMode = window.playerStats && window.playerStats.audioSessionMode === "ambient";
+        let isMuted = window.playerStats ? (window.playerStats.mute || isAmbientMode) : false;
+        let musicVolSetting =
+          window.playerStats && window.playerStats.volumeMusic !== undefined
+            ? window.playerStats.volumeMusic
+            : 0.5;
 
-    // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
-    let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
+        // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
+        let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
 
     if (this.currentState !== state) {
       this.currentState = state;
