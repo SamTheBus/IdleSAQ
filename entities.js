@@ -8875,8 +8875,8 @@
     // 2. BACKGROUND SCENERY & VEGETATION (Every element outlined)
         window.bgScenery.forEach((s) => {
           s.seed = s.seed || Math.random();
-          // Prune background drawing cycles by 55% in Eco Mode to lower CPU temperature
-          if (window.playerStats && window.playerStats.ecoMode && s.seed > 0.45) return;
+          // Prune background drawing cycles by 20% in Eco Mode to balance visual density and CPU temperature
+          if (window.playerStats && window.playerStats.ecoMode && s.seed > 0.80) return;
           let ts = s.size;
           ctx.save();
           ctx.strokeStyle = "#000000";
@@ -10328,8 +10328,8 @@
             sy = s.y,
             ss = s.size;
           s.seed = s.seed || Math.random();
-          // Prune foreground drawing cycles by 65% in Eco Mode to lower CPU temperature
-          if (window.playerStats && window.playerStats.ecoMode && s.seed > 0.35) return;
+          // Prune foreground drawing cycles by 25% in Eco Mode to balance visual density and CPU temperature
+          if (window.playerStats && window.playerStats.ecoMode && s.seed > 0.75) return;
 
           ctx.save();
           ctx.strokeStyle = "#000000";
