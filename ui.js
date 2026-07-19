@@ -2479,6 +2479,7 @@ window.updateAudioUI = function () {
   let sfxLabel = document.getElementById("vol-sfx-label");
   let musicLabel = document.getElementById("vol-music-label");
   let muteBtn = document.getElementById("btn-audio-mute");
+  let sessionModeBtn = document.getElementById("btn-audio-session-mode");
 
   if (masterSlider) masterSlider.value = window.playerStats.volumeMaster;
   if (sfxSlider) sfxSlider.value = window.playerStats.volumeSFX;
@@ -2508,6 +2509,18 @@ window.updateAudioUI = function () {
       muteBtn.style.background = "#c0392b";
     }
   }
+  if (sessionModeBtn && window.playerStats) {
+    let mode = window.playerStats.audioSessionMode || "ambient";
+    if (mode === "ambient") {
+      sessionModeBtn.innerText = "🎧 Spotify Mixer (Ambient)";
+      sessionModeBtn.style.background = "#1abc9c";
+      sessionModeBtn.style.borderColor = "#16a085";
+    } else {
+      sessionModeBtn.innerText = "🏝️ Island Takeover (Playback)";
+      sessionModeBtn.style.background = "#9b59b6";
+      sessionModeBtn.style.borderColor = "#8e44ad";
+    }
+  }
 };
 
 window.changeVolume = function (type, val) {
@@ -2532,16 +2545,36 @@ window.toggleMute = function () {
     if (window.SoundManager && typeof window.SoundManager.init === "function") {
       window.SoundManager.init();
     }
-    if (window.MusicManager && typeof window.MusicManager.init === "function") {
-      window.MusicManager.init();
-    }
-    // Set to ambient on unmute so Spotify mixes alongside game sounds
-    if ('audioSession' in navigator) {
-      navigator.audioSession.type = 'ambient';
+    // Set to configured audio session mode on unmute
+    if ('audioSession' in navigator && window.playerStats) {
+      try {
+        navigator.audioSession.type = window.playerStats.audioSessionMode || 'ambient';
+      } catch (err) {
+        console.warn("Failed to set audio session type on unmute:", err);
+      }
     }
   }
   window.updateAudioUI();
   window.SoundManager.updateVolumes();
+  window.saveGame();
+};
+
+window.toggleAudioSessionMode = function () {
+  if (!window.playerStats) return;
+  window.playerStats.audioSessionMode = window.playerStats.audioSessionMode === "ambient" ? "playback" : "ambient";
+
+  if (!window.playerStats.mute && 'audioSession' in navigator) {
+    try {
+      navigator.audioSession.type = window.playerStats.audioSessionMode;
+    } catch (e) {
+      console.warn("Failed to dynamically set audio session type:", e);
+    }
+  }
+
+  window.updateAudioUI();
+  if (typeof window.updateMediaSession === "function") {
+    window.updateMediaSession();
+  }
   window.saveGame();
 };
 
@@ -18921,7 +18954,7 @@ window.playGlobalUnlockAnimation = function (
 };
 
 window.updateMediaSession = function () {
-  // Only update Lock Screen / Dynamic Island parameters if game has primary focus (not in ambient mode)
+  // Only update Lock Screen / Dynamic Island parameters if game has primary playback focus
   if ("mediaSession" in navigator && window.playerStats && navigator.audioSession && navigator.audioSession.type === "playback") {
     let p = window.playerStats;
     let titleStr = `Stage ${p.stage} - Level ${p.level}`;
@@ -18938,8 +18971,8 @@ window.updateMediaSession = function () {
       album: "Idle SAQ: Slaying and Questing",
       artwork: [
         {
-          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 L19 8 L18 21 L14 21 L13.5 10 Z' fill='%2300d2ff' stroke='%230f172a' stroke-width='1.2'/%3E%3C/svg%3E",
-          sizes: "96x96",
+          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Ccircle cx='64' cy='64' r='58' fill='%230d0e12' stroke='%23a855f7' stroke-width='4'/%3E%3Ccircle cx='64' cy='64' r='48' fill='none' stroke='%232c0e3a' stroke-width='2' stroke-dasharray='4 3'/%3E%3Cg transform='translate%2864,64%29 rotate%28-45%29 translate%28-64,-64%29'%3E%3Cpath d='M60 20 L64 10 L68 20 L66 75 L62 75 Z' fill='%2300d2ff' opacity='0.5'/%3E%3Cpath d='M61 22 L64 12 L67 22 L65 74 L63 74 Z' fill='%23ffffff' stroke='%2300d2ff' stroke-width='1.5'/%3E%3Cline x1='64' y1='14' x2='64' y2='74' stroke='%230099ff' stroke-width='1'/%3E%3Cpath d='M52 74 H76 V78 H52 Z' fill='%23ffd700' stroke='%230f172a' stroke-width='1.5'/%3E%3Crect x='61' y='78' width='6' height='18' fill='%231e293b' stroke='%230f172a' stroke-width='1.2'/%3E%3Ccircle cx='64' cy='98' r='4' fill='%2300d2ff' stroke='%230f172a' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E",
+          sizes: "128x128",
           type: "image/svg+xml",
         },
       ],

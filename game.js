@@ -2728,14 +2728,24 @@ window.onload = function () {
         return;
       }
 
-      // Set to 'ambient' to allow parallel mixing with background music (Spotify)
-      if ('audioSession' in navigator) {
-        navigator.audioSession.type = 'ambient';
+      // Set audio session type according to preferred mode
+      if ('audioSession' in navigator && window.playerStats) {
+        try {
+          navigator.audioSession.type = window.playerStats.audioSessionMode || "ambient";
+        } catch (err) {
+          console.warn("Failed to set audio session type:", err);
+        }
       }
 
       window.SoundManager.init();
+
+      // Disable or enable BGM based on audio mode to prevent interrupting Spotify
       if (window.MusicManager) {
-        window.MusicManager.init(); // Starts and loops your BGM adaptively on first click
+        if (window.playerStats && window.playerStats.audioSessionMode === "ambient") {
+          console.log("[AUDIO] BGM disabled in Ambient mode to prevent interrupting Spotify.");
+        } else {
+          window.MusicManager.init(); // Starts and loops your BGM adaptively on first click
+        }
       }
 
       // Force-unlock all mobile Web Audio context threads on touch/tap events
