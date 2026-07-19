@@ -76,6 +76,10 @@ class BigNum {
     this.normalize();
   }
 
+  valueOf() {
+    return this.m * Math.pow(10, this.e);
+  }
+
   normalize() {
     if (this.m === 0) {
       this.e = 0;
@@ -333,7 +337,8 @@ window.getDepthQualityMultiplier = function (stage) {
 };
 
 // Initialize transaction-safe GameState manager
-window.GameState = {
+window.GameState = window.GameState || {};
+Object.assign(window.GameState, {
   gainXp(amount, isOffline = false) {
     let amt = BigNum.from(amount);
     if (amt.lte(0)) return;
@@ -491,18 +496,18 @@ window.GameState = {
   },
 
   spendCoins(amount) {
-    let amt = BigNum.from(amount);
-    if (amt.lte(0)) return false;
-    let coins = BigNum.from(window.playerStats.coins);
-    if (coins.lt(amt)) return false;
-    window.playerStats.coins = coins.sub(amt);
-    if (window.playerStats.coins.eq(0)) {
-      window.playerStats.hasTriggeredExactChange = true;
-    }
-    if (typeof window.updateUI === "function") window.updateUI();
-    return true;
-  },
-};
+      let amt = BigNum.from(amount);
+      if (amt.lte(0)) return false;
+      let coins = BigNum.from(window.playerStats.coins);
+      if (coins.lt(amt)) return false;
+      window.playerStats.coins = coins.sub(amt);
+      if (window.playerStats.coins.eq(0)) {
+        window.playerStats.hasTriggeredExactChange = true;
+      }
+      if (typeof window.updateUI === "function") window.updateUI();
+      return true;
+    },
+  });
 
 // Legacy Compatibility Aliases to protect references
 window.gainXp = (amount, isOffline) =>
@@ -826,22 +831,19 @@ window.checkAchievements = function () {
     }
   });
   if (unlockedAny) {
-    window.recalculateAchievementTotals();
-    if (
-      typeof window.resolvePlayerStats === "function" &&
-      typeof window.updateUI === "function"
-    ) {
-      let p = window.resolvePlayerStats();
-      window.playerStats.currentHp = Math.min(
-        window.playerStats.currentHp,
-        p.maxHp,
-      );
-      window.updateUI();
-      if (typeof window.renderInventory === "function")
-        window.renderInventory();
-      if (typeof window.saveGame === "function") window.saveGame();
+      window.recalculateAchievementTotals();
+      if (
+        typeof window.resolvePlayerStats === "function" &&
+        typeof window.updateUI === "function"
+      ) {
+        let p = window.resolvePlayerStats();
+        window.playerStats.currentHp = window.playerStats.currentHp.gt(p.maxHp) ? p.maxHp : window.playerStats.currentHp;
+        window.updateUI();
+        if (typeof window.renderInventory === "function")
+          window.renderInventory();
+        if (typeof window.saveGame === "function") window.saveGame();
+      }
     }
-  }
 };
 
 window.isCavernEffectActive = function (id) {
@@ -920,19 +922,29 @@ window.hasUniquePassive = function (uniqueKey) {
         window.equippedSlots.subweapon.isUniqueChronicle
       );
     case "boots_warpcore":
-      return !!(
-        window.equippedSlots.boots &&
-        window.equippedSlots.boots.isUniqueWarpCore
-      );
-    case "helmet_tempest":
-      return !!(
-        window.equippedSlots.helmet &&
-        window.equippedSlots.helmet.isUniqueTempest
-      );
-    default:
-      return false;
-  }
-};
+          return !!(
+            window.equippedSlots.boots &&
+            window.equippedSlots.boots.isUniqueWarpCore
+          );
+        case "helmet_tempest":
+          return !!(
+            window.equippedSlots.helmet &&
+            window.equippedSlots.helmet.isUniqueTempest
+          );
+        case "dagger_viper":
+          return !!(
+            window.equippedSlots.subweapon &&
+            window.equippedSlots.subweapon.isUniqueViper
+          );
+        case "tome_conduit":
+          return !!(
+            window.equippedSlots.subweapon &&
+            window.equippedSlots.subweapon.isUniqueConduit
+          );
+        default:
+          return false;
+      }
+    };
 
 window.getArtifactTemperLevel = function (trait) {
   if (!window.equippedSlots) return 0;
@@ -1006,9 +1018,9 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   let p = {
-    atk: 0,
-    maxHp: 0,
-    def: 0,
+    atk: BigNum.from(0),
+    maxHp: BigNum.from(0),
+    def: BigNum.from(0),
     moveSpeed: window.playerStats.baseMoveSpeed,
     idleAttackSpeed: window.playerStats.baseIdleSpeed,
     activeAttackSpeed: window.playerStats.baseActiveSpeed,
@@ -1067,7 +1079,7 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
   let aT = window.playerStats.cachedAchievementBonusTotals;
 
-  p.def += aT.def;
+  p.def = BigNum.from(p.def).add(aT.def);
   p.moveSpeed += aT.moveSpeed;
   p.critChance += aT.critChance;
   p.critDamage += aT.critDamage;
@@ -1116,89 +1128,89 @@ window.resolvePlayerStats = function (useDraft = false) {
     });
   }
 
-  let flatGearAtk = 0;
-    let flatGearHp = 0;
-    let flatGearDef = 0;
-    let itemAtkPct = 0;
-    let itemHpPct = 0;
-    let itemDefPct = 0;
-    let itemSpdPct = 0;
-    let itemStrPct = 0;
-    let itemDexPct = 0;
-    let itemIntPct = 0;
-    let idleSpeedPct = 0.0 + (aT.idleSpeedPct || 0);
-    let activeSpeedPct = 0.0 + (aT.activeSpeedPct || 0);
+  let flatGearAtk = BigNum.from(0);
+  let flatGearHp = BigNum.from(0);
+  let flatGearDef = BigNum.from(0);
+  let itemAtkPct = 0;
+  let itemHpPct = 0;
+  let itemDefPct = 0;
+  let itemSpdPct = 0;
+  let itemStrPct = 0;
+  let itemDexPct = 0;
+  let itemIntPct = 0;
+  let idleSpeedPct = 0.0 + (aT.idleSpeedPct || 0);
+  let activeSpeedPct = 0.0 + (aT.activeSpeedPct || 0);
 
-    for (let key in window.equippedSlots) {
-      let item = window.equippedSlots[key];
-      if (item) {
-        let slotLvl =
-          (window.playerStats.slotUpgrades &&
-            window.playerStats.slotUpgrades[key]) ||
-          0;
-        let runBonus =
-          (window.playerStats.isCrucibleMode &&
-            p.crucibleSlotBonuses &&
-            p.crucibleSlotBonuses[key]) ||
-          0;
-        let slotMult = 1.0 + slotLvl * 0.01 + runBonus;
+  for (let key in window.equippedSlots) {
+    let item = window.equippedSlots[key];
+    if (item) {
+      let slotLvl =
+        (window.playerStats.slotUpgrades &&
+          window.playerStats.slotUpgrades[key]) ||
+        0;
+      let runBonus =
+        (window.playerStats.isCrucibleMode &&
+          p.crucibleSlotBonuses &&
+          p.crucibleSlotBonuses[key]) ||
+        0;
+      let slotMult = 1.0 + slotLvl * 0.01 + runBonus;
 
-        // Flat base additions from Forge Slot Attunements (completely level-independent!)
-        if (key === "weapon") flatGearAtk += slotLvl * 15;
-        if (key === "chest" || key === "leggings" || key === "overall") {
-          flatGearHp += slotLvl * 50;
-          flatGearDef += slotLvl * 10;
-        }
-        if (key === "ring1" || key === "ring2") {
-          flatGearAtk += slotLvl * 10;
-          flatGearHp += slotLvl * 30;
-        }
-        if (key === "boots") {
-          p.moveSpeed += slotLvl * 2;
-        }
-
-        // Flat item stats
-        flatGearAtk += (item.atk || 0) * slotMult;
-        flatGearHp += (item.maxHp || 0) * slotMult;
-        flatGearDef += (item.def || 0) * slotMult;
-        p.moveSpeed += (item.moveSpeed || 0) * slotMult;
-
-        let itemIdleSpeed = item.idleAttackSpeed || 0;
-        if (itemIdleSpeed < 0) itemIdleSpeed = Math.abs(itemIdleSpeed) * 0.05;
-        idleSpeedPct += itemIdleSpeed * slotMult;
-
-        let itemActiveSpeed = item.activeAttackSpeed || 0;
-        if (itemActiveSpeed < 0)
-          itemActiveSpeed = Math.abs(itemActiveSpeed) * 0.05;
-        activeSpeedPct += itemActiveSpeed * slotMult;
-
-        p.drop += (item.dropRate || 0) * slotMult;
-        p.qly += (item.quality || 0) * slotMult;
-        p.gold += (item.goldMulti || 0) * slotMult;
-        p.critChance += (item.critChance || 0) * slotMult;
-        p.critDamage += (item.critDamage || 0) * slotMult;
-        p.block += (item.block || 0) * slotMult;
-        p.parry += (item.parry || 0) * slotMult;
-        p.str += (item.str || 0) * slotMult;
-        p.dex += (item.dex || 0) * slotMult;
-        p.int += (item.int || 0) * slotMult;
-        p.rareSpawn += (item.rareSpawn || 0) * slotMult;
-        p.fairySpawn += (item.fairySpawn || 0) * slotMult;
-
-        if (item.atkPct) itemAtkPct += item.atkPct * slotMult;
-        if (item.maxHpPct) itemHpPct += item.maxHpPct * slotMult;
-        if (item.defPct) itemDefPct += item.defPct * slotMult;
-        if (item.moveSpeedPct) itemSpdPct += item.moveSpeedPct * slotMult;
-        if (item.strPct) itemStrPct += item.strPct * slotMult;
-        if (item.dexPct) itemDexPct += item.dexPct * slotMult;
-        if (item.intPct) itemIntPct += item.intPct * slotMult;
-
-        // Treat flat affixes (bonusAtk, bonusMaxHp, bonusDef) as percentages under the pure-multiplicative model
-        itemAtkPct += ((item.bonusAtk || 0) / 100) * slotMult;
-        itemHpPct += ((item.bonusMaxHp || 0) / 100) * slotMult;
-        itemDefPct += ((item.bonusDef || 0) / 100) * slotMult;
+      // Flat base additions from Forge Slot Attunements (completely level-independent!)
+      if (key === "weapon") flatGearAtk = flatGearAtk.add(slotLvl * 15);
+      if (key === "chest" || key === "leggings" || key === "overall") {
+        flatGearHp = flatGearHp.add(slotLvl * 50);
+        flatGearDef = flatGearDef.add(slotLvl * 10);
       }
+      if (key === "ring1" || key === "ring2") {
+        flatGearAtk = flatGearAtk.add(slotLvl * 10);
+        flatGearHp = flatGearHp.add(slotLvl * 30);
+      }
+      if (key === "boots") {
+        p.moveSpeed += slotLvl * 2;
+      }
+
+      // Flat item stats (safely handled regardless of source type)
+      flatGearAtk = flatGearAtk.add(BigNum.from(item.atk || 0).mul(slotMult));
+      flatGearHp = flatGearHp.add(BigNum.from(item.maxHp || 0).mul(slotMult));
+      flatGearDef = flatGearDef.add(BigNum.from(item.def || 0).mul(slotMult));
+      p.moveSpeed += (item.moveSpeed || 0) * slotMult;
+
+      let itemIdleSpeed = item.idleAttackSpeed || 0;
+      if (itemIdleSpeed < 0) itemIdleSpeed = Math.abs(itemIdleSpeed) * 0.05;
+      idleSpeedPct += itemIdleSpeed * slotMult;
+
+      let itemActiveSpeed = item.activeAttackSpeed || 0;
+      if (itemActiveSpeed < 0)
+        itemActiveSpeed = Math.abs(itemActiveSpeed) * 0.05;
+      activeSpeedPct += itemActiveSpeed * slotMult;
+
+      p.drop += (item.dropRate || 0) * slotMult;
+      p.qly += (item.quality || 0) * slotMult;
+      p.gold += (item.goldMulti || 0) * slotMult;
+      p.critChance += (item.critChance || 0) * slotMult;
+      p.critDamage += (item.critDamage || 0) * slotMult;
+      p.block += (item.block || 0) * slotMult;
+      p.parry += (item.parry || 0) * slotMult;
+      p.str += (item.str || 0) * slotMult;
+      p.dex += (item.dex || 0) * slotMult;
+      p.int += (item.int || 0) * slotMult;
+      p.rareSpawn += (item.rareSpawn || 0) * slotMult;
+      p.fairySpawn += (item.fairySpawn || 0) * slotMult;
+
+      if (item.atkPct) itemAtkPct += item.atkPct * slotMult;
+      if (item.maxHpPct) itemHpPct += item.maxHpPct * slotMult;
+      if (item.defPct) itemDefPct += item.defPct * slotMult;
+      if (item.moveSpeedPct) itemSpdPct += item.moveSpeedPct * slotMult;
+      if (item.strPct) itemStrPct += item.strPct * slotMult;
+      if (item.dexPct) itemDexPct += item.dexPct * slotMult;
+      if (item.intPct) itemIntPct += item.intPct * slotMult;
+
+      // Treat flat affixes as percentages under the pure-multiplicative model
+      itemAtkPct += (BigNum.from(item.bonusAtk || 0).div(100).mul(slotMult).valueOf());
+      itemHpPct += (BigNum.from(item.bonusMaxHp || 0).div(100).mul(slotMult).valueOf());
+      itemDefPct += (BigNum.from(item.bonusDef || 0).div(100).mul(slotMult).valueOf());
     }
+  }
 
   if (
     window.checkArtifactTrait("golem_stance") &&
@@ -1243,10 +1255,6 @@ window.resolvePlayerStats = function (useDraft = false) {
     str: 0,
     dex: 0,
     int: 0,
-    strPctBonus: 0, // Track percent STR bonuses from sets
-    dexPctBonus: 0, // Track percent DEX bonuses from sets
-    intPctBonus: 0, // Track percent INT bonuses from sets
-    moveSpeedPctBonus: 0, // Track percent Move Speed bonuses from sets
     gold: 0,
     drop: 0,
     qly: 0,
@@ -1264,8 +1272,8 @@ window.resolvePlayerStats = function (useDraft = false) {
       });
   }
 
-  p.atk += setCtx.atk;
-  p.maxHp += setCtx.maxHp;
+  p.atk = p.atk.add(BigNum.from(setCtx.atk));
+  p.maxHp = p.maxHp.add(BigNum.from(setCtx.maxHp));
   p.moveSpeed += setCtx.moveSpeed;
   idleSpeedPct += setCtx.idleSpeedPct;
   activeSpeedPct += setCtx.activeSpeedPct;
@@ -1285,104 +1293,9 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.hasShatterSet = setCtx.hasShatterSet;
   p.hasSingularitySet = setCtx.hasSingularitySet;
 
-  // Apply new percentage attribute and defense increases before final resolving
-    achAtkPct += setCtx.atkPctBonus;
-    achMaxHpPct += setCtx.maxHpPctBonus;
-    achDefPct += setCtx.defPctBonus; // Added fix: Bridges silent defense-multiplier bug!
-    achStrPct += setCtx.strPctBonus + itemStrPct; // Added fix: Infuses percentage STR set bonuses and Ring implicits
-    achDexPct += setCtx.dexPctBonus + itemDexPct; // Added fix: Infuses percentage DEX set bonuses and Ring implicits
-    achIntPct += setCtx.intPctBonus + itemIntPct; // Added fix: Infuses percentage INT set bonuses and Ring implicits
-
-    // --- BESTIARY Album SYSTEM RESOLUTION ---
-  let cardsOwned = window.playerStats.monsterCards || {};
-
-  // 1. Process Individual Card Stat Additions
-  let activeCardsCounts = {};
-  for (let cKey in window.MONSTER_CARDS_DATA) {
-    let cData = window.MONSTER_CARDS_DATA[cKey];
-    let count = cardsOwned[cKey] || 0;
-    let tier = window.getCardTier(count);
-    activeCardsCounts[cKey] = tier; // Cache for set checks
-
-    if (tier >= 0) {
-      let isUtility = [
-        "critChance",
-        "critDamage",
-        "block",
-        "parry",
-        "dropRate",
-        "quality",
-        "goldMulti",
-        "rareSpawn",
-        "fairySpawn",
-        "xpRate",
-      ].includes(cData.baseStat);
-      let val = isUtility
-        ? window.getUtilityCardValue(tier)
-        : window.getCardValue(cData.baseVal, tier);
-
-      if (cData.baseStat === "atk")
-        p.atk += Math.floor(val * p.atk); // Scaled attack add
-      else if (cData.baseStat === "maxHp") p.maxHp += Math.floor(val * p.maxHp);
-      else if (cData.baseStat === "def") p.def += Math.floor(val * p.def);
-      else if (cData.baseStat === "moveSpeed") p.moveSpeed += val;
-      else if (cData.baseStat === "critChance") p.critChance += val;
-      else if (cData.baseStat === "critDamage") p.critDamage += val;
-      else if (cData.baseStat === "block") p.block += val;
-      else if (cData.baseStat === "parry") p.parry += val;
-      else if (cData.baseStat === "dropRate") p.drop += val;
-      else if (cData.baseStat === "quality") p.qly += val;
-      else if (cData.baseStat === "goldMulti") p.gold += val;
-      else if (cData.baseStat === "rareSpawn") p.rareSpawn += val;
-      else if (cData.baseStat === "int") p.int += Math.floor(val);
-      else if (cData.baseStat === "xpRate") p.xpRate += val;
-    }
-  }
-
-  // 2. Process Progressive Set Multipliers
-  let attributesMult = 1.0;
-  for (let sKey in window.CARD_SETS_DATA) {
-    let sData = window.CARD_SETS_DATA[sKey];
-    let minTierInSet = 5;
-    let anyLocked = false;
-    let minCopiesInSet = 999999;
-
-    sData.cards.forEach((cKey) => {
-      let count = cardsOwned[cKey] || 0;
-      if (count < minCopiesInSet) minCopiesInSet = count;
-
-      let tier =
-        activeCardsCounts[cKey] !== undefined ? activeCardsCounts[cKey] : -1;
-      if (tier < 0) anyLocked = true;
-      if (tier < minTierInSet) minTierInSet = tier;
-    });
-
-    // Set Bonus requires at least 10 copies of each card in the set to activate
-    if (minCopiesInSet >= 10 && !anyLocked && minTierInSet >= 0) {
-      // Set Level Progression: Unlocked = 20%, Rare = 35%, Magic = 50%, Epic = 65%, Legendary = 80%, Mythic = 100%
-      const setMultipliers = [0.2, 0.35, 0.5, 0.65, 0.8, 1.0];
-      let borderPct = setMultipliers[minTierInSet] || 0.2;
-
-      if (sData.statKey === "xpRate") p.xpRate += borderPct;
-      else if (sData.statKey === "atkPctBonus") achAtkPct += borderPct;
-      else if (sData.statKey === "defPctBonus") achDefPct += borderPct;
-      else if (sData.statKey === "maxHpPctBonus") achMaxHpPct += borderPct;
-      else if (sData.statKey === "qly") p.qly += borderPct;
-      else if (sData.statKey === "attributesMult") attributesMult += borderPct;
-    }
-  }
-
-  // Apply Core Attributes Set Multiplier
-  if (attributesMult > 1.0) {
-    p.str = Math.floor(p.str * attributesMult);
-    p.dex = Math.floor(p.dex * attributesMult);
-    p.int = Math.floor(p.int * attributesMult);
-  }
-
-  p.atk = Math.floor(p.atk);
-  p.maxHp = Math.floor(p.maxHp);
-  p.def = Math.floor(p.def);
-  p.moveSpeed = parseFloat(p.moveSpeed.toFixed(1));
+  achAtkPct += setCtx.atkPctBonus;
+  achMaxHpPct += setCtx.maxHpPctBonus;
+  achDefPct += setCtx.defPctBonus;
 
   p.str = Math.floor(p.str * achStrPct);
   p.dex = Math.floor(p.dex * achDexPct);
@@ -1393,18 +1306,18 @@ window.resolvePlayerStats = function (useDraft = false) {
   let effectiveInt = Math.max(0, p.int - 5);
 
   // --- CALCULATE SECURE EXPONENTIAL CHARACTER-BOUND BASE STATS ---
-    let levelScale = Math.pow(1.2, window.playerStats.level - 1);
-    let baseCharAtk = (10 + window.playerStats.level * 2 + p.str * 0.4 + p.dex * 0.2 + p.int * 0.1) * levelScale;
-    let baseCharHp = (100 + window.playerStats.level * 8 + p.str * 1.2) * levelScale;
-    let baseCharDef = (5 + window.playerStats.level * 1 + p.int * 0.4 + p.str * 0.1) * levelScale;
+  let levelScale = BigNum.from(1.2).pow(window.playerStats.level - 1);
+  let baseCharAtk = BigNum.from(10 + window.playerStats.level * 2 + p.str * 0.4 + p.dex * 0.2 + p.int * 0.1).mul(levelScale);
+  let baseCharHp = BigNum.from(100 + window.playerStats.level * 8 + p.str * 1.2).mul(levelScale);
+  let baseCharDef = BigNum.from(5 + window.playerStats.level * 1 + p.int * 0.4 + p.str * 0.1).mul(levelScale);
 
-    p.atk = baseCharAtk + flatGearAtk;
-    p.maxHp = baseCharHp + flatGearHp;
-    let flatTotalDef = baseCharDef + flatGearDef + setCtx.flatDefBonus;
+  p.atk = baseCharAtk.add(flatGearAtk);
+  p.maxHp = baseCharHp.add(flatGearHp);
+  let flatTotalDef = baseCharDef.add(flatGearDef).add(BigNum.from(setCtx.flatDefBonus));
 
   // Suffixes multipliers applied on total flat base
-  p.atk = Math.floor(p.atk * (1.0 + itemAtkPct) * achAtkPct);
-  p.maxHp = Math.floor(p.maxHp * (1.0 + itemHpPct) * achMaxHpPct);
+  p.atk = p.atk.mul(1.0 + itemAtkPct).mul(achAtkPct);
+  p.maxHp = p.maxHp.mul(1.0 + itemHpPct).mul(achMaxHpPct);
   p.moveSpeed = p.moveSpeed * (achMoveSpeedPct + itemSpdPct + (setCtx.moveSpeedPctBonus || 0));
 
   let defMultiplier = 1.0 + setCtx.defPctBonus;
@@ -1416,7 +1329,7 @@ window.resolvePlayerStats = function (useDraft = false) {
       defMultiplier += stars * 0.03 + slotLvl * 0.01;
     }
   }
-  p.def = Math.ceil(flatTotalDef * (defMultiplier + itemDefPct) * achDefPct);
+  p.def = flatTotalDef.mul(defMultiplier + itemDefPct).mul(achDefPct);
 
   // Apply Cavern Sigil Active Modifiers (Dungeon Mode)
   if (
@@ -1425,10 +1338,9 @@ window.resolvePlayerStats = function (useDraft = false) {
   ) {
     let activeSig = window.playerStats.activeDungeonSigil;
     p.qly += activeSig.qualityBoost || 0;
-    p.gold += activeSig.rewardMultiplier || 0; // Sigil also increases Gold natively
-    p.drop += activeSig.rewardMultiplier || 0; // Sigil also increases Drop Rate natively
+    p.gold += activeSig.rewardMultiplier || 0;
+    p.drop += activeSig.rewardMultiplier || 0;
 
-    // Loop and apply the sigil's buffs and debuffs
     activeSig.buffs.forEach((b) => {
       if (b.id === "swift_strikes") {
         p.idleAttackSpeed = Math.max(10, Math.round(p.idleAttackSpeed / 1.25));
@@ -1437,11 +1349,11 @@ window.resolvePlayerStats = function (useDraft = false) {
           Math.round(p.activeAttackSpeed / 1.25),
         );
       } else if (b.id === "giant_might") {
-        p.atk = Math.floor(p.atk * 1.3);
+        p.atk = p.atk.mul(1.3);
       } else if (b.id === "iron_aegis") {
-        p.def = Math.floor(p.def * 1.35);
+        p.def = p.def.mul(1.35);
       } else if (b.id === "vital_fountain") {
-        p.maxHp = Math.floor(p.maxHp * 1.4);
+        p.maxHp = p.maxHp.mul(1.4);
       } else if (b.id === "unstable_surge") {
         p.critChance += 0.15;
       } else if (b.id === "shatter_frenzy") {
@@ -1464,18 +1376,17 @@ window.resolvePlayerStats = function (useDraft = false) {
       }
     });
 
-    // Skip debuffs if protected by Purified Aegis
     if (!(window.playerStats.purifiedAegisTimer > 0)) {
       activeSig.debuffs.forEach((d) => {
         if (d.id === "iron_gaze") {
           p.idleAttackSpeed = Math.round(p.idleAttackSpeed * 1.2);
           p.activeAttackSpeed = Math.round(p.activeAttackSpeed * 1.2);
         } else if (d.id === "shattered_armour") {
-          p.def = Math.floor(p.def * 0.75);
+          p.def = p.def.mul(0.75);
         } else if (d.id === "frail_vessel") {
-          p.maxHp = Math.floor(p.maxHp * 0.8);
+          p.maxHp = p.maxHp.mul(0.8);
         } else if (d.id === "dull_blades") {
-          p.atk = Math.floor(p.atk * 0.8);
+          p.atk = p.atk.mul(0.8);
         } else if (d.id === "heavy_mist") {
           p.moveSpeed = Math.max(1.0, p.moveSpeed * 0.7);
         } else if (d.id === "blind_spot") {
@@ -1503,37 +1414,20 @@ window.resolvePlayerStats = function (useDraft = false) {
   if (window.checkArtifactTrait("alchemist_alembic"))
     potStrengthMultiplier += 0.3;
 
-  // Apply compounding Aetheric Spark modifiers / Astral Awakening state multiplier
   if (window.playerStats.astralAwakeningTimer > 0) {
-    p.atk = Math.floor(p.atk * 2.0); // +100% Total Damage
-    activeSpeedPct += 0.15; // +15% Active Atk Spd
-    idleSpeedPct += 0.15; // +15% Idle Atk Spd
+    p.atk = p.atk.mul(2.0);
+    activeSpeedPct += 0.15;
+    idleSpeedPct += 0.15;
   } else if (window.playerStats.sparkChainCount > 0) {
-    p.atk = Math.floor(
-      p.atk * (1.0 + window.playerStats.sparkChainCount * 0.1),
-    ); // +10% damage per chain link
+    p.atk = p.atk.mul(1.0 + window.playerStats.sparkChainCount * 0.1);
   }
 
   if (window.playerStats.atkPotionTimer > 0)
-    p.atk = Math.ceil(
-      p.atk *
-        (1 +
-          (window.playerStats.atkPotionStrength || 0.1) *
-            potStrengthMultiplier),
-    );
+    p.atk = p.atk.mul(1 + (window.playerStats.atkPotionStrength || 0.1) * potStrengthMultiplier);
   if (window.playerStats.hpPotionTimer > 0)
-    p.maxHp = Math.ceil(
-      p.maxHp *
-        (1 +
-          (window.playerStats.hpPotionStrength || 0.1) * potStrengthMultiplier),
-    );
+    p.maxHp = p.maxHp.mul(1 + (window.playerStats.hpPotionStrength || 0.1) * potStrengthMultiplier);
   if (window.playerStats.defPotionTimer > 0)
-    p.def = Math.ceil(
-      p.def *
-        (1 +
-          (window.playerStats.defPotionStrength || 0.1) *
-            potStrengthMultiplier),
-    );
+    p.def = p.def.mul(1 + (window.playerStats.defPotionStrength || 0.1) * potStrengthMultiplier);
 
   if (window.playerStats.hastePotionTimer > 0) {
     let tier = window.playerStats.hastePotionStrength || 1;
@@ -1542,7 +1436,6 @@ window.resolvePlayerStats = function (useDraft = false) {
     idleSpeedPct += 0.1 * tier * potStrengthMultiplier;
   }
 
-  // Addive Double Drop and Drop Quality checks
   if (window.playerStats.dropPotionTimer > 0) {
     p.drop += 1.0 * potStrengthMultiplier;
   }
@@ -1577,7 +1470,6 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.idleAttackSpeed = Math.max(10, Math.round(60 / finalIdleDivisor));
   p.activeAttackSpeed = Math.max(4, Math.round(15 / finalActiveDivisor));
 
-  // UNIQUE: Warp-Core Greaves "Time Dilation" Boss Kill Max Haste trigger
   if (
     window.hasUniquePassive("boots_warpcore") &&
     window.playerStats.warpCoreSprintTimer > 0
@@ -1587,63 +1479,64 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   if (window.playerStats.frenzyTimer > 0) {
-      p.critChance = 1.0;
-      p.critDamage += 0.5;
-      p.activeAttackSpeed = 4;
-      p.idleAttackSpeed = 15;
+    p.critChance = 1.0;
+    p.critDamage += 0.5;
+    p.activeAttackSpeed = 4;
+    p.idleAttackSpeed = 15;
+  }
+
+  let maxBlockCap = 0.20;
+  let maxParryCap = 0.15;
+
+  let subItem = window.equippedSlots ? window.equippedSlots.subweapon : null;
+  let hasShield = subItem && subItem.subType === "shield";
+  let hasDagger = subItem && subItem.subType === "dagger";
+  let hasTitanGrip = window.checkArtifactTrait && window.checkArtifactTrait("titan_grip");
+
+  if (hasShield) {
+    maxBlockCap = hasTitanGrip ? 0.25 : 0.20;
+  } else if (hasTitanGrip) {
+    maxBlockCap = 0.10;
+  } else {
+    p.block = 0.0;
+  }
+
+  if (hasDagger) {
+    let noun = subItem.noun ? subItem.noun.toLowerCase() : "";
+    if (noun.includes("main-gauche")) {
+      maxParryCap = hasTitanGrip ? 0.35 : 0.30;
+    } else {
+      maxParryCap = hasTitanGrip ? 0.30 : 0.15;
     }
+  } else if (hasTitanGrip) {
+    maxParryCap = 0.08;
+  } else {
+    p.parry = 0.0;
+  }
 
-    let maxBlockCap = 0.20;
-        let maxParryCap = 0.15;
+  maxBlockCap += (p.crucibleCapBonus || 0);
+  maxParryCap += (p.crucibleCapBonus || 0);
 
-        let subItem = window.equippedSlots ? window.equippedSlots.subweapon : null;
-        let hasShield = subItem && subItem.subType === "shield";
-        let hasDagger = subItem && subItem.subType === "dagger";
-        let hasTitanGrip = window.checkArtifactTrait && window.checkArtifactTrait("titan_grip");
+  p.rawBlock = p.block;
+  p.rawParry = p.parry;
 
-        if (hasShield) {
-          maxBlockCap = hasTitanGrip ? 0.25 : 0.20;
-        } else {
-          p.block = 0.0;
-        }
+  if (p.block > maxBlockCap) p.block = maxBlockCap;
+  if (p.parry > maxParryCap) p.parry = maxParryCap;
 
-        if (hasDagger) {
-          let noun = subItem.noun ? subItem.noun.toLowerCase() : "";
-          if (noun.includes("main-gauche")) {
-            maxParryCap = hasTitanGrip ? 0.35 : 0.30;
-          } else {
-            maxParryCap = hasTitanGrip ? 0.30 : 0.15;
-          }
-        } else {
-          p.parry = 0.0;
-        }
-
-        maxBlockCap += (p.crucibleCapBonus || 0);
-        maxParryCap += (p.crucibleCapBonus || 0);
-
-        p.rawBlock = p.block;
-        p.rawParry = p.parry;
-
-        if (p.block > maxBlockCap) p.block = maxBlockCap;
-        if (p.parry > maxParryCap) p.parry = maxParryCap;
-
-    // Apply diminishing returns to raw accumulated Rare Spawn rates to prevent key hyper-inflation
   let rawRare = p.rareSpawn;
-  let limit = window.checkArtifactTrait("void_pull") ? 0.1 : 0.075; // 7.5% base cap, 10.0% elevated with Void Core
+  let limit = window.checkArtifactTrait("void_pull") ? 0.1 : 0.075;
   let excessRare = Math.max(0, rawRare - 0.01);
   let scale = limit - 0.01;
   p.rareSpawn = 0.01 + (excessRare * scale) / (excessRare + scale);
 
-  // Set default targets required based on current active gameplay mode
   if (!window.playerStats.isCrucibleMode && !window.playerStats.isDungeonMode) {
-    window.playerStats.targetsRequired = 3; // Reduced from 5 to 3
+    window.playerStats.targetsRequired = 3;
   } else if (window.playerStats.isCrucibleMode) {
-    window.playerStats.targetsRequired = 3; // Exactly 3 enemies per wave in the Crucible!
+    window.playerStats.targetsRequired = 3;
   } else if (window.playerStats.isDungeonMode) {
-    window.playerStats.targetsRequired = 3; // Standard 3 for Infinite Caverns (Reduced from 5)
+    window.playerStats.targetsRequired = 3;
   }
 
-  // UNIQUE: Warp-Core Greaves "Time Dilation" missing health attack speed scaling
   if (
     window.hasUniquePassive("boots_warpcore") &&
     window.mob &&
@@ -1651,12 +1544,11 @@ window.resolvePlayerStats = function (useDraft = false) {
   ) {
     let hpPct = window.mob.hp / window.mob.maxHp;
     let missingHpPct = 1.0 - hpPct;
-    let speedBonus = Math.min(0.99, missingHpPct); // up to +99% speed
+    let speedBonus = Math.min(0.99, missingHpPct);
     idleSpeedPct += speedBonus;
     activeSpeedPct += speedBonus;
   }
 
-  // UNIQUE: Maelstrom Gale-Glaive "Tornado Alley" speed stacking
   if (window.playerStats.maelstromSpeedTimer > 0) {
     window.playerStats.maelstromSpeedTimer--;
     if (window.playerStats.maelstromSpeedTimer <= 0) {
@@ -1668,7 +1560,6 @@ window.resolvePlayerStats = function (useDraft = false) {
     activeSpeedPct += window.playerStats.maelstromSpeedStacks * 0.1;
   }
 
-  // Deduct active attack speed per active Anomalous Shard (Apathy Distortion)
   let activeShardsList = window.activeRiftOrbs
     ? window.activeRiftOrbs.filter((orb) => orb.type === "anomalous_shard")
     : [];
@@ -1701,7 +1592,6 @@ window.resolvePlayerStats = function (useDraft = false) {
     (window.playerStats.prestigeUpgrades?.fairy || 0) * 0.05;
   p.fairySpawn += prestigeFairyBonus;
 
-  // Apply permanent Mission Shop Upgrades
   let missionGoldBonus = (window.playerStats.missionUpgrades?.gold || 0) * 0.05;
   p.gold += missionGoldBonus;
 
@@ -1712,11 +1602,9 @@ window.resolvePlayerStats = function (useDraft = false) {
     p.qly += window.playerStats.qlyPotionStrength || 0.5;
   }
 
-  // Centralized real-time XP rate multiplier calculation
   let expBonusMult =
     1.0 + (window.playerStats.prestigeUpgrades?.exp || 0) * 0.1;
 
-  // Add Aetheric Wisdom Clan Skill passive XP rate multiplier
   let wisdom = Math.min(
     30,
     window.playerStats.clanSkills?.aetheric_wisdom || 0,
@@ -1784,15 +1672,14 @@ window.resolvePlayerStats = function (useDraft = false) {
     window.playerStats.prestigeUpgrades?.fort || 0,
   );
 
-  // Apply Mission Shop Attack and Health multipliers
   let missionAtkMult =
     1.0 + (window.playerStats.missionUpgrades?.atk || 0) * 0.02;
   let missionHpMult =
     1.0 + (window.playerStats.missionUpgrades?.hp || 0) * 0.03;
 
-  p.atk = Math.floor(p.atk * prestigeAtkMult * missionAtkMult);
-  p.maxHp = Math.floor(p.maxHp * prestigeHpMult * missionHpMult);
-  p.def = Math.floor(p.def * prestigeDefMult);
+  p.atk = p.atk.mul(prestigeAtkMult).mul(missionAtkMult);
+  p.maxHp = p.maxHp.mul(prestigeHpMult).mul(missionHpMult);
+  p.def = p.def.mul(prestigeDefMult);
 
   // Apply Crucible Active Run Modifiers
   if (
@@ -1810,7 +1697,6 @@ window.resolvePlayerStats = function (useDraft = false) {
     let buffStrength = isBuffInfused ? 1.5 : 1.0;
     let debuffStrength = isDebuffInfused ? 1.5 : 1.0;
 
-    // 1. Apply Buffs
     if (b.id === "swift_strikes") {
       p.idleAttackSpeed = Math.max(
         10,
@@ -1821,11 +1707,11 @@ window.resolvePlayerStats = function (useDraft = false) {
         Math.round(p.activeAttackSpeed / (1.0 + 0.25 * buffStrength)),
       );
     } else if (b.id === "giant_might") {
-      p.atk = Math.floor(p.atk * (1.0 + 0.3 * buffStrength));
+      p.atk = p.atk.mul(1.0 + 0.3 * buffStrength);
     } else if (b.id === "iron_aegis") {
-      p.def = Math.floor(p.def * (1.0 + 0.35 * buffStrength));
+      p.def = p.def.mul(1.0 + 0.35 * buffStrength);
     } else if (b.id === "vital_fountain") {
-      p.maxHp = Math.floor(p.maxHp * (1.0 + 0.4 * buffStrength));
+      p.maxHp = p.maxHp.mul(1.0 + 0.4 * buffStrength);
     } else if (b.id === "unstable_surge") {
       p.critChance += 0.15 * buffStrength;
     } else if (b.id === "shatter_frenzy") {
@@ -1847,20 +1733,17 @@ window.resolvePlayerStats = function (useDraft = false) {
       p.qly += 0.25 * buffStrength;
     }
 
-    // 2. Apply Debuffs
     if (d) {
       if (d.id === "iron_gaze") {
         p.idleAttackSpeed = Math.round(
           p.idleAttackSpeed * (1.0 + 0.2 * debuffStrength),
         );
       } else if (d.id === "shattered_armour") {
-        p.def = Math.floor(p.def * Math.max(0.1, 1.0 - 0.25 * debuffStrength));
+        p.def = p.def.mul(Math.max(0.1, 1.0 - 0.25 * debuffStrength));
       } else if (d.id === "frail_vessel") {
-        p.maxHp = Math.floor(
-          p.maxHp * Math.max(0.1, 1.0 - 0.2 * debuffStrength),
-        );
+        p.maxHp = p.maxHp.mul(Math.max(0.1, 1.0 - 0.2 * debuffStrength));
       } else if (d.id === "dull_blades") {
-        p.atk = Math.floor(p.atk * Math.max(0.1, 1.0 - 0.2 * debuffStrength));
+        p.atk = p.atk.mul(Math.max(0.1, 1.0 - 0.2 * debuffStrength));
       } else if (d.id === "heavy_mist") {
         p.moveSpeed = Math.max(
           1.0,
@@ -1879,7 +1762,6 @@ window.resolvePlayerStats = function (useDraft = false) {
     }
   }
 
-  // Apply Shared Cooperative Clan Skill Multipliers
   let phalanx = Math.min(50, window.playerStats.clanSkills?.steel_phalanx || 0);
   let well = Math.min(50, window.playerStats.clanSkills?.vitality_well || 0);
   let accord = Math.min(
@@ -1891,9 +1773,9 @@ window.resolvePlayerStats = function (useDraft = false) {
     window.playerStats.clanSkills?.voyagers_guidance || 0,
   );
 
-  p.atk = Math.floor(p.atk * (1.0 + phalanx * 0.005));
-  p.def = Math.floor(p.def * (1.0 + phalanx * 0.005));
-  p.maxHp = Math.floor(p.maxHp * (1.0 + well * 0.008));
+  p.atk = p.atk.mul(1.0 + phalanx * 0.005);
+  p.def = p.def.mul(1.0 + phalanx * 0.005);
+  p.maxHp = p.maxHp.mul(1.0 + well * 0.008);
   p.gold += accord * 0.01;
   p.drop += guidance * 0.005;
   p.qly += guidance * 0.005;
@@ -1911,10 +1793,9 @@ window.resolvePlayerStats = function (useDraft = false) {
   )
     p.activeAttackSpeed = 15;
 
-  // Hyperbolic soft cap on the Drop Rate bonus to prevent infinite late-game inventory overflow
   let rawDropBonus = p.drop - 1.0;
   if (rawDropBonus > 1.0) {
-    let softCapLimit = 4.0; // Absolute maximum bonus is +400% (5.0x drop multiplier)
+    let softCapLimit = 4.0;
     p.drop =
       1.0 +
       1.0 +
@@ -1922,10 +1803,9 @@ window.resolvePlayerStats = function (useDraft = false) {
         (rawDropBonus - 1.0 + softCapLimit);
   }
 
-  // Hyperbolic soft cap on the Gold Multiplier bonus to prevent massive late-game economy inflation
   let rawGoldBonus = p.gold - 1.0;
   if (rawGoldBonus > 4.0) {
-    let softCapLimit = 12.0; // Absolute maximum bonus is +1200% (17.0x gold multiplier total)
+    let softCapLimit = 12.0;
     p.gold =
       1.0 +
       4.0 +
@@ -1933,10 +1813,9 @@ window.resolvePlayerStats = function (useDraft = false) {
         (rawGoldBonus - 4.0 + softCapLimit);
   }
 
-  // Hyperbolic soft cap on the Drop Quality bonus to prevent 100% Mythic drop rates at endgame
   let rawQlyBonus = p.qly - 1.0;
   if (rawQlyBonus > 2.0) {
-    let softCapLimit = 3.0; // Absolute maximum bonus is +300% (6.0x drop quality total)
+    let softCapLimit = 3.0;
     p.qly =
       1.0 +
       2.0 +
@@ -1945,13 +1824,13 @@ window.resolvePlayerStats = function (useDraft = false) {
 
   window.playerStats.crucibleSelfDmgReduction = p.crucibleSelfDmgReduction;
 
-  if (!useDraft) {
-    window.cachedPlayerStats = p;
-    window.playerStatsDirty = false;
-  }
+    if (!useDraft) {
+      window.cachedPlayerStats = p;
+      window.playerStatsDirty = false;
+    }
 
-  return p;
-};
+    return p;
+  };
 
 // --- INITIAL GLOBAL STATE ---
 
@@ -2163,9 +2042,9 @@ window.playerStats = {
   baseBlock: 0.0,
   baseParry: 0.0,
   baseRareSpawn: 0.01,
-  baseFairySpawn: 1.0,
-  currentHp: 100,
-  coins: new BigNum(0, 0),
+    baseFairySpawn: 1.0,
+    currentHp: new BigNum(100, 0),
+    coins: new BigNum(0, 0),
   stage: 1,
   maxStage: 1,
   killCount: 0,

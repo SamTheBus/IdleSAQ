@@ -1220,26 +1220,37 @@ window.updateUI = function () {
   }
 
   let trackHtml = "";
-  if (isBoss) {
-    trackHtml = `
-          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; position: relative; z-index: 2;">
-            <!-- Left Wing -->
-            <svg class="boss-wing-svg" width="18" height="12" viewBox="0 0 24 16" fill="none" stroke="#ff3b30" stroke-width="2.5" opacity="0.8">
-              <path d="M2 8 Q12 2, 22 14 M2 8 L8 14" />
-            </svg>
-            <span style="font-size: 8.5px; font-weight: 900; color: #ff3b30; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 8px rgba(255, 59, 48, 0.6); white-space: nowrap;">
-              WARDEN CONFRONTED
-            </span>
-            <!-- Right Wing -->
-            <svg class="boss-wing-svg" width="18" height="12" viewBox="0 0 24 16" fill="none" stroke="#ff3b30" stroke-width="2.5" opacity="0.8" style="transform: scaleX(-1);">
-              <path d="M2 8 Q12 2, 22 14 M2 8 L8 14" />
-            </svg>
-          </div>
-        `;
-  } else {
-    // 6 Distinct mystical runic glyphs
-    const glyphsList = ["ᚦ", "ᚷ", "ᛉ", "ᛟ", "ᛋ", "ᛏ"];
-    let orbs = [];
+    if (isBoss) {
+      trackHtml = `
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; position: relative; z-index: 2;">
+              <!-- Left Wing -->
+              <svg class="boss-wing-svg" width="18" height="12" viewBox="0 0 24 16" fill="none" stroke="#ff3b30" stroke-width="2.5" opacity="0.8">
+                <path d="M2 8 Q12 2, 22 14 M2 8 L8 14" />
+              </svg>
+              <span style="font-size: 8.5px; font-weight: 900; color: #ff3b30; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 8px rgba(255, 59, 48, 0.6); white-space: nowrap;">
+                WARDEN CONFRONTED
+              </span>
+              <!-- Right Wing -->
+              <svg class="boss-wing-svg" width="18" height="12" viewBox="0 0 24 16" fill="none" stroke="#ff3b30" stroke-width="2.5" opacity="0.8" style="transform: scaleX(-1);">
+                <path d="M2 8 Q12 2, 22 14 M2 8 L8 14" />
+              </svg>
+            </div>
+          `;
+    } else if (window.playerStats.isFarmingLoop) {
+      trackHtml = `
+            <div style="display: flex; align-items: center; justify-content: center; width: 100%; position: relative; z-index: 2;">
+              <button class="btn-action btn-pulse" style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: 1.5px solid #fff; font-weight: 900; font-size: 11px; padding: 0 16px; border-radius: 6px; box-shadow: 0 0 10px rgba(231, 76, 60, 0.4); cursor: pointer; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: auto; max-width: 100%; text-transform: uppercase;" onclick="window.rechallengeBoss(); event.stopPropagation();">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;">
+                  <path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4"/>
+                </svg>
+                RE-CHALLENGE STAGE
+              </button>
+            </div>
+          `;
+    } else {
+      // 6 Distinct mystical runic glyphs
+      const glyphsList = ["ᚦ", "ᚷ", "ᛉ", "ᛟ", "ᛋ", "ᛏ"];
+      let orbs = [];
     for (let i = 1; i <= targetsReq; i++) {
       let isFilled = i <= killCount;
       let isActiveTarget = i === killCount + 1;
@@ -13507,11 +13518,11 @@ window.switchForgeStation = function (val) {
 
 window.selectedBoutiqueSkinKey =
   window.selectedBoutiqueSkinKey ||
-  window.playerStats.cosmeticSkin ||
+  (window.playerStats && window.playerStats.cosmeticSkin) ||
   "default";
 window.selectedBoutiqueCostumeKey =
   window.selectedBoutiqueCostumeKey ||
-  window.playerStats.equippedCostume ||
+  (window.playerStats && window.playerStats.equippedCostume) ||
   "knight";
 
 // Replace your existing switchBoutiqueCategory function in ui.js
@@ -17330,13 +17341,29 @@ window.SPECTRAL_METADATA = {
     type: "boots",
   },
   helmet_tempest: {
-    name: "Crown of Tempests",
-    desc: "Taking damage has a 15% chance to trigger static lightning strikes.",
-    color: "#00d2ff",
-    icon: "✦",
-    type: "helmet",
-  },
-};
+      name: "Crown of Tempests",
+      desc: "Taking damage has a 15% chance to trigger static lightning strikes.",
+      color: "#00d2ff",
+      icon: "✦",
+      type: "helmet",
+    },
+    dagger_viper: {
+      name: "Viper's Perfect Stiletto",
+      desc: "Critical strikes have a 25% chance to trigger a Perfect Strike reticle. Tapping it within 2s deals 5x defense-bypassing damage and inflicts a toxic poison sting.",
+      color: "#2ecc71",
+      icon: "✦",
+      type: "subweapon",
+      subType: "dagger",
+    },
+    tome_conduit: {
+      name: "Conduit of the Lexicon",
+      desc: "Periodically projects an Aetheric Conduit on the field (15s Cooldown). Discharging it casts triple elemental spells & resets cooldowns.",
+      color: "#9b59b6",
+      icon: "✦",
+      type: "subweapon",
+      subType: "tome",
+    },
+  };
 
 window.updateSpectralReliquaryBanner = function () {
   let banner = document.getElementById("spectral-reliquary-banner");

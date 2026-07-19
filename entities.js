@@ -4857,18 +4857,32 @@
           name: "Chronicle of past Lives",
         };
       } else if (resonance === "boots_warpcore") {
-        equipped.boots = {
-          isUniqueWarpCore: true,
-          type: "boots",
-          name: "Warp-Core Greaves",
-        };
-      } else if (resonance === "helmet_tempest") {
-        equipped.helmet = {
-          isUniqueTempest: true,
-          type: "helmet",
-          name: "Crown of Tempests",
-        };
-      }
+              equipped.boots = {
+                isUniqueWarpCore: true,
+                type: "boots",
+                name: "Warp-Core Greaves",
+              };
+            } else if (resonance === "helmet_tempest") {
+              equipped.helmet = {
+                isUniqueTempest: true,
+                type: "helmet",
+                name: "Crown of Tempests",
+              };
+            } else if (resonance === "dagger_viper") {
+              equipped.subweapon = {
+                isUniqueViper: true,
+                type: "subweapon",
+                subType: "dagger",
+                name: "Viper's Perfect Stiletto",
+              };
+            } else if (resonance === "tome_conduit") {
+              equipped.subweapon = {
+                isUniqueConduit: true,
+                type: "subweapon",
+                subType: "tome",
+                name: "Conduit of the Lexicon",
+              };
+            }
     }
 
     // Custom visual skin color profiles for future cosmetic extensibility (with fallback mapping for leaderboards & clan rosters)
@@ -5072,42 +5086,63 @@
         ctx.translate(24, -6 + bounce + tomeFloat);
         ctx.rotate(-Math.PI / 12);
         if (isWatch) {
-          ctx.fillStyle = "#d4af37";
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = 1.8;
-          ctx.beginPath();
-          ctx.arc(0, 0, 8, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-          ctx.fillStyle = "#fdf6e2";
-          ctx.beginPath();
-          ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-          ctx.strokeStyle = "#111";
-          ctx.lineWidth = 1.2;
-          let clockTime = Date.now() / 300;
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(Math.cos(clockTime) * 4.5, Math.sin(clockTime) * 4.5);
-          ctx.stroke();
-        } else if (isChronicle) {
-          ctx.fillStyle = "#111116";
-          ctx.strokeStyle = "#f1c40f";
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.roundRect(-5, -7, 10, 14, [1.5]);
-          ctx.fill();
-          ctx.stroke();
-          ctx.fillStyle = "#fff";
-          ctx.fillRect(3.5, -6, 1.5, 12);
-          let pulseRad = 12 + Math.sin(Date.now() / 150) * 2;
-          ctx.strokeStyle = "rgba(241, 196, 15, 0.25)";
-          ctx.lineWidth = 1.0;
-          ctx.beginPath();
-          ctx.arc(0, 0, pulseRad, 0, Math.PI * 2);
-          ctx.stroke();
-        } else {
+                  ctx.fillStyle = "#d4af37";
+                  ctx.strokeStyle = "#000000";
+                  ctx.lineWidth = 1.8;
+                  ctx.beginPath();
+                  ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                  ctx.fill();
+                  ctx.stroke();
+                  ctx.fillStyle = "#fdf6e2";
+                  ctx.beginPath();
+                  ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+                  ctx.fill();
+                  ctx.stroke();
+                  ctx.strokeStyle = "#111";
+                  ctx.lineWidth = 1.2;
+                  let clockTime = Date.now() / 300;
+                  ctx.beginPath();
+                  ctx.moveTo(0, 0);
+                  ctx.lineTo(Math.cos(clockTime) * 4.5, Math.sin(clockTime) * 4.5);
+                  ctx.stroke();
+                } else if (isChronicle) {
+                  ctx.fillStyle = "#111116";
+                  ctx.strokeStyle = "#f1c40f";
+                  ctx.lineWidth = 1.5;
+                  ctx.beginPath();
+                  ctx.roundRect(-5, -7, 10, 14, [1.5]);
+                  ctx.fill();
+                  ctx.stroke();
+                  ctx.fillStyle = "#fff";
+                  ctx.fillRect(3.5, -6, 1.5, 12);
+                  let pulseRad = 12 + Math.sin(Date.now() / 150) * 2;
+                  ctx.strokeStyle = "rgba(241, 196, 15, 0.25)";
+                  ctx.lineWidth = 1.0;
+                  ctx.beginPath();
+                  ctx.arc(0, 0, pulseRad, 0, Math.PI * 2);
+                  ctx.stroke();
+                } else if (equipped.subweapon && equipped.subweapon.isUniqueConduit) {
+                  // --- UNIQUE: CONDUIT OF THE LEXICON ---
+                  ctx.fillStyle = "#0c0515"; // Deep occult violet cover
+                  ctx.strokeStyle = "#9b59b6";
+                  ctx.lineWidth = 1.5;
+                  ctx.beginPath();
+                  ctx.roundRect(-5, -7, 10, 14, [1.5]);
+                  ctx.fill();
+                  ctx.stroke();
+                  ctx.fillStyle = "#ffffff";
+                  ctx.fillRect(3.5, -6, 1.5, 12); // Paper edges
+                  ctx.fillStyle = "#2ecc71"; // Emerald core emblem
+                  ctx.beginPath();
+                  ctx.arc(0, 0, 3, 0, Math.PI * 2);
+                  ctx.fill();
+                  let pulseRad = 12 + Math.sin(Date.now() / 150) * 2;
+                  ctx.strokeStyle = "rgba(46, 204, 113, 0.25)";
+                  ctx.lineWidth = 1.0;
+                  ctx.beginPath();
+                  ctx.arc(0, 0, pulseRad, 0, Math.PI * 2);
+                  ctx.stroke();
+                } else {
           let tomeItem = equipped.subweapon;
           let noun =
             tomeItem && tomeItem.noun ? tomeItem.noun.toLowerCase() : "";
@@ -5366,7 +5401,64 @@
           ctx.lineTo(2.2, 3);
           ctx.closePath();
           ctx.fill();
-        } else if (noun.includes("main")) {
+        } else if (item.isUniqueViper) {
+                  // --- UNIQUE: VIPER'S PERFECT STILETTO ---
+                  ctx.fillStyle = "#1e272e"; // Dark hilt
+                  ctx.beginPath();
+                  ctx.arc(0, 10, 2.5, 0, Math.PI * 2);
+                  ctx.fill();
+                  ctx.strokeStyle = "#000000";
+                  ctx.lineWidth = 1.2;
+                  ctx.stroke();
+
+                  ctx.fillStyle = "#2ecc71"; // Emerald pommel gem
+                  ctx.beginPath();
+                  ctx.arc(0, 10, 1.2, 0, Math.PI * 2);
+                  ctx.fill();
+
+                  ctx.fillStyle = "#4a2306"; // Dark leather wrap
+                  ctx.beginPath();
+                  ctx.rect(-1.5, 3, 3, 7);
+                  ctx.fill();
+                  ctx.stroke();
+
+                  ctx.fillStyle = "#f1c40f"; // Gold crossguard
+                  ctx.beginPath();
+                  ctx.moveTo(-7, 3);
+                  ctx.lineTo(7, 3);
+                  ctx.lineTo(4, 5);
+                  ctx.lineTo(-4, 5);
+                  ctx.closePath();
+                  ctx.fill();
+                  ctx.stroke();
+
+                  // Poison-etched serpentine blade
+                  ctx.fillStyle = "#2ecc71"; // Poison green blade body
+                  ctx.strokeStyle = "#16a085"; // Darker border
+                  ctx.lineWidth = 1.5;
+                  ctx.beginPath();
+                  ctx.moveTo(-2.5, 3);
+                  ctx.lineTo(-1, -3);
+                  ctx.lineTo(-2, -8);
+                  ctx.lineTo(0, -14); // sharp tip
+                  ctx.lineTo(2, -8);
+                  ctx.lineTo(1, -3);
+                  ctx.lineTo(2.5, 3);
+                  ctx.closePath();
+                  ctx.fill();
+                  ctx.stroke();
+
+                  // Poison highlight line
+                  ctx.fillStyle = "#ffffff";
+                  ctx.beginPath();
+                  ctx.moveTo(0, 3);
+                  ctx.lineTo(0, -14);
+                  ctx.lineTo(2, -8);
+                  ctx.lineTo(1, -3);
+                  ctx.lineTo(2.5, 3);
+                  ctx.closePath();
+                  ctx.fill();
+                } else if (noun.includes("main")) {
           // Main-Gauche Curved Parrying Guard
           ctx.strokeStyle = tierColor;
           ctx.lineWidth = 1.2;
