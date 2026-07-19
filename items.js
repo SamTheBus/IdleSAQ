@@ -2967,21 +2967,23 @@ Object.assign(window.GameState, {
         }
 
         if (typeof window.resolvePlayerStats === "function") {
-          let newMaxHp = window.resolvePlayerStats().maxHp;
-          window.playerStats.currentHp = window.BigNumMin(
-            window.playerStats.currentHp,
-            newMaxHp
-          );
-        }
+                  let newMaxHp = window.resolvePlayerStats().maxHp;
+                  window.playerStats.currentHp = window.BigNumMin(
+                    window.playerStats.currentHp,
+                    newMaxHp
+                  );
+                }
 
-        if (typeof window.checkAchievements === "function")
-      window.checkAchievements();
-    if (typeof window.updateUI === "function") window.updateUI();
-    if (typeof window.renderInventory === "function") window.renderInventory();
-    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-    if (typeof window.saveGame === "function") window.saveGame();
-  },
-});
+                if (typeof window.checkAchievements === "function")
+              window.checkAchievements();
+            window.state.paperDollDirty = true;
+            window.state.inventoryDirty = true;
+            if (typeof window.updateUI === "function") window.updateUI();
+            if (typeof window.renderInventory === "function") window.renderInventory();
+            if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+            if (typeof window.saveGame === "function") window.saveGame();
+          },
+        });
 
 // Legacy Compatibility Aliases to protect references
 window.equipItem = (id) => window.GameState.equipItem(id);
@@ -3019,21 +3021,23 @@ Object.assign(window.GameState, {
         }
 
         if (typeof window.resolvePlayerStats === "function") {
-          let newMaxHp = window.resolvePlayerStats().maxHp;
-          window.playerStats.currentHp = window.BigNumMin(
-            window.playerStats.currentHp,
-            newMaxHp
-          );
-        }
+                  let newMaxHp = window.resolvePlayerStats().maxHp;
+                  window.playerStats.currentHp = window.BigNumMin(
+                    window.playerStats.currentHp,
+                    newMaxHp
+                  );
+                }
 
-        if (typeof window.checkAchievements === "function")
-      window.checkAchievements();
-    if (typeof window.updateUI === "function") window.updateUI();
-    if (typeof window.renderInventory === "function") window.renderInventory();
-    if (typeof window.renderForgeTab === "function") window.renderForgeTab();
-    if (typeof window.saveGame === "function") window.saveGame();
-  },
-});
+                if (typeof window.checkAchievements === "function")
+              window.checkAchievements();
+            window.state.paperDollDirty = true;
+            window.state.inventoryDirty = true;
+            if (typeof window.updateUI === "function") window.updateUI();
+            if (typeof window.renderInventory === "function") window.renderInventory();
+            if (typeof window.renderForgeTab === "function") window.renderForgeTab();
+            if (typeof window.saveGame === "function") window.saveGame();
+          },
+        });
 
 // Legacy Compatibility Aliases to protect references
 window.unequipItem = (slotKey) => window.GameState.unequipItem(slotKey);
@@ -3129,18 +3133,20 @@ window.executeSalvageItemLogic = function (
     }
 
     if (typeof window.resolvePlayerStats === "function") {
-      let newMaxHp = window.resolvePlayerStats().maxHp;
-      window.playerStats.currentHp = window.BigNumMin(
-        window.playerStats.currentHp,
-        newMaxHp
-      );
-    }
-    if (typeof window.checkAchievements === "function")
-    window.checkAchievements();
-  if (typeof window.updateUI === "function") window.updateUI();
-  if (typeof window.renderInventory === "function") window.renderInventory();
-  if (typeof window.saveGame === "function") window.saveGame();
-};
+          let newMaxHp = window.resolvePlayerStats().maxHp;
+          window.playerStats.currentHp = window.BigNumMin(
+            window.playerStats.currentHp,
+            newMaxHp
+          );
+        }
+        if (typeof window.checkAchievements === "function")
+        window.checkAchievements();
+      window.state.paperDollDirty = true;
+      window.state.inventoryDirty = true;
+      if (typeof window.updateUI === "function") window.updateUI();
+      if (typeof window.renderInventory === "function") window.renderInventory();
+      if (typeof window.saveGame === "function") window.saveGame();
+    };
 
 window.salvageItem = function (id) {
   if (typeof window.hideTooltip === "function") window.hideTooltip();

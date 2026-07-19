@@ -70,6 +70,44 @@ window.securePlayerStatsBigNums = function () {
       configurable: true,
     });
   }
+
+  const originalOffsetXDescriptor = Object.getOwnPropertyDescriptor(
+    CanvasRenderingContext2D.prototype,
+    "shadowOffsetX",
+  );
+  if (originalOffsetXDescriptor && originalOffsetXDescriptor.set) {
+    const originalSetX = originalOffsetXDescriptor.set;
+    Object.defineProperty(CanvasRenderingContext2D.prototype, "shadowOffsetX", {
+      set: function (value) {
+        if (window.playerStats && window.playerStats.ecoMode) {
+          originalSetX.call(this, 0);
+        } else {
+          originalSetX.call(this, value);
+        }
+      },
+      get: originalOffsetXDescriptor.get,
+      configurable: true,
+    });
+  }
+
+  const originalOffsetYDescriptor = Object.getOwnPropertyDescriptor(
+    CanvasRenderingContext2D.prototype,
+    "shadowOffsetY",
+  );
+  if (originalOffsetYDescriptor && originalOffsetYDescriptor.set) {
+    const originalSetY = originalOffsetYDescriptor.set;
+    Object.defineProperty(CanvasRenderingContext2D.prototype, "shadowOffsetY", {
+      set: function (value) {
+        if (window.playerStats && window.playerStats.ecoMode) {
+          originalSetY.call(this, 0);
+        } else {
+          originalSetY.call(this, value);
+        }
+      },
+      get: originalOffsetYDescriptor.get,
+      configurable: true,
+    });
+  }
 })();
 
 // --- SCREEN WAKE LOCK API ---
@@ -3173,12 +3211,13 @@ function engineCycle() {
     }
 
     // Limit render cycles to save CPU/GPU resources on mobile or Eco Mode
-        let renderLimit =
-          window.playerStats && window.playerStats.ecoMode ? 1000 / 30 : 0; // Optimized 30 FPS for mobile thermal stability
+    let renderLimit =
+      window.playerStats && window.playerStats.ecoMode ? 1000 / 30 : 0; // Optimized 30 FPS for mobile thermal stability
 
     if (now - lastRenderTime >= renderLimit) {
       window.draw();
-      lastRenderTime = now;
+      // Maintain mathematically aligned intervals to prevent drift stutters
+      lastRenderTime = renderLimit > 0 ? now - ((now - lastRenderTime) % renderLimit) : now;
     }
 
     requestAnimationFrame(engineCycle);

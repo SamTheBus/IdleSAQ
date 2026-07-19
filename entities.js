@@ -91,6 +91,9 @@
           if (window.playerStats.ecoMode && window.particles.length > 100) return;
           if (window.particles.length > 200) return;
       let count = 15;
+      if (window.playerStats && window.playerStats.ecoMode) {
+        count = Math.max(2, Math.floor(count * 0.25)); // 75% fewer death debris elements in Eco Mode
+      }
       let colors = ["#2ecc71", "#27ae60", "#a3fd83"]; // Default Slime Green
       let speed = 4;
 
@@ -215,6 +218,9 @@
       let spawnY = cvs ? cvs.height / 2 : 125;
 
       let count = 25;
+      if (window.playerStats && window.playerStats.ecoMode) {
+        count = Math.max(5, Math.floor(count * 0.25)); // 75% fewer celebration elements in Eco Mode
+      }
       let speed = 5;
       let text = "✦ PURCHASED! ✦";
 
@@ -8867,13 +8873,15 @@
     }
 
     // 2. BACKGROUND SCENERY & VEGETATION (Every element outlined)
-    window.bgScenery.forEach((s) => {
-      s.seed = s.seed || Math.random();
-      let ts = s.size;
-      ctx.save();
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = penBgScenery * ts;
-      ctx.lineJoin = "round";
+        window.bgScenery.forEach((s) => {
+          s.seed = s.seed || Math.random();
+          // Prune background drawing cycles by 55% in Eco Mode to lower CPU temperature
+          if (window.playerStats && window.playerStats.ecoMode && s.seed > 0.45) return;
+          let ts = s.size;
+          ctx.save();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penBgScenery * ts;
+          ctx.lineJoin = "round";
 
       if (
         window.playerStats.isCrucibleMode ||
@@ -10315,16 +10323,18 @@
     });
 
     // 6.5. FOREGROUND SCENERY OBJECTS (Outlines unified)
-    window.fgScenery.forEach((s) => {
-      let sx = s.x,
-        sy = s.y,
-        ss = s.size;
-      s.seed = s.seed || Math.random();
+        window.fgScenery.forEach((s) => {
+          let sx = s.x,
+            sy = s.y,
+            ss = s.size;
+          s.seed = s.seed || Math.random();
+          // Prune foreground drawing cycles by 65% in Eco Mode to lower CPU temperature
+          if (window.playerStats && window.playerStats.ecoMode && s.seed > 0.35) return;
 
-      ctx.save();
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = penFgScenery * ss;
-      ctx.lineJoin = "round";
+          ctx.save();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = penFgScenery * ss;
+          ctx.lineJoin = "round";
 
       if (
         window.playerStats.isCrucibleMode ||
@@ -11164,19 +11174,20 @@
     });
 
     if (window.getStageTier() === 1 && !window.playerStats.isDungeonMode) {
-      if (Math.random() < 0.4) {
-        window.snowflakes.push({
-          x: Math.random() * canvas.width,
-          y: -10,
-          r: Math.random() * 1.8 + 0.8,
-          speed: Math.random() * 0.8 + 0.4,
-          swingSpeed: Math.random() * 0.02 + 0.01,
-          swingRange: Math.random() * 1.5 + 0.5,
-        });
-      }
-    } else {
-      window.snowflakes = [];
-    }
+          let spawnChance = window.playerStats.ecoMode ? 0.1 : 0.4;
+          if (Math.random() < spawnChance) {
+            window.snowflakes.push({
+              x: Math.random() * canvas.width,
+              y: -10,
+              r: Math.random() * 1.8 + 0.8,
+              speed: Math.random() * 0.8 + 0.4,
+              swingSpeed: Math.random() * 0.02 + 0.01,
+              swingRange: Math.random() * 1.5 + 0.5,
+            });
+          }
+        } else {
+          window.snowflakes = [];
+        }
 
     // Spawn floating morning fireflies in the Forest environment (Tier 0)
     if (

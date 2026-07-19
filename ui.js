@@ -529,6 +529,11 @@ window.draftAllocations = null;
 window.draftSP = 0;
 window.activeStatTooltip = null;
 
+// Initialize high-performance DOM-dirty flags for iPhone 16 thermal prevention
+window.state = window.state || {};
+window.state.paperDollDirty = true;
+window.state.inventoryDirty = true;
+
 // Rigorous alphanumeric checks to prevent HTML element breaking, XSS, and SQL injection
 window.validateNameInput = function (name) {
   return (
@@ -1098,9 +1103,20 @@ window.UIManager.updateScrollLock = function () {
 window.updateScrollLock = () => window.UIManager.updateScrollLock();
 
 // Bind high-performance delegated proxy method to window.UIManager
+window.updateScrollLock = () => window.UIManager.updateScrollLock();
 window.UIManager.updateUI = () => window.updateUI();
 
+window.uiUpdatePending = false;
 window.updateUI = function () {
+  if (window.uiUpdatePending) return;
+  window.uiUpdatePending = true;
+  requestAnimationFrame(() => {
+    window.executeUIUpdate();
+    window.uiUpdatePending = false;
+  });
+};
+
+window.executeUIUpdate = function () {
   window.updateScrollLock();
   let hasDraftChanges = false;
   if (window.draftAllocations) {
@@ -1835,11 +1851,17 @@ window.updateUI = function () {
   let sigilMaxBtn = document.getElementById("btn-sigil-max");
   if (sigilMaxBtn) sigilMaxBtn.innerText = capMax;
 
-  window.renderPaperDoll();
-  window.renderInventory();
+  if (window.state.paperDollDirty) {
+      window.renderPaperDoll();
+      window.state.paperDollDirty = false;
+    }
+    if (window.state.inventoryDirty) {
+      window.renderInventory();
+      window.state.inventoryDirty = false;
+    }
 
-  // Invalidate the player stats cache on any UI update to force clean computations on state change
-  window.invalidatePlayerStats();
+    // Invalidate the player stats cache on any UI update to force clean computations on state change
+    window.invalidatePlayerStats();
 
   // Auto-refresh tooltip
   if (window.activeStatTooltip) {
@@ -2655,6 +2677,7 @@ window.addEtcDrop = function (itemName, amount = 1) {
     window.inventory.ETC[itemName] = 0;
   }
   window.inventory.ETC[itemName] += amount;
+  window.state.inventoryDirty = true;
   if (typeof window.renderInventory === "function") window.renderInventory();
 };
 
@@ -2663,6 +2686,7 @@ window.addUseDrop = function (itemName, amount = 1) {
     window.inventory.USE[itemName] = 0;
   }
   window.inventory.USE[itemName] += amount;
+  window.state.inventoryDirty = true;
   if (typeof window.renderInventory === "function") window.renderInventory();
 };
 
