@@ -2777,14 +2777,10 @@ window.onload = function () {
 
       window.SoundManager.init();
 
-      // Disable or enable BGM based on audio mode to prevent interrupting Spotify
-      if (window.MusicManager) {
-        if (window.playerStats && window.playerStats.audioSessionMode === "ambient") {
-          console.log("[AUDIO] BGM disabled in Ambient mode to prevent interrupting Spotify.");
-        } else {
-          window.MusicManager.init(); // Starts and loops your BGM adaptively on first click
-        }
-      }
+      // Initialize BGM
+            if (window.MusicManager) {
+              window.MusicManager.init(); // Starts and loops your BGM adaptively on first click
+            }
 
       // Force-unlock all mobile Web Audio context threads on touch/tap events
     const forceUnlockMobileAudio = () => {

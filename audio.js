@@ -1659,15 +1659,14 @@ window.MusicManager = {
     }
 
     // Resolve volume levels through settings
-        let isAmbientMode = window.playerStats && window.playerStats.audioSessionMode === "ambient";
-        let isMuted = window.playerStats ? (window.playerStats.mute || isAmbientMode) : false;
-        let musicVolSetting =
-          window.playerStats && window.playerStats.volumeMusic !== undefined
-            ? window.playerStats.volumeMusic
-            : 0.5;
+                let isMuted = window.playerStats ? window.playerStats.mute : false;
+                let musicVolSetting =
+                  window.playerStats && window.playerStats.volumeMusic !== undefined
+                    ? window.playerStats.volumeMusic
+                    : 0.5;
 
-        // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
-        let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
+                // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
+                let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
 
     if (this.currentState !== state) {
       this.currentState = state;
