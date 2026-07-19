@@ -2900,65 +2900,81 @@ Object.assign(window.GameState, {
       oldMaxHp = window.resolvePlayerStats().maxHp;
 
     if (item.type === "overall") {
-      if (window.equippedSlots.chest) {
-        delete window.equippedSlots.chest.isEquippedSlot;
-        window.inventory.EQUIP.push(window.equippedSlots.chest);
-        window.equippedSlots.chest = null;
-      }
-      if (window.equippedSlots.leggings) {
-        delete window.equippedSlots.leggings.isEquippedSlot;
-        window.inventory.EQUIP.push(window.equippedSlots.leggings);
-        window.equippedSlots.leggings = null;
-      }
-      if (window.equippedSlots.overall) {
-        delete window.equippedSlots.overall.isEquippedSlot;
-        window.inventory.EQUIP.push(window.equippedSlots.overall);
-      }
-      window.equippedSlots.overall = item;
-    } else if (item.type === "chest" || item.type === "leggings") {
-      if (window.equippedSlots.overall) {
-        delete window.equippedSlots.overall.isEquippedSlot;
-        window.inventory.EQUIP.push(window.equippedSlots.overall);
-        window.equippedSlots.overall = null;
-      }
-      if (window.equippedSlots[item.type]) {
-        delete window.equippedSlots[item.type].isEquippedSlot;
-        window.inventory.EQUIP.push(window.equippedSlots[item.type]);
-      }
-      window.equippedSlots[item.type] = item;
-    } else if (item.type === "artifact") {
-      // Prevent equipping duplicate artifacts in core bag slot clicking
-      let isAlreadyEquipped = ["art1", "art2", "art3"].some(
-        (slot) =>
-          window.equippedSlots[slot] &&
-          window.equippedSlots[slot].trait === item.trait,
-      );
-      if (isAlreadyEquipped) {
-        if (typeof window.pushHeaderToast === "function") {
-          window.pushHeaderToast(
-            "❌ You cannot equip duplicate artifacts!",
-            "#e74c3c",
+          if (window.equippedSlots.chest) {
+            delete window.equippedSlots.chest.isEquippedSlot;
+            window.inventory.EQUIP.push(window.equippedSlots.chest);
+            window.equippedSlots.chest = null;
+          }
+          if (window.equippedSlots.leggings) {
+            delete window.equippedSlots.leggings.isEquippedSlot;
+            window.inventory.EQUIP.push(window.equippedSlots.leggings);
+            window.equippedSlots.leggings = null;
+          }
+          if (window.equippedSlots.overall) {
+            delete window.equippedSlots.overall.isEquippedSlot;
+            window.inventory.EQUIP.push(window.equippedSlots.overall);
+          }
+          window.equippedSlots.overall = item;
+          item.isEquippedSlot = "overall";
+        } else if (item.type === "chest" || item.type === "leggings") {
+          if (window.equippedSlots.overall) {
+            delete window.equippedSlots.overall.isEquippedSlot;
+            window.inventory.EQUIP.push(window.equippedSlots.overall);
+            window.equippedSlots.overall = null;
+          }
+          if (window.equippedSlots[item.type]) {
+            delete window.equippedSlots[item.type].isEquippedSlot;
+            window.inventory.EQUIP.push(window.equippedSlots[item.type]);
+          }
+          window.equippedSlots[item.type] = item;
+          item.isEquippedSlot = item.type;
+        } else if (item.type === "artifact") {
+          // Prevent equipping duplicate artifacts in core bag slot clicking
+          let isAlreadyEquipped = ["art1", "art2", "art3"].some(
+            (slot) =>
+              window.equippedSlots[slot] &&
+              window.equippedSlots[slot].trait === item.trait,
           );
-        }
-        return;
-      }
+          if (isAlreadyEquipped) {
+            if (typeof window.pushHeaderToast === "function") {
+              window.pushHeaderToast(
+                "❌ You cannot equip duplicate artifacts!",
+                "#e74c3c",
+              );
+            }
+            return;
+          }
 
-      if (!window.equippedSlots.art1) window.equippedSlots.art1 = item;
-      else if (!window.equippedSlots.art2) window.equippedSlots.art2 = item;
-      else {
-        if (window.equippedSlots.art3) {
-          delete window.equippedSlots.art3.isEquippedSlot;
-          window.inventory.ARTIFACT.push(window.equippedSlots.art3);
+          if (!window.equippedSlots.art1) {
+            window.equippedSlots.art1 = item;
+            item.isEquippedSlot = "art1";
+          } else if (!window.equippedSlots.art2) {
+            window.equippedSlots.art2 = item;
+            item.isEquippedSlot = "art2";
+          } else {
+            if (window.equippedSlots.art3) {
+              delete window.equippedSlots.art3.isEquippedSlot;
+              window.inventory.ARTIFACT.push(window.equippedSlots.art3);
+            }
+            window.equippedSlots.art3 = item;
+            item.isEquippedSlot = "art3";
+          }
+        } else if (item.type === "ring") {
+          let slotKey = !window.equippedSlots.ring1 ? "ring1" : !window.equippedSlots.ring2 ? "ring2" : "ring1";
+          if (window.equippedSlots[slotKey]) {
+            delete window.equippedSlots[slotKey].isEquippedSlot;
+            window.inventory.EQUIP.push(window.equippedSlots[slotKey]);
+          }
+          window.equippedSlots[slotKey] = item;
+          item.isEquippedSlot = slotKey;
+        } else {
+          if (window.equippedSlots[item.type]) {
+            delete window.equippedSlots[item.type].isEquippedSlot;
+            window.inventory.EQUIP.push(window.equippedSlots[item.type]);
+          }
+          window.equippedSlots[item.type] = item;
+          item.isEquippedSlot = item.type;
         }
-        window.equippedSlots.art3 = item;
-      }
-    } else {
-      if (window.equippedSlots[item.type]) {
-        delete window.equippedSlots[item.type].isEquippedSlot;
-        window.inventory.EQUIP.push(window.equippedSlots[item.type]);
-      }
-      window.equippedSlots[item.type] = item;
-    }
 
     if (isArtifactSack) {
           window.inventory.ARTIFACT.splice(index, 1);

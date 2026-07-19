@@ -5409,64 +5409,64 @@
           ctx.lineTo(2.2, 3);
           ctx.closePath();
           ctx.fill();
-        } else if (item.isUniqueViper) {
-                  // --- UNIQUE: VIPER'S PERFECT STILETTO ---
-                  ctx.fillStyle = "#1e272e"; // Dark hilt
-                  ctx.beginPath();
-                  ctx.arc(0, 10, 2.5, 0, Math.PI * 2);
-                  ctx.fill();
-                  ctx.strokeStyle = "#000000";
-                  ctx.lineWidth = 1.2;
-                  ctx.stroke();
+        } else if (dItem.isUniqueViper) {
+                          // --- UNIQUE: VIPER'S PERFECT STILETTO ---
+                          ctx.fillStyle = "#1e272e"; // Dark hilt
+                          ctx.beginPath();
+                          ctx.arc(0, 10, 2.5, 0, Math.PI * 2);
+                          ctx.fill();
+                          ctx.strokeStyle = "#000000";
+                          ctx.lineWidth = 1.2;
+                          ctx.stroke();
 
-                  ctx.fillStyle = "#2ecc71"; // Emerald pommel gem
-                  ctx.beginPath();
-                  ctx.arc(0, 10, 1.2, 0, Math.PI * 2);
-                  ctx.fill();
+                          ctx.fillStyle = "#2ecc71"; // Emerald pommel gem
+                          ctx.beginPath();
+                          ctx.arc(0, 10, 1.2, 0, Math.PI * 2);
+                          ctx.fill();
 
-                  ctx.fillStyle = "#4a2306"; // Dark leather wrap
-                  ctx.beginPath();
-                  ctx.rect(-1.5, 3, 3, 7);
-                  ctx.fill();
-                  ctx.stroke();
+                          ctx.fillStyle = "#4a2306"; // Dark leather wrap
+                          ctx.beginPath();
+                          ctx.rect(-1.5, 3, 3, 7);
+                          ctx.fill();
+                          ctx.stroke();
 
-                  ctx.fillStyle = "#f1c40f"; // Gold crossguard
-                  ctx.beginPath();
-                  ctx.moveTo(-7, 3);
-                  ctx.lineTo(7, 3);
-                  ctx.lineTo(4, 5);
-                  ctx.lineTo(-4, 5);
-                  ctx.closePath();
-                  ctx.fill();
-                  ctx.stroke();
+                          ctx.fillStyle = "#f1c40f"; // Gold crossguard
+                          ctx.beginPath();
+                          ctx.moveTo(-7, 3);
+                          ctx.lineTo(7, 3);
+                          ctx.lineTo(4, 5);
+                          ctx.lineTo(-4, 5);
+                          ctx.closePath();
+                          ctx.fill();
+                          ctx.stroke();
 
-                  // Poison-etched serpentine blade
-                  ctx.fillStyle = "#2ecc71"; // Poison green blade body
-                  ctx.strokeStyle = "#16a085"; // Darker border
-                  ctx.lineWidth = 1.5;
-                  ctx.beginPath();
-                  ctx.moveTo(-2.5, 3);
-                  ctx.lineTo(-1, -3);
-                  ctx.lineTo(-2, -8);
-                  ctx.lineTo(0, -14); // sharp tip
-                  ctx.lineTo(2, -8);
-                  ctx.lineTo(1, -3);
-                  ctx.lineTo(2.5, 3);
-                  ctx.closePath();
-                  ctx.fill();
-                  ctx.stroke();
+                          // Poison-etched serpentine blade
+                          ctx.fillStyle = "#2ecc71"; // Poison green blade body
+                          ctx.strokeStyle = "#16a085"; // Darker border
+                          ctx.lineWidth = 1.5;
+                          ctx.beginPath();
+                          ctx.moveTo(-2.5, 3);
+                          ctx.lineTo(-1, -3);
+                          ctx.lineTo(-2, -8);
+                          ctx.lineTo(0, -14); // sharp tip
+                          ctx.lineTo(2, -8);
+                          ctx.lineTo(1, -3);
+                          ctx.lineTo(2.5, 3);
+                          ctx.closePath();
+                          ctx.fill();
+                          ctx.stroke();
 
-                  // Poison highlight line
-                  ctx.fillStyle = "#ffffff";
-                  ctx.beginPath();
-                  ctx.moveTo(0, 3);
-                  ctx.lineTo(0, -14);
-                  ctx.lineTo(2, -8);
-                  ctx.lineTo(1, -3);
-                  ctx.lineTo(2.5, 3);
-                  ctx.closePath();
-                  ctx.fill();
-                } else if (noun.includes("main")) {
+                          // Poison highlight line
+                          ctx.fillStyle = "#ffffff";
+                          ctx.beginPath();
+                          ctx.moveTo(0, 3);
+                          ctx.lineTo(0, -14);
+                          ctx.lineTo(2, -8);
+                          ctx.lineTo(1, -3);
+                          ctx.lineTo(2.5, 3);
+                          ctx.closePath();
+                          ctx.fill();
+                        } else if (noun.includes("main")) {
           // Main-Gauche Curved Parrying Guard
           ctx.strokeStyle = tierColor;
           ctx.lineWidth = 1.2;
