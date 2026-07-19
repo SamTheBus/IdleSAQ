@@ -1854,9 +1854,12 @@ window.updateUI = function () {
     window.updateSpectralReliquaryBanner();
   }
   if (typeof window.renderActiveEffectsHudBar === "function") {
-    window.renderActiveEffectsHudBar();
-  }
-};
+      window.renderActiveEffectsHudBar();
+    }
+    if (typeof window.updateMediaSession === "function") {
+      window.updateMediaSession();
+    }
+  };
 
 // --- ATTRIBUTES MATRIX CONTROLS ---
 
@@ -2525,6 +2528,18 @@ window.changeVolume = function (type, val) {
 
 window.toggleMute = function () {
   window.playerStats.mute = !window.playerStats.mute;
+  if (!window.playerStats.mute) {
+    if (window.SoundManager && typeof window.SoundManager.init === "function") {
+      window.SoundManager.init();
+    }
+    if (window.MusicManager && typeof window.MusicManager.init === "function") {
+      window.MusicManager.init();
+    }
+    // Set to ambient on unmute so Spotify mixes alongside game sounds
+    if ('audioSession' in navigator) {
+      navigator.audioSession.type = 'ambient';
+    }
+  }
   window.updateAudioUI();
   window.SoundManager.updateVolumes();
   window.saveGame();
@@ -18903,4 +18918,31 @@ window.playGlobalUnlockAnimation = function (
       }, 700);
     }, 450);
   }, 700);
+};
+
+window.updateMediaSession = function () {
+  // Only update Lock Screen / Dynamic Island parameters if game has primary focus (not in ambient mode)
+  if ("mediaSession" in navigator && window.playerStats && navigator.audioSession && navigator.audioSession.type === "playback") {
+    let p = window.playerStats;
+    let titleStr = `Stage ${p.stage} - Level ${p.level}`;
+    if (p.isDungeonMode && p.currentDungeon) {
+      let dFloor = p.currentDungeonStage[p.currentDungeon] || 1;
+      titleStr = `Dungeon Floor ${dFloor} - Level ${p.level}`;
+    } else if (p.isCrucibleMode) {
+      titleStr = `Crucible Wave ${p.crucibleWave || 1} - Level ${p.level}`;
+    }
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: titleStr,
+      artist: `${p.playerName || "Guest"} (Hoor\\'s Champion)`,
+      album: "Idle SAQ: Slaying and Questing",
+      artwork: [
+        {
+          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 L19 8 L18 21 L14 21 L13.5 10 Z' fill='%2300d2ff' stroke='%230f172a' stroke-width='1.2'/%3E%3C/svg%3E",
+          sizes: "96x96",
+          type: "image/svg+xml",
+        },
+      ],
+    });
+  }
 };

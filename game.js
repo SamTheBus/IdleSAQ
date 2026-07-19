@@ -2405,11 +2405,28 @@ window.onload = function () {
             let transformStyle = "";
 
             if (diffY < -threshold) {
-              isDismissed = true;
-              transitionStyle =
-                "transform 0.2s ease-out, opacity 0.2s ease-out";
-              transformStyle = `translate(${diffX}px, -150%)`;
-            } else if (Math.abs(diffX) > threshold) {
+                          isDismissed = true;
+                          // Cascade dismiss: Swipe every notification above it up and away!
+                          let sibling = newToast.previousElementSibling;
+                          let delay = 50;
+                          while (sibling) {
+                            let currentSibling = sibling;
+                            if (!currentSibling.classList.contains("fading-out")) {
+                              currentSibling.classList.add("fading-out");
+                              setTimeout(() => {
+                                currentSibling.style.transition = "transform 0.2s ease-out, opacity 0.2s ease-out";
+                                currentSibling.style.transform = "translateY(-150%)";
+                                currentSibling.style.opacity = "0";
+                                setTimeout(() => currentSibling.remove(), 200);
+                              }, delay);
+                              delay += 40;
+                            }
+                            sibling = sibling.previousElementSibling;
+                          }
+                          transitionStyle =
+                            "transform 0.2s ease-out, opacity 0.2s ease-out";
+                          transformStyle = `translate(${diffX}px, -150%)`;
+                        } else if (Math.abs(diffX) > threshold) {
               isDismissed = true;
               transitionStyle =
                 "transform 0.2s ease-out, opacity 0.2s ease-out";
@@ -2705,13 +2722,23 @@ window.onload = function () {
   preventTooltipLeaks("stat-tooltip");
 
   // Warm user gesture activation for Web Audio Context & BGM
-  const initAudio = () => {
-    window.SoundManager.init();
-    if (window.MusicManager) {
-      window.MusicManager.init(); // Starts and loops your BGM adaptively on first click
-    }
+    const initAudio = () => {
+      if (window.playerStats && window.playerStats.mute) {
+        console.log("[AUDIO] Game is muted. Web Audio initialization deferred to preserve background music (Spotify) focus.");
+        return;
+      }
 
-    // Force-unlock all mobile Web Audio context threads on touch/tap events
+      // Set to 'ambient' to allow parallel mixing with background music (Spotify)
+      if ('audioSession' in navigator) {
+        navigator.audioSession.type = 'ambient';
+      }
+
+      window.SoundManager.init();
+      if (window.MusicManager) {
+        window.MusicManager.init(); // Starts and loops your BGM adaptively on first click
+      }
+
+      // Force-unlock all mobile Web Audio context threads on touch/tap events
     const forceUnlockMobileAudio = () => {
       let sfxCtx = window.SoundManager.ctx || window.SoundManager.audioCtx;
       if (sfxCtx && sfxCtx.state === "suspended") {
@@ -6150,11 +6177,9 @@ window.CombatEngine = {
           }
           // Balanced unique artifact tempering speed by adjusting Overlord's Sigil rate to 20%
           if (Math.random() < 0.05) {
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop("Overlord's Sigil", 1);
-            if (typeof window.pushToast === "function")
-              window.pushToast("Overlord's Sigil", null, "#1abc9c", true, 1);
-          }
+                      if (typeof window.addEtcDrop === "function")
+                        window.addEtcDrop("Overlord's Sigil", 1);
+                    }
         } else {
           // Let the single-roll loot and Pity system handle minion kills cleanly
           if (typeof window.rollEquipmentDrop === "function") {
@@ -6171,23 +6196,17 @@ window.CombatEngine = {
           let dShardChance = 0.0016 * (dDepthQ - 1.0);
 
           if (dDepthQ > 1.0 && Math.random() < dCoreChance) {
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop("Ancient Core", 1);
-            if (typeof window.pushToast === "function")
-              window.pushToast("Ancient Core", null, "#9b59b6", true, 1);
-          }
-          if (dDepthQ > 1.0 && Math.random() < dKeyChance) {
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop("Gacha Key", 1);
-            if (typeof window.pushToast === "function")
-              window.pushToast("Gacha Key", null, "#f1c40f", true, 1);
-          }
-          if (dDepthQ > 1.0 && Math.random() < dShardChance) {
-            if (typeof window.addEtcDrop === "function")
-              window.addEtcDrop("Eridium Shard", 1);
-            if (typeof window.pushToast === "function")
-              window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
-          }
+                      if (typeof window.addEtcDrop === "function")
+                        window.addEtcDrop("Ancient Core", 1);
+                    }
+                    if (dDepthQ > 1.0 && Math.random() < dKeyChance) {
+                      if (typeof window.addEtcDrop === "function")
+                        window.addEtcDrop("Gacha Key", 1);
+                    }
+                    if (dDepthQ > 1.0 && Math.random() < dShardChance) {
+                      if (typeof window.addEtcDrop === "function")
+                        window.addEtcDrop("Eridium Shard", 1);
+                    }
 
           // Gated progression scrap drops for Material Cavern Bosses
           let sigMult = 1.0;
@@ -6435,45 +6454,38 @@ window.CombatEngine = {
       );
 
       // Standardized flat drop rates (keeps Sigils/Cores/Shards rare and consistent)
-      if (activeStage >= peakLimit) {
-        if (Math.random() < 0.01) {
-          window.addEtcDrop("Ancient Core", 1);
-          window.pushToast("Ancient Core", null, "#e74c3c", true, 1);
-        }
-        if (Math.random() < 0.005) {
-          window.addEtcDrop("Overlord's Sigil", 1);
-          window.pushToast("Overlord's Sigil", null, "#1abc9c", true, 1);
-        }
-      }
-      if (activeStage >= 18 && Math.random() < 0.005) {
-        window.addEtcDrop("Eridium Shard", 1);
-        window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
-      }
-      if (
-        activeStage >= 50 &&
-        Math.random() <
-          0.0003 * (window.getDepthQualityMultiplier(activeStage) - 1.0)
-      ) {
-        window.addEtcDrop("Gacha Key", 1);
-        window.pushToast("Gacha Key", null, "#f1c40f", true, 1);
-      }
+            if (activeStage >= peakLimit) {
+              if (Math.random() < 0.01) {
+                window.addEtcDrop("Ancient Core", 1);
+              }
+              if (Math.random() < 0.005) {
+                window.addEtcDrop("Overlord's Sigil", 1);
+              }
+            }
+            if (activeStage >= 18 && Math.random() < 0.005) {
+              window.addEtcDrop("Eridium Shard", 1);
+            }
+            if (
+              activeStage >= 50 &&
+              Math.random() <
+                0.0003 * (window.getDepthQualityMultiplier(activeStage) - 1.0)
+            ) {
+              window.addEtcDrop("Gacha Key", 1);
+            }
     } else if (
-      window.playerStats.isDungeonMode &&
-      window.mob.type === "dungeon_boss"
-    ) {
-      // Standardized flat drops for Dungeon Bosses
-      if (Math.random() < 0.02) {
-        window.addEtcDrop("Ancient Core", 1);
-        window.pushToast("Ancient Core", null, "#e74c3c", true, 1);
-      }
-      if (Math.random() < 0.015) {
-        window.addEtcDrop("Overlord's Sigil", 1);
-        window.pushToast("Overlord's Sigil", null, "#1abc9c", true, 1);
-      }
-      if (Math.random() < 0.015) {
-        window.addEtcDrop("Eridium Shard", 1);
-        window.pushToast("Eridium Shard", null, "#8e44ad", true, 1);
-      }
+          window.playerStats.isDungeonMode &&
+          window.mob.type === "dungeon_boss"
+        ) {
+          // Standardized flat drops for Dungeon Bosses
+          if (Math.random() < 0.02) {
+            window.addEtcDrop("Ancient Core", 1);
+          }
+          if (Math.random() < 0.015) {
+            window.addEtcDrop("Overlord's Sigil", 1);
+          }
+          if (Math.random() < 0.015) {
+            window.addEtcDrop("Eridium Shard", 1);
+          }
     } else if (!isBoss && !window.playerStats.isDungeonMode) {
       // Dynamic scaled drop rates matching player Drop Rate (p.drop) attributes
       let soulDropChance = window.mob.isRare ? 0.25 : 0.12; // 25% for Rare, 12% for Normal
