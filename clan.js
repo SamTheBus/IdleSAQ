@@ -180,12 +180,12 @@ window.getClanEmblemHtml = function (seed, size = 32, clanLevel = 1) {
 };
 
 window.toggleClanHall = function () {
-  // Allow all ascended players to bypass the level 25 requirement check
+  // Allow all ascended players to bypass the level 13 requirement check
   if (
-    window.playerStats.level < 25 &&
+    window.playerStats.level < 13 &&
     (window.playerStats.prestigeCount || 0) === 0
   ) {
-    window.pushHeaderToast("🔒 Clan Hall unlocks at Level 25!", "#e74c3c");
+    window.pushHeaderToast("🔒 Clan Hall unlocks at Level 13!", "#e74c3c");
     return;
   }
   let modal = document.getElementById("clan-draggable-window");

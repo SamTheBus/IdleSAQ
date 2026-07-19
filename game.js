@@ -6617,22 +6617,43 @@ window.CombatEngine = {
         window.playerStats.killCount++;
       }
     } else if (isBoss) {
-      if (!window.playerStats.isUberBoss) {
-        let oldMax = window.playerStats.maxStage;
-        let oldPeak = window.playerStats.lifetimePeakStage || 1; // Capture original all-time peak stage before increments
-        window.playerStats.stage++;
-        window.playerStats.maxStage = Math.max(
-          window.playerStats.maxStage || 1,
-          window.playerStats.stage,
-        );
-        window.playerStats.lifetimePeakStage = Math.max(
-          window.playerStats.lifetimePeakStage || 1,
-          window.playerStats.maxStage,
-        );
-        if (typeof window.pushLog === "function")
-          window.pushLog(
-            `<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${window.playerStats.stage}.</span>`,
-          );
+                  if (!window.playerStats.isUberBoss) {
+                    let oldMax = window.playerStats.maxStage;
+                    let oldPeak = window.playerStats.lifetimePeakStage || 1; // Capture original all-time peak stage before increments
+                    window.playerStats.stage++;
+                    window.playerStats.maxStage = Math.max(
+                      window.playerStats.maxStage || 1,
+                      window.playerStats.stage,
+                    );
+                    window.playerStats.lifetimePeakStage = Math.max(
+                      window.playerStats.lifetimePeakStage || 1,
+                      window.playerStats.maxStage,
+                    );
+                    if (typeof window.pushLog === "function")
+                      window.pushLog(
+                        `<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${window.playerStats.stage}.</span>`,
+                      );
+
+                    // Check if they reached Stage 81 (beating Stage 80) for the first time to trigger Altar of Ascension / Prestige Unlock
+                    if (
+                      window.playerStats.maxStage >= 81 &&
+                      !window.playerStats.hasTriggeredPrestigeUnlock
+                    ) {
+                      window.playerStats.hasTriggeredPrestigeUnlock = true;
+                      setTimeout(() => {
+                        if (typeof window.playGlobalUnlockAnimation === "function") {
+                          window.playGlobalUnlockAnimation(
+                            "ALTAR OF ASCENSION UNLOCKED",
+                            "👑",
+                            () => {
+                              if (typeof window.switchTab === "function") {
+                                window.switchTab("prestige");
+                              }
+                            },
+                          );
+                        }
+                      }, 1500); // Trigger shortly after the level-up/boss flash settles
+                    }
 
         // First-Time 25-Stage Milestone Key Allocation
         let currentMax = window.playerStats.maxStage;

@@ -1117,25 +1117,25 @@ window.updateUI = function () {
   // Dynamic Clan Hall Locked Overlay Rendering (Void-style Lock & Chains)
   let clanCard = document.getElementById("hub-card-clan");
   if (clanCard) {
-    // Only lock out clan hall if the player is under level 25 AND has never prestige-ascended
-    if (
-      window.playerStats.level < 25 &&
-      (window.playerStats.prestigeCount || 0) === 0
-    ) {
-      clanCard.classList.add("locked-void");
-      clanCard.innerHTML = `
-        <div class="hub-card-icon" style="border-color: #9b59b6 !important; background: rgba(155, 89, 182, 0.15) !important; position: relative; z-index: 2;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff007f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px #ff007f);">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-        </div>
-        <div style="flex: 1; min-width: 0; position: relative; z-index: 2;">
-          <strong style="color: #df9ffb !important; font-size: 11.5px; text-shadow: 0 0 4px rgba(155, 89, 182, 0.5);">Clan Hall [LOCKED]</strong>
-          <div style="font-size: 9px; color: #a29bfe !important; margin-top: 2px;">
-            Unlocks at Level 25 (Required: ${window.playerStats.level}/25)
-          </div>
-        </div>
+    // Only lock out clan hall if the player is under level 13 AND has never prestige-ascended
+        if (
+          window.playerStats.level < 13 &&
+          (window.playerStats.prestigeCount || 0) === 0
+        ) {
+          clanCard.classList.add("locked-void");
+          clanCard.innerHTML = `
+            <div class="hub-card-icon" style="border-color: #9b59b6 !important; background: rgba(155, 89, 182, 0.15) !important; position: relative; z-index: 2;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff007f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px #ff007f);">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <div style="flex: 1; min-width: 0; position: relative; z-index: 2;">
+              <strong style="color: #df9ffb !important; font-size: 11.5px; text-shadow: 0 0 4px rgba(155, 89, 182, 0.5);">Clan Hall [LOCKED]</strong>
+              <div style="font-size: 9px; color: #a29bfe !important; margin-top: 2px;">
+                Unlocks at Level 13 (Required: ${window.playerStats.level}/13)
+              </div>
+            </div>
         <!-- Chain Graphic Overlay -->
         <div style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; opacity:0.65;">
           <svg width="100%" height="100%" viewBox="0 0 200 60" preserveAspectRatio="none">
@@ -2541,7 +2541,7 @@ window.showCustomConfirm = function (
   overlay.style.display = "flex";
   overlay.style.justifyContent = "center";
   overlay.style.alignItems = "center";
-  overlay.style.zIndex = "40000";
+  overlay.style.zIndex = "55000";
   overlay.style.backdropFilter = "blur(5px)";
   overlay.style.animation = "deathFadeIn 0.25s ease-out";
 
@@ -4349,8 +4349,8 @@ window.renderPrestigeTab = function () {
   if (!el) return;
 
   let p = window.playerStats;
-  if (p.level < 25 && (p.prestigeCount || 0) === 0) {
-    let progressPct = Math.min(100, (p.level / 25) * 100);
+  if (p.maxStage < 81 && (p.prestigeCount || 0) === 0) {
+    let progressPct = Math.min(100, ((p.maxStage || 1) / 81) * 100);
     el.innerHTML = `
         <div style="text-align:center; padding: 40px 20px; background: linear-gradient(135deg, #0e051d 0%, #030109 100%); border: 2px solid #8e44ad; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(142, 68, 173, 0.22); max-width: 440px; margin: 0 auto; animation: toastFadeIn 0.3s ease-out;">
             <div style="margin-bottom: 20px;">
@@ -4364,13 +4364,13 @@ window.renderPrestigeTab = function () {
             </div>
             <h3 style="margin:0 0 10px 0; color:#df9ffb; font-size:15px; font-weight:bold; letter-spacing:2px; text-transform:uppercase; text-shadow: 0 0 10px rgba(155, 89, 182, 0.55);">Celestial Seal Active</h3>
             <p style="font-size:11px; color:#a29bfe; max-width: 320px; margin: 0 auto 15px auto; line-height: 1.5; white-space:normal;">
-                The Altar of Ascension is protected by an ancient cosmic seal. Reach <strong style="color:#ffd700;">Level 25</strong> to break the seal and unlock permanent multipliers!
+                The Altar of Ascension is protected by an ancient cosmic seal. Reach <strong style="color:#ffd700;">Stage 81 (beat Stage 80)</strong> to break the seal and unlock permanent multipliers!
             </p>
             <div style="width:100%; max-width:260px; margin: 0 auto 8px auto; background:#111; height:8px; border-radius:4px; overflow:hidden; border:1px solid #333; position:relative;">
                 <div style="width:${progressPct}%; height:100%; background:linear-gradient(90deg, #9b59b6, #e84393); box-shadow:0 0 8px #9b59b6; transition: width 0.4s ease;"></div>
             </div>
             <div style="font-size: 11.5px; font-weight: bold; color: #f1f5f9; font-family: monospace;">
-                Progress: <span style="color:#e74c3c;">Lv ${p.level}</span> / <span style="color:#2ecc71;">25</span> (${progressPct.toFixed(0)}%)
+                Progress: Stage <span style="color:#e74c3c;">${p.maxStage || 1}</span> / <span style="color:#2ecc71;">81</span> (${progressPct.toFixed(0)}%)
             </div>
         </div>
     `;
@@ -18499,12 +18499,15 @@ window.HoorTutorial = {
       highlightSelector: "#activities-sec-crucible",
     },
     prestige_tab: {
-      title: "Hoor",
-      avatar: "🏅",
-      text: "This is the Altar of Ascension. Challenge the dragon Hooktail at the maximum stage you can survive. Slaying her lets you Ascend, granting permanent Prestige Points (PP) to invest in multipliers!",
-      trigger: () => window.HoorTutorial.getActiveTab() === "prestige",
-      highlightSelector: "#tab-prestige",
-    },
+          title: "Hoor",
+          avatar: "🏅",
+          text: "This is the Altar of Ascension. Prestige here to gain permanent Prestige Points (PP) to invest in multipliers!",
+          trigger: () =>
+            window.HoorTutorial.getActiveTab() === "prestige" &&
+            (window.playerStats.maxStage >= 81 ||
+              (window.playerStats.prestigeCount || 0) > 0),
+          highlightSelector: "#tab-prestige",
+        },
     reforge_mode: {
       title: "Hoor",
       avatar: "🏅",

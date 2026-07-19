@@ -404,26 +404,47 @@ window.GameState = {
     if (leveledUp) {
       window.triggerLevelUpEffect();
 
-      // Check if they reached Level 25 for the first time to trigger Altar / Clan Hall Unlock
-      if (
-        window.playerStats.level >= 25 &&
-        !window.playerStats.hasTriggeredLevel25Unlock
-      ) {
-        window.playerStats.hasTriggeredLevel25Unlock = true;
-        setTimeout(() => {
-          if (typeof window.playGlobalUnlockAnimation === "function") {
-            window.playGlobalUnlockAnimation(
-              "RIFT ALTAR & CLAN HALL UNLOCKED",
-              "🔮",
-              () => {
-                if (typeof window.switchTab === "function") {
-                  window.switchTab("activities");
+      // Check if they reached Level 13 for the first time to trigger Clan Hall Unlock
+            if (
+              window.playerStats.level >= 13 &&
+              !window.playerStats.hasTriggeredLevel13Unlock
+            ) {
+              window.playerStats.hasTriggeredLevel13Unlock = true;
+              setTimeout(() => {
+                if (typeof window.playGlobalUnlockAnimation === "function") {
+                  window.playGlobalUnlockAnimation(
+                    "CLAN HALL UNLOCKED",
+                    "🏛️",
+                    () => {
+                      if (typeof window.toggleMenuHub === "function") {
+                        window.toggleMenuHub(); // Pop open the Hub so the padlock shatters right over the locked button!
+                      }
+                    },
+                  );
                 }
-              },
-            );
-          }
-        }, 1500); // Trigger shortly after the level-up flash settles
-      }
+              }, 1500);
+            }
+
+            // Check if they reached Level 25 for the first time to trigger Rift Altar Unlock
+            if (
+              window.playerStats.level >= 25 &&
+              !window.playerStats.hasTriggeredLevel25Unlock
+            ) {
+              window.playerStats.hasTriggeredLevel25Unlock = true;
+              setTimeout(() => {
+                if (typeof window.playGlobalUnlockAnimation === "function") {
+                  window.playGlobalUnlockAnimation(
+                    "RIFT ALTAR UNLOCKED",
+                    "🔮",
+                    () => {
+                      if (typeof window.switchTab === "function") {
+                        window.switchTab("activities");
+                      }
+                    },
+                  );
+                }
+              }, 1500); // Trigger shortly after the level-up flash settles
+            }
 
       window.invalidatePlayerStats();
       let p = window.resolvePlayerStats();
@@ -2306,9 +2327,11 @@ window.playerStats = {
   completedTutorialSteps: [],
   visitedTabs: [],
   visitedSubTabs: [],
-  hasTriggeredLevel25Unlock: false,
-  equippedTitle: null,
-  achievementTimestamps: {},
+  hasTriggeredLevel13Unlock: false,
+    hasTriggeredLevel25Unlock: false,
+    hasTriggeredPrestigeUnlock: false,
+    equippedTitle: null,
+    achievementTimestamps: {},
   claimedMailIds: [],
   unlockedSkins: ["default"],
   equippedCostume: "knight",
