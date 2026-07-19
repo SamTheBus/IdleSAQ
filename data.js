@@ -2576,9 +2576,13 @@ window.recalculateXpRequirement = function () {
 };
 // Expose the manual boss rechallenge actuator to the DOM window
 window.rechallengeBoss = function () {
+  let p = window.resolvePlayerStats();
+  window.playerStats.currentHp = p.maxHp;
   window.playerStats.isFarmingLoop = false;
-  window.playerStats.isBossMode = true;
-  window.playerStats.killCount = window.playerStats.targetsRequired;
+  window.playerStats.isBossMode = false;
+  window.playerStats.killCount = 0;
   window.mob = null;
+  window.projectiles = [];
+  window.hero.x = 40;
   if (typeof window.updateUI === "function") window.updateUI();
 };
