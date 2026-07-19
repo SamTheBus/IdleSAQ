@@ -5102,3 +5102,28 @@ summary {
   position: relative !important;
   z-index: 10001 !important; /* Forces highlighted elements above the dark backdrop */
 }
+
+/* Eco Mode Performance Override */
+body.eco-active .btn-pulse,
+body.eco-active .btn-pulse-teal,
+body.eco-active .tab-crucible-aura,
+body.eco-active .tab-crucible-core,
+body.eco-active .tab-crucible-spark,
+body.eco-active .tab-enchanter-crystal,
+body.eco-active .tab-enchanter-aura,
+body.eco-active .portal-spiral,
+body.eco-active .prestige-ruby-heart,
+body.eco-active .prestige-ruby-spark,
+body.eco-active .market-coin,
+body.eco-active .market-potion,
+body.eco-active .awning-tassels,
+body.eco-active .hero-shield-group,
+body.eco-active .hero-sword,
+body.eco-active .hero-aura-ring,
+body.eco-active .hero-shield-gem,
+body.eco-active .hero-sword-gem,
+body.eco-active .tab-anvil-hammer,
+body.eco-active .tab-anvil-ember {
+  animation: none !important;
+  transition: none !important;
+}

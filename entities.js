@@ -88,7 +88,8 @@
   // Append spawnDeathParticles inside window.RenderEngine
   Object.assign(window.RenderEngine, {
     spawnDeathParticles(x, y, mobType) {
-      if (window.particles.length > 250) return;
+          if (window.playerStats.ecoMode && window.particles.length > 100) return;
+          if (window.particles.length > 200) return;
       let count = 15;
       let colors = ["#2ecc71", "#27ae60", "#a3fd83"]; // Default Slime Green
       let speed = 4;
@@ -207,7 +208,8 @@
   // Append spawnPurchaseCelebration inside window.RenderEngine
   Object.assign(window.RenderEngine, {
     spawnPurchaseCelebration(theme, color, rarity) {
-      if (window.particles.length > 300) return;
+          if (window.playerStats.ecoMode && window.particles.length > 100) return;
+          if (window.particles.length > 200) return;
       let cvs = document.getElementById("gameCanvas");
       let spawnX = cvs ? cvs.width / 2 : 375;
       let spawnY = cvs ? cvs.height / 2 : 125;
@@ -13139,13 +13141,16 @@
   };
 
   window.updateEcoModeStyle = function () {
-    let active = window.playerStats.ecoMode === true;
-    let btn = document.getElementById("settings-toggle-eco");
-    if (btn) {
-      btn.innerText = active ? "Saver: ON" : "Saver: OFF";
-      btn.className = active ? "btn-action" : "btn-action un";
-    }
-  };
+      let active = window.playerStats.ecoMode === true;
+      let btn = document.getElementById("settings-toggle-eco");
+      if (btn) {
+        btn.innerText = active ? "Saver: ON" : "Saver: OFF";
+        btn.className = active ? "btn-action" : "btn-action un";
+      }
+      // Toggle class on body for CSS performance overrides
+      if (active) document.body.classList.add("eco-active");
+      else document.body.classList.remove("eco-active");
+    };
 
   window.toggleDpsOverlay = function () {
     window.playerStats.showDpsOverlay = !window.playerStats.showDpsOverlay;

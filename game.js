@@ -3136,8 +3136,8 @@ function engineCycle() {
     }
 
     // Limit render cycles to save CPU/GPU resources on mobile or Eco Mode
-    let renderLimit =
-      window.playerStats && window.playerStats.ecoMode ? 1000 / 45 : 0; // Perfectly preserves your 45 FPS Eco Mode target
+        let renderLimit =
+          window.playerStats && window.playerStats.ecoMode ? 1000 / 30 : 0; // Optimized 30 FPS for mobile thermal stability
 
     if (now - lastRenderTime >= renderLimit) {
       window.draw();

@@ -1745,137 +1745,60 @@ Object.assign(window.ItemFactory, {
           if (pool.length === 0) break;
           let selectedStat = pool.pop();
           let expBase = Math.pow(1.045, stageScale); // Controlled exponential base
-          if (selectedStat === "atk")
-            item.bonusAtk += Math.ceil(
-              window.randFloat(0.04, 0.08) * expBase * rarityMult
-            );
-          else if (selectedStat === "maxHp")
-            item.bonusMaxHp += Math.ceil(
-              window.randFloat(0.12, 0.24) * expBase * rarityMult
-            );
-          else if (selectedStat === "def")
-            item.bonusDef += Math.ceil(
-              window.randFloat(0.04, 0.08) * expBase * rarityMult
-            );
-      else if (selectedStat === "moveSpeed")
-        item.bonusMoveSpeed += Math.ceil(
-          window.randInt(1, 2) * stageScale * pctRarityMult * prestigeMult,
-        );
-      else if (selectedStat === "critChance") {
-        let rolled =
-          window.randFloat(0.01, 0.025) *
-          Math.sqrt(stageScale) *
-          pctRarityMult *
-          prestigeMult;
-        item.bonusCritChance += parseFloat(Math.min(0.2, rolled).toFixed(4));
-      } else if (selectedStat === "critDamage") {
-        let rolled =
-          window.randFloat(0.03, 0.06) *
-          Math.sqrt(stageScale) *
-          pctRarityMult *
-          prestigeMult;
-        item.bonusCritDamage += parseFloat(rolled.toFixed(4));
-      } else if (selectedStat === "block") {
-        let rolled =
-          window.randFloat(0.005, 0.015) *
-          Math.sqrt(stageScale) *
-          pctRarityMult *
-          prestigeMult;
-        item.bonusBlock += parseFloat(Math.min(0.15, rolled).toFixed(4));
-      } else if (selectedStat === "parry") {
-        let rolled =
-          window.randFloat(0.005, 0.015) *
-          Math.sqrt(stageScale) *
-          pctRarityMult *
-          prestigeMult;
-        item.bonusParry += parseFloat(Math.min(0.15, rolled).toFixed(4));
-      } else if (selectedStat === "activeSpd") {
-        let sScale = Math.pow(stageScale, 0.3);
-        let rMult = 1 + statLinesCount * 0.08;
-        let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
-        item.bonusActiveSpeed += parseFloat(
-          (window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4),
-        );
-      } else if (selectedStat === "idleSpd") {
-        let sScale = Math.pow(stageScale, 0.3);
-        let rMult = 1 + statLinesCount * 0.08;
-        let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
-        item.bonusIdleSpeed += parseFloat(
-          (window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4),
-        );
-      } else if (selectedStat === "str")
-        item.bonusStr += Math.ceil(
-          window.randInt(1, 3) *
-            Math.pow(stageScale, 1.8) *
-            rarityMult *
-            prestigeMult,
-        );
-      else if (selectedStat === "dex")
-        item.bonusDex += Math.ceil(
-          window.randInt(1, 3) *
-            Math.pow(stageScale, 1.8) *
-            rarityMult *
-            prestigeMult,
-        );
-      else if (selectedStat === "int")
-        item.bonusInt += Math.ceil(
-          window.randInt(1, 3) *
-            Math.pow(stageScale, 1.8) *
-            rarityMult *
-            prestigeMult,
-        );
-      else if (selectedStat === "dropRate") {
-        let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
-        item.dropRate += parseFloat(
-          (
-            window.randFloat(0.02, 0.05) *
-            pctRarityMult *
-            prestigeMult *
-            utilityScale
-          ).toFixed(4),
-        );
-      } else if (selectedStat === "quality") {
-        let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
-        item.quality += parseFloat(
-          (
-            window.randFloat(0.01, 0.03) *
-            pctRarityMult *
-            prestigeMult *
-            utilityScale
-          ).toFixed(4),
-        );
-      } else if (selectedStat === "goldMulti") {
-        let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
-        item.goldMulti += parseFloat(
-          (
-            window.randFloat(0.02, 0.05) *
-            pctRarityMult *
-            prestigeMult *
-            utilityScale
-          ).toFixed(4),
-        );
-      } else if (selectedStat === "rareSpawn") {
-        let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
-        item.rareSpawn += parseFloat(
-          (
-            window.randFloat(0.002, 0.006) *
-            pctRarityMult *
-            prestigeMult *
-            utilityScale
-          ).toFixed(4),
-        );
-      } else if (selectedStat === "fairySpawn") {
-        let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
-        item.fairySpawn += parseFloat(
-          (
-            window.randFloat(0.02, 0.06) *
-            pctRarityMult *
-            prestigeMult *
-            utilityScale
-          ).toFixed(4),
-        );
-      }
-    }
+
+          if (selectedStat === "atk") {
+            item.bonusAtk += Math.ceil(window.randFloat(0.04, 0.08) * expBase * rarityMult);
+          } else if (selectedStat === "maxHp") {
+            item.bonusMaxHp += Math.ceil(window.randFloat(0.12, 0.24) * expBase * rarityMult);
+          } else if (selectedStat === "def") {
+            item.bonusDef += Math.ceil(window.randFloat(0.04, 0.08) * expBase * rarityMult);
+          } else if (selectedStat === "moveSpeed") {
+            item.bonusMoveSpeed += Math.ceil(window.randInt(1, 2) * stageScale * pctRarityMult * prestigeMult);
+          } else if (selectedStat === "critChance") {
+            let rolled = window.randFloat(0.01, 0.025) * Math.sqrt(stageScale) * pctRarityMult * prestigeMult;
+            item.bonusCritChance += parseFloat(Math.min(0.2, rolled).toFixed(4));
+          } else if (selectedStat === "critDamage") {
+            let rolled = window.randFloat(0.03, 0.06) * Math.sqrt(stageScale) * pctRarityMult * prestigeMult;
+            item.bonusCritDamage += parseFloat(rolled.toFixed(4));
+          } else if (selectedStat === "block") {
+            let rolled = window.randFloat(0.005, 0.015) * Math.sqrt(stageScale) * pctRarityMult * prestigeMult;
+            item.bonusBlock += parseFloat(Math.min(0.15, rolled).toFixed(4));
+          } else if (selectedStat === "parry") {
+            let rolled = window.randFloat(0.005, 0.015) * Math.sqrt(stageScale) * pctRarityMult * prestigeMult;
+            item.bonusParry += parseFloat(Math.min(0.15, rolled).toFixed(4));
+          } else if (selectedStat === "activeSpd") {
+            let sScale = Math.pow(stageScale, 0.3);
+            let rMult = 1 + statLinesCount * 0.08;
+            let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
+            item.bonusActiveSpeed += parseFloat((window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4));
+          } else if (selectedStat === "idleSpd") {
+            let sScale = Math.pow(stageScale, 0.3);
+            let rMult = 1 + statLinesCount * 0.08;
+            let pMult = Math.pow(1.02, window.playerStats.prestigeCount || 0);
+            item.bonusIdleSpeed += parseFloat((window.randFloat(0.01, 0.03) * sScale * rMult * pMult).toFixed(4));
+          } else if (selectedStat === "str") {
+            item.bonusStr += Math.ceil(window.randInt(1, 3) * Math.pow(stageScale, 1.2) * rarityMult * prestigeMult);
+          } else if (selectedStat === "dex") {
+            item.bonusDex += Math.ceil(window.randInt(1, 3) * Math.pow(stageScale, 1.2) * rarityMult * prestigeMult);
+          } else if (selectedStat === "int") {
+            item.bonusInt += Math.ceil(window.randInt(1, 3) * Math.pow(stageScale, 1.2) * rarityMult * prestigeMult);
+          } else if (selectedStat === "dropRate") {
+            let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+            item.dropRate += parseFloat((window.randFloat(0.02, 0.05) * pctRarityMult * prestigeMult * utilityScale).toFixed(4));
+          } else if (selectedStat === "quality") {
+            let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+            item.quality += parseFloat((window.randFloat(0.01, 0.03) * pctRarityMult * prestigeMult * utilityScale).toFixed(4));
+          } else if (selectedStat === "goldMulti") {
+            let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+            item.goldMulti += parseFloat((window.randFloat(0.02, 0.05) * pctRarityMult * prestigeMult * utilityScale).toFixed(4));
+          } else if (selectedStat === "rareSpawn") {
+            let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+            item.rareSpawn += parseFloat((window.randFloat(0.002, 0.006) * pctRarityMult * prestigeMult * utilityScale).toFixed(4));
+          } else if (selectedStat === "fairySpawn") {
+            let utilityScale = 1.0 + Math.sqrt(Math.max(1, stageScale) - 1) * 0.12;
+            item.fairySpawn += parseFloat((window.randFloat(0.02, 0.06) * pctRarityMult * prestigeMult * utilityScale).toFixed(4));
+          }
+        }
 
     item.atk = (item.baseAtk || 0) + item.bonusAtk;
         item.maxHp = (item.baseMaxHp || 0) + item.bonusMaxHp;
@@ -2102,15 +2025,15 @@ Object.assign(window.ItemFactory, {
       min += Math.ceil(1 * stageLevel * rarityMult);
       max += Math.ceil(2 * stageLevel * rarityMult);
     } else if (statKey === "str" && (item.bonusStr > 0 || isArt)) {
-      min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
-      max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
-    } else if (statKey === "dex" && (item.bonusDex > 0 || isArt)) {
-      min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
-      max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
-    } else if (statKey === "int" && (item.bonusInt > 0 || isArt)) {
-      min += Math.ceil(1 * Math.pow(stageLevel, 1.8) * rarityMult);
-      max += Math.ceil(3 * Math.pow(stageLevel, 1.8) * rarityMult);
-    } else if (statKey === "critChance" && item.bonusCritChance > 0) {
+            min += Math.ceil(1 * Math.pow(stageLevel, 1.2) * rarityMult);
+            max += Math.ceil(3 * Math.pow(stageLevel, 1.2) * rarityMult);
+          } else if (statKey === "dex" && (item.bonusDex > 0 || isArt)) {
+            min += Math.ceil(1 * Math.pow(stageLevel, 1.2) * rarityMult);
+            max += Math.ceil(3 * Math.pow(stageLevel, 1.2) * rarityMult);
+          } else if (statKey === "int" && (item.bonusInt > 0 || isArt)) {
+            min += Math.ceil(1 * Math.pow(stageLevel, 1.2) * rarityMult);
+            max += Math.ceil(3 * Math.pow(stageLevel, 1.2) * rarityMult);
+          } else if (statKey === "critChance" && item.bonusCritChance > 0) {
       min += 0.01 * Math.sqrt(stageLevel) * rarityMult;
       max += 0.025 * Math.sqrt(stageLevel) * rarityMult;
     } else if (statKey === "critDamage" && item.bonusCritDamage > 0) {
@@ -2914,26 +2837,26 @@ Object.assign(window.ItemFactory, {
         ).toFixed(4),
       );
     } else if (selectedStat === "str")
-      item.bonusStr += Math.ceil(
-        window.randInt(1, 3) *
-          Math.pow(stageScale, 1.8) *
-          rarityMult *
-          prestigeMult,
-      );
-    else if (selectedStat === "dex")
-      item.bonusDex += Math.ceil(
-        window.randInt(1, 3) *
-          Math.pow(stageScale, 1.8) *
-          rarityMult *
-          prestigeMult,
-      );
-    else if (selectedStat === "int")
-      item.bonusInt += Math.ceil(
-        window.randInt(1, 3) *
-          Math.pow(stageScale, 1.8) *
-          rarityMult *
-          prestigeMult,
-      );
+            item.bonusStr += Math.ceil(
+              window.randInt(1, 3) *
+                Math.pow(stageScale, 1.2) *
+                pctRarityMult *
+                prestigeMult,
+            );
+          else if (selectedStat === "dex")
+            item.bonusDex += Math.ceil(
+              window.randInt(1, 3) *
+                Math.pow(stageScale, 1.2) *
+                pctRarityMult *
+                prestigeMult,
+            );
+          else if (selectedStat === "int")
+            item.bonusInt += Math.ceil(
+              window.randInt(1, 3) *
+                Math.pow(stageScale, 1.2) *
+                pctRarityMult *
+                prestigeMult,
+            );
 
     window.recalculateItemStats(item);
   },
