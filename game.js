@@ -4466,11 +4466,19 @@ function update() {
 
       let isBlocked = Math.random() < p.block;
 
-      if (isBlocked) {
-        window.SoundManager.play("block");
+                if (isBlocked) {
+                  window.SoundManager.play("block");
 
-        // High-Powered Shield Bash Counter-Attack for all Shields!
-        if (window.mob && window.mob.hp.gt(0)) {
+                  // Trigger the floating BLOCK text and shield animation
+                  window.effects.push({
+                    type: "block",
+                    x: window.hero.x + 12,
+                    y: window.hero.y - 15,
+                    life: 40,
+                  });
+
+                  // High-Powered Shield Bash Counter-Attack for all Shields!
+                  if (window.mob && window.mob.hp.gt(0)) {
           let sub = window.equippedSlots.subweapon;
           let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
           let bashMult = 1.5;
@@ -4589,12 +4597,20 @@ function update() {
 
                 let isParried = Math.random() < p.parry;
 
-                if (isParried) {
-                  // Mitigate incoming damage by 60% (takes 40% damage)
-                  netDamageBig = netDamageBig.mul(0.4);
-                  window.SoundManager.play("parry");
+                                    if (isParried) {
+                                      // Mitigate incoming damage by 60% (takes 40% damage)
+                                      netDamageBig = netDamageBig.mul(0.4);
+                                      window.SoundManager.play("parry");
 
-                  // Instant offensive Riposte counter-attack scaling with DEX & ATK!
+                                      // Trigger the floating PARRY text and crossed sabers animation
+                                      window.effects.push({
+                                        type: "parry",
+                                        x: window.hero.x + 12,
+                                        y: window.hero.y - 15,
+                                        life: 40,
+                                      });
+
+                                      // Instant offensive Riposte counter-attack scaling with DEX & ATK!
                   let sub = window.equippedSlots.subweapon;
                   let noun = sub && sub.noun ? sub.noun.toLowerCase() : "";
                   let riposteMult = 1.0;

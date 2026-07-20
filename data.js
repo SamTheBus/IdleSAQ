@@ -1205,12 +1205,12 @@ window.resolvePlayerStats = function (useDraft = false) {
       if (item.dexPct) itemDexPct += item.dexPct * slotMult;
       if (item.intPct) itemIntPct += item.intPct * slotMult;
 
-      // Treat flat affixes as percentages under the pure-multiplicative model
-      itemAtkPct += (BigNum.from(item.bonusAtk || 0).div(100).mul(slotMult).valueOf());
-      itemHpPct += (BigNum.from(item.bonusMaxHp || 0).div(100).mul(slotMult).valueOf());
-      itemDefPct += (BigNum.from(item.bonusDef || 0).div(100).mul(slotMult).valueOf());
-    }
-  }
+      // Commented out to prevent flat-to-percentage double-dipping in late game
+            // itemAtkPct += (BigNum.from(item.bonusAtk || 0).div(100).mul(slotMult).valueOf());
+            // itemHpPct += (BigNum.from(item.bonusMaxHp || 0).div(100).mul(slotMult).valueOf());
+            // itemDefPct += (BigNum.from(item.bonusDef || 0).div(100).mul(slotMult).valueOf());
+          }
+        }
 
   if (
     window.checkArtifactTrait("golem_stance") &&
@@ -1306,10 +1306,10 @@ window.resolvePlayerStats = function (useDraft = false) {
   let effectiveInt = Math.max(0, p.int - 5);
 
   // --- CALCULATE SECURE EXPONENTIAL CHARACTER-BOUND BASE STATS ---
-  let levelScale = BigNum.from(1.04).pow(window.playerStats.level - 1);
-  let baseCharAtk = BigNum.from(10 + window.playerStats.level * 2 + p.str * 0.4 + p.dex * 0.2 + p.int * 0.1).mul(levelScale);
-  let baseCharHp = BigNum.from(100 + window.playerStats.level * 8 + p.str * 1.2).mul(levelScale);
-  let baseCharDef = BigNum.from(5 + window.playerStats.level * 1 + p.int * 0.4 + p.str * 0.1).mul(levelScale);
+      let levelScale = BigNum.from(1.025).pow(window.playerStats.level - 1);
+      let baseCharAtk = BigNum.from(10 + window.playerStats.level * 2).mul(levelScale).add(p.str * 5 + p.dex * 2 + p.int * 1);
+      let baseCharHp = BigNum.from(100 + window.playerStats.level * 8).mul(levelScale).add(p.str * 15);
+      let baseCharDef = BigNum.from(5 + window.playerStats.level * 1).mul(levelScale).add(p.int * 3);
 
   p.atk = baseCharAtk.add(flatGearAtk);
   p.maxHp = baseCharHp.add(flatGearHp);
@@ -1319,6 +1319,14 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.atk = p.atk.mul(1.0 + itemAtkPct).mul(achAtkPct);
   p.maxHp = p.maxHp.mul(1.0 + itemHpPct).mul(achMaxHpPct);
   p.moveSpeed = p.moveSpeed * (achMoveSpeedPct + itemSpdPct + (setCtx.moveSpeedPctBonus || 0));
+
+// Calculate Arcane Barrier for Inspected Player holding a Tome
+  let insSub = window.equippedSlots.subweapon;
+  if (insSub && insSub.subType === "tome") {
+    let insEffInt = Math.max(0, p.int - 5);
+    let insIntBonus = Math.min(0.15, (insEffInt * 0.15) / (insEffInt + 150));
+    p.arcaneBarrier = 0.20 + insIntBonus;
+  }
 
   let defMultiplier = 1.0 + setCtx.defPctBonus;
   for (let key in window.equippedSlots) {
@@ -1518,10 +1526,20 @@ window.resolvePlayerStats = function (useDraft = false) {
   maxParryCap += (p.crucibleCapBonus || 0);
 
   p.rawBlock = p.block;
-  p.rawParry = p.parry;
+    p.rawParry = p.parry;
 
-  if (p.block > maxBlockCap) p.block = maxBlockCap;
-  if (p.parry > maxParryCap) p.parry = maxParryCap;
+    if (p.block > maxBlockCap) p.block = maxBlockCap;
+    if (p.parry > maxParryCap) p.parry = maxParryCap;
+
+    // Calculate Tome passive Arcane Barrier
+    let hasTome = subItem && subItem.subType === "tome";
+    if (hasTome) {
+      // Base 20% absorption, scaling up to 35% with INT
+      let intBonus = Math.min(0.15, (effectiveInt * 0.15) / (effectiveInt + 150));
+      p.arcaneBarrier = 0.20 + intBonus;
+    } else {
+      p.arcaneBarrier = 0.0;
+    }
 
   let rawRare = p.rareSpawn;
   let limit = window.checkArtifactTrait("void_pull") ? 0.1 : 0.075;
