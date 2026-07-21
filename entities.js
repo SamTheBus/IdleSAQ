@@ -10317,19 +10317,18 @@
     ctx.restore();
 
     // 5. STYLIZED MONSTERS DRAW
-    if (window.mob) {
-      window.drawSingleMob(ctx, window.mob);
-      let bHp = BigNum.from(window.mob.hp);
-      let bMaxHp = BigNum.from(window.mob.maxHp);
-      let hpPct = Math.max(
-        0,
-        Math.min(
-          1,
-          Number(
-            bHp.div(bMaxHp).m * Math.pow(10, Math.min(15, bHp.div(bMaxHp).e)),
-          ),
-        ),
-      );
+        if (window.mob) {
+          window.drawSingleMob(ctx, window.mob);
+
+          // Lazy-cache HP percentage to eliminate real-time BigNum allocations at 60fps
+          if (window.mob.lastCachedHp_m !== window.mob.hp.m || window.mob.lastCachedHp_e !== window.mob.hp.e) {
+            window.mob.lastCachedHp_m = window.mob.hp.m;
+            window.mob.lastCachedHp_e = window.mob.hp.e;
+            let bHp = BigNum.from(window.mob.hp);
+            let bMaxHp = BigNum.from(window.mob.maxHp);
+            window.mob.hpPct = Math.max(0, Math.min(1, Number(bHp.div(bMaxHp).m * Math.pow(10, Math.min(15, bHp.div(bMaxHp).e)))));
+          }
+          let hpPct = window.mob.hpPct !== undefined ? window.mob.hpPct : 1.0;
 
       if (
         hpPct < 1.0 &&
@@ -11576,21 +11575,19 @@
       ctx.fill();
       ctx.stroke();
 
-      let bHp = BigNum.from(window.mob.hp);
-      let bMaxHp = BigNum.from(window.mob.maxHp);
-      let hpPct = Math.max(
-        0,
-        Math.min(
-          1,
-          Number(
-            bHp.div(bMaxHp).m * Math.pow(10, Math.min(15, bHp.div(bMaxHp).e)),
-          ),
-        ),
-      );
+      // Lazy-cache HP percentage to eliminate real-time BigNum allocations at 60fps
+            if (window.mob.lastCachedHp_m !== window.mob.hp.m || window.mob.lastCachedHp_e !== window.mob.hp.e) {
+              window.mob.lastCachedHp_m = window.mob.hp.m;
+              window.mob.lastCachedHp_e = window.mob.hp.e;
+              let bHp = BigNum.from(window.mob.hp);
+              let bMaxHp = BigNum.from(window.mob.maxHp);
+              window.mob.hpPct = Math.max(0, Math.min(1, Number(bHp.div(bMaxHp).m * Math.pow(10, Math.min(15, bHp.div(bMaxHp).e)))));
+            }
+            let hpPct = window.mob.hpPct !== undefined ? window.mob.hpPct : 1.0;
 
-      // High-performance percentage lerp replaces heavy float trailing HP updates
-      window.mob.trailingPct =
-        window.mob.trailingPct !== undefined ? window.mob.trailingPct : hpPct;
+            // High-performance percentage lerp replaces heavy float trailing HP updates
+            window.mob.trailingPct =
+              window.mob.trailingPct !== undefined ? window.mob.trailingPct : hpPct;
       if (window.mob.trailingPct > hpPct) {
         window.mob.trailingPct = Math.max(
           hpPct,

@@ -1668,26 +1668,30 @@ window.MusicManager = {
                 // We target a default 0.45x mix volume for music to preserve a comfortable balance with SFX
                 let finalTargetVolume = isMuted ? 0 : musicVolSetting * 0.45 * volumeScale;
 
-    if (this.currentState !== state) {
-      this.currentState = state;
-      console.log(
-        `[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Q: ${targetQ.toFixed(1)}, Echo: ${(targetDelayGain * 100).toFixed(0)}%, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`,
-      );
-    }
+    // Check if state, volume, or mute status changed
+          let hasVolumeChanged = this.lastTargetVolume !== finalTargetVolume;
 
-    // Apply exponential sweeps
-    if (this.filter && this.filter.frequency && this.ctx) {
-      this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
-    }
-    if (this.filter && this.filter.Q && this.ctx) {
-      this.filter.Q.setTargetAtTime(targetQ, now, 0.25);
-    }
-    if (this.gainNode && this.gainNode.gain && this.ctx) {
-      this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
-    }
-    if (this.delayGain && this.delayGain.gain && this.ctx) {
-      this.delayGain.gain.setTargetAtTime(targetDelayGain, now, 0.25);
-    }
+          if (this.currentState !== state || hasVolumeChanged) {
+            this.currentState = state;
+            this.lastTargetVolume = finalTargetVolume;
+            console.log(
+              `[BGM] State Transition ➔ ${state.toUpperCase()} (Filter: ${targetFreq}Hz, Q: ${targetQ.toFixed(1)}, Echo: ${(targetDelayGain * 100).toFixed(0)}%, Gain: ${(finalTargetVolume * 100).toFixed(0)}%)`,
+            );
+
+            // Apply exponential sweeps ONLY when parameters actually change
+            if (this.filter && this.filter.frequency && this.ctx) {
+              this.filter.frequency.setTargetAtTime(targetFreq, now, 0.25); // 250ms transition
+            }
+            if (this.filter && this.filter.Q && this.ctx) {
+              this.filter.Q.setTargetAtTime(targetQ, now, 0.25);
+            }
+            if (this.gainNode && this.gainNode.gain && this.ctx) {
+              this.gainNode.gain.setTargetAtTime(finalTargetVolume, now, 0.22);
+            }
+            if (this.delayGain && this.delayGain.gain && this.ctx) {
+              this.delayGain.gain.setTargetAtTime(targetDelayGain, now, 0.25);
+            }
+          }
 
     // Always keep the direct audio element synchronized to bypass browser Web Audio muting conflicts
     if (this.audio) {
