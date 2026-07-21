@@ -1580,14 +1580,6 @@ window.executeUIUpdate = function () {
   };
   updateSPButtonStates();
 
-  // Challenge portal visibility
-  let rechallengeBtn = document.getElementById("btn-rechallenge");
-  if (rechallengeBtn) {
-    rechallengeBtn.style.display = window.playerStats.isFarmingLoop
-      ? "block"
-      : "none";
-  }
-
   // Set synergy hud lists
   let activeSetsHtml = [];
   let activeSetCounts = {};
@@ -1694,22 +1686,24 @@ window.executeUIUpdate = function () {
     window.renderAltarTab();
   }
 
-  // Update Vending Subtab variables if active
-  let gachaSec = document.getElementById("market-sec-gacha");
-  if (gachaSec && gachaSec.style.display !== "none") {
-    window.setText(
-      "gachapon-lvl-display",
-      window.playerStats.vendingQLevel || 0,
-    );
-    window.setText(
-      "gacha-key-count-lbl",
-      window.inventory.ETC["Gacha Key"] || 0,
-    );
-    window.updateGachaRecentList();
-    window.renderGachaShowcaseMarquee();
+  // Update Gacha Recent List
+    let gachaSec = document.getElementById("market-sec-gacha");
+    if (gachaSec && gachaSec.style.display !== "none") {
+      let vendingLvl = window.playerStats.vendingQLevel || 0;
+      window.setText(
+        "gachapon-lvl-display",
+        vendingLvl,
+      );
+      window.setText(
+        "gacha-key-count-lbl",
+        window.inventory.ETC["Gacha Key"] || 0,
+      );
+      window.updateGachaRecentList();
+      window.renderGachaShowcaseMarquee();
 
-    // Update live vending rates board (Fully live with your stats!)
-    let probs = window.calculateRarityProbabilities(p.qly, true);
+      // Update live vending rates board (Fully live with your stats!)
+      let effectiveVendingLvl = vendingLvl * window.getMilestoneMultiplier(vendingLvl);
+      let probs = window.calculateRarityProbabilities(p.qly + effectiveVendingLvl * 0.01, true);
 
     window.setText("vending-rate-5", probs[5].toFixed(2) + "%");
     window.setText("vending-rate-4", probs[4].toFixed(2) + "%");
@@ -4030,76 +4024,80 @@ window.renderGoldUpgrades = function () {
     ];
 
   el.innerHTML = upgrades
-    .map((u) => {
-      let canAfford = BigNum.from(p.coins).gte(u.cost);
-      let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+          .map((u) => {
+            let canAfford = BigNum.from(p.coins).gte(u.cost);
+            let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+            let costStr = window.formatNumber(u.cost) + " G";
 
-      let btnHtml = "";
-      if (canAfford) {
-        btnHtml = `
-                      <button class="btn-action"
-                                                    style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
-                                                    onmouseenter="window.hideTooltip();"
-                                                    onpointerdown="event.stopPropagation();"
-                                                    ontouchstart="window.hideTooltip(); event.stopPropagation();"
-                                                    onclick="event.stopPropagation(); window.buyGoldUpgrade('${u.id}')">
-                                                Upgrade Sink
-                                            </button>
-                    `;
-      } else {
-        btnHtml = `
-        <button class="btn-action"
-                style="background: #242933; color: #5c6370; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #2d3139; cursor: not-allowed; opacity: 0.8;"
-                disabled>
-            🔒 Lacking Gold
-        </button>
-      `;
-      }
+            let btnHtml = "";
+            if (canAfford) {
+              btnHtml = `
+                            <button class="btn-action"
+                                                          style="background: ${u.color}; color: ${u.color === "#f1c40f" ? "#111" : "#fff"}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${u.color}44; cursor: pointer; transition: all 0.2s;"
+                                                          onmouseenter="window.hideTooltip();"
+                                                          onpointerdown="event.stopPropagation();"
+                                                          ontouchstart="window.hideTooltip(); event.stopPropagation();"
+                                                          onclick="event.stopPropagation(); window.buyGoldUpgrade('${u.id}')">
+                                                      Upgrade - ${costStr}
+                                                  </button>
+                          `;
+            } else {
+              btnHtml = `
+              <button class="btn-action"
+                      style="background: #242933; color: #5c6370; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #2d3139; cursor: not-allowed; opacity: 0.8;"
+                      disabled>
+                  🔒 Lacking Gold (${costStr})
+              </button>
+            `;
+            }
 
-      // Segment milestone calculations
-      let currentMilestoneProgress = u.level % 10;
-      let nextMilestone = Math.ceil((u.level + 1) / 10) * 10;
-      let progressPercent = (currentMilestoneProgress / 10) * 100;
-      if (u.level > 0 && u.level % 10 === 0) {
-        progressPercent = 100;
-        currentMilestoneProgress = 10;
-      }
+            // Segment milestone calculations
+                      let currentMilestoneProgress = u.level % 10;
+                      let nextMilestone = Math.ceil((u.level + 1) / 10) * 10;
+                      let progressPercent = (currentMilestoneProgress / 10) * 100;
+                      if (u.level > 0 && u.level % 10 === 0) {
+                        progressPercent = 100;
+                        currentMilestoneProgress = 10;
+                      }
 
-      return `
-      <div id="sink-card-${u.id}" class="sink-slate-panel ${u.accentClass}"
-           style="display: flex; flex-direction: column; justify-content: space-between; border: 1.5px solid ${u.color}50; border-radius: 12px; padding: 16px; position: relative; overflow: hidden; background: linear-gradient(180deg, #161a23 0%, #0c0f17 100%); transition: all 0.25s ease-in-out; min-height: 290px; box-shadow: 0 4px 15px rgba(0,0,0,0.65), inset 0 0 10px rgba(${window.hexToRgbValues(u.color)}, 0.05);">
+                      let milestones = Math.floor(u.level / 10);
+                      let milestoneBonusHtml = milestones > 0
+                        ? `<div style="font-size:9.5px; color:#ffd700; font-weight:bold; margin-top:4px; font-family:monospace; line-height:1; display:flex; align-items:center; gap:3px;">🏆 SYNERGY: +${milestones * 25}% EFFECTIVE</div>`
+                        : "";
 
-          <!-- Holographic sweep shine overlay -->
-          <div class="sink-shimmer" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(135deg, rgba(255,255,255,0) 45%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 55%); transform: rotate(-15deg); pointer-events: none; z-index: 1; transition: all 0.75s ease-in-out;"></div>
+                      return `
+                      <div id="sink-card-${u.id}" class="sink-slate-panel ${u.accentClass}"
+                           style="display: flex; flex-direction: column; justify-content: space-between; border: 1.5px solid ${u.color}50; border-radius: 12px; padding: 16px; position: relative; overflow: hidden; background: linear-gradient(180deg, #161a23 0%, #0c0f17 100%); transition: all 0.25s ease-in-out; min-height: 290px; box-shadow: 0 4px 15px rgba(0,0,0,0.65), inset 0 0 10px rgba(${window.hexToRgbValues(u.color)}, 0.05);">
 
-          <div>
-              <!-- Top Row Header: Name & Cost Badge -->
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; position: relative; z-index: 2;">
-                  <strong style="color: ${u.color}; font-size: 14.5px; font-weight: bold; text-shadow: 0 0 10px ${u.color}35;">${u.name}</strong>
-                  <span style="background: ${costColor}12; border: 1.5px solid ${costColor}80; color: ${costColor}; font-family: monospace; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px; box-shadow: 0 0 8px ${costColor}1a;">
-                      ${window.formatNumber(u.cost)} G
-                  </span>
-              </div>
+                          <!-- Holographic sweep shine overlay -->
+                          <div class="sink-shimmer" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(135deg, rgba(255,255,255,0) 45%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 55%); transform: rotate(-15deg); pointer-events: none; z-index: 1; transition: all 0.75s ease-in-out;"></div>
 
-              <!-- Content Row: Vector Icon and Stat Block Matrix -->
-              <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px; position: relative; z-index: 2;">
-                  <div class="sink-icon-container" style="width: 76px; height: 72px; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55); border: 2px solid ${u.color}; border-radius: 10px; flex-shrink: 0; box-shadow: inset 0 0 10px #000; transition: transform 0.2s ease;">
-                      ${u.iconSvg}
-                  </div>
+                          <div>
+                              <!-- Top Row Header: Name -->
+                              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; position: relative; z-index: 2;">
+                                  <strong style="color: ${u.color}; font-size: 14.5px; font-weight: bold; text-shadow: 0 0 10px ${u.color}35;">${u.name}</strong>
+                              </div>
 
-                  <div style="flex: 1; display: grid; grid-template-columns: 1fr; gap: 4px; background: rgba(0,0,0,0.3); border: 1px solid #222; border-radius: 6px; padding: 6px 10px;">
-                      <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; line-height:1;">
-                          <span>RANK TIER:</span>
-                          <span style="color: #fff; font-weight: bold; font-family: monospace;">Lv. ${u.level} ➔ <span style="color:#2ecc71;">${u.level + 1}</span></span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; line-height:1;">
-                          <span>EFFECTIVE:</span>
-                          <span style="color: #fff; font-weight: bold; font-family: monospace;">
-                              +${(u.level * u.effectPerLevel).toFixed(1)}% ➔ <span style="color:#2ecc71;">+${((u.level + 1) * u.effectPerLevel).toFixed(1)}%</span>
-                          </span>
-                      </div>
-                  </div>
-              </div>
+                              <!-- Content Row: Vector Icon and Stat Block Matrix -->
+                              <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px; position: relative; z-index: 2;">
+                                  <div class="sink-icon-container" style="width: 76px; height: 72px; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55); border: 2px solid ${u.color}; border-radius: 10px; flex-shrink: 0; box-shadow: inset 0 0 10px #000; transition: transform 0.2s ease;">
+                                      ${u.iconSvg}
+                                  </div>
+
+                                  <div style="flex: 1; display: grid; grid-template-columns: 1fr; gap: 4px; background: rgba(0,0,0,0.3); border: 1px solid #222; border-radius: 6px; padding: 6px 10px;">
+                                      <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; line-height:1;">
+                                          <span>RANK TIER:</span>
+                                          <span style="color: #fff; font-weight: bold; font-family: monospace;">Lv. ${u.level} ➔ <span style="color:#2ecc71;">${u.level + 1}</span></span>
+                                      </div>
+                                      <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; line-height:1;">
+                                          <span>EFFECTIVE:</span>
+                                          <span style="color: #fff; font-weight: bold; font-family: monospace;">
+                                              +${(u.level * u.effectPerLevel * window.getMilestoneMultiplier(u.level)).toFixed(1)}% ➔ <span style="color:#2ecc71;">+${((u.level + 1) * u.effectPerLevel * window.getMilestoneMultiplier(u.level + 1)).toFixed(1)}%</span>
+                                          </span>
+                                      </div>
+                                      ${milestoneBonusHtml}
+                                  </div>
+                              </div>
 
               <!-- Description Block -->
               <div style="font-size: 11px; color: #cbd5e1; line-height: 1.45; text-align: left; white-space: normal; margin-bottom: 12px; position: relative; z-index: 2; min-height: 38px;">
@@ -4465,47 +4463,212 @@ window.renderPrestigeTab = function () {
   let isEligible = currentStage >= minReqStage;
 
   let getUpgradeCardHtml = (
-    type,
-    label,
-    icon,
-    currentText,
-    bonusDesc,
-    pts,
-    color,
-  ) => {
-    let cost = window.getPrestigeUpgradeCost(type, pts);
-    let canAfford = p.prestigePoints >= cost;
-    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-    let bgStyle = window.hexToRgba(color, 0.04);
-    let fontColor =
-      color === "#f1c40f" || color === "#ffb6c1" ? "#111" : "#fff";
+      type,
+      label,
+      icon,
+      currentText,
+      bonusDesc,
+      pts,
+      color,
+    ) => {
+      let cost = window.getPrestigeUpgradeCost(type, pts);
+      let canAfford = p.prestigePoints >= cost;
+      let costStr = `${cost} PP`;
+      let fontColor = color === "#f1c40f" || color === "#ffb6c1" ? "#111" : "#fff";
 
-    const maxLevels = {
-      gold: 30,
-      drop: 30,
-      exp: 50,
-      fairy: 100,
-    };
-    let isMaxed = maxLevels[type] !== undefined && pts >= maxLevels[type];
+      const maxLevels = {
+        gold: 30,
+        drop: 30,
+        exp: 50,
+        fairy: 100,
+        atk: 100,
+        fort: 100,
+      };
+      let maxL = maxLevels[type] || 100;
+      let isMaxed = pts >= maxL;
 
-    let costLabel = isMaxed
-      ? `<span style="color:#2ecc71; font-weight:bold; font-size:11px;">MAXED</span>`
-      : `<span style="color:${costColor}; font-weight:bold; font-size:11px;">${cost} PP</span>`;
-    let btnHtml = isMaxed
-      ? `<button class="btn-action" style="background:#222; color:#555; border:1px solid #333; font-weight:bold; font-size:10px; padding:4px; cursor:not-allowed;" disabled>MAXED</button>`
-      : `<button class="btn-action" style="background:${color}; color:${fontColor}; font-weight:bold; font-size:10px; padding:4px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.buyPrestigeUpgrade('${type}')">Upgrade</button>`;
+      let multCur = window.getMilestoneMultiplier(pts);
+          let multNext = window.getMilestoneMultiplier(pts + 1);
 
-    return `
-          <div class="shop-row" style="border-color:${color}; background:${bgStyle}; flex-direction:column; align-items:stretch; text-align:left; gap:4px; padding:10px; margin-bottom:0; cursor:help;">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <strong style="color:${color}; font-size:11.5px;">${icon} ${label} <span style="color:#aaa;">(Lv. ${pts})</span></strong>
-                  ${costLabel}
-              </div>
-              <div style="font-size:9.5px; color:#aaa; line-height:1.35; margin-bottom:6px;">${bonusDesc} <br>Currently: <span style="color:#fff; font-weight:bold;">${currentText}</span></div>
-              ${btnHtml}
-          </div>
+          let curEff = "";
+          let nextEff = "";
+          if (type === "gold") {
+            curEff = `+${(pts * 25 * multCur).toFixed(0)}%`;
+            nextEff = `+${((pts + 1) * 25 * multNext).toFixed(0)}%`;
+          } else if (type === "exp") {
+            curEff = `+${(pts * 10 * multCur).toFixed(0)}%`;
+            nextEff = `+${((pts + 1) * 10 * multNext).toFixed(0)}%`;
+          } else if (type === "drop") {
+            curEff = `+${(pts * 5 * multCur).toFixed(0)}%`;
+            nextEff = `+${((pts + 1) * 5 * multNext).toFixed(0)}%`;
+          } else if (type === "atk") {
+            curEff = `+${(pts * 12 * multCur).toFixed(0)}%`;
+            nextEff = `+${((pts + 1) * 12 * multNext).toFixed(0)}%`;
+          } else if (type === "fort") {
+            curEff = `+${(pts * 10 * multCur).toFixed(0)}% / +${(pts * 5 * multCur).toFixed(0)}%`;
+            nextEff = `+${((pts + 1) * 10 * multNext).toFixed(0)}% / +${((pts + 1) * 5 * multNext).toFixed(0)}%`;
+          } else if (type === "fairy") {
+            curEff = `+${(pts * 5 * multCur).toFixed(0)}%`;
+            nextEff = `+${((pts + 1) * 5 * multNext).toFixed(0)}%`;
+          }
+
+      let iconSvg = "";
+      if (type === "gold") {
+        iconSvg = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="20" fill="none" stroke="${color}" stroke-width="2.5" />
+            <path d="M32 18 v28 M24 24 h16 M24 38 h16" stroke="${color}" stroke-width="3" stroke-linecap="round" />
+          </svg>
         `;
-  };
+      } else if (type === "exp") {
+        iconSvg = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="20" fill="none" stroke="${color}" stroke-width="2.5" />
+            <path d="M32 16 L18 24 L32 32 L46 24 Z" fill="${color}20" stroke="${color}" stroke-width="2" />
+            <path d="M18 24 V38 C18 42, 32 46, 32 46 C32 46, 46 42, 46 38 V24" fill="none" stroke="${color}" stroke-width="2" />
+          </svg>
+        `;
+      } else if (type === "drop") {
+        iconSvg = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none">
+            <path d="M32 10 C24 20, 12 25, 12 38 C12 50, 20 54, 32 54 C44 54, 52 50, 52 38 C52 25, 40 20, 32 10 Z" fill="${color}15" stroke="${color}" stroke-width="2.5" />
+            <circle cx="32" cy="35" r="5" fill="#fff" stroke="${color}" stroke-width="1.5" />
+          </svg>
+        `;
+      } else if (type === "atk") {
+        iconSvg = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none">
+            <path d="M14 50 L50 14 M12 52 L18 50 M44 14 L50 20" stroke="${color}" stroke-width="3" stroke-linecap="round" />
+            <path d="M50 14 L14 50 M50 12 L44 14 M14 50 L20 52" stroke="${color}" stroke-width="3" stroke-linecap="round" />
+          </svg>
+        `;
+      } else if (type === "fort") {
+        iconSvg = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none">
+            <path d="M14 12 Q32 8, 50 12 Q48 36, 32 52 Q16 36, 14 12 Z" fill="${color}15" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" />
+            <path d="M22 22 H42 M32 16 V38" stroke="${color}" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        `;
+      } else if (type === "fairy") {
+        iconSvg = `
+          <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="10" fill="none" stroke="${color}" stroke-width="2.5" />
+            <path d="M32 6 Q24 16, 20 32 M32 6 Q40 16, 44 32 M12 32 Q32 40, 52 32" fill="none" stroke="${color}" stroke-width="1.5" />
+          </svg>
+        `;
+      }
+
+      let barColorStyle = "";
+      if (type === "gold") {
+        barColorStyle = `background: linear-gradient(90deg, #f1c40f, #e67e22); box-shadow: 0 0 6px rgba(241, 196, 15, 0.4);`;
+      } else if (type === "exp") {
+        barColorStyle = `background: linear-gradient(90deg, #a855f7, #6c5ce7); box-shadow: 0 0 6px rgba(168, 85, 247, 0.4);`;
+      } else if (type === "drop") {
+        barColorStyle = `background: linear-gradient(90deg, #2ecc71, #27ae60); box-shadow: 0 0 6px rgba(46, 204, 113, 0.4);`;
+      } else if (type === "atk") {
+        barColorStyle = `background: linear-gradient(90deg, #e74c3c, #c0392b); box-shadow: 0 0 6px rgba(231, 76, 60, 0.4);`;
+      } else if (type === "fort") {
+        barColorStyle = `background: linear-gradient(90deg, #3498db, #1d4ed8); box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);`;
+      } else if (type === "fairy") {
+        barColorStyle = `background: linear-gradient(90deg, #ffb6c1, #ff7675); box-shadow: 0 0 6px rgba(255, 182, 193, 0.4);`;
+      }
+
+      let currentMilestoneProgress = pts % 10;
+      let progressPercent = (currentMilestoneProgress / 10) * 100;
+      if (pts > 0 && pts % 10 === 0) {
+        progressPercent = 100;
+        currentMilestoneProgress = 10;
+      }
+
+      let btnHtml = "";
+      if (isMaxed) {
+        btnHtml = `
+          <button class="btn-action"
+                  style="background: #222; color: #555; border: 1px solid #333; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; cursor: not-allowed; opacity: 0.8;"
+                  disabled>
+              MAX RANK
+          </button>
+        `;
+      } else if (canAfford) {
+        btnHtml = `
+          <button class="btn-action"
+                  style="background: ${color}; color: ${fontColor}; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #fff; box-shadow: 0 0 10px ${color}44; cursor: pointer; transition: all 0.2s;"
+                  onmouseenter="window.hideTooltip();"
+                  onpointerdown="event.stopPropagation();"
+                  ontouchstart="window.hideTooltip(); event.stopPropagation();"
+                  onclick="event.stopPropagation(); window.buyPrestigeUpgrade('${type}')">
+              Upgrade - ${costStr}
+          </button>
+        `;
+      } else {
+        btnHtml = `
+          <button class="btn-action"
+                  style="background: #242933; color: #5c6370; width: 100%; padding: 10px; font-size: 11px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid #2d3139; cursor: not-allowed; opacity: 0.8;"
+                  disabled>
+              🔒 Lacking PP (${costStr})
+          </button>
+        `;
+      }
+
+      let milestones = Math.floor(pts / 10);
+            let milestoneBonusHtml = milestones > 0
+              ? `<div style="font-size:9.5px; color:#ffd700; font-weight:bold; margin-top:4px; font-family:monospace; line-height:1; display:flex; align-items:center; gap:3px;">🏆 SYNERGY: +${milestones * 25}% EFFECTIVE</div>`
+              : "";
+
+            return `
+              <div id="prestige-card-${type}" class="sink-slate-panel"
+                   style="display: flex; flex-direction: column; justify-content: space-between; border: 1.5px solid ${color}50; border-radius: 12px; padding: 16px; position: relative; overflow: hidden; background: linear-gradient(180deg, #161a23 0%, #0c0f17 100%); transition: all 0.25s ease-in-out; min-height: 290px; box-shadow: 0 4px 15px rgba(0,0,0,0.65), inset 0 0 10px rgba(${window.hexToRgbValues(color)}, 0.05); margin-bottom: 12px;">
+
+                  <!-- Holographic sweep shine overlay -->
+                  <div class="sink-shimmer" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(135deg, rgba(255,255,255,0) 45%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 55%); transform: rotate(-15deg); pointer-events: none; z-index: 1; transition: all 0.75s ease-in-out;"></div>
+
+                  <div>
+                      <!-- Top Row Header: Name -->
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; position: relative; z-index: 2;">
+                          <strong style="color: ${color}; font-size: 14.5px; font-weight: bold; text-shadow: 0 0 10px ${color}35;">${label}</strong>
+                      </div>
+
+                      <!-- Content Row: Vector Icon and Stat Block Matrix -->
+                      <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px; position: relative; z-index: 2;">
+                          <div class="sink-icon-container" style="width: 76px; height: 72px; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55); border: 2px solid ${color}; border-radius: 10px; flex-shrink: 0; box-shadow: inset 0 0 10px #000; transition: transform 0.2s ease;">
+                              ${iconSvg}
+                          </div>
+
+                          <div style="flex: 1; display: grid; grid-template-columns: 1fr; gap: 4px; background: rgba(0,0,0,0.3); border: 1px solid #222; border-radius: 6px; padding: 6px 10px;">
+                              <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; line-height:1;">
+                                  <span>RANK TIER:</span>
+                                  <span style="color: #fff; font-weight: bold; font-family: monospace;">Lv. ${pts} ➔ <span style="color:#2ecc71;">${isMaxed ? pts : pts + 1}</span></span>
+                              </div>
+                              <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; line-height:1;">
+                                  <span>EFFECTIVE:</span>
+                                  <span style="color: #fff; font-weight: bold; font-family: monospace;">
+                                      ${curEff} ➔ <span style="color:#2ecc71;">${isMaxed ? curEff : nextEff}</span>
+                                  </span>
+                              </div>
+                              ${milestoneBonusHtml}
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- Description Block -->
+                  <div style="font-size: 11px; color: #cbd5e1; line-height: 1.45; text-align: left; white-space: normal; margin-bottom: 12px; position: relative; z-index: 2; min-height: 38px;">
+                      ${bonusDesc}
+                  </div>
+
+                  <!-- Bottom Area: Milestone segment bar & Button -->
+                  <div style="position: relative; z-index: 2; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 12px; margin-top: auto;">
+                      <div style="display: flex; justify-content: space-between; font-size: 9px; color: #aaa; font-family: monospace; margin-bottom: 4px; line-height: 1;">
+                          <span>MILESTONE PROGRESS:</span>
+                          <span style="color: #df9ffb; font-weight: bold;">${currentMilestoneProgress} / 10</span>
+                      </div>
+                      <div class="sink-prog-track" style="margin-top: 0; margin-bottom: 12px;">
+                          <div class="sink-prog-fill" style="width: ${progressPercent}%; height: 100%; transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); ${barColorStyle}"></div>
+                      </div>
+                      ${btnHtml}
+                  </div>
+              </div>
+            `;
+          };
 
   // Paragon Cost
   let parLevel = p.paragonLevel || 0;
@@ -4635,12 +4798,12 @@ window.renderPrestigeTab = function () {
                                     </div>
 
                                     <!-- RIGHT COLUMN: UPGRADES & PARAGON -->
-                                    <div style="display:flex; flex-direction:column; gap:12px;">
-                                        <!-- Prestige points balance banner -->
-                                        <div style="background:#111; border:1px solid #333; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px;">
-                                            <span>Ascension Points:</span>
-                                            <strong style="color:#9b59b6; font-size:13px;">${p.prestigePoints} PP</strong>
-                                        </div>
+                                                <div style="display:flex; flex-direction:column; gap:12px;">
+                                                    <!-- Prestige points balance banner -->
+                                                    <div style="position: sticky; top: var(--canvas-height, 404px); z-index: 100; background: #222; padding-top: 12px; padding-bottom: 8px; margin-top: -12px; margin-bottom: 4px; border-bottom: 1px dashed #333; display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px; box-shadow: 0 4px 10px rgba(0,0,0,0.35);">
+                                                        <span style="color:#aaa;">Ascension Points:</span>
+                                                        <strong style="color:#9b59b6; font-size:13px; text-shadow:0 0 8px rgba(155,89,182,0.3);">${p.prestigePoints} PP</strong>
+                                                    </div>
 
                                         <div style="display:flex; flex-direction:column; gap:6px;">
                                             ${getUpgradeCardHtml("gold", "Midas' Legacy", "🟡", `+${(goldPts * 25).toFixed(0)}% Gold`, "Increases Gold gained from mobs/bosses by +25% per level.", goldPts, "#f1c40f")}
@@ -6929,7 +7092,9 @@ window.refreshMarketShopIfNeeded = function () {
       let isIOTD = i === 4;
       let p = window.resolvePlayerStats();
       // Incorporate Merchant Investment (+1% quality multiplier per level) for shop items
-      let luckMultiplier = p.qly + (window.playerStats.shopQLevel || 0) * 0.01;
+      let shopLvl = window.playerStats.shopQLevel || 0;
+      let effectiveShopLvl = shopLvl * window.getMilestoneMultiplier(shopLvl);
+      let luckMultiplier = p.qly + effectiveShopLvl * 0.01;
       let roll = Math.random() * 100;
       let statLinesCount = 0;
 
@@ -10791,8 +10956,10 @@ window.renderGachaModal = function () {
   }
 
   // Calculate live rates for the LED screen
-  let p = window.resolvePlayerStats();
-  let probs = window.calculateRarityProbabilities(p.qly, true, isGlim);
+    let p = window.resolvePlayerStats();
+    let vendingLvl = window.playerStats.vendingQLevel || 0;
+    let effectiveVendingLvl = vendingLvl * window.getMilestoneMultiplier(vendingLvl);
+    let probs = window.calculateRarityProbabilities(p.qly + effectiveVendingLvl * 0.01, true, isGlim);
 
   let ledContent = isGlim
     ? `
@@ -10870,17 +11037,17 @@ window.renderGachaModal = function () {
             </div>
 
             <!-- CONTROL PANEL & CRANK -->
-            <div class="gacha-control-panel">
-                <div style="font-size:10px; color:#aaa; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace; display:flex; flex-direction:column; align-items:center; gap:4px; width:100%;">
-                    <div style="display:flex; justify-content:space-between; width:100%; padding: 0 10px;">
-                        <span>Standard Keys:</span>
-                        <strong style="color:#f1c40f;">${standardKeys}</strong>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; width:100%; padding: 0 10px;">
-                        <span>Glimmering Keys:</span>
-                        <strong style="color:#00d2ff;">${glimmeringKeys}</strong>
-                    </div>
-                </div>
+                        <div class="gacha-control-panel">
+                            <div style="font-size:10px; color:#aaa; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace; display:flex; flex-direction:column; align-items:center; gap:4px; width:100%;">
+                                <div style="display:flex; justify-content:space-between; width:100%; padding: 0 10px;">
+                                    <span>Standard Keys:</span>
+                                    <strong id="gacha-modal-standard-keys" style="color:#f1c40f;">${standardKeys}</strong>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; width:100%; padding: 0 10px;">
+                                    <span>Glimmering Keys:</span>
+                                    <strong id="gacha-modal-glimmering-keys" style="color:#00d2ff;">${glimmeringKeys}</strong>
+                                </div>
+                            </div>
 
                 <div class="gacha-crank-handle" id="gacha-crank-element" onclick="window.crankGachaMachine()">
                     <div class="gacha-crank-cross"></div>
@@ -10976,12 +11143,18 @@ window.crankGachaMachine = function (forceSpendStandard = false) {
     }
 
     window.pushHeaderToast("❌ " + res.error, "#e74c3c");
-    return;
-  }
+            return;
+          }
 
-  // 2. Success flow: Lock machine state and trigger full 360 spin
-  let rolledItem = res.item;
-  window.gachaActiveState = "spinning";
+          // Update the key counts on the Gacha modal interface instantly
+          let elStd = document.getElementById("gacha-modal-standard-keys");
+          let elGlim = document.getElementById("gacha-modal-glimmering-keys");
+          if (elStd) elStd.innerText = window.inventory.ETC["Gacha Key"] || 0;
+          if (elGlim) elGlim.innerText = window.inventory.ETC["Glimmering Gachapon Key"] || 0;
+
+          // 2. Success flow: Lock machine state and trigger full 360 spin
+          let rolledItem = res.item;
+          window.gachaActiveState = "spinning";
 
   if (crank) {
     crank.classList.add("crank-animate");
@@ -12024,16 +12197,18 @@ window.renderMissionsWindow = function () {
   }
 
   contentEl.innerHTML = `
-      ${tabHeaderHtml}
+          <div style="position: sticky; top: -12px; z-index: 100; background: #07030b; padding-top: 12px; padding-bottom: 8px; margin-top: -12px; margin-bottom: 8px; border-bottom: 1px dashed #222;">
+              ${tabHeaderHtml}
 
-      <!-- Quest Points Balance Bar -->
-      <div style="background:#111; border:1px solid #333; padding:8px; border-radius:6px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px;">
-          <span>Quest Points:</span>
-          <strong style="color:#f1c40f; font-size:13px;" id="mission-point-lbl">${tokenBalance} QP</strong>
-      </div>
+              <!-- Quest Points Balance Bar -->
+              <div style="background:#111; border:1px solid #333; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:11px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);">
+                  <span>Quest Points:</span>
+                  <strong style="color:#f1c40f; font-size:13px;" id="mission-point-lbl">${tokenBalance} QP</strong>
+              </div>
+          </div>
 
-      ${contentHtml}
-    `;
+          ${contentHtml}
+        `;
 
   if (currentTab === "BOARD") {
     // Dynamic countdown timer calculations locked to Pacific Time (PST/PDT)
@@ -14206,10 +14381,9 @@ window.renderDailyCalendar = function () {
   let claimedToday = window.playerStats.loginClaimedToday;
 
   let gridHtml = window.DAILY_CALENDAR_REWARDS.map((r, idx) => {
-    let dayNum = idx + 1;
-    let isCurrent = idx === currentStreak && !claimedToday;
-    let isClaimed =
-      idx < currentStreak || (idx === currentStreak && claimedToday);
+          let dayNum = idx + 1;
+          let isCurrent = idx === currentStreak && !claimedToday;
+          let isClaimed = idx < currentStreak;
 
     let borderCol = isCurrent ? r.color : isClaimed ? "#2ecc71" : "#2d3748";
     let opacity = isClaimed ? "opacity:0.4;" : "";

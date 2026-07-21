@@ -4613,7 +4613,9 @@ window.rollGachaCrateItem = function (
   if (isPityTriggered) {
     statLinesCount = 5; // Guaranteed Mythic
   } else {
-    let probs = window.calculateRarityProbabilities(p.qly, true, isGlimmering);
+    let vendingLvl = window.playerStats.vendingQLevel || 0;
+    let effectiveVendingLvl = vendingLvl * window.getMilestoneMultiplier(vendingLvl);
+    let probs = window.calculateRarityProbabilities(p.qly + effectiveVendingLvl * 0.01, true, isGlimmering);
     let roll = Math.random() * 100;
     let cumulative = 0;
 

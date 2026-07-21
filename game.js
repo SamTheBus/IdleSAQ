@@ -2286,6 +2286,12 @@ window.adjustCanvasDimensions = function () {
   if (typeof window.updateDpsOverlayPosition === "function") {
     window.updateDpsOverlayPosition();
   }
+
+  // Dynamically track and expose the exact sticky canvas container height to support sub-canvas sticky overlays
+  let canvasContainer = document.getElementById("canvas-container");
+  if (canvasContainer) {
+    document.documentElement.style.setProperty('--canvas-height', canvasContainer.offsetHeight + 'px');
+  }
 };
 
 window.onload = function () {

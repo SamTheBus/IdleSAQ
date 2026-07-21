@@ -44,6 +44,11 @@ window.getEffectiveStage = function (stage) {
   return s <= 100 ? s : 100 + Math.pow(s - 100, 0.7) * 1.5;
 };
 
+window.getMilestoneMultiplier = function (level) {
+  let milestones = Math.floor(level / 10);
+  return 1.0 + milestones * 0.25; // +25% compounding effectiveness per 10 levels
+};
+
 window.calculateRenownForStageRange = function (fromStage, toStage) {
   if (toStage <= fromStage) return 0;
   let start = Math.max(0, fromStage);
@@ -1612,20 +1617,27 @@ window.resolvePlayerStats = function (useDraft = false) {
     window.playerStats.bypassGearLockActive = false;
   }
 
-  let prestigeGoldBonus =
-    (window.playerStats.prestigeUpgrades?.gold || 0) * 0.25;
-  p.gold += prestigeGoldBonus;
+  // Space Upgrades scaled with compounding milestones
+        let globalLvl = window.playerStats.globalQLevel || 0;
+        let effectiveGlobalLvl = globalLvl * window.getMilestoneMultiplier(globalLvl);
+        p.drop += effectiveGlobalLvl * 0.01;
+        p.qly += effectiveGlobalLvl * 0.01;
 
-  let prestigeDropBonus =
-    (window.playerStats.prestigeUpgrades?.drop || 0) * 0.05;
-  p.drop += prestigeDropBonus;
+        let goldLvl = window.playerStats.prestigeUpgrades?.gold || 0;
+        let prestigeGoldBonus = goldLvl * 0.25 * window.getMilestoneMultiplier(goldLvl);
+        p.gold += prestigeGoldBonus;
 
-  let prestigeExpBonus = (window.playerStats.prestigeUpgrades?.exp || 0) * 0.1;
-  p.xpRate += prestigeExpBonus;
+        let dropLvl = window.playerStats.prestigeUpgrades?.drop || 0;
+        let prestigeDropBonus = dropLvl * 0.05 * window.getMilestoneMultiplier(dropLvl);
+        p.drop += prestigeDropBonus;
 
-  let prestigeFairyBonus =
-    (window.playerStats.prestigeUpgrades?.fairy || 0) * 0.05;
-  p.fairySpawn += prestigeFairyBonus;
+        let expLvl = window.playerStats.prestigeUpgrades?.exp || 0;
+        let prestigeExpBonus = expLvl * 0.1 * window.getMilestoneMultiplier(expLvl);
+        p.xpRate += prestigeExpBonus;
+
+        let fairyLvl = window.playerStats.prestigeUpgrades?.fairy || 0;
+        let prestigeFairyBonus = fairyLvl * 0.05 * window.getMilestoneMultiplier(fairyLvl);
+        p.fairySpawn += prestigeFairyBonus;
 
   let missionGoldBonus = (window.playerStats.missionUpgrades?.gold || 0) * 0.05;
   p.gold += missionGoldBonus;
@@ -1694,18 +1706,14 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
   let stageScale = Math.floor((activeStage - 1) / 10) + 1;
 
-  let prestigeAtkMult = Math.pow(
-    1.12,
-    window.playerStats.prestigeUpgrades?.atk || 0,
-  );
-  let prestigeHpMult = Math.pow(
-    1.1,
-    window.playerStats.prestigeUpgrades?.fort || 0,
-  );
-  let prestigeDefMult = Math.pow(
-    1.05,
-    window.playerStats.prestigeUpgrades?.fort || 0,
-  );
+  let atkLvl = window.playerStats.prestigeUpgrades?.atk || 0;
+    let effectiveAtkLvl = atkLvl * window.getMilestoneMultiplier(atkLvl);
+    let prestigeAtkMult = Math.pow(1.12, effectiveAtkLvl);
+
+    let fortLvl = window.playerStats.prestigeUpgrades?.fort || 0;
+    let effectiveFortLvl = fortLvl * window.getMilestoneMultiplier(fortLvl);
+    let prestigeHpMult = Math.pow(1.1, effectiveFortLvl);
+    let prestigeDefMult = Math.pow(1.05, effectiveFortLvl);
 
   let missionAtkMult =
     1.0 + (window.playerStats.missionUpgrades?.atk || 0) * 0.02;
