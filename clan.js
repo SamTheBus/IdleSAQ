@@ -530,140 +530,139 @@ window.renderClanDashboard = function (clan, members, invitations) {
     let emblem = window.getClanEmblemHtml(emblemSeed, 32, clan.level);
 
     // --- COOPERATIVE CLAN WEEKLY CRATE CLAIMS SEGMENT ---
-    let crateSectionHtml = "";
-    let myMember = members.find((x) => x.userId === userId);
-    let weeklyContribution = (myMember && myMember.weekly_contribution) || 0;
-    let lastClaimedWeek =
-      (window.playerStats && window.playerStats.lastClaimedCrateWeek) || "";
-    let currentWeek = clan.currentWeekId || "";
+        let crateSectionHtml = "";
+        let lastClaimedWeek =
+          (window.playerStats && window.playerStats.lastClaimedCrateWeek) || "";
+        let currentWeek = clan.currentWeekId || "";
 
-    if (lastClaimedWeek === currentWeek) {
-      crateSectionHtml = `
-                  <div style="background:rgba(0,0,0,0.45); border:1.5px solid #2d3748; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                      <strong style="color:#7f8c8d; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Weekly Clan Crate</strong>
-                      <span style="font-size:9.5px; color:#666; display:block; margin-top:2px;">Crate already claimed for this week. Great work!</span>
-                    </div>
-                    <span style="color:#7f8c8d; font-weight:bold; font-size:11px;">Claimed [✓]</span>
-                  </div>
-                `;
-    } else if (weeklyContribution < 100) {
-      crateSectionHtml = `
-                  <div style="background:rgba(231,76,60,0.03); border:1.5px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                      <strong style="color:#e74c3c; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Weekly Clan Crate</strong>
-                      <span style="font-size:9.5px; color:#aaa; display:block; margin-top:2px;">Requires at least 100 Renown contribution (Current: ${weeklyContribution}/100)</span>
-                    </div>
-                    <button class="btn-action" style="background:#333; border-color:#333; color:#666; cursor:not-allowed;" disabled>Locked</button>
-                  </div>
-                `;
-    } else {
-      crateSectionHtml = `
-                  <div style="background:rgba(46,204,113,0.03); border:1.5px solid #2ecc71; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; display:flex; justify-content:space-between; align-items:center; animation: pulseGlow 1.8s infinite;">
-                    <div>
-                      <strong style="color:#2ecc71; font-size:11.5px; text-transform:uppercase; letter-spacing:0.5px;">Weekly Clan Crate Ready!</strong>
-                      <span style="font-size:9.5px; color:#fff; display:block; margin-top:2px;">Contribution goal met! Click to claim and unbox your supplies instantly.</span>
-                    </div>
-                    <button class="btn-action btn-pulse-teal" style="background:#2ecc71; color:#fff; font-size:11px; padding:6px 12px;" onclick="window.claimWeeklyClanCrate(event)">Claim Crate</button>
-                  </div>
-                `;
-    }
+        // Calculate weekly countdown timer (resets next Monday 12:00 AM Pacific Time)
+        let now = Date.now();
+        let ptDate = window.getPacificTimeNow ? window.getPacificTimeNow(now) : new Date();
+        let dayOfWeek = ptDate.getDay();
+        let daysToMonday = (8 - dayOfWeek) % 7;
+        if (daysToMonday === 0) daysToMonday = 7;
+        let nextMondayPt = new Date(ptDate.getFullYear(), ptDate.getMonth(), ptDate.getDate() + daysToMonday, 0, 0, 0, 0);
+        let weeklyLeftMs = nextMondayPt.getTime() - ptDate.getTime();
 
-    // Guild Hearth Vectors (Flame changes color based on Level thresholds)
-    let hearthGlow = "#ff5500";
-    let hearthLabel = "Warm Embers";
-    if (clan.level >= 30) {
-      hearthGlow = "#00d2ff";
-      hearthLabel = "Celestial Portal Flame";
-    } else if (clan.level >= 20) {
-      hearthGlow = "#9b59b6";
-      hearthLabel = "Arcane Void Hearth";
-    } else if (clan.level >= 10) {
-      hearthGlow = "#ffd700";
-      hearthLabel = "Vibrant Sunfire Hearth";
-    }
+        let wD = Math.floor(weeklyLeftMs / 86400000);
+        let wH = Math.floor((weeklyLeftMs % 86400000) / 3600000);
+        let wM = Math.floor((weeklyLeftMs % 3600000) / 60000);
+        let timerText = `${wD}d ${wH}h ${wM}m remaining`;
 
-    let pulseDuration = Math.max(0.5, 3.2 - clan.level * 0.08) + "s";
-    let hearthSvg = `
-      <svg width="100%" height="75" viewBox="0 0 200 75" style="display:block; margin: 8px auto; overflow:visible; --hearth-glow-color:${hearthGlow};">
-        <ellipse cx="100" cy="62" rx="42" ry="10" fill="none" stroke="#2d3748" stroke-width="1.2" stroke-dasharray="3 3.5" class="portal-spiral" style="transform-origin: 100px 62px; animation: portalSpiralRotate 7s linear infinite;" />
-        <ellipse cx="100" cy="62" rx="28" ry="6.5" fill="rgba(0,0,0,0.4)" stroke="#4a5568" stroke-width="1.5" />
-        <polygon points="86,58 114,58 109,24 91,14" fill="#2d3748" stroke="#1a202c" stroke-width="2.2" />
-        <path d="M 96,24 L 104,24 M 95,33 L 100,38 L 105,33 M 96,48 L 104,48" fill="none" stroke="${hearthGlow}" stroke-width="2.2" stroke-linecap="round" style="animation: runicHearthPulse ${pulseDuration} ease-in-out infinite;" />
-        <line x1="87" y1="50" x2="113" y2="50" stroke="#d4af37" stroke-width="1.2" />
-      </svg>
-    `;
+        if (lastClaimedWeek === currentWeek) {
+                  crateSectionHtml = `
+                              <div style="background:rgba(0,0,0,0.45); border:1.5px solid #2d3748; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                  <strong style="color:#7f8c8d; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Weekly Clan Crate</strong>
+                                  <span style="font-size:9.5px; color:#666; display:block; margin-top:2px;">Crate already claimed for this week. Next refresh in: <b>${timerText}</b></span>
+                                </div>
+                                <span style="color:#7f8c8d; font-weight:bold; font-size:11px;">Claimed [✓]</span>
+                              </div>
+                            `;
+                } else {
+                  crateSectionHtml = `
+                              <div style="background:rgba(46,204,113,0.03); border:1.5px solid #2ecc71; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; display:flex; justify-content:space-between; align-items:center; animation: pulseGlow 1.8s infinite;">
+                                <div>
+                                  <strong style="color:#2ecc71; font-size:11.5px; text-transform:uppercase; letter-spacing:0.5px;">Weekly Clan Crate Ready!</strong>
+                                  <span style="font-size:9.5px; color:#fff; display:block; margin-top:2px;">Your weekly clan supplies are waiting. Refresh in: <b>${timerText}</b></span>
+                                </div>
+                                <button class="btn-action btn-pulse-teal" style="background:#2ecc71; color:#fff; font-size:11px; padding:6px 12px;" onclick="window.claimWeeklyClanCrate(event)">Claim Crate</button>
+                              </div>
+                            `;
+                }
 
-    let logs = clan.activity_log || [
-      "No active records available in treasury catalogs.",
-    ];
-    let ledgerHtml = logs
-      .slice()
-      .reverse()
-      .map(
-        (log) => `
-      <div style="font-family:monospace; font-size:10px; color:#c8b195; border-bottom:1px solid #1a202c; padding:5px 0; display:flex; justify-content:space-between; gap:10px; text-align:left;">
-        <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">✦ ${window.escapeHTML(log)}</span>
-        <span style="color:#4a5568; font-size:8px; font-weight:bold;">LOG</span>
-      </div>
-    `,
-      )
-      .join("");
+            // Guild Hearth Vectors (Flame changes color based on Level thresholds)
+            let hearthGlow = "#ff5500";
+            let hearthLabel = "Warm Embers";
+            if (clan.level >= 30) {
+              hearthGlow = "#00d2ff";
+              hearthLabel = "Celestial Portal Flame";
+            } else if (clan.level >= 20) {
+              hearthGlow = "#9b59b6";
+              hearthLabel = "Arcane Void Hearth";
+            } else if (clan.level >= 10) {
+              hearthGlow = "#ffd700";
+              hearthLabel = "Vibrant Sunfire Hearth";
+            }
 
-    tabContentHtml = `
-      <div class="clan-scroll-frame">
-          <!-- Dangling Crest Tapestry Frame -->
-          <div style="background:rgba(0,0,0,0.5); border: 2px solid #5c4033; border-top-width:6px; border-bottom-width:4px; border-radius:8px; padding:12px; margin-bottom:12px; display:flex; align-items:center; gap:12px; text-align:left; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7); position:relative;">
-              ${emblem}
-              <div style="flex:1; min-width:0;">
-                  <strong style="font-size:14.5px; color:#df9ffb; text-shadow: 0 0 8px rgba(155,89,182,0.4);">${window.escapeHTML(clan.name)}</strong>
-                  <div style="font-size:10.5px; color:#aaa; font-family:monospace;">Clan Level ${clan.level} (${clan.xp}/${nextXp} XP)</div>
-                  <div style="width:100%; height:5px; background:#0f1115; border-radius:3px; overflow:hidden; border:1px solid #222; margin-top:6px;">
-                      <div style="width:${xpPct}%; height:100%; background:linear-gradient(90deg, #9b59b6, #e84393); box-shadow:0 0 6px #9b59b6;"></div>
-                  </div>
+            let pulseDuration = Math.max(0.5, 3.2 - clan.level * 0.08) + "s";
+            let hearthSvg = `
+              <svg width="100%" height="75" viewBox="0 0 200 75" style="display:block; margin: 8px auto; overflow:visible; --hearth-glow-color:${hearthGlow};">
+                <ellipse cx="100" cy="62" rx="42" ry="10" fill="none" stroke="#2d3748" stroke-width="1.2" stroke-dasharray="3 3.5" class="portal-spiral" style="transform-origin: 100px 62px; animation: portalSpiralRotate 7s linear infinite;" />
+                <ellipse cx="100" cy="62" rx="28" ry="6.5" fill="rgba(0,0,0,0.4)" stroke="#4a5568" stroke-width="1.5" />
+                <polygon points="86,58 114,58 109,24 91,14" fill="#2d3748" stroke="#1a202c" stroke-width="2.2" />
+                <path d="M 96,24 L 104,24 M 95,33 L 100,38 L 105,33 M 96,48 L 104,48" fill="none" stroke="${hearthGlow}" stroke-width="2.2" stroke-linecap="round" style="animation: runicHearthPulse ${pulseDuration} ease-in-out infinite;" />
+                <line x1="87" y1="50" x2="113" y2="50" stroke="#d4af37" stroke-width="1.2" />
+              </svg>
+            `;
+
+            let logs = clan.activity_log || [
+              "No active records available in treasury catalogs.",
+            ];
+            let ledgerHtml = logs
+              .slice()
+              .reverse()
+              .map(
+                (log) => `
+              <div style="font-family:monospace; font-size:10px; color:#c8b195; border-bottom:1px solid #1a202c; padding:5px 0; display:flex; justify-content:space-between; gap:10px; text-align:left;">
+                <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">✦ ${window.escapeHTML(log)}</span>
+                <span style="color:#4a5568; font-size:8px; font-weight:bold;">LOG</span>
               </div>
-          </div>
+            `,
+              )
+              .join("");
 
-          <div style="display:grid; grid-template-columns: 1.15fr 0.85fr; gap:12px; margin-bottom:12px;">
-              <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
-                  <div style="background:#0c0f12; border:1px solid #222; border-radius:6px; padding:8px 10px; font-size:11px; text-align:left; line-height:1.45; color:#c8b195; font-style:italic;">
-                      <span style="color:#7f8c8d; font-size:8px; font-weight:bold; display:block; margin-bottom:2px; text-transform:uppercase; font-style:normal;">✦ ANNOUNCEMENT:</span>
-                      "${window.escapeHTML(clan.description || "Founders are preparing instructions.")}"
+            tabContentHtml = `
+              <div class="clan-scroll-frame">
+                  <!-- Dangling Crest Tapestry Frame -->
+                  <div style="background:rgba(0,0,0,0.5); border: 2px solid #5c4033; border-top-width:6px; border-bottom-width:4px; border-radius:8px; padding:12px; margin-bottom:12px; display:flex; align-items:center; gap:12px; text-align:left; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7); position:relative;">
+                      ${emblem}
+                      <div style="flex:1; min-width:0;">
+                          <strong style="font-size:14.5px; color:#df9ffb; text-shadow: 0 0 8px rgba(155,89,182,0.4);">${window.escapeHTML(clan.name)}</strong>
+                          <div style="font-size:10.5px; color:#aaa; font-family:monospace;">Clan Level ${clan.level} (${clan.xp}/${nextXp} XP)</div>
+                          <div style="width:100%; height:5px; background:#0f1115; border-radius:3px; overflow:hidden; border:1px solid #222; margin-top:6px;">
+                              <div style="width:${xpPct}%; height:100%; background:linear-gradient(90deg, #9b59b6, #e84393); box-shadow:0 0 6px #9b59b6;"></div>
+                          </div>
+                      </div>
                   </div>
 
-                  <div style="background:#090b0e; border:1px solid #222; border-radius:6px; padding:8px 10px; display:flex; flex-direction:column; justify-content:flex-start; min-height:115px;">
-                      <span style="color:#9b59b6; font-size:8.5px; font-weight:bold; display:block; margin-bottom:4px; text-transform:uppercase; text-align:left;">✦ CLAN LEDGER FEED:</span>
-                      <div style="overflow-y:auto; max-height:85px; padding-right:4px;">
-                          ${ledgerHtml}
+                  <div style="display:grid; grid-template-columns: 1.15fr 0.85fr; gap:12px; margin-bottom:12px;">
+                      <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
+                          <div style="background:#0c0f12; border:1px solid #222; border-radius:6px; padding:8px 10px; font-size:11px; text-align:left; line-height:1.45; color:#c8b195; font-style:italic;">
+                              <span style="color:#7f8c8d; font-size:8px; font-weight:bold; display:block; margin-bottom:2px; text-transform:uppercase; font-style:normal;">✦ ANNOUNCEMENT:</span>
+                              "${window.escapeHTML(clan.description || "Founders are preparing instructions.")}"
+                          </div>
+
+                          <div style="background:#090b0e; border:1px solid #222; border-radius:6px; padding:8px 10px; display:flex; flex-direction:column; justify-content:flex-start; min-height:115px;">
+                              <span style="color:#9b59b6; font-size:8.5px; font-weight:bold; display:block; margin-bottom:4px; text-transform:uppercase; text-align:left;">✦ CLAN LEDGER FEED:</span>
+                              <div style="overflow-y:auto; max-height:85px; padding-right:4px;">
+                                  ${ledgerHtml}
+                              </div>
+                          </div>
+                      </div>
+
+                      <!-- Guild Hearth Panel -->
+                      <div class="chiseled-stone-panel" style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                          <span style="color:#df9ffb; font-size:8.5px; font-weight:bold; display:block; text-transform:uppercase; letter-spacing:0.5px;">✦ ${hearthLabel}</span>
+                          ${hearthSvg}
+                          <span style="font-size:8.5px; color:#555; font-family:monospace; margin-top:2px;">Runic Intensity: Lv. ${clan.level}</span>
+                      </div>
+                  </div>
+
+                  <!-- Crate claims trigger injected right above Vault assets -->
+                  ${crateSectionHtml}
+
+                  <!-- Mini Vault Overview -->
+                  <div style="background:rgba(0,0,0,0.55); border:1.5px solid #2d3748; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; box-shadow: inset 0 0 10px #000;">
+                      <div style="color:#f1c40f; font-weight:bold; border-bottom:1px dashed #222; padding-bottom:4px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace; font-size:10px;">✦ Shared Vault Assets:</div>
+                      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; text-align:center; font-family:monospace; font-size:11px;">
+                          <div style="background:#0f1115; padding:8px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:4px;">GOLD</span><strong style="color:#f1c40f; display:block;">${window.formatNumber(clan.gold_bank)}</strong></div>
+                          <div style="background:#0f1115; padding:8px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:4px;">SOULS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.souls_bank)}</strong></div>
+                          <div style="background:#0f1115; padding:8px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:4px;">LUMINOUS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.luminous_bank)}</strong></div>
                       </div>
                   </div>
               </div>
-
-              <!-- Guild Hearth Panel -->
-              <div class="chiseled-stone-panel" style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                  <span style="color:#df9ffb; font-size:8.5px; font-weight:bold; display:block; text-transform:uppercase; letter-spacing:0.5px;">✦ ${hearthLabel}</span>
-                  ${hearthSvg}
-                  <span style="font-size:8.5px; color:#555; font-family:monospace; margin-top:2px;">Runic Intensity: Lv. ${clan.level}</span>
-              </div>
-          </div>
-
-          <!-- Crate claims trigger injected right above Vault assets -->
-                    ${crateSectionHtml}
-
-                    <!-- Crate claims trigger injected right above Vault assets -->
-                              ${crateSectionHtml}
-
-                              <!-- Mini Vault Overview -->
-                              <div style="background:rgba(0,0,0,0.55); border:1.5px solid #2d3748; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; box-shadow: inset 0 0 10px #000;">
-                                  <div style="color:#f1c40f; font-weight:bold; border-bottom:1px dashed #222; padding-bottom:4px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace; font-size:10px;">✦ Shared Vault Assets:</div>
-                                  <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; text-align:center; font-family:monospace; font-size:11px;">
-                                      <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">GOLD</span><strong style="color:#f1c40f; display:block;">${window.formatNumber(clan.gold_bank)}</strong></div>
-                                      <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">SOULS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.souls_bank)}</strong></div>
-                                      <div style="background:#0f1115; padding:6px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:2px;">LUMINOUS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.luminous_bank)}</strong></div>
-                                  </div>
-                              </div>
-                          </div>
-                        `;
+            `;
   } else if (currentTab === "MEMBERS") {
     // Segregate members list into structured rank groupings
     let groups = { founder: [], officer: [], vanguard: [], recruit: [] };
@@ -834,17 +833,16 @@ window.renderClanDashboard = function (clan, members, invitations) {
     let listHtml = "";
 
     if (
-      !questsData ||
-      !questsData.activeList ||
-      questsData.activeList.length === 0
-    ) {
-      listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
-    } else {
-      let stgScale = Math.max(
-        1,
-        Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) + 1,
-      );
-      let calculatedGoldMult = 1.0 + Math.pow(stgScale, 1.5) * 1.2;
+                        !questsData ||
+                        !questsData.activeList ||
+                        questsData.activeList.length === 0
+                      ) {
+                        listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
+                      } else {
+                        let peakLvl = window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+                        let effStage = window.getEffectiveStage(peakLvl);
+                        let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+                        let scaleVal = Math.pow(growthRate, effStage);
 
       // Define inline micro vector icons to completely eradicate emojis
       const keyIcon =
@@ -911,13 +909,13 @@ window.renderClanDashboard = function (clan, members, invitations) {
             );
 
           if (q.rewards.goldBase > 0) {
-            let actualGoldReward = Math.ceil(
-              q.rewards.goldBase * calculatedGoldMult,
-            );
-            rewardItems.push(
-              `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${goldIcon}+${window.formatNumber(actualGoldReward)} Gold</span>`,
-            );
-          }
+                      // Normalize the server-provided goldBase and scale with campaign progress curve
+                      let baseRatio = (q.rewards.goldBase || 150000) / 150000;
+                      let actualGoldReward = Math.ceil(scaleVal * 1200 * baseRatio);
+                      rewardItems.push(
+                        `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${goldIcon}+${window.formatNumber(actualGoldReward)} Gold</span>`,
+                      );
+                    }
 
           // Completed bounty cards receive a 3D Wax Seal Stamp overlay!
           let completedOverlay = q.completed
@@ -984,190 +982,100 @@ window.renderClanDashboard = function (clan, members, invitations) {
                                   </div>
                                 `;
   } else if (currentTab === "DONATE") {
-    let goldOwned = window.playerStats.coins || 0;
-    let soulsOwned = window.inventory.ETC["Monster Soul"] || 0;
-    let luminousOwned = window.inventory.ETC["Luminous Soul"] || 0;
+      let personalCP = 0;
+      let meMember = members.find((x) => x.userId === userId);
+      if (meMember) {
+        personalCP = meMember.weekly_contribution || 0;
+      }
 
-    // Track weekly cooperative points to render Cooperative Vault Chest Bar (Scaled up 25x)
-    let vaultPoints = clan.vault_points || 0;
-    let currentChestTier = "common";
-    if (vaultPoints >= 750000) currentChestTier = "mythic";
-    else if (vaultPoints >= 300000) currentChestTier = "legendary";
-    else if (vaultPoints >= 120000) currentChestTier = "epic";
-    else if (vaultPoints >= 50000) currentChestTier = "magic";
-    else if (vaultPoints >= 15000) currentChestTier = "rare";
+      // Track weekly cooperative points to render Cooperative Vault Chest Bar (Scaled up 25x)
+      let vaultPoints = clan.vault_points || 0;
+      let currentChestTier = "common";
+      if (vaultPoints >= 750000) currentChestTier = "mythic";
+      else if (vaultPoints >= 300000) currentChestTier = "legendary";
+      else if (vaultPoints >= 120000) currentChestTier = "epic";
+      else if (vaultPoints >= 50000) currentChestTier = "magic";
+      else if (vaultPoints >= 15000) currentChestTier = "rare";
 
-    // Progress percentage mapping
-    let maxThreshold = 750000;
-    let chestPct = Math.min(100, (vaultPoints / maxThreshold) * 100);
+      // Progress percentage mapping
+      let maxThreshold = 750000;
+      let chestPct = Math.min(100, (vaultPoints / maxThreshold) * 100);
 
-    let nextThresholdLabel = "";
-    let nextThresholdVal = 0;
-    if (currentChestTier === "common") {
-      nextThresholdLabel = "Rare";
-      nextThresholdVal = 15000;
-    } else if (currentChestTier === "rare") {
-      nextThresholdLabel = "Magic";
-      nextThresholdVal = 50000;
-    } else if (currentChestTier === "magic") {
-      nextThresholdLabel = "Epic";
-      nextThresholdVal = 120000;
-    } else if (currentChestTier === "epic") {
-      nextThresholdLabel = "Legendary";
-      nextThresholdVal = 300000;
-    } else if (currentChestTier === "legendary") {
-      nextThresholdLabel = "Mythic";
-      nextThresholdVal = 750000;
-    } else {
-      nextThresholdLabel = "Maxed";
-      nextThresholdVal = 750000;
-    }
+      let nextThresholdLabel = "";
+      let nextThresholdVal = 0;
+      if (currentChestTier === "common") {
+        nextThresholdLabel = "Rare";
+        nextThresholdVal = 15000;
+      } else if (currentChestTier === "rare") {
+        nextThresholdLabel = "Magic";
+        nextThresholdVal = 50000;
+      } else if (currentChestTier === "magic") {
+        nextThresholdLabel = "Epic";
+        nextThresholdVal = 120000;
+      } else if (currentChestTier === "epic") {
+        nextThresholdLabel = "Legendary";
+        nextThresholdVal = 300000;
+      } else if (currentChestTier === "legendary") {
+        nextThresholdLabel = "Mythic";
+        nextThresholdVal = 750000;
+      } else {
+        nextThresholdLabel = "Maxed";
+        nextThresholdVal = 750000;
+      }
 
-    let personalCP = 0;
-    let meMember = members.find((x) => x.userId === userId);
-    if (meMember) {
-      personalCP = meMember.weekly_contribution || 0;
-    }
+      tabContentHtml = `
+                  <!-- Cooperative Vault Chest Progression Card -->
+                  <div class="chiseled-stone-panel" style="margin-bottom:12px; padding:12px; border-color:#d4af3780;">
+                      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                          <strong style="color:#ffd700; font-size:12px; display:inline-flex; align-items:center; gap:4px; text-transform:uppercase;">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M12 2v5M17 5H7"/></svg>
+                              Cooperative Vault Chest
+                          </strong>
+                          <span style="font-family:monospace; font-size:10px; color:#ffd700; background:rgba(241,196,15,0.08); padding:2px 6px; border-radius:3px; border:1px solid rgba(241,196,15,0.3); font-weight:bold;">
+                              ${currentChestTier.toUpperCase()} CHEST
+                          </span>
+                      </div>
+                      <div style="font-size:10.5px; color:#aaa; line-height:1.45; text-align:left; margin-bottom:8px;">
+                          Weekly Group Score: <strong style="color:#fff;">${vaultPoints.toLocaleString()} / 750,000</strong>. Resets every Monday. All active members who contributed at least <strong style="color:#2ecc71;">100 Renown</strong> will receive a Vault reward sack!
+                      </div>
 
-    // Direct, dynamic Stage-scaling calculation for display boxes
-    let peakStage =
-      window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-    if (peakStage && typeof peakStage === "object") {
-      peakStage = Number(peakStage.m * Math.pow(10, peakStage.e)) || 1;
-    }
-    peakStage = Number(peakStage);
-    if (isNaN(peakStage) || peakStage < 1) peakStage = 1;
+                      <!-- Progress track -->
+                      <div class="cooperative-vault-track">
+                          <!-- Threshold marker notches at 15,000 (2.0%), 50,000 (6.6%), 120,000 (16%), 300,000 (40%) -->
+                          <div class="vault-threshold-marker" style="left:2%;"></div>
+                          <div class="vault-threshold-marker" style="left:6.6%;"></div>
+                          <div class="vault-threshold-marker" style="left:16%;"></div>
+                          <div class="vault-threshold-marker" style="left:40%;"></div>
+                          <div class="cooperative-vault-fill ${currentChestTier}" style="width: ${chestPct}%;"></div>
+                      </div>
+                      <div style="display:flex; justify-content:space-between; font-size:9px; color:#888; margin-top:4px; font-family:monospace; line-height:1;">
+                          <span>Current: ${currentChestTier.toUpperCase()}</span>
+                          <span>Next Milestone: <strong style="color:#ffd700;">${nextThresholdLabel} (${vaultPoints.toLocaleString()}/${nextThresholdVal.toLocaleString()})</strong></span>
+                      </div>
 
-    // Use robust BigNum instances to calculate scaling costs without floating-point overflow
-    let costGoldSmallBig = BigNum.from(10000).mul(
-      BigNum.from(1.045).pow(peakStage),
-    );
-    let costGoldLargeBig = BigNum.from(50000).mul(
-      BigNum.from(1.045).pow(peakStage),
-    );
-    let goldOwnedBig = BigNum.from(goldOwned);
+                      <div style="margin-top:10px; background:rgba(0,0,0,0.4); border:1px solid #222; padding:6px; border-radius:4px; text-align:left; font-size:10px; line-height:1.35;">
+                          👤 <strong style="color:#2ecc71;">YOUR INVOLVEMENT:</strong><br>
+                          You have contributed <strong style="color:#fff;">${personalCP.toLocaleString()} Renown</strong> this week.<br>
+                          Status: ${personalCP >= 100 ? `<span style="color:#2ecc71; font-weight:bold;">QUALIFIED ✓ (Weekly rewards active!)</span>` : `<span style="color:#e74c3c; font-weight:bold;">INELIGIBLE ✗ (Requires 100 Renown. Contribute to Research upgrades or fund the Aetheric Hearth to qualify!)</span>`}
+                      </div>
+                  </div>
 
-    let canAffordSmall = goldOwnedBig.gte(costGoldSmallBig);
-    let canAffordLarge = goldOwnedBig.gte(costGoldLargeBig);
-
-    // Stringify exponential parameters to safely pass through inline click handlers on mobile WebViews
-    let costGoldSmallStr = costGoldSmallBig.m + "e" + costGoldSmallBig.e;
-    let costGoldLargeStr = costGoldLargeBig.m + "e" + costGoldLargeBig.e;
-
-    tabContentHtml = `
-                <!-- Cooperative Vault Chest Progression Card -->
-                <div class="chiseled-stone-panel" style="margin-bottom:12px; padding:12px; border-color:#d4af3780;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <strong style="color:#ffd700; font-size:12px; display:inline-flex; align-items:center; gap:4px; text-transform:uppercase;">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M12 2v5M17 5H7"/></svg>
-                            Cooperative Vault Chest
-                        </strong>
-                        <span style="font-family:monospace; font-size:10px; color:#ffd700; background:rgba(241,196,15,0.08); padding:2px 6px; border-radius:3px; border:1px solid rgba(241,196,15,0.3); font-weight:bold;">
-                            ${currentChestTier.toUpperCase()} CHEST
-                        </span>
-                    </div>
-                    <div style="font-size:10.5px; color:#aaa; line-height:1.45; text-align:left; margin-bottom:8px;">
-                        Weekly Group Score: <strong style="color:#fff;">${vaultPoints.toLocaleString()} / 750,000</strong>. Resets every Monday. All active members who contributed at least <strong style="color:#2ecc71;">100 Renown</strong> will receive a Vault reward sack!
-                    </div>
-
-                    <!-- Progress track with markers scaled up 25x -->
-                    <div class="cooperative-vault-track">
-                        <!-- Threshold marker notches at 15,000 (2.0%), 50,000 (6.6%), 120,000 (16%), 300,000 (40%) -->
-                        <div class="vault-threshold-marker" style="left:2%;"></div>
-                        <div class="vault-threshold-marker" style="left:6.6%;"></div>
-                        <div class="vault-threshold-marker" style="left:16%;"></div>
-                        <div class="vault-threshold-marker" style="left:40%;"></div>
-                        <div class="cooperative-vault-fill ${currentChestTier}" style="width: ${chestPct}%;"></div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:9px; color:#888; margin-top:4px; font-family:monospace; line-height:1;">
-                        <span>Current: ${currentChestTier.toUpperCase()}</span>
-                        <span>Next Milestone: <strong style="color:#ffd700;">${nextThresholdLabel} (${vaultPoints.toLocaleString()}/${nextThresholdVal.toLocaleString()})</strong></span>
-                    </div>
-
-                    <div style="margin-top:10px; background:rgba(0,0,0,0.4); border:1px solid #222; padding:6px; border-radius:4px; text-align:left; font-size:10px; line-height:1.35;">
-                        👤 <strong style="color:#2ecc71;">YOUR INVOLVEMENT:</strong><br>
-                        You have contributed <strong style="color:#fff;">${personalCP.toLocaleString()} Renown</strong> this week.<br>
-                        Status: ${personalCP >= 100 ? `<span style="color:#2ecc71; font-weight:bold;">QUALIFIED ✓ (Weekly rewards active!)</span>` : `<span style="color:#e74c3c; font-weight:bold;">INELIGIBLE ✗ (Requires 100 Renown. Participate or Donate!)</span>`}
-                    </div>
-                </div>
-
-                <div style="text-align:left; background:rgba(0,0,0,0.3); border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:12px; font-size:11px; line-height:1.45;">
-                    <strong style="color:#f1c40f; display:inline-flex; align-items:center; gap:4px; margin-bottom:4px;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M9 10h6M9 13h6"/></svg>
-                        Contribution Chamber (Donate to earn Renown)
-                    </strong>
-                    Donating resources directly progresses the weekly chest!
-                </div>
-
-                <div style="display:flex; flex-direction:column; gap:6px; text-align:left;">
-                    <!-- Gold Donation 1 -->
-                                                            <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                                                                <div style="text-align:left;">
-                                                                    <div style="font-size:11.5px; font-weight:bold; color:#f1c40f;">Small Gold Tithe</div>
-                                                                    <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-${window.formatNumber(costGoldSmallBig)} Gold</span> (Owned: ${window.formatNumber(goldOwned)})</div>
-                                                                </div>
-                                                                <button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${canAffordSmall ? "" : "disabled"} onclick="window.executeClanDonate('gold', '${costGoldSmallStr}')">
-                                                                    +50 Renown
-                                                                </button>
-                                                            </div>
-
-                                                            <!-- Gold Donation 2 -->
-                                                            <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                                                                <div style="text-align:left;">
-                                                                    <div style="font-size:11.5px; font-weight:bold; color:#f1c40f;">Large Gold Tithe</div>
-                                                                    <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-${window.formatNumber(costGoldLargeBig)} Gold</span> (Owned: ${window.formatNumber(goldOwned)})</div>
-                                                                </div>
-                                                                <button class="btn-action" style="background:#f1c40f; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${canAffordLarge ? "" : "disabled"} onclick="window.executeClanDonate('gold', '${costGoldLargeStr}')">
-                                                                    +300 Renown
-                                                                </button>
-                                                            </div>
-
-                    <!-- Monster Souls Donation 1 -->
-                    <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                        <div style="text-align:left;">
-                            <div style="font-size:11.5px; font-weight:bold; color:#bdc3c7;">Donate Monster Souls (Small)</div>
-                            <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-50 Souls</span> (Owned: ${soulsOwned.toLocaleString()})</div>
-                        </div>
-                        <button class="btn-action" style="background:#bdc3c7; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${soulsOwned >= 50 ? "" : "disabled"} onclick="window.executeClanDonate('souls', 50)">
-                            +250 Renown
-                        </button>
-                    </div>
-
-                    <!-- Monster Souls Donation 2 -->
-                    <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                        <div style="text-align:left;">
-                            <div style="font-size:11.5px; font-weight:bold; color:#bdc3c7;">Donate Monster Souls (Large)</div>
-                            <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-250 Souls</span> (Owned: ${soulsOwned.toLocaleString()})</div>
-                        </div>
-                        <button class="btn-action" style="background:#bdc3c7; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${soulsOwned >= 250 ? "" : "disabled"} onclick="window.executeClanDonate('souls', 250)">
-                            +1,250 Renown
-                        </button>
-                    </div>
-
-                    <!-- Luminous Souls Donation 1 -->
-                    <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                        <div style="text-align:left;">
-                            <div style="font-size:11.5px; font-weight:bold; color:#ffb6c1;">Donate Luminous Souls (Small)</div>
-                            <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-5 Souls</span> (Owned: ${luminousOwned.toLocaleString()})</div>
-                        </div>
-                        <button class="btn-action" style="background:#ffb6c1; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${luminousOwned >= 5 ? "" : "disabled"} onclick="window.executeClanDonate('luminous', 5)">
-                            +750 Renown
-                        </button>
-                    </div>
-
-                    <!-- Luminous Souls Donation 2 -->
-                    <div style="background:#111; border:1px solid #222; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                        <div style="text-align:left;">
-                            <div style="font-size:11.5px; font-weight:bold; color:#ffb6c1;">Donate Luminous Souls (Large)</div>
-                            <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-top:2px;">Cost: <span style="color:#ff7675; font-weight:bold;">-25 Souls</span> (Owned: ${luminousOwned.toLocaleString()})</div>
-                        </div>
-                        <button class="btn-action" style="background:#ffb6c1; color:#111; font-size:10px; padding:6px 12px; font-weight:bold; border:1px solid #fff;" ${luminousOwned >= 25 ? "" : "disabled"} onclick="window.executeClanDonate('luminous', 25)">
-                            +3,750 Renown
-                        </button>
-                    </div>
-                </div>
-              </div>
-            `;
+                  <!-- Shared Vault Treasury Bank -->
+                  <div style="background:rgba(0,0,0,0.55); border:1.5px solid #2d3748; border-radius:8px; padding:12px; box-shadow: inset 0 0 10px #000; text-align:left;">
+                      <div style="color:#f1c40f; font-weight:bold; border-bottom:1px dashed #222; padding-bottom:6px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; font-family:monospace; font-size:11px; display:flex; align-items:center; gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+                        Shared Vault Treasury Assets
+                      </div>
+                      <div style="font-size:10px; color:#aaa; line-height:1.45; margin-bottom:10px; white-space:normal;">
+                        This represents the shared resources accumulated from auto-tithes (vault taxes set by the leader). Officers and Leaders can allocate these assets directly to fund and upgrade research card tiers.
+                      </div>
+                      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; text-align:center; font-family:monospace; font-size:11px;">
+                          <div style="background:#0f1115; padding:8px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:4px;">GOLD</span><strong style="color:#f1c40f; display:block;">${window.formatNumber(clan.gold_bank)}</strong></div>
+                          <div style="background:#0f1115; padding:8px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:4px;">SOULS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.souls_bank)}</strong></div>
+                          <div style="background:#0f1115; padding:8px; border-radius:4px; border:1px solid #222;"><span style="color:#888; font-size:8.5px; display:block; margin-bottom:4px;">LUMINOUS</span><strong style="color:#ffb6c1; display:block;">${window.formatNumber(clan.luminous_bank)}</strong></div>
+                      </div>
+                  </div>
+                `;
   } else if (currentTab === "SETTINGS") {
     let isJoinOpen = clan.join_policy === "open";
     let activeEmblemSeed =
@@ -1290,10 +1198,10 @@ window.renderClanDashboard = function (clan, members, invitations) {
         rawSoulName = "Luminous Soul";
       }
 
-      // Stage-Scaled Gold Model matching player's current stage income curve
-      let peakStage =
-        window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-      costGold = Math.floor(costGold * Math.pow(1.045, peakStage));
+      // Group Cooperative Model: Scale costs purely based on Clan Level and Research Level
+            // This ensures all clan members see the exact same unified target and progress bar!
+            let clanLvl = clan.level || 1;
+            costGold = Math.floor(costGold * (1.0 + clanLvl * 0.15) * 20);
 
       let isMaxed = currentL >= maxL;
       let clanLevel = clan.level || 1;
@@ -1491,18 +1399,17 @@ window.executeClaimClanQuestReward = function (questId) {
           window.addUseDrop("Clan Reward Sack", r.sacks);
           claimsReport.push(`+${r.sacks}x Clan Sacks`);
         } else if (r.goldBase > 0) {
-          let stgScale = Math.max(
-            1,
-            Math.floor(((window.playerStats.lifetimePeakStage || 1) - 1) / 5) +
-              1,
-          );
-          // Replaced hyper-exponential growth with balanced polynomial curve scaling
-          let calculatedGold = Math.ceil(
-            r.goldBase * (1.0 + Math.pow(stgScale, 1.5) * 1.2),
-          );
-          window.addCoins(calculatedGold);
-          claimsReport.push(`+${window.formatNumber(calculatedGold)} Gold`);
-        }
+                  let peakLvl = window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+                  let effStage = window.getEffectiveStage(peakLvl);
+                  let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+                  let scaleVal = Math.pow(growthRate, effStage);
+
+                  let baseRatio = (r.goldBase || 150000) / 150000;
+                  let calculatedGold = Math.ceil(scaleVal * 1200 * baseRatio);
+
+                  window.addCoins(calculatedGold);
+                  claimsReport.push(`+${window.formatNumber(calculatedGold)} Gold`);
+                }
 
         window.pushHeaderToast(
           `🎁 Quest Claimed: ${claimsReport.join(", ")}!`,
@@ -2586,53 +2493,49 @@ window.executeClanVaultAllocate = function (skillKey, resType, amount) {
 
   // Local-Only Simulation Fallback to allow immediate testing without backend redeploys
   const runLocalSimulation = () => {
-    let isGold = resType === "gold";
-    let bankField = isGold
-      ? "gold_bank"
-      : skillKey === "steel_phalanx" || skillKey === "vitality_well"
-        ? "souls_bank"
-        : "luminous_bank";
+        let isGold = resType === "gold";
+        let bankField = isGold
+          ? "gold_bank"
+          : skillKey === "steel_phalanx" || skillKey === "vitality_well"
+            ? "souls_bank"
+            : "luminous_bank";
 
-    clan[bankField] = Math.max(0, (clan[bankField] || 0) - amount);
+        clan[bankField] = Math.max(0, (clan[bankField] || 0) - amount);
 
-    let progress = (clan.research_progress = clan.research_progress || {});
-    let skillProgress = (progress[skillKey] = progress[skillKey] || {
-      gold: 0,
-      souls: 0,
-    });
+        let progress = (clan.research_progress = clan.research_progress || {});
+        let skillProgress = (progress[skillKey] = progress[skillKey] || {
+          gold: 0,
+          souls: 0,
+        });
 
-    let currentL = window.playerStats.clanSkills[skillKey] || 0;
-    let costGold = 0;
-    let costSoul = 0;
-    if (skillKey === "steel_phalanx" || skillKey === "vitality_well") {
-      costGold = Math.floor(
-        (skillKey === "steel_phalanx" ? 25000 : 20000) *
-          Math.pow(1.35, currentL),
-      );
-      costSoul = Math.floor(200 * Math.pow(1.25, currentL));
-    } else {
-      let baseG =
-        skillKey === "prosperity_accord"
-          ? 40000
-          : skillKey === "voyagers_guidance"
-            ? 50000
-            : skillKey === "clan_supply_depot"
-              ? 55000
-              : 45000;
-      let baseS =
-        skillKey === "aetheric_wisdom"
-          ? 6
-          : skillKey === "clan_supply_depot"
-            ? 8
-            : 5;
-      let scaleG = skillKey === "clan_supply_depot" ? 1.45 : 1.4;
-      let scaleS = skillKey === "clan_supply_depot" ? 1.35 : 1.3;
-      costGold = Math.floor(baseG * Math.pow(scaleG, currentL));
-      costSoul = Math.floor(baseS * Math.pow(scaleS, currentL));
-    }
-    let peakStage =
-      window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-    costGold = Math.floor(costGold * Math.pow(1.045, peakStage));
+        let currentL = window.playerStats.clanSkills[skillKey] || 0;
+        let costGold = 0;
+        let costSoul = 0;
+        if (skillKey === "steel_phalanx" || skillKey === "vitality_well") {
+          costGold = Math.floor(
+            (skillKey === "steel_phalanx" ? 25000 : 20000) *
+              Math.pow(1.35, currentL),
+          );
+          costSoul = Math.floor(200 * Math.pow(1.25, currentL));
+        } else {
+          let baseG =
+            skillKey === "prosperity_accord"
+              ? 40000
+              : skillKey === "voyagers_guidance"
+                ? 50000
+                : skillKey === "clan_supply_depot"
+                  ? 55000
+                  : 45000;
+          let baseS =
+            skillKey === "aetheric_wisdom" ? 6 : skillKey === "clan_supply_depot" ? 8 : 5; // Resolved ReferenceError crash
+          let scaleG = skillKey === "clan_supply_depot" ? 1.45 : 1.4;
+          let scaleS = skillKey === "clan_supply_depot" ? 1.35 : 1.3;
+          costGold = Math.floor(baseG * Math.pow(scaleG, currentL));
+          costSoul = Math.floor(baseS * Math.pow(scaleS, currentL));
+        }
+        // Group Cooperative Model: Scale costs purely based on Clan Level and Research Level
+        let clanLvl = clan.level || 1;
+        costGold = Math.floor(costGold * (1.0 + clanLvl * 0.15) * 20);
 
     let leveledUp = false;
     if (isGold) {

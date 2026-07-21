@@ -2358,39 +2358,39 @@ window.generateDailyMissions = () => window.QuestSystem.generateDailyMissions();
 // Append generateWeeklyMissions inside window.QuestSystem
 Object.assign(window.QuestSystem, {
   generateWeeklyMissions() {
-    let pool = [
-      {
-        type: "rifts",
-        label: "Slay Rift Guardians",
-        targetBase: 3,
-        unit: "guardians",
-      },
-      {
-        type: "dungeons",
-        label: "Ascend Dungeon floors",
-        targetBase: 15,
-        unit: "floors",
-      },
-      {
-        type: "gold",
-        label: "Amass extreme wealth",
-        targetBase: 15000,
-        stageScale: true,
-        unit: "Gold",
-      },
-      {
-        type: "kills",
-        label: "Execute massive purges",
-        targetBase: 1500,
-        unit: "enemies",
-      },
-      {
-        type: "tempers",
-        label: "Master slot attunement",
-        targetBase: 15,
-        unit: "slots",
-      },
-    ];
+      let pool = [
+        {
+          type: "rifts",
+          label: "Slay Rift Guardians",
+          targetBase: 10, // Increased from 3
+          unit: "guardians",
+        },
+        {
+          type: "dungeons",
+          label: "Ascend Dungeon floors",
+          targetBase: 50, // Increased from 15
+          unit: "floors",
+        },
+        {
+          type: "gold",
+          label: "Amass extreme wealth",
+          targetBase: 150000, // Increased from 15000
+          stageScale: true,
+          unit: "Gold",
+        },
+        {
+          type: "kills",
+          label: "Execute massive purges",
+          targetBase: 15000, // Increased from 1500
+          unit: "enemies",
+        },
+        {
+          type: "tempers",
+          label: "Master slot attunement",
+          targetBase: 40, // Increased from 15
+          unit: "slots",
+        },
+      ];
 
     pool.sort(() => Math.random() - 0.5);
     let selected = pool.slice(0, 3);
