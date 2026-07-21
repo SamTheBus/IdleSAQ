@@ -3712,11 +3712,13 @@ function update() {
   }
 
   if (window.hero.attackTimer > 0) {
-    window.hero.attackTimer--;
-    let cooldownCap =
-      window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
-    window.hero.slashFrame = window.hero.attackTimer > cooldownCap - 6;
-  }
+      window.hero.attackTimer--;
+      let cooldownCap =
+        window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
+      // Scale animation frame duration dynamically to prevent sword from getting stuck in swinging position at hyper speeds
+      let animDuration = Math.min(6, Math.max(2, Math.floor(cooldownCap / 2)));
+      window.hero.slashFrame = window.hero.attackTimer > (cooldownCap - animDuration);
+    }
 
   window.playerStats.sessionPlaytime =
     (window.playerStats.sessionPlaytime || 0) + 1000 / 60;
