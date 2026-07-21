@@ -1024,12 +1024,17 @@ window.SaveManager = {
         window.playerStats.qlyPotionStrength = 0.5;
 
       if (window.playerStats.unlockedAchievements === undefined)
-        window.playerStats.unlockedAchievements = [];
-      if (window.playerStats.unviewedAchievements === undefined)
-        window.playerStats.unviewedAchievements = [];
-      if (window.playerStats.visitedSubTabs === undefined)
-        window.playerStats.visitedSubTabs = [];
-      if (window.playerStats.chatFloatingMode === undefined)
+              window.playerStats.unlockedAchievements = [];
+            if (window.playerStats.unviewedAchievements === undefined)
+              window.playerStats.unviewedAchievements = [];
+            if (window.playerStats.visitedSubTabs === undefined)
+              window.playerStats.visitedSubTabs = [];
+            if (window.playerStats.renown === undefined)
+              window.playerStats.renown = 0;
+            if (window.playerStats.pendingClanProgress && window.playerStats.pendingClanProgress.renown === undefined) {
+              window.playerStats.pendingClanProgress.renown = 0;
+            }
+            if (window.playerStats.chatFloatingMode === undefined)
         window.playerStats.chatFloatingMode = false;
       if (window.playerStats.chatX === undefined)
         window.playerStats.chatX = null;
@@ -1390,6 +1395,7 @@ window.SaveManager = {
   applyOfflineGains(offlineMs) {
     if (offlineMs <= 60000) return 0;
 
+    let oldPeak = window.playerStats.lifetimePeakStage || 1;
     let offlineSeconds = Math.floor(offlineMs / 1000);
     if (offlineSeconds >= 28800) {
       window.playerStats.hasTriggeredTimeCapsule = true;
@@ -1850,17 +1856,28 @@ window.SaveManager = {
     window.playerStats.totalLifetimeKills =
       (window.playerStats.totalLifetimeKills || 0) + totalKills;
     window.playerStats.stage = currentStage;
-    window.playerStats.maxStage = Math.max(
-      window.playerStats.maxStage || 1,
-      window.playerStats.stage,
-    );
-    window.playerStats.lifetimePeakStage = Math.max(
-      window.playerStats.lifetimePeakStage || 1,
-      window.playerStats.maxStage,
-    );
+        window.playerStats.maxStage = Math.max(
+          window.playerStats.maxStage || 1,
+          window.playerStats.stage,
+        );
+        window.playerStats.lifetimePeakStage = Math.max(
+          window.playerStats.lifetimePeakStage || 1,
+          window.playerStats.maxStage,
+        );
 
-    // Reconstruct flat values to display on the offline progress card
-    totalGold = b_totalGold;
+        if (window.playerStats.lifetimePeakStage > oldPeak) {
+          let renownGained = window.calculateRenownForStageRange(oldPeak, window.playerStats.lifetimePeakStage);
+          if (renownGained > 0) {
+            window.playerStats.renown = (window.playerStats.renown || 0) + renownGained;
+            if (window.playerStats.pendingClanProgress) {
+              window.playerStats.pendingClanProgress.renown = (window.playerStats.pendingClanProgress.renown || 0) + renownGained;
+            }
+            scrapsGainedMap["Renown"] = (scrapsGainedMap["Renown"] || 0) + renownGained;
+          }
+        }
+
+        // Reconstruct flat values to display on the offline progress card
+        totalGold = b_totalGold;
     totalXp = b_totalXp;
 
     window.gainXp(totalXp, true);
@@ -2761,21 +2778,21 @@ window.onload = function () {
 
   // Warm user gesture activation for Web Audio Context & BGM
     const initAudio = () => {
-      if (window.playerStats && window.playerStats.mute) {
-        console.log("[AUDIO] Game is muted. Web Audio initialization deferred to preserve background music (Spotify) focus.");
-        return;
-      }
-
-      // Set audio session type according to preferred mode
-      if ('audioSession' in navigator && window.playerStats) {
-        try {
-          navigator.audioSession.type = window.playerStats.audioSessionMode || "ambient";
-        } catch (err) {
-          console.warn("Failed to set audio session type:", err);
+        if (window.playerStats && window.playerStats.mute) {
+          console.log("[AUDIO] Game is muted. Web Audio initialization deferred to preserve background music (Spotify) focus.");
+          return;
         }
-      }
 
-      window.SoundManager.init();
+        // Force default ambient mixable audio session to prevent Dynamic Island/lock screen takeover and allow Spotify/background music mixing
+        if ('audioSession' in navigator) {
+          try {
+            navigator.audioSession.type = "ambient";
+          } catch (err) {
+            console.warn("Failed to set audio session type:", err);
+          }
+        }
+
+        window.SoundManager.init();
 
       // Initialize BGM
             if (window.MusicManager) {
@@ -6748,18 +6765,37 @@ window.CombatEngine = {
                     let oldMax = window.playerStats.maxStage;
                     let oldPeak = window.playerStats.lifetimePeakStage || 1; // Capture original all-time peak stage before increments
                     window.playerStats.stage++;
-                    window.playerStats.maxStage = Math.max(
-                      window.playerStats.maxStage || 1,
-                      window.playerStats.stage,
-                    );
-                    window.playerStats.lifetimePeakStage = Math.max(
-                      window.playerStats.lifetimePeakStage || 1,
-                      window.playerStats.maxStage,
-                    );
-                    if (typeof window.pushLog === "function")
-                      window.pushLog(
-                        `<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${window.playerStats.stage}.</span>`,
-                      );
+                                        window.playerStats.maxStage = Math.max(
+                                          window.playerStats.maxStage || 1,
+                                          window.playerStats.stage,
+                                        );
+                                        window.playerStats.lifetimePeakStage = Math.max(
+                                          window.playerStats.lifetimePeakStage || 1,
+                                          window.playerStats.maxStage,
+                                        );
+                                        if (window.playerStats.lifetimePeakStage > oldPeak) {
+                                          let renownGained = window.calculateRenownForStageRange(oldPeak, window.playerStats.lifetimePeakStage);
+                                          if (renownGained > 0) {
+                                            window.playerStats.renown = (window.playerStats.renown || 0) + renownGained;
+                                            if (window.playerStats.pendingClanProgress) {
+                                              window.playerStats.pendingClanProgress.renown = (window.playerStats.pendingClanProgress.renown || 0) + renownGained;
+                                            }
+                                            if (typeof window.pushToast === "function") {
+                                              window.pushToast(
+                                                "Renown",
+                                                null,
+                                                "#df9ffb",
+                                                true,
+                                                renownGained,
+                                                `✨ HWM Peak Stage! Gained +${renownGained} Renown`
+                                              );
+                                            }
+                                          }
+                                        }
+                                        if (typeof window.pushLog === "function")
+                                          window.pushLog(
+                                            `<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${window.playerStats.stage}.</span>`,
+                                          );
 
                     // Check if they reached Stage 81 (beating Stage 80) for the first time to trigger Altar of Ascension / Prestige Unlock
                     if (
@@ -9455,17 +9491,18 @@ window.showOfflineSummaryModal = function (
       : `<div style="color:#666; font-style:italic; font-size:11px; padding: 15px 0; text-align:center;">No new high-quality gear kept.</div>`;
 
   let scrapKeys = Object.keys(scraps);
-  let scrapsListHtml =
-    scrapKeys.length > 0
-      ? scrapKeys
-          .map((key) => {
-            let color = key.includes("Scrap")
-              ? "#3498db"
-              : key.includes("Soul")
-                ? "#ffb6c1"
-                : "#9b59b6";
-            if (key === "Eridium Shard") color = "#8e44ad";
-            if (key.includes("Attack Elixir")) color = "#2ecc71";
+            let scrapsListHtml =
+              scrapKeys.length > 0
+                ? scrapKeys
+                    .map((key) => {
+                      let color = key.includes("Scrap")
+                        ? "#3498db"
+                        : key.includes("Soul")
+                          ? "#ffb6c1"
+                          : "#9b59b6";
+                      if (key === "Eridium Shard") color = "#8e44ad";
+                      if (key === "Renown") color = "#df9ffb";
+                      if (key.includes("Attack Elixir")) color = "#2ecc71";
             else if (key.includes("Vitality Elixir")) color = "#e74c3c";
             else if (key.includes("Armored Elixir")) color = "#3498db";
             else if (key.includes("Haste Elixir")) color = "#f1c40f";

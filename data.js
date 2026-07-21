@@ -44,6 +44,23 @@ window.getEffectiveStage = function (stage) {
   return s <= 100 ? s : 100 + Math.pow(s - 100, 0.7) * 1.5;
 };
 
+window.calculateRenownForStageRange = function (fromStage, toStage) {
+  if (toStage <= fromStage) return 0;
+  let start = Math.max(0, fromStage);
+  let end = toStage;
+  let delta = end - start;
+  if (delta > 2000) {
+    const F = (s) => 5 * s + 1.25 * Math.pow(s, 1.6);
+    return Math.max(1, Math.floor(F(end) - F(start)));
+  } else {
+    let total = 0;
+    for (let s = start + 1; s <= end; s++) {
+      total += Math.max(1, Math.floor(5 + 2 * Math.pow(s, 0.6)));
+    }
+    return total;
+  }
+};
+
 function getCardTier(count) {
   let thresholds = window.CARD_UPGRADE_THRESHOLDS || [1, 25, 50, 150, 300, 750];
   let t = -1;
@@ -1997,6 +2014,7 @@ window.playerStats = {
   lastDailyLoginDayStr: "",
   loginStreak: 0,
   loginClaimedToday: false,
+  renown: 0,
   slotUpgrades: {
       weapon: 0,
       subweapon: 0,
@@ -2160,17 +2178,18 @@ window.playerStats = {
   canvasClicksWindow: [],
   recentHeals: [], // Track siphoned heals in a sliding 1,000ms window
   pendingClanProgress: {
-    kills: 0,
-    rifts: 0,
-    prestige: 0,
-    dungeons: 0,
-    fairies: 0,
-    tempers: 0,
-    reforges: 0,
-    potions: 0,
-    salvage: 0,
-    crits: 0,
-  },
+      kills: 0,
+      rifts: 0,
+      prestige: 0,
+      dungeons: 0,
+      fairies: 0,
+      tempers: 0,
+      reforges: 0,
+      potions: 0,
+      salvage: 0,
+      crits: 0,
+      renown: 0,
+    },
 
   // Achievement Checkpoint Flags
   hasTriggeredMurphysLaw: false,

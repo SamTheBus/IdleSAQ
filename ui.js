@@ -2531,18 +2531,6 @@ window.updateAudioUI = function () {
       muteBtn.style.background = "#c0392b";
     }
   }
-  if (sessionModeBtn && window.playerStats) {
-    let mode = window.playerStats.audioSessionMode || "ambient";
-    if (mode === "ambient") {
-      sessionModeBtn.innerText = "🎧 Spotify Mixer (Ambient)";
-      sessionModeBtn.style.background = "#1abc9c";
-      sessionModeBtn.style.borderColor = "#16a085";
-    } else {
-      sessionModeBtn.innerText = "🏝️ Island Takeover (Playback)";
-      sessionModeBtn.style.background = "#9b59b6";
-      sessionModeBtn.style.borderColor = "#8e44ad";
-    }
-  }
 };
 
 window.changeVolume = function (type, val) {
@@ -2584,24 +2572,7 @@ window.toggleMute = function () {
   window.saveGame();
 };
 
-window.toggleAudioSessionMode = function () {
-  if (!window.playerStats) return;
-  window.playerStats.audioSessionMode = window.playerStats.audioSessionMode === "ambient" ? "playback" : "ambient";
-
-  if (!window.playerStats.mute && 'audioSession' in navigator) {
-    try {
-      navigator.audioSession.type = window.playerStats.audioSessionMode;
-    } catch (e) {
-      console.warn("Failed to dynamically set audio session type:", e);
-    }
-  }
-
-  window.updateAudioUI();
-  if (typeof window.updateMediaSession === "function") {
-    window.updateMediaSession();
-  }
-  window.saveGame();
-};
+window.toggleAudioSessionMode = function () {};
 
 window.showCustomConfirm = function (
   title,

@@ -680,154 +680,168 @@ window.renderClanDashboard = function (clan, members, invitations) {
     };
 
     // Construct the Weekly Contribution Leaderboard Top 3 podiums
-    let sortedContrib = [...members].sort(
-      (a, b) => (b.weekly_contribution || 0) - (a.weekly_contribution || 0),
-    );
-    let leaderboardHtml = "";
-    if (sortedContrib.length > 0) {
-      let podiumMarkers = ["✦", "★", "⌖"];
-      let podiumColors = ["#ffd700", "#bdc3c7", "#e67e22"];
+        let sortedContrib = [...members].sort((a, b) => {
+          let contribA = a.weekly_contribution || a.weekly_renown || a.weeklyContribution || 0;
+          let contribB = b.weekly_contribution || b.weekly_renown || b.weeklyContribution || 0;
+          return contribB - contribA;
+        });
+        let leaderboardHtml = "";
+        if (sortedContrib.length > 0) {
+          let podiumMarkers = ["✦", "★", "⌖"];
+          let podiumColors = ["#ffd700", "#bdc3c7", "#e67e22"];
 
-      leaderboardHtml = `
-        <div class="chiseled-stone-panel" style="margin-bottom:12px; padding:10px; border-color:#9b59b650;">
-            <div style="font-size:10px; font-weight:bold; color:#df9ffb; text-transform:uppercase; letter-spacing:1.5px; text-align:center; border-bottom:1px solid #4a154b; padding-bottom:4px; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:4px;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                Weekly Contribution Leaderboard
-            </div>
-            <div style="display:flex; flex-direction:column; gap:4px;">
-      `;
-
-      sortedContrib.slice(0, 5).forEach((m, idx) => {
-        let nameCol = m.userId === userId ? "#ffd700" : "#fff";
-        let rankLabel =
-          idx < 3
-            ? `<strong style="color:${podiumColors[idx]}; font-family:monospace; margin-right:4px;">${podiumMarkers[idx]}</strong>`
-            : `<span style="color:#aaa; font-family:monospace; margin-right:4px;">#${idx + 1}</span>`;
-        leaderboardHtml += `
-                <div style="display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:10px; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:4px; border:1px solid #222;">
-                  <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px; text-align:left;">
-                      ${rankLabel} <strong style="color:${nameCol};">${window.escapeHTML(m.name)}</strong>
-                  </span>
-                  <span style="color:#2ecc71; font-weight:bold;">+${(m.weekly_contribution || 0).toLocaleString()} Renown</span>
+          leaderboardHtml = `
+            <div class="chiseled-stone-panel" style="margin-bottom:12px; padding:10px; border-color:#9b59b650;">
+                <div style="font-size:10px; font-weight:bold; color:#df9ffb; text-transform:uppercase; letter-spacing:1.5px; text-align:center; border-bottom:1px solid #4a154b; padding-bottom:4px; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    Weekly Contribution Leaderboard
                 </div>
-              `;
-      });
-
-      leaderboardHtml += `</div></div>`;
-    }
-
-    // Process Roster Group headers
-    let rosterHtml = "";
-    ["founder", "officer", "vanguard", "recruit"].forEach((rKey) => {
-      let rMembers = groups[rKey];
-      if (rMembers.length === 0) return;
-
-      let sectionHeader = `
-        <div style="font-size:10px; font-weight:bold; color:#7f8c8d; text-transform:uppercase; letter-spacing:1px; margin-top:12px; margin-bottom:6px; border-bottom:1.5px solid #2d3748; padding-bottom:3px; display:flex; justify-content:space-between; align-items:center;">
-          <span>${groupLabels[rKey]} [${rMembers.length}]</span>
-        </div>
-      `;
-
-      let cardsHtml = rMembers
-        .map((m) => {
-          let isLeaderRow = m.userId === clan.leader_id;
-          let isMe = m.userId === userId;
-          let canvasId = `clan-member-canvas-${m.userId}`;
-
-          let titleTextHtml = "";
-          if (m.equippedTitle && window.TITLES_DATA[m.equippedTitle]) {
-            let tData = window.TITLES_DATA[m.equippedTitle];
-            titleTextHtml = `<span style="color:${tData.color || "#ff007f"}; font-size:8px; font-weight:bold; margin-left:4px;">[${tData.name}]</span>`;
-          }
-
-          // Inline admin choices dropdown selector
-          let adminSelectHtml = "";
-          if (isLeader && !isMe) {
-            adminSelectHtml = `
-            <select class="rank-action-select" onchange="window.handleInlineAdminAction(this, '${m.userId}', '${window.escapeHTML(m.name)}')">
-              <option value="">Actions...</option>
-              ${m.clan_rank === "recruit" ? `<option value="promote">Promote to Vanguard</option>` : ""}
-              ${m.clan_rank === "vanguard" ? `<option value="promote">Promote to Officer</option><option value="demote">Demote to Recruit</option>` : ""}
-              ${m.clan_rank === "officer" ? `<option value="demote">Demote to Vanguard</option>` : ""}
-              <option value="founder">Transfer Ownership</option>
-              <option value="kick">Expel Member</option>
-            </select>
+                <div style="display:flex; flex-direction:column; gap:4px;">
           `;
-          } else if (isLeader && isMe) {
-            adminSelectHtml = `<span style="font-size:8px; color:#f1c40f; font-weight:bold; font-family:monospace;">Leader</span>`;
-          } else if (clan.leader_id !== userId && isLeaderRow) {
-            adminSelectHtml = `<span style="font-size:8px; color:#f1c40f; font-weight:bold; font-family:monospace;">Founder</span>`;
-          } else if (clan.leader_id !== userId && !isLeaderRow && !isMe) {
-            // Check if viewer is Officer and target is a Recruit/Vanguard
-            let myRankRes = members.find((x) => x.userId === userId);
-            let myRank = myRankRes ? myRankRes.clan_rank : "recruit";
-            if (
-              myRank === "officer" &&
-              (m.clan_rank === "recruit" || m.clan_rank === "vanguard")
-            ) {
-              adminSelectHtml = `
-              <select class="rank-action-select" onchange="window.handleInlineAdminAction(this, '${m.userId}', '${window.escapeHTML(m.name)}')">
-                <option value="">Actions...</option>
-                ${m.clan_rank === "recruit" ? `<option value="promote">Promote to Vanguard</option>` : ""}
-                ${m.clan_rank === "vanguard" ? `<option value="demote">Demote to Recruit</option>` : ""}
-                <option value="kick">Expel Member</option>
-              </select>
-            `;
-            }
-          }
 
-          return `
-          <div style="background:#111; border:1px solid #222; border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-              <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; text-align:left;">
-                  <div style="position:relative; flex-shrink:0;">
-                    <canvas id="${canvasId}" width="30" height="40" style="width:30px; height:40px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:4px; display:block; pointer-events:none;"></canvas>
-                    <div style="position:absolute; bottom:-3px; right:-3px; z-index:4;">${window.getRankShieldSvg(m.clan_rank || "recruit", 14)}</div>
-                  </div>
-                  <div style="min-width:0; flex:1;">
-                      <div style="display:flex; align-items:center; flex-wrap:wrap; line-height:1.1;">
-                          <strong style="font-size:11.5px; color:${isMe ? "#f1c40f" : "#fff"}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">${window.escapeHTML(m.name)}</strong>
-                          ${titleTextHtml}
-                      </div>
-                      <span style="font-size:9px; color:#aaa; font-family:monospace; display:block; margin-top:2px;">Lv. ${m.level} • Peak Stg ${m.lifetimePeakStage} • Weekly Renown: <span style="color:#2ecc71; font-weight:bold;">${(m.weekly_contribution || 0).toLocaleString()}</span></span>
-                      <span style="font-size:8px; color:#7f8c8d; font-family:monospace;">Contribution: ${window.formatNumber(m.clanContribution)}</span>
-                  </div>
-              </div>
-              <div style="display:flex; align-items:center; gap:4px;">
-                  <button class="btn-action" style="background:#3498db; font-size:9.5px; padding:3px 6px; height:24px; line-height:1;" onclick="window.inspectPlayer('${m.userId}')">Inspect</button>
-                  ${adminSelectHtml}
-              </div>
-          </div>
-        `;
-        })
-        .join("");
-
-      rosterHtml +=
-        sectionHeader +
-        `<div style="display:flex; flex-direction:column; gap:4px;">${cardsHtml}</div>`;
-    });
-
-    tabContentHtml = `
-          ${leaderboardHtml}
-          <div style="display:flex; flex-direction:column; gap:4px;">
-              ${rosterHtml}
-          </div>
-        `;
-
-    setTimeout(() => {
-      members.forEach((m) => {
-        let canvas = document.getElementById(`clan-member-canvas-${m.userId}`);
-        if (canvas) {
-          let ctx = canvas.getContext("2d");
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.imageSmoothingEnabled = false;
-          window.drawSingleHero(ctx, 15, 14, 0.55, m.equippedSlots, m, 0, {
-            slashFrame: false,
-            deathAnimationTimer: 0,
-            isMainHero: false,
+          sortedContrib.slice(0, 5).forEach((m, idx) => {
+            let mId = m.userId || m.user_id;
+            let nameCol = mId === userId ? "#ffd700" : "#fff";
+            let rankLabel =
+              idx < 3
+                ? `<strong style="color:${podiumColors[idx]}; font-family:monospace; margin-right:4px;">${podiumMarkers[idx]}</strong>`
+                : `<span style="color:#aaa; font-family:monospace; margin-right:4px;">#${idx + 1}</span>`;
+            let contributionVal = m.weekly_contribution || m.weekly_renown || m.weeklyContribution || 0;
+            leaderboardHtml += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:10px; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:4px; border:1px solid #222;">
+                      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px; text-align:left;">
+                          ${rankLabel} <strong style="color:${nameCol};">${window.escapeHTML(m.name)}</strong>
+                      </span>
+                      <span style="color:#2ecc71; font-weight:bold;">+${contributionVal.toLocaleString()} Renown</span>
+                    </div>
+                  `;
           });
+
+          leaderboardHtml += `</div></div>`;
         }
-      });
-    }, 50);
+
+        // Process Roster Group headers
+        let rosterHtml = "";
+        ["founder", "officer", "vanguard", "recruit"].forEach((rKey) => {
+          let rMembers = groups[rKey];
+          if (rMembers.length === 0) return;
+
+          let sectionHeader = `
+            <div style="font-size:10px; font-weight:bold; color:#7f8c8d; text-transform:uppercase; letter-spacing:1px; margin-top:12px; margin-bottom:6px; border-bottom:1.5px solid #2d3748; padding-bottom:3px; display:flex; justify-content:space-between; align-items:center;">
+              <span>${groupLabels[rKey]} [${rMembers.length}]</span>
+            </div>
+          `;
+
+          let cardsHtml = rMembers
+            .map((m) => {
+              let mId = m.userId || m.user_id;
+              let isLeaderRow = mId === clan.leader_id;
+              let isMe = mId === userId;
+              let canvasId = `clan-member-canvas-${mId}`;
+
+              let titleTextHtml = "";
+              if (m.equippedTitle && window.TITLES_DATA[m.equippedTitle]) {
+                let tData = window.TITLES_DATA[m.equippedTitle];
+                titleTextHtml = `<span style="color:${tData.color || "#ff007f"}; font-size:8px; font-weight:bold; margin-left:4px;">[${tData.name}]</span>`;
+              }
+
+              // Inline admin choices dropdown selector
+              let adminSelectHtml = "";
+              let clanPermissions = window.playerStats.clanPermissions || { officer_kick: true, officer_vault: true };
+
+              if (isLeader && !isMe) {
+                adminSelectHtml = `
+                <select class="rank-action-select" onchange="window.handleInlineAdminAction(this, '${mId}', '${window.escapeHTML(m.name)}')">
+                  <option value="">Actions...</option>
+                  ${m.clan_rank === "recruit" ? `<option value="promote">Promote to Vanguard</option>` : ""}
+                  ${m.clan_rank === "vanguard" ? `<option value="promote">Promote to Officer</option><option value="demote">Demote to Recruit</option>` : ""}
+                  ${m.clan_rank === "officer" ? `<option value="demote">Demote to Vanguard</option>` : ""}
+                  <option value="founder">Transfer Ownership</option>
+                  <option value="kick">Expel Member</option>
+                </select>
+              `;
+              } else if (isLeader && isMe) {
+                adminSelectHtml = `<span style="font-size:8px; color:#f1c40f; font-weight:bold; font-family:monospace;">Leader</span>`;
+              } else if (clan.leader_id !== userId && isLeaderRow) {
+                adminSelectHtml = `<span style="font-size:8px; color:#f1c40f; font-weight:bold; font-family:monospace;">Founder</span>`;
+              } else if (clan.leader_id !== userId && !isLeaderRow && !isMe) {
+                // Check if viewer is Officer and target is a Recruit/Vanguard
+                let myRankRes = members.find((x) => (x.userId || x.user_id) === userId);
+                let myRank = myRankRes ? myRankRes.clan_rank : "recruit";
+                let canOfficerKick = clanPermissions.officer_kick !== false;
+
+                if (
+                  myRank === "officer" &&
+                  canOfficerKick &&
+                  (m.clan_rank === "recruit" || m.clan_rank === "vanguard")
+                ) {
+                  adminSelectHtml = `
+                  <select class="rank-action-select" onchange="window.handleInlineAdminAction(this, '${mId}', '${window.escapeHTML(m.name)}')">
+                    <option value="">Actions...</option>
+                    ${m.clan_rank === "recruit" ? `<option value="promote">Promote to Vanguard</option>` : ""}
+                    ${m.clan_rank === "vanguard" ? `<option value="demote">Demote to Recruit</option>` : ""}
+                    <option value="kick">Expel Member</option>
+                  </select>
+                `;
+                }
+              }
+
+              let weeklyRenownVal = m.weekly_contribution || m.weekly_renown || m.weeklyContribution || 0;
+              let clanContributionVal = m.clanContribution || m.clan_contribution || 0;
+
+              return `
+              <div style="background:#111; border:1px solid #222; border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                  <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; text-align:left;">
+                      <div style="position:relative; flex-shrink:0;">
+                        <canvas id="${canvasId}" width="30" height="40" style="width:30px; height:40px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:4px; display:block; pointer-events:none;"></canvas>
+                        <div style="position:absolute; bottom:-3px; right:-3px; z-index:4;">${window.getRankShieldSvg(m.clan_rank || "recruit", 14)}</div>
+                      </div>
+                      <div style="min-width:0; flex:1;">
+                          <div style="display:flex; align-items:center; flex-wrap:wrap; line-height:1.1;">
+                              <strong style="font-size:11.5px; color:${isMe ? "#f1c40f" : "#fff"}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">${window.escapeHTML(m.name)}</strong>
+                              ${titleTextHtml}
+                          </div>
+                          <span style="font-size:9px; color:#aaa; font-family:monospace; display:block; margin-top:2px;">Lv. ${m.level} • Peak Stg ${m.lifetimePeakStage} • Weekly Renown: <span style="color:#2ecc71; font-weight:bold;">${weeklyRenownVal.toLocaleString()}</span></span>
+                          <span style="font-size:8px; color:#7f8c8d; font-family:monospace;">Contribution: ${window.formatNumber(clanContributionVal)}</span>
+                      </div>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:4px;">
+                      <button class="btn-action" style="background:#3498db; font-size:9.5px; padding:3px 6px; height:24px; line-height:1;" onclick="window.inspectPlayer('${mId}')">Inspect</button>
+                      ${adminSelectHtml}
+                  </div>
+              </div>
+            `;
+            })
+            .join("");
+
+          rosterHtml +=
+            sectionHeader +
+            `<div style="display:flex; flex-direction:column; gap:4px;">${cardsHtml}</div>`;
+        });
+
+        tabContentHtml = `
+              ${leaderboardHtml}
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                  ${rosterHtml}
+              </div>
+            `;
+
+        setTimeout(() => {
+          members.forEach((m) => {
+            let mId = m.userId || m.user_id;
+            let canvas = document.getElementById(`clan-member-canvas-${mId}`);
+            if (canvas) {
+              let ctx = canvas.getContext("2d");
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              ctx.imageSmoothingEnabled = false;
+              window.drawSingleHero(ctx, 15, 14, 0.55, m.equippedSlots, m, 0, {
+                slashFrame: false,
+                deathAnimationTimer: 0,
+                isMainHero: false,
+              });
+            }
+          });
+        }, 50);
   } else if (currentTab === "QUESTS") {
     let questsData = clan.quests;
     let listHtml = "";
@@ -982,13 +996,13 @@ window.renderClanDashboard = function (clan, members, invitations) {
                                   </div>
                                 `;
   } else if (currentTab === "DONATE") {
-      let personalCP = 0;
-      let meMember = members.find((x) => x.userId === userId);
-      if (meMember) {
-        personalCP = meMember.weekly_contribution || 0;
-      }
+            let personalCP = 0;
+            let meMember = members.find((x) => (x.userId || x.user_id) === userId);
+            if (meMember) {
+              personalCP = meMember.weekly_contribution || meMember.weekly_renown || meMember.weeklyContribution || 0;
+            }
 
-      // Track weekly cooperative points to render Cooperative Vault Chest Bar (Scaled up 25x)
+            // Track weekly cooperative points to render Cooperative Vault Chest Bar (Scaled up 25x)
       let vaultPoints = clan.vault_points || 0;
       let currentChestTier = "common";
       if (vaultPoints >= 750000) currentChestTier = "mythic";
@@ -1116,32 +1130,68 @@ window.renderClanDashboard = function (clan, members, invitations) {
                         </div>
 
                         <!-- Emblem Customizer & Tithe Rate -->
-                        <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:6px; background:#111; border:1px solid #222; padding:8px; border-radius:6px; align-items:center;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <div id="settings-emblem-live-indicator" style="flex-shrink:0;">
-                                    ${window.getClanEmblemHtml(activeEmblemSeed, 32, clan.level)}
-                                </div>
-                                <div style="flex:1;">
-                                    <label for="settings-clan-emblem" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Emblem Pattern:</label>
-                                    <div style="display:flex; align-items:center; gap:6px;">
-                                        <input type="range" id="settings-clan-emblem" min="0" max="100" value="${activeEmblemSeed}" style="flex:1; height:4px; accent-color:#f1c40f; cursor:pointer;" oninput="window.previewClanEmblem(this.value, ${clan.level})">
-                                        <span id="settings-emblem-preview-val" style="font-family:monospace; font-size:10px; width:22px; text-align:right;">${activeEmblemSeed}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="settings-clan-tithe" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Auto-Tithe (Vault Tax):</label>
-                                <select id="settings-clan-tithe" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px;">
-                                    <option value="0" ${clan.tithe_rate === 0 ? "selected" : ""}>0% (Disabled)</option>
-                                    <option value="1" ${clan.tithe_rate === 1 ? "selected" : ""}>1% Auto-Tax</option>
-                                    <option value="2" ${clan.tithe_rate === 2 ? "selected" : ""}>2% Auto-Tax</option>
-                                    <option value="3" ${clan.tithe_rate === 3 ? "selected" : ""}>3% Auto-Tax</option>
-                                    <option value="5" ${clan.tithe_rate === 5 ? "selected" : ""}>5% Auto-Tax (Max)</option>
-                                </select>
-                            </div>
-                        </div>
+                                                <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:6px; background:#111; border:1px solid #222; padding:8px; border-radius:6px; align-items:center;">
+                                                    <div style="display:flex; align-items:center; gap:8px;">
+                                                        <div id="settings-emblem-live-indicator" style="flex-shrink:0;">
+                                                            ${window.getClanEmblemHtml(activeEmblemSeed, 32, clan.level)}
+                                                        </div>
+                                                        <div style="flex:1;">
+                                                            <label for="settings-clan-emblem" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Emblem Pattern:</label>
+                                                            <div style="display:flex; align-items:center; gap:6px;">
+                                                                <input type="range" id="settings-clan-emblem" min="0" max="100" value="${activeEmblemSeed}" style="flex:1; height:4px; accent-color:#f1c40f; cursor:pointer;" oninput="window.previewClanEmblem(this.value, ${clan.level})">
+                                                                <span id="settings-emblem-preview-val" style="font-family:monospace; font-size:10px; width:22px; text-align:right;">${activeEmblemSeed}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label for="settings-clan-tithe" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Auto-Tithe (Vault Tax):</label>
+                                                        <select id="settings-clan-tithe" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px;">
+                                                            <option value="0" ${clan.tithe_rate === 0 ? "selected" : ""}>0% (Disabled)</option>
+                                                            <option value="1" ${clan.tithe_rate === 1 ? "selected" : ""}>1% Auto-Tax</option>
+                                                            <option value="2" ${clan.tithe_rate === 2 ? "selected" : ""}>2% Auto-Tax</option>
+                                                            <option value="3" ${clan.tithe_rate === 3 ? "selected" : ""}>3% Auto-Tax</option>
+                                                            <option value="5" ${clan.tithe_rate === 5 ? "selected" : ""}>5% Auto-Tax (Max)</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
 
-                        <button class="btn-action" style="width:100%; margin-bottom: 10px; background:#2ecc71; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeSaveClanSettings()">Save Clan Customizations</button>
+                                                <!-- Rank Authority Matrix -->
+                                                <div style="background:#111; border:1px solid #222; padding:10px; border-radius:6px; text-align:left; margin-bottom:8px;">
+                                                    <strong style="color:#ffd700; font-size:10px; display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">⚔️ Rank Authority Matrix</strong>
+                                                    <p style="font-size:9.5px; color:#aaa; margin:0 0 8px 0; line-height:1.45;">Configure the administrative rights for each clan rank. Leaders have absolute control, while Officers can be delegated specific permissions:</p>
+                                                    <div style="display:flex; flex-direction:column; gap:4px; font-family:monospace; font-size:10px; color:#fff;">
+                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
+                                                            <span>• Officers can invite members:</span>
+                                                            <select id="settings-perm-officer-invite" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
+                                                                <option value="allow" ${(window.playerStats.clanPermissions?.officer_invite !== false) ? "selected" : ""}>ALLOWED ✓</option>
+                                                                <option value="block" ${(window.playerStats.clanPermissions?.officer_invite === false) ? "selected" : ""}>DENIED ✗</option>
+                                                            </select>
+                                                        </div>
+                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
+                                                            <span>• Officers can expel Recruits:</span>
+                                                            <select id="settings-perm-officer-kick" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
+                                                                <option value="allow" ${(window.playerStats.clanPermissions?.officer_kick !== false) ? "selected" : ""}>ALLOWED ✓</option>
+                                                                <option value="block" ${(window.playerStats.clanPermissions?.officer_kick === false) ? "selected" : ""}>DENIED ✗</option>
+                                                            </select>
+                                                        </div>
+                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
+                                                            <span>• Officers can spend Vault Funds:</span>
+                                                            <select id="settings-perm-officer-vault" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
+                                                                <option value="allow" ${(window.playerStats.clanPermissions?.officer_vault !== false) ? "selected" : ""}>ALLOWED ✓</option>
+                                                                <option value="block" ${(window.playerStats.clanPermissions?.officer_vault === false) ? "selected" : ""}>DENIED ✗</option>
+                                                            </select>
+                                                        </div>
+                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
+                                                            <span>• Vanguards can invite recruits:</span>
+                                                            <select id="settings-perm-vanguard-invite" style="background:#111; color:#e74c3c; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
+                                                                <option value="allow" ${(window.playerStats.clanPermissions?.vanguard_invite === true) ? "selected" : ""}>ALLOWED ✓</option>
+                                                                <option value="block" ${(window.playerStats.clanPermissions?.vanguard_invite !== true) ? "selected" : ""}>DENIED ✗</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <button class="btn-action" style="width:100%; margin-bottom: 10px; background:#2ecc71; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeSaveClanSettings()">Save Clan Customizations</button>
 
                         <button class="btn-action un" style="width:100%; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeDisbandClan()">Disband Clan</button>
                     </div>
@@ -1154,12 +1204,13 @@ window.renderClanDashboard = function (clan, members, invitations) {
                 }
               `;
   } else if (currentTab === "RESEARCH") {
-    let myMember = members.find((x) => x.userId === userId);
-    let myRank = myMember ? myMember.clan_rank : "recruit";
-    let canManageVault =
-      myRank === "founder" || myRank === "officer" || isLeader;
+      let myMember = members.find((x) => (x.userId || x.user_id) === userId);
+      let myRank = myMember ? myMember.clan_rank : "recruit";
+      let clanPermissions = window.playerStats.clanPermissions || { officer_vault: true };
+      let canManageVault =
+        myRank === "founder" || isLeader || (myRank === "officer" && clanPermissions.officer_vault !== false);
 
-    let getSkillUpgradeCardHtml = (
+      let getSkillUpgradeCardHtml = (
       key,
       label,
       bonusText,
@@ -1457,6 +1508,12 @@ window.executeSaveClanSettings = function () {
   let emblemInput = document.getElementById("settings-clan-emblem");
   let titheSelect = document.getElementById("settings-clan-tithe");
 
+  // Read rank permissions dropdowns if they exist
+  let permOfficerInvite = document.getElementById("settings-perm-officer-invite");
+  let permOfficerKick = document.getElementById("settings-perm-officer-kick");
+  let permOfficerVault = document.getElementById("settings-perm-officer-vault");
+  let permVanguardInvite = document.getElementById("settings-perm-vanguard-invite");
+
   if (
     !descInput ||
     !policySelect ||
@@ -1473,6 +1530,13 @@ window.executeSaveClanSettings = function () {
   const emblem = parseInt(emblemInput.value, 10) || 0;
   const titheRate = parseInt(titheSelect.value, 10) || 0;
 
+  let permissions = {
+    officer_invite: permOfficerInvite ? permOfficerInvite.value === "allow" : true,
+    officer_kick: permOfficerKick ? permOfficerKick.value === "allow" : true,
+    officer_vault: permOfficerVault ? permOfficerVault.value === "allow" : true,
+    vanguard_invite: permVanguardInvite ? permVanguardInvite.value === "allow" : false,
+  };
+
   fetch(`${window.GAME_SERVER_URL}/api/clan/update-settings`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1483,12 +1547,14 @@ window.executeSaveClanSettings = function () {
       minLevel,
       emblem,
       titheRate,
+      permissions
     }),
   })
     .then((r) => r.json())
     .then((data) => {
       if (data.success) {
         window.playerStats.clanEmblem = emblem;
+        window.playerStats.clanPermissions = permissions;
         window.pushHeaderToast(`✓ Clan settings customized!`, "#2ecc71");
         window.fetchClanData();
         window.saveGame();
@@ -2116,7 +2182,7 @@ window.executeClanResearchDonate = function (skillKey, resType, amount) {
       if (data.success) {
         let label = resType === "gold" ? "Gold" : "Souls";
         window.pushHeaderToast(
-          `🙏 Contributed +${data.addedAmount.toLocaleString()} ${label}! (+${data.renownEarned} Renown)`,
+          `✓ Contributed +${data.addedAmount.toLocaleString()} ${label}! (+${data.renownEarned} Renown)`,
           "#2ecc71",
         );
         if (window.SoundManager) window.SoundManager.play("fairy");
@@ -2137,6 +2203,8 @@ window.executeClanResearchDonate = function (skillKey, resType, amount) {
         }
 
         if (data.leveledUp) {
+          window.playerStats.clanSkills = window.playerStats.clanSkills || {};
+          window.playerStats.clanSkills[skillKey] = data.newLevel;
           window.pushHeaderToast(
             `🎉 Research Upgraded to Lv. ${data.newLevel}!`,
             "#ffd700",
@@ -2156,10 +2224,92 @@ window.executeClanResearchDonate = function (skillKey, resType, amount) {
       }
     })
     .catch(() => {
+      // Local-Only Simulation Fallback for seamless offline gameplay
+      let clan = window.lastFetchedClanData || {
+        level: window.playerStats.clanLevel || 1,
+        research_progress: {},
+        members: []
+      };
+      window.lastFetchedClanData = clan;
+
+      let isGold = resType === "gold";
+      let progress = (clan.research_progress = clan.research_progress || {});
+      let skillProgress = (progress[skillKey] = progress[skillKey] || { gold: 0, souls: 0 });
+
+      let currentL = window.playerStats.clanSkills[skillKey] || 0;
+      let costGold = 0;
+      let costSoul = 0;
+
+      if (skillKey === "steel_phalanx" || skillKey === "vitality_well") {
+        costGold = Math.floor((skillKey === "steel_phalanx" ? 25000 : 20000) * Math.pow(1.35, currentL));
+        costSoul = Math.floor(200 * Math.pow(1.25, currentL));
+      } else {
+        let baseG = skillKey === "prosperity_accord" ? 40000 : skillKey === "voyagers_guidance" ? 50000 : skillKey === "clan_supply_depot" ? 55000 : 45000;
+        let baseS = skillKey === "aetheric_wisdom" ? 6 : skillKey === "clan_supply_depot" ? 8 : 5;
+        let scaleG = skillKey === "clan_supply_depot" ? 1.45 : 1.4;
+        let scaleS = skillKey === "clan_supply_depot" ? 1.35 : 1.3;
+        costGold = Math.floor(baseG * Math.pow(scaleG, currentL));
+        costSoul = Math.floor(baseS * Math.pow(scaleS, currentL));
+      }
+      let clanLvl = clan.level || 1;
+      costGold = Math.floor(costGold * (1.0 + clanLvl * 0.15) * 20);
+
+      let addedAmount = amount;
+      let leveledUp = false;
+
+      if (isGold) {
+        let availableToMax = costGold - (skillProgress.gold || 0);
+        addedAmount = Math.min(amount, availableToMax);
+        skillProgress.gold = (skillProgress.gold || 0) + addedAmount;
+        window.playerStats.coins = BigNum.from(window.playerStats.coins).sub(addedAmount);
+        if (window.playerStats.coins.eq(0)) window.playerStats.hasTriggeredExactChange = true;
+      } else {
+        let availableToMax = costSoul - (skillProgress.souls || 0);
+        addedAmount = Math.min(amount, availableToMax);
+        skillProgress.souls = (skillProgress.souls || 0) + addedAmount;
+        let rawSoulName = (skillKey === "steel_phalanx" || skillKey === "vitality_well") ? "Monster Soul" : "Luminous Soul";
+        window.inventory.ETC[rawSoulName] -= addedAmount;
+        if (window.inventory.ETC[rawSoulName] === 0) delete window.inventory.ETC[rawSoulName];
+      }
+
+      let renownEarned = 0;
+      if (isGold) {
+        renownEarned = Math.floor(addedAmount / 1000);
+        if (renownEarned < 1 && addedAmount > 0) renownEarned = 1;
+      } else {
+        let isMonster = (skillKey === "steel_phalanx" || skillKey === "vitality_well");
+        renownEarned = isMonster ? addedAmount * 2 : addedAmount * 40;
+      }
+
+      clan.vault_points = (clan.vault_points || 0) + renownEarned;
+      let membersList = clan.members || [];
+      let meMember = membersList.find((x) => (x.userId || x.user_id) === userId);
+      if (meMember) {
+        let currentContrib = meMember.weekly_contribution || meMember.weekly_renown || meMember.weeklyContribution || 0;
+        meMember.weekly_contribution = currentContrib + renownEarned;
+      }
+
       window.pushHeaderToast(
-        "❌ Network error contributing resources.",
-        "#e74c3c",
+        `✓ Contributed +${addedAmount.toLocaleString()} ${isGold ? "Gold" : "Souls"} (Offline)! (+${renownEarned} Renown)`,
+        "#2ecc71"
       );
+
+      if (skillProgress.gold >= costGold && skillProgress.souls >= costSoul) {
+        leveledUp = true;
+        skillProgress.gold = 0;
+        skillProgress.souls = 0;
+        window.playerStats.clanSkills[skillKey] = currentL + 1;
+        window.pushHeaderToast(`🎉 Research Upgraded to Lv. ${currentL + 1}!`, "#ffd700");
+        if (window.SoundManager) window.SoundManager.play("revive");
+        if (window.spawnPurchaseCelebration) {
+          window.spawnPurchaseCelebration("alchemy", "#f1c40f", 5);
+        }
+      }
+
+      window.renderClanDashboard(clan, membersList, []);
+      window.updateUI();
+      window.renderInventory();
+      window.saveGame();
     });
 };
 
