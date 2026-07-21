@@ -4787,15 +4787,18 @@ window.buyGoldUpgrade = function (type) {
   let levelField = "";
 
   if (type === "vending") {
-      levelField = "vendingQLevel";
-      cost = BigNum.from(15000).mul(BigNum.from(1.18).pow(p.vendingQLevel || 0));
-    } else if (type === "shop") {
-      levelField = "shopQLevel";
-      cost = BigNum.from(30000).mul(BigNum.from(1.22).pow(p.shopQLevel || 0));
-    } else if (type === "global") {
-      levelField = "globalQLevel";
-      cost = BigNum.from(100000).mul(BigNum.from(1.28).pow(p.globalQLevel || 0));
-    }
+            levelField = "vendingQLevel";
+            // Steep exponential scaling curve aligns Gacha upgrades with late-game depth inflation
+            cost = BigNum.from(15000).mul(BigNum.from(1.50).pow(p.vendingQLevel || 0));
+          } else if (type === "shop") {
+            levelField = "shopQLevel";
+            // Steep exponential scaling curve aligns Shop quality upgrades with late-game depth inflation
+            cost = BigNum.from(30000).mul(BigNum.from(1.65).pow(p.shopQLevel || 0));
+          } else if (type === "global") {
+            levelField = "globalQLevel";
+            // Steep exponential scaling curve aligns Global Luck upgrades with late-game depth inflation
+            cost = BigNum.from(100000).mul(BigNum.from(1.85).pow(p.globalQLevel || 0));
+          }
 
   let coins = BigNum.from(p.coins);
   let costBig = BigNum.from(cost);

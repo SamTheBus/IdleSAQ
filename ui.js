@@ -4023,40 +4023,40 @@ window.renderGoldUpgrades = function () {
   `;
 
   let upgrades = [
-    {
-      id: "vending",
-      name: "Gacha Calibration",
-      level: p.vendingQLevel || 0,
-      effectPerLevel: 1.0,
-      cost: Math.floor(15000 * Math.pow(1.18, p.vendingQLevel || 0)),
-      color: "#f1c40f",
-      desc: "Calibrates the Gachapon vending machine, permanently increasing base roll quality multipliers by +1% per level.",
-      accentClass: "sink-accent-vending",
-      iconSvg: gachaIconSvg,
-    },
-    {
-      id: "shop",
-      name: "Merchant Investment",
-      level: p.shopQLevel || 0,
-      effectPerLevel: 1.0,
-      cost: Math.floor(30000 * Math.pow(1.22, p.shopQLevel || 0)),
-      color: "#3498db",
-      desc: "Invests in the local merchant guild, permanently improving the base quality of restocked shop items by +1% per level.",
-      accentClass: "sink-accent-shop",
-      iconSvg: shopIconSvg,
-    },
-    {
-      id: "global",
-      name: "Aura of Fortune",
-      level: p.globalQLevel || 0,
-      effectPerLevel: 1.5,
-      cost: Math.floor(100000 * Math.pow(1.28, p.globalQLevel || 0)),
-      color: "#2ecc71",
-      desc: "Projects a global aura of pure probability, permanently boosting world drop rates and quality parameters by +1% per level.",
-      accentClass: "sink-accent-global",
-      iconSvg: globalIconSvg,
-    },
-  ];
+      {
+        id: "vending",
+        name: "Gacha Calibration",
+        level: p.vendingQLevel || 0,
+        effectPerLevel: 1.0,
+        cost: BigNum.from(15000).mul(BigNum.from(1.50).pow(p.vendingQLevel || 0)),
+        color: "#f1c40f",
+        desc: "Calibrates the Gachapon vending machine, permanently increasing base roll quality multipliers by +1% per level.",
+        accentClass: "sink-accent-vending",
+        iconSvg: gachaIconSvg,
+      },
+      {
+        id: "shop",
+        name: "Merchant Investment",
+        level: p.shopQLevel || 0,
+        effectPerLevel: 1.0,
+        cost: BigNum.from(30000).mul(BigNum.from(1.65).pow(p.shopQLevel || 0)),
+        color: "#3498db",
+        desc: "Invests in the local merchant guild, permanently improving the base quality of restocked shop items by +1% per level.",
+        accentClass: "sink-accent-shop",
+        iconSvg: shopIconSvg,
+      },
+      {
+        id: "global",
+        name: "Aura of Fortune",
+        level: p.globalQLevel || 0,
+        effectPerLevel: 1.5,
+        cost: BigNum.from(100000).mul(BigNum.from(1.85).pow(p.globalQLevel || 0)),
+        color: "#2ecc71",
+        desc: "Projects a global aura of pure probability, permanently boosting world drop rates and quality parameters by +1% per level.",
+        accentClass: "sink-accent-global",
+        iconSvg: globalIconSvg,
+      },
+    ];
 
   el.innerHTML = upgrades
     .map((u) => {
@@ -5081,27 +5081,27 @@ window.showGoldUpgradeTooltip = function (e, upId) {
   let p = window.playerStats;
   let up;
   if (upId === "vending") {
-    up = {
-      name: "🎰 Gacha Calibration",
-      level: p.vendingQLevel || 0,
-      cost: Math.floor(15000 * Math.pow(1.18, p.vendingQLevel || 0)),
-      color: "#f1c40f",
-    };
-  } else if (upId === "shop") {
-    up = {
-      name: "🛒 Merchant Investment",
-      level: p.shopQLevel || 0,
-      cost: Math.floor(30000 * Math.pow(1.22, p.shopQLevel || 0)),
-      color: "#3498db",
-    };
-  } else if (upId === "global") {
-    up = {
-      name: "🍀 Aura of Fortune",
-      level: p.globalQLevel || 0,
-      cost: Math.floor(100000 * Math.pow(1.28, p.globalQLevel || 0)),
-      color: "#2ecc71",
-    };
-  }
+      up = {
+        name: "🎰 Gacha Calibration",
+        level: p.vendingQLevel || 0,
+        cost: BigNum.from(15000).mul(BigNum.from(1.50).pow(p.vendingQLevel || 0)),
+        color: "#f1c40f",
+      };
+    } else if (upId === "shop") {
+      up = {
+        name: "🛒 Merchant Investment",
+        level: p.shopQLevel || 0,
+        cost: BigNum.from(30000).mul(BigNum.from(1.65).pow(p.shopQLevel || 0)),
+        color: "#3498db",
+      };
+    } else if (upId === "global") {
+      up = {
+        name: "🍀 Aura of Fortune",
+        level: p.globalQLevel || 0,
+        cost: BigNum.from(100000).mul(BigNum.from(1.85).pow(p.globalQLevel || 0)),
+        color: "#2ecc71",
+      };
+    }
   if (!up) return;
 
   let goldStr = window.formatNumber(p.coins);
@@ -6981,25 +6981,23 @@ window.refreshMarketShopIfNeeded = function () {
 
       // Resolve base boss gold drops matching this item's specific Level/Stage Scale
       let itemStage = stageScale * 5;
-      let effStage = window.getEffectiveStage(itemStage);
-      let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-      // Mapped on 5-stage scale to prevent purchase costs from out-inflating combat value
-      let scale = Math.pow(growthRate, effStage * 0.95);
-      let baseBossGold = Math.floor(15 * scale);
+                    let effStage = window.getEffectiveStage(itemStage);
+                    let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+                    // Calculates shop item costs using BigNum to prevent float overflow and precision loss at high stages
+                    let bnScale = BigNum.from(growthRate).pow(Math.floor(effStage * 0.95));
+                    let bnBaseBossGold = BigNum.from(15).mul(bnScale);
 
-      // Balanced Rarity Cost multipliers (expressed as equivalent boss kills of that item's level)
-      const rarityCostMultipliers = [
-        15, // 0★ Common
-        45, // 1★ Rare
-        120, // 2★ Magic
-        400, // 3★ Epic
-        1500, // 4★ Legendary
-        6000, // 5★ Mythic
-      ];
-      let itemRarityFactor = rarityCostMultipliers[statLinesCount] || 15;
+                    const rarityCostMultipliers = [
+                      15, // 0★ Common
+                      45, // 1★ Rare
+                      120, // 2★ Magic
+                      400, // 3★ Epic
+                      1500, // 4★ Legendary
+                      6000, // 5★ Mythic
+                    ];
+                    let itemRarityFactor = rarityCostMultipliers[statLinesCount] || 15;
 
-      // Final Level-Anchored shop cost calculation
-      let cost = Math.floor(baseBossGold * itemRarityFactor);
+                    let cost = bnBaseBossGold.mul(itemRarityFactor);
 
       let shopItemData = window.createItemObject(
         chosenType,

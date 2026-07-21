@@ -4931,169 +4931,282 @@
       let isChronicle = equipped.subweapon.isUniqueChronicle;
 
       if (subType === "shield") {
-        ctx.save();
-        ctx.translate(8, 4 + bounce);
+                  // Heavy defensive arm sway rotation
+                  let sway = Math.sin(Date.now() / 320) * 0.05;
 
-        let shieldItem = equipped.subweapon;
-        let noun =
-          shieldItem && shieldItem.noun ? shieldItem.noun.toLowerCase() : "";
-        let tierColor = window.getTierColor(
-          shieldItem ? shieldItem.statsRolled : 0,
-        );
+                  ctx.save();
+                  ctx.translate(8, 4 + bounce);
+                  ctx.rotate(sway);
 
-        if (isAegis) {
-          // --- UNIQUE: VOID-WARPED BULWARK ---
-          ctx.fillStyle = "#25033c";
-          ctx.beginPath();
-          ctx.moveTo(-6, -8);
-          ctx.lineTo(6, -8);
-          ctx.lineTo(8, 0);
-          ctx.lineTo(0, 10);
-          ctx.lineTo(-8, 0);
-          ctx.closePath();
-          ctx.fill();
-          ctx.strokeStyle = "#8e44ad";
-          ctx.lineWidth = penHero + 0.5;
-          ctx.stroke();
+                  let shieldItem = equipped.subweapon;
+                  let noun =
+                    shieldItem && shieldItem.noun ? shieldItem.noun.toLowerCase() : "";
+                  let tierColor = window.getTierColor(
+                    shieldItem ? shieldItem.statsRolled : 0,
+                  );
 
-          ctx.strokeStyle = "#e84393";
-          ctx.lineWidth = 1.8;
-          ctx.beginPath();
-          ctx.moveTo(0, -6);
-          ctx.lineTo(0, 6);
-          ctx.moveTo(-5, 0);
-          ctx.lineTo(5, 0);
-          ctx.stroke();
-        } else if (noun.includes("kite")) {
-          // --- KITE SHIELD (Tall & Rounded Taper) ---
-          ctx.fillStyle = "#7f8c8d";
-          ctx.beginPath();
-          ctx.moveTo(-5.5, -9);
-          ctx.quadraticCurveTo(0, -11, 5.5, -9); // Curved top
-          ctx.lineTo(7, -1);
-          ctx.lineTo(0, 11); // Long pointer
-          ctx.lineTo(-7, -1);
-          ctx.closePath();
-          ctx.fill();
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = penHero + 0.5;
-          ctx.stroke();
+                  if (isAegis) {
+                    // --- UNIQUE: VOID-WARPED BULWARK ---
+                    ctx.fillStyle = "#25033c";
+                    ctx.beginPath();
+                    ctx.moveTo(-6, -8);
+                    ctx.lineTo(6, -8);
+                    ctx.lineTo(8, 0);
+                    ctx.lineTo(0, 10);
+                    ctx.lineTo(-8, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = "#8e44ad";
+                    ctx.lineWidth = penHero + 0.5;
+                    ctx.stroke();
 
-          // Central heraldry cross matching quality tier
-          ctx.strokeStyle = tierColor;
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.moveTo(0, -8.5);
-          ctx.lineTo(0, 8);
-          ctx.moveTo(-4.5, -1.5);
-          ctx.lineTo(4.5, -1.5);
-          ctx.stroke();
-        } else if (noun.includes("tower")) {
-          // --- TOWER SHIELD (Heavy Protective Rectangle) ---
-          ctx.fillStyle = "#7f8c8d";
-          ctx.beginPath();
-          ctx.roundRect(-7, -9.5, 14, 19, [1.5]);
-          ctx.closePath();
-          ctx.fill();
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = penHero + 0.5;
-          ctx.stroke();
+                    ctx.strokeStyle = "#e84393";
+                    ctx.lineWidth = 1.8;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -6);
+                    ctx.lineTo(0, 6);
+                    ctx.moveTo(-5, 0);
+                    ctx.lineTo(5, 0);
+                    ctx.stroke();
+                  } else if (noun.includes("kite")) {
+                    // --- KITE SHIELD (Tall & Rounded Taper) ---
+                    ctx.fillStyle = "#7f8c8d";
+                    ctx.beginPath();
+                    ctx.moveTo(-5.5, -9);
+                    ctx.quadraticCurveTo(0, -11, 5.5, -9); // Curved top
+                    ctx.lineTo(7, -1);
+                    ctx.lineTo(0, 11); // Long pointer
+                    ctx.lineTo(-7, -1);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = penHero + 0.5;
+                    ctx.stroke();
 
-          // Inward border frame matching quality tier
-          ctx.strokeStyle = tierColor;
-          ctx.lineWidth = 1.0;
-          ctx.beginPath();
-          ctx.roundRect(-5, -7.5, 10, 15, [1]);
-          ctx.stroke();
+                    // Central heraldry cross matching quality tier
+                    ctx.strokeStyle = tierColor;
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -8.5);
+                    ctx.lineTo(0, 8);
+                    ctx.moveTo(-4.5, -1.5);
+                    ctx.lineTo(4.5, -1.5);
+                    ctx.stroke();
+                  } else if (noun.includes("tower")) {
+                    // --- TOWER SHIELD (Heavy Protective Rectangle) ---
+                    ctx.fillStyle = "#7f8c8d";
+                    ctx.beginPath();
+                    ctx.roundRect(-7, -9.5, 14, 19, [1.5]);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = penHero + 0.5;
+                    ctx.stroke();
 
-          // Central horizontal reinforcing band
-          ctx.strokeStyle = "#1c1c1f";
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.moveTo(-7, 0);
-          ctx.lineTo(7, 0);
-          ctx.stroke();
-        } else if (noun.includes("buckler")) {
-          // --- BUCKLER (Small Circular Shield) ---
-          ctx.fillStyle = "#7f8c8d";
-          ctx.beginPath();
-          ctx.arc(0, 1, 9.5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = penHero + 0.5;
-          ctx.stroke();
+                    // Inward border frame matching quality tier
+                    ctx.strokeStyle = tierColor;
+                    ctx.lineWidth = 1.0;
+                    ctx.beginPath();
+                    ctx.roundRect(-5, -7.5, 10, 15, [1]);
+                    ctx.stroke();
 
-          // Quality indicator ring
-          ctx.strokeStyle = tierColor;
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.arc(0, 1, 6.5, 0, Math.PI * 2);
-          ctx.stroke();
+                    // Central horizontal reinforcing band
+                    ctx.strokeStyle = "#1c1c1f";
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.moveTo(-7, 0);
+                    ctx.lineTo(7, 0);
+                    ctx.stroke();
+                  } else if (noun.includes("buckler")) {
+                    // --- BUCKLER (Small Circular Shield) ---
+                    ctx.fillStyle = "#7f8c8d";
+                    ctx.beginPath();
+                    ctx.arc(0, 1, 9.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = penHero + 0.5;
+                    ctx.stroke();
 
-          // Core steel boss center rivet
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.arc(0, 1, 2.5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = 0.8;
-          ctx.stroke();
-        } else {
-          // --- DEFAULT / HEATER SHIELD (The exact shape you love) ---
-          ctx.fillStyle = "#7f8c8d";
-          ctx.beginPath();
-          ctx.moveTo(-6, -8);
-          ctx.lineTo(6, -8);
-          ctx.lineTo(8, 0);
-          ctx.lineTo(0, 10);
-          ctx.lineTo(-8, 0);
-          ctx.closePath();
-          ctx.fill();
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = penHero + 0.5;
-          ctx.stroke();
+                    // Quality indicator ring
+                    ctx.strokeStyle = tierColor;
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(0, 1, 6.5, 0, Math.PI * 2);
+                    ctx.stroke();
 
-          // Draw inner quality-aligned framing border
-          ctx.beginPath();
-          ctx.moveTo(-4, -6.5);
-          ctx.lineTo(4, -6.5);
-          ctx.lineTo(5.5, -0.5);
-          ctx.lineTo(0, 7.5);
-          ctx.lineTo(-5.5, -0.5);
-          ctx.closePath();
-          ctx.strokeStyle = tierColor;
-          ctx.lineWidth = 1.2;
-          ctx.stroke();
-        }
+                    // Core steel boss center rivet
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(0, 1, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
+                  } else {
+                    // --- DEFAULT / HEATER SHIELD (The exact shape you love) ---
+                    ctx.fillStyle = "#7f8c8d";
+                    ctx.beginPath();
+                    ctx.moveTo(-6, -8);
+                    ctx.lineTo(6, -8);
+                    ctx.lineTo(8, 0);
+                    ctx.lineTo(0, 10);
+                    ctx.lineTo(-8, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = penHero + 0.5;
+                    ctx.stroke();
 
-        ctx.restore();
-        if (
-          isAegis &&
-          (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
-        ) {
-          ctx.save();
-          ctx.translate(8, 4 + bounce);
-          let orbitTime = Date.now() / 250;
-          ctx.fillStyle = "#110221";
-          ctx.strokeStyle = "#8e44ad";
-          ctx.lineWidth = 1.0;
-          for (let i = 0; i < 2; i++) {
-            let angle = orbitTime + i * Math.PI;
-            let ox = Math.cos(angle) * 14;
-            let oy = Math.sin(angle) * 6;
-            ctx.beginPath();
-            ctx.arc(ox, oy, 2.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-          }
-          ctx.restore();
-        }
-      } else if (subType === "tome") {
-        ctx.save();
-        let tomeFloat = Math.sin(Date.now() / 200) * 5;
-        ctx.translate(24, -6 + bounce + tomeFloat);
-        ctx.rotate(-Math.PI / 12);
-        if (isWatch) {
+                    // Draw inner quality-aligned framing border
+                    ctx.beginPath();
+                    ctx.moveTo(-4, -6.5);
+                    ctx.lineTo(4, -6.5);
+                    ctx.lineTo(5.5, -0.5);
+                    ctx.lineTo(0, 7.5);
+                    ctx.lineTo(-5.5, -0.5);
+                    ctx.closePath();
+                    ctx.strokeStyle = tierColor;
+                    ctx.lineWidth = 1.2;
+                    ctx.stroke();
+                  }
+
+                  // Searing Steel Glint Sweep (Diagonal light reflections)
+                  let glintTime = (Date.now() / 2000) % 1.0;
+                  if (glintTime < 0.3) {
+                    let glintY = -9.5 + (glintTime / 0.3) * 19;
+                    ctx.save();
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(-6, glintY);
+                    ctx.lineTo(6, glintY - 3);
+                    ctx.stroke();
+                    ctx.restore();
+                  }
+
+                  ctx.restore();
+
+                  // Orbiting Void Sparks (Aegis Unique only)
+                  if (
+                    isAegis &&
+                    (!options.deathAnimationTimer || options.deathAnimationTimer === 0)
+                  ) {
+                    ctx.save();
+                    ctx.translate(8, 4 + bounce);
+                    ctx.rotate(sway);
+                    let orbitTime = Date.now() / 250;
+                    ctx.fillStyle = "#110221";
+                    ctx.strokeStyle = "#8e44ad";
+                    ctx.lineWidth = 1.0;
+                    for (let i = 0; i < 2; i++) {
+                      let angle = orbitTime + i * Math.PI;
+                      let ox = Math.cos(angle) * 14;
+                      let oy = Math.sin(angle) * 6;
+                      ctx.beginPath();
+                      ctx.arc(ox, oy, 2.5, 0, Math.PI * 2);
+                      ctx.fill();
+                      ctx.stroke();
+                    }
+                    ctx.restore();
+                  }
+
+                  // Active Block Forcefield Flash centred on the Hero
+                  let timeSinceBlock = Date.now() - (stats.recentBlockTime || 0);
+                  if (timeSinceBlock < 250 && (!options.deathAnimationTimer || options.deathAnimationTimer === 0)) {
+                    let opacity = (250 - timeSinceBlock) / 250;
+                    let currentR = 24 + (1.0 - opacity) * 6;
+                    ctx.save();
+                    ctx.strokeStyle = tierColor;
+                    ctx.fillStyle = window.hexToRgba ? window.hexToRgba(tierColor, 0.15 * opacity) : `rgba(52, 152, 219, ${0.15 * opacity})`;
+                    ctx.lineWidth = 2.0;
+                    ctx.globalAlpha = opacity;
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                      let angle = (i * Math.PI) / 3;
+                      let hx = Math.cos(angle) * currentR;
+                      let hy = Math.sin(angle) * currentR + 4 + bounce;
+                      ctx.lineTo(hx, hy);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                  }
+                } else if (subType === "tome") {
+                ctx.save();
+                let tomeFloat = Math.sin(Date.now() / 200) * 5;
+                ctx.translate(24, -6 + bounce + tomeFloat);
+                ctx.rotate(-Math.PI / 12);
+
+                let tomeItem = equipped.subweapon;
+                let isUniqueConduit = tomeItem && tomeItem.isUniqueConduit;
+
+                // Unified Rarity/Stars Resolver (Uniques are treated as 5★)
+                let stars = tomeItem ? (tomeItem.statsRolled === "UNIQUE" ? 5 : tomeItem.statsRolled || 0) : 0;
+                if (isWatch || isChronicle || isUniqueConduit) {
+                  stars = 5;
+                }
+
+                let tierColor = window.getTierColor(tomeItem ? (tomeItem.statsRolled === "UNIQUE" ? 5 : tomeItem.statsRolled) : 0);
+                if (isWatch) tierColor = "#d4af37";
+                else if (isChronicle) tierColor = "#f1c40f";
+                else if (isUniqueConduit) tierColor = "#9b59b6";
+
+                let rgbVals = window.hexToRgbValues ? window.hexToRgbValues(tierColor) : "155, 89, 182";
+
+                // 3D Orbital properties
+                let R = 15;
+                let R_minor = 7;
+                let orbitTime = Date.now() / 280;
+
+                // Parametric calculation of points on 3D-tilted orbital planes
+                let getOrbPos = (i) => {
+                  let phi = i * (Math.PI / stars) + Math.PI / 12;
+                  let theta = orbitTime + i * ((Math.PI * 2) / stars);
+
+                  let ox = R * Math.cos(theta) * Math.cos(phi) - R_minor * Math.sin(theta) * Math.sin(phi);
+                  let oy = R * Math.cos(theta) * Math.sin(phi) + R_minor * Math.sin(theta) * Math.cos(phi) - 1;
+                  let oz = Math.sin(theta); // Depth indicator
+
+                  return { ox, oy, oz, phi };
+                };
+
+                // 1. Draw continuous translucent orbit rings behind the Tome
+                if (stars > 0) {
+                  ctx.save();
+                  ctx.lineWidth = 0.6;
+                  for (let i = 0; i < stars; i++) {
+                    let pos = getOrbPos(i);
+                    ctx.strokeStyle = `rgba(${rgbVals}, 0.08)`;
+                    ctx.beginPath();
+                    ctx.ellipse(0, -1, R, R_minor, pos.phi, 0, Math.PI * 2);
+                    ctx.stroke();
+                  }
+                  ctx.restore();
+                }
+
+                // 2. Draw orbs that are rotating behind the book (oz < 0)
+                if (stars > 0) {
+                  for (let i = 0; i < stars; i++) {
+                    let pos = getOrbPos(i);
+                    if (pos.oz < 0) {
+                      ctx.save();
+                      ctx.fillStyle = "#ffffff";
+                      ctx.beginPath();
+                      ctx.arc(pos.ox, pos.oy, 0.8, 0, Math.PI * 2);
+                      ctx.fill();
+
+                      ctx.fillStyle = tierColor;
+                      ctx.beginPath();
+                      ctx.arc(pos.ox, pos.oy, 2.0, 0, Math.PI * 2);
+                      ctx.fill();
+                      ctx.restore();
+                    }
+                  }
+                }
+
+                // 3. Draw Book / Unique Tome Core Body Graphics
+                if (isWatch) {
                   ctx.fillStyle = "#d4af37";
                   ctx.strokeStyle = "#000000";
                   ctx.lineWidth = 1.8;
@@ -5129,7 +5242,7 @@
                   ctx.beginPath();
                   ctx.arc(0, 0, pulseRad, 0, Math.PI * 2);
                   ctx.stroke();
-                } else if (equipped.subweapon && equipped.subweapon.isUniqueConduit) {
+                } else if (isUniqueConduit) {
                   // --- UNIQUE: CONDUIT OF THE LEXICON ---
                   ctx.fillStyle = "#0c0515"; // Deep occult violet cover
                   ctx.strokeStyle = "#9b59b6";
@@ -5151,265 +5264,252 @@
                   ctx.arc(0, 0, pulseRad, 0, Math.PI * 2);
                   ctx.stroke();
                 } else {
-          let tomeItem = equipped.subweapon;
-          let noun =
-            tomeItem && tomeItem.noun ? tomeItem.noun.toLowerCase() : "";
-          let tierColor = window.getTierColor(
-            tomeItem ? tomeItem.statsRolled : 0,
-          );
-          let rgbVals = window.hexToRgbValues
-            ? window.hexToRgbValues(tierColor)
-            : "155, 89, 182";
+                  let noun = tomeItem && tomeItem.noun ? tomeItem.noun.toLowerCase() : "";
 
-          // 1. Magical Rarity Glow Aura (Behind-the-book baseline)
-          let auraRadius = 14 + Math.sin(Date.now() / 150) * 4;
-          let auraGrad = ctx.createRadialGradient(0, -1, 1, 0, -1, auraRadius);
-          auraGrad.addColorStop(0, `rgba(${rgbVals}, 0.65)`);
-          auraGrad.addColorStop(0.5, `rgba(${rgbVals}, 0.2)`);
-          auraGrad.addColorStop(1, `rgba(${rgbVals}, 0)`);
-          ctx.fillStyle = auraGrad;
-          ctx.beginPath();
-          ctx.arc(0, -1, auraRadius, 0, Math.PI * 2);
-          ctx.fill();
+                  // Magical Rarity Glow Aura (Behind-the-book baseline)
+                  let auraRadius = 14 + Math.sin(Date.now() / 150) * 4;
+                  let auraGrad = ctx.createRadialGradient(0, -1, 1, 0, -1, auraRadius);
+                  auraGrad.addColorStop(0, `rgba(${rgbVals}, 0.65)`);
+                  auraGrad.addColorStop(0.5, `rgba(${rgbVals}, 0.2)`);
+                  auraGrad.addColorStop(1, `rgba(${rgbVals}, 0)`);
+                  ctx.fillStyle = auraGrad;
+                  ctx.beginPath();
+                  ctx.arc(0, -1, auraRadius, 0, Math.PI * 2);
+                  ctx.fill();
 
-          // 1b. Locally scoped spark drawer helper
-          let drawSingleSpark = (angle) => {
-            let ox = Math.cos(angle) * 11;
-            let oy = Math.sin(angle) * 4.5 - 1;
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.arc(ox, oy, 1.0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = tierColor;
-            ctx.beginPath();
-            ctx.arc(ox, oy, 2.5, 0, Math.PI * 2);
-            ctx.fill();
-          };
+                  // Resolve custom Book Cover styles
+                  let coverColor = "#8e44ad"; // Default magic purple
+                  if (noun.includes("grimoire"))
+                    coverColor = "#1b002a"; // Deep occult black
+                  else if (noun.includes("codex"))
+                    coverColor = "#784212"; // Antique brass/bronze
+                  else if (noun.includes("lexicon"))
+                    coverColor = "#1b4f72"; // Scholar blue
+                  else if (noun.includes("chronicle")) coverColor = "#4d1a00"; // Rustic relic leather
 
-          // 1c. Orbiting Sparks PASS 1: DRAW BEHIND THE BOOK (Y Offset / sin(angle) < 0)
-          let orbitTime = Date.now() / 350;
-          for (let i = 0; i < 2; i++) {
-            let angle = orbitTime + i * Math.PI;
-            if (Math.sin(angle) < 0) {
-              drawSingleSpark(angle);
-            }
-          }
+                  ctx.fillStyle = coverColor;
+                  ctx.beginPath();
+                  ctx.roundRect(-6, -8, 12, 14, [1.5]);
+                  ctx.fill();
+                  ctx.strokeStyle = "#000000";
+                  ctx.lineWidth = penHero;
+                  ctx.stroke();
 
-          // 2. Resolve custom Book Cover styles
-          let coverColor = "#8e44ad"; // Default magic purple
-          if (noun.includes("grimoire"))
-            coverColor = "#1b002a"; // Deep occult black
-          else if (noun.includes("codex"))
-            coverColor = "#784212"; // Antique brass/bronze
-          else if (noun.includes("lexicon"))
-            coverColor = "#1b4f72"; // Scholar blue
-          else if (noun.includes("chronicle")) coverColor = "#4d1a00"; // Rustic relic leather
+                  // Draw book spine on left binding edge
+                  ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+                  ctx.fillRect(-6, -8, 3, 14);
 
-          ctx.fillStyle = coverColor;
-          ctx.beginPath();
-          ctx.roundRect(-6, -8, 12, 14, [1.5]);
-          ctx.fill();
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = penHero;
-          ctx.stroke();
+                  // Draw paper edges on the right
+                  ctx.fillStyle = "#f5f5dc";
+                  ctx.beginPath();
+                  ctx.rect(4, -7, 1.5, 12);
+                  ctx.fill();
+                  ctx.stroke();
 
-          // Draw book spine on left binding edge
-          ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
-          ctx.fillRect(-6, -8, 3, 14);
+                  // Render detailed central cover glyphs
+                  ctx.save();
+                  if (noun.includes("grimoire")) {
+                    ctx.fillStyle = "#f1c40f";
+                    ctx.beginPath();
+                    ctx.arc(1, -1, 2.2, -Math.PI / 2, Math.PI / 2, false);
+                    ctx.quadraticCurveTo(2.0, -1, 1, -3.2);
+                    ctx.closePath();
+                    ctx.fill();
+                  } else if (noun.includes("codex")) {
+                    ctx.strokeStyle = "#bdc3c7";
+                    ctx.lineWidth = 0.8;
+                    ctx.beginPath();
+                    ctx.arc(1, -1, 2, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.fillStyle = tierColor;
+                    ctx.beginPath();
+                    ctx.arc(1, -1, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                  } else if (noun.includes("lexicon")) {
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.lineWidth = 0.7;
+                    ctx.beginPath();
+                    ctx.ellipse(1, -1, 2.5, 1.3, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.fillStyle = tierColor;
+                    ctx.beginPath();
+                    ctx.arc(1, -1, 0.8, 0, Math.PI * 2);
+                    ctx.fill();
+                  } else if (noun.includes("chronicle")) {
+                    ctx.fillStyle = "#f1c40f";
+                    ctx.beginPath();
+                    ctx.moveTo(-1, -3);
+                    ctx.lineTo(3, -3);
+                    ctx.lineTo(1, -1);
+                    ctx.lineTo(3, 1);
+                    ctx.lineTo(-1, 1);
+                    ctx.closePath();
+                    ctx.fill();
+                  } else {
+                    ctx.fillStyle = tierColor;
+                    ctx.beginPath();
+                    ctx.arc(1, -1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
+                  }
+                  ctx.restore();
+                }
 
-          // Draw paper edges on the right
-          ctx.fillStyle = "#f5f5dc";
-          ctx.beginPath();
-          ctx.rect(4, -7, 1.5, 12);
-          ctx.fill();
-          ctx.stroke();
+                // 4. Draw orbs that are rotating in front of the book (oz >= 0)
+                if (stars > 0) {
+                  for (let i = 0; i < stars; i++) {
+                    let pos = getOrbPos(i);
+                    if (pos.oz >= 0) {
+                      ctx.save();
+                      ctx.fillStyle = "#ffffff";
+                      ctx.beginPath();
+                      ctx.arc(pos.ox, pos.oy, 0.8, 0, Math.PI * 2);
+                      ctx.fill();
 
-          // 3. Render detailed central cover glyphs
-          ctx.save();
-          if (noun.includes("grimoire")) {
-            ctx.fillStyle = "#f1c40f";
-            ctx.beginPath();
-            ctx.arc(1, -1, 2.2, -Math.PI / 2, Math.PI / 2, false);
-            ctx.quadraticCurveTo(2.0, -1, 1, -3.2);
-            ctx.closePath();
-            ctx.fill();
-          } else if (noun.includes("codex")) {
-            ctx.strokeStyle = "#bdc3c7";
-            ctx.lineWidth = 0.8;
-            ctx.beginPath();
-            ctx.arc(1, -1, 2, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.fillStyle = tierColor;
-            ctx.beginPath();
-            ctx.arc(1, -1, 1, 0, Math.PI * 2);
-            ctx.fill();
-          } else if (noun.includes("lexicon")) {
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 0.7;
-            ctx.beginPath();
-            ctx.ellipse(1, -1, 2.5, 1.3, 0, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.fillStyle = tierColor;
-            ctx.beginPath();
-            ctx.arc(1, -1, 0.8, 0, Math.PI * 2);
-            ctx.fill();
-          } else if (noun.includes("chronicle")) {
-            ctx.fillStyle = "#f1c40f";
-            ctx.beginPath();
-            ctx.moveTo(-1, -3);
-            ctx.lineTo(3, -3);
-            ctx.lineTo(1, -1);
-            ctx.lineTo(3, 1);
-            ctx.lineTo(-1, 1);
-            ctx.closePath();
-            ctx.fill();
-          } else {
-            ctx.fillStyle = tierColor;
-            ctx.beginPath();
-            ctx.arc(1, -1, 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 0.8;
-            ctx.stroke();
-          }
-          ctx.restore();
+                      ctx.fillStyle = tierColor;
+                      ctx.beginPath();
+                      ctx.arc(pos.ox, pos.oy, 2.0, 0, Math.PI * 2);
+                      ctx.fill();
+                      ctx.restore();
+                    }
+                  }
+                }
 
-          // 1d. Orbiting Sparks PASS 2: DRAW IN FRONT OF THE BOOK (Y Offset / sin(angle) >= 0)
-          for (let i = 0; i < 2; i++) {
-            let angle = orbitTime + i * Math.PI;
-            if (Math.sin(angle) >= 0) {
-              drawSingleSpark(angle);
-            }
-          }
-        }
+                ctx.restore();
+              } else if (subType === "dagger") {
+                        let dItem = equipped.subweapon;
+                        let stars = dItem ? (dItem.statsRolled === "UNIQUE" ? 5 : dItem.statsRolled || 0) : 0;
+                        let tierColor = window.getTierColor(dItem ? (dItem.statsRolled === "UNIQUE" ? 5 : dItem.statsRolled) : 0);
+                        if (dItem && dItem.isUniqueViper) tierColor = "#2ecc71";
 
-        ctx.restore();
-      } else if (subType === "dagger") {
-        ctx.save();
-        ctx.translate(8, 8 + bounce);
-        ctx.rotate(Math.PI / 4);
+                        // Dynamic breathing sway rotation
+                        let sway = Math.sin(Date.now() / 240) * 0.08;
 
-        let dItem = equipped.subweapon;
-        let noun = dItem && dItem.noun ? dItem.noun.toLowerCase() : "";
-        let tierColor = window.getTierColor(dItem ? dItem.statsRolled : 0);
+                        ctx.save();
+                        ctx.translate(8, 8 + bounce);
+                        ctx.rotate(Math.PI / 4 + sway);
 
-        // 1. Draw Hilt Grip & Core Pommel
-        ctx.fillStyle = "#1c1c1f"; // Dark metallic hilt core
-        ctx.beginPath();
-        ctx.arc(0, 10, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
+                        // 1. Draw Hilt Grip & Core Pommel
+                        ctx.fillStyle = "#1c1c1f"; // Dark metallic hilt core
+                        ctx.beginPath();
+                        ctx.arc(0, 10, 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = "#000000";
+                        ctx.lineWidth = 1.2;
+                        ctx.stroke();
 
-        // Custom pommel core gem matching active tier color
-        ctx.fillStyle = tierColor;
-        ctx.beginPath();
-        ctx.arc(0, 10, 1.2, 0, Math.PI * 2);
-        ctx.fill();
+                        // Custom pommel core gem matching active tier color
+                        ctx.fillStyle = tierColor;
+                        ctx.beginPath();
+                        ctx.arc(0, 10, 1.2, 0, Math.PI * 2);
+                        ctx.fill();
 
-        ctx.fillStyle = "#5c3a21"; // Padded wood hilt
-        ctx.beginPath();
-        ctx.rect(-1.5, 3, 3, 7);
-        ctx.fill();
-        ctx.stroke();
+                        ctx.fillStyle = "#5c3a21"; // Padded wood hilt
+                        ctx.beginPath();
+                        ctx.rect(-1.5, 3, 3, 7);
+                        ctx.fill();
+                        ctx.stroke();
 
-        // 2. Resolve Custom Guards & Blades based on specific Dagger sub-class
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = penHero;
+                        // 2. Resolve Custom Guards & Blades based on specific Dagger sub-class
+                        ctx.strokeStyle = "#000000";
+                        ctx.lineWidth = penHero;
 
-        if (noun.includes("kris")) {
-          // Wavy Kris Flared Guard
-          ctx.fillStyle = tierColor;
-          ctx.beginPath();
-          ctx.moveTo(-6, 3);
-          ctx.lineTo(6, 3);
-          ctx.lineTo(4, 5);
-          ctx.lineTo(-4, 5);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
+                        let noun = dItem && dItem.noun ? dItem.noun.toLowerCase() : "";
 
-          // Wavy/Serpentine Kris Blade
-          ctx.fillStyle = "#7f8c8d";
-          ctx.beginPath();
-          ctx.moveTo(-2.5, 3);
-          ctx.lineTo(-1.2, -1);
-          ctx.lineTo(-2.2, -4.5);
-          ctx.lineTo(-1.2, -8);
-          ctx.lineTo(0, -13); // Sharp wavy tip
-          ctx.lineTo(1.2, -8);
-          ctx.lineTo(2.2, -4.5);
-          ctx.lineTo(1.2, -1);
-          ctx.lineTo(2.5, 3);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
+                        if (noun.includes("kris")) {
+                          // Serpentine Kris Guard
+                          ctx.fillStyle = tierColor;
+                          ctx.beginPath();
+                          ctx.moveTo(-6, 3);
+                          ctx.lineTo(6, 3);
+                          ctx.lineTo(4, 5);
+                          ctx.lineTo(-4, 5);
+                          ctx.closePath();
+                          ctx.fill();
+                          ctx.stroke();
 
-          // Light reflection highlight
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.moveTo(0, 3);
-          ctx.lineTo(0, -13);
-          ctx.lineTo(1.2, -8);
-          ctx.lineTo(2.2, -4.5);
-          ctx.lineTo(1.2, -1);
-          ctx.lineTo(2.5, 3);
-          ctx.closePath();
-          ctx.fill();
-        } else if (noun.includes("baselard")) {
-          // Broad cross H-guard
-          ctx.fillStyle = tierColor;
-          ctx.fillRect(-6, 1.5, 12, 2);
-          ctx.strokeRect(-6, 1.5, 12, 2);
-          // Secondary matching H-pommel
-          ctx.fillRect(-5, 9, 10, 2);
-          ctx.strokeRect(-5, 9, 10, 2);
+                          // Wavy/Serpentine Kris Blade
+                          ctx.fillStyle = "#95a5a6";
+                          ctx.beginPath();
+                          ctx.moveTo(-2.5, 3);
+                          ctx.lineTo(-1.2, -1);
+                          ctx.lineTo(-2.5, -4.5);
+                          ctx.lineTo(-1.2, -8);
+                          ctx.lineTo(0, -14); // Sharp wavy tip
+                          ctx.lineTo(1.2, -8);
+                          ctx.lineTo(2.5, -4.5);
+                          ctx.lineTo(1.2, -1);
+                          ctx.lineTo(2.5, 3);
+                          ctx.closePath();
+                          ctx.fill();
+                          ctx.stroke();
 
-          // Broad diamond-point blade
-          ctx.fillStyle = "#7f8c8d";
-          ctx.beginPath();
-          ctx.moveTo(-3, 1.5);
-          ctx.lineTo(0, -12); // tip
-          ctx.lineTo(3, 1.5);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
+                          // Contrast Highlight Line
+                          ctx.fillStyle = "#ffffff";
+                          ctx.beginPath();
+                          ctx.moveTo(0, 3);
+                          ctx.lineTo(0, -14);
+                          ctx.lineTo(1.2, -8);
+                          ctx.lineTo(2.5, -4.5);
+                          ctx.lineTo(1.2, -1);
+                          ctx.lineTo(2.5, 3);
+                          ctx.closePath();
+                          ctx.fill();
+                        } else if (noun.includes("baselard")) {
+                          // Broad cross H-guard
+                          ctx.fillStyle = tierColor;
+                          ctx.fillRect(-6, 1.5, 12, 2);
+                          ctx.strokeRect(-6, 1.5, 12, 2);
+                          // Secondary matching H-pommel
+                          ctx.fillRect(-5, 9, 10, 2);
+                          ctx.strokeRect(-5, 9, 10, 2);
 
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.moveTo(0, 1.5);
-          ctx.lineTo(0, -12);
-          ctx.lineTo(3, 1.5);
-          ctx.closePath();
-          ctx.fill();
-        } else if (noun.includes("dirk")) {
-          // Standard wide iron guard disc
-          ctx.fillStyle = "#343a40";
-          ctx.beginPath();
-          ctx.ellipse(0, 3, 5, 1.5, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
+                          // Broad diamond-point blade
+                          ctx.fillStyle = "#7f8c8d";
+                          ctx.beginPath();
+                          ctx.moveTo(-3, 1.5);
+                          ctx.lineTo(0, -14); // tip
+                          ctx.lineTo(3, 1.5);
+                          ctx.closePath();
+                          ctx.fill();
+                          ctx.stroke();
 
-          // Heavy single-edged wedge blade
-          ctx.fillStyle = "#7f8c8d";
-          ctx.beginPath();
-          ctx.moveTo(-2.2, 3);
-          ctx.lineTo(-2.2, -8); // Flat blunt back edge
-          ctx.lineTo(0, -12); // Blade point
-          ctx.lineTo(2.2, 3); // Curved cutting slope front
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
+                          ctx.fillStyle = "#ffffff";
+                          ctx.beginPath();
+                          ctx.moveTo(0, 1.5);
+                          ctx.lineTo(0, -14);
+                          ctx.lineTo(3, 1.5);
+                          ctx.closePath();
+                          ctx.fill();
+                        } else if (noun.includes("dirk")) {
+                          // Standard wide iron guard disc
+                          ctx.fillStyle = "#343a40";
+                          ctx.beginPath();
+                          ctx.ellipse(0, 3, 5, 1.5, 0, 0, Math.PI * 2);
+                          ctx.fill();
+                          ctx.stroke();
 
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.moveTo(0, 3);
-          ctx.lineTo(0, -12);
-          ctx.lineTo(2.2, 3);
-          ctx.closePath();
-          ctx.fill();
-        } else if (dItem.isUniqueViper) {
+                          // Heavy single-edged wedge blade
+                          ctx.fillStyle = "#7f8c8d";
+                          ctx.beginPath();
+                          ctx.moveTo(-2.2, 3);
+                          ctx.lineTo(-2.2, -10); // Flat blunt back edge
+                          ctx.lineTo(0, -14); // Blade point
+                          ctx.lineTo(2.2, 3); // Curved cutting slope front
+                          ctx.closePath();
+                          ctx.fill();
+                          ctx.stroke();
+
+                          ctx.fillStyle = "#ffffff";
+                          ctx.beginPath();
+                          ctx.moveTo(0, 3);
+                          ctx.lineTo(0, -14);
+                          ctx.lineTo(2.2, 3);
+                          ctx.closePath();
+                          ctx.fill();
+                        } else if (dItem && dItem.isUniqueViper) {
                           // --- UNIQUE: VIPER'S PERFECT STILETTO ---
                           ctx.fillStyle = "#1e272e"; // Dark hilt
                           ctx.beginPath();
@@ -5441,14 +5541,14 @@
                           ctx.stroke();
 
                           // Poison-etched serpentine blade
-                          ctx.fillStyle = "#2ecc71"; // Poison green blade body
-                          ctx.strokeStyle = "#16a085"; // Darker border
+                          ctx.fillStyle = "#0c1711"; // Dark obsidian core
+                          ctx.strokeStyle = "#2ecc71"; // Poison green edge glow
                           ctx.lineWidth = 1.5;
                           ctx.beginPath();
                           ctx.moveTo(-2.5, 3);
                           ctx.lineTo(-1, -3);
                           ctx.lineTo(-2, -8);
-                          ctx.lineTo(0, -14); // sharp tip
+                          ctx.lineTo(0, -15); // sharp tip
                           ctx.lineTo(2, -8);
                           ctx.lineTo(1, -3);
                           ctx.lineTo(2.5, 3);
@@ -5456,109 +5556,129 @@
                           ctx.fill();
                           ctx.stroke();
 
-                          // Poison highlight line
-                          ctx.fillStyle = "#ffffff";
+                          // Acidic fuller lines
+                          ctx.strokeStyle = "#2ecc71";
+                          ctx.lineWidth = 0.8;
                           ctx.beginPath();
-                          ctx.moveTo(0, 3);
+                          ctx.moveTo(0, 2);
+                          ctx.lineTo(0, -12);
+                          ctx.stroke();
+                        } else if (noun.includes("main")) {
+                          // Main-Gauche Curved Parrying Guard
+                          ctx.strokeStyle = tierColor;
+                          ctx.lineWidth = 1.2;
+                          ctx.beginPath();
+                          ctx.moveTo(-7, 3);
+                          ctx.quadraticCurveTo(0, -1.5, 7, 3);
+                          ctx.stroke();
+                          // Finger protective basket loop
+                          ctx.beginPath();
+                          ctx.arc(0, 5.5, 3.5, 0, Math.PI);
+                          ctx.stroke();
+
+                          ctx.strokeStyle = "#000000";
+                          ctx.lineWidth = penHero;
+
+                          // Narrow stiletto needle blade
+                          ctx.fillStyle = "#7f8c8d";
+                          ctx.beginPath();
+                          ctx.moveTo(-1.8, 1.5);
                           ctx.lineTo(0, -14);
-                          ctx.lineTo(2, -8);
-                          ctx.lineTo(1, -3);
-                          ctx.lineTo(2.5, 3);
+                          ctx.lineTo(1.8, 1.5);
                           ctx.closePath();
                           ctx.fill();
-                        } else if (noun.includes("main")) {
-          // Main-Gauche Curved Parrying Guard
-          ctx.strokeStyle = tierColor;
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.moveTo(-7, 3);
-          ctx.quadraticCurveTo(0, -1.5, 7, 3);
-          ctx.stroke();
-          // Finger protective basket loop
-          ctx.beginPath();
-          ctx.arc(0, 5.5, 3.5, 0, Math.PI);
-          ctx.stroke();
+                          ctx.stroke();
 
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = penHero;
+                          ctx.fillStyle = "#ffffff";
+                          ctx.beginPath();
+                          ctx.moveTo(0, 1.5);
+                          ctx.lineTo(0, -14);
+                          ctx.lineTo(1.8, 1.5);
+                          ctx.closePath();
+                          ctx.fill();
+                        } else {
+                          // Default Stiletto Needle structure
+                          ctx.fillStyle = tierColor; // Guard matching quality tier
+                          ctx.beginPath();
+                          ctx.moveTo(-8, 3);
+                          ctx.quadraticCurveTo(0, -2, 8, 3);
+                          ctx.quadraticCurveTo(0, 2, -8, 3);
+                          ctx.closePath();
+                          ctx.fill();
+                          ctx.stroke();
 
-          // Narrow stiletto needle blade
-          ctx.fillStyle = "#7f8c8d";
-          ctx.beginPath();
-          ctx.moveTo(-1.8, 1.5);
-          ctx.lineTo(0, -13);
-          ctx.lineTo(1.8, 1.5);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
+                          // Straight thin piercing blade
+                          ctx.fillStyle = "#7f8c8d";
+                          ctx.beginPath();
+                          ctx.moveTo(-2.2, 2.5);
+                          ctx.lineTo(0, -14);
+                          ctx.lineTo(2.2, 2.5);
+                          ctx.closePath();
+                          ctx.fill();
+                          ctx.stroke();
 
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.moveTo(0, 1.5);
-          ctx.lineTo(0, -13);
-          ctx.lineTo(1.8, 1.5);
-          ctx.closePath();
-          ctx.fill();
-        } else {
-          // Default Stiletto Needle structure
-          ctx.fillStyle = tierColor; // Guard matching quality tier
-          ctx.beginPath();
-          ctx.moveTo(-8, 3);
-          ctx.quadraticCurveTo(0, -2, 8, 3);
-          ctx.quadraticCurveTo(0, 2, -8, 3);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
+                          ctx.fillStyle = "#ffffff";
+                          ctx.beginPath();
+                          ctx.moveTo(0, 2.5);
+                          ctx.lineTo(0, -14);
+                          ctx.lineTo(2.2, 2.5);
+                          ctx.closePath();
+                          ctx.fill();
+                        }
 
-          // Straight thin piercing blade
-          ctx.fillStyle = "#7f8c8d";
-          ctx.beginPath();
-          ctx.moveTo(-2.2, 2.5);
-          ctx.lineTo(0, -12);
-          ctx.lineTo(2.2, 2.5);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
+                        // 3. Procedural Metallic Glint Sweep Overlay
+                        let glintTime = (Date.now() / 1500) % 1.0;
+                        if (glintTime < 0.3) {
+                          let glintY = 10 - (glintTime / 0.3) * 24;
+                          ctx.save();
+                          ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+                          ctx.lineWidth = 1.2;
+                          ctx.beginPath();
+                          ctx.moveTo(-2, glintY);
+                          ctx.lineTo(2, glintY - 2.5);
+                          ctx.stroke();
+                          ctx.restore();
+                        }
 
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.moveTo(0, 2.5);
-          ctx.lineTo(0, -12);
-          ctx.lineTo(2.2, 2.5);
-          ctx.closePath();
-          ctx.fill();
-        }
+                        ctx.restore();
 
-        // 3. Emit dripping elemental particles from sheathed blade
-        if (Math.random() < 0.2 && !window.isGamePaused && options.isMainHero) {
-          let dRgb = window.hexToRgbValues
-            ? window.hexToRgbValues(tierColor)
-            : "142, 68, 173";
-          window.particles.push({
-            x: window.hero.x + 20,
-            y: window.hero.y + 18 + bounce,
-            vx: -window.randFloat(0.3, 0.8),
-            vy: -window.randFloat(0.5, 1.2),
-            radius: window.randFloat(1, 2.2),
-            color: `rgba(${dRgb}, 0.65)`,
-            alpha: 0.8,
-            life: window.randInt(15, 30),
-          });
-        }
+                        // 4. Quality-Scaled Active Spark Trails (Spirals off the moving blade tip)
+                        if (!window.isGamePaused && options.isMainHero && stars > 0) {
+                          let spawnChance = window.playerStats.ecoMode ? 0.08 : 0.25;
+                          if (Math.random() < spawnChance * stars) {
+                            let theta = Math.PI / 4 + sway;
+                            let worldTipX = x + (8 + 14 * Math.sin(theta)) * scale;
+                            let worldTipY = y + (8 + bounce - 14 * Math.cos(theta)) * scale;
 
-        ctx.restore();
+                            window.particles.push(
+                              window.ParticlePool.get(
+                                worldTipX,
+                                worldTipY,
+                                -Math.cos(theta) * window.randFloat(0.3, 0.8) - (window.playerStats.isDungeonMode ? 1.5 : 0),
+                                -window.randFloat(0.2, 0.6) + bounce * 0.05,
+                                window.randFloat(0.8, 1.8),
+                                tierColor,
+                                0.85,
+                                window.randInt(15, 30),
+                                undefined,
+                                undefined,
+                                true, // Fade out over time
+                              )
+                            );
+                          }
+                        }
 
-        // 4. Rising elemental vapor matching equipped quality color!
-        let dRgb = window.hexToRgbValues
-          ? window.hexToRgbValues(tierColor)
-          : "46, 204, 113";
-        let mistCycle = (Date.now() / 150) % 6;
-        ctx.fillStyle = `rgba(${dRgb}, ${0.55 - mistCycle / 12})`;
-        ctx.beginPath();
-        ctx.arc(0, -16 - mistCycle, 1.2 + mistCycle / 3, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
+                        // 5. Rising elemental vapor matching equipped quality color!
+                        let dRgb = window.hexToRgbValues
+                          ? window.hexToRgbValues(tierColor)
+                          : "46, 204, 113";
+                        let mistCycle = (Date.now() / 150) % 6;
+                        ctx.fillStyle = `rgba(${dRgb}, ${0.55 - mistCycle / 12})`;
+                        ctx.beginPath();
+                        ctx.arc(0, -16 - mistCycle, 1.2 + mistCycle / 3, 0, Math.PI * 2);
+                        ctx.fill();
+                      }
+                    }
 
     // Cascading, safe fallbacks to pull cosmetics from flat/nested tables and JSON structures on leaderboard/clan renders
     let costume =
@@ -8875,9 +8995,14 @@
     // 2. BACKGROUND SCENERY & VEGETATION (Every element outlined)
         window.bgScenery.forEach((s) => {
           s.seed = s.seed || Math.random();
-          // Prune background drawing cycles by 20% in Eco Mode to balance visual density and CPU temperature
-          if (window.playerStats && window.playerStats.ecoMode && s.seed > 0.80) return;
+          // Prune background drawing cycles by 50% in Eco Mode to balance visual density and CPU temperature
+          if (window.playerStats && window.playerStats.ecoMode && s.seed > 0.50) return;
           let ts = s.size;
+
+          // Frustum Culling: Skip expensive vector drawing and canvas states if off-screen
+          let margin = ts * 60;
+          if (s.x < -margin || s.x > (canvas ? canvas.width + margin : 800)) return;
+
           ctx.save();
           ctx.strokeStyle = "#000000";
           ctx.lineWidth = penBgScenery * ts;
@@ -10298,29 +10423,33 @@
     }
 
     // 6. FAIRIES
-    window.activeFairies.forEach((f) => {
-      let flap = Math.abs(Math.sin(Date.now() / 100 + f.offset)) * 8 + 2;
-      let hover = Math.sin(Date.now() / 200 + f.offset) * 10;
-      let fx = f.x;
-      let fy = f.y + hover;
-      ctx.save();
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = f.color || "#ffb6c1";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
-      ctx.beginPath();
-      ctx.ellipse(fx - 4, fy - 4, 6, flap, Math.PI / 6, 0, Math.PI * 2);
-      ctx.ellipse(fx + 4, fy - 4, 6, flap, -Math.PI / 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      ctx.fillStyle = f.color || "#ffb6c1";
-      ctx.beginPath();
-      ctx.arc(fx, fy, 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
-    });
+        window.activeFairies.forEach((f) => {
+          let flap = Math.abs(Math.sin(Date.now() / 100 + f.offset)) * 8 + 2;
+          let hover = Math.sin(Date.now() / 200 + f.offset) * 10;
+          let fx = f.x;
+          let fy = f.y + hover;
+
+          // Frustum Culling: Skip rendering fairies if they are off-screen
+          if (fx < -30 || fx > (canvas ? canvas.width + 30 : 800)) return;
+
+          ctx.save();
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = f.color || "#ffb6c1";
+          ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+          ctx.beginPath();
+          ctx.ellipse(fx - 4, fy - 4, 6, flap, Math.PI / 6, 0, Math.PI * 2);
+          ctx.ellipse(fx + 4, fy - 4, 6, flap, -Math.PI / 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.fillStyle = f.color || "#ffb6c1";
+          ctx.beginPath();
+          ctx.arc(fx, fy, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        });
 
     // 6.5. FOREGROUND SCENERY OBJECTS (Outlines unified)
         window.fgScenery.forEach((s) => {
@@ -10328,8 +10457,12 @@
             sy = s.y,
             ss = s.size;
           s.seed = s.seed || Math.random();
-          // Prune foreground drawing cycles by 25% in Eco Mode to balance visual density and CPU temperature
-          if (window.playerStats && window.playerStats.ecoMode && s.seed > 0.75) return;
+          // Prune foreground drawing cycles by 50% in Eco Mode to balance visual density and CPU temperature
+          if (window.playerStats && window.playerStats.ecoMode && s.seed > 0.50) return;
+
+          // Frustum Culling: Skip expensive vector drawing and canvas states if off-screen
+          let margin = ss * 40;
+          if (sx < -margin || sx > (canvas ? canvas.width + margin : 800)) return;
 
           ctx.save();
           ctx.strokeStyle = "#000000";
@@ -11732,14 +11865,17 @@
     });
 
     window.particles.forEach((pt) => {
-      ctx.save();
-      if (pt.alpha !== undefined) ctx.globalAlpha = pt.alpha;
-      ctx.fillStyle = pt.color;
-      ctx.beginPath();
-      ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    });
+          // Frustum Culling: Skip rendering particles that are off-screen
+          if (pt.x < -10 || pt.x > (canvas ? canvas.width + 10 : 800) || pt.y < -10 || pt.y > (canvas ? canvas.height + 10 : 400)) return;
+
+          ctx.save();
+          if (pt.alpha !== undefined) ctx.globalAlpha = pt.alpha;
+          ctx.fillStyle = pt.color;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
 
     // Draw Gold Homing Particles
     if (window.goldParticles) {
