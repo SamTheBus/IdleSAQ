@@ -1573,19 +1573,18 @@ Object.assign(window.ItemFactory, {
         item.baseDef = Math.ceil(0.35 * stageScale * baseRarityMult);
         item.baseMoveSpeed = Math.ceil(1.0 * stageScale);
       } else if (item.type === "ring") {
-        // Decoupled Wildcard Implicit Ring Generation
-        let flatRoll = Math.random();
-        let expBase = Math.pow(1.045, stageScale * 5); // Balanced exponential base
-        if (flatRoll < 0.33) {
-          item.implicitType = "atk";
-          item.baseAtk = Math.ceil(0.15 * expBase * baseRarityMult);
-        } else if (flatRoll < 0.66) {
-          item.implicitType = "maxHp";
-          item.baseMaxHp = Math.ceil(0.45 * expBase * baseRarityMult);
-        } else {
-          item.implicitType = "def";
-          item.baseDef = Math.ceil(0.15 * expBase * baseRarityMult);
-        }
+              // Decoupled Wildcard Implicit Ring Generation - Supplemental, balanced linear scaling
+              let flatRoll = Math.random();
+              if (flatRoll < 0.33) {
+                item.implicitType = "atk";
+                item.baseAtk = Math.ceil(0.6 * stageScale * baseRarityMult);
+              } else if (flatRoll < 0.66) {
+                item.implicitType = "maxHp";
+                item.baseMaxHp = Math.ceil(1.5 * stageScale * baseRarityMult);
+              } else {
+                item.implicitType = "def";
+                item.baseDef = Math.ceil(0.35 * stageScale * baseRarityMult);
+              }
 
         let pctRoll = Math.random();
         let scaleFactor = Math.pow(stageScale, 0.8);
@@ -2553,20 +2552,19 @@ Object.assign(window.ItemFactory, {
           item.baseMoveSpeed = baseSpdVal;
         }
       } else if (item.type === "ring") {
-        let expBase = Math.pow(1.045, stageScale * 5);
-        if (item.implicitType === undefined) {
-          if (item.baseAtk > 0) item.implicitType = "atk";
-          else if (item.baseMaxHp > 0) item.implicitType = "maxHp";
-          else item.implicitType = "def";
-        }
-        if (item.implicitType === "atk")
-          item.baseAtk = Math.ceil(0.15 * expBase * baseRarityMult);
-        else if (item.implicitType === "maxHp")
-          item.baseMaxHp = Math.ceil(0.45 * expBase * baseRarityMult);
-        else if (item.implicitType === "def")
-          item.baseDef = Math.ceil(0.15 * expBase * baseRarityMult);
+                  if (item.implicitType === undefined) {
+                    if (item.baseAtk > 0) item.implicitType = "atk";
+                    else if (item.baseMaxHp > 0) item.implicitType = "maxHp";
+                    else item.implicitType = "def";
+                  }
+                  if (item.implicitType === "atk")
+                    item.baseAtk = Math.ceil(0.6 * stageScale * baseRarityMult);
+                  else if (item.implicitType === "maxHp")
+                    item.baseMaxHp = Math.ceil(1.5 * stageScale * baseRarityMult);
+                  else if (item.implicitType === "def")
+                    item.baseDef = Math.ceil(0.35 * stageScale * baseRarityMult);
 
-        let scaleFactor = Math.pow(stageScale, 0.8);
+                  let scaleFactor = Math.pow(stageScale, 0.8);
         if (item.atkPct > 0)
           item.atkPct = parseFloat((0.04 * scaleFactor).toFixed(4));
         if (item.maxHpPct > 0)

@@ -7186,37 +7186,37 @@ window.CombatEngine = {
       let tier = window.getStageTier();
       if (window.playerStats.isBossMode) {
         if (window.playerStats.isUberBoss) {
-          let bossType = window.playerStats.currentUberBoss || "guardian";
-          let hpMult = 10.0;
-          let dmgMult = 10.0;
-          let speedMult = 100;
-          let mType = "aegis_goliath";
-          let logText =
-            "<strong style='color:#3498db;'>Aegis Goliath, The Iron Sentinel</strong> has materialized from the cracked Aether!";
+                    let bossType = window.playerStats.currentUberBoss || "guardian";
+                    let hpMult = 45.0; // Increased from 10.0 to 45.0 for a meaningful, challenging boss health pool
+                    let dmgMult = 3.5; // Reduced from 10.0 to 3.5 to create a sustained, non-one-shot battle pace
+                    let speedMult = 100;
+                    let mType = "aegis_goliath";
+                    let logText =
+                      "<strong style='color:#3498db;'>Aegis Goliath, The Iron Sentinel</strong> has materialized from the cracked Aether!";
 
-          if (bossType === "chronos") {
-            speedMult = 90;
-            mType = "chronos_arbitrator";
-            logText =
-              "<strong style='color:#f1c40f;'>Chronos Arbitrator</strong> has stepped from the temporal flow!";
-          } else if (bossType === "nexus") {
-            speedMult = 80;
-            mType = "nexus_overseer";
-            logText =
-              "<strong style='color:#ff007f;'>Nexus Overseer</strong> has infected the reality stream!";
-          }
+                    if (bossType === "chronos") {
+                      speedMult = 90;
+                      mType = "chronos_arbitrator";
+                      logText =
+                        "<strong style='color:#f1c40f;'>Chronos Arbitrator</strong> has stepped from the temporal flow!";
+                    } else if (bossType === "nexus") {
+                      speedMult = 80;
+                      mType = "nexus_overseer";
+                      logText =
+                        "<strong style='color:#ff007f;'>Nexus Overseer</strong> has infected the reality stream!";
+                    }
 
-          let riftLvl = window.playerStats.activeRiftLevel || 1;
-          let equivalentStage = 50 + riftLvl * 10;
-          let riftGrowthRate =
-            1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
-          let b_riftScale = BigNum.from(riftGrowthRate).pow(equivalentStage);
+                    let riftLvl = window.playerStats.activeRiftLevel || 1;
+                    let equivalentStage = 50 + riftLvl * 10;
+                    let riftGrowthRate =
+                      1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
+                    let b_riftScale = BigNum.from(riftGrowthRate).pow(equivalentStage);
 
-          let hp = BigNum.from(hpMult)
-            .mul(100)
-            .mul(b_riftScale)
-            .mul(1 + equivalentStage * 0.06);
-          let dmg = BigNum.from(20).mul(b_riftScale).mul(dmgMult);
+                    let hp = BigNum.from(hpMult)
+                      .mul(100)
+                      .mul(b_riftScale)
+                      .mul(1 + equivalentStage * 0.06);
+                    let dmg = BigNum.from(20).mul(b_riftScale).mul(dmgMult);
           window.mob = {
             x: spawnEdgeX,
             y: 115,
@@ -9165,18 +9165,20 @@ window.rollEquipmentDrop = function (
   }
 
   // Setup logic moved outside the if block or placed correctly
-  let allowArtifact = window.playerStats.isUberBoss && Math.random() < 0.05;
-    let types = [
-      "weapon",
-      "subweapon",
-      "helmet",
-      "chest",
-      "leggings",
-      "overall",
-      "boots",
-      "ring",
-    ];
-    let allowedTraits = null;
+            let riftLvl = window.playerStats.activeRiftLevel || 1;
+            let artifactChance = Math.min(0.15, 0.01 + riftLvl * 0.003); // Scaled dynamically (1.3% up to 15.0% cap)
+            let allowArtifact = window.playerStats.isUberBoss && Math.random() < artifactChance;
+            let types = [
+              "weapon",
+              "subweapon",
+              "helmet",
+              "chest",
+              "leggings",
+              "overall",
+              "boots",
+              "ring",
+            ];
+            let allowedTraits = null;
 
   if (window.playerStats.isUberBoss) {
     let bossType = window.playerStats.currentUberBoss || "guardian";

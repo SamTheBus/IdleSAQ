@@ -737,28 +737,31 @@ window.renderRiftConsole = function () {
     : `Rift Altar: Prepare Hunt`;
 
   let levelSelectorHtml = "";
-  if (isRiftActive) {
-    levelSelectorHtml = `
-              <div style="background:rgba(231,76,60,0.1); border:1px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:center;">
-                  <strong style="color:#e74c3c; font-size:11.5px;">⚠️ RIFT ACTIVE (LEVEL ${activeLvl})</strong><br>
-                  <span style="font-size:10px; color:#aaa;">The Rift is locked. Slay or Collapse it to adjust level.</span>
-              </div>
-          `;
-  } else {
-    levelSelectorHtml = `
-                <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="flex:1; min-width:0; padding-right:8px; cursor:help; text-align:left;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl}); event.stopPropagation();">
-                        <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER: ⓘ</strong>
-                        <span style="font-size:10px; color:#aaa;">Max Unlocked: Level ${maxLvl}</span>
+        if (isRiftActive) {
+          levelSelectorHtml = `
+                    <div style="background:rgba(231,76,60,0.1); border:1px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:center;">
+                        <strong style="color:#e74c3c; font-size:11.5px;">⚠️ RIFT ACTIVE (LEVEL ${activeLvl})</strong><br>
+                        <span style="font-size:10px; color:#aaa;">The Rift is locked. Slay or Collapse it to adjust level.</span>
                     </div>
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeRiftLevel(-1)">-</button>
-                        <strong style="font-size:14px; font-family:monospace; min-width:30px; text-align:center; color:#fff;" id="rift-console-level-val">${selectedLvl}</strong>
-                        <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeRiftLevel(1)">+</button>
-                    </div>
-                </div>
-            `;
-  }
+                `;
+        } else {
+                        let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15);
+                      let artifactChance = Math.min(0.15, 0.01 + selectedLvl * 0.003) * 100;
+                      levelSelectorHtml = `
+                        <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                            <div style="flex:1; min-width:0; padding-right:8px; cursor:help; text-align:left;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl}); event.stopPropagation();">
+                                <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER: ⓘ</strong>
+                                <span style="font-size:9.5px; color:#ffd700; font-weight:bold; display:block; margin-top:2px; font-family:monospace;">Summon Cost: ${coresNeeded} Core${coresNeeded > 1 ? "s" : ""} • Artifact Rate: ${artifactChance.toFixed(2)}%</span>
+                                <span style="font-size:9px; color:#aaa; display:block; margin-top:1px;">Max Unlocked: Level ${maxLvl}</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                <button class="btn-action" style="background:#333; border:1px solid #555; width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:#fff;" onclick="window.changeRiftLevel(-1); event.stopPropagation();">-</button>
+                                <span style="font-family:monospace; font-size:14px; font-weight:bold; color:#fff; min-width:30px; text-align:center;">Lvl ${selectedLvl}</span>
+                                <button class="btn-action" style="background:#333; border:1px solid #555; width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:#fff;" onclick="window.changeRiftLevel(1); event.stopPropagation();">+</button>
+                            </div>
+                        </div>
+                      `;
+                    }
 
   let slidesHtml = window.riftBossesMetadata
     .map((boss, idx) => {
@@ -829,18 +832,19 @@ window.renderRiftConsole = function () {
             </div>
         `;
   } else {
-    let canAfford = coresOwned >= 1;
-    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-    actionBtnHtml = `
-            <div style="display:flex; flex-direction:column; gap:8px;">
-                <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; font-family:monospace; padding:0 4px;">
-                    <span>Cores Owned: <strong style="color:${coresOwned >= 1 ? "#2ecc71" : "#e74c3c"};">${coresOwned} / 1</strong></span>
-                    <span>Summon Cost: <strong style="color:#ff007f;">1 Core</strong></span>
-                </div>
-                <button class="btn-action" style="background:#9b59b6; width:100%; font-weight:bold; padding:12px; font-size:11.5px; letter-spacing:0.5px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeRiftSummon()">🔮 COMMENCE SUMMONING</button>
-            </div>
-        `;
-  }
+          let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15); // Progressive scaling cost
+          let canAfford = coresOwned >= coresNeeded;
+          let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+          actionBtnHtml = `
+                  <div style="display:flex; flex-direction:column; gap:8px;">
+                      <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; font-family:monospace; padding:0 4px;">
+                          <span>Cores Owned: <strong style="color:${costColor};">${coresOwned} / ${coresNeeded}</strong></span>
+                          <span>Summon Cost: <strong style="color:#ff007f;">${coresNeeded} Core${coresNeeded > 1 ? "s" : ""}</strong></span>
+                      </div>
+                      <button class="btn-action" style="background:#9b59b6; width:100%; font-weight:bold; padding:12px; font-size:11.5px; letter-spacing:0.5px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeRiftSummon()">🔮 COMMENCE SUMMONING</button>
+                  </div>
+              `;
+        }
 
   modal.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
@@ -909,7 +913,7 @@ window.renderRiftConsole = function () {
 window.changeRiftLevel = function (direction) {
   let maxLvl = (window.playerStats.highestRiftLevel || 0) + 5;
   let newLvl = window.riftSelectedLevel + direction;
-  let minLvl = Math.max(1, window.playerStats.highestRiftLevel || 1);
+  let minLvl = 1;
   if (newLvl < minLvl) newLvl = minLvl;
   if (newLvl > maxLvl) newLvl = maxLvl;
   window.riftSelectedLevel = newLvl;
@@ -937,33 +941,34 @@ window.setRiftSlide = function (idx) {
 };
 
 window.executeRiftSummon = function (isReentry = false) {
-  if (
-    !isReentry &&
-    (window.playerStats.isDungeonMode ||
-      window.playerStats.isCrucibleMode ||
-      window.playerStats.isPrestigeBossMode ||
-      window.playerStats.isUberBoss)
-  ) {
-    window.pushHeaderToast(
-      "Cannot summon: already in another activity!",
-      "#e74c3c",
-    );
-    return;
-  }
-  let cores = window.inventory.ETC["Ancient Core"] || 0;
-  let boss = window.riftBossesMetadata[window.riftSlideIndex];
-  let lvl = isReentry
-    ? window.playerStats.activeRiftLevel || 1
-    : window.riftSelectedLevel;
+      if (
+        !isReentry &&
+        (window.playerStats.isDungeonMode ||
+          window.playerStats.isCrucibleMode ||
+          window.playerStats.isPrestigeBossMode ||
+          window.playerStats.isUberBoss)
+      ) {
+        window.pushHeaderToast(
+          "Cannot summon: already in another activity!",
+          "#e74c3c",
+        );
+        return;
+      }
+      let cores = window.inventory.ETC["Ancient Core"] || 0;
+      let boss = window.riftBossesMetadata[window.riftSlideIndex];
+      let lvl = isReentry
+        ? window.playerStats.activeRiftLevel || 1
+        : window.riftSelectedLevel;
 
-  if (!isReentry) {
-    if (cores < 1) return;
-    window.inventory.ETC["Ancient Core"]--;
-    if (window.inventory.ETC["Ancient Core"] === 0)
-      delete window.inventory.ETC["Ancient Core"];
-    window.playerStats.activeRift = boss.type;
-    window.playerStats.activeRiftLevel = lvl;
-  }
+      if (!isReentry) {
+        let coresNeeded = 1 + Math.floor((lvl - 1) / 15); // Progressive scaling cost
+        if (cores < coresNeeded) return;
+        window.inventory.ETC["Ancient Core"] -= coresNeeded;
+        if (window.inventory.ETC["Ancient Core"] === 0)
+          delete window.inventory.ETC["Ancient Core"];
+        window.playerStats.activeRift = boss.type;
+        window.playerStats.activeRiftLevel = lvl;
+      }
 
   let actualBossType = isReentry ? window.playerStats.activeRift : boss.type;
 
@@ -10268,15 +10273,21 @@ window.showRiftRewardBreakdownTooltip = function (e, lvl) {
   let mythic = Math.floor(lvl / 3);
 
   let starsName = window.getTierName(minStars);
-  let starsColor = window.getTierColor(minStars);
+                let starsColor = window.getTierColor(minStars);
 
-  let html = `
-    <div style="padding: 12px; width: 250px; box-sizing: border-box; font-family: sans-serif;">
-        <div class="tt-title" style="color:#9b59b6; font-size:12px; font-weight:bold; margin-bottom:4px; border-bottom:1px solid #333; padding-bottom:4px;">🌌 Rift Level ${lvl} Payouts</div>
-        <div class="tt-subtitle" style="margin-bottom:8px; color:#aaa; font-size:10px; font-style: italic;">Scaling reward projections for this Tier:</div>
-        <div style="display:flex; flex-direction:column; gap:4px; font-size:11px; font-family: monospace;">
-            <div class="tt-stat-line" style="color:#fff;">• 👑 Min Quality: <strong style="color:${starsColor};">${starsName} (${minStars}★)</strong></div>
-            <div class="tt-stat-line" style="color:#fff;">• 🔑 Gacha Keys: <strong style="color:#f1c40f;">x${keys}</strong></div>
+                let coresNeeded = 1 + Math.floor((lvl - 1) / 15);
+                let artifactChance = Math.min(0.15, 0.01 + lvl * 0.003) * 100;
+
+                let html = `
+                  <div style="padding: 12px; width: 250px; box-sizing: border-box; font-family: sans-serif;">
+                      <div class="tt-title" style="color:#9b59b6; font-size:12px; font-weight:bold; margin-bottom:4px; border-bottom:1px solid #333; padding-bottom:4px;">🌌 Rift Level ${lvl} Payouts</div>
+                      <div class="tt-subtitle" style="margin-bottom:8px; color:#aaa; font-size:10px; font-style: italic;">Scaling reward projections for this Tier:</div>
+                      <div style="display:flex; flex-direction:column; gap:4px; font-size:11px; font-family: monospace;">
+                          <div class="tt-stat-line" style="color:#ffd700;">• 🔮 Artifact Drop Rate: <strong style="color:#ffd700;">${artifactChance.toFixed(2)}%</strong></div>
+                          <div class="tt-stat-line" style="color:#e74c3c;">• 🔴 Core Entry Cost: <strong style="color:#e74c3c;">${coresNeeded} Core${coresNeeded > 1 ? "s" : ""}</strong></div>
+                          <div style="height:1px; background:rgba(255,255,255,0.08); margin: 4px 0;"></div>
+                          <div class="tt-stat-line" style="color:#fff;">• 👑 Min Quality: <strong style="color:${starsColor};">${starsName} (${minStars}★)</strong></div>
+                          <div class="tt-stat-line" style="color:#fff;">• 🔑 Gacha Keys: <strong style="color:#f1c40f;">x${keys}</strong></div>
             <div class="tt-stat-line" style="color:#fff;">• 🔮 Eridium Shards: <strong style="color:#8e44ad;">x${shards}</strong></div>
             <div class="tt-stat-line" style="color:#fff;">• 🔋 Catalyst Cores: <strong style="color:#2ecc71;">x${coresMin === coresMax ? coresMin : coresMin + "-" + coresMax}</strong></div>
             <div class="tt-stat-line" style="color:#fff;">• 🌌 Astral Essence: <strong style="color:#9b59b6;">x${essenceMin === essenceMax ? essenceMin : essenceMin + "-" + essenceMax}</strong></div>
@@ -10742,28 +10753,31 @@ window.renderAltarTab = function () {
   let coresOwned = window.inventory.ETC["Ancient Core"] || 0;
 
   let lvlSelectorHtml = "";
-  if (isRiftActive) {
-    lvlSelectorHtml = `
-                              <div style="background:rgba(231,76,60,0.1); border:1px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:center;">
-                                  <strong style="color:#e74c3c; font-size:11.5px;">⚠️ RIFT ACTIVE (LEVEL ${activeLvl})</strong><br>
-                                  <span style="font-size:10px; color:#aaa;">The Rift is locked. Slay or Collapse it to adjust level.</span>
-                              </div>
-                          `;
-  } else {
-    lvlSelectorHtml = `
-                                <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                                    <div style="flex:1; min-width:0; padding-right:8px; cursor:help; text-align:left;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl}); event.stopPropagation();">
-                                        <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER: ⓘ</strong>
-                                        <span style="font-size:10px; color:#aaa;">Max Unlocked: Level ${maxLvl}</span>
+        if (isRiftActive) {
+          lvlSelectorHtml = `
+                                    <div style="background:rgba(231,76,60,0.1); border:1px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:center;">
+                                        <strong style="color:#e74c3c; font-size:11.5px;">⚠️ RIFT ACTIVE (LEVEL ${activeLvl})</strong><br>
+                                        <span style="font-size:10px; color:#aaa;">The Rift is locked. Slay or Collapse it to adjust level.</span>
                                     </div>
-                                    <div style="display:flex; align-items:center; gap:6px;">
-                                        <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeAltarRiftLevel(-1)">-</button>
-                                        <strong style="font-size:14px; font-family:monospace; min-width:30px; text-align:center; color:#fff;">${selectedLvl}</strong>
-                                        <button class="btn-action" style="padding:4px 10px; background:#4a154b;" onclick="window.changeAltarRiftLevel(1)">+</button>
-                                    </div>
-                                </div>
-                            `;
-  }
+                                `;
+        } else {
+                        let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15);
+                      let artifactChance = Math.min(0.15, 0.01 + selectedLvl * 0.003) * 100;
+                      lvlSelectorHtml = `
+                                                          <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                                                              <div style="flex:1; min-width:0; padding-right:8px; cursor:help; text-align:left;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl}); event.stopPropagation();">
+                                                                  <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER: ⓘ</strong>
+                                                                  <span style="font-size:9.5px; color:#ffd700; font-weight:bold; display:block; margin-top:2px; font-family:monospace;">Summon Cost: ${coresNeeded} Core${coresNeeded > 1 ? "s" : ""} • Artifact Rate: ${artifactChance.toFixed(2)}%</span>
+                                                                  <span style="font-size:9px; color:#aaa; display:block; margin-top:1px;">Max Unlocked: Level ${maxLvl}</span>
+                                                              </div>
+                                                              <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                                                  <button class="btn-action" style="background:#333; border:1px solid #555; width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:#fff;" onclick="window.changeAltarRiftLevel(-1); event.stopPropagation();">-</button>
+                                                                  <span style="font-family:monospace; font-size:14px; font-weight:bold; color:#fff; min-width:30px; text-align:center;">Lvl ${selectedLvl}</span>
+                                                                  <button class="btn-action" style="background:#333; border:1px solid #555; width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:#fff;" onclick="window.changeAltarRiftLevel(1); event.stopPropagation();">+</button>
+                                                              </div>
+                                              </div>
+                                          `;
+                    }
 
   let slidesHtml = window.riftBossesMetadata
     .map((boss, idx) => {
@@ -10839,18 +10853,19 @@ window.renderAltarTab = function () {
                             </div>
                         `;
   } else {
-    let canAfford = coresOwned >= 1;
-    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-    actionBtnHtml = `
-                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; font-family:monospace; padding:0 4px;">
-                                    <span>Cores Owned: <strong style="color:${coresOwned >= 1 ? "#2ecc71" : "#e74c3c"};">${coresOwned} / 1</strong></span>
-                                    <span>Summon Cost: <strong style="color:#ff007f;">1 Core</strong></span>
-                                </div>
-                                <button class="btn-action" style="background:#9b59b6; width:100%; font-weight:bold; padding:12px; font-size:11.5px; letter-spacing:0.5px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeAltarSummon()">🔮 COMMENCE SUMMONING</button>
-                            </div>
-                        `;
-  }
+          let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15); // Progressive scaling cost
+          let canAfford = coresOwned >= coresNeeded;
+          let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+          actionBtnHtml = `
+                                      <div style="display:flex; flex-direction:column; gap:8px;">
+                                          <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; font-family:monospace; padding:0 4px;">
+                                              <span>Cores Owned: <strong style="color:${costColor};">${coresOwned} / ${coresNeeded}</strong></span>
+                                              <span>Summon Cost: <strong style="color:#ff007f;">${coresNeeded} Core${coresNeeded > 1 ? "s" : ""}</strong></span>
+                                          </div>
+                                          <button class="btn-action" style="background:#9b59b6; width:100%; font-weight:bold; padding:12px; font-size:11.5px; letter-spacing:0.5px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeAltarSummon()">🔮 COMMENCE SUMMONING</button>
+                                      </div>
+                                  `;
+        }
 
   let highestRiftText = `🏆 Highest Rift Cleared: Level ${window.playerStats.highestRiftLevel || 0}`;
 
@@ -10924,7 +10939,7 @@ window.renderAltarTab = function () {
 window.changeAltarRiftLevel = function (direction) {
   let maxLvl = (window.playerStats.highestRiftLevel || 0) + 5;
   let newLvl = window.riftSelectedLevel + direction;
-  let minLvl = Math.max(1, window.playerStats.highestRiftLevel || 1);
+  let minLvl = 1;
   if (newLvl < minLvl) newLvl = minLvl;
   if (newLvl > maxLvl) newLvl = maxLvl;
   window.riftSelectedLevel = newLvl;
@@ -10952,33 +10967,34 @@ window.setAltarSlide = function (idx) {
 };
 
 window.executeAltarSummon = function (isReentry = false) {
-  if (
-    !isReentry &&
-    (window.playerStats.isDungeonMode ||
-      window.playerStats.isCrucibleMode ||
-      window.playerStats.isPrestigeBossMode ||
-      window.playerStats.isUberBoss)
-  ) {
-    window.pushHeaderToast(
-      "Cannot summon: already in another activity!",
-      "#e74c3c",
-    );
-    return;
-  }
-  let cores = window.inventory.ETC["Ancient Core"] || 0;
-  let boss = window.riftBossesMetadata[window.altarSlideIndex];
-  let lvl = isReentry
-    ? window.playerStats.activeRiftLevel || 1
-    : window.riftSelectedLevel;
+      if (
+        !isReentry &&
+        (window.playerStats.isDungeonMode ||
+          window.playerStats.isCrucibleMode ||
+          window.playerStats.isPrestigeBossMode ||
+          window.playerStats.isUberBoss)
+      ) {
+        window.pushHeaderToast(
+          "Cannot summon: already in another activity!",
+          "#e74c3c",
+        );
+        return;
+      }
+      let cores = window.inventory.ETC["Ancient Core"] || 0;
+      let boss = window.riftBossesMetadata[window.altarSlideIndex];
+      let lvl = isReentry
+        ? window.playerStats.activeRiftLevel || 1
+        : window.riftSelectedLevel;
 
-  if (!isReentry) {
-    if (cores < 1) return;
-    window.inventory.ETC["Ancient Core"]--;
-    if (window.inventory.ETC["Ancient Core"] === 0)
-      delete window.inventory.ETC["Ancient Core"];
-    window.playerStats.activeRift = boss.type;
-    window.playerStats.activeRiftLevel = lvl;
-  }
+      if (!isReentry) {
+        let coresNeeded = 1 + Math.floor((lvl - 1) / 15); // Progressive scaling cost
+        if (cores < coresNeeded) return;
+        window.inventory.ETC["Ancient Core"] -= coresNeeded;
+        if (window.inventory.ETC["Ancient Core"] === 0)
+          delete window.inventory.ETC["Ancient Core"];
+        window.playerStats.activeRift = boss.type;
+        window.playerStats.activeRiftLevel = lvl;
+      }
 
   let actualBossType = isReentry ? window.playerStats.activeRift : boss.type;
 
@@ -15379,19 +15395,21 @@ window.renderInspectModal = function (profile) {
   }
 
   // Build the inspected paper doll layout
-  let slots = [
-    "helmet",
-    "weapon",
-    "chest",
-    "subweapon",
-    "leggings",
-    "overall",
-    "boots",
-    "art1",
-    "art2",
-    "art3",
-  ];
-  let paperDollHtml = slots
+        let slots = [
+          "helmet",
+          "weapon",
+          "chest",
+          "subweapon",
+          "leggings",
+          "overall",
+          "boots",
+          "ring1",
+          "ring2",
+          "art1",
+          "art2",
+          "art3",
+        ];
+        let paperDollHtml = slots
     .map((slot) => {
       let item = equipped[slot];
       let slotLvl = (stats.slotUpgrades && stats.slotUpgrades[slot]) || 0;
