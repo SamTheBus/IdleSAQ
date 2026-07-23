@@ -3257,6 +3257,43 @@ window.ASTRAL_SHOP_STOCK = [
     color: "#ffb6c1",
     desc: "A radiant, pure soul used for advanced mystical trades.",
   },
+  {
+    name: "Legendary Scrap",
+    cost: 400,
+    color: "#f1c40f",
+    desc: "A piece of legendary-tier material, essential for high-level tempering.",
+  },
+  {
+    name: "Mythic Scrap",
+    cost: 1200,
+    color: "#e74c3c",
+    desc: "A perfect fragment of mythic-tier gear. Highly sought after for end-game tempering.",
+  },
+  {
+    name: "Double Drop Elixir",
+    cost: 250,
+    color: "#22c55e",
+    desc: "Doubles global drop rate multiplier (+100%) for 5 minutes (scales with INT).",
+  },
+  {
+    name: "Drop Quality Elixir",
+    cost: 350,
+    color: "#ec4899",
+    desc: "Boosts drop quality checks (+50% Qly) for 5 minutes (scales with INT).",
+  },
+  {
+    name: "Monster Card Sack",
+    cost: 500,
+    color: "#a855f7",
+    desc: "A card binder containing 5 random collectible cards for your Bestiary Album.",
+  },
+  {
+    name: "Astral Conqueror",
+    cost: 25000,
+    color: "#9b59b6",
+    isTitle: true,
+    desc: "An exclusive permanent title badge of cosmic victory. Grants +10% Attack, +10% Max HP, and +5% Active/Idle Speed multiplier.",
+  },
 ];
 
 window.TITLES_DATA = {
@@ -3270,6 +3307,20 @@ window.TITLES_DATA = {
       drop: 0.05,
       qly: 0.05,
     },
+  },
+  astral_conqueror: {
+    id: "astral_conqueror",
+    name: "Astral Conqueror",
+    desc: "Wielder of dimensional singularity vectors.",
+    color: "#9b59b6",
+    icon: "🌌",
+    stats: {
+      atkPct: 0.1,
+      maxHpPct: 0.1,
+      activeSpeedPct: 0.05,
+      idleSpeedPct: 0.05,
+    },
+    received: "Purchased from the Astral Shop for 25,000 Astral Shards.",
   },
 };
 

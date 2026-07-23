@@ -1039,34 +1039,38 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   let p = {
-    atk: BigNum.from(0),
-    maxHp: BigNum.from(0),
-    def: BigNum.from(0),
-    moveSpeed: window.playerStats.baseMoveSpeed,
-    idleAttackSpeed: window.playerStats.baseIdleSpeed,
-    activeAttackSpeed: window.playerStats.baseActiveSpeed,
-    drop: window.playerStats.baseDrop,
-    qly: window.playerStats.baseQuality,
-    gold: window.playerStats.baseGold,
-    critChance: window.playerStats.baseCritChance,
-    critDamage: window.playerStats.baseCritDamage,
-    block: window.playerStats.baseBlock,
-    parry: window.playerStats.baseParry,
-    rareSpawn: window.playerStats.baseRareSpawn,
-    str: window.playerStats.baseStr,
-    dex: window.playerStats.baseDex,
-    int: window.playerStats.baseInt,
-    fairySpawn: window.playerStats.baseFairySpawn,
-    arcaneBarrier: 0.0,
-    xpRate: 1.0,
-    crucibleSelfDmgReduction: 1.0,
-    crucibleCritHeal: 0.0,
-    crucibleEchoChance: 0.0,
-    crucibleCapBonus: 0.0,
-    crucibleShardMult: 1.0,
-    crucibleSpellChanceBonus: 0.0,
-    crucibleDaggerBleed: 0,
-  };
+      atk: BigNum.from(0),
+      maxHp: BigNum.from(0),
+      def: BigNum.from(0),
+      moveSpeed: window.playerStats.baseMoveSpeed,
+      idleAttackSpeed: window.playerStats.baseIdleSpeed,
+      activeAttackSpeed: window.playerStats.baseActiveSpeed,
+      drop: window.playerStats.baseDrop,
+      qly: window.playerStats.baseQuality,
+      gold: window.playerStats.baseGold,
+      critChance: window.playerStats.baseCritChance,
+      critDamage: window.playerStats.baseCritDamage,
+      block: window.playerStats.baseBlock,
+      parry: window.playerStats.baseParry,
+      rareSpawn: window.playerStats.baseRareSpawn,
+      str: window.playerStats.baseStr,
+      dex: window.playerStats.baseDex,
+      int: window.playerStats.baseInt,
+      fairySpawn: window.playerStats.baseFairySpawn,
+      arcaneBarrier: 0.0,
+      xpRate: 1.0,
+      crucibleSelfDmgReduction: 1.0,
+      crucibleCritHeal: 0.0,
+      crucibleEchoChance: 0.0,
+      crucibleCapBonus: 0.0,
+      crucibleShardMult: 1.0,
+      crucibleSpellChanceBonus: 0.0,
+      crucibleDaggerBleed: 0,
+      activeSpeedPct: 0,
+      idleSpeedPct: 0,
+      atkPct: 0,
+      maxHpPct: 0,
+    };
 
   // Secure Local Slot Bonus Matrix to prevent runaway persistent state compounding
   p.crucibleSlotBonuses = {
@@ -1150,17 +1154,17 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   let flatGearAtk = BigNum.from(0);
-  let flatGearHp = BigNum.from(0);
-  let flatGearDef = BigNum.from(0);
-  let itemAtkPct = 0;
-  let itemHpPct = 0;
-  let itemDefPct = 0;
-  let itemSpdPct = 0;
-  let itemStrPct = 0;
-  let itemDexPct = 0;
-  let itemIntPct = 0;
-  let idleSpeedPct = 0.0 + (aT.idleSpeedPct || 0);
-  let activeSpeedPct = 0.0 + (aT.activeSpeedPct || 0);
+    let flatGearHp = BigNum.from(0);
+    let flatGearDef = BigNum.from(0);
+    let itemAtkPct = 0;
+    let itemHpPct = 0;
+    let itemDefPct = 0;
+    let itemSpdPct = 0;
+    let itemStrPct = 0;
+    let itemDexPct = 0;
+    let itemIntPct = 0;
+    let idleSpeedPct = 0.0 + (aT.idleSpeedPct || 0) + (p.idleSpeedPct || 0);
+    let activeSpeedPct = 0.0 + (aT.activeSpeedPct || 0) + (p.activeSpeedPct || 0);
 
   for (let key in window.equippedSlots) {
     let item = window.equippedSlots[key];
@@ -1731,22 +1735,22 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
   let stageScale = Math.floor((activeStage - 1) / 10) + 1;
 
-  let atkLvl = window.playerStats.prestigeUpgrades?.atk || 0;
-  let effectiveAtkLvl = atkLvl * window.getMilestoneMultiplier(atkLvl);
-  let prestigeAtkMult = Math.pow(1.12, effectiveAtkLvl);
+  let attkLvl = window.playerStats.prestigeUpgrades?.atk || 0;
+    let effectiveAtkLvl = attkLvl * window.getMilestoneMultiplier(attkLvl);
+    let prestigeAtkMult = Math.pow(1.12, effectiveAtkLvl);
 
-  let fortLvl = window.playerStats.prestigeUpgrades?.fort || 0;
-  let effectiveFortLvl = fortLvl * window.getMilestoneMultiplier(fortLvl);
-  let prestigeHpMult = Math.pow(1.1, effectiveFortLvl);
-  let prestigeDefMult = Math.pow(1.05, effectiveFortLvl);
+    let fortLvl = window.playerStats.prestigeUpgrades?.fort || 0;
+    let effectiveFortLvl = fortLvl * window.getMilestoneMultiplier(fortLvl);
+    let prestigeHpMult = Math.pow(1.1, effectiveFortLvl);
+    let prestigeDefMult = Math.pow(1.05, effectiveFortLvl);
 
-  let missionAtkMult =
-    1.0 + (window.playerStats.missionUpgrades?.atk || 0) * 0.02;
-  let missionHpMult =
-    1.0 + (window.playerStats.missionUpgrades?.hp || 0) * 0.03;
+    let missionAtkMult =
+      1.0 + (window.playerStats.missionUpgrades?.atk || 0) * 0.02;
+    let missionHpMult =
+      1.0 + (window.playerStats.missionUpgrades?.hp || 0) * 0.03;
 
-  p.atk = p.atk.mul(prestigeAtkMult).mul(missionAtkMult);
-  p.maxHp = p.maxHp.mul(prestigeHpMult).mul(missionHpMult);
+    p.atk = p.atk.mul(prestigeAtkMult).mul(missionAtkMult).mul(1.0 + (p.atkPct || 0));
+    p.maxHp = p.maxHp.mul(prestigeHpMult).mul(missionHpMult).mul(1.0 + (p.maxHpPct || 0));
   p.def = p.def.mul(prestigeDefMult);
 
   // Apply Crucible Active Run Modifiers

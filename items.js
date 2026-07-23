@@ -4736,18 +4736,19 @@ window.rollGachaCrateItem = function (
   }
 
   let allowArtifact = Math.random() < (isGlimmering ? 0.05 : 0.01);
-  let types = [
-    "weapon",
-    "subweapon",
-    "helmet",
-    "chest",
-    "leggings",
-    "overall",
-    "boots",
-  ];
-  let chosenType = allowArtifact
-    ? "artifact"
-    : types[Math.floor(Math.random() * types.length)];
+    let types = [
+      "weapon",
+      "subweapon",
+      "helmet",
+      "chest",
+      "leggings",
+      "overall",
+      "boots",
+      "ring",
+    ];
+    let chosenType = allowArtifact
+      ? "artifact"
+      : types[Math.floor(Math.random() * types.length)];
 
   if (chosenType === "artifact") {
     if (window.inventory.ARTIFACT.length >= maxBag) {
@@ -4905,10 +4906,9 @@ window.buyMysticalItem = function (index) {
   let currency = item.currency;
 
   if (currency === "Gold") {
-    cost = BigNum.from(item.cost).mul(
-      BigNum.from(1.08).pow(window.playerStats.stage),
-    );
-    let coins = BigNum.from(window.playerStats.coins);
+      // Modified scaling from exponential to a balanced linear level scaling (item.cost * player level)
+      cost = BigNum.from(item.cost).mul(window.playerStats.level || 1);
+      let coins = BigNum.from(window.playerStats.coins);
     if (coins.lt(cost)) {
       window.pushHeaderToast("❌ Insufficient Gold!", "#e74c3c");
       return;
@@ -5141,8 +5141,25 @@ window.buyAstralShopItem = function (index) {
     return;
   }
 
-  window.playerStats.astralShards -= item.cost;
-  window.addEtcDrop(item.name, 1);
+  if (item.isTitle) {
+    let unlocked = window.playerStats.unlockedTitles || [];
+    if (unlocked.includes("astral_conqueror")) {
+      window.pushHeaderToast("❌ Already unlocked this title!", "#e74c3c");
+      return;
+    }
+    window.playerStats.astralShards -= item.cost;
+    window.playerStats.unlockedTitles = window.playerStats.unlockedTitles || [];
+    window.playerStats.unlockedTitles.push("astral_conqueror");
+    window.playerStats.equippedTitle = "astral_conqueror"; // Auto-equip title
+  } else {
+    window.playerStats.astralShards -= item.cost;
+    const useItems = ["Double Drop Elixir", "Drop Quality Elixir", "Monster Card Sack"];
+    if (useItems.includes(item.name)) {
+      window.addUseDrop(item.name, 1);
+    } else {
+      window.addEtcDrop(item.name, 1);
+    }
+  }
 
   window.pushHeaderToast(`🛒 Purchased ${item.name}!`, "#2ecc71");
   if (window.SoundManager) window.SoundManager.play("fairy");

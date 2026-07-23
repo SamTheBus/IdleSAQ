@@ -1474,21 +1474,22 @@ window.SaveManager = {
     }
 
     let maxBag = window.getMaxBagSlots();
-    let initialEquipIds = new Set(
-      window.inventory.EQUIP.map((item) => item.id),
-    );
-    let initialArtifactIds = new Set(
-      window.inventory.ARTIFACT.map((item) => item.id),
-    );
-    let equipTypesList = [
-      "weapon",
-      "subweapon",
-      "helmet",
-      "chest",
-      "leggings",
-      "overall",
-      "boots",
-    ];
+        let initialEquipIds = new Set(
+          window.inventory.EQUIP.map((item) => item.id),
+        );
+        let initialArtifactIds = new Set(
+          window.inventory.ARTIFACT.map((item) => item.id),
+        );
+        let equipTypesList = [
+          "weapon",
+          "subweapon",
+          "helmet",
+          "chest",
+          "leggings",
+          "overall",
+          "boots",
+          "ring",
+        ];
 
     function rollOfflineItem(isBossKill, stageNum, isRareMob) {
       let pCurrent = window.resolvePlayerStats();
@@ -1724,18 +1725,11 @@ window.SaveManager = {
           rollOfflineItem(true, currentStage, false);
         }
 
-        // Roll for Monster Card Sack from stage boss clears
-        if (cardSacksGained < 2) {
-          let stageFactor = Math.min(
-            1.0,
-            Math.pow((window.playerStats.lifetimePeakStage || 1) / 100000, 0.5),
-          );
-          let cardChance = 0.01 * p.drop * stageFactor;
-          if (Math.random() < cardChance) {
-            recordScrapGained("Monster Card Sack", 1);
-            cardSacksGained++;
-          }
-        }
+        // Roll for Monster Card Sack from stage boss clears (unrestricted)
+                let cardChance = 0.01 * p.drop;
+                if (Math.random() < cardChance) {
+                  recordScrapGained("Monster Card Sack", 1);
+                }
       } else {
         break; // Time ran out for this stage advancement
       }
@@ -1777,55 +1771,33 @@ window.SaveManager = {
       }
 
       // Potion and Card Sack drop rolls
-      if (farmKills > 0) {
-        let stageFactor = Math.min(
-          1.0,
-          Math.pow((window.playerStats.lifetimePeakStage || 1) / 100000, 0.5),
-        );
-        let pCurrent = window.resolvePlayerStats();
+          if (farmKills > 0) {
+            let pCurrent = window.resolvePlayerStats();
 
-        // 1. Potion Roll Engine
-        let rollChance = 0.0004 * pCurrent.drop * stageFactor;
-        let maxPotionsLimit = Math.min(
-          40,
-          Math.max(5, Math.floor(40 * (offlineSeconds / 28800) * stageFactor)),
-        );
+            // 1. Unrestricted Potion Roll Engine (Matches standard active drop rate)
+            let potionChance = 0.0004 * pCurrent.drop;
+            const types = [
+              "Attack Elixir",
+              "Vitality Elixir",
+              "Armored Elixir",
+              "Haste Elixir",
+            ];
 
-        let potionsGained = 0;
-        const types = [
-          "Attack Elixir",
-          "Vitality Elixir",
-          "Armored Elixir",
-          "Haste Elixir",
-        ];
+            for (let k = 0; k < farmKills; k++) {
+              if (Math.random() < potionChance) {
+                let rolledPot = types[Math.floor(Math.random() * types.length)];
+                recordScrapGained(rolledPot, 1);
+              }
+            }
 
-        for (let k = 0; k < farmKills; k++) {
-          if (potionsGained >= maxPotionsLimit) break;
-          if (Math.random() < rollChance) {
-            let rolledPot = types[Math.floor(Math.random() * types.length)];
-            recordScrapGained(rolledPot, 1);
-            potionsGained++;
-          }
-        }
-
-        // 2. Card Sack Roll Engine from Farming
-        if (cardSacksGained < 3) {
-          // Combined cap (2 from pushing + 1 from farming = max 3)
-          let maxFarmSacksLimit = cardSacksGained < 2 ? 1 : 0; // Can only get max 1 from farming itself
-          let farmSacksGained = 0;
-          let cardChance = 0.00002 * pCurrent.drop * stageFactor;
-
-          for (let k = 0; k < farmKills; k++) {
-            if (farmSacksGained >= maxFarmSacksLimit || cardSacksGained >= 3)
-              break;
-            if (Math.random() < cardChance) {
-              recordScrapGained("Monster Card Sack", 1);
-              cardSacksGained++;
-              farmSacksGained++;
+            // 2. Unrestricted Card Sack Roll Engine from Farming (Simulates active card drop frequencies)
+            let cardChance = 0.00005 * pCurrent.drop;
+            for (let k = 0; k < farmKills; k++) {
+              if (Math.random() < cardChance) {
+                recordScrapGained("Monster Card Sack", 1);
+              }
             }
           }
-        }
-      }
 
       elapsedSeconds += remainingSeconds;
       remainingSeconds = 0;
@@ -8785,15 +8757,16 @@ window.triggerFairyLoot = function (targetFairy) {
   }
 
   if (rollEquip) {
-    let types = [
-      "weapon",
-      "subweapon",
-      "helmet",
-      "chest",
-      "leggings",
-      "overall",
-      "boots",
-    ];
+      let types = [
+        "weapon",
+        "subweapon",
+        "helmet",
+        "chest",
+        "leggings",
+        "overall",
+        "boots",
+        "ring",
+      ];
     let chosenType = types[Math.floor(Math.random() * types.length)];
     let statLinesCount = 0;
     let luckMultiplier = p.qly;
@@ -9193,16 +9166,17 @@ window.rollEquipmentDrop = function (
 
   // Setup logic moved outside the if block or placed correctly
   let allowArtifact = window.playerStats.isUberBoss && Math.random() < 0.05;
-  let types = [
-    "weapon",
-    "subweapon",
-    "helmet",
-    "chest",
-    "leggings",
-    "overall",
-    "boots",
-  ];
-  let allowedTraits = null;
+    let types = [
+      "weapon",
+      "subweapon",
+      "helmet",
+      "chest",
+      "leggings",
+      "overall",
+      "boots",
+      "ring",
+    ];
+    let allowedTraits = null;
 
   if (window.playerStats.isUberBoss) {
     let bossType = window.playerStats.currentUberBoss || "guardian";

@@ -3845,14 +3845,32 @@ window.showAstralShopItemTooltip = function (e, index) {
   if (!item) return;
 
   let ownedShards = window.playerStats.astralShards || 0;
-  let ownedReagent = window.inventory.ETC[item.name] || 0;
   let canAfford = ownedShards >= item.cost;
   let costTextColor = canAfford ? "#2ecc71" : "#e74c3c";
 
-  let iconHtml = window
-    .getEtcIconHtml(item.name)
-    .replace("margin-right: 12px;", "margin-right: 8px;");
+  let iconHtml = "";
+  if (item.isTitle) {
+    iconHtml = `<div style="font-size: 20px; margin-right: 8px; display:inline-flex; align-items:center;">🌌</div>`;
+  } else {
+    iconHtml = item.name.includes("Elixir") || item.name.includes("Sack")
+      ? window.getUseIconHtml(item.name)
+      : window.getEtcIconHtml(item.name);
+    iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 8px;");
+  }
+
   let tt = document.getElementById("game-tooltip");
+
+  let ownedText = "";
+  if (item.isTitle) {
+    let unlocked = window.playerStats.unlockedTitles || [];
+    let isOwned = unlocked.includes("astral_conqueror");
+    ownedText = `• Status: <strong style="color:${isOwned ? "#2ecc71" : "#e74c3c"};">${isOwned ? "Unlocked" : "Locked"}</strong>`;
+  } else {
+    let ownedReagent = item.name.includes("Elixir") || item.name.includes("Sack")
+      ? (window.inventory.USE[item.name] || 0)
+      : (window.inventory.ETC[item.name] || 0);
+    ownedText = `• Owned Reagent: <strong style="color:#fff;">${ownedReagent.toLocaleString()}</strong>`;
+  }
 
   tt.innerHTML = `
     <div style="padding: 10px; width: 220px; box-sizing: border-box;">
@@ -3860,7 +3878,7 @@ window.showAstralShopItemTooltip = function (e, index) {
         <div style="color:#aaa; font-size:11px; white-space:normal; line-height:1.4; margin-top:8px;">
             ${item.desc}<br><br>
             • Cost: <strong style="color:${costTextColor};">${item.cost} Shards (Owned: ${ownedShards})</strong><br>
-            • Owned Reagent: <strong style="color:#fff;">${ownedReagent.toLocaleString()}</strong>
+            ${ownedText}
         </div>
     </div>
   `;
@@ -4155,13 +4173,12 @@ window.renderMysticalShop = function () {
         costColor = owned >= item.cost ? "#9b59b6" : "#e74c3c";
         currencyLabel = "Shards";
       } else {
-        displayCost = Math.ceil(
-          item.cost * Math.pow(1.08, window.playerStats.stage),
-        );
-        costColor = BigNum.from(window.playerStats.coins).gte(displayCost)
-          ? "#f1c40f"
-          : "#e74c3c";
-      }
+          // Modified scaling to a balanced linear level scaling (item.cost * player level)
+          displayCost = Math.ceil(item.cost * (window.playerStats.level || 1));
+          costColor = BigNum.from(window.playerStats.coins).gte(displayCost)
+            ? "#f1c40f"
+            : "#e74c3c";
+        }
 
       let iconHtml =
         item.name === "Gacha Key" ||
@@ -4257,18 +4274,39 @@ window.renderAstralShop = function () {
   if (!el) return;
 
   let ownedShards = window.playerStats.astralShards || 0;
+
+  let balanceEl = document.getElementById("astral-shards-balance");
+  if (balanceEl) {
+    balanceEl.innerHTML = `Shards Owned: <strong style="color: #df9ffb; font-family: monospace;">${ownedShards.toLocaleString()} ✦</strong>`;
+  }
+
   let html = "";
 
   window.ASTRAL_SHOP_STOCK.forEach((item, index) => {
     let canAfford = ownedShards >= item.cost;
-    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-    let iconHtml = window
-      .getEtcIconHtml(item.name)
-      .replace("margin-right: 12px;", "margin-right: 6px;");
+    let isAlreadyOwnedTitle = item.isTitle && window.playerStats.unlockedTitles && window.playerStats.unlockedTitles.includes("astral_conqueror");
 
-    let btnStyle = canAfford
-      ? `background: ${item.color}; color: ${item.color === "#f1c40f" || item.color === "#ffb6c1" ? "#111" : "#fff"}; font-weight: bold;`
-      : "";
+    let costColor = isAlreadyOwnedTitle ? "#bdc3c7" : (canAfford ? "#2ecc71" : "#e74c3c");
+
+    let iconHtml = "";
+    if (item.isTitle) {
+      iconHtml = `<div style="font-size:20px; margin-right:6px; display:inline-flex; align-items:center;">🌌</div>`;
+    } else {
+      iconHtml = item.name.includes("Elixir") || item.name.includes("Sack")
+        ? window.getUseIconHtml(item.name)
+        : window.getEtcIconHtml(item.name);
+      iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 6px;");
+    }
+
+    let btnStyle = "";
+    if (isAlreadyOwnedTitle) {
+      btnStyle = "background: #222; color: #555; border: 1px solid #333; cursor: not-allowed;";
+    } else if (canAfford) {
+      btnStyle = `background: ${item.color}; color: ${item.color === "#f1c40f" || item.color === "#ffb6c1" ? "#111" : "#fff"}; font-weight: bold;`;
+    }
+
+    let buttonText = isAlreadyOwnedTitle ? "OWNED" : "Infuse Shards";
+    let isDisabled = isAlreadyOwnedTitle || !canAfford;
 
     html += `
         <div class="runic-altar-card" style="flex-direction: column; align-items: stretch; text-align: left; gap: 4px; padding: 12px; height:100%; display:flex; justify-content:space-between; margin-bottom:0;" onmouseenter="window.showAstralShopItemTooltip(event, ${index})" onmouseleave="window.hideTooltip()">
@@ -4276,7 +4314,7 @@ window.renderAstralShop = function () {
             <div class="starry-bg"></div>
 
             <!-- Floating glowing rune price tag -->
-            <span class="rune-price-badge" style="color:${costColor};">${item.cost} Shards</span>
+            <span class="rune-price-badge" style="color:${costColor};">${isAlreadyOwnedTitle ? "UNLOCKED" : item.cost + " Shards"}</span>
 
             <div style="position:relative; z-index:2;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -4290,7 +4328,7 @@ window.renderAstralShop = function () {
             </div>
 
             <div style="position:relative; z-index:2; border-top: 1px dashed rgba(255,255,255,0.08); padding-top:8px; margin-top:6px;">
-                                              <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px;" ${canAfford ? "" : "disabled"} onmouseenter="window.hideTooltip();" onpointerdown="event.stopPropagation();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="event.stopPropagation(); window.buyAstralShopItem(${index})">Infuse Shards</button>
+                                              <button class="btn-action btn-infuse-shards" style="width:100%; font-size:10.5px; padding:6px; border-radius:4px; ${btnStyle}" ${isDisabled ? "disabled" : ""} onmouseenter="window.hideTooltip();" onpointerdown="event.stopPropagation();" ontouchstart="window.hideTooltip(); event.stopPropagation();" onclick="event.stopPropagation(); window.buyAstralShopItem(${index})">${buttonText}</button>
                                           </div>
         </div>
       `;
@@ -7169,19 +7207,20 @@ window.refreshMarketShopIfNeeded = function () {
     window.playerStats.shopItems = [];
 
     let peakRunStage = Math.max(
-      window.playerStats.stage,
-      window.playerStats.maxStage || 1,
-    );
-    let stageScale = Math.floor((peakRunStage - 1) / 5) + 1;
-    let types = [
-      "weapon",
-      "subweapon",
-      "helmet",
-      "chest",
-      "leggings",
-      "overall",
-      "boots",
-    ];
+          window.playerStats.stage,
+          window.playerStats.maxStage || 1,
+        );
+        let stageScale = Math.floor((peakRunStage - 1) / 5) + 1;
+        let types = [
+          "weapon",
+          "subweapon",
+          "helmet",
+          "chest",
+          "leggings",
+          "overall",
+          "boots",
+          "ring",
+        ];
 
     for (let i = 0; i < 5; i++) {
       let isIOTD = i === 4;
@@ -12698,17 +12737,18 @@ window.openDailyRewardSack = function (specificName) {
     (window.playerStats.missionTokens || 0) + 1;
 
   // Always give a piece of equipment at your lifetime peak stage
-  let pCurrent = window.resolvePlayerStats();
-  let types = [
-    "weapon",
-    "subweapon",
-    "helmet",
-    "chest",
-    "leggings",
-    "overall",
-    "boots",
-  ];
-  let chosenType = types[Math.floor(Math.random() * types.length)];
+    let pCurrent = window.resolvePlayerStats();
+    let types = [
+      "weapon",
+      "subweapon",
+      "helmet",
+      "chest",
+      "leggings",
+      "overall",
+      "boots",
+      "ring",
+    ];
+    let chosenType = types[Math.floor(Math.random() * types.length)];
 
   let statLinesCount = 0;
   let luckMultiplier = pCurrent.qly;
@@ -13682,29 +13722,29 @@ window.claimMailReward = function (mailId) {
         }
 
         // 6. Claim Custom On-Level Gear
-        if (rewards.custom_gear) {
-          const slotType = rewards.custom_gear.slot;
-          const stars = parseInt(rewards.custom_gear.stars, 10) || 0;
-          let stageScale = Math.max(
-            1,
-            Math.floor(
-              ((window.playerStats.lifetimePeakStage ||
-                window.playerStats.stage ||
-                1) -
-                1) /
-                5,
-            ) + 1,
-          );
+                if (rewards.custom_gear) {
+                  const slotType = rewards.custom_gear.slot;
+                  const stars = parseInt(rewards.custom_gear.stars, 10) || 0;
+                  let stageScale = Math.max(
+                    1,
+                    Math.floor(
+                      ((window.playerStats.lifetimePeakStage ||
+                        window.playerStats.stage ||
+                        1) -
+                        1) /
+                        5,
+                    ) + 1,
+                  );
 
-          const spawnAndAddGear = (slot) => {
-            let item = window.createItemObject(slot, stars, stageScale, stars);
-            window.inventory.EQUIP.push(item);
-            window.frozenItemDb[item.id] = window.cloneItemForTooltip(item);
-            return item;
-          };
+                  const spawnAndAddGear = (slot) => {
+                    let item = window.createItemObject(slot, stars, stageScale, stars);
+                    window.inventory.EQUIP.push(item);
+                    window.frozenItemDb[item.id] = window.cloneItemForTooltip(item);
+                    return item;
+                  };
 
-          if (slotType === "full_set") {
-            const slots = ["weapon", "helmet", "chest", "leggings", "boots"];
+                  if (slotType === "full_set") {
+                    const slots = ["weapon", "helmet", "chest", "leggings", "boots", "ring"];
             slots.forEach((s) => spawnAndAddGear(s));
             if (typeof window.pushLog === "function") {
               window.pushLog(
