@@ -350,9 +350,12 @@ window.renderClanCreation = function (clansList, invitations) {
             .map(
               (inv) => `
               <div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:6px; border-radius:4px; margin-bottom:4px; border:1px solid #333;">
-                  <span style="font-size:11px; color:#fff; font-weight:bold;">${window.escapeHTML(inv.clanName)}</span>
-                  <button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71;" onclick="window.acceptClanInvitation(${inv.id})">Join</button>
-              </div>
+                                <span style="font-size:11px; color:#fff; font-weight:bold;">${window.escapeHTML(inv.clanName)}</span>
+                                <div style="display:flex; gap:4px;">
+                                    <button class="btn-action un" style="padding:2px 8px; font-size:10px; background:#e74c3c;" onclick="window.rejectClanInvitation(${inv.id})">Decline</button>
+                                    <button class="btn-action" style="padding:2px 8px; font-size:10px; background:#2ecc71;" onclick="window.acceptClanInvitation(${inv.id})">Join</button>
+                                </div>
+                            </div>
           `,
             )
             .join("")}
@@ -463,6 +466,32 @@ window.executeCreateClan = function () {
     })
     .catch(() => {
       window.pushHeaderToast("❌ Network error founding clan.", "#e74c3c");
+    });
+};
+
+window.rejectClanInvitation = function (inviteId) {
+  const userId = window.getGameUserId();
+  fetch(`${window.GAME_SERVER_URL}/api/clan/reject`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, inviteId }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.success) {
+        window.pushHeaderToast("Invitation declined.", "#7f8c8d");
+        if (window.playerStats.pendingClanInvitationsCount > 0) {
+          window.playerStats.pendingClanInvitationsCount--;
+        }
+        window.fetchClanData();
+        window.updateUI();
+        window.saveGame();
+      } else {
+        window.pushHeaderToast(`Error: ${data.error}`, "#e74c3c");
+      }
+    })
+    .catch(() => {
+      window.pushHeaderToast("Network error declining invitation.", "#e74c3c");
     });
 };
 
@@ -1229,101 +1258,104 @@ window.renderClanDashboard = function (clan, members, invitations) {
 
                 ${
                   isLeader
-                    ? `
-                    <div style="display:flex; flex-direction:column; gap:8px; text-align:left;">
-                        <!-- Description -->
-                        <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px;">
-                            <label for="settings-clan-desc" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Custom Announcement / Desc:</label>
-                            <textarea id="settings-clan-desc" style="width:100%; height:45px; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px; font-family:sans-serif; resize:none;" maxlength="120">${window.escapeHTML(clan.description || "")}</textarea>
-                        </div>
+                                    ? `
+                                    <div style="display:flex; flex-direction:column; gap:8px; text-align:left;">
+                                        <!-- Description -->
+                                        <div style="background:#111; border:1px solid #222; padding:8px; border-radius:6px;">
+                                            <label for="settings-clan-desc" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Custom Announcement / Desc:</label>
+                                            <textarea id="settings-clan-desc" style="width:100%; height:45px; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px; font-family:sans-serif; resize:none;" maxlength="120">${window.escapeHTML(clan.description || "")}</textarea>
+                                        </div>
 
-                        <!-- Join Policy & Min Lvl -->
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; background:#111; border:1px solid #222; padding:8px; border-radius:6px;">
-                            <div>
-                                <label for="settings-clan-policy" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Join Policy:</label>
-                                <select id="settings-clan-policy" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px;">
-                                    <option value="invite_only" ${!isJoinOpen ? "selected" : ""}>Invite Only</option>
-                                    <option value="open" ${isJoinOpen ? "selected" : ""}>Open Join</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="settings-clan-minlevel" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Min Level:</label>
-                                <input type="number" id="settings-clan-minlevel" value="${clan.min_level || 1}" min="1" max="1000" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px; font-family:monospace;">
-                            </div>
-                        </div>
+                                        <!-- Join Policy & Min Lvl -->
+                                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; background:#111; border:1px solid #222; padding:8px; border-radius:6px;">
+                                            <div>
+                                                <label for="settings-clan-policy" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Join Policy:</label>
+                                                <select id="settings-clan-policy" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px;">
+                                                    <option value="invite_only" ${!isJoinOpen ? "selected" : ""}>Invite Only</option>
+                                                    <option value="open" ${isJoinOpen ? "selected" : ""}>Open Join</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="settings-clan-minlevel" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Min Level:</label>
+                                                <input type="number" id="settings-clan-minlevel" value="${clan.min_level || 1}" min="1" max="1000" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px; font-family:monospace;">
+                                            </div>
+                                        </div>
 
-                        <!-- Emblem Customizer & Tithe Rate -->
-                                                <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:6px; background:#111; border:1px solid #222; padding:8px; border-radius:6px; align-items:center;">
-                                                    <div style="display:flex; align-items:center; gap:8px;">
-                                                        <div id="settings-emblem-live-indicator" style="flex-shrink:0;">
-                                                            ${window.getClanEmblemHtml(activeEmblemSeed, 32, clan.level)}
-                                                        </div>
-                                                        <div style="flex:1;">
-                                                            <label for="settings-clan-emblem" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Emblem Pattern:</label>
-                                                            <div style="display:flex; align-items:center; gap:6px;">
-                                                                <input type="range" id="settings-clan-emblem" min="0" max="100" value="${activeEmblemSeed}" style="flex:1; height:4px; accent-color:#f1c40f; cursor:pointer;" oninput="window.previewClanEmblem(this.value, ${clan.level})">
-                                                                <span id="settings-emblem-preview-val" style="font-family:monospace; font-size:10px; width:22px; text-align:right;">${activeEmblemSeed}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <label for="settings-clan-tithe" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Auto-Tithe (Vault Tax):</label>
-                                                        <select id="settings-clan-tithe" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px;">
-                                                            <option value="0" ${clan.tithe_rate === 0 ? "selected" : ""}>0% (Disabled)</option>
-                                                            <option value="1" ${clan.tithe_rate === 1 ? "selected" : ""}>1% Auto-Tax</option>
-                                                            <option value="2" ${clan.tithe_rate === 2 ? "selected" : ""}>2% Auto-Tax</option>
-                                                            <option value="3" ${clan.tithe_rate === 3 ? "selected" : ""}>3% Auto-Tax</option>
-                                                            <option value="5" ${clan.tithe_rate === 5 ? "selected" : ""}>5% Auto-Tax (Max)</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
+                                        <!-- Emblem Customizer & Tithe Rate -->
+                                                                <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:6px; background:#111; border:1px solid #222; padding:8px; border-radius:6px; align-items:center;">
+                                                                    <div style="display:flex; align-items:center; gap:8px;">
+                                                                        <div id="settings-emblem-live-indicator" style="flex-shrink:0;">
+                                                                            ${window.getClanEmblemHtml(activeEmblemSeed, 32, clan.level)}
+                                                                        </div>
+                                                                        <div style="flex:1;">
+                                                                            <label for="settings-clan-emblem" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Emblem Pattern:</label>
+                                                                            <div style="display:flex; align-items:center; gap:6px;">
+                                                                                <input type="range" id="settings-clan-emblem" min="0" max="100" value="${activeEmblemSeed}" style="flex:1; height:4px; accent-color:#f1c40f; cursor:pointer;" oninput="window.previewClanEmblem(this.value, ${clan.level})">
+                                                                                <span id="settings-emblem-preview-val" style="font-family:monospace; font-size:10px; width:22px; text-align:right;">${activeEmblemSeed}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label for="settings-clan-tithe" style="font-size:10px; font-weight:bold; color:#f1c40f; display:block; margin-bottom:4px; text-transform:uppercase;">Auto-Tithe (Vault Tax):</label>
+                                                                        <select id="settings-clan-tithe" style="width:100%; background:#07030b; color:#fff; border:1px solid #444; border-radius:4px; padding:4px; font-size:10.5px;">
+                                                                            <option value="0" ${clan.tithe_rate === 0 ? "selected" : ""}>0% (Disabled)</option>
+                                                                            <option value="1" ${clan.tithe_rate === 1 ? "selected" : ""}>1% Auto-Tax</option>
+                                                                            <option value="2" ${clan.tithe_rate === 2 ? "selected" : ""}>2% Auto-Tax</option>
+                                                                            <option value="3" ${clan.tithe_rate === 3 ? "selected" : ""}>3% Auto-Tax</option>
+                                                                            <option value="5" ${clan.tithe_rate === 5 ? "selected" : ""}>5% Auto-Tax (Max)</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
 
-                                                <!-- Rank Authority Matrix -->
-                                                <div style="background:#111; border:1px solid #222; padding:10px; border-radius:6px; text-align:left; margin-bottom:8px;">
-                                                    <strong style="color:#ffd700; font-size:10px; display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">⚔️ Rank Authority Matrix</strong>
-                                                    <p style="font-size:9.5px; color:#aaa; margin:0 0 8px 0; line-height:1.45;">Configure the administrative rights for each clan rank. Leaders have absolute control, while Officers can be delegated specific permissions:</p>
-                                                    <div style="display:flex; flex-direction:column; gap:4px; font-family:monospace; font-size:10px; color:#fff;">
-                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
-                                                            <span>• Officers can invite members:</span>
-                                                            <select id="settings-perm-officer-invite" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
-                                                                <option value="allow" ${window.playerStats.clanPermissions?.officer_invite !== false ? "selected" : ""}>ALLOWED ✓</option>
-                                                                <option value="block" ${window.playerStats.clanPermissions?.officer_invite === false ? "selected" : ""}>DENIED ✗</option>
-                                                            </select>
-                                                        </div>
-                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
-                                                            <span>• Officers can expel Recruits:</span>
-                                                            <select id="settings-perm-officer-kick" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
-                                                                <option value="allow" ${window.playerStats.clanPermissions?.officer_kick !== false ? "selected" : ""}>ALLOWED ✓</option>
-                                                                <option value="block" ${window.playerStats.clanPermissions?.officer_kick === false ? "selected" : ""}>DENIED ✗</option>
-                                                            </select>
-                                                        </div>
-                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
-                                                            <span>• Officers can spend Vault Funds:</span>
-                                                            <select id="settings-perm-officer-vault" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
-                                                                <option value="allow" ${window.playerStats.clanPermissions?.officer_vault !== false ? "selected" : ""}>ALLOWED ✓</option>
-                                                                <option value="block" ${window.playerStats.clanPermissions?.officer_vault === false ? "selected" : ""}>DENIED ✗</option>
-                                                            </select>
-                                                        </div>
-                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
-                                                            <span>• Vanguards can invite recruits:</span>
-                                                            <select id="settings-perm-vanguard-invite" style="background:#111; color:#e74c3c; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
-                                                                <option value="allow" ${window.playerStats.clanPermissions?.vanguard_invite === true ? "selected" : ""}>ALLOWED ✓</option>
-                                                                <option value="block" ${window.playerStats.clanPermissions?.vanguard_invite !== true ? "selected" : ""}>DENIED ✗</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                                <!-- Rank Authority Matrix -->
+                                                                <div style="background:#111; border:1px solid #222; padding:10px; border-radius:6px; text-align:left; margin-bottom:8px;">
+                                                                    <strong style="color:#ffd700; font-size:10px; display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">⚔️ Rank Authority Matrix</strong>
+                                                                    <p style="font-size:9.5px; color:#aaa; margin:0 0 8px 0; line-height:1.45;">Configure the administrative rights for each clan rank. Leaders have absolute control, while Officers can be delegated specific permissions:</p>
+                                                                    <div style="display:flex; flex-direction:column; gap:4px; font-family:monospace; font-size:10px; color:#fff;">
+                                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
+                                                                            <span>• Officers can invite members:</span>
+                                                                            <select id="settings-perm-officer-invite" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
+                                                                                <option value="allow" ${window.playerStats.clanPermissions?.officer_invite !== false ? "selected" : ""}>ALLOWED ✓</option>
+                                                                                <option value="block" ${window.playerStats.clanPermissions?.officer_invite === false ? "selected" : ""}>DENIED ✗</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
+                                                                            <span>• Officers can expel Recruits:</span>
+                                                                            <select id="settings-perm-officer-kick" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
+                                                                                <option value="allow" ${window.playerStats.clanPermissions?.officer_kick !== false ? "selected" : ""}>ALLOWED ✓</option>
+                                                                                <option value="block" ${window.playerStats.clanPermissions?.officer_kick === false ? "selected" : ""}>DENIED ✗</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
+                                                                            <span>• Officers can spend Vault Funds:</span>
+                                                                            <select id="settings-perm-officer-vault" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
+                                                                                <option value="allow" ${window.playerStats.clanPermissions?.officer_vault !== false ? "selected" : ""}>ALLOWED ✓</option>
+                                                                                <option value="block" ${window.playerStats.clanPermissions?.officer_vault === false ? "selected" : ""}>DENIED ✗</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
+                                                                            <span>• Vanguards can invite recruits:</span>
+                                                                            <select id="settings-perm-vanguard-invite" style="background:#111; color:#e74c3c; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
+                                                                                <option value="allow" ${window.playerStats.clanPermissions?.vanguard_invite === true ? "selected" : ""}>ALLOWED ✓</option>
+                                                                                <option value="block" ${window.playerStats.clanPermissions?.vanguard_invite !== true ? "selected" : ""}>DENIED ✗</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
-                                                <button class="btn-action" style="width:100%; margin-bottom: 10px; background:#2ecc71; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeSaveClanSettings()">Save Clan Customizations</button>
+                                                                <button class="btn-action" style="width:100%; margin-bottom: 10px; background:#2ecc71; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeSaveClanSettings()">Save Clan Customizations</button>
 
-                        <button class="btn-action un" style="width:100%; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeDisbandClan()">Disband Clan</button>
-                    </div>
-                `
-                    : `
-                    <div style="border:1px solid #222; border-radius:6px; padding:15px; text-align:center; color:#888; font-style:italic; font-size:11px; white-space:normal; line-height:1.45;">
-                        🔐 Founder lock enabled. Only the Founder/Leader can modify settings, change description, or set join policy limitations.
-                    </div>
-                `
+                                        <button class="btn-action un" style="width:100%; padding:10px 0; font-weight:bold; font-size:11px;" onclick="window.executeDisbandClan()">Disband Clan</button>
+                                    </div>
+                                  `
+                                      : `
+                                    <div style="display:flex; flex-direction:column; gap:8px; text-align:left;">
+                                        <div style="border:1px solid #222; border-radius:6px; padding:15px; text-align:center; color:#888; font-style:italic; font-size:11px; white-space:normal; line-height:1.45;">
+                                            🔐 Founder lock enabled. Only the Founder/Leader can modify settings, change description, or set join policy limitations.
+                                        </div>
+                                        <button class="btn-action un" style="width:100%; padding:10px 0; font-weight:bold; font-size:11px; background:linear-gradient(135deg, #c0392b, #962d22);" onclick="window.executeDisbandClan()">Leave Clan</button>
+                                    </div>
+                                  `
                 }
               `;
   } else if (currentTab === "RESEARCH") {

@@ -3,8 +3,8 @@
    Sack Management, Forge/Crafting, and Shop Transaction Logic.
    ========================================================================= */
 window.getRarityMultiplier = function (stars) {
-  if (stars === "UNIQUE" || stars === "unique") return 22.0;
-  const multipliers = [1.0, 1.8, 3.2, 5.5, 10.0, 18.0];
+  if (stars === "UNIQUE" || stars === "unique") return 10.0;
+  const multipliers = [1.0, 1.8, 3.2, 4.5, 6.0, 8.0];
   return multipliers[stars] || 1.0;
 };
 
@@ -2611,173 +2611,173 @@ Object.assign(window.ItemFactory, {
     } else if (item.type === "artifact") {
       // Artifact parameters are managed statically on drop; preserve them as is
     } else {
-      // Reset all stats to build deterministic static unique profiles
-      item.baseAtk = 0;
-      item.baseMaxHp = 0;
-      item.baseDef = 0;
-      item.baseMoveSpeed = 0;
-      item.baseBlock = 0;
-      item.baseParry = 0;
-      item.baseInt = 0;
-      item.baseStr = 0;
-      item.baseDex = 0;
-      item.atkPct = 0;
-      item.maxHpPct = 0;
-      item.defPct = 0;
-      item.moveSpeedPct = 0;
-      item.strPct = 0;
-      item.dexPct = 0;
-      item.intPct = 0;
-      item.baseCritChance = 0;
-      item.baseCritDamage = 0;
+          // Reset all stats to build deterministic static unique profiles
+          item.baseAtk = 0;
+          item.baseMaxHp = 0;
+          item.baseDef = 0;
+          item.baseMoveSpeed = 0;
+          item.baseBlock = 0;
+          item.baseParry = 0;
+          item.baseInt = 0;
+          item.baseStr = 0;
+          item.baseDex = 0;
+          item.atkPct = 0;
+          item.maxHpPct = 0;
+          item.defPct = 0;
+          item.moveSpeedPct = 0;
+          item.strPct = 0;
+          item.dexPct = 0;
+          item.intPct = 0;
+          item.baseCritChance = 0;
+          item.baseCritDamage = 0;
 
-      item.bonusAtk = 0;
-      item.bonusMaxHp = 0;
-      item.bonusDef = 0;
-      item.bonusMoveSpeed = 0;
-      item.bonusCritChance = 0;
-      item.bonusCritDamage = 0;
-      item.bonusBlock = 0;
-      item.bonusParry = 0;
-      item.bonusActiveSpeed = 0;
-      item.bonusIdleSpeed = 0;
-      item.bonusStr = 0;
-      item.bonusDex = 0;
-      item.bonusInt = 0;
+          item.bonusAtk = 0;
+          item.bonusMaxHp = 0;
+          item.bonusDef = 0;
+          item.bonusMoveSpeed = 0;
+          item.bonusCritChance = 0;
+          item.bonusCritDamage = 0;
+          item.bonusBlock = 0;
+          item.bonusParry = 0;
+          item.bonusActiveSpeed = 0;
+          item.bonusIdleSpeed = 0;
+          item.bonusStr = 0;
+          item.bonusDex = 0;
+          item.bonusInt = 0;
 
-      if (item.isUniqueStaff) {
-        item.baseInt = Math.ceil(20 * stageScale * 18.0);
-        item.baseAtk = Math.ceil(8 * stageScale * 18.0);
-        item.intPct = 0.15;
-        item.bonusAtk = Math.ceil(0.3 * expScale * 18.0);
-        item.bonusInt = Math.ceil(2 * Math.pow(stageScale, 1.2) * 2.25);
-        item.bonusCritChance = parseFloat(
-          (0.02 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-        item.bonusCritDamage = parseFloat(
-          (0.05 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-        item.bonusActiveSpeed = parseFloat(
-          (0.02 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
-        );
-      } else if (item.isUniqueSword) {
-        item.baseAtk = Math.ceil(30 * stageScale * 18.0);
-        item.baseCritChance = 0.08;
-        item.bonusAtk = Math.ceil(0.35 * expScale * 18.0);
-        item.bonusStr = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
-        item.bonusCritChance = parseFloat(
-          (0.025 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-        item.bonusCritDamage = parseFloat(
-          (0.06 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-        item.bonusIdleSpeed = parseFloat(
-          (0.025 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
-        );
-      } else if (item.isUniqueSingularity) {
-        item.baseAtk = Math.ceil(40 * stageScale * 18.0);
-        item.baseCritDamage = 0.3;
-        item.bonusAtk = Math.ceil(0.4 * expScale * 18.0);
-        item.bonusStr = Math.ceil(4 * Math.pow(stageScale, 1.2) * 2.25);
-        item.bonusCritDamage = parseFloat(
-          (0.08 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-        item.bonusDef = Math.ceil(0.2 * hpDefExpScale * 18.0);
-        item.bonusMaxHp = Math.ceil(0.6 * hpDefExpScale * 18.0);
-      } else if (item.isUniqueMaelstrom) {
-        item.baseAtk = Math.ceil(25 * stageScale * 18.0);
-        item.moveSpeedPct = 0.12;
-        item.bonusAtk = Math.ceil(0.3 * expScale * 18.0);
-        item.bonusDex = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
-        item.bonusActiveSpeed = parseFloat(
-          (0.03 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
-        );
-        item.bonusIdleSpeed = parseFloat(
-          (0.03 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
-        );
-        item.bonusMoveSpeed = Math.ceil(1.5 * stageScale * 1.75);
-      } else if (item.isUniqueAegis) {
-        item.baseDef = Math.ceil(15 * stageScale * 18.0);
-        item.baseBlock = 0.1;
-        item.bonusDef = Math.ceil(0.25 * hpDefExpScale * 18.0);
-        item.bonusMaxHp = Math.ceil(0.8 * hpDefExpScale * 18.0);
-        item.bonusBlock = parseFloat(
-          (0.015 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-        item.bonusStr = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
-      } else if (item.isUniqueWatch) {
-        item.baseInt = Math.ceil(15 * stageScale * 18.0);
-        item.baseAtk = Math.ceil(5 * stageScale * 18.0);
-        item.bonusInt = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
-        item.bonusActiveSpeed = parseFloat(
-          (0.02 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
-        );
-        item.bonusIdleSpeed = parseFloat(
-          (0.02 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
-        );
-        item.bonusMoveSpeed = Math.ceil(1.2 * stageScale * 1.75);
-        item.bonusDex = Math.ceil(2 * Math.pow(stageScale, 1.2) * 2.25);
-      } else if (item.isUniqueChronicle) {
-        item.baseInt = Math.ceil(15 * stageScale * 18.0);
-        item.baseAtk = Math.ceil(5 * stageScale * 18.0);
-        item.bonusInt = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
-        item.bonusMaxHp = Math.ceil(0.5 * hpDefExpScale * 18.0);
-        item.bonusDef = Math.ceil(0.15 * hpDefExpScale * 18.0);
-        item.bonusStr = Math.ceil(2 * Math.pow(stageScale, 1.2) * 2.25);
-        item.bonusDex = Math.ceil(2 * Math.pow(stageScale, 1.2) * 2.25);
-      } else if (item.isUniqueConduit) {
-        item.baseInt = Math.ceil(20 * stageScale * 18.0);
-        item.baseAtk = Math.ceil(6 * stageScale * 18.0);
-        item.bonusInt = Math.ceil(4 * Math.pow(stageScale, 1.2) * 2.25);
-        item.bonusActiveSpeed = parseFloat(
-          (0.025 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
-        );
-        item.bonusCritChance = parseFloat(
-          (0.015 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-        item.bonusCritDamage = parseFloat(
-          (0.04 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-        item.bonusDex = Math.ceil(2 * Math.pow(stageScale, 1.2) * 2.25);
-      } else if (item.isUniqueViper) {
-        item.baseAtk = Math.ceil(12 * stageScale * 18.0);
-        item.baseParry = 0.08;
-        item.bonusAtk = Math.ceil(0.25 * expScale * 18.0);
-        item.bonusDex = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
-        item.bonusCritChance = parseFloat(
-          (0.02 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-        item.bonusCritDamage = parseFloat(
-          (0.05 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-        item.bonusParry = parseFloat(
-          (0.015 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-      } else if (item.isUniqueWarpCore) {
-        item.baseDef = Math.ceil(3.5 * stageScale * 18.0);
-        item.baseMoveSpeed = Math.ceil(3.0 * stageScale);
-        item.bonusMoveSpeed = Math.ceil(2.0 * stageScale * 1.75);
-        item.bonusActiveSpeed = parseFloat(
-          (0.02 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
-        );
-        item.bonusIdleSpeed = parseFloat(
-          (0.02 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
-        );
-        item.bonusDex = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
-        item.bonusMaxHp = Math.ceil(0.3 * hpDefExpScale * 18.0);
-      } else if (item.isUniqueTempest) {
-        item.baseDef = Math.ceil(7.0 * stageScale * 18.0);
-        item.baseMaxHp = Math.ceil(30.0 * stageScale * 18.0);
-        item.bonusMaxHp = Math.ceil(0.5 * hpDefExpScale * 18.0);
-        item.bonusDef = Math.ceil(0.15 * hpDefExpScale * 18.0);
-        item.bonusInt = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
-        item.bonusParry = parseFloat(
-          (0.015 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-        item.bonusBlock = parseFloat(
-          (0.015 * Math.sqrt(stageScale) * 1.75).toFixed(4),
-        );
-      }
+          if (item.isUniqueStaff) {
+            item.baseInt = Math.ceil(20 * stageScale * 10.0);
+            item.baseAtk = Math.ceil(8 * stageScale * 10.0);
+            item.intPct = 0.15;
+            item.bonusAtk = Math.ceil(0.3 * expScale * 10.0);
+            item.bonusInt = Math.ceil(2 * Math.pow(stageScale, 1.2) * 2.25);
+            item.bonusCritChance = parseFloat(
+              (0.02 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+            item.bonusCritDamage = parseFloat(
+              (0.05 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+            item.bonusActiveSpeed = parseFloat(
+              (0.02 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
+            );
+          } else if (item.isUniqueSword) {
+            item.baseAtk = Math.ceil(30 * stageScale * 10.0);
+            item.baseCritChance = 0.08;
+            item.bonusAtk = Math.ceil(0.35 * expScale * 10.0);
+            item.bonusStr = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
+            item.bonusCritChance = parseFloat(
+              (0.025 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+            item.bonusCritDamage = parseFloat(
+              (0.06 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+            item.bonusIdleSpeed = parseFloat(
+              (0.025 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
+            );
+          } else if (item.isUniqueSingularity) {
+            item.baseAtk = Math.ceil(40 * stageScale * 10.0);
+            item.baseCritDamage = 0.3;
+            item.bonusAtk = Math.ceil(0.4 * expScale * 10.0);
+            item.bonusStr = Math.ceil(4 * Math.pow(stageScale, 1.2) * 2.25);
+            item.bonusCritDamage = parseFloat(
+              (0.08 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+            item.bonusDef = Math.ceil(0.2 * hpDefExpScale * 10.0);
+            item.bonusMaxHp = Math.ceil(0.6 * hpDefExpScale * 10.0);
+          } else if (item.isUniqueMaelstrom) {
+            item.baseAtk = Math.ceil(25 * stageScale * 10.0);
+            item.moveSpeedPct = 0.12;
+            item.bonusAtk = Math.ceil(0.3 * expScale * 10.0);
+            item.bonusDex = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
+            item.bonusActiveSpeed = parseFloat(
+              (0.03 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
+            );
+            item.bonusIdleSpeed = parseFloat(
+              (0.03 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
+            );
+            item.bonusMoveSpeed = Math.ceil(1.5 * stageScale * 1.75);
+          } else if (item.isUniqueAegis) {
+            item.baseDef = Math.ceil(15 * stageScale * 10.0);
+            item.baseBlock = 0.1;
+            item.bonusDef = Math.ceil(0.25 * hpDefExpScale * 10.0);
+            item.bonusMaxHp = Math.ceil(0.8 * hpDefExpScale * 10.0);
+            item.bonusBlock = parseFloat(
+              (0.015 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+            item.bonusStr = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
+          } else if (item.isUniqueWatch) {
+            item.baseInt = Math.ceil(15 * stageScale * 10.0);
+            item.baseAtk = Math.ceil(5 * stageScale * 10.0);
+            item.bonusInt = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
+            item.bonusActiveSpeed = parseFloat(
+              (0.02 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
+            );
+            item.bonusIdleSpeed = parseFloat(
+              (0.02 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
+            );
+            item.bonusMoveSpeed = Math.ceil(1.2 * stageScale * 1.75);
+            item.bonusDex = Math.ceil(2 * Math.pow(stageScale, 1.2) * 2.25);
+          } else if (item.isUniqueChronicle) {
+            item.baseInt = Math.ceil(15 * stageScale * 10.0);
+            item.baseAtk = Math.ceil(5 * stageScale * 10.0);
+            item.bonusInt = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
+            item.bonusMaxHp = Math.ceil(0.5 * hpDefExpScale * 10.0);
+            item.bonusDef = Math.ceil(0.15 * hpDefExpScale * 10.0);
+            item.bonusStr = Math.ceil(2 * Math.pow(stageScale, 1.2) * 2.25);
+            item.bonusDex = Math.ceil(2 * Math.pow(stageScale, 1.2) * 2.25);
+          } else if (item.isUniqueConduit) {
+            item.baseInt = Math.ceil(20 * stageScale * 10.0);
+            item.baseAtk = Math.ceil(6 * stageScale * 10.0);
+            item.bonusInt = Math.ceil(4 * Math.pow(stageScale, 1.2) * 2.25);
+            item.bonusActiveSpeed = parseFloat(
+              (0.025 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
+            );
+            item.bonusCritChance = parseFloat(
+              (0.015 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+            item.bonusCritDamage = parseFloat(
+              (0.04 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+            item.bonusDex = Math.ceil(2 * Math.pow(stageScale, 1.2) * 2.25);
+          } else if (item.isUniqueViper) {
+            item.baseAtk = Math.ceil(12 * stageScale * 10.0);
+            item.baseParry = 0.08;
+            item.bonusAtk = Math.ceil(0.25 * expScale * 10.0);
+            item.bonusDex = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
+            item.bonusCritChance = parseFloat(
+              (0.02 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+            item.bonusCritDamage = parseFloat(
+              (0.05 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+            item.bonusParry = parseFloat(
+              (0.015 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+          } else if (item.isUniqueWarpCore) {
+            item.baseDef = Math.ceil(3.5 * stageScale * 10.0);
+            item.baseMoveSpeed = Math.ceil(3.0 * stageScale);
+            item.bonusMoveSpeed = Math.ceil(2.0 * stageScale * 1.75);
+            item.bonusActiveSpeed = parseFloat(
+              (0.02 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
+            );
+            item.bonusIdleSpeed = parseFloat(
+              (0.02 * Math.pow(stageScale, 0.3) * 1.4).toFixed(4),
+            );
+            item.bonusDex = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
+            item.bonusMaxHp = Math.ceil(0.3 * hpDefExpScale * 10.0);
+          } else if (item.isUniqueTempest) {
+            item.baseDef = Math.ceil(7.0 * stageScale * 10.0);
+            item.baseMaxHp = Math.ceil(30.0 * stageScale * 10.0);
+            item.bonusMaxHp = Math.ceil(0.5 * hpDefExpScale * 10.0);
+            item.bonusDef = Math.ceil(0.15 * hpDefExpScale * 10.0);
+            item.bonusInt = Math.ceil(3 * Math.pow(stageScale, 1.2) * 2.25);
+            item.bonusParry = parseFloat(
+              (0.015 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+            item.bonusBlock = parseFloat(
+              (0.015 * Math.sqrt(stageScale) * 1.75).toFixed(4),
+            );
+          }
     }
 
     // Sum combined totals using standard base values

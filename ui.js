@@ -4590,32 +4590,32 @@ window.renderPrestigeTab = function () {
       fort: 100,
     };
     let maxL = maxLevels[type] || 100;
-    let isMaxed = pts >= maxL;
+        let isMaxed = pts >= maxL;
 
-    let multCur = window.getMilestoneMultiplier(pts);
-    let multNext = window.getMilestoneMultiplier(pts + 1);
+        let multCur = window.getMilestoneMultiplier(pts);
+        let multNext = window.getMilestoneMultiplier(pts + 1);
 
-    let curEff = "";
-    let nextEff = "";
-    if (type === "gold") {
-      curEff = `+${(pts * 25 * multCur).toFixed(0)}%`;
-      nextEff = `+${((pts + 1) * 25 * multNext).toFixed(0)}%`;
-    } else if (type === "exp") {
-      curEff = `+${(pts * 10 * multCur).toFixed(0)}%`;
-      nextEff = `+${((pts + 1) * 10 * multNext).toFixed(0)}%`;
-    } else if (type === "drop") {
-      curEff = `+${(pts * 5 * multCur).toFixed(0)}%`;
-      nextEff = `+${((pts + 1) * 5 * multNext).toFixed(0)}%`;
-    } else if (type === "atk") {
-      curEff = `+${(pts * 12 * multCur).toFixed(0)}%`;
-      nextEff = `+${((pts + 1) * 12 * multNext).toFixed(0)}%`;
-    } else if (type === "fort") {
-      curEff = `+${(pts * 10 * multCur).toFixed(0)}% / +${(pts * 5 * multCur).toFixed(0)}%`;
-      nextEff = `+${((pts + 1) * 10 * multNext).toFixed(0)}% / +${((pts + 1) * 5 * multNext).toFixed(0)}%`;
-    } else if (type === "fairy") {
-      curEff = `+${(pts * 5 * multCur).toFixed(0)}%`;
-      nextEff = `+${((pts + 1) * 5 * multNext).toFixed(0)}%`;
-    }
+        let curEff = "";
+        let nextEff = "";
+        if (type === "gold") {
+          curEff = `x${(1.0 + pts * 0.25 * multCur).toFixed(2)}`;
+          nextEff = `x${(1.0 + (pts + 1) * 0.25 * multNext).toFixed(2)}`;
+        } else if (type === "exp") {
+          curEff = `x${(1.0 + pts * 0.1 * multCur).toFixed(2)}`;
+          nextEff = `x${(1.0 + (pts + 1) * 0.1 * multNext).toFixed(2)}`;
+        } else if (type === "drop") {
+          curEff = `x${(1.0 + pts * 0.05 * multCur).toFixed(2)}`;
+          nextEff = `x${(1.0 + (pts + 1) * 0.05 * multNext).toFixed(2)}`;
+        } else if (type === "atk") {
+          curEff = `x${Math.pow(1.12, pts * multCur).toFixed(2)}`;
+          nextEff = `x${Math.pow(1.12, (pts + 1) * multNext).toFixed(2)}`;
+        } else if (type === "fort") {
+          curEff = `x${Math.pow(1.1, pts * multCur).toFixed(2)} HP / x${Math.pow(1.05, pts * multCur).toFixed(2)} Def`;
+          nextEff = `x${Math.pow(1.1, (pts + 1) * multNext).toFixed(2)} HP / x${Math.pow(1.05, (pts + 1) * multNext).toFixed(2)} Def`;
+        } else if (type === "fairy") {
+          curEff = `x${(1.0 + pts * 0.05 * multCur).toFixed(2)}`;
+          nextEff = `x${(1.0 + (pts + 1) * 0.05 * multNext).toFixed(2)}`;
+        }
 
     let iconSvg = "";
     if (type === "gold") {
