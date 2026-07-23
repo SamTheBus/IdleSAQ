@@ -14865,8 +14865,19 @@ window.updateHubAlerts = function () {
   let hasMailAlert = mailBadge && mailBadge.style.display === "inline-block";
 
   // 4. Evaluate Clan Hall
-  let clanBadge = document.getElementById("hub-card-clan-badge");
-  let hasClanAlert = clanBadge && clanBadge.style.display === "inline-block";
+    let clanBadge = document.getElementById("hub-card-clan-badge");
+    let hasClanAlert = false;
+    if (window.playerStats.clanId) {
+      let unclaimedQuests = window.playerStats.pendingClanQuestsCompletedCount || 0;
+      let lastClaimedWeek = window.playerStats.lastClaimedCrateWeek || "";
+      let currentWeek = (window.lastFetchedClanData && window.lastFetchedClanData.currentWeekId) || "";
+      let weeklyCrateClaimable = window.playerStats.weekly_renown >= 100 && lastClaimedWeek !== currentWeek;
+      hasClanAlert = unclaimedQuests > 0 || weeklyCrateClaimable;
+    } else {
+      let inviteCount = window.playerStats.pendingClanInvitationsCount || 0;
+      hasClanAlert = inviteCount > 0;
+    }
+    if (clanBadge) clanBadge.style.display = hasClanAlert ? "inline-block" : "none";
 
   // 5. Evaluate Settings / Name Setup Alert
   let hasSettingsAlert =
@@ -14920,6 +14931,11 @@ window.checkUnreadMail = function () {
   if (!userId) return;
 
   const claimedMailIds = window.playerStats.claimedMailIds || [];
+
+  // Passive background check for outstanding clan invitations
+  if (typeof window.checkClanInvitations === "function") {
+    window.checkClanInvitations();
+  }
 
   fetch(`${window.GAME_SERVER_URL}/api/mailbox`, {
     method: "POST",

@@ -179,6 +179,32 @@ window.getClanEmblemHtml = function (seed, size = 32, clanLevel = 1) {
   return result;
 };
 
+window.checkClanInvitations = function () {
+  if (!window.GAME_SERVER_URL) return;
+  const userId = window.getGameUserId ? window.getGameUserId() : null;
+  if (!userId) return;
+
+  fetch(`${window.GAME_SERVER_URL}/api/clan/info`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.success) {
+        let inviteCount = (data.invitations && data.invitations.length) || 0;
+        window.playerStats.pendingClanInvitationsCount = inviteCount;
+
+        if (window.playerStats.clanId) {
+          window.playerStats.pendingClanInvitationsCount = 0;
+        }
+
+        window.updateHubAlerts();
+      }
+    })
+    .catch(() => {});
+};
+
 window.toggleClanHall = function () {
   // Allow all ascended players to bypass the level 13 requirement check
   if (
@@ -294,16 +320,17 @@ window.joinOpenClan = function (clanId) {
     .then((r) => r.json())
     .then((data) => {
       if (data.success) {
-        window.pushHeaderToast("🎉 Welcome to your new Clan!", "#2ecc71");
+        window.playerStats.pendingClanInvitationsCount = 0; // Clear the outstanding count
+        window.pushHeaderToast("Welcome to your new Clan!", "#2ecc71");
         window.fetchClanData();
         window.updateUI();
         window.saveGame();
       } else {
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+        window.pushHeaderToast(`Error: ${data.error}`, "#e74c3c");
       }
     })
     .catch(() => {
-      window.pushHeaderToast("❌ Connection error joining clan.", "#e74c3c");
+      window.pushHeaderToast("Connection error joining clan.", "#e74c3c");
     });
 };
 
@@ -449,16 +476,17 @@ window.acceptClanInvitation = function (inviteId) {
     .then((r) => r.json())
     .then((data) => {
       if (data.success) {
-        window.pushHeaderToast("🎉 Welcome to your new Clan!", "#2ecc71");
+        window.playerStats.pendingClanInvitationsCount = 0; // Clear the outstanding count
+        window.pushHeaderToast("Welcome to your new Clan!", "#2ecc71");
         window.fetchClanData();
         window.updateUI();
         window.saveGame();
       } else {
-        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+        window.pushHeaderToast(`Error: ${data.error}`, "#e74c3c");
       }
     })
     .catch(() => {
-      window.pushHeaderToast("❌ Network error joining clan.", "#e74c3c");
+      window.pushHeaderToast("Network error joining clan.", "#e74c3c");
     });
 };
 

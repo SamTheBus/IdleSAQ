@@ -3846,17 +3846,19 @@ function update() {
           window.playerStats.currentHp.sub(decayDmg),
         );
         window.effects.push({
-          x: window.hero.x,
-          y: window.hero.y,
-          text: `-${decayDmg} [DECAY]`,
-          color: "#ff007f",
-          life: 30,
-        });
-        if (window.playerStats.currentHp <= 1) {
-          window.playerStats.currentHp = 0;
-          window.deathAnimationTimer = window.deathMaxFrames;
-        }
-        window.updateUI();
+                      x: window.hero.x,
+                      y: window.hero.y,
+                      text: `-${decayDmg} [DECAY]`,
+                      color: "#ff007f",
+                      life: 30,
+                    });
+                    if (BigNum.from(window.playerStats.currentHp).lte(1)) {
+                      window.playerStats.currentHp = 0;
+                      window.updateUI();
+                      window.deathAnimationTimer = window.deathMaxFrames;
+                    } else {
+                      window.updateUI();
+                    }
       }
 
       window.playerStats.apathyDecayTimer -= 60;
@@ -3904,17 +3906,19 @@ function update() {
           window.playerStats.currentHp.sub(totalDrain),
         );
         window.effects.push({
-          x: window.hero.x,
-          y: window.hero.y,
-          text: `-${totalDrain} [DISTORTION]`,
-          color: "#ff2200",
-          life: 30,
-        });
-        if (window.playerStats.currentHp <= 1) {
-          window.playerStats.currentHp = 0;
-          window.deathAnimationTimer = window.deathMaxFrames;
-        }
-        window.updateUI();
+                      x: window.hero.x,
+                      y: window.hero.y,
+                      text: `-${totalDrain} [DISTORTION]`,
+                      color: "#ff2200",
+                      life: 30,
+                    });
+                    if (BigNum.from(window.playerStats.currentHp).lte(1)) {
+                      window.playerStats.currentHp = 0;
+                      window.updateUI();
+                      window.deathAnimationTimer = window.deathMaxFrames;
+                    } else {
+                      window.updateUI();
+                    }
       }
     }
 
@@ -4887,11 +4891,11 @@ function update() {
             }
           }
         }
-        if (window.playerStats.currentHp <= 0) {
-          if (
-            window.checkArtifactTrait("second_wind") &&
-            !window.playerStats.usedSecondWind
-          ) {
+        if (BigNum.from(window.playerStats.currentHp).lte(0)) {
+                  if (
+                    window.checkArtifactTrait("second_wind") &&
+                    !window.playerStats.usedSecondWind
+                  ) {
             window.playerStats.usedSecondWind = true;
             let T = window.getArtifactTemperLevel("second_wind");
             let healPct = 0.4 + T * 0.05; // 40% base + 5% per level (max 70%)
@@ -4924,11 +4928,12 @@ function update() {
                 : "Standard Monster";
 
             window.playerStats.killedByMob = { ...window.mob };
-            window.playerStats.currentHp = 0;
-            window.deathAnimationTimer = window.deathMaxFrames;
-            return;
-          }
-        }
+                        window.playerStats.currentHp = 0;
+                        window.updateUI();
+                        window.deathAnimationTimer = window.deathMaxFrames;
+                        return;
+                      }
+                    }
       }
       window.updateUI();
     }
@@ -5051,7 +5056,7 @@ window.detonateGaleFlurry = function () {
 
 window.CombatEngine = {
   triggerPlayerSlash(isManual = false) {
-    if (window.isGamePaused) return;
+    if (window.isGamePaused || window.deathAnimationTimer > 0 || BigNum.from(window.playerStats.currentHp).lte(0)) return;
     let p = window.resolvePlayerStats();
     let cooldownCap =
       window.playerStats.frenzyTimer > 0 ? 4 : p.activeAttackSpeed;
@@ -5330,17 +5335,19 @@ window.CombatEngine = {
             window.playerStats.currentHp - selfDmg,
           );
           window.effects.push({
-            x: window.hero.x,
-            y: window.hero.y,
-            text: "-" + selfDmg + " [TAX]",
-            color: "#e74c3c",
-            life: 30,
-          });
-          if (window.playerStats.currentHp <= 1) {
-            window.playerStats.currentHp = 0;
-            window.deathAnimationTimer = window.deathMaxFrames;
-          }
-          window.updateUI();
+                      x: window.hero.x,
+                      y: window.hero.y,
+                      text: "-" + selfDmg + " [TAX]",
+                      color: "#e74c3c",
+                      life: 30,
+                    });
+                    if (BigNum.from(window.playerStats.currentHp).lte(1)) {
+                      window.playerStats.currentHp = 0;
+                      window.updateUI();
+                      window.deathAnimationTimer = window.deathMaxFrames;
+                    } else {
+                      window.updateUI();
+                    }
         }
       }
       if (typeof window.checkAchievements === "function") {
@@ -5361,17 +5368,19 @@ window.CombatEngine = {
           window.playerStats.currentHp.sub(selfDmg),
         );
         window.effects.push({
-          x: window.hero.x,
-          y: window.hero.y,
-          text: "-" + selfDmg + " [RECOIL]",
-          color: "#e74c3c",
-          life: 30,
-        });
-        if (window.playerStats.currentHp <= 1) {
-          window.playerStats.currentHp = 0;
-          window.deathAnimationTimer = window.deathMaxFrames;
-        }
-        window.updateUI();
+                  x: window.hero.x,
+                  y: window.hero.y,
+                  text: "-" + selfDmg + " [RECOIL]",
+                  color: "#e74c3c",
+                  life: 30,
+                });
+                if (BigNum.from(window.playerStats.currentHp).lte(1)) {
+                  window.playerStats.currentHp = 0;
+                  window.updateUI();
+                  window.deathAnimationTimer = window.deathMaxFrames;
+                } else {
+                  window.updateUI();
+                }
       }
 
       if (window.playerStats.singularityState === "storing") {
@@ -6237,20 +6246,20 @@ window.CombatEngine = {
             window.playerStats.currentHp.sub(dmg),
           );
           window.effects.push({
-            x: window.hero.x,
-            y: window.hero.y,
-            text: "-" + dmg + " [EXPLOSION]",
-            color: "#e74c3c",
-            life: 40,
-          });
-          window.SoundManager.play("death");
-          if (window.playerStats.currentHp <= 1) {
-            window.playerStats.currentHp = 0;
-            window.deathAnimationTimer = window.deathMaxFrames;
-            window.mob = null;
-            window.updateUI();
-            return;
-          }
+                      x: window.hero.x,
+                      y: window.hero.y,
+                      text: "-" + dmg + " [EXPLOSION]",
+                      color: "#e74c3c",
+                      life: 40,
+                    });
+                    window.SoundManager.play("death");
+                    if (BigNum.from(window.playerStats.currentHp).lte(1)) {
+                      window.playerStats.currentHp = 0;
+                      window.updateUI();
+                      window.deathAnimationTimer = window.deathMaxFrames;
+                      window.mob = null;
+                      return;
+                    }
         }
       }
 
@@ -6779,46 +6788,46 @@ window.CombatEngine = {
       }
 
       // Active Debuff: Volatile Sparks (On-death mitigatable explosions)
-      if (
-        window.playerStats.activeDungeonSigil?.debuffs.some(
-          (d) => d.id === "volatile_sparks",
-        )
-      ) {
-        let isBlocked = Math.random() < p.block;
-        let isParried = !isBlocked && Math.random() < p.parry;
+            if (
+              window.playerStats.activeDungeonSigil?.debuffs.some(
+                (d) => d.id === "volatile_sparks",
+              )
+            ) {
+              let isBlocked = Math.random() < p.block;
+              let isParried = !isBlocked && Math.random() < p.parry;
 
-        if (isBlocked || isParried) {
-          window.effects.push({
-            type: isBlocked ? "block" : "parry",
-            x: window.hero.x - 5,
-            y: window.hero.y - 20,
-            color: isBlocked ? "#3498db" : "#9b59b6",
-            life: 45,
-          });
-          window.SoundManager.play(isBlocked ? "block" : "parry");
-        } else {
-          let dmg = Math.ceil(p.maxHp * 0.18);
-          window.playerStats.currentHp = window.BigNumMax(
-            1,
-            window.playerStats.currentHp.sub(dmg),
-          );
-          window.effects.push({
-            x: window.hero.x,
-            y: window.hero.y,
-            text: "-" + dmg + " [EXPLOSION]",
-            color: "#e74c3c",
-            life: 40,
-          });
-          window.SoundManager.play("death");
-          if (window.playerStats.currentHp <= 1) {
-            window.playerStats.currentHp = 0;
-            window.deathAnimationTimer = window.deathMaxFrames;
-            window.mob = null;
-            window.updateUI();
-            return;
-          }
-        }
-      }
+              if (isBlocked || isParried) {
+                window.effects.push({
+                  type: isBlocked ? "block" : "parry",
+                  x: window.hero.x - 5,
+                  y: window.hero.y - 20,
+                  color: isBlocked ? "#3498db" : "#9b59b6",
+                  life: 45,
+                });
+                window.SoundManager.play(isBlocked ? "block" : "parry");
+              } else {
+                let dmg = Math.ceil(p.maxHp * 0.18);
+                window.playerStats.currentHp = window.BigNumMax(
+                  1,
+                  window.playerStats.currentHp.sub(dmg),
+                );
+                window.effects.push({
+                  x: window.hero.x,
+                  y: window.hero.y,
+                  text: "-" + dmg + " [EXPLOSION]",
+                  color: "#e74c3c",
+                  life: 40,
+                });
+                window.SoundManager.play("death");
+                if (BigNum.from(window.playerStats.currentHp).lte(1)) {
+                  window.playerStats.currentHp = 0;
+                  window.updateUI();
+                  window.deathAnimationTimer = window.deathMaxFrames;
+                  window.mob = null;
+                  return;
+                }
+              }
+            }
 
       if (window.mob.type === "dungeon_boss") {
         let dType = window.playerStats.currentDungeon;
