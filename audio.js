@@ -74,26 +74,29 @@ window.SoundManager = {
   },
 
   updateVolumes() {
-      if (!this.ctx) return;
-      const now = this.ctx.currentTime;
-      const targetMaster = window.playerStats.mute
-        ? 0
-        : window.playerStats.volumeMaster || 0.5;
-      const targetSFX = window.playerStats.volumeSFX || 0.5;
-      this.masterGain.gain.setTargetAtTime(
-        Math.max(0, Math.min(1, targetMaster)),
-        now,
-        0.015,
-      );
-      this.sfxGain.gain.setTargetAtTime(
-        Math.max(0, Math.min(1, targetSFX)),
-        now,
-        0.015,
-      );
-      if (window.MusicManager && typeof window.MusicManager.updateVolume === "function") {
-        window.MusicManager.updateVolume();
-      }
-    },
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const targetMaster = window.playerStats.mute
+      ? 0
+      : window.playerStats.volumeMaster || 0.5;
+    const targetSFX = window.playerStats.volumeSFX || 0.5;
+    this.masterGain.gain.setTargetAtTime(
+      Math.max(0, Math.min(1, targetMaster)),
+      now,
+      0.015,
+    );
+    this.sfxGain.gain.setTargetAtTime(
+      Math.max(0, Math.min(1, targetSFX)),
+      now,
+      0.015,
+    );
+    if (
+      window.MusicManager &&
+      typeof window.MusicManager.updateVolume === "function"
+    ) {
+      window.MusicManager.updateVolume();
+    }
+  },
 
   play(type) {
     if (window.playerStats.mute) return;
@@ -1504,9 +1507,7 @@ window.MusicManager = {
   currentTrackIndex: 0,
 
   // Playlist array: easily add more track filenames here in the future!
-  tracks: [
-    "music.mp3"
-  ],
+  tracks: ["music.mp3"],
 
   init() {
     if (this.initialized) return;
@@ -1540,7 +1541,10 @@ window.MusicManager = {
       // Start playback of the loaded buffer
       this.startSource();
     } catch (err) {
-      console.warn(`[MusicManager] Failed to load or decode track: ${trackUrl}`, err);
+      console.warn(
+        `[MusicManager] Failed to load or decode track: ${trackUrl}`,
+        err,
+      );
       this.isLoading = false;
     }
   },
@@ -1609,8 +1613,15 @@ window.MusicManager = {
   updateVolume() {
     if (!this.ctx || !this.gainNode) return;
     let now = this.ctx.currentTime;
-    let masterVol = window.playerStats.mute ? 0 : (window.playerStats.volumeMaster !== undefined ? window.playerStats.volumeMaster : 0.5);
-    let musicVol = window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5;
+    let masterVol = window.playerStats.mute
+      ? 0
+      : window.playerStats.volumeMaster !== undefined
+        ? window.playerStats.volumeMaster
+        : 0.5;
+    let musicVol =
+      window.playerStats.volumeMusic !== undefined
+        ? window.playerStats.volumeMusic
+        : 0.5;
     this.gainNode.gain.setTargetAtTime(masterVol * musicVol, now, 0.015);
-  }
+  },
 };

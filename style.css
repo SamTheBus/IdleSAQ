@@ -3962,13 +3962,18 @@ summary {
 
 /* --- ACCRETION DISK CHROME SHIMMER (VOID SINGULARITY) --- */
 @keyframes voidSingularityShimmer {
-  0%, 100% {
+  0%,
+  100% {
     border-color: #8e44ad !important;
-    box-shadow: inset 0 0 12px #510a74, 0 0 10px rgba(142, 68, 173, 0.45);
+    box-shadow:
+      inset 0 0 12px #510a74,
+      0 0 10px rgba(142, 68, 173, 0.45);
   }
   50% {
     border-color: #ff007f !important;
-    box-shadow: inset 0 0 18px #a8135a, 0 0 18px rgba(255, 0, 127, 0.75);
+    box-shadow:
+      inset 0 0 18px #a8135a,
+      0 0 18px rgba(255, 0, 127, 0.75);
   }
 }
 

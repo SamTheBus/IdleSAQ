@@ -530,6 +530,8 @@ window.renderForgeTab = function () {
       "leggings",
       "overall",
       "boots",
+      "ring1",
+      "ring2",
       "art1",
       "art2",
       "art3",
@@ -542,6 +544,8 @@ window.renderForgeTab = function () {
       leggings: "Leggings Slot",
       overall: "Overall Slot",
       boots: "Boots Slot",
+      ring1: "Ring Slot 1",
+      ring2: "Ring Slot 2",
       art1: "Artifact Slot 1",
       art2: "Artifact Slot 2",
       art3: "Artifact Slot 3",
@@ -1393,12 +1397,12 @@ Object.assign(window.ItemFactory, {
       glow = "rgba(230,126,34,0.4)";
       lore = `"Born of a feather plucked from the solar phoenix, its core burns with the warmth of a thousand dying suns. Even in the deepest cold of the void, its fire never falters."`;
     } else if (item.isUniqueSingularity) {
-          bg = "linear-gradient(135deg, #0d011a 0%, #1c0529 50%, #030008 100%)";
-          border = "#8e44ad";
-          shadow = "inset 0 0 12px #510a74, 0 0 15px rgba(232, 67, 147, 0.25)";
-          glow = "rgba(142, 68, 173, 0.5)";
-          lore = `"This colossal blade harbors the core of a collapsed dying star, pulling the surrounding space into a constant state of gravitational collapse."`;
-        } else if (item.isUniqueMaelstrom) {
+      bg = "linear-gradient(135deg, #0d011a 0%, #1c0529 50%, #030008 100%)";
+      border = "#8e44ad";
+      shadow = "inset 0 0 12px #510a74, 0 0 15px rgba(232, 67, 147, 0.25)";
+      glow = "rgba(142, 68, 173, 0.5)";
+      lore = `"This colossal blade harbors the core of a collapsed dying star, pulling the surrounding space into a constant state of gravitational collapse."`;
+    } else if (item.isUniqueMaelstrom) {
       bg = "linear-gradient(135deg, #031d0d, #010803)";
       border = "#2ecc71";
       shadow = "#145a32";
@@ -1554,37 +1558,35 @@ Object.assign(window.ItemFactory, {
     let hpDefExpScale = repScale;
 
     // Apply baseline attribute values matching slot configurations (Slot-Specific Base Stats)
-        if (chosenType !== "artifact") {
-          let baseRarityMult = window.getRarityMultiplier(statLinesCount);
-          if (chosenType === "weapon") {
-            item.baseAtk = Math.ceil(2.5 * repScale * baseRarityMult);
-          } else if (chosenType === "chest" || chosenType === "overall") {
-            let overallMult = chosenType === "overall" ? 1.8 : 1.0;
-            item.baseDef = Math.ceil(
-              1.5 * repScale * baseRarityMult * overallMult,
-            );
-            item.baseMaxHp = Math.ceil(
-              6.0 * repScale * baseRarityMult * overallMult,
-            );
-          } else if (chosenType === "helmet" || chosenType === "leggings") {
-            item.baseDef = Math.ceil(0.7 * repScale * baseRarityMult);
-            item.baseMaxHp = Math.ceil(3.0 * repScale * baseRarityMult);
-          } else if (item.type === "boots") {
-            item.baseDef = Math.ceil(0.35 * repScale * baseRarityMult);
-            item.baseMoveSpeed = Math.ceil(1.0 * stageScale);
-          } else if (item.type === "ring") {
-            // Decoupled Wildcard Implicit Ring Generation - Supplemental, balanced linear scaling
-            let flatRoll = Math.random();
-            if (flatRoll < 0.33) {
-              item.implicitType = "atk";
-              item.baseAtk = Math.ceil(0.6 * repScale * baseRarityMult);
-            } else if (flatRoll < 0.66) {
-              item.implicitType = "maxHp";
-              item.baseMaxHp = Math.ceil(1.5 * repScale * baseRarityMult);
-            } else {
-              item.implicitType = "def";
-              item.baseDef = Math.ceil(0.35 * repScale * baseRarityMult);
-            }
+    if (chosenType !== "artifact") {
+      let baseRarityMult = window.getRarityMultiplier(statLinesCount);
+      if (chosenType === "weapon") {
+        item.baseAtk = Math.ceil(2.5 * repScale * baseRarityMult);
+      } else if (chosenType === "chest" || chosenType === "overall") {
+        let overallMult = chosenType === "overall" ? 1.8 : 1.0;
+        item.baseDef = Math.ceil(1.5 * repScale * baseRarityMult * overallMult);
+        item.baseMaxHp = Math.ceil(
+          6.0 * repScale * baseRarityMult * overallMult,
+        );
+      } else if (chosenType === "helmet" || chosenType === "leggings") {
+        item.baseDef = Math.ceil(0.7 * repScale * baseRarityMult);
+        item.baseMaxHp = Math.ceil(3.0 * repScale * baseRarityMult);
+      } else if (item.type === "boots") {
+        item.baseDef = Math.ceil(0.35 * repScale * baseRarityMult);
+        item.baseMoveSpeed = Math.ceil(1.0 * stageScale);
+      } else if (item.type === "ring") {
+        // Decoupled Wildcard Implicit Ring Generation - Supplemental, balanced linear scaling
+        let flatRoll = Math.random();
+        if (flatRoll < 0.33) {
+          item.implicitType = "atk";
+          item.baseAtk = Math.ceil(0.6 * repScale * baseRarityMult);
+        } else if (flatRoll < 0.66) {
+          item.implicitType = "maxHp";
+          item.baseMaxHp = Math.ceil(1.5 * repScale * baseRarityMult);
+        } else {
+          item.implicitType = "def";
+          item.baseDef = Math.ceil(0.35 * repScale * baseRarityMult);
+        }
 
         let pctRoll = Math.random();
         let scaleFactor = Math.pow(stageScale, 0.8);
@@ -1689,12 +1691,12 @@ Object.assign(window.ItemFactory, {
     }
     let actualStatLines = chosenType === "artifact" ? 3 : statLinesCount + 1;
 
-        for (let i = 0; i < actualStatLines; i++) {
-          if (pool.length === 0) break;
-          let selectedStat = pool.pop();
-          let expBase = expScale; // Controlled exponential base aligned with stage scale * 5
+    for (let i = 0; i < actualStatLines; i++) {
+      if (pool.length === 0) break;
+      let selectedStat = pool.pop();
+      let expBase = expScale; // Controlled exponential base aligned with stage scale * 5
 
-          if (selectedStat === "atk") {
+      if (selectedStat === "atk") {
         item.bonusAtk += Math.ceil(
           window.randFloat(0.04, 0.08) * expBase * rarityMult,
         );
@@ -2395,218 +2397,218 @@ Object.assign(window.ItemFactory, {
 
     // Dynamic base scaling transitions for standard slot configurations
     if (item.type !== "artifact" && !window.isItemUnique(item)) {
-              // Reset base stats first to avoid double-compounding
-              item.baseAtk = 0;
-              item.baseMaxHp = 0;
-              item.baseDef = 0;
-              item.baseMoveSpeed = 0;
-              item.baseBlock = 0;
-              item.baseParry = 0;
-              item.baseInt = 0;
-              item.baseStr = 0;
-              item.baseDex = 0;
-              item.atkPct = 0;
-              item.maxHpPct = 0;
-              item.defPct = 0;
-              item.moveSpeedPct = 0;
-              item.strPct = 0;
-              item.dexPct = 0;
-              item.intPct = 0;
-              item.baseCritChance = 0;
-              item.baseCritDamage = 0;
+      // Reset base stats first to avoid double-compounding
+      item.baseAtk = 0;
+      item.baseMaxHp = 0;
+      item.baseDef = 0;
+      item.baseMoveSpeed = 0;
+      item.baseBlock = 0;
+      item.baseParry = 0;
+      item.baseInt = 0;
+      item.baseStr = 0;
+      item.baseDex = 0;
+      item.atkPct = 0;
+      item.maxHpPct = 0;
+      item.defPct = 0;
+      item.moveSpeedPct = 0;
+      item.strPct = 0;
+      item.dexPct = 0;
+      item.intPct = 0;
+      item.baseCritChance = 0;
+      item.baseCritDamage = 0;
 
-              let stars = item.statsRolled || 0;
-              let baseRarityMult = window.getRarityMultiplier(stars); // Apply new non-linear rarity multiplier on recalculation
-              let noun = item.noun ? item.noun.toLowerCase() : "";
+      let stars = item.statsRolled || 0;
+      let baseRarityMult = window.getRarityMultiplier(stars); // Apply new non-linear rarity multiplier on recalculation
+      let noun = item.noun ? item.noun.toLowerCase() : "";
 
-              if (
-                item.type === "weapon" &&
-                !item.isUniqueStaff &&
-                !item.isUniqueSword &&
-                !item.isUniqueSingularity &&
-                !item.isUniqueMaelstrom
-              ) {
-                let baseVal = Math.ceil(2.5 * repScale * baseRarityMult);
-                if (noun.includes("greatsword") || noun.includes("claymore")) {
-                  item.baseAtk = Math.ceil(baseVal * 1.15);
-                  item.baseCritDamage = 0.15;
-                } else if (noun.includes("longsword") || noun.includes("broadsword")) {
-                  item.baseAtk = Math.ceil(baseVal * 0.95);
-                  item.baseCritChance = 0.04;
-                } else if (noun.includes("halberd") || noun.includes("battleaxe")) {
-                  item.baseAtk = Math.ceil(baseVal * 1.2);
-                  item.atkPct = 0.05;
-                } else if (noun.includes("warhammer") || noun.includes("mace")) {
-                  item.baseAtk = Math.ceil(baseVal * 1.1);
-                  item.baseStr = Math.ceil(0.8 * stageScale * baseRarityMult);
-                } else {
-                  item.baseAtk = baseVal;
-                }
-              } else if (item.type === "chest" || item.type === "overall") {
-                let overallMult = item.type === "overall" ? 1.8 : 1.0;
-                let baseDefVal = Math.ceil(
-                  1.5 * repScale * baseRarityMult * overallMult,
-                );
-                let baseHpVal = Math.ceil(
-                  6.0 * repScale * baseRarityMult * overallMult,
-                );
+      if (
+        item.type === "weapon" &&
+        !item.isUniqueStaff &&
+        !item.isUniqueSword &&
+        !item.isUniqueSingularity &&
+        !item.isUniqueMaelstrom
+      ) {
+        let baseVal = Math.ceil(2.5 * repScale * baseRarityMult);
+        if (noun.includes("greatsword") || noun.includes("claymore")) {
+          item.baseAtk = Math.ceil(baseVal * 1.15);
+          item.baseCritDamage = 0.15;
+        } else if (noun.includes("longsword") || noun.includes("broadsword")) {
+          item.baseAtk = Math.ceil(baseVal * 0.95);
+          item.baseCritChance = 0.04;
+        } else if (noun.includes("halberd") || noun.includes("battleaxe")) {
+          item.baseAtk = Math.ceil(baseVal * 1.2);
+          item.atkPct = 0.05;
+        } else if (noun.includes("warhammer") || noun.includes("mace")) {
+          item.baseAtk = Math.ceil(baseVal * 1.1);
+          item.baseStr = Math.ceil(0.8 * stageScale * baseRarityMult);
+        } else {
+          item.baseAtk = baseVal;
+        }
+      } else if (item.type === "chest" || item.type === "overall") {
+        let overallMult = item.type === "overall" ? 1.8 : 1.0;
+        let baseDefVal = Math.ceil(
+          1.5 * repScale * baseRarityMult * overallMult,
+        );
+        let baseHpVal = Math.ceil(
+          6.0 * repScale * baseRarityMult * overallMult,
+        );
 
-                if (
-                  noun.includes("cuirass") ||
-                  noun.includes("plate_mail") ||
-                  noun.includes("full_plate")
-                ) {
-                  item.baseDef = Math.ceil(baseDefVal * 1.3);
-                  item.baseMaxHp = Math.ceil(baseHpVal * 0.8);
-                  item.defPct = 0.04;
-                } else if (noun.includes("hauberk") || noun.includes("chain_mail")) {
-                  item.baseDef = baseDefVal;
-                  item.baseMaxHp = baseHpVal;
-                  item.baseBlock = 0.02;
-                } else if (
-                  noun.includes("brigandine") ||
-                  noun.includes("doublet") ||
-                  noun.includes("trenchcoat")
-                ) {
-                  item.baseDef = Math.ceil(baseDefVal * 0.7);
-                  item.baseMaxHp = Math.ceil(baseHpVal * 1.4);
-                  item.maxHpPct = 0.05;
-                } else if (noun.includes("exosuit")) {
-                  item.baseDef = baseDefVal;
-                  item.baseMaxHp = baseHpVal;
-                  item.maxHpPct = 0.06;
-                } else if (noun.includes("robes")) {
-                  item.baseDef = Math.ceil(baseDefVal * 0.6);
-                  item.baseMaxHp = Math.ceil(baseHpVal * 1.4);
-                  item.baseInt = Math.ceil(2.0 * stageScale * baseRarityMult);
-                } else {
-                  item.baseDef = baseDefVal;
-                  item.baseMaxHp = baseHpVal;
-                }
-              } else if (item.type === "helmet" && !item.isUniqueTempest) {
-                let baseDefVal = Math.ceil(0.7 * repScale * baseRarityMult);
-                let baseHpVal = Math.ceil(3.0 * repScale * baseRarityMult);
+        if (
+          noun.includes("cuirass") ||
+          noun.includes("plate_mail") ||
+          noun.includes("full_plate")
+        ) {
+          item.baseDef = Math.ceil(baseDefVal * 1.3);
+          item.baseMaxHp = Math.ceil(baseHpVal * 0.8);
+          item.defPct = 0.04;
+        } else if (noun.includes("hauberk") || noun.includes("chain_mail")) {
+          item.baseDef = baseDefVal;
+          item.baseMaxHp = baseHpVal;
+          item.baseBlock = 0.02;
+        } else if (
+          noun.includes("brigandine") ||
+          noun.includes("doublet") ||
+          noun.includes("trenchcoat")
+        ) {
+          item.baseDef = Math.ceil(baseDefVal * 0.7);
+          item.baseMaxHp = Math.ceil(baseHpVal * 1.4);
+          item.maxHpPct = 0.05;
+        } else if (noun.includes("exosuit")) {
+          item.baseDef = baseDefVal;
+          item.baseMaxHp = baseHpVal;
+          item.maxHpPct = 0.06;
+        } else if (noun.includes("robes")) {
+          item.baseDef = Math.ceil(baseDefVal * 0.6);
+          item.baseMaxHp = Math.ceil(baseHpVal * 1.4);
+          item.baseInt = Math.ceil(2.0 * stageScale * baseRarityMult);
+        } else {
+          item.baseDef = baseDefVal;
+          item.baseMaxHp = baseHpVal;
+        }
+      } else if (item.type === "helmet" && !item.isUniqueTempest) {
+        let baseDefVal = Math.ceil(0.7 * repScale * baseRarityMult);
+        let baseHpVal = Math.ceil(3.0 * repScale * baseRarityMult);
 
-                if (noun.includes("greathelm") || noun.includes("visor")) {
-                  item.baseDef = Math.ceil(baseDefVal * 1.25);
-                  item.baseMaxHp = Math.ceil(baseHpVal * 0.85);
-                  item.defPct = 0.03;
-                } else if (
-                  noun.includes("armet") ||
-                  noun.includes("bascinet") ||
-                  noun.includes("barbuta")
-                ) {
-                  item.baseDef = baseDefVal;
-                  item.baseMaxHp = baseHpVal;
-                  item.baseParry = 0.02;
-                } else if (noun.includes("circlet") || noun.includes("coif")) {
-                  item.baseDef = Math.ceil(baseDefVal * 0.65);
-                  item.baseMaxHp = Math.ceil(baseHpVal * 1.35);
-                  item.baseCritChance = 0.03;
-                } else {
-                  item.baseDef = baseDefVal;
-                  item.baseMaxHp = baseHpVal;
-                }
-              } else if (item.type === "leggings") {
-                let baseDefVal = Math.ceil(0.7 * repScale * baseRarityMult);
-                let baseHpVal = Math.ceil(3.0 * repScale * baseRarityMult);
+        if (noun.includes("greathelm") || noun.includes("visor")) {
+          item.baseDef = Math.ceil(baseDefVal * 1.25);
+          item.baseMaxHp = Math.ceil(baseHpVal * 0.85);
+          item.defPct = 0.03;
+        } else if (
+          noun.includes("armet") ||
+          noun.includes("bascinet") ||
+          noun.includes("barbuta")
+        ) {
+          item.baseDef = baseDefVal;
+          item.baseMaxHp = baseHpVal;
+          item.baseParry = 0.02;
+        } else if (noun.includes("circlet") || noun.includes("coif")) {
+          item.baseDef = Math.ceil(baseDefVal * 0.65);
+          item.baseMaxHp = Math.ceil(baseHpVal * 1.35);
+          item.baseCritChance = 0.03;
+        } else {
+          item.baseDef = baseDefVal;
+          item.baseMaxHp = baseHpVal;
+        }
+      } else if (item.type === "leggings") {
+        let baseDefVal = Math.ceil(0.7 * repScale * baseRarityMult);
+        let baseHpVal = Math.ceil(3.0 * repScale * baseRarityMult);
 
-                if (noun.includes("legplates")) {
-                  item.baseDef = Math.ceil(baseDefVal * 1.2);
-                  item.baseMaxHp = Math.ceil(baseHpVal * 0.8);
-                  item.defPct = 0.03;
-                } else if (noun.includes("greaves")) {
-                  item.baseDef = baseDefVal;
-                  item.baseMaxHp = baseHpVal;
-                  item.baseBlock = 0.02;
-                } else if (noun.includes("chausses") || noun.includes("cuisses")) {
-                  item.baseDef = Math.ceil(baseDefVal * 0.7);
-                  item.baseMaxHp = Math.ceil(baseHpVal * 1.3);
-                  item.baseParry = 0.03;
-                } else {
-                  item.baseDef = baseDefVal;
-                  item.baseMaxHp = baseHpVal;
-                }
-              } else if (item.type === "boots" && !item.isUniqueWarpCore) {
-                let baseDefVal = Math.ceil(0.35 * repScale * baseRarityMult);
-                let baseSpdVal = Math.ceil(1.0 * stageScale);
+        if (noun.includes("legplates")) {
+          item.baseDef = Math.ceil(baseDefVal * 1.2);
+          item.baseMaxHp = Math.ceil(baseHpVal * 0.8);
+          item.defPct = 0.03;
+        } else if (noun.includes("greaves")) {
+          item.baseDef = baseDefVal;
+          item.baseMaxHp = baseHpVal;
+          item.baseBlock = 0.02;
+        } else if (noun.includes("chausses") || noun.includes("cuisses")) {
+          item.baseDef = Math.ceil(baseDefVal * 0.7);
+          item.baseMaxHp = Math.ceil(baseHpVal * 1.3);
+          item.baseParry = 0.03;
+        } else {
+          item.baseDef = baseDefVal;
+          item.baseMaxHp = baseHpVal;
+        }
+      } else if (item.type === "boots" && !item.isUniqueWarpCore) {
+        let baseDefVal = Math.ceil(0.35 * repScale * baseRarityMult);
+        let baseSpdVal = Math.ceil(1.0 * stageScale);
 
-                if (
-                  noun.includes("sabatons") ||
-                  noun.includes("steel_boots") ||
-                  noun.includes("steel")
-                ) {
-                  item.baseDef = Math.ceil(baseDefVal * 1.4);
-                  item.baseMoveSpeed = Math.ceil(baseSpdVal * 0.8);
-                  item.defPct = 0.03;
-                } else if (noun.includes("sollerets")) {
-                  item.baseDef = baseDefVal;
-                  item.baseMoveSpeed = baseSpdVal;
-                  item.baseParry = 0.02;
-                } else if (noun.includes("treads")) {
-                  item.baseDef = Math.ceil(baseDefVal * 0.6);
-                  item.baseMoveSpeed = Math.ceil(baseSpdVal * 1.35);
-                  item.moveSpeedPct = 0.04;
-                } else {
-                  item.baseDef = baseDefVal;
-                  item.baseMoveSpeed = baseSpdVal;
-                }
-              } else if (item.type === "ring") {
-                          if (item.implicitType === undefined) {
-                            if (item.baseAtk > 0) item.implicitType = "atk";
-                            else if (item.baseMaxHp > 0) item.implicitType = "maxHp";
-                            else item.implicitType = "def";
-                          }
-                          if (item.implicitType === "atk")
-                            item.baseAtk = Math.ceil(0.6 * repScale * baseRarityMult);
-                          else if (item.implicitType === "maxHp")
-                            item.baseMaxHp = Math.ceil(1.5 * repScale * baseRarityMult);
-                          else if (item.implicitType === "def")
-                            item.baseDef = Math.ceil(0.35 * repScale * baseRarityMult);
+        if (
+          noun.includes("sabatons") ||
+          noun.includes("steel_boots") ||
+          noun.includes("steel")
+        ) {
+          item.baseDef = Math.ceil(baseDefVal * 1.4);
+          item.baseMoveSpeed = Math.ceil(baseSpdVal * 0.8);
+          item.defPct = 0.03;
+        } else if (noun.includes("sollerets")) {
+          item.baseDef = baseDefVal;
+          item.baseMoveSpeed = baseSpdVal;
+          item.baseParry = 0.02;
+        } else if (noun.includes("treads")) {
+          item.baseDef = Math.ceil(baseDefVal * 0.6);
+          item.baseMoveSpeed = Math.ceil(baseSpdVal * 1.35);
+          item.moveSpeedPct = 0.04;
+        } else {
+          item.baseDef = baseDefVal;
+          item.baseMoveSpeed = baseSpdVal;
+        }
+      } else if (item.type === "ring") {
+        if (item.implicitType === undefined) {
+          if (item.baseAtk > 0) item.implicitType = "atk";
+          else if (item.baseMaxHp > 0) item.implicitType = "maxHp";
+          else item.implicitType = "def";
+        }
+        if (item.implicitType === "atk")
+          item.baseAtk = Math.ceil(0.6 * repScale * baseRarityMult);
+        else if (item.implicitType === "maxHp")
+          item.baseMaxHp = Math.ceil(1.5 * repScale * baseRarityMult);
+        else if (item.implicitType === "def")
+          item.baseDef = Math.ceil(0.35 * repScale * baseRarityMult);
 
-                          let scaleFactor = Math.pow(stageScale, 0.8);
-                if (item.atkPct > 0)
-                  item.atkPct = parseFloat((0.04 * scaleFactor).toFixed(4));
-                if (item.maxHpPct > 0)
-                  item.maxHpPct = parseFloat((0.04 * scaleFactor).toFixed(4));
-                if (item.defPct > 0)
-                  item.defPct = parseFloat((0.04 * scaleFactor).toFixed(4));
-                if (item.strPct > 0)
-                  item.strPct = parseFloat((0.04 * scaleFactor).toFixed(4));
-                if (item.dexPct > 0)
-                  item.dexPct = parseFloat((0.04 * scaleFactor).toFixed(4));
-                if (item.intPct > 0)
-                  item.intPct = parseFloat((0.04 * scaleFactor).toFixed(4));
-              } else if (
-                item.type === "subweapon" &&
-                !item.isUniqueAegis &&
-                !item.isUniqueWatch &&
-                !item.isUniqueChronicle &&
-                !item.isUniqueConduit &&
-                !item.isUniqueViper
-              ) {
-                if (item.subType === "shield") {
-                  item.baseDef = Math.ceil(1.0 * repScale * baseRarityMult);
-                  if (noun.includes("buckler")) {
-                    item.baseBlock = 0.12;
-                  } else if (noun.includes("tower")) {
-                    item.baseBlock = 0.02;
-                  } else {
-                    item.baseBlock = 0.05;
-                  }
-                } else if (item.subType === "dagger") {
-                  item.baseAtk = Math.ceil(0.8 * repScale * baseRarityMult);
-                  if (noun.includes("main-gauche")) {
-                    item.baseParry = 0.1;
-                  } else {
-                    item.baseParry = 0.05;
-                  }
-                } else if (item.subType === "tome") {
-                  item.baseInt = Math.ceil(1.5 * stageScale * baseRarityMult);
-                  item.baseAtk = Math.ceil(0.4 * repScale * baseRarityMult);
-                }
-              }
-            } else if (item.type === "artifact") {
+        let scaleFactor = Math.pow(stageScale, 0.8);
+        if (item.atkPct > 0)
+          item.atkPct = parseFloat((0.04 * scaleFactor).toFixed(4));
+        if (item.maxHpPct > 0)
+          item.maxHpPct = parseFloat((0.04 * scaleFactor).toFixed(4));
+        if (item.defPct > 0)
+          item.defPct = parseFloat((0.04 * scaleFactor).toFixed(4));
+        if (item.strPct > 0)
+          item.strPct = parseFloat((0.04 * scaleFactor).toFixed(4));
+        if (item.dexPct > 0)
+          item.dexPct = parseFloat((0.04 * scaleFactor).toFixed(4));
+        if (item.intPct > 0)
+          item.intPct = parseFloat((0.04 * scaleFactor).toFixed(4));
+      } else if (
+        item.type === "subweapon" &&
+        !item.isUniqueAegis &&
+        !item.isUniqueWatch &&
+        !item.isUniqueChronicle &&
+        !item.isUniqueConduit &&
+        !item.isUniqueViper
+      ) {
+        if (item.subType === "shield") {
+          item.baseDef = Math.ceil(1.0 * repScale * baseRarityMult);
+          if (noun.includes("buckler")) {
+            item.baseBlock = 0.12;
+          } else if (noun.includes("tower")) {
+            item.baseBlock = 0.02;
+          } else {
+            item.baseBlock = 0.05;
+          }
+        } else if (item.subType === "dagger") {
+          item.baseAtk = Math.ceil(0.8 * repScale * baseRarityMult);
+          if (noun.includes("main-gauche")) {
+            item.baseParry = 0.1;
+          } else {
+            item.baseParry = 0.05;
+          }
+        } else if (item.subType === "tome") {
+          item.baseInt = Math.ceil(1.5 * stageScale * baseRarityMult);
+          item.baseAtk = Math.ceil(0.4 * repScale * baseRarityMult);
+        }
+      }
+    } else if (item.type === "artifact") {
       // Artifact parameters are managed statically on drop; preserve them as is
     } else {
       // Reset all stats to build deterministic static unique profiles
@@ -4042,6 +4044,11 @@ Object.assign(window.ForgeManager, {
         leggings: 0,
         overall: 0,
         boots: 0,
+        ring1: 0,
+        ring2: 0,
+        art1: 0,
+        art2: 0,
+        art3: 0,
       };
       let curLvl = window.playerStats.slotUpgrades[slotKey] || 0;
       if (curLvl >= 100) return;
@@ -4091,6 +4098,15 @@ Object.assign(window.ForgeManager, {
       }
 
       window.playerStats.slotUpgrades[slotKey]++;
+
+      // Recalculate statistics for the equipped item on the fly and trigger redraw flags
+      let eqItem = window.equippedSlots[slotKey];
+      if (eqItem) {
+        window.recalculateItemStats(eqItem);
+      }
+      window.state.paperDollDirty = true;
+      window.invalidatePlayerStats();
+
       window.playerStats.totalTempers =
         (window.playerStats.totalTempers || 0) + 1;
 
@@ -4203,11 +4219,24 @@ Object.assign(window.ForgeManager, {
     if (!window.forgeSelectedItem) return;
     let item = window.forgeSelectedItem;
 
-    let slotKey = item.type === "subweapon" ? "subweapon" : item.type;
-    let slotLevel =
-      (window.playerStats.slotUpgrades &&
-        window.playerStats.slotUpgrades[slotKey]) ||
-      0;
+    let slotKey =
+      item.isEquippedSlot ||
+      (item.type === "subweapon" ? "subweapon" : item.type);
+    let slotLevel = 0;
+
+    if (item.type === "ring" && !item.isEquippedSlot) {
+      // Check the highest of your two ring slots for unequipped inventory rings
+      slotLevel = Math.max(
+        window.playerStats.slotUpgrades.ring1 || 0,
+        window.playerStats.slotUpgrades.ring2 || 0,
+      );
+    } else {
+      slotLevel =
+        (window.playerStats.slotUpgrades &&
+          window.playerStats.slotUpgrades[slotKey]) ||
+        0;
+    }
+
     if (slotLevel < 50) {
       if (typeof window.pushHeaderToast === "function")
         window.pushHeaderToast(
@@ -4734,19 +4763,19 @@ window.rollGachaCrateItem = function (
   }
 
   let allowArtifact = Math.random() < (isGlimmering ? 0.05 : 0.01);
-    let types = [
-      "weapon",
-      "subweapon",
-      "helmet",
-      "chest",
-      "leggings",
-      "overall",
-      "boots",
-      "ring",
-    ];
-    let chosenType = allowArtifact
-      ? "artifact"
-      : types[Math.floor(Math.random() * types.length)];
+  let types = [
+    "weapon",
+    "subweapon",
+    "helmet",
+    "chest",
+    "leggings",
+    "overall",
+    "boots",
+    "ring",
+  ];
+  let chosenType = allowArtifact
+    ? "artifact"
+    : types[Math.floor(Math.random() * types.length)];
 
   if (chosenType === "artifact") {
     if (window.inventory.ARTIFACT.length >= maxBag) {
@@ -4904,9 +4933,9 @@ window.buyMysticalItem = function (index) {
   let currency = item.currency;
 
   if (currency === "Gold") {
-      // Modified scaling from exponential to a balanced linear level scaling (item.cost * player level)
-      cost = BigNum.from(item.cost).mul(window.playerStats.level || 1);
-      let coins = BigNum.from(window.playerStats.coins);
+    // Modified scaling from exponential to a balanced linear level scaling (item.cost * player level)
+    cost = BigNum.from(item.cost).mul(window.playerStats.level || 1);
+    let coins = BigNum.from(window.playerStats.coins);
     if (coins.lt(cost)) {
       window.pushHeaderToast("❌ Insufficient Gold!", "#e74c3c");
       return;
@@ -4965,18 +4994,18 @@ window.buyGoldUpgrade = function (type) {
   let levelField = "";
 
   if (type === "vending") {
-      levelField = "vendingQLevel";
-      // Elevated cost scaling exponent (1.5 -> 1.75) to prevent trivialization during deep stage progression
-      cost = BigNum.from(15000).mul(BigNum.from(1.75).pow(p.vendingQLevel || 0));
-    } else if (type === "shop") {
-      levelField = "shopQLevel";
-      // Elevated cost scaling exponent (1.65 -> 1.95) to prevent trivialization during deep stage progression
-      cost = BigNum.from(30000).mul(BigNum.from(1.95).pow(p.shopQLevel || 0));
-    } else if (type === "global") {
-      levelField = "globalQLevel";
-      // Elevated cost scaling exponent (1.85 -> 2.25) to prevent trivialization during deep stage progression
-      cost = BigNum.from(100000).mul(BigNum.from(2.25).pow(p.globalQLevel || 0));
-    }
+    levelField = "vendingQLevel";
+    // Elevated cost scaling exponent (1.5 -> 1.75) to prevent trivialization during deep stage progression
+    cost = BigNum.from(15000).mul(BigNum.from(1.75).pow(p.vendingQLevel || 0));
+  } else if (type === "shop") {
+    levelField = "shopQLevel";
+    // Elevated cost scaling exponent (1.65 -> 1.95) to prevent trivialization during deep stage progression
+    cost = BigNum.from(30000).mul(BigNum.from(1.95).pow(p.shopQLevel || 0));
+  } else if (type === "global") {
+    levelField = "globalQLevel";
+    // Elevated cost scaling exponent (1.85 -> 2.25) to prevent trivialization during deep stage progression
+    cost = BigNum.from(100000).mul(BigNum.from(2.25).pow(p.globalQLevel || 0));
+  }
 
   let coins = BigNum.from(p.coins);
   let costBig = BigNum.from(cost);
@@ -5151,7 +5180,11 @@ window.buyAstralShopItem = function (index) {
     window.playerStats.equippedTitle = "astral_conqueror"; // Auto-equip title
   } else {
     window.playerStats.astralShards -= item.cost;
-    const useItems = ["Double Drop Elixir", "Drop Quality Elixir", "Monster Card Sack"];
+    const useItems = [
+      "Double Drop Elixir",
+      "Drop Quality Elixir",
+      "Monster Card Sack",
+    ];
     if (useItems.includes(item.name)) {
       window.addUseDrop(item.name, 1);
     } else {

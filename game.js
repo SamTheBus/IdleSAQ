@@ -186,7 +186,10 @@ window.removeWakeLockGestureListeners = function () {
 document.addEventListener("visibilitychange", async () => {
   if (document.visibilityState === "visible") {
     // Resume BGM and Web Audio context only if the player hasn't muted the game
-    if (window.MusicManager && typeof window.MusicManager.resume === "function") {
+    if (
+      window.MusicManager &&
+      typeof window.MusicManager.resume === "function"
+    ) {
       window.MusicManager.resume();
     }
     if (window.SoundManager && window.SoundManager.ctx) {
@@ -201,7 +204,10 @@ document.addEventListener("visibilitychange", async () => {
     }, 1000);
   } else {
     // Pause BGM and suspend Web Audio context to completely halt background audio and conserve resource/battery
-    if (window.MusicManager && typeof window.MusicManager.pause === "function") {
+    if (
+      window.MusicManager &&
+      typeof window.MusicManager.pause === "function"
+    ) {
       window.MusicManager.pause();
     }
     if (window.SoundManager && window.SoundManager.ctx) {
@@ -1474,22 +1480,22 @@ window.SaveManager = {
     }
 
     let maxBag = window.getMaxBagSlots();
-        let initialEquipIds = new Set(
-          window.inventory.EQUIP.map((item) => item.id),
-        );
-        let initialArtifactIds = new Set(
-          window.inventory.ARTIFACT.map((item) => item.id),
-        );
-        let equipTypesList = [
-          "weapon",
-          "subweapon",
-          "helmet",
-          "chest",
-          "leggings",
-          "overall",
-          "boots",
-          "ring",
-        ];
+    let initialEquipIds = new Set(
+      window.inventory.EQUIP.map((item) => item.id),
+    );
+    let initialArtifactIds = new Set(
+      window.inventory.ARTIFACT.map((item) => item.id),
+    );
+    let equipTypesList = [
+      "weapon",
+      "subweapon",
+      "helmet",
+      "chest",
+      "leggings",
+      "overall",
+      "boots",
+      "ring",
+    ];
 
     function rollOfflineItem(isBossKill, stageNum, isRareMob) {
       let pCurrent = window.resolvePlayerStats();
@@ -1726,10 +1732,10 @@ window.SaveManager = {
         }
 
         // Roll for Monster Card Sack from stage boss clears (unrestricted)
-                let cardChance = 0.01 * p.drop;
-                if (Math.random() < cardChance) {
-                  recordScrapGained("Monster Card Sack", 1);
-                }
+        let cardChance = 0.01 * p.drop;
+        if (Math.random() < cardChance) {
+          recordScrapGained("Monster Card Sack", 1);
+        }
       } else {
         break; // Time ran out for this stage advancement
       }
@@ -1771,33 +1777,33 @@ window.SaveManager = {
       }
 
       // Potion and Card Sack drop rolls
-          if (farmKills > 0) {
-            let pCurrent = window.resolvePlayerStats();
+      if (farmKills > 0) {
+        let pCurrent = window.resolvePlayerStats();
 
-            // 1. Unrestricted Potion Roll Engine (Matches standard active drop rate)
-            let potionChance = 0.0004 * pCurrent.drop;
-            const types = [
-              "Attack Elixir",
-              "Vitality Elixir",
-              "Armored Elixir",
-              "Haste Elixir",
-            ];
+        // 1. Unrestricted Potion Roll Engine (Matches standard active drop rate)
+        let potionChance = 0.0004 * pCurrent.drop;
+        const types = [
+          "Attack Elixir",
+          "Vitality Elixir",
+          "Armored Elixir",
+          "Haste Elixir",
+        ];
 
-            for (let k = 0; k < farmKills; k++) {
-              if (Math.random() < potionChance) {
-                let rolledPot = types[Math.floor(Math.random() * types.length)];
-                recordScrapGained(rolledPot, 1);
-              }
-            }
-
-            // 2. Unrestricted Card Sack Roll Engine from Farming (Simulates active card drop frequencies)
-            let cardChance = 0.00005 * pCurrent.drop;
-            for (let k = 0; k < farmKills; k++) {
-              if (Math.random() < cardChance) {
-                recordScrapGained("Monster Card Sack", 1);
-              }
-            }
+        for (let k = 0; k < farmKills; k++) {
+          if (Math.random() < potionChance) {
+            let rolledPot = types[Math.floor(Math.random() * types.length)];
+            recordScrapGained(rolledPot, 1);
           }
+        }
+
+        // 2. Unrestricted Card Sack Roll Engine from Farming (Simulates active card drop frequencies)
+        let cardChance = 0.00005 * pCurrent.drop;
+        for (let k = 0; k < farmKills; k++) {
+          if (Math.random() < cardChance) {
+            recordScrapGained("Monster Card Sack", 1);
+          }
+        }
+      }
 
       elapsedSeconds += remainingSeconds;
       remainingSeconds = 0;
@@ -4944,15 +4950,15 @@ function update() {
   }
 
   // AI Autopilot Tab Explorer & Status Update Hook
-    //if (window.AIPlaytester && window.AIPlaytester.active) {
-      //window.AIPlaytester.exploreTabs();
-      //if (window.logicClock % 15 === 0) {
-        //window.AIPlaytester.updateHud();
-      //}
-    //}
-  }
+  //if (window.AIPlaytester && window.AIPlaytester.active) {
+  //window.AIPlaytester.exploreTabs();
+  //if (window.logicClock % 15 === 0) {
+  //window.AIPlaytester.updateHud();
+  //}
+  //}
+}
 
-  // --- GAMEPLAY TRIGGERS & HOOKS ---
+// --- GAMEPLAY TRIGGERS & HOOKS ---
 
 window.registerMaelstromTap = function () {
   if (
@@ -6851,7 +6857,7 @@ window.CombatEngine = {
           window.playerStats.lifetimePeakStage || 1,
           window.playerStats.maxStage,
         );
-        
+
         if (typeof window.pushLog === "function")
           window.pushLog(
             `<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${window.playerStats.stage}.</span>`,
@@ -7145,37 +7151,37 @@ window.CombatEngine = {
       let tier = window.getStageTier();
       if (window.playerStats.isBossMode) {
         if (window.playerStats.isUberBoss) {
-                    let bossType = window.playerStats.currentUberBoss || "guardian";
-                    let hpMult = 45.0; // Increased from 10.0 to 45.0 for a meaningful, challenging boss health pool
-                    let dmgMult = 3.5; // Reduced from 10.0 to 3.5 to create a sustained, non-one-shot battle pace
-                    let speedMult = 100;
-                    let mType = "aegis_goliath";
-                    let logText =
-                      "<strong style='color:#3498db;'>Aegis Goliath, The Iron Sentinel</strong> has materialized from the cracked Aether!";
+          let bossType = window.playerStats.currentUberBoss || "guardian";
+          let hpMult = 45.0; // Increased from 10.0 to 45.0 for a meaningful, challenging boss health pool
+          let dmgMult = 3.5; // Reduced from 10.0 to 3.5 to create a sustained, non-one-shot battle pace
+          let speedMult = 100;
+          let mType = "aegis_goliath";
+          let logText =
+            "<strong style='color:#3498db;'>Aegis Goliath, The Iron Sentinel</strong> has materialized from the cracked Aether!";
 
-                    if (bossType === "chronos") {
-                      speedMult = 90;
-                      mType = "chronos_arbitrator";
-                      logText =
-                        "<strong style='color:#f1c40f;'>Chronos Arbitrator</strong> has stepped from the temporal flow!";
-                    } else if (bossType === "nexus") {
-                      speedMult = 80;
-                      mType = "nexus_overseer";
-                      logText =
-                        "<strong style='color:#ff007f;'>Nexus Overseer</strong> has infected the reality stream!";
-                    }
+          if (bossType === "chronos") {
+            speedMult = 90;
+            mType = "chronos_arbitrator";
+            logText =
+              "<strong style='color:#f1c40f;'>Chronos Arbitrator</strong> has stepped from the temporal flow!";
+          } else if (bossType === "nexus") {
+            speedMult = 80;
+            mType = "nexus_overseer";
+            logText =
+              "<strong style='color:#ff007f;'>Nexus Overseer</strong> has infected the reality stream!";
+          }
 
-                    let riftLvl = window.playerStats.activeRiftLevel || 1;
-                    let equivalentStage = 50 + riftLvl * 10;
-                    let riftGrowthRate =
-                      1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
-                    let b_riftScale = BigNum.from(riftGrowthRate).pow(equivalentStage);
+          let riftLvl = window.playerStats.activeRiftLevel || 1;
+          let equivalentStage = 50 + riftLvl * 10;
+          let riftGrowthRate =
+            1.045 + (equivalentStage * 0.04) / (equivalentStage + 200);
+          let b_riftScale = BigNum.from(riftGrowthRate).pow(equivalentStage);
 
-                    let hp = BigNum.from(hpMult)
-                      .mul(100)
-                      .mul(b_riftScale)
-                      .mul(1 + equivalentStage * 0.06);
-                    let dmg = BigNum.from(20).mul(b_riftScale).mul(dmgMult);
+          let hp = BigNum.from(hpMult)
+            .mul(100)
+            .mul(b_riftScale)
+            .mul(1 + equivalentStage * 0.06);
+          let dmg = BigNum.from(20).mul(b_riftScale).mul(dmgMult);
           window.mob = {
             x: spawnEdgeX,
             y: 115,
@@ -8716,16 +8722,16 @@ window.triggerFairyLoot = function (targetFairy) {
   }
 
   if (rollEquip) {
-      let types = [
-        "weapon",
-        "subweapon",
-        "helmet",
-        "chest",
-        "leggings",
-        "overall",
-        "boots",
-        "ring",
-      ];
+    let types = [
+      "weapon",
+      "subweapon",
+      "helmet",
+      "chest",
+      "leggings",
+      "overall",
+      "boots",
+      "ring",
+    ];
     let chosenType = types[Math.floor(Math.random() * types.length)];
     let statLinesCount = 0;
     let luckMultiplier = p.qly;
@@ -9124,20 +9130,21 @@ window.rollEquipmentDrop = function (
   }
 
   // Setup logic moved outside the if block or placed correctly
-            let riftLvl = window.playerStats.activeRiftLevel || 1;
-            let artifactChance = Math.min(0.15, 0.01 + riftLvl * 0.003); // Scaled dynamically (1.3% up to 15.0% cap)
-            let allowArtifact = window.playerStats.isUberBoss && Math.random() < artifactChance;
-            let types = [
-              "weapon",
-              "subweapon",
-              "helmet",
-              "chest",
-              "leggings",
-              "overall",
-              "boots",
-              "ring",
-            ];
-            let allowedTraits = null;
+  let riftLvl = window.playerStats.activeRiftLevel || 1;
+  let artifactChance = Math.min(0.15, 0.01 + riftLvl * 0.003); // Scaled dynamically (1.3% up to 15.0% cap)
+  let allowArtifact =
+    window.playerStats.isUberBoss && Math.random() < artifactChance;
+  let types = [
+    "weapon",
+    "subweapon",
+    "helmet",
+    "chest",
+    "leggings",
+    "overall",
+    "boots",
+    "ring",
+  ];
+  let allowedTraits = null;
 
   if (window.playerStats.isUberBoss) {
     let bossType = window.playerStats.currentUberBoss || "guardian";
@@ -11141,12 +11148,12 @@ window.executeConduitDischarge = function (orb, index) {
 
 // Dynamic Localhost Dev-Only Script Injector
 //(function () {
-  //const isLocal =
-    //window.location.hostname === "localhost" ||
-    //window.location.hostname === "127.0.0.1";
-  //if (isLocal) {
-    //const script = document.createElement("script");
-    //script.src = "ai_playtester.js?v=" + Date.now();
-    //document.body.appendChild(script);
-  //}
+//const isLocal =
+//window.location.hostname === "localhost" ||
+//window.location.hostname === "127.0.0.1";
+//if (isLocal) {
+//const script = document.createElement("script");
+//script.src = "ai_playtester.js?v=" + Date.now();
+//document.body.appendChild(script);
+//}
 //})();

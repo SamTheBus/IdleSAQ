@@ -737,17 +737,17 @@ window.renderRiftConsole = function () {
     : `Rift Altar: Prepare Hunt`;
 
   let levelSelectorHtml = "";
-        if (isRiftActive) {
-          levelSelectorHtml = `
+  if (isRiftActive) {
+    levelSelectorHtml = `
                     <div style="background:rgba(231,76,60,0.1); border:1px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:center;">
                         <strong style="color:#e74c3c; font-size:11.5px;">⚠️ RIFT ACTIVE (LEVEL ${activeLvl})</strong><br>
                         <span style="font-size:10px; color:#aaa;">The Rift is locked. Slay or Collapse it to adjust level.</span>
                     </div>
                 `;
-        } else {
-                        let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15);
-                      let artifactChance = Math.min(0.15, 0.01 + selectedLvl * 0.003) * 100;
-                      levelSelectorHtml = `
+  } else {
+    let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15);
+    let artifactChance = Math.min(0.15, 0.01 + selectedLvl * 0.003) * 100;
+    levelSelectorHtml = `
                         <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
                             <div style="flex:1; min-width:0; padding-right:8px; cursor:help; text-align:left;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl}); event.stopPropagation();">
                                 <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER: ⓘ</strong>
@@ -761,7 +761,7 @@ window.renderRiftConsole = function () {
                             </div>
                         </div>
                       `;
-                    }
+  }
 
   let slidesHtml = window.riftBossesMetadata
     .map((boss, idx) => {
@@ -832,10 +832,10 @@ window.renderRiftConsole = function () {
             </div>
         `;
   } else {
-          let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15); // Progressive scaling cost
-          let canAfford = coresOwned >= coresNeeded;
-          let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-          actionBtnHtml = `
+    let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15); // Progressive scaling cost
+    let canAfford = coresOwned >= coresNeeded;
+    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+    actionBtnHtml = `
                   <div style="display:flex; flex-direction:column; gap:8px;">
                       <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; font-family:monospace; padding:0 4px;">
                           <span>Cores Owned: <strong style="color:${costColor};">${coresOwned} / ${coresNeeded}</strong></span>
@@ -844,7 +844,7 @@ window.renderRiftConsole = function () {
                       <button class="btn-action" style="background:#9b59b6; width:100%; font-weight:bold; padding:12px; font-size:11.5px; letter-spacing:0.5px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeRiftSummon()">🔮 COMMENCE SUMMONING</button>
                   </div>
               `;
-        }
+  }
 
   modal.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
@@ -941,34 +941,34 @@ window.setRiftSlide = function (idx) {
 };
 
 window.executeRiftSummon = function (isReentry = false) {
-      if (
-        !isReentry &&
-        (window.playerStats.isDungeonMode ||
-          window.playerStats.isCrucibleMode ||
-          window.playerStats.isPrestigeBossMode ||
-          window.playerStats.isUberBoss)
-      ) {
-        window.pushHeaderToast(
-          "Cannot summon: already in another activity!",
-          "#e74c3c",
-        );
-        return;
-      }
-      let cores = window.inventory.ETC["Ancient Core"] || 0;
-      let boss = window.riftBossesMetadata[window.riftSlideIndex];
-      let lvl = isReentry
-        ? window.playerStats.activeRiftLevel || 1
-        : window.riftSelectedLevel;
+  if (
+    !isReentry &&
+    (window.playerStats.isDungeonMode ||
+      window.playerStats.isCrucibleMode ||
+      window.playerStats.isPrestigeBossMode ||
+      window.playerStats.isUberBoss)
+  ) {
+    window.pushHeaderToast(
+      "Cannot summon: already in another activity!",
+      "#e74c3c",
+    );
+    return;
+  }
+  let cores = window.inventory.ETC["Ancient Core"] || 0;
+  let boss = window.riftBossesMetadata[window.riftSlideIndex];
+  let lvl = isReentry
+    ? window.playerStats.activeRiftLevel || 1
+    : window.riftSelectedLevel;
 
-      if (!isReentry) {
-        let coresNeeded = 1 + Math.floor((lvl - 1) / 15); // Progressive scaling cost
-        if (cores < coresNeeded) return;
-        window.inventory.ETC["Ancient Core"] -= coresNeeded;
-        if (window.inventory.ETC["Ancient Core"] === 0)
-          delete window.inventory.ETC["Ancient Core"];
-        window.playerStats.activeRift = boss.type;
-        window.playerStats.activeRiftLevel = lvl;
-      }
+  if (!isReentry) {
+    let coresNeeded = 1 + Math.floor((lvl - 1) / 15); // Progressive scaling cost
+    if (cores < coresNeeded) return;
+    window.inventory.ETC["Ancient Core"] -= coresNeeded;
+    if (window.inventory.ETC["Ancient Core"] === 0)
+      delete window.inventory.ETC["Ancient Core"];
+    window.playerStats.activeRift = boss.type;
+    window.playerStats.activeRiftLevel = lvl;
+  }
 
   let actualBossType = isReentry ? window.playerStats.activeRift : boss.type;
 
@@ -3628,38 +3628,42 @@ window.showStatBreakdown = function (e, statKey, isPct = false) {
     html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): ${formatVal(intScaleTotal)}</div>`;
 
   let totalVal =
-      data.base +
-      data.lvl +
-      gearTotal +
-      artTotal +
-      achTotal +
-      intScaleTotal +
-      prestigeTotal +
-      setFlatBonus;
-    if (statKey === "atk") {
-      let activeSubForBreakdown = window.equippedSlots ? window.equippedSlots.subweapon : null;
-      let activeSubTypeForBreakdown = activeSubForBreakdown ? activeSubForBreakdown.subType : null;
+    data.base +
+    data.lvl +
+    gearTotal +
+    artTotal +
+    achTotal +
+    intScaleTotal +
+    prestigeTotal +
+    setFlatBonus;
+  if (statKey === "atk") {
+    let activeSubForBreakdown = window.equippedSlots
+      ? window.equippedSlots.subweapon
+      : null;
+    let activeSubTypeForBreakdown = activeSubForBreakdown
+      ? activeSubForBreakdown.subType
+      : null;
 
-      let scalingStatKey = "str";
-      let scalingStatLabel = "Strength Scaling (STR)";
-      let effectiveScalingVal = effectiveStr;
+    let scalingStatKey = "str";
+    let scalingStatLabel = "Strength Scaling (STR)";
+    let effectiveScalingVal = effectiveStr;
 
-      if (activeSubTypeForBreakdown === "dagger") {
-        scalingStatKey = "dex";
-        scalingStatLabel = "Dexterity Scaling (DEX)";
-        effectiveScalingVal = effectiveDex;
-      } else if (activeSubTypeForBreakdown === "tome") {
-        scalingStatKey = "int";
-        scalingStatLabel = "Intelligence Scaling (INT)";
-        effectiveScalingVal = effectiveInt;
-      }
-
-      if (effectiveScalingVal > 0) {
-        let actualDmgAdded = Math.floor(totalVal * (effectiveScalingVal * 0.001));
-        html += `<div class="tt-stat-line" style="color:#e67e22;">• ${window.getUiIconSvg(scalingStatKey, 11)} ${scalingStatLabel}: +${window.formatNumber(actualDmgAdded)} Damage</div>`;
-        html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveScalingVal * 0.1).toFixed(1)}% Multiplier)</div>`;
-      }
+    if (activeSubTypeForBreakdown === "dagger") {
+      scalingStatKey = "dex";
+      scalingStatLabel = "Dexterity Scaling (DEX)";
+      effectiveScalingVal = effectiveDex;
+    } else if (activeSubTypeForBreakdown === "tome") {
+      scalingStatKey = "int";
+      scalingStatLabel = "Intelligence Scaling (INT)";
+      effectiveScalingVal = effectiveInt;
     }
+
+    if (effectiveScalingVal > 0) {
+      let actualDmgAdded = Math.floor(totalVal * (effectiveScalingVal * 0.001));
+      html += `<div class="tt-stat-line" style="color:#e67e22;">• ${window.getUiIconSvg(scalingStatKey, 11)} ${scalingStatLabel}: +${window.formatNumber(actualDmgAdded)} Damage</div>`;
+      html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveScalingVal * 0.1).toFixed(1)}% Multiplier)</div>`;
+    }
+  }
   if (statKey === "maxHp" && effectiveStr > 0) {
     let hpBonus = Math.floor(totalVal * (effectiveStr * 0.001));
     html += `<div class="tt-stat-line" style="color:#e74c3c;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(hpBonus)} HP</div>`;
@@ -3876,9 +3880,10 @@ window.showAstralShopItemTooltip = function (e, index) {
   if (item.isTitle) {
     iconHtml = `<div style="font-size: 20px; margin-right: 8px; display:inline-flex; align-items:center;">🌌</div>`;
   } else {
-    iconHtml = item.name.includes("Elixir") || item.name.includes("Sack")
-      ? window.getUseIconHtml(item.name)
-      : window.getEtcIconHtml(item.name);
+    iconHtml =
+      item.name.includes("Elixir") || item.name.includes("Sack")
+        ? window.getUseIconHtml(item.name)
+        : window.getEtcIconHtml(item.name);
     iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 8px;");
   }
 
@@ -3890,9 +3895,10 @@ window.showAstralShopItemTooltip = function (e, index) {
     let isOwned = unlocked.includes("astral_conqueror");
     ownedText = `• Status: <strong style="color:${isOwned ? "#2ecc71" : "#e74c3c"};">${isOwned ? "Unlocked" : "Locked"}</strong>`;
   } else {
-    let ownedReagent = item.name.includes("Elixir") || item.name.includes("Sack")
-      ? (window.inventory.USE[item.name] || 0)
-      : (window.inventory.ETC[item.name] || 0);
+    let ownedReagent =
+      item.name.includes("Elixir") || item.name.includes("Sack")
+        ? window.inventory.USE[item.name] || 0
+        : window.inventory.ETC[item.name] || 0;
     ownedText = `• Owned Reagent: <strong style="color:#fff;">${ownedReagent.toLocaleString()}</strong>`;
   }
 
@@ -4197,12 +4203,12 @@ window.renderMysticalShop = function () {
         costColor = owned >= item.cost ? "#9b59b6" : "#e74c3c";
         currencyLabel = "Shards";
       } else {
-          // Modified scaling to a balanced linear level scaling (item.cost * player level)
-          displayCost = Math.ceil(item.cost * (window.playerStats.level || 1));
-          costColor = BigNum.from(window.playerStats.coins).gte(displayCost)
-            ? "#f1c40f"
-            : "#e74c3c";
-        }
+        // Modified scaling to a balanced linear level scaling (item.cost * player level)
+        displayCost = Math.ceil(item.cost * (window.playerStats.level || 1));
+        costColor = BigNum.from(window.playerStats.coins).gte(displayCost)
+          ? "#f1c40f"
+          : "#e74c3c";
+      }
 
       let iconHtml =
         item.name === "Gacha Key" ||
@@ -4308,23 +4314,32 @@ window.renderAstralShop = function () {
 
   window.ASTRAL_SHOP_STOCK.forEach((item, index) => {
     let canAfford = ownedShards >= item.cost;
-    let isAlreadyOwnedTitle = item.isTitle && window.playerStats.unlockedTitles && window.playerStats.unlockedTitles.includes("astral_conqueror");
+    let isAlreadyOwnedTitle =
+      item.isTitle &&
+      window.playerStats.unlockedTitles &&
+      window.playerStats.unlockedTitles.includes("astral_conqueror");
 
-    let costColor = isAlreadyOwnedTitle ? "#bdc3c7" : (canAfford ? "#2ecc71" : "#e74c3c");
+    let costColor = isAlreadyOwnedTitle
+      ? "#bdc3c7"
+      : canAfford
+        ? "#2ecc71"
+        : "#e74c3c";
 
     let iconHtml = "";
     if (item.isTitle) {
       iconHtml = `<div style="font-size:20px; margin-right:6px; display:inline-flex; align-items:center;">🌌</div>`;
     } else {
-      iconHtml = item.name.includes("Elixir") || item.name.includes("Sack")
-        ? window.getUseIconHtml(item.name)
-        : window.getEtcIconHtml(item.name);
+      iconHtml =
+        item.name.includes("Elixir") || item.name.includes("Sack")
+          ? window.getUseIconHtml(item.name)
+          : window.getEtcIconHtml(item.name);
       iconHtml = iconHtml.replace("margin-right: 12px;", "margin-right: 6px;");
     }
 
     let btnStyle = "";
     if (isAlreadyOwnedTitle) {
-      btnStyle = "background: #222; color: #555; border: 1px solid #333; cursor: not-allowed;";
+      btnStyle =
+        "background: #222; color: #555; border: 1px solid #333; cursor: not-allowed;";
     } else if (canAfford) {
       btnStyle = `background: ${item.color}; color: ${item.color === "#f1c40f" || item.color === "#ffb6c1" ? "#111" : "#fff"}; font-weight: bold;`;
     }
@@ -4414,7 +4429,8 @@ window.executePrestigeAscension = function () {
       );
 
       if (window.playerStats.clanId && renownGained > 0) {
-        window.playerStats.renown = (window.playerStats.renown || 0) + renownGained;
+        window.playerStats.renown =
+          (window.playerStats.renown || 0) + renownGained;
         if (window.playerStats.pendingClanProgress) {
           window.playerStats.pendingClanProgress.renown =
             (window.playerStats.pendingClanProgress.renown || 0) + renownGained;
@@ -5585,20 +5601,20 @@ window.renderPaperDoll = function () {
       el.style.borderColor = color;
 
       let uniqueStyle = window.getUniqueItemStyle(item);
-            if (uniqueStyle) {
-              el.style.background = uniqueStyle.bg;
-              el.style.borderColor = uniqueStyle.border;
-              el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
-              if (item.isUniqueSingularity) {
-                el.style.animation = "voidSingularityShimmer 4s infinite ease-in-out";
-              } else {
-                el.style.animation = "";
-              }
-            } else {
-              el.style.background = "";
-              el.style.boxShadow = "";
-              el.style.animation = "";
-            }
+      if (uniqueStyle) {
+        el.style.background = uniqueStyle.bg;
+        el.style.borderColor = uniqueStyle.border;
+        el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
+        if (item.isUniqueSingularity) {
+          el.style.animation = "voidSingularityShimmer 4s infinite ease-in-out";
+        } else {
+          el.style.animation = "";
+        }
+      } else {
+        el.style.background = "";
+        el.style.boxShadow = "";
+        el.style.animation = "";
+      }
 
       let tierLabel =
         item.statsRolled === "UNIQUE"
@@ -5764,13 +5780,15 @@ window.renderInventory = function () {
 
           let details = `<span style="font-size:10px;color:#aaa;">Slot: ${typeText} | <span style="color:${nameColor};font-weight:bold;">${tierStr}</span></span>`;
           let uniqueStyle = window.getUniqueItemStyle(item);
-                    let itemStyleStr = "";
-                    if (uniqueStyle) {
-                      let animStr = item.isUniqueSingularity ? " animation: voidSingularityShimmer 4s infinite ease-in-out;" : "";
-                      itemStyleStr = `background: ${uniqueStyle.bg}; border: 1.5px solid ${uniqueStyle.border}; box-shadow: inset 0 0 6px ${uniqueStyle.shadow}, 0 0 8px ${uniqueStyle.glow};${animStr}`;
-                    } else {
-                      itemStyleStr = `border-left: 4.5px solid ${nameColor} !important; background: rgba(15, 17, 26, 0.65);`;
-                    }
+          let itemStyleStr = "";
+          if (uniqueStyle) {
+            let animStr = item.isUniqueSingularity
+              ? " animation: voidSingularityShimmer 4s infinite ease-in-out;"
+              : "";
+            itemStyleStr = `background: ${uniqueStyle.bg}; border: 1.5px solid ${uniqueStyle.border}; box-shadow: inset 0 0 6px ${uniqueStyle.shadow}, 0 0 8px ${uniqueStyle.glow};${animStr}`;
+          } else {
+            itemStyleStr = `border-left: 4.5px solid ${nameColor} !important; background: rgba(15, 17, 26, 0.65);`;
+          }
 
           let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center; flex-shrink:0;">${window.getEquipIconHtml(item, 28)}</div>`;
 
@@ -6239,6 +6257,24 @@ window.showSlotTooltip = function (e, slot) {
   window.positionTooltip(e, tt);
 };
 
+window.toggleRingComparisonSlot = function (e, itemId) {
+  if (e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+  window.state.preferredRingComparisonSlot = (window.state.preferredRingComparisonSlot || "ring1") === "ring1" ? "ring2" : "ring1";
+
+  // Force update and re-render the tooltip with the new slot selection
+  let tt = document.getElementById("game-tooltip");
+  if (tt && tt.style.display === "block" && itemId) {
+    let item = window.inventory.EQUIP.find((i) => i.id === itemId) || window.frozenItemDb[itemId];
+    if (item) {
+      tt.innerHTML = window.buildGeneralTooltipHtml(item, true);
+      tt.style.borderColor = window.getTierColor(item.statsRolled);
+    }
+  }
+};
+
 window.buildGeneralTooltipHtml = function (item, isBagItem = false) {
   let eq = isBagItem ? getEquippedItemForComparison(item.type) : null;
   let html = "";
@@ -6252,7 +6288,21 @@ window.buildGeneralTooltipHtml = function (item, isBagItem = false) {
       : ``;
     html += `<div class="tooltip-card" ${activeStyle}>${window.generateItemCardHtml(item, null, isEquipped)}</div>`;
   }
-  return `<div class="tooltip-flex-container">${html}</div>`;
+
+  // Inject the slot switcher bar at the bottom if comparing unequipped rings
+  if (isBagItem && item.type === "ring") {
+    let otherSlot = (window.state.preferredRingComparisonSlot || "ring1") === "ring1" ? "ring2" : "ring1";
+    let otherLabel = otherSlot === "ring1" ? "Ring Slot 1" : "Ring Slot 2";
+    html += `
+      <div style="width: 100%; text-align: center; margin-top: 8px; border-top: 1px dashed #333; padding-top: 8px; z-index: 50100; position: relative;">
+        <button class="btn-action" style="background: #9b59b6; font-size: 10px; padding: 4px 10px;" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="window.toggleRingComparisonSlot(event, ${item.id})">
+          ⟲ Compare with ${otherLabel}
+        </button>
+      </div>
+    `;
+  }
+
+  return `<div class="tooltip-flex-container" style="flex-wrap: wrap;">${html}</div>`;
 };
 
 window.generateItemCardHtml = function (
@@ -6418,10 +6468,10 @@ window.generateItemCardHtml = function (
   html += `<div class="tt-subtitle">${subtitle}</div>`;
 
   // --- IMPLICIT MODIFIERS SECTION ---
-      let implicits = [];
-      if (item.type !== "artifact" && item.statsRolled !== "UNIQUE") {
-        if (item.type === "ring") {
-          if (item.atkPct > 0)
+  let implicits = [];
+  if (item.type !== "artifact" && item.statsRolled !== "UNIQUE") {
+    if (item.type === "ring") {
+      if (item.atkPct > 0)
         implicits.push({
           label: "Attack",
           value: `+${(item.atkPct * 100).toFixed(1)}%`,
@@ -7101,15 +7151,17 @@ window.generateItemCardHtml = function (
   }
 
   if (uniqueStyle) {
-      if (uniqueStyle.lore) {
-        html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
-      }
-      let animationStyle = item.isUniqueSingularity ? " animation: voidSingularityShimmer 4s infinite ease-in-out;" : "";
-      html = `<div style="position: relative; background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 16px 12px 12px 12px; border-radius: 4px; box-sizing: border-box; width: 100%;${animationStyle}">
+    if (uniqueStyle.lore) {
+      html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
+    }
+    let animationStyle = item.isUniqueSingularity
+      ? " animation: voidSingularityShimmer 4s infinite ease-in-out;"
+      : "";
+    html = `<div style="position: relative; background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 16px 12px 12px 12px; border-radius: 4px; box-sizing: border-box; width: 100%;${animationStyle}">
                               ${runicBadge}
                               ${html}
                           </div>`;
-    }
+  }
 
   return html;
 };
@@ -7145,6 +7197,9 @@ function getEquippedItemForComparison(type) {
       return window.equippedSlots.overall;
     }
     slotKey = type;
+  }
+  if (type === "ring") {
+    slotKey = window.state.preferredRingComparisonSlot || "ring1";
   }
   let item = window.equippedSlots[slotKey];
   if (item) {
@@ -7263,20 +7318,20 @@ window.refreshMarketShopIfNeeded = function () {
     window.playerStats.shopItems = [];
 
     let peakRunStage = Math.max(
-          window.playerStats.stage,
-          window.playerStats.maxStage || 1,
-        );
-        let stageScale = Math.floor((peakRunStage - 1) / 5) + 1;
-        let types = [
-          "weapon",
-          "subweapon",
-          "helmet",
-          "chest",
-          "leggings",
-          "overall",
-          "boots",
-          "ring",
-        ];
+      window.playerStats.stage,
+      window.playerStats.maxStage || 1,
+    );
+    let stageScale = Math.floor((peakRunStage - 1) / 5) + 1;
+    let types = [
+      "weapon",
+      "subweapon",
+      "helmet",
+      "chest",
+      "leggings",
+      "overall",
+      "boots",
+      "ring",
+    ];
 
     for (let i = 0; i < 5; i++) {
       let isIOTD = i === 4;
@@ -7314,13 +7369,13 @@ window.refreshMarketShopIfNeeded = function () {
       let bnBaseBossGold = BigNum.from(15).mul(bnScale);
 
       const rarityCostMultipliers = [
-            15, // 0★ Common
-            60, // 1★ Rare
-            200, // 2★ Magic
-            600, // 3★ Epic
-            3000, // 4★ Legendary
-            15000, // 5★ Mythic
-          ];
+        15, // 0★ Common
+        60, // 1★ Rare
+        200, // 2★ Magic
+        600, // 3★ Epic
+        3000, // 4★ Legendary
+        15000, // 5★ Mythic
+      ];
       let itemRarityFactor = rarityCostMultipliers[statLinesCount] || 15;
 
       let cost = bnBaseBossGold.mul(itemRarityFactor);
@@ -10332,12 +10387,12 @@ window.showRiftRewardBreakdownTooltip = function (e, lvl) {
   let mythic = Math.floor(lvl / 3);
 
   let starsName = window.getTierName(minStars);
-                let starsColor = window.getTierColor(minStars);
+  let starsColor = window.getTierColor(minStars);
 
-                let coresNeeded = 1 + Math.floor((lvl - 1) / 15);
-                let artifactChance = Math.min(0.15, 0.01 + lvl * 0.003) * 100;
+  let coresNeeded = 1 + Math.floor((lvl - 1) / 15);
+  let artifactChance = Math.min(0.15, 0.01 + lvl * 0.003) * 100;
 
-                let html = `
+  let html = `
                   <div style="padding: 12px; width: 250px; box-sizing: border-box; font-family: sans-serif;">
                       <div class="tt-title" style="color:#9b59b6; font-size:12px; font-weight:bold; margin-bottom:4px; border-bottom:1px solid #333; padding-bottom:4px;">🌌 Rift Level ${lvl} Payouts</div>
                       <div class="tt-subtitle" style="margin-bottom:8px; color:#aaa; font-size:10px; font-style: italic;">Scaling reward projections for this Tier:</div>
@@ -10812,17 +10867,17 @@ window.renderAltarTab = function () {
   let coresOwned = window.inventory.ETC["Ancient Core"] || 0;
 
   let lvlSelectorHtml = "";
-        if (isRiftActive) {
-          lvlSelectorHtml = `
+  if (isRiftActive) {
+    lvlSelectorHtml = `
                                     <div style="background:rgba(231,76,60,0.1); border:1px dashed #e74c3c; border-radius:6px; padding:10px; margin-bottom:12px; text-align:center;">
                                         <strong style="color:#e74c3c; font-size:11.5px;">⚠️ RIFT ACTIVE (LEVEL ${activeLvl})</strong><br>
                                         <span style="font-size:10px; color:#aaa;">The Rift is locked. Slay or Collapse it to adjust level.</span>
                                     </div>
                                 `;
-        } else {
-                        let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15);
-                      let artifactChance = Math.min(0.15, 0.01 + selectedLvl * 0.003) * 100;
-                      lvlSelectorHtml = `
+  } else {
+    let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15);
+    let artifactChance = Math.min(0.15, 0.01 + selectedLvl * 0.003) * 100;
+    lvlSelectorHtml = `
                                                           <div style="background:rgba(155, 89, 182, 0.1); border:1px solid #4a154b; border-radius:6px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
                                                               <div style="flex:1; min-width:0; padding-right:8px; cursor:help; text-align:left;" onmouseenter="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl})" onmouseleave="window.hideTooltip()" ontouchstart="window.showRiftRewardBreakdownTooltip(event, ${selectedLvl}); event.stopPropagation();">
                                                                   <strong style="color:#df9ffb; font-size:11.5px; display:block;">CHOOSE RIFT TIER: ⓘ</strong>
@@ -10836,7 +10891,7 @@ window.renderAltarTab = function () {
                                                               </div>
                                               </div>
                                           `;
-                    }
+  }
 
   let slidesHtml = window.riftBossesMetadata
     .map((boss, idx) => {
@@ -10912,10 +10967,10 @@ window.renderAltarTab = function () {
                             </div>
                         `;
   } else {
-          let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15); // Progressive scaling cost
-          let canAfford = coresOwned >= coresNeeded;
-          let costColor = canAfford ? "#2ecc71" : "#e74c3c";
-          actionBtnHtml = `
+    let coresNeeded = 1 + Math.floor((selectedLvl - 1) / 15); // Progressive scaling cost
+    let canAfford = coresOwned >= coresNeeded;
+    let costColor = canAfford ? "#2ecc71" : "#e74c3c";
+    actionBtnHtml = `
                                       <div style="display:flex; flex-direction:column; gap:8px;">
                                           <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; font-family:monospace; padding:0 4px;">
                                               <span>Cores Owned: <strong style="color:${costColor};">${coresOwned} / ${coresNeeded}</strong></span>
@@ -10924,7 +10979,7 @@ window.renderAltarTab = function () {
                                           <button class="btn-action" style="background:#9b59b6; width:100%; font-weight:bold; padding:12px; font-size:11.5px; letter-spacing:0.5px;" ${canAfford ? "" : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="window.executeAltarSummon()">🔮 COMMENCE SUMMONING</button>
                                       </div>
                                   `;
-        }
+  }
 
   let highestRiftText = `🏆 Highest Rift Cleared: Level ${window.playerStats.highestRiftLevel || 0}`;
 
@@ -11026,34 +11081,34 @@ window.setAltarSlide = function (idx) {
 };
 
 window.executeAltarSummon = function (isReentry = false) {
-      if (
-        !isReentry &&
-        (window.playerStats.isDungeonMode ||
-          window.playerStats.isCrucibleMode ||
-          window.playerStats.isPrestigeBossMode ||
-          window.playerStats.isUberBoss)
-      ) {
-        window.pushHeaderToast(
-          "Cannot summon: already in another activity!",
-          "#e74c3c",
-        );
-        return;
-      }
-      let cores = window.inventory.ETC["Ancient Core"] || 0;
-      let boss = window.riftBossesMetadata[window.altarSlideIndex];
-      let lvl = isReentry
-        ? window.playerStats.activeRiftLevel || 1
-        : window.riftSelectedLevel;
+  if (
+    !isReentry &&
+    (window.playerStats.isDungeonMode ||
+      window.playerStats.isCrucibleMode ||
+      window.playerStats.isPrestigeBossMode ||
+      window.playerStats.isUberBoss)
+  ) {
+    window.pushHeaderToast(
+      "Cannot summon: already in another activity!",
+      "#e74c3c",
+    );
+    return;
+  }
+  let cores = window.inventory.ETC["Ancient Core"] || 0;
+  let boss = window.riftBossesMetadata[window.altarSlideIndex];
+  let lvl = isReentry
+    ? window.playerStats.activeRiftLevel || 1
+    : window.riftSelectedLevel;
 
-      if (!isReentry) {
-        let coresNeeded = 1 + Math.floor((lvl - 1) / 15); // Progressive scaling cost
-        if (cores < coresNeeded) return;
-        window.inventory.ETC["Ancient Core"] -= coresNeeded;
-        if (window.inventory.ETC["Ancient Core"] === 0)
-          delete window.inventory.ETC["Ancient Core"];
-        window.playerStats.activeRift = boss.type;
-        window.playerStats.activeRiftLevel = lvl;
-      }
+  if (!isReentry) {
+    let coresNeeded = 1 + Math.floor((lvl - 1) / 15); // Progressive scaling cost
+    if (cores < coresNeeded) return;
+    window.inventory.ETC["Ancient Core"] -= coresNeeded;
+    if (window.inventory.ETC["Ancient Core"] === 0)
+      delete window.inventory.ETC["Ancient Core"];
+    window.playerStats.activeRift = boss.type;
+    window.playerStats.activeRiftLevel = lvl;
+  }
 
   let actualBossType = isReentry ? window.playerStats.activeRift : boss.type;
 
@@ -12804,18 +12859,18 @@ window.openDailyRewardSack = function (specificName) {
     (window.playerStats.missionTokens || 0) + 1;
 
   // Always give a piece of equipment at your lifetime peak stage
-    let pCurrent = window.resolvePlayerStats();
-    let types = [
-      "weapon",
-      "subweapon",
-      "helmet",
-      "chest",
-      "leggings",
-      "overall",
-      "boots",
-      "ring",
-    ];
-    let chosenType = types[Math.floor(Math.random() * types.length)];
+  let pCurrent = window.resolvePlayerStats();
+  let types = [
+    "weapon",
+    "subweapon",
+    "helmet",
+    "chest",
+    "leggings",
+    "overall",
+    "boots",
+    "ring",
+  ];
+  let chosenType = types[Math.floor(Math.random() * types.length)];
 
   let statLinesCount = 0;
   let luckMultiplier = pCurrent.qly;
@@ -13789,29 +13844,36 @@ window.claimMailReward = function (mailId) {
         }
 
         // 6. Claim Custom On-Level Gear
-                if (rewards.custom_gear) {
-                  const slotType = rewards.custom_gear.slot;
-                  const stars = parseInt(rewards.custom_gear.stars, 10) || 0;
-                  let stageScale = Math.max(
-                    1,
-                    Math.floor(
-                      ((window.playerStats.lifetimePeakStage ||
-                        window.playerStats.stage ||
-                        1) -
-                        1) /
-                        5,
-                    ) + 1,
-                  );
+        if (rewards.custom_gear) {
+          const slotType = rewards.custom_gear.slot;
+          const stars = parseInt(rewards.custom_gear.stars, 10) || 0;
+          let stageScale = Math.max(
+            1,
+            Math.floor(
+              ((window.playerStats.lifetimePeakStage ||
+                window.playerStats.stage ||
+                1) -
+                1) /
+                5,
+            ) + 1,
+          );
 
-                  const spawnAndAddGear = (slot) => {
-                    let item = window.createItemObject(slot, stars, stageScale, stars);
-                    window.inventory.EQUIP.push(item);
-                    window.frozenItemDb[item.id] = window.cloneItemForTooltip(item);
-                    return item;
-                  };
+          const spawnAndAddGear = (slot) => {
+            let item = window.createItemObject(slot, stars, stageScale, stars);
+            window.inventory.EQUIP.push(item);
+            window.frozenItemDb[item.id] = window.cloneItemForTooltip(item);
+            return item;
+          };
 
-                  if (slotType === "full_set") {
-                    const slots = ["weapon", "helmet", "chest", "leggings", "boots", "ring"];
+          if (slotType === "full_set") {
+            const slots = [
+              "weapon",
+              "helmet",
+              "chest",
+              "leggings",
+              "boots",
+              "ring",
+            ];
             slots.forEach((s) => spawnAndAddGear(s));
             if (typeof window.pushLog === "function") {
               window.pushLog(
@@ -15250,7 +15312,7 @@ window.renderLeaderboardItems = function (leaderboard) {
       let canvasId = `leaderboard-canvas-${player.userId}`;
 
       let guildBadgeHtml = "";
-      if (player.guildName) {
+      if (player.guildName && player.clanId) {
         // Retrieve actual guild level from database parameters to draw correctly evolved emblems
         let emblem = window.getClanEmblemHtml(
           player.guildEmblem || 0,
@@ -15258,10 +15320,10 @@ window.renderLeaderboardItems = function (leaderboard) {
           player.guildLevel || 1,
         );
         guildBadgeHtml = `
-                                <div style="display: inline-flex; align-items: center; gap: 3px; background: rgba(142, 68, 173, 0.1); border: 1px solid #8e44ad; padding: 1px 4px; border-radius: 3px; font-size: 8.5px; color: #df9ffb; font-weight: bold; margin-left: 6px;">
-                                  ${emblem} <span>${window.escapeHTML(player.guildName)}</span>
-                                </div>
-                              `;
+                                      <div onclick="window.inspectClan(${player.clanId}); event.stopPropagation();" style="display: inline-flex; align-items: center; gap: 3px; background: rgba(142, 68, 173, 0.1); border: 1px solid #8e44ad; padding: 1px 4px; border-radius: 3px; font-size: 8.5px; color: #df9ffb; font-weight: bold; margin-left: 6px; cursor: pointer;" title="Click to Inspect Clan">
+                                        ${emblem} <span>${window.escapeHTML(player.guildName)}</span>
+                                      </div>
+                                    `;
       }
 
       // Relative Social Active Status Indicators
@@ -15454,21 +15516,21 @@ window.renderInspectModal = function (profile) {
   }
 
   // Build the inspected paper doll layout
-        let slots = [
-          "helmet",
-          "weapon",
-          "chest",
-          "subweapon",
-          "leggings",
-          "overall",
-          "boots",
-          "ring1",
-          "ring2",
-          "art1",
-          "art2",
-          "art3",
-        ];
-        let paperDollHtml = slots
+  let slots = [
+    "helmet",
+    "weapon",
+    "chest",
+    "subweapon",
+    "leggings",
+    "overall",
+    "boots",
+    "ring1",
+    "ring2",
+    "art1",
+    "art2",
+    "art3",
+  ];
+  let paperDollHtml = slots
     .map((slot) => {
       let item = equipped[slot];
       let slotLvl = (stats.slotUpgrades && stats.slotUpgrades[slot]) || 0;
@@ -15572,27 +15634,112 @@ window.renderInspectModal = function (profile) {
           `;
   } else {
     medalBannerHtml = `
-            <div id="inspected-medal-banner"
-                 style="margin-top: 6px; border: 1.5px dashed #444; background: #151515; border-radius: 6px; padding: 10px; display: flex; align-items: center; gap: 10px; cursor: default;">
-                <div style="flex-shrink:0; font-size: 18px; display: flex; align-items: center; justify-content: center; width:28px; height:28px; background:#111; border:1px dashed #444; border-radius:4px;">
-                    🏅
-                </div>
-                <div style="flex:1; min-width:0; text-align:left; margin-left: 8px;">
-                    <span style="font-size:9px; color:#666; text-transform:uppercase; letter-spacing:1px; display:block; line-height:1;">Equipped Medal</span>
-                    <strong style="color:#7f8c8d; font-size:11.5px; display:block; font-style:italic;">[No Title Equipped]</strong>
-                </div>
+              <div id="inspected-medal-banner"
+                   style="margin-top: 6px; border: 1.5px dashed #444; background: #151515; border-radius: 6px; padding: 10px; display: flex; align-items: center; gap: 10px; cursor: default;">
+                  <div style="flex-shrink:0; font-size: 18px; display: flex; align-items: center; justify-content: center; width:28px; height:28px; background:#111; border:1px dashed #444; border-radius:4px;">
+                      🏅
+                  </div>
+                  <div style="flex:1; min-width:0; text-align:left; margin-left: 8px;">
+                      <span style="font-size:9px; color:#666; text-transform:uppercase; letter-spacing:1px; display:block; line-height:1;">Equipped Medal</span>
+                      <strong style="color:#7f8c8d; font-size:11.5px; display:block; font-style:italic;">[No Title Equipped]</strong>
+                  </div>
+              </div>
+            `;
+  }
+
+  let clanBannerHtml = "";
+  if (profile.clan) {
+    let c = profile.clan;
+    let emblem = window.getClanEmblemHtml(c.emblem, 32, c.level);
+    let color = "#9b59b6"; // Regal cosmic purple
+
+    // Build list of active research levels
+    let skillDetails = [
+      { label: "Steel Phalanx", val: c.skills.steel_phalanx, color: "#e74c3c" },
+      { label: "Vitality Well", val: c.skills.vitality_well, color: "#3498db" },
+      {
+        label: "Prosperity Accord",
+        val: c.skills.prosperity_accord,
+        color: "#f1c40f",
+      },
+      {
+        label: "Voyager's Guidance",
+        val: c.skills.voyagers_guidance,
+        color: "#2ecc71",
+      },
+      {
+        label: "Aetheric Wisdom",
+        val: c.skills.aetheric_wisdom,
+        color: "#9b59b6",
+      },
+      {
+        label: "Supply Depot",
+        val: c.skills.clan_supply_depot,
+        color: "#ffaa00",
+      },
+    ];
+
+    let skillsHtml = skillDetails
+      .map(
+        (s) => `
+          <div style="background:#0f1115; border:1px solid #222; border-left:3px solid ${s.color} !important; padding:4px 8px; border-radius:4px; font-family:monospace; font-size:9.5px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#aaa;">${s.label}</span>
+            <strong style="color:${s.color};">Lv. ${s.val}</strong>
+          </div>
+        `,
+      )
+      .join("");
+
+    clanBannerHtml = `
+                      <div id="inspected-clan-banner"
+                           style="margin-top: 6px; border: 1.5px solid ${color}; background: rgba(155, 89, 182, 0.05); border-radius: 6px; padding: 10px; display: flex; flex-direction:column; gap: 8px; box-shadow: inset 0 0 10px rgba(155,89,182,0.08), 0 0 6px rgba(155,89,182,0.1); position:relative; cursor:default;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                          <div style="flex-shrink:0;">
+                              ${emblem}
+                          </div>
+                          <div style="flex:1; min-width:0; text-align:left;">
+                              <span style="font-size:9px; color:#888; text-transform:uppercase; letter-spacing:1px; display:block; line-height:1;">Affiliated Clan</span>
+                              <strong style="color:${color}; font-size:12.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:0 0 8px rgba(155,89,182,0.25); margin-top:2px;">${window.escapeHTML(c.name)}</strong>
+                              <span style="font-size:9px; color:#aaa; font-family:monospace; display:block; margin-top:1px;">Level ${c.level} • ${c.member_count} Member${c.member_count > 1 ? "s" : ""}</span>
+                          </div>
+                          <button class="btn-action" style="background:#8e44ad; font-size:9.5px; padding:4px 8px; border-radius:4px; height:auto; line-height:1;" onclick="window.inspectClan(${c.id})">Inspect Clan</button>
+                        </div>
+
+                        <details style="margin-top: 4px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 6px;" onclick="event.stopPropagation();">
+                          <summary style="font-size: 9.5px; color:#df9ffb; cursor:pointer; user-select:none; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:4px; outline:none; list-style:none;">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transform:translateY(0.5px);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v8M9 11h6"/></svg>
+                            View Clan Research Upgrades
+                          </summary>
+                          <div style="margin-top:8px; display:grid; grid-template-columns:1fr 1fr; gap:4px; animation: toastFadeIn 0.2s ease-out;">
+                            ${skillsHtml}
+                          </div>
+                        </details>
+                      </div>
+                    `;
+  } else {
+    clanBannerHtml = `
+        <div id="inspected-clan-banner"
+             style="margin-top: 6px; border: 1.5px dashed #444; background: #151515; border-radius: 6px; padding: 10px; display: flex; align-items: center; gap: 10px; cursor: default;">
+            <div style="flex-shrink:0; font-size: 18px; display: flex; align-items: center; justify-content: center; width:28px; height:28px; background:#111; border:1px dashed #444; border-radius:4px; font-family:monospace; color:#666;">
+                🏛️
             </div>
-          `;
+            <div style="flex:1; min-width:0; text-align:left; margin-left: 8px;">
+                <span style="font-size:9px; color:#666; text-transform:uppercase; letter-spacing:1px; display:block; line-height:1;">Affiliated Clan</span>
+                <strong style="color:#7f8c8d; font-size:11.5px; display:block; font-style:italic;">[No Clan Affiliation]</strong>
+            </div>
+        </div>
+      `;
   }
 
   contentEl.innerHTML = `
-          <div style="display:grid; grid-template-columns: 1.15fr 0.85fr; gap:12px;">
-                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:4px;">
-                                    ${paperDollHtml}
-                                </div>
-                                ${medalBannerHtml}
-                            </div>
+            <div style="display:grid; grid-template-columns: 1.15fr 0.85fr; gap:12px;">
+                              <div style="display:flex; flex-direction:column; gap:8px;">
+                                  <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:4px;">
+                                      ${paperDollHtml}
+                                  </div>
+                                  ${medalBannerHtml}
+                                  ${clanBannerHtml}
+                              </div>
                             <div style="display:flex; flex-direction:column; gap:10px;">
                             <!-- Miniature inspect canvas -->
                             <div style="background:#090b0d; border: 1px solid #333; border-radius:6px; padding:15px; display:flex; justify-content:center; align-items:center;">

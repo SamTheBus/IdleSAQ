@@ -370,17 +370,20 @@ window.renderClanCreation = function (clansList, invitations) {
                     btnHtml = `<span style="font-size:9.5px; color:#666;" title="This clan requires an explicit invitation from the founder.">Invite-Only</span>`;
                   }
                   return `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#111; border:1px solid #222; padding:6px 10px; border-radius:4px; gap:8px;">
-                <div style="display:flex; align-items:center; gap:6px; text-align:left; min-width:0; flex:1;">
-                    ${emblem}
-                    <div style="min-width:0; flex:1;">
-                        <strong style="font-size:11.5px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${window.escapeHTML(g.name)}</strong>
-                        <span style="font-size:9px; color:#aaa; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Level ${g.level} ${g.min_level > 1 ? "• Min Lv. " + g.min_level : ""}</span>
-                    </div>
-                </div>
-                ${btnHtml}
-            </div>
-          `;
+                              <div style="display:flex; justify-content:space-between; align-items:center; background:#111; border:1px solid #222; padding:6px 10px; border-radius:4px; gap:8px;">
+                                  <div style="display:flex; align-items:center; gap:6px; text-align:left; min-width:0; flex:1;">
+                                      ${emblem}
+                                      <div style="min-width:0; flex:1;">
+                                          <strong style="font-size:11.5px; color:#fff; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${window.escapeHTML(g.name)}</strong>
+                                          <span style="font-size:9px; color:#aaa; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Level ${g.level} ${g.min_level > 1 ? "• Min Lv. " + g.min_level : ""}</span>
+                                      </div>
+                                  </div>
+                                  <div style="display:flex; gap:4px; align-items:center;">
+                                      <button class="btn-action" style="padding:2px 8px; font-size:10px; background:#3498db;" onclick="window.inspectClan(${g.id})">Inspect</button>
+                                      ${btnHtml}
+                                  </div>
+                              </div>
+                            `;
                 })
                 .join("")
         }
@@ -456,6 +459,50 @@ window.acceptClanInvitation = function (inviteId) {
     })
     .catch(() => {
       window.pushHeaderToast("❌ Network error joining clan.", "#e74c3c");
+    });
+};
+
+window.canPlayerInvite = function (clan, myRank) {
+  if (myRank === "founder") return true;
+  let clanPermissions = window.playerStats.clanPermissions || {
+    officer_invite: true,
+    vanguard_invite: false,
+  };
+  if (myRank === "officer" && clanPermissions.officer_invite !== false)
+    return true;
+  if (myRank === "vanguard" && clanPermissions.vanguard_invite === true)
+    return true;
+  return false;
+};
+
+window.executeClanInvite = function () {
+  let input = document.getElementById("clan-invite-name");
+  if (!input) return;
+  let name = input.value.trim();
+
+  if (!window.validateNameInput(name)) {
+    window.pushHeaderToast("❌ Invalid Name format!", "#e74c3c");
+    return;
+  }
+
+  const userId = window.getGameUserId();
+  fetch(`${window.GAME_SERVER_URL}/api/clan/invite`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, charName: name }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.success) {
+        window.pushHeaderToast(`✉️ Invitation sent to ${name}!`, "#2ecc71");
+        input.value = "";
+        window.fetchClanData();
+      } else {
+        window.pushHeaderToast(`❌ ${data.error}`, "#e74c3c");
+      }
+    })
+    .catch(() => {
+      window.pushHeaderToast("❌ Network error sending invite.", "#e74c3c");
     });
 };
 
@@ -689,6 +736,25 @@ window.renderClanDashboard = function (clan, members, invitations) {
       recruit: "Recruits ⚑",
     };
 
+    let myMember = members.find((x) => (x.userId || x.user_id) === userId);
+    let myRank = myMember ? myMember.clan_rank : "recruit";
+    let inviteFormHtml = "";
+
+    if (window.canPlayerInvite(clan, myRank)) {
+      inviteFormHtml = `
+          <div style="border: 1px solid #3498db; border-radius: 6px; padding: 10px; background: rgba(52, 152, 219, 0.05); margin-bottom: 12px; text-align:left;">
+              <strong style="color:#60a5fa; font-size:11.5px; display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+                  Invite Player to Clan:
+              </strong>
+              <div style="display:flex; gap:6px;">
+                  <input type="text" id="clan-invite-name" placeholder="Character Name" maxlength="14" style="flex:1; background:#111; color:#fff; border:1px solid #444; padding:4px; font-size:11px; border-radius:4px;">
+                  <button class="btn-action" style="background:#3498db; color:#fff;" onclick="window.executeClanInvite()">Send Invite</button>
+              </div>
+          </div>
+        `;
+    }
+
     // Construct the Weekly Contribution Leaderboard Top 3 podiums
     let sortedContrib = [...members].sort((a, b) => {
       let contribA =
@@ -843,11 +909,12 @@ window.renderClanDashboard = function (clan, members, invitations) {
     });
 
     tabContentHtml = `
-              ${leaderboardHtml}
-              <div style="display:flex; flex-direction:column; gap:4px;">
-                  ${rosterHtml}
-              </div>
-            `;
+                  ${inviteFormHtml}
+                  ${leaderboardHtml}
+                  <div style="display:flex; flex-direction:column; gap:4px;">
+                      ${rosterHtml}
+                  </div>
+                `;
 
     setTimeout(() => {
       members.forEach((m) => {
@@ -2906,4 +2973,213 @@ window.claimWeeklyClanCrate = function (e) {
         "#e74c3c",
       );
     });
+};
+
+window.inspectClan = function (clanId) {
+  if (!window.GAME_SERVER_URL) {
+    window.pushHeaderToast("🔒 Offline mode. Cannot inspect clan.", "#e74c3c");
+    return;
+  }
+
+  window.hideTooltip();
+  let existing = document.getElementById("clan-inspect-draggable-window");
+  if (existing) existing.remove();
+
+  let win = document.createElement("div");
+  win.id = "clan-inspect-draggable-window";
+  win.className = "draggable-window";
+  win.style.left = "110px";
+  win.style.top = "90px";
+  win.style.width = "500px";
+  win.style.zIndex = "42000";
+
+  win.innerHTML = `
+            <div class="draggable-header" id="clan-inspect-win-handle" style="background: linear-gradient(180deg, #181d24 0%, #0d1117 100%);">
+                <span style="display:flex; align-items:center; gap:6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="M12 8v8M9 11h6"/>
+                    </svg>
+                    Inspecting Clan...
+                </span>
+                <button onclick="document.getElementById('clan-inspect-draggable-window').remove(); window.hideTooltip();" style="background:transparent; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:11px; padding:2px;">[X]</button>
+            </div>
+            <div class="draggable-content" id="clan-inspect-win-content" style="max-height: 400px; padding: 12px; background:#07030b; overflow-y:auto;">
+                <div style="color:#aaa; text-align:center; padding: 20px 0; font-size:11px;">Connecting to Clan Sanctum...</div>
+            </div>
+          `;
+
+  document.getElementById("game-container").appendChild(win);
+  window.makeWindowDraggable(
+    win,
+    document.getElementById("clan-inspect-win-handle"),
+  );
+
+  fetch(`${window.GAME_SERVER_URL}/api/clan/inspect`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ clanId }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.success && data.clan) {
+        window.renderClanInspectContent(data.clan, data.members);
+      } else {
+        document.getElementById("clan-inspect-win-content").innerHTML = `
+                                <div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Error loading clan records: ${data.error || "Unknown error"}</div>
+                              `;
+      }
+    })
+    .catch((err) => {
+      console.error("Clan inspect fetch failed:", err);
+      document.getElementById("clan-inspect-win-content").innerHTML = `
+                              <div style="color:#e74c3c; text-align:center; padding: 20px 0; font-size:11px;">Could not connect to the Clan Sanctum server.</div>
+                            `;
+    });
+};
+
+window.renderClanInspectContent = function (clan, members) {
+  const contentEl = document.getElementById("clan-inspect-win-content");
+  if (!contentEl) return;
+
+  let emblemSeed =
+    clan.emblem !== undefined ? clan.emblem : clan.leader_id.charCodeAt(0) || 0;
+  let emblem = window.getClanEmblemHtml(emblemSeed, 32, clan.level);
+  let nextXp = Math.floor(100 * Math.pow(clan.level, 1.8));
+  let xpPct = Math.min(100, (clan.xp / nextXp) * 100);
+
+  let skills = [
+    {
+      label: "Steel Phalanx",
+      val: clan.skill_steel_phalanx || 0,
+      color: "#e74c3c",
+      desc: "Attack & Defense bonus",
+    },
+    {
+      label: "Vitality Well",
+      val: clan.skill_vitality_well || 0,
+      color: "#3498db",
+      desc: "Max HP bonus",
+    },
+    {
+      label: "Prosperity Accord",
+      val: clan.skill_prosperity_accord || 0,
+      color: "#f1c40f",
+      desc: "Gold Multiplier",
+    },
+    {
+      label: "Voyager's Guidance",
+      val: clan.skill_voyagers_guidance || 0,
+      color: "#2ecc71",
+      desc: "Drop Rate & Quality",
+    },
+    {
+      label: "Aetheric Wisdom",
+      val: clan.skill_aetheric_wisdom || 0,
+      color: "#9b59b6",
+      desc: "XP Rate",
+    },
+    {
+      label: "Supply Depot",
+      val: clan.skill_clan_supply_depot || 0,
+      color: "#ffaa00",
+      desc: "Crate yields",
+    },
+  ];
+
+  let skillsHtml = skills
+    .map(
+      (s) => `
+                      <div style="background:#0f1115; border:1px solid #222; border-left:3.5px solid ${s.color} !important; padding:6px; border-radius:4px; text-align:left;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                          <strong style="color:${s.color}; font-size:10.5px;">${s.label}</strong>
+                          <span style="color:#fff; font-family:monospace; font-size:10.5px;">Lv. ${s.val}</span>
+                        </div>
+                        <span style="font-size:8.5px; color:#aaa; display:block; margin-top:2px;">${s.desc}</span>
+                      </div>
+                    `,
+    )
+    .join("");
+
+  let rosterHtml = members
+    .map((m) => {
+      let mId = m.userId || m.user_id;
+      let canvasId = `clan-inspect-member-canvas-${mId}`;
+
+      let titleTextHtml = "";
+      if (m.equippedTitle && window.TITLES_DATA[m.equippedTitle]) {
+        let tData = window.TITLES_DATA[m.equippedTitle];
+        titleTextHtml = `<span style="color:${tData.color || "#ff007f"}; font-size:8px; font-weight:bold; margin-left:4px;">[${tData.name}]</span>`;
+      }
+
+      return `
+                        <div style="background:#111; border:1px solid #222; border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; text-align:left;">
+                                <div style="position:relative; flex-shrink:0;">
+                                  <canvas id="${canvasId}" width="30" height="40" style="width:30px; height:40px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:4px; display:block; pointer-events:none;"></canvas>
+                                  <div style="position:absolute; bottom:-3px; right:-3px; z-index:4;">${window.getRankShieldSvg(m.clan_rank || "recruit", 14)}</div>
+                                </div>
+                                <div style="min-width:0; flex:1;">
+                                    <div style="display:flex; align-items:center; flex-wrap:wrap; line-height:1.1;">
+                                        <strong style="font-size:11.5px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">${window.escapeHTML(m.playerName || m.name)}</strong>
+                                        ${titleTextHtml}
+                                    </div>
+                                    <span style="font-size:9px; color:#aaa; font-family:monospace; display:block; margin-top:2px;">Lv. ${m.level} • Peak Stg ${m.lifetimePeakStage} • Contribution: ${window.formatNumber(m.clanContribution || 0)}</span>
+                                </div>
+                            </div>
+                            <button class="btn-action" style="background:#3498db; font-size:9.5px; padding:3px 6px; height:24px; line-height:1;" onclick="window.inspectPlayer('${mId}')">Inspect</button>
+                        </div>
+                      `;
+    })
+    .join("");
+
+  contentEl.innerHTML = `
+                    <!-- Header banner -->
+                    <div style="background:rgba(0,0,0,0.5); border: 2px solid #5c4033; border-top-width:6px; border-bottom-width:4px; border-radius:8px; padding:12px; margin-bottom:12px; display:flex; align-items:center; gap:12px; text-align:left; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7); position:relative;">
+                        ${emblem}
+                        <div style="flex:1; min-width:0;">
+                            <strong style="font-size:14.5px; color:#df9ffb; text-shadow: 0 0 8px rgba(155,89,182,0.4);">${window.escapeHTML(clan.name)}</strong>
+                            <div style="font-size:10.5px; color:#aaa; font-family:monospace;">Clan Level ${clan.level} (${clan.xp} / ${nextXp} XP)</div>
+                            <div style="width:100%; height:5px; background:#0f1115; border-radius:3px; overflow:hidden; border:1px solid #222; margin-top:6px;">
+                                <div style="width:${xpPct}%; height:100%; background:linear-gradient(90deg, #9b59b6, #e84393); box-shadow:0 0 6px #9b59b6;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Announcement -->
+                    <div style="background:#0c0f12; border:1px solid #222; border-radius:6px; padding:8px 10px; font-size:11px; text-align:left; line-height:1.45; color:#c8b195; font-style:italic; margin-bottom:12px;">
+                        <span style="color:#7f8c8d; font-size:8px; font-weight:bold; display:block; margin-bottom:2px; text-transform:uppercase; font-style:normal;">✦ ANNOUNCEMENT:</span>
+                        "${window.escapeHTML(clan.description || "Founders are preparing instructions.")}"
+                    </div>
+
+                    <!-- Upgraded Skill Matrices -->
+                    <strong style="color:#df9ffb; font-size:11px; display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; text-align:left;">⚔️ Clan Research Matrix:</strong>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:12px;">
+                      ${skillsHtml}
+                    </div>
+
+                    <!-- Member Roster -->
+                                        <strong style="color:#df9ffb; font-size:11px; display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; text-align:left;">👥 Member Roster (${members.length}):</strong>
+                                        <div style="display:flex; flex-direction:column; gap:4px; max-height:150px; overflow-y:auto; padding-right:4px;">
+                                          ${rosterHtml}
+                                        </div>
+                                      `;
+
+  // Draw heroes for the inspect roster
+  setTimeout(() => {
+    members.forEach((m) => {
+      let mId = m.userId || m.user_id;
+      let canvas = document.getElementById(`clan-inspect-member-canvas-${mId}`);
+      if (canvas) {
+        let ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = false;
+        window.drawSingleHero(ctx, 15, 14, 0.55, m.equippedSlots, m, 0, {
+          slashFrame: false,
+          deathAnimationTimer: 0,
+          isMainHero: false,
+        });
+      }
+    });
+  }, 50);
 };

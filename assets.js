@@ -822,7 +822,7 @@ window.AssetCatalog = {
           `;
     },
     sigil(id, color) {
-          return `
+      return `
                 <defs>
                   <linearGradient id="g_sig_${id}" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0%" stop-color="#ffffff"/>
@@ -834,9 +834,9 @@ window.AssetCatalog = {
                 <circle cx="16" cy="16" r="6.2" fill="none" stroke="#ffffff" stroke-dasharray="2 2" stroke-width="1" opacity="0.75" />
                 <path d="M16 9 L16 23 M11 16 L21 16" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
               `;
-        },
-        signet_ring(id, color) {
-          return `
+    },
+    signet_ring(id, color) {
+      return `
             <defs>
               <linearGradient id="ring_band_${id}" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#ffeaa7" />
@@ -857,9 +857,9 @@ window.AssetCatalog = {
             <!-- Specular Chime -->
             <circle cx="14" cy="10" r="1" fill="#fff" opacity="0.8" />
           `;
-        },
-        loop_ring(id, color) {
-          return `
+    },
+    loop_ring(id, color) {
+      return `
             <defs>
               <linearGradient id="ring_band_${id}" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#ffeaa7" />
@@ -881,9 +881,9 @@ window.AssetCatalog = {
             <!-- Shine Sparkle -->
             <polygon points="16,4 17,9 16,10 15,9" fill="#fff" opacity="0.7" />
           `;
-        },
-        band_ring(id, color) {
-          return `
+    },
+    band_ring(id, color) {
+      return `
             <defs>
               <linearGradient id="ring_band_${id}" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#abb2b9" />
@@ -904,9 +904,9 @@ window.AssetCatalog = {
             <circle cx="9.5" cy="10.5" r="1.2" fill="${color}" stroke="#000" stroke-width="0.6" />
             <circle cx="22.5" cy="10.5" r="1.2" fill="${color}" stroke="#000" stroke-width="0.6" />
           `;
-        },
-        seal_ring(id, color) {
-          return `
+    },
+    seal_ring(id, color) {
+      return `
             <defs>
               <linearGradient id="ring_band_${id}" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#95a5a6" />
@@ -926,9 +926,9 @@ window.AssetCatalog = {
             <!-- Engraved Seal Emblem -->
             <polygon points="16,7.5 17,9.5 19,9.5 17.5,10.5 18,12.5 16,11.2 14,12.5 14.5,10.5 13,9.5 15,9.5" fill="#fff" opacity="0.8" />
           `;
-        },
-        ring(id, color) {
-          return `
+    },
+    ring(id, color) {
+      return `
             <defs>
               <linearGradient id="ring_band_${id}" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#ffeaa7" />
@@ -938,8 +938,8 @@ window.AssetCatalog = {
             <ellipse cx="16" cy="17" rx="8" ry="9" fill="none" stroke="url(#ring_band_${id})" stroke-width="2" />
             <circle cx="16" cy="8" r="3.2" fill="${color}" stroke="#000" stroke-width="1" />
           `;
-        },
-      },
+    },
+  },
 
   // Blueprints for procedurally rendering bosses on indicators or consoles
   bosses: {
@@ -1440,7 +1440,7 @@ window.AssetCatalog = {
       `;
     },
     singularity(uid) {
-          return `
+      return `
             <defs>
               <linearGradient id="g_un_sg_blade_${uid}" x1="0" y1="1" x2="1" y2="0">
                 <stop offset="0%" stop-color="#090114"/>
@@ -1483,7 +1483,7 @@ window.AssetCatalog = {
             <!-- Inner black hole core -->
             <circle cx="26" cy="6" r="2.2" fill="#000000" stroke="#ff007f" stroke-width="0.8"/>
           `;
-        },
+    },
     maelstrom(uid) {
       return `
         <defs><linearGradient id="g_un_ml_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#55efc4"/><stop offset="100%" stop-color="#00b894"/></linearGradient></defs>
