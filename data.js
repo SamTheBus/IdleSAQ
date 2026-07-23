@@ -1327,14 +1327,48 @@ window.resolvePlayerStats = function (useDraft = false) {
   p.int = Math.floor(p.int * achIntPct);
 
   let effectiveStr = Math.max(0, p.str - 5);
-  let effectiveDex = Math.max(0, p.dex - 5);
-  let effectiveInt = Math.max(0, p.int - 5);
+    let effectiveDex = Math.max(0, p.dex - 5);
+    let effectiveInt = Math.max(0, p.int - 5);
 
-  // --- CALCULATE SECURE EXPONENTIAL CHARACTER-BOUND BASE STATS ---
-  let levelScale = BigNum.from(1.025).pow(window.playerStats.level - 1);
-  let baseCharAtk = BigNum.from(10 + window.playerStats.level * 2)
-    .mul(levelScale)
-    .add(p.str * 5 + p.dex * 2 + p.int * 1);
+    // Dynamically adjust offensive percentage scaling based on equipped subweapon archetype
+    let activeSubForPct = window.equippedSlots ? window.equippedSlots.subweapon : null;
+    let activeSubTypeForPct = activeSubForPct ? activeSubForPct.subType : null;
+    let mainStatAtkPct = 0;
+
+    if (activeSubTypeForPct === "dagger") {
+      mainStatAtkPct = effectiveDex * 0.001;
+    } else if (activeSubTypeForPct === "tome") {
+      mainStatAtkPct = effectiveInt * 0.001;
+    } else {
+      mainStatAtkPct = effectiveStr * 0.001;
+    }
+
+    // Synchronized with the latest balance formulas in resolvePlayerStats()
+    itemAtkPct += mainStatAtkPct;
+    itemHpPct += effectiveStr * 0.001; // Vitality remains bound to physical strength (STR)
+
+    // --- CALCULATE SECURE EXPONENTIAL CHARACTER-BOUND BASE STATS ---
+      let levelScale = BigNum.from(1.025).pow(window.playerStats.level - 1);
+
+      let activeSub = window.equippedSlots ? window.equippedSlots.subweapon : null;
+      let activeSubType = activeSub ? activeSub.subType : null;
+      let strWeight = 5;
+      let dexWeight = 2;
+      let intWeight = 1;
+
+      if (activeSubType === "dagger") {
+        strWeight = 2;
+        dexWeight = 5;
+        intWeight = 1;
+      } else if (activeSubType === "tome") {
+        strWeight = 2;
+        dexWeight = 1;
+        intWeight = 5;
+      }
+
+      let baseCharAtk = BigNum.from(10 + window.playerStats.level * 2)
+        .mul(levelScale)
+        .add(p.str * strWeight + p.dex * dexWeight + p.int * intWeight);
   let baseCharHp = BigNum.from(100 + window.playerStats.level * 8)
     .mul(levelScale)
     .add(p.str * 15);

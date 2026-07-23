@@ -3628,19 +3628,38 @@ window.showStatBreakdown = function (e, statKey, isPct = false) {
     html += `<div class="tt-stat-line" style="color:#9b59b6;">• Intelligence Scaling (INT): ${formatVal(intScaleTotal)}</div>`;
 
   let totalVal =
-    data.base +
-    data.lvl +
-    gearTotal +
-    artTotal +
-    achTotal +
-    intScaleTotal +
-    prestigeTotal +
-    setFlatBonus;
-  if (statKey === "atk" && effectiveStr > 0) {
-    let actualDmgAdded = Math.floor(totalVal * (effectiveStr * 0.001));
-    html += `<div class="tt-stat-line" style="color:#e67e22;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(actualDmgAdded)} Damage</div>`;
-    html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveStr * 0.1).toFixed(1)}% Multiplier)</div>`;
-  }
+      data.base +
+      data.lvl +
+      gearTotal +
+      artTotal +
+      achTotal +
+      intScaleTotal +
+      prestigeTotal +
+      setFlatBonus;
+    if (statKey === "atk") {
+      let activeSubForBreakdown = window.equippedSlots ? window.equippedSlots.subweapon : null;
+      let activeSubTypeForBreakdown = activeSubForBreakdown ? activeSubForBreakdown.subType : null;
+
+      let scalingStatKey = "str";
+      let scalingStatLabel = "Strength Scaling (STR)";
+      let effectiveScalingVal = effectiveStr;
+
+      if (activeSubTypeForBreakdown === "dagger") {
+        scalingStatKey = "dex";
+        scalingStatLabel = "Dexterity Scaling (DEX)";
+        effectiveScalingVal = effectiveDex;
+      } else if (activeSubTypeForBreakdown === "tome") {
+        scalingStatKey = "int";
+        scalingStatLabel = "Intelligence Scaling (INT)";
+        effectiveScalingVal = effectiveInt;
+      }
+
+      if (effectiveScalingVal > 0) {
+        let actualDmgAdded = Math.floor(totalVal * (effectiveScalingVal * 0.001));
+        html += `<div class="tt-stat-line" style="color:#e67e22;">• ${window.getUiIconSvg(scalingStatKey, 11)} ${scalingStatLabel}: +${window.formatNumber(actualDmgAdded)} Damage</div>`;
+        html += `<div class="tt-stat-line" style="color:#e67e22; font-style:italic;">  (+${(effectiveScalingVal * 0.1).toFixed(1)}% Multiplier)</div>`;
+      }
+    }
   if (statKey === "maxHp" && effectiveStr > 0) {
     let hpBonus = Math.floor(totalVal * (effectiveStr * 0.001));
     html += `<div class="tt-stat-line" style="color:#e74c3c;">• ${window.getUiIconSvg("str", 11)} Strength Scaling (STR): +${window.formatNumber(hpBonus)} HP</div>`;
@@ -4363,10 +4382,19 @@ window.executePrestigeAscension = function () {
     : 0;
   let deltaPP = Math.max(0, rCurrent - rHwm);
 
+  let renownLine = "";
+  let renownGained = 0;
+  if (window.playerStats.clanId) {
+    renownGained = Math.floor(deltaPP * 50);
+    if (renownGained > 0) {
+      renownLine = `<br>• <strong style="color:#df9ffb;">Clan Renown Awarded: +${renownGained} Renown</strong>`;
+    }
+  }
+
   let message = `Are you sure you want to perform an Ascension? This will soft-reset your current run but award permanent multipliers!<br><br>
                  • Current Stage Reached: <strong style="color:#fff;">Stage ${currentStage}</strong><br>
                  • High-Water Mark Peak: <strong style="color:#bdc3c7;">Stage ${hwm}</strong><br>
-                 • <strong>Prestige Points (PP) Awarded: <span style="color:#ffd700;">+${deltaPP} PP</span></strong>`;
+                 • <strong>Prestige Points (PP) Awarded: <span style="color:#ffd700;">+${deltaPP} PP</span></strong>${renownLine}`;
 
   window.showCustomConfirm(
     "Ascend Soul",
@@ -4385,6 +4413,14 @@ window.executePrestigeAscension = function () {
         currentStage,
       );
 
+      if (window.playerStats.clanId && renownGained > 0) {
+        window.playerStats.renown = (window.playerStats.renown || 0) + renownGained;
+        if (window.playerStats.pendingClanProgress) {
+          window.playerStats.pendingClanProgress.renown =
+            (window.playerStats.pendingClanProgress.renown || 0) + renownGained;
+        }
+      }
+
       let peak = window.playerStats.lifetimePeakStage || 1;
       let advancedStart = Math.max(1, Math.floor(peak * 0.5));
       window.playerStats.stage = advancedStart;
@@ -4400,7 +4436,12 @@ window.executePrestigeAscension = function () {
       let p = window.resolvePlayerStats();
       window.playerStats.currentHp = p.maxHp;
 
-      // Show congratulations modal
+      let renownRewardHtml = "";
+      if (window.playerStats.clanId && renownGained > 0) {
+        renownRewardHtml = `<div style="font-size:16px; color:#df9ffb; font-weight:bold; margin-bottom:6px;">✦ +${renownGained} Clan Renown</div>`;
+      }
+
+      // Show congratulations modal (cleaned of any emojis)
       let modal = document.createElement("div");
       modal.style.position = "fixed";
       modal.style.top = "0";
@@ -4416,14 +4457,15 @@ window.executePrestigeAscension = function () {
 
       modal.innerHTML = `
         <div style="background:#151515; border:3px solid #9b59b6; border-radius: 8px; width:100%; max-width:440px; display:flex; flex-direction:column; box-shadow: 0 10px 40px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s;">
-          <h2 style="margin:0 0 10px 0; color:#df9ffb; letter-spacing:3px; text-transform:uppercase; font-size:22px;">🌌 SOUL ASCENDED!</h2>
+          <h2 style="margin:0 0 10px 0; color:#df9ffb; letter-spacing:3px; text-transform:uppercase; font-size:22px;">SOUL ASCENDED!</h2>
           <div style="height:2px; background:linear-gradient(90deg, transparent, #9b59b6, transparent); margin-bottom:15px;"></div>
           <p style="font-size:12px; color:#ddd; line-height:1.5; margin-bottom:20px;">
             Your soul has ascended to a higher plane of permanent power!
           </p>
           <div style="background:#0b0f12; border:1px solid #9b59b6; border-radius:6px; padding:15px; margin-bottom:20px;">
             <div style="font-size:11px; color:#aaa; margin-bottom:4px;">REWARDS EARNED:</div>
-            <div style="font-size:20px; color:#ffd700; font-weight:bold; margin-bottom:6px;">✨ +${deltaPP} Prestige Points</div>
+            <div style="font-size:20px; color:#ffd700; font-weight:bold; margin-bottom:6px;">✦ +${deltaPP} Prestige Points</div>
+            ${renownRewardHtml}
             <div style="font-size:11px; color:#9b59b6; font-weight:bold; border-top: 1px solid #333; padding-top:6px; margin-top:6px;">Total Ascensions: ${window.playerStats.prestigeCount}</div>
           </div>
           <button id="btn-prestige-ascend-confirm" style="background:linear-gradient(135deg, #9b59b6, #8e44ad); color:white; border:1px solid #fff; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:1px; padding:12px 24px; border-radius:4px; cursor:pointer; width:100%;">Continue Journey</button>
@@ -5021,6 +5063,16 @@ window.triggerPrestigeAscension = function () {
       (window.playerStats.pendingClanProgress.prestige || 0) + 1;
   }
 
+  let renownGained = 0;
+  if (window.playerStats.clanId) {
+    renownGained = Math.floor(totalAwarded * 50);
+    window.playerStats.renown = (window.playerStats.renown || 0) + renownGained;
+    if (window.playerStats.pendingClanProgress) {
+      window.playerStats.pendingClanProgress.renown =
+        (window.playerStats.pendingClanProgress.renown || 0) + renownGained;
+    }
+  }
+
   let nowTime = Date.now();
   if (
     window.playerStats.lastAscensionTime &&
@@ -5052,10 +5104,16 @@ window.triggerPrestigeAscension = function () {
   window.playerStats.isPrestigeBossMode = false;
   window.playerStats.prestigeApproachTimer = 0;
   window.mob = null;
+  window.playerStats.usedSecondWind = false;
   window.hero.x = 40;
 
   let p = window.resolvePlayerStats();
   window.playerStats.currentHp = p.maxHp;
+
+  let renownRewardHtml = "";
+  if (window.playerStats.clanId && renownGained > 0) {
+    renownRewardHtml = `<div style="font-size:11px; color:#df9ffb; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">✦ Clan Renown: +${renownGained}</div>`;
+  }
 
   let modal = document.createElement("div");
   modal.style.position = "fixed";
@@ -5072,22 +5130,23 @@ window.triggerPrestigeAscension = function () {
 
   modal.innerHTML = `
                                                                                       <div style="background:#151515; border: 3px solid #e74c3c; border-radius: 8px; width:100%; max-width:440px; display:flex; flex-direction:column; box-shadow: 0 10px 40px rgba(0,0,0,0.95); text-align:center; padding:20px; animation: toastFadeIn 0.3s;">
-                                                                                          <h2 style="margin:0 0 10px 0; color:#e74c3c; letter-spacing:3px; text-transform:uppercase; font-size:22px;">🐉 ASCENSION ACHIEVED!</h2>
+                                                                                          <h2 style="margin:0 0 10px 0; color:#e74c3c; letter-spacing:3px; text-transform:uppercase; font-size:22px;">ASCENSION ACHIEVED!</h2>
                                                                                           <div style="height:2px; background:linear-gradient(90deg, transparent, #e74c3c, transparent); margin-bottom:15px;"></div>
                                                                                           <p style="font-size:12px; color:#ddd; line-height:1.5; margin-bottom:20px;">
                                                                                               You have slain **Hooktail** and shattered your mortal limits! Your soul ascends into a higher plane of legend.
                                                                                           </p>
                                                                                           <div style="background:#0b0f12; border:1px solid #e74c3c; border-radius:6px; padding:15px; margin-bottom:20px;">
                                                                                               <div style="font-size:11px; color:#aaa; margin-bottom:4px;">REWARDS EARNED:</div>
-                                                                                              <div style="font-size:20px; color:#f1c40f; font-weight:bold; margin-bottom:6px;">✨ +${totalAwarded} Prestige Points</div>
+                                                                                              <div style="font-size:20px; color:#f1c40f; font-weight:bold; margin-bottom:6px;">✦ +${totalAwarded} Prestige Points</div>
                                                                                               <div style="font-size:9.5px; color:#aaa; font-family:monospace; margin-bottom:12px; line-height:1.3; text-align:left; background:rgba(0,0,0,0.35); padding:6px; border:1px dashed #333;">
                                                                                                   • Base & Rank Award: <strong style="color:#fff;">+${Math.min(10, basePoints + bonusPoints)} PP</strong><br>
                                                                                                   • Deep Push Bonus (Stage ${activeStage}): <strong style="color:#2ecc71;">+${pushBonus} PP</strong> (1 per 10 stages over 80)
                                                                                               </div>
-                                                                                              <div style="font-size:11px; color:#8e44ad; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">🔮 Eridium Shards: +${awardedShards}</div>
-                                                                                              <div style="font-size:11px; color:#e67e22; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">🟧 Epic Scraps: +${awardedEpic}</div>
-                                                                                              <div style="font-size:11px; color:#f1c40f; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">🟨 Legendary Scraps: +${awardedLeg}</div>
-                                                                                              <div style="font-size:11px; color:#e74c3c; font-weight:bold; margin-bottom:8px; text-align:left; padding-left:15px;">🟥 Mythic Scraps: +${awardedMythic}</div>
+                                                                                              ${renownRewardHtml}
+                                                                                              <div style="font-size:11px; color:#8e44ad; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">✦ Eridium Shards: +${awardedShards}</div>
+                                                                                              <div style="font-size:11px; color:#e67e22; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">✦ Epic Scraps: +${awardedEpic}</div>
+                                                                                              <div style="font-size:11px; color:#f1c40f; font-weight:bold; margin-bottom:4px; text-align:left; padding-left:15px;">✦ Legendary Scraps: +${awardedLeg}</div>
+                                                                                              <div style="font-size:11px; color:#e74c3c; font-weight:bold; margin-bottom:8px; text-align:left; padding-left:15px;">✦ Mythic Scraps: +${awardedMythic}</div>
                                                                                               <div style="font-size:11px; color:#9b59b6; font-weight:bold; border-top: 1px solid #333; padding-top:6px; margin-top:6px;">Total Ascensions: ${window.playerStats.prestigeCount}</div>
                                                                                           </div>
                                                                                           <p style="font-size:11px; color:#7f8c8d; line-height:1.4; margin-bottom:20px;">
@@ -5095,7 +5154,7 @@ window.triggerPrestigeAscension = function () {
                                                                                           </p>
                                                                                           <button id="btn-prestige-ascend-confirm" style="background:linear-gradient(135deg, #e74c3c, #c0392b); color:white; border:1px solid #f1c40f; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:1px; padding:12px 24px; border-radius:4px; cursor:pointer; width:100%; box-shadow:0 4px 10px rgba(0,0,0,0.4);">Arise as an Ascended Hero</button>
                                                                                       </div>
-                                                                                  `;
+                                                                                    `;
   document.body.appendChild(modal);
 
   document.getElementById("btn-prestige-ascend-confirm").onclick = function () {

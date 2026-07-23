@@ -67,18 +67,23 @@
   window.penBoss = 2.4;
 
   // Initialize central RenderEngine Namespace
-  window.RenderEngine = {
-    getStageTier() {
-      let st = window.playerStats.stage;
-      if (st <= 100) return 0; // Forest (Stages 1-100)
-      if (st <= 200) return 1; // Peaks/Ruins (Stages 101-200)
-      if (st <= 300) return 2; // Inferno (Stages 201-300)
-      if (st <= 400) return 3; // Swamp (Stages 301-400)
-      if (st <= 500) return 4; // Void (Stages 401-500)
-      if (st <= 600) return 5; // Temporal Sanctorum (Stages 501-600)
-      return 6; // Cyberspace Nexus (Stages 601+)
-    },
-  };
+    window.RenderEngine = {
+      getStageTier() {
+        let st = window.playerStats.stage;
+        if (st <= 100) return 0; // Forest (Stages 1-100)
+        if (st <= 200) return 1; // Peaks/Ruins (Stages 101-200)
+        if (st <= 300) return 2; // Inferno (Stages 201-300)
+        if (st <= 400) return 3; // Swamp (Stages 301-400)
+        if (st <= 500) return 4; // Void (Stages 401-500)
+        if (st <= 600) return 5; // Temporal Sanctorum (Stages 501-600)
+        if (st <= 700) return 6; // Cyberspace Nexus (Stages 601-700)
+
+        // Deterministic pseudorandom cycle every 100 stages after Stage 700
+        let blockIndex = Math.floor((st - 1) / 100); // e.g. 7 for Stages 701-800, 8 for 801-900
+        let seedVal = Math.sin(blockIndex) * 10000;
+        return Math.floor((seedVal - Math.floor(seedVal)) * 7); // Deterministically returns 0 to 6
+      },
+    };
 
   // Legacy Compatibility Aliases to protect references
   window.getStageTier = () => window.RenderEngine.getStageTier();

@@ -1864,23 +1864,6 @@ window.SaveManager = {
       window.playerStats.maxStage,
     );
 
-    if (window.playerStats.lifetimePeakStage > oldPeak) {
-      let renownGained = window.calculateRenownForStageRange(
-        oldPeak,
-        window.playerStats.lifetimePeakStage,
-      );
-      if (renownGained > 0) {
-        window.playerStats.renown =
-          (window.playerStats.renown || 0) + renownGained;
-        if (window.playerStats.pendingClanProgress) {
-          window.playerStats.pendingClanProgress.renown =
-            (window.playerStats.pendingClanProgress.renown || 0) + renownGained;
-        }
-        scrapsGainedMap["Renown"] =
-          (scrapsGainedMap["Renown"] || 0) + renownGained;
-      }
-    }
-
     // Reconstruct flat values to display on the offline progress card
     totalGold = b_totalGold;
     totalXp = b_totalXp;
@@ -6868,31 +6851,7 @@ window.CombatEngine = {
           window.playerStats.lifetimePeakStage || 1,
           window.playerStats.maxStage,
         );
-        if (window.playerStats.lifetimePeakStage > oldPeak) {
-          let renownGained = window.calculateRenownForStageRange(
-            oldPeak,
-            window.playerStats.lifetimePeakStage,
-          );
-          if (renownGained > 0) {
-            window.playerStats.renown =
-              (window.playerStats.renown || 0) + renownGained;
-            if (window.playerStats.pendingClanProgress) {
-              window.playerStats.pendingClanProgress.renown =
-                (window.playerStats.pendingClanProgress.renown || 0) +
-                renownGained;
-            }
-            if (typeof window.pushToast === "function") {
-              window.pushToast(
-                "Renown",
-                null,
-                "#df9ffb",
-                true,
-                renownGained,
-                `✨ HWM Peak Stage! Gained +${renownGained} Renown`,
-              );
-            }
-          }
-        }
+        
         if (typeof window.pushLog === "function")
           window.pushLog(
             `<span style='color:#2ecc71; font-weight:bold;'>[AREA CLEARED] Advancing to Stage ${window.playerStats.stage}.</span>`,
