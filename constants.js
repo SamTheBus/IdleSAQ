@@ -399,13 +399,13 @@ window.ARTIFACT_POOL = [
     fairySpawn: 0,
   },
   {
-        name: "Phoenix Ankh",
-        trait: "second_wind",
-        desc: "Ignore a fatal blow once per stage attempt (40% Heal). Passive +5 STR & +30 Max HP.",
-        breakdown:
-          "<strong>Second Wind:</strong><br>• Survive fatal blows with <span style='color:#e74c3c;'>40% HP restored</span>.<br>• Passive: Grants <span style='color:#e74c3c;'>+5 STR</span> (+50 Max HP and +7.5 Atk) and <span style='color:#2ecc71;'>+30 Flat Max HP</span>.",
-        str: 5,
-        maxHp: 30,
+    name: "Phoenix Ankh",
+    trait: "second_wind",
+    desc: "Ignore a fatal blow once per stage attempt (40% Heal). Passive +5 STR & +30 Max HP.",
+    breakdown:
+      "<strong>Second Wind:</strong><br>• Survive fatal blows with <span style='color:#e74c3c;'>40% HP restored</span>.<br>• Passive: Grants <span style='color:#e74c3c;'>+5 STR</span> (+50 Max HP and +7.5 Atk) and <span style='color:#2ecc71;'>+30 Flat Max HP</span>.",
+    str: 5,
+    maxHp: 30,
     dropRate: 0,
     quality: 0,
     goldMulti: 0,
@@ -2958,11 +2958,7 @@ window.slotNouns = {
     dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"],
     tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"],
   },
-  helmet: [
-    "Greathelm",
-    "Armet",
-    "Visor",
-  ],
+  helmet: ["Greathelm", "Armet", "Visor"],
   chest: [
     "Hauberk",
     "Cuirass",

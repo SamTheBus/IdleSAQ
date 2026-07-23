@@ -530,27 +530,37 @@ window.renderClanDashboard = function (clan, members, invitations) {
     let emblem = window.getClanEmblemHtml(emblemSeed, 32, clan.level);
 
     // --- COOPERATIVE CLAN WEEKLY CRATE CLAIMS SEGMENT ---
-        let crateSectionHtml = "";
-        let lastClaimedWeek =
-          (window.playerStats && window.playerStats.lastClaimedCrateWeek) || "";
-        let currentWeek = clan.currentWeekId || "";
+    let crateSectionHtml = "";
+    let lastClaimedWeek =
+      (window.playerStats && window.playerStats.lastClaimedCrateWeek) || "";
+    let currentWeek = clan.currentWeekId || "";
 
-        // Calculate weekly countdown timer (resets next Monday 12:00 AM Pacific Time)
-        let now = Date.now();
-        let ptDate = window.getPacificTimeNow ? window.getPacificTimeNow(now) : new Date();
-        let dayOfWeek = ptDate.getDay();
-        let daysToMonday = (8 - dayOfWeek) % 7;
-        if (daysToMonday === 0) daysToMonday = 7;
-        let nextMondayPt = new Date(ptDate.getFullYear(), ptDate.getMonth(), ptDate.getDate() + daysToMonday, 0, 0, 0, 0);
-        let weeklyLeftMs = nextMondayPt.getTime() - ptDate.getTime();
+    // Calculate weekly countdown timer (resets next Monday 12:00 AM Pacific Time)
+    let now = Date.now();
+    let ptDate = window.getPacificTimeNow
+      ? window.getPacificTimeNow(now)
+      : new Date();
+    let dayOfWeek = ptDate.getDay();
+    let daysToMonday = (8 - dayOfWeek) % 7;
+    if (daysToMonday === 0) daysToMonday = 7;
+    let nextMondayPt = new Date(
+      ptDate.getFullYear(),
+      ptDate.getMonth(),
+      ptDate.getDate() + daysToMonday,
+      0,
+      0,
+      0,
+      0,
+    );
+    let weeklyLeftMs = nextMondayPt.getTime() - ptDate.getTime();
 
-        let wD = Math.floor(weeklyLeftMs / 86400000);
-        let wH = Math.floor((weeklyLeftMs % 86400000) / 3600000);
-        let wM = Math.floor((weeklyLeftMs % 3600000) / 60000);
-        let timerText = `${wD}d ${wH}h ${wM}m remaining`;
+    let wD = Math.floor(weeklyLeftMs / 86400000);
+    let wH = Math.floor((weeklyLeftMs % 86400000) / 3600000);
+    let wM = Math.floor((weeklyLeftMs % 3600000) / 60000);
+    let timerText = `${wD}d ${wH}h ${wM}m remaining`;
 
-        if (lastClaimedWeek === currentWeek) {
-                  crateSectionHtml = `
+    if (lastClaimedWeek === currentWeek) {
+      crateSectionHtml = `
                               <div style="background:rgba(0,0,0,0.45); border:1.5px solid #2d3748; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;">
                                 <div>
                                   <strong style="color:#7f8c8d; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Weekly Clan Crate</strong>
@@ -559,8 +569,8 @@ window.renderClanDashboard = function (clan, members, invitations) {
                                 <span style="color:#7f8c8d; font-weight:bold; font-size:11px;">Claimed [✓]</span>
                               </div>
                             `;
-                } else {
-                  crateSectionHtml = `
+    } else {
+      crateSectionHtml = `
                               <div style="background:rgba(46,204,113,0.03); border:1.5px solid #2ecc71; border-radius:6px; padding:10px; margin-bottom:12px; text-align:left; display:flex; justify-content:space-between; align-items:center; animation: pulseGlow 1.8s infinite;">
                                 <div>
                                   <strong style="color:#2ecc71; font-size:11.5px; text-transform:uppercase; letter-spacing:0.5px;">Weekly Clan Crate Ready!</strong>
@@ -569,24 +579,24 @@ window.renderClanDashboard = function (clan, members, invitations) {
                                 <button class="btn-action btn-pulse-teal" style="background:#2ecc71; color:#fff; font-size:11px; padding:6px 12px;" onclick="window.claimWeeklyClanCrate(event)">Claim Crate</button>
                               </div>
                             `;
-                }
+    }
 
-            // Guild Hearth Vectors (Flame changes color based on Level thresholds)
-            let hearthGlow = "#ff5500";
-            let hearthLabel = "Warm Embers";
-            if (clan.level >= 30) {
-              hearthGlow = "#00d2ff";
-              hearthLabel = "Celestial Portal Flame";
-            } else if (clan.level >= 20) {
-              hearthGlow = "#9b59b6";
-              hearthLabel = "Arcane Void Hearth";
-            } else if (clan.level >= 10) {
-              hearthGlow = "#ffd700";
-              hearthLabel = "Vibrant Sunfire Hearth";
-            }
+    // Guild Hearth Vectors (Flame changes color based on Level thresholds)
+    let hearthGlow = "#ff5500";
+    let hearthLabel = "Warm Embers";
+    if (clan.level >= 30) {
+      hearthGlow = "#00d2ff";
+      hearthLabel = "Celestial Portal Flame";
+    } else if (clan.level >= 20) {
+      hearthGlow = "#9b59b6";
+      hearthLabel = "Arcane Void Hearth";
+    } else if (clan.level >= 10) {
+      hearthGlow = "#ffd700";
+      hearthLabel = "Vibrant Sunfire Hearth";
+    }
 
-            let pulseDuration = Math.max(0.5, 3.2 - clan.level * 0.08) + "s";
-            let hearthSvg = `
+    let pulseDuration = Math.max(0.5, 3.2 - clan.level * 0.08) + "s";
+    let hearthSvg = `
               <svg width="100%" height="75" viewBox="0 0 200 75" style="display:block; margin: 8px auto; overflow:visible; --hearth-glow-color:${hearthGlow};">
                 <ellipse cx="100" cy="62" rx="42" ry="10" fill="none" stroke="#2d3748" stroke-width="1.2" stroke-dasharray="3 3.5" class="portal-spiral" style="transform-origin: 100px 62px; animation: portalSpiralRotate 7s linear infinite;" />
                 <ellipse cx="100" cy="62" rx="28" ry="6.5" fill="rgba(0,0,0,0.4)" stroke="#4a5568" stroke-width="1.5" />
@@ -596,23 +606,23 @@ window.renderClanDashboard = function (clan, members, invitations) {
               </svg>
             `;
 
-            let logs = clan.activity_log || [
-              "No active records available in treasury catalogs.",
-            ];
-            let ledgerHtml = logs
-              .slice()
-              .reverse()
-              .map(
-                (log) => `
+    let logs = clan.activity_log || [
+      "No active records available in treasury catalogs.",
+    ];
+    let ledgerHtml = logs
+      .slice()
+      .reverse()
+      .map(
+        (log) => `
               <div style="font-family:monospace; font-size:10px; color:#c8b195; border-bottom:1px solid #1a202c; padding:5px 0; display:flex; justify-content:space-between; gap:10px; text-align:left;">
                 <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">✦ ${window.escapeHTML(log)}</span>
                 <span style="color:#4a5568; font-size:8px; font-weight:bold;">LOG</span>
               </div>
             `,
-              )
-              .join("");
+      )
+      .join("");
 
-            tabContentHtml = `
+    tabContentHtml = `
               <div class="clan-scroll-frame">
                   <!-- Dangling Crest Tapestry Frame -->
                   <div style="background:rgba(0,0,0,0.5); border: 2px solid #5c4033; border-top-width:6px; border-bottom-width:4px; border-radius:8px; padding:12px; margin-bottom:12px; display:flex; align-items:center; gap:12px; text-align:left; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7); position:relative;">
@@ -680,17 +690,19 @@ window.renderClanDashboard = function (clan, members, invitations) {
     };
 
     // Construct the Weekly Contribution Leaderboard Top 3 podiums
-        let sortedContrib = [...members].sort((a, b) => {
-          let contribA = a.weekly_contribution || a.weekly_renown || a.weeklyContribution || 0;
-          let contribB = b.weekly_contribution || b.weekly_renown || b.weeklyContribution || 0;
-          return contribB - contribA;
-        });
-        let leaderboardHtml = "";
-        if (sortedContrib.length > 0) {
-          let podiumMarkers = ["✦", "★", "⌖"];
-          let podiumColors = ["#ffd700", "#bdc3c7", "#e67e22"];
+    let sortedContrib = [...members].sort((a, b) => {
+      let contribA =
+        a.weekly_contribution || a.weekly_renown || a.weeklyContribution || 0;
+      let contribB =
+        b.weekly_contribution || b.weekly_renown || b.weeklyContribution || 0;
+      return contribB - contribA;
+    });
+    let leaderboardHtml = "";
+    if (sortedContrib.length > 0) {
+      let podiumMarkers = ["✦", "★", "⌖"];
+      let podiumColors = ["#ffd700", "#bdc3c7", "#e67e22"];
 
-          leaderboardHtml = `
+      leaderboardHtml = `
             <div class="chiseled-stone-panel" style="margin-bottom:12px; padding:10px; border-color:#9b59b650;">
                 <div style="font-size:10px; font-weight:bold; color:#df9ffb; text-transform:uppercase; letter-spacing:1.5px; text-align:center; border-bottom:1px solid #4a154b; padding-bottom:4px; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:4px;">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -699,15 +711,16 @@ window.renderClanDashboard = function (clan, members, invitations) {
                 <div style="display:flex; flex-direction:column; gap:4px;">
           `;
 
-          sortedContrib.slice(0, 5).forEach((m, idx) => {
-            let mId = m.userId || m.user_id;
-            let nameCol = mId === userId ? "#ffd700" : "#fff";
-            let rankLabel =
-              idx < 3
-                ? `<strong style="color:${podiumColors[idx]}; font-family:monospace; margin-right:4px;">${podiumMarkers[idx]}</strong>`
-                : `<span style="color:#aaa; font-family:monospace; margin-right:4px;">#${idx + 1}</span>`;
-            let contributionVal = m.weekly_contribution || m.weekly_renown || m.weeklyContribution || 0;
-            leaderboardHtml += `
+      sortedContrib.slice(0, 5).forEach((m, idx) => {
+        let mId = m.userId || m.user_id;
+        let nameCol = mId === userId ? "#ffd700" : "#fff";
+        let rankLabel =
+          idx < 3
+            ? `<strong style="color:${podiumColors[idx]}; font-family:monospace; margin-right:4px;">${podiumMarkers[idx]}</strong>`
+            : `<span style="color:#aaa; font-family:monospace; margin-right:4px;">#${idx + 1}</span>`;
+        let contributionVal =
+          m.weekly_contribution || m.weekly_renown || m.weeklyContribution || 0;
+        leaderboardHtml += `
                     <div style="display:flex; justify-content:space-between; align-items:center; font-family:monospace; font-size:10px; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:4px; border:1px solid #222;">
                       <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px; text-align:left;">
                           ${rankLabel} <strong style="color:${nameCol};">${window.escapeHTML(m.name)}</strong>
@@ -715,42 +728,45 @@ window.renderClanDashboard = function (clan, members, invitations) {
                       <span style="color:#2ecc71; font-weight:bold;">+${contributionVal.toLocaleString()} Renown</span>
                     </div>
                   `;
-          });
+      });
 
-          leaderboardHtml += `</div></div>`;
-        }
+      leaderboardHtml += `</div></div>`;
+    }
 
-        // Process Roster Group headers
-        let rosterHtml = "";
-        ["founder", "officer", "vanguard", "recruit"].forEach((rKey) => {
-          let rMembers = groups[rKey];
-          if (rMembers.length === 0) return;
+    // Process Roster Group headers
+    let rosterHtml = "";
+    ["founder", "officer", "vanguard", "recruit"].forEach((rKey) => {
+      let rMembers = groups[rKey];
+      if (rMembers.length === 0) return;
 
-          let sectionHeader = `
+      let sectionHeader = `
             <div style="font-size:10px; font-weight:bold; color:#7f8c8d; text-transform:uppercase; letter-spacing:1px; margin-top:12px; margin-bottom:6px; border-bottom:1.5px solid #2d3748; padding-bottom:3px; display:flex; justify-content:space-between; align-items:center;">
               <span>${groupLabels[rKey]} [${rMembers.length}]</span>
             </div>
           `;
 
-          let cardsHtml = rMembers
-            .map((m) => {
-              let mId = m.userId || m.user_id;
-              let isLeaderRow = mId === clan.leader_id;
-              let isMe = mId === userId;
-              let canvasId = `clan-member-canvas-${mId}`;
+      let cardsHtml = rMembers
+        .map((m) => {
+          let mId = m.userId || m.user_id;
+          let isLeaderRow = mId === clan.leader_id;
+          let isMe = mId === userId;
+          let canvasId = `clan-member-canvas-${mId}`;
 
-              let titleTextHtml = "";
-              if (m.equippedTitle && window.TITLES_DATA[m.equippedTitle]) {
-                let tData = window.TITLES_DATA[m.equippedTitle];
-                titleTextHtml = `<span style="color:${tData.color || "#ff007f"}; font-size:8px; font-weight:bold; margin-left:4px;">[${tData.name}]</span>`;
-              }
+          let titleTextHtml = "";
+          if (m.equippedTitle && window.TITLES_DATA[m.equippedTitle]) {
+            let tData = window.TITLES_DATA[m.equippedTitle];
+            titleTextHtml = `<span style="color:${tData.color || "#ff007f"}; font-size:8px; font-weight:bold; margin-left:4px;">[${tData.name}]</span>`;
+          }
 
-              // Inline admin choices dropdown selector
-              let adminSelectHtml = "";
-              let clanPermissions = window.playerStats.clanPermissions || { officer_kick: true, officer_vault: true };
+          // Inline admin choices dropdown selector
+          let adminSelectHtml = "";
+          let clanPermissions = window.playerStats.clanPermissions || {
+            officer_kick: true,
+            officer_vault: true,
+          };
 
-              if (isLeader && !isMe) {
-                adminSelectHtml = `
+          if (isLeader && !isMe) {
+            adminSelectHtml = `
                 <select class="rank-action-select" onchange="window.handleInlineAdminAction(this, '${mId}', '${window.escapeHTML(m.name)}')">
                   <option value="">Actions...</option>
                   ${m.clan_rank === "recruit" ? `<option value="promote">Promote to Vanguard</option>` : ""}
@@ -760,22 +776,24 @@ window.renderClanDashboard = function (clan, members, invitations) {
                   <option value="kick">Expel Member</option>
                 </select>
               `;
-              } else if (isLeader && isMe) {
-                adminSelectHtml = `<span style="font-size:8px; color:#f1c40f; font-weight:bold; font-family:monospace;">Leader</span>`;
-              } else if (clan.leader_id !== userId && isLeaderRow) {
-                adminSelectHtml = `<span style="font-size:8px; color:#f1c40f; font-weight:bold; font-family:monospace;">Founder</span>`;
-              } else if (clan.leader_id !== userId && !isLeaderRow && !isMe) {
-                // Check if viewer is Officer and target is a Recruit/Vanguard
-                let myRankRes = members.find((x) => (x.userId || x.user_id) === userId);
-                let myRank = myRankRes ? myRankRes.clan_rank : "recruit";
-                let canOfficerKick = clanPermissions.officer_kick !== false;
+          } else if (isLeader && isMe) {
+            adminSelectHtml = `<span style="font-size:8px; color:#f1c40f; font-weight:bold; font-family:monospace;">Leader</span>`;
+          } else if (clan.leader_id !== userId && isLeaderRow) {
+            adminSelectHtml = `<span style="font-size:8px; color:#f1c40f; font-weight:bold; font-family:monospace;">Founder</span>`;
+          } else if (clan.leader_id !== userId && !isLeaderRow && !isMe) {
+            // Check if viewer is Officer and target is a Recruit/Vanguard
+            let myRankRes = members.find(
+              (x) => (x.userId || x.user_id) === userId,
+            );
+            let myRank = myRankRes ? myRankRes.clan_rank : "recruit";
+            let canOfficerKick = clanPermissions.officer_kick !== false;
 
-                if (
-                  myRank === "officer" &&
-                  canOfficerKick &&
-                  (m.clan_rank === "recruit" || m.clan_rank === "vanguard")
-                ) {
-                  adminSelectHtml = `
+            if (
+              myRank === "officer" &&
+              canOfficerKick &&
+              (m.clan_rank === "recruit" || m.clan_rank === "vanguard")
+            ) {
+              adminSelectHtml = `
                   <select class="rank-action-select" onchange="window.handleInlineAdminAction(this, '${mId}', '${window.escapeHTML(m.name)}')">
                     <option value="">Actions...</option>
                     ${m.clan_rank === "recruit" ? `<option value="promote">Promote to Vanguard</option>` : ""}
@@ -783,13 +801,18 @@ window.renderClanDashboard = function (clan, members, invitations) {
                     <option value="kick">Expel Member</option>
                   </select>
                 `;
-                }
-              }
+            }
+          }
 
-              let weeklyRenownVal = m.weekly_contribution || m.weekly_renown || m.weeklyContribution || 0;
-              let clanContributionVal = m.clanContribution || m.clan_contribution || 0;
+          let weeklyRenownVal =
+            m.weekly_contribution ||
+            m.weekly_renown ||
+            m.weeklyContribution ||
+            0;
+          let clanContributionVal =
+            m.clanContribution || m.clan_contribution || 0;
 
-              return `
+          return `
               <div style="background:#111; border:1px solid #222; border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
                   <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; text-align:left;">
                       <div style="position:relative; flex-shrink:0;">
@@ -811,52 +834,53 @@ window.renderClanDashboard = function (clan, members, invitations) {
                   </div>
               </div>
             `;
-            })
-            .join("");
+        })
+        .join("");
 
-          rosterHtml +=
-            sectionHeader +
-            `<div style="display:flex; flex-direction:column; gap:4px;">${cardsHtml}</div>`;
-        });
+      rosterHtml +=
+        sectionHeader +
+        `<div style="display:flex; flex-direction:column; gap:4px;">${cardsHtml}</div>`;
+    });
 
-        tabContentHtml = `
+    tabContentHtml = `
               ${leaderboardHtml}
               <div style="display:flex; flex-direction:column; gap:4px;">
                   ${rosterHtml}
               </div>
             `;
 
-        setTimeout(() => {
-          members.forEach((m) => {
-            let mId = m.userId || m.user_id;
-            let canvas = document.getElementById(`clan-member-canvas-${mId}`);
-            if (canvas) {
-              let ctx = canvas.getContext("2d");
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              ctx.imageSmoothingEnabled = false;
-              window.drawSingleHero(ctx, 15, 14, 0.55, m.equippedSlots, m, 0, {
-                slashFrame: false,
-                deathAnimationTimer: 0,
-                isMainHero: false,
-              });
-            }
+    setTimeout(() => {
+      members.forEach((m) => {
+        let mId = m.userId || m.user_id;
+        let canvas = document.getElementById(`clan-member-canvas-${mId}`);
+        if (canvas) {
+          let ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.imageSmoothingEnabled = false;
+          window.drawSingleHero(ctx, 15, 14, 0.55, m.equippedSlots, m, 0, {
+            slashFrame: false,
+            deathAnimationTimer: 0,
+            isMainHero: false,
           });
-        }, 50);
+        }
+      });
+    }, 50);
   } else if (currentTab === "QUESTS") {
     let questsData = clan.quests;
     let listHtml = "";
 
     if (
-                        !questsData ||
-                        !questsData.activeList ||
-                        questsData.activeList.length === 0
-                      ) {
-                        listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
-                      } else {
-                        let peakLvl = window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-                        let effStage = window.getEffectiveStage(peakLvl);
-                        let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-                        let scaleVal = Math.pow(growthRate, effStage);
+      !questsData ||
+      !questsData.activeList ||
+      questsData.activeList.length === 0
+    ) {
+      listHtml = `<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:35px 0;">No active weekly quests. Check back shortly!</div>`;
+    } else {
+      let peakLvl =
+        window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
+      let effStage = window.getEffectiveStage(peakLvl);
+      let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+      let scaleVal = Math.pow(growthRate, effStage);
 
       // Define inline micro vector icons to completely eradicate emojis
       const keyIcon =
@@ -923,13 +947,13 @@ window.renderClanDashboard = function (clan, members, invitations) {
             );
 
           if (q.rewards.goldBase > 0) {
-                      // Normalize the server-provided goldBase and scale with campaign progress curve
-                      let baseRatio = (q.rewards.goldBase || 150000) / 150000;
-                      let actualGoldReward = Math.ceil(scaleVal * 1200 * baseRatio);
-                      rewardItems.push(
-                        `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${goldIcon}+${window.formatNumber(actualGoldReward)} Gold</span>`,
-                      );
-                    }
+            // Normalize the server-provided goldBase and scale with campaign progress curve
+            let baseRatio = (q.rewards.goldBase || 150000) / 150000;
+            let actualGoldReward = Math.ceil(scaleVal * 1200 * baseRatio);
+            rewardItems.push(
+              `<span style="color:#5c4033; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">${goldIcon}+${window.formatNumber(actualGoldReward)} Gold</span>`,
+            );
+          }
 
           // Completed bounty cards receive a 3D Wax Seal Stamp overlay!
           let completedOverlay = q.completed
@@ -996,48 +1020,52 @@ window.renderClanDashboard = function (clan, members, invitations) {
                                   </div>
                                 `;
   } else if (currentTab === "DONATE") {
-            let personalCP = 0;
-            let meMember = members.find((x) => (x.userId || x.user_id) === userId);
-            if (meMember) {
-              personalCP = meMember.weekly_contribution || meMember.weekly_renown || meMember.weeklyContribution || 0;
-            }
+    let personalCP = 0;
+    let meMember = members.find((x) => (x.userId || x.user_id) === userId);
+    if (meMember) {
+      personalCP =
+        meMember.weekly_contribution ||
+        meMember.weekly_renown ||
+        meMember.weeklyContribution ||
+        0;
+    }
 
-            // Track weekly cooperative points to render Cooperative Vault Chest Bar (Scaled up 25x)
-      let vaultPoints = clan.vault_points || 0;
-      let currentChestTier = "common";
-      if (vaultPoints >= 750000) currentChestTier = "mythic";
-      else if (vaultPoints >= 300000) currentChestTier = "legendary";
-      else if (vaultPoints >= 120000) currentChestTier = "epic";
-      else if (vaultPoints >= 50000) currentChestTier = "magic";
-      else if (vaultPoints >= 15000) currentChestTier = "rare";
+    // Track weekly cooperative points to render Cooperative Vault Chest Bar (Scaled up 25x)
+    let vaultPoints = clan.vault_points || 0;
+    let currentChestTier = "common";
+    if (vaultPoints >= 750000) currentChestTier = "mythic";
+    else if (vaultPoints >= 300000) currentChestTier = "legendary";
+    else if (vaultPoints >= 120000) currentChestTier = "epic";
+    else if (vaultPoints >= 50000) currentChestTier = "magic";
+    else if (vaultPoints >= 15000) currentChestTier = "rare";
 
-      // Progress percentage mapping
-      let maxThreshold = 750000;
-      let chestPct = Math.min(100, (vaultPoints / maxThreshold) * 100);
+    // Progress percentage mapping
+    let maxThreshold = 750000;
+    let chestPct = Math.min(100, (vaultPoints / maxThreshold) * 100);
 
-      let nextThresholdLabel = "";
-      let nextThresholdVal = 0;
-      if (currentChestTier === "common") {
-        nextThresholdLabel = "Rare";
-        nextThresholdVal = 15000;
-      } else if (currentChestTier === "rare") {
-        nextThresholdLabel = "Magic";
-        nextThresholdVal = 50000;
-      } else if (currentChestTier === "magic") {
-        nextThresholdLabel = "Epic";
-        nextThresholdVal = 120000;
-      } else if (currentChestTier === "epic") {
-        nextThresholdLabel = "Legendary";
-        nextThresholdVal = 300000;
-      } else if (currentChestTier === "legendary") {
-        nextThresholdLabel = "Mythic";
-        nextThresholdVal = 750000;
-      } else {
-        nextThresholdLabel = "Maxed";
-        nextThresholdVal = 750000;
-      }
+    let nextThresholdLabel = "";
+    let nextThresholdVal = 0;
+    if (currentChestTier === "common") {
+      nextThresholdLabel = "Rare";
+      nextThresholdVal = 15000;
+    } else if (currentChestTier === "rare") {
+      nextThresholdLabel = "Magic";
+      nextThresholdVal = 50000;
+    } else if (currentChestTier === "magic") {
+      nextThresholdLabel = "Epic";
+      nextThresholdVal = 120000;
+    } else if (currentChestTier === "epic") {
+      nextThresholdLabel = "Legendary";
+      nextThresholdVal = 300000;
+    } else if (currentChestTier === "legendary") {
+      nextThresholdLabel = "Mythic";
+      nextThresholdVal = 750000;
+    } else {
+      nextThresholdLabel = "Maxed";
+      nextThresholdVal = 750000;
+    }
 
-      tabContentHtml = `
+    tabContentHtml = `
                   <!-- Cooperative Vault Chest Progression Card -->
                   <div class="chiseled-stone-panel" style="margin-bottom:12px; padding:12px; border-color:#d4af3780;">
                       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -1163,29 +1191,29 @@ window.renderClanDashboard = function (clan, members, invitations) {
                                                         <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
                                                             <span>• Officers can invite members:</span>
                                                             <select id="settings-perm-officer-invite" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
-                                                                <option value="allow" ${(window.playerStats.clanPermissions?.officer_invite !== false) ? "selected" : ""}>ALLOWED ✓</option>
-                                                                <option value="block" ${(window.playerStats.clanPermissions?.officer_invite === false) ? "selected" : ""}>DENIED ✗</option>
+                                                                <option value="allow" ${window.playerStats.clanPermissions?.officer_invite !== false ? "selected" : ""}>ALLOWED ✓</option>
+                                                                <option value="block" ${window.playerStats.clanPermissions?.officer_invite === false ? "selected" : ""}>DENIED ✗</option>
                                                             </select>
                                                         </div>
                                                         <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
                                                             <span>• Officers can expel Recruits:</span>
                                                             <select id="settings-perm-officer-kick" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
-                                                                <option value="allow" ${(window.playerStats.clanPermissions?.officer_kick !== false) ? "selected" : ""}>ALLOWED ✓</option>
-                                                                <option value="block" ${(window.playerStats.clanPermissions?.officer_kick === false) ? "selected" : ""}>DENIED ✗</option>
+                                                                <option value="allow" ${window.playerStats.clanPermissions?.officer_kick !== false ? "selected" : ""}>ALLOWED ✓</option>
+                                                                <option value="block" ${window.playerStats.clanPermissions?.officer_kick === false ? "selected" : ""}>DENIED ✗</option>
                                                             </select>
                                                         </div>
                                                         <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
                                                             <span>• Officers can spend Vault Funds:</span>
                                                             <select id="settings-perm-officer-vault" style="background:#111; color:#2ecc71; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
-                                                                <option value="allow" ${(window.playerStats.clanPermissions?.officer_vault !== false) ? "selected" : ""}>ALLOWED ✓</option>
-                                                                <option value="block" ${(window.playerStats.clanPermissions?.officer_vault === false) ? "selected" : ""}>DENIED ✗</option>
+                                                                <option value="allow" ${window.playerStats.clanPermissions?.officer_vault !== false ? "selected" : ""}>ALLOWED ✓</option>
+                                                                <option value="block" ${window.playerStats.clanPermissions?.officer_vault === false ? "selected" : ""}>DENIED ✗</option>
                                                             </select>
                                                         </div>
                                                         <div style="display:flex; justify-content:space-between; align-items:center; background:#07030b; padding:4px 8px; border-radius:4px; border:1px solid #222;">
                                                             <span>• Vanguards can invite recruits:</span>
                                                             <select id="settings-perm-vanguard-invite" style="background:#111; color:#e74c3c; border:1px solid #444; font-size:9.5px; padding:2px; font-weight:bold;">
-                                                                <option value="allow" ${(window.playerStats.clanPermissions?.vanguard_invite === true) ? "selected" : ""}>ALLOWED ✓</option>
-                                                                <option value="block" ${(window.playerStats.clanPermissions?.vanguard_invite !== true) ? "selected" : ""}>DENIED ✗</option>
+                                                                <option value="allow" ${window.playerStats.clanPermissions?.vanguard_invite === true ? "selected" : ""}>ALLOWED ✓</option>
+                                                                <option value="block" ${window.playerStats.clanPermissions?.vanguard_invite !== true ? "selected" : ""}>DENIED ✗</option>
                                                             </select>
                                                         </div>
                                                     </div>
@@ -1204,13 +1232,17 @@ window.renderClanDashboard = function (clan, members, invitations) {
                 }
               `;
   } else if (currentTab === "RESEARCH") {
-      let myMember = members.find((x) => (x.userId || x.user_id) === userId);
-      let myRank = myMember ? myMember.clan_rank : "recruit";
-      let clanPermissions = window.playerStats.clanPermissions || { officer_vault: true };
-      let canManageVault =
-        myRank === "founder" || isLeader || (myRank === "officer" && clanPermissions.officer_vault !== false);
+    let myMember = members.find((x) => (x.userId || x.user_id) === userId);
+    let myRank = myMember ? myMember.clan_rank : "recruit";
+    let clanPermissions = window.playerStats.clanPermissions || {
+      officer_vault: true,
+    };
+    let canManageVault =
+      myRank === "founder" ||
+      isLeader ||
+      (myRank === "officer" && clanPermissions.officer_vault !== false);
 
-      let getSkillUpgradeCardHtml = (
+    let getSkillUpgradeCardHtml = (
       key,
       label,
       bonusText,
@@ -1250,9 +1282,9 @@ window.renderClanDashboard = function (clan, members, invitations) {
       }
 
       // Group Cooperative Model: Scale costs purely based on Clan Level and Research Level
-            // This ensures all clan members see the exact same unified target and progress bar!
-            let clanLvl = clan.level || 1;
-            costGold = Math.floor(costGold * (1.0 + clanLvl * 0.15) * 20);
+      // This ensures all clan members see the exact same unified target and progress bar!
+      let clanLvl = clan.level || 1;
+      costGold = Math.floor(costGold * (1.0 + clanLvl * 0.15) * 20);
 
       let isMaxed = currentL >= maxL;
       let clanLevel = clan.level || 1;
@@ -1450,17 +1482,20 @@ window.executeClaimClanQuestReward = function (questId) {
           window.addUseDrop("Clan Reward Sack", r.sacks);
           claimsReport.push(`+${r.sacks}x Clan Sacks`);
         } else if (r.goldBase > 0) {
-                  let peakLvl = window.playerStats.lifetimePeakStage || window.playerStats.stage || 1;
-                  let effStage = window.getEffectiveStage(peakLvl);
-                  let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
-                  let scaleVal = Math.pow(growthRate, effStage);
+          let peakLvl =
+            window.playerStats.lifetimePeakStage ||
+            window.playerStats.stage ||
+            1;
+          let effStage = window.getEffectiveStage(peakLvl);
+          let growthRate = 1.045 + (effStage * 0.04) / (effStage + 200);
+          let scaleVal = Math.pow(growthRate, effStage);
 
-                  let baseRatio = (r.goldBase || 150000) / 150000;
-                  let calculatedGold = Math.ceil(scaleVal * 1200 * baseRatio);
+          let baseRatio = (r.goldBase || 150000) / 150000;
+          let calculatedGold = Math.ceil(scaleVal * 1200 * baseRatio);
 
-                  window.addCoins(calculatedGold);
-                  claimsReport.push(`+${window.formatNumber(calculatedGold)} Gold`);
-                }
+          window.addCoins(calculatedGold);
+          claimsReport.push(`+${window.formatNumber(calculatedGold)} Gold`);
+        }
 
         window.pushHeaderToast(
           `🎁 Quest Claimed: ${claimsReport.join(", ")}!`,
@@ -1509,10 +1544,14 @@ window.executeSaveClanSettings = function () {
   let titheSelect = document.getElementById("settings-clan-tithe");
 
   // Read rank permissions dropdowns if they exist
-  let permOfficerInvite = document.getElementById("settings-perm-officer-invite");
+  let permOfficerInvite = document.getElementById(
+    "settings-perm-officer-invite",
+  );
   let permOfficerKick = document.getElementById("settings-perm-officer-kick");
   let permOfficerVault = document.getElementById("settings-perm-officer-vault");
-  let permVanguardInvite = document.getElementById("settings-perm-vanguard-invite");
+  let permVanguardInvite = document.getElementById(
+    "settings-perm-vanguard-invite",
+  );
 
   if (
     !descInput ||
@@ -1531,10 +1570,14 @@ window.executeSaveClanSettings = function () {
   const titheRate = parseInt(titheSelect.value, 10) || 0;
 
   let permissions = {
-    officer_invite: permOfficerInvite ? permOfficerInvite.value === "allow" : true,
+    officer_invite: permOfficerInvite
+      ? permOfficerInvite.value === "allow"
+      : true,
     officer_kick: permOfficerKick ? permOfficerKick.value === "allow" : true,
     officer_vault: permOfficerVault ? permOfficerVault.value === "allow" : true,
-    vanguard_invite: permVanguardInvite ? permVanguardInvite.value === "allow" : false,
+    vanguard_invite: permVanguardInvite
+      ? permVanguardInvite.value === "allow"
+      : false,
   };
 
   fetch(`${window.GAME_SERVER_URL}/api/clan/update-settings`, {
@@ -1547,7 +1590,7 @@ window.executeSaveClanSettings = function () {
       minLevel,
       emblem,
       titheRate,
-      permissions
+      permissions,
     }),
   })
     .then((r) => r.json())
@@ -2228,24 +2271,42 @@ window.executeClanResearchDonate = function (skillKey, resType, amount) {
       let clan = window.lastFetchedClanData || {
         level: window.playerStats.clanLevel || 1,
         research_progress: {},
-        members: []
+        members: [],
       };
       window.lastFetchedClanData = clan;
 
       let isGold = resType === "gold";
       let progress = (clan.research_progress = clan.research_progress || {});
-      let skillProgress = (progress[skillKey] = progress[skillKey] || { gold: 0, souls: 0 });
+      let skillProgress = (progress[skillKey] = progress[skillKey] || {
+        gold: 0,
+        souls: 0,
+      });
 
       let currentL = window.playerStats.clanSkills[skillKey] || 0;
       let costGold = 0;
       let costSoul = 0;
 
       if (skillKey === "steel_phalanx" || skillKey === "vitality_well") {
-        costGold = Math.floor((skillKey === "steel_phalanx" ? 25000 : 20000) * Math.pow(1.35, currentL));
+        costGold = Math.floor(
+          (skillKey === "steel_phalanx" ? 25000 : 20000) *
+            Math.pow(1.35, currentL),
+        );
         costSoul = Math.floor(200 * Math.pow(1.25, currentL));
       } else {
-        let baseG = skillKey === "prosperity_accord" ? 40000 : skillKey === "voyagers_guidance" ? 50000 : skillKey === "clan_supply_depot" ? 55000 : 45000;
-        let baseS = skillKey === "aetheric_wisdom" ? 6 : skillKey === "clan_supply_depot" ? 8 : 5;
+        let baseG =
+          skillKey === "prosperity_accord"
+            ? 40000
+            : skillKey === "voyagers_guidance"
+              ? 50000
+              : skillKey === "clan_supply_depot"
+                ? 55000
+                : 45000;
+        let baseS =
+          skillKey === "aetheric_wisdom"
+            ? 6
+            : skillKey === "clan_supply_depot"
+              ? 8
+              : 5;
         let scaleG = skillKey === "clan_supply_depot" ? 1.45 : 1.4;
         let scaleS = skillKey === "clan_supply_depot" ? 1.35 : 1.3;
         costGold = Math.floor(baseG * Math.pow(scaleG, currentL));
@@ -2261,15 +2322,22 @@ window.executeClanResearchDonate = function (skillKey, resType, amount) {
         let availableToMax = costGold - (skillProgress.gold || 0);
         addedAmount = Math.min(amount, availableToMax);
         skillProgress.gold = (skillProgress.gold || 0) + addedAmount;
-        window.playerStats.coins = BigNum.from(window.playerStats.coins).sub(addedAmount);
-        if (window.playerStats.coins.eq(0)) window.playerStats.hasTriggeredExactChange = true;
+        window.playerStats.coins = BigNum.from(window.playerStats.coins).sub(
+          addedAmount,
+        );
+        if (window.playerStats.coins.eq(0))
+          window.playerStats.hasTriggeredExactChange = true;
       } else {
         let availableToMax = costSoul - (skillProgress.souls || 0);
         addedAmount = Math.min(amount, availableToMax);
         skillProgress.souls = (skillProgress.souls || 0) + addedAmount;
-        let rawSoulName = (skillKey === "steel_phalanx" || skillKey === "vitality_well") ? "Monster Soul" : "Luminous Soul";
+        let rawSoulName =
+          skillKey === "steel_phalanx" || skillKey === "vitality_well"
+            ? "Monster Soul"
+            : "Luminous Soul";
         window.inventory.ETC[rawSoulName] -= addedAmount;
-        if (window.inventory.ETC[rawSoulName] === 0) delete window.inventory.ETC[rawSoulName];
+        if (window.inventory.ETC[rawSoulName] === 0)
+          delete window.inventory.ETC[rawSoulName];
       }
 
       let renownEarned = 0;
@@ -2277,21 +2345,28 @@ window.executeClanResearchDonate = function (skillKey, resType, amount) {
         renownEarned = Math.floor(addedAmount / 1000);
         if (renownEarned < 1 && addedAmount > 0) renownEarned = 1;
       } else {
-        let isMonster = (skillKey === "steel_phalanx" || skillKey === "vitality_well");
+        let isMonster =
+          skillKey === "steel_phalanx" || skillKey === "vitality_well";
         renownEarned = isMonster ? addedAmount * 2 : addedAmount * 40;
       }
 
       clan.vault_points = (clan.vault_points || 0) + renownEarned;
       let membersList = clan.members || [];
-      let meMember = membersList.find((x) => (x.userId || x.user_id) === userId);
+      let meMember = membersList.find(
+        (x) => (x.userId || x.user_id) === userId,
+      );
       if (meMember) {
-        let currentContrib = meMember.weekly_contribution || meMember.weekly_renown || meMember.weeklyContribution || 0;
+        let currentContrib =
+          meMember.weekly_contribution ||
+          meMember.weekly_renown ||
+          meMember.weeklyContribution ||
+          0;
         meMember.weekly_contribution = currentContrib + renownEarned;
       }
 
       window.pushHeaderToast(
         `✓ Contributed +${addedAmount.toLocaleString()} ${isGold ? "Gold" : "Souls"} (Offline)! (+${renownEarned} Renown)`,
-        "#2ecc71"
+        "#2ecc71",
       );
 
       if (skillProgress.gold >= costGold && skillProgress.souls >= costSoul) {
@@ -2299,7 +2374,10 @@ window.executeClanResearchDonate = function (skillKey, resType, amount) {
         skillProgress.gold = 0;
         skillProgress.souls = 0;
         window.playerStats.clanSkills[skillKey] = currentL + 1;
-        window.pushHeaderToast(`🎉 Research Upgraded to Lv. ${currentL + 1}!`, "#ffd700");
+        window.pushHeaderToast(
+          `🎉 Research Upgraded to Lv. ${currentL + 1}!`,
+          "#ffd700",
+        );
         if (window.SoundManager) window.SoundManager.play("revive");
         if (window.spawnPurchaseCelebration) {
           window.spawnPurchaseCelebration("alchemy", "#f1c40f", 5);
@@ -2643,49 +2721,53 @@ window.executeClanVaultAllocate = function (skillKey, resType, amount) {
 
   // Local-Only Simulation Fallback to allow immediate testing without backend redeploys
   const runLocalSimulation = () => {
-        let isGold = resType === "gold";
-        let bankField = isGold
-          ? "gold_bank"
-          : skillKey === "steel_phalanx" || skillKey === "vitality_well"
-            ? "souls_bank"
-            : "luminous_bank";
+    let isGold = resType === "gold";
+    let bankField = isGold
+      ? "gold_bank"
+      : skillKey === "steel_phalanx" || skillKey === "vitality_well"
+        ? "souls_bank"
+        : "luminous_bank";
 
-        clan[bankField] = Math.max(0, (clan[bankField] || 0) - amount);
+    clan[bankField] = Math.max(0, (clan[bankField] || 0) - amount);
 
-        let progress = (clan.research_progress = clan.research_progress || {});
-        let skillProgress = (progress[skillKey] = progress[skillKey] || {
-          gold: 0,
-          souls: 0,
-        });
+    let progress = (clan.research_progress = clan.research_progress || {});
+    let skillProgress = (progress[skillKey] = progress[skillKey] || {
+      gold: 0,
+      souls: 0,
+    });
 
-        let currentL = window.playerStats.clanSkills[skillKey] || 0;
-        let costGold = 0;
-        let costSoul = 0;
-        if (skillKey === "steel_phalanx" || skillKey === "vitality_well") {
-          costGold = Math.floor(
-            (skillKey === "steel_phalanx" ? 25000 : 20000) *
-              Math.pow(1.35, currentL),
-          );
-          costSoul = Math.floor(200 * Math.pow(1.25, currentL));
-        } else {
-          let baseG =
-            skillKey === "prosperity_accord"
-              ? 40000
-              : skillKey === "voyagers_guidance"
-                ? 50000
-                : skillKey === "clan_supply_depot"
-                  ? 55000
-                  : 45000;
-          let baseS =
-            skillKey === "aetheric_wisdom" ? 6 : skillKey === "clan_supply_depot" ? 8 : 5; // Resolved ReferenceError crash
-          let scaleG = skillKey === "clan_supply_depot" ? 1.45 : 1.4;
-          let scaleS = skillKey === "clan_supply_depot" ? 1.35 : 1.3;
-          costGold = Math.floor(baseG * Math.pow(scaleG, currentL));
-          costSoul = Math.floor(baseS * Math.pow(scaleS, currentL));
-        }
-        // Group Cooperative Model: Scale costs purely based on Clan Level and Research Level
-        let clanLvl = clan.level || 1;
-        costGold = Math.floor(costGold * (1.0 + clanLvl * 0.15) * 20);
+    let currentL = window.playerStats.clanSkills[skillKey] || 0;
+    let costGold = 0;
+    let costSoul = 0;
+    if (skillKey === "steel_phalanx" || skillKey === "vitality_well") {
+      costGold = Math.floor(
+        (skillKey === "steel_phalanx" ? 25000 : 20000) *
+          Math.pow(1.35, currentL),
+      );
+      costSoul = Math.floor(200 * Math.pow(1.25, currentL));
+    } else {
+      let baseG =
+        skillKey === "prosperity_accord"
+          ? 40000
+          : skillKey === "voyagers_guidance"
+            ? 50000
+            : skillKey === "clan_supply_depot"
+              ? 55000
+              : 45000;
+      let baseS =
+        skillKey === "aetheric_wisdom"
+          ? 6
+          : skillKey === "clan_supply_depot"
+            ? 8
+            : 5; // Resolved ReferenceError crash
+      let scaleG = skillKey === "clan_supply_depot" ? 1.45 : 1.4;
+      let scaleS = skillKey === "clan_supply_depot" ? 1.35 : 1.3;
+      costGold = Math.floor(baseG * Math.pow(scaleG, currentL));
+      costSoul = Math.floor(baseS * Math.pow(scaleS, currentL));
+    }
+    // Group Cooperative Model: Scale costs purely based on Clan Level and Research Level
+    let clanLvl = clan.level || 1;
+    costGold = Math.floor(costGold * (1.0 + clanLvl * 0.15) * 20);
 
     let leveledUp = false;
     if (isGold) {

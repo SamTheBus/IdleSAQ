@@ -11,19 +11,19 @@ window.SoundManager = {
   sfxGain: null,
   cachedNoiseBuffer: null, // Cached to prevent real-time GC stutters on iOS
 
-      init() {
-          // Map iOS AudioSession category dynamically based on preferred mode & mute state
-          if (navigator.audioSession) {
-            try {
-              let targetType = "ambient";
-              if (window.playerStats && !window.playerStats.mute) {
-                targetType = window.playerStats.audioSessionMode || "ambient";
-              }
-              navigator.audioSession.type = targetType;
-            } catch (e) {
-              console.warn("Could not set iOS AudioSession category:", e);
-            }
-          }
+  init() {
+    // Map iOS AudioSession category dynamically based on preferred mode & mute state
+    if (navigator.audioSession) {
+      try {
+        let targetType = "ambient";
+        if (window.playerStats && !window.playerStats.mute) {
+          targetType = window.playerStats.audioSessionMode || "ambient";
+        }
+        navigator.audioSession.type = targetType;
+      } catch (e) {
+        console.warn("Could not set iOS AudioSession category:", e);
+      }
+    }
 
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return false;
@@ -74,23 +74,26 @@ window.SoundManager = {
   },
 
   updateVolumes() {
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-    const targetMaster = window.playerStats.mute
-      ? 0
-      : window.playerStats.volumeMaster || 0.5;
-    const targetSFX = window.playerStats.volumeSFX || 0.5;
-    this.masterGain.gain.setTargetAtTime(
-      Math.max(0, Math.min(1, targetMaster)),
-      now,
-      0.015,
-    );
-    this.sfxGain.gain.setTargetAtTime(
-      Math.max(0, Math.min(1, targetSFX)),
-      now,
-      0.015,
-    );
-  },
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const targetMaster = window.playerStats.mute
+        ? 0
+        : window.playerStats.volumeMaster || 0.5;
+      const targetSFX = window.playerStats.volumeSFX || 0.5;
+      this.masterGain.gain.setTargetAtTime(
+        Math.max(0, Math.min(1, targetMaster)),
+        now,
+        0.015,
+      );
+      this.sfxGain.gain.setTargetAtTime(
+        Math.max(0, Math.min(1, targetSFX)),
+        now,
+        0.015,
+      );
+      if (window.MusicManager && typeof window.MusicManager.updateVolume === "function") {
+        window.MusicManager.updateVolume();
+      }
+    },
 
   play(type) {
     if (window.playerStats.mute) return;
@@ -1486,24 +1489,128 @@ if (document.readyState === "loading") {
 
 /* ==========================================================================
    INTERACTIVE ADAPTIVE BGM ENGINE (MusicManager)
-   Streams a single music file and modifies DSP filters in real-time.
+   Loads and decodes local audio files dynamically into Web Audio buffers
+   to prevent iOS Safari lockscreen hijacking.
    ========================================================================== */
 
 window.MusicManager = {
   ctx: null,
-  audio: null,
   source: null,
-  filter: null,
   gainNode: null,
+  activeBuffer: null,
   initialized: false,
-  currentState: "",
+  isLoading: false,
+  isPaused: false,
+  currentTrackIndex: 0,
+
+  // Playlist array: easily add more track filenames here in the future!
+  tracks: [
+    "music.mp3"
+  ],
 
   init() {
-    // Completely deactivated to prevent iOS Safari from hijacking audio focus and spawning Dynamic Island controls
+    if (this.initialized) return;
+    if (!window.SoundManager || !window.SoundManager.ctx) return;
+    this.ctx = window.SoundManager.ctx;
     this.initialized = true;
+
+    this.gainNode = this.ctx.createGain();
+    this.updateVolume();
+    this.gainNode.connect(this.ctx.destination);
+
+    this.play();
   },
 
-  play() {},
+  async play() {
+    if (!this.ctx || this.tracks.length === 0) return;
 
-  tick() {}
+    // Stop any currently playing track first
+    this.stopSource();
+    this.isPaused = false;
+    this.isLoading = true;
+
+    let trackUrl = this.tracks[this.currentTrackIndex];
+
+    try {
+      const response = await fetch(trackUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      this.activeBuffer = await this.ctx.decodeAudioData(arrayBuffer);
+      this.isLoading = false;
+
+      // Start playback of the loaded buffer
+      this.startSource();
+    } catch (err) {
+      console.warn(`[MusicManager] Failed to load or decode track: ${trackUrl}`, err);
+      this.isLoading = false;
+    }
+  },
+
+  startSource() {
+    if (!this.ctx || !this.activeBuffer || this.isPaused) return;
+
+    this.source = this.ctx.createBufferSource();
+    this.source.buffer = this.activeBuffer;
+
+    // If you only have 1 track, we loop it. If you have multiple, we play the next on end.
+    if (this.tracks.length === 1) {
+      this.source.loop = true;
+    } else {
+      this.source.loop = false;
+      this.source.onended = () => {
+        if (!this.isPaused && !this.isLoading) {
+          this.nextTrack();
+        }
+      };
+    }
+
+    this.source.connect(this.gainNode);
+    this.source.start(0);
+  },
+
+  stopSource() {
+    if (this.source) {
+      try {
+        this.source.stop();
+      } catch (e) {}
+      this.source.disconnect();
+      this.source = null;
+    }
+  },
+
+  pause() {
+    this.isPaused = true;
+    this.stopSource();
+  },
+
+  resume() {
+    if (this.initialized && this.isPaused) {
+      this.isPaused = false;
+      if (this.activeBuffer) {
+        this.startSource();
+      } else {
+        this.play();
+      }
+    }
+  },
+
+  nextTrack() {
+    if (this.tracks.length <= 1) return;
+    this.currentTrackIndex = (this.currentTrackIndex + 1) % this.tracks.length;
+    this.play();
+  },
+
+  playTrack(index) {
+    if (index < 0 || index >= this.tracks.length) return;
+    if (this.currentTrackIndex === index && this.source) return; // Already playing
+    this.currentTrackIndex = index;
+    this.play();
+  },
+
+  updateVolume() {
+    if (!this.ctx || !this.gainNode) return;
+    let now = this.ctx.currentTime;
+    let masterVol = window.playerStats.mute ? 0 : (window.playerStats.volumeMaster !== undefined ? window.playerStats.volumeMaster : 0.5);
+    let musicVol = window.playerStats.volumeMusic !== undefined ? window.playerStats.volumeMusic : 0.5;
+    this.gainNode.gain.setTargetAtTime(masterVol * musicVol, now, 0.015);
+  }
 };

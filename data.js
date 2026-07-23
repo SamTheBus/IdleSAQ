@@ -3,8 +3,8 @@
    initial global state, and system utility functions.
    ========================================================================= */
 
-window.GAME_VERSION = 1.000; // Release Version 1.0.00
-window.MIN_COMPATIBLE_VERSION = 1.000; // Hard reset epoch threshold
+window.GAME_VERSION = 1.0; // Release Version 1.0.00
+window.MIN_COMPATIBLE_VERSION = 1.0; // Hard reset epoch threshold
 
 // Core Security: HTML Sanitizer to prevent XSS injection in user lists
 window.escapeHTML = function (str) {
@@ -46,7 +46,8 @@ window.getEffectiveStage = function (stage) {
 
 window.getMilestoneMultiplier = function (level) {
   let milestones = Math.floor(level / 10);
-  return 1.0 + milestones * 0.25; // +25% compounding effectiveness per 10 levels
+  // Asymptotic square-root scaling dampens late-game stat inflation while preserving milestone achievements
+  return 1.0 + Math.sqrt(milestones) * 0.25;
 };
 
 window.calculateRenownForStageRange = function (fromStage, toStage) {
@@ -397,9 +398,9 @@ Object.assign(window.GameState, {
       }
 
       // Calculate next xpReq safely using BigNum exponential power scaling
-                  xpReq = BigNum.from(350).mul(
-                    BigNum.from(1.45).pow(window.playerStats.level - 1),
-                  );
+      xpReq = BigNum.from(350).mul(
+        BigNum.from(1.45).pow(window.playerStats.level - 1),
+      );
       leveledUp = true;
     }
 
@@ -432,46 +433,42 @@ Object.assign(window.GameState, {
       window.triggerLevelUpEffect();
 
       // Check if they reached Level 13 for the first time to trigger Clan Hall Unlock
-            if (
-              window.playerStats.level >= 13 &&
-              !window.playerStats.hasTriggeredLevel13Unlock
-            ) {
-              window.playerStats.hasTriggeredLevel13Unlock = true;
-              setTimeout(() => {
-                if (typeof window.playGlobalUnlockAnimation === "function") {
-                  window.playGlobalUnlockAnimation(
-                    "CLAN HALL UNLOCKED",
-                    "🏛️",
-                    () => {
-                      if (typeof window.toggleMenuHub === "function") {
-                        window.toggleMenuHub(); // Pop open the Hub so the padlock shatters right over the locked button!
-                      }
-                    },
-                  );
-                }
-              }, 1500);
-            }
+      if (
+        window.playerStats.level >= 13 &&
+        !window.playerStats.hasTriggeredLevel13Unlock
+      ) {
+        window.playerStats.hasTriggeredLevel13Unlock = true;
+        setTimeout(() => {
+          if (typeof window.playGlobalUnlockAnimation === "function") {
+            window.playGlobalUnlockAnimation("CLAN HALL UNLOCKED", "🏛️", () => {
+              if (typeof window.toggleMenuHub === "function") {
+                window.toggleMenuHub(); // Pop open the Hub so the padlock shatters right over the locked button!
+              }
+            });
+          }
+        }, 1500);
+      }
 
-            // Check if they reached Level 25 for the first time to trigger Rift Altar Unlock
-            if (
-              window.playerStats.level >= 25 &&
-              !window.playerStats.hasTriggeredLevel25Unlock
-            ) {
-              window.playerStats.hasTriggeredLevel25Unlock = true;
-              setTimeout(() => {
-                if (typeof window.playGlobalUnlockAnimation === "function") {
-                  window.playGlobalUnlockAnimation(
-                    "RIFT ALTAR UNLOCKED",
-                    "🔮",
-                    () => {
-                      if (typeof window.switchTab === "function") {
-                        window.switchTab("activities");
-                      }
-                    },
-                  );
+      // Check if they reached Level 25 for the first time to trigger Rift Altar Unlock
+      if (
+        window.playerStats.level >= 25 &&
+        !window.playerStats.hasTriggeredLevel25Unlock
+      ) {
+        window.playerStats.hasTriggeredLevel25Unlock = true;
+        setTimeout(() => {
+          if (typeof window.playGlobalUnlockAnimation === "function") {
+            window.playGlobalUnlockAnimation(
+              "RIFT ALTAR UNLOCKED",
+              "🔮",
+              () => {
+                if (typeof window.switchTab === "function") {
+                  window.switchTab("activities");
                 }
-              }, 1500); // Trigger shortly after the level-up flash settles
-            }
+              },
+            );
+          }
+        }, 1500); // Trigger shortly after the level-up flash settles
+      }
 
       window.invalidatePlayerStats();
       let p = window.resolvePlayerStats();
@@ -492,19 +489,19 @@ Object.assign(window.GameState, {
         }
       }
       if (typeof window.checkAchievements === "function") {
-                  window.checkAchievements();
-                }
-                // Evaluate tutorial triggers immediately after level-up animations/sounds settle
-                setTimeout(() => {
-                  if (window.HoorTutorial) {
-                    window.HoorTutorial.checkTriggers();
-                  }
-                }, 1000);
-              }
+        window.checkAchievements();
+      }
+      // Evaluate tutorial triggers immediately after level-up animations/sounds settle
+      setTimeout(() => {
+        if (window.HoorTutorial) {
+          window.HoorTutorial.checkTriggers();
+        }
+      }, 1000);
+    }
 
-              if (typeof window.updateUI === "function") {
-                window.updateUI();
-              }
+    if (typeof window.updateUI === "function") {
+      window.updateUI();
+    }
   },
 
   addCoins(amount) {
@@ -518,18 +515,18 @@ Object.assign(window.GameState, {
   },
 
   spendCoins(amount) {
-      let amt = BigNum.from(amount);
-      if (amt.lte(0)) return false;
-      let coins = BigNum.from(window.playerStats.coins);
-      if (coins.lt(amt)) return false;
-      window.playerStats.coins = coins.sub(amt);
-      if (window.playerStats.coins.eq(0)) {
-        window.playerStats.hasTriggeredExactChange = true;
-      }
-      if (typeof window.updateUI === "function") window.updateUI();
-      return true;
-    },
-  });
+    let amt = BigNum.from(amount);
+    if (amt.lte(0)) return false;
+    let coins = BigNum.from(window.playerStats.coins);
+    if (coins.lt(amt)) return false;
+    window.playerStats.coins = coins.sub(amt);
+    if (window.playerStats.coins.eq(0)) {
+      window.playerStats.hasTriggeredExactChange = true;
+    }
+    if (typeof window.updateUI === "function") window.updateUI();
+    return true;
+  },
+});
 
 // Legacy Compatibility Aliases to protect references
 window.gainXp = (amount, isOffline) =>
@@ -853,19 +850,21 @@ window.checkAchievements = function () {
     }
   });
   if (unlockedAny) {
-      window.recalculateAchievementTotals();
-      if (
-        typeof window.resolvePlayerStats === "function" &&
-        typeof window.updateUI === "function"
-      ) {
-        let p = window.resolvePlayerStats();
-        window.playerStats.currentHp = window.playerStats.currentHp.gt(p.maxHp) ? p.maxHp : window.playerStats.currentHp;
-        window.updateUI();
-        if (typeof window.renderInventory === "function")
-          window.renderInventory();
-        if (typeof window.saveGame === "function") window.saveGame();
-      }
+    window.recalculateAchievementTotals();
+    if (
+      typeof window.resolvePlayerStats === "function" &&
+      typeof window.updateUI === "function"
+    ) {
+      let p = window.resolvePlayerStats();
+      window.playerStats.currentHp = window.playerStats.currentHp.gt(p.maxHp)
+        ? p.maxHp
+        : window.playerStats.currentHp;
+      window.updateUI();
+      if (typeof window.renderInventory === "function")
+        window.renderInventory();
+      if (typeof window.saveGame === "function") window.saveGame();
     }
+  }
 };
 
 window.isCavernEffectActive = function (id) {
@@ -944,29 +943,29 @@ window.hasUniquePassive = function (uniqueKey) {
         window.equippedSlots.subweapon.isUniqueChronicle
       );
     case "boots_warpcore":
-          return !!(
-            window.equippedSlots.boots &&
-            window.equippedSlots.boots.isUniqueWarpCore
-          );
-        case "helmet_tempest":
-          return !!(
-            window.equippedSlots.helmet &&
-            window.equippedSlots.helmet.isUniqueTempest
-          );
-        case "dagger_viper":
-          return !!(
-            window.equippedSlots.subweapon &&
-            window.equippedSlots.subweapon.isUniqueViper
-          );
-        case "tome_conduit":
-          return !!(
-            window.equippedSlots.subweapon &&
-            window.equippedSlots.subweapon.isUniqueConduit
-          );
-        default:
-          return false;
-      }
-    };
+      return !!(
+        window.equippedSlots.boots &&
+        window.equippedSlots.boots.isUniqueWarpCore
+      );
+    case "helmet_tempest":
+      return !!(
+        window.equippedSlots.helmet &&
+        window.equippedSlots.helmet.isUniqueTempest
+      );
+    case "dagger_viper":
+      return !!(
+        window.equippedSlots.subweapon &&
+        window.equippedSlots.subweapon.isUniqueViper
+      );
+    case "tome_conduit":
+      return !!(
+        window.equippedSlots.subweapon &&
+        window.equippedSlots.subweapon.isUniqueConduit
+      );
+    default:
+      return false;
+  }
+};
 
 window.getArtifactTemperLevel = function (trait) {
   if (!window.equippedSlots) return 0;
@@ -1228,11 +1227,11 @@ window.resolvePlayerStats = function (useDraft = false) {
       if (item.intPct) itemIntPct += item.intPct * slotMult;
 
       // Commented out to prevent flat-to-percentage double-dipping in late game
-            // itemAtkPct += (BigNum.from(item.bonusAtk || 0).div(100).mul(slotMult).valueOf());
-            // itemHpPct += (BigNum.from(item.bonusMaxHp || 0).div(100).mul(slotMult).valueOf());
-            // itemDefPct += (BigNum.from(item.bonusDef || 0).div(100).mul(slotMult).valueOf());
-          }
-        }
+      // itemAtkPct += (BigNum.from(item.bonusAtk || 0).div(100).mul(slotMult).valueOf());
+      // itemHpPct += (BigNum.from(item.bonusMaxHp || 0).div(100).mul(slotMult).valueOf());
+      // itemDefPct += (BigNum.from(item.bonusDef || 0).div(100).mul(slotMult).valueOf());
+    }
+  }
 
   if (
     window.checkArtifactTrait("golem_stance") &&
@@ -1328,33 +1327,49 @@ window.resolvePlayerStats = function (useDraft = false) {
   let effectiveInt = Math.max(0, p.int - 5);
 
   // --- CALCULATE SECURE EXPONENTIAL CHARACTER-BOUND BASE STATS ---
-      let levelScale = BigNum.from(1.025).pow(window.playerStats.level - 1);
-      let baseCharAtk = BigNum.from(10 + window.playerStats.level * 2).mul(levelScale).add(p.str * 5 + p.dex * 2 + p.int * 1);
-      let baseCharHp = BigNum.from(100 + window.playerStats.level * 8).mul(levelScale).add(p.str * 15);
-      let baseCharDef = BigNum.from(5 + window.playerStats.level * 1).mul(levelScale).add(p.int * 3);
+  let levelScale = BigNum.from(1.025).pow(window.playerStats.level - 1);
+  let baseCharAtk = BigNum.from(10 + window.playerStats.level * 2)
+    .mul(levelScale)
+    .add(p.str * 5 + p.dex * 2 + p.int * 1);
+  let baseCharHp = BigNum.from(100 + window.playerStats.level * 8)
+    .mul(levelScale)
+    .add(p.str * 15);
+  let baseCharDef = BigNum.from(5 + window.playerStats.level * 1)
+    .mul(levelScale)
+    .add(p.int * 3);
 
   p.atk = baseCharAtk.add(flatGearAtk);
   p.maxHp = baseCharHp.add(flatGearHp);
-  let flatTotalDef = baseCharDef.add(flatGearDef).add(BigNum.from(setCtx.flatDefBonus));
+  let flatTotalDef = baseCharDef
+    .add(flatGearDef)
+    .add(BigNum.from(setCtx.flatDefBonus));
 
   // Suffixes multipliers applied on total flat base
   p.atk = p.atk.mul(1.0 + itemAtkPct).mul(achAtkPct);
   p.maxHp = p.maxHp.mul(1.0 + itemHpPct).mul(achMaxHpPct);
-  p.moveSpeed = p.moveSpeed * (achMoveSpeedPct + itemSpdPct + (setCtx.moveSpeedPctBonus || 0));
+  p.moveSpeed =
+    p.moveSpeed *
+    (achMoveSpeedPct + itemSpdPct + (setCtx.moveSpeedPctBonus || 0));
 
-// Calculate Arcane Barrier for Inspected Player holding a Tome
+  // Calculate Arcane Barrier for Inspected Player holding a Tome
   let insSub = window.equippedSlots.subweapon;
   if (insSub && insSub.subType === "tome") {
     let insEffInt = Math.max(0, p.int - 5);
     let insIntBonus = Math.min(0.15, (insEffInt * 0.15) / (insEffInt + 150));
-    p.arcaneBarrier = 0.20 + insIntBonus;
+    p.arcaneBarrier = 0.2 + insIntBonus;
   }
 
   let defMultiplier = 1.0 + setCtx.defPctBonus;
   for (let key in window.equippedSlots) {
     let item = window.equippedSlots[key];
-    if (item && ["chest", "leggings", "overall", "helmet"].includes(item.type)) {
-      let slotLvl = (window.playerStats.slotUpgrades && window.playerStats.slotUpgrades[key]) || 0;
+    if (
+      item &&
+      ["chest", "leggings", "overall", "helmet"].includes(item.type)
+    ) {
+      let slotLvl =
+        (window.playerStats.slotUpgrades &&
+          window.playerStats.slotUpgrades[key]) ||
+        0;
       let stars = item.statsRolled === "UNIQUE" ? 5 : item.statsRolled || 0;
       defMultiplier += stars * 0.03 + slotLvl * 0.01;
     }
@@ -1453,11 +1468,17 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   if (window.playerStats.atkPotionTimer > 0)
-    p.atk = p.atk.mul(1 + (window.playerStats.atkPotionStrength || 0.1) * potStrengthMultiplier);
+    p.atk = p.atk.mul(
+      1 + (window.playerStats.atkPotionStrength || 0.1) * potStrengthMultiplier,
+    );
   if (window.playerStats.hpPotionTimer > 0)
-    p.maxHp = p.maxHp.mul(1 + (window.playerStats.hpPotionStrength || 0.1) * potStrengthMultiplier);
+    p.maxHp = p.maxHp.mul(
+      1 + (window.playerStats.hpPotionStrength || 0.1) * potStrengthMultiplier,
+    );
   if (window.playerStats.defPotionTimer > 0)
-    p.def = p.def.mul(1 + (window.playerStats.defPotionStrength || 0.1) * potStrengthMultiplier);
+    p.def = p.def.mul(
+      1 + (window.playerStats.defPotionStrength || 0.1) * potStrengthMultiplier,
+    );
 
   if (window.playerStats.hastePotionTimer > 0) {
     let tier = window.playerStats.hastePotionStrength || 1;
@@ -1515,18 +1536,19 @@ window.resolvePlayerStats = function (useDraft = false) {
     p.idleAttackSpeed = 15;
   }
 
-  let maxBlockCap = 0.20;
+  let maxBlockCap = 0.2;
   let maxParryCap = 0.15;
 
   let subItem = window.equippedSlots ? window.equippedSlots.subweapon : null;
   let hasShield = subItem && subItem.subType === "shield";
   let hasDagger = subItem && subItem.subType === "dagger";
-  let hasTitanGrip = window.checkArtifactTrait && window.checkArtifactTrait("titan_grip");
+  let hasTitanGrip =
+    window.checkArtifactTrait && window.checkArtifactTrait("titan_grip");
 
   if (hasShield) {
-    maxBlockCap = hasTitanGrip ? 0.25 : 0.20;
+    maxBlockCap = hasTitanGrip ? 0.25 : 0.2;
   } else if (hasTitanGrip) {
-    maxBlockCap = 0.10;
+    maxBlockCap = 0.1;
   } else {
     p.block = 0.0;
   }
@@ -1534,9 +1556,9 @@ window.resolvePlayerStats = function (useDraft = false) {
   if (hasDagger) {
     let noun = subItem.noun ? subItem.noun.toLowerCase() : "";
     if (noun.includes("main-gauche")) {
-      maxParryCap = hasTitanGrip ? 0.35 : 0.30;
+      maxParryCap = hasTitanGrip ? 0.35 : 0.3;
     } else {
-      maxParryCap = hasTitanGrip ? 0.30 : 0.15;
+      maxParryCap = hasTitanGrip ? 0.3 : 0.15;
     }
   } else if (hasTitanGrip) {
     maxParryCap = 0.08;
@@ -1544,24 +1566,24 @@ window.resolvePlayerStats = function (useDraft = false) {
     p.parry = 0.0;
   }
 
-  maxBlockCap += (p.crucibleCapBonus || 0);
-  maxParryCap += (p.crucibleCapBonus || 0);
+  maxBlockCap += p.crucibleCapBonus || 0;
+  maxParryCap += p.crucibleCapBonus || 0;
 
   p.rawBlock = p.block;
-    p.rawParry = p.parry;
+  p.rawParry = p.parry;
 
-    if (p.block > maxBlockCap) p.block = maxBlockCap;
-    if (p.parry > maxParryCap) p.parry = maxParryCap;
+  if (p.block > maxBlockCap) p.block = maxBlockCap;
+  if (p.parry > maxParryCap) p.parry = maxParryCap;
 
-    // Calculate Tome passive Arcane Barrier
-    let hasTome = subItem && subItem.subType === "tome";
-    if (hasTome) {
-      // Base 20% absorption, scaling up to 35% with INT
-      let intBonus = Math.min(0.15, (effectiveInt * 0.15) / (effectiveInt + 150));
-      p.arcaneBarrier = 0.20 + intBonus;
-    } else {
-      p.arcaneBarrier = 0.0;
-    }
+  // Calculate Tome passive Arcane Barrier
+  let hasTome = subItem && subItem.subType === "tome";
+  if (hasTome) {
+    // Base 20% absorption, scaling up to 35% with INT
+    let intBonus = Math.min(0.15, (effectiveInt * 0.15) / (effectiveInt + 150));
+    p.arcaneBarrier = 0.2 + intBonus;
+  } else {
+    p.arcaneBarrier = 0.0;
+  }
 
   let rawRare = p.rareSpawn;
   let limit = window.checkArtifactTrait("void_pull") ? 0.1 : 0.075;
@@ -1618,26 +1640,29 @@ window.resolvePlayerStats = function (useDraft = false) {
   }
 
   // Space Upgrades scaled with compounding milestones
-        let globalLvl = window.playerStats.globalQLevel || 0;
-        let effectiveGlobalLvl = globalLvl * window.getMilestoneMultiplier(globalLvl);
-        p.drop += effectiveGlobalLvl * 0.01;
-        p.qly += effectiveGlobalLvl * 0.01;
+  let globalLvl = window.playerStats.globalQLevel || 0;
+  let effectiveGlobalLvl = globalLvl * window.getMilestoneMultiplier(globalLvl);
+  p.drop += effectiveGlobalLvl * 0.01;
+  p.qly += effectiveGlobalLvl * 0.01;
 
-        let goldLvl = window.playerStats.prestigeUpgrades?.gold || 0;
-        let prestigeGoldBonus = goldLvl * 0.25 * window.getMilestoneMultiplier(goldLvl);
-        p.gold += prestigeGoldBonus;
+  let goldLvl = window.playerStats.prestigeUpgrades?.gold || 0;
+  let prestigeGoldBonus =
+    goldLvl * 0.25 * window.getMilestoneMultiplier(goldLvl);
+  p.gold += prestigeGoldBonus;
 
-        let dropLvl = window.playerStats.prestigeUpgrades?.drop || 0;
-        let prestigeDropBonus = dropLvl * 0.05 * window.getMilestoneMultiplier(dropLvl);
-        p.drop += prestigeDropBonus;
+  let dropLvl = window.playerStats.prestigeUpgrades?.drop || 0;
+  let prestigeDropBonus =
+    dropLvl * 0.05 * window.getMilestoneMultiplier(dropLvl);
+  p.drop += prestigeDropBonus;
 
-        let expLvl = window.playerStats.prestigeUpgrades?.exp || 0;
-        let prestigeExpBonus = expLvl * 0.1 * window.getMilestoneMultiplier(expLvl);
-        p.xpRate += prestigeExpBonus;
+  let expLvl = window.playerStats.prestigeUpgrades?.exp || 0;
+  let prestigeExpBonus = expLvl * 0.1 * window.getMilestoneMultiplier(expLvl);
+  p.xpRate += prestigeExpBonus;
 
-        let fairyLvl = window.playerStats.prestigeUpgrades?.fairy || 0;
-        let prestigeFairyBonus = fairyLvl * 0.05 * window.getMilestoneMultiplier(fairyLvl);
-        p.fairySpawn += prestigeFairyBonus;
+  let fairyLvl = window.playerStats.prestigeUpgrades?.fairy || 0;
+  let prestigeFairyBonus =
+    fairyLvl * 0.05 * window.getMilestoneMultiplier(fairyLvl);
+  p.fairySpawn += prestigeFairyBonus;
 
   let missionGoldBonus = (window.playerStats.missionUpgrades?.gold || 0) * 0.05;
   p.gold += missionGoldBonus;
@@ -1707,13 +1732,13 @@ window.resolvePlayerStats = function (useDraft = false) {
   let stageScale = Math.floor((activeStage - 1) / 10) + 1;
 
   let atkLvl = window.playerStats.prestigeUpgrades?.atk || 0;
-    let effectiveAtkLvl = atkLvl * window.getMilestoneMultiplier(atkLvl);
-    let prestigeAtkMult = Math.pow(1.12, effectiveAtkLvl);
+  let effectiveAtkLvl = atkLvl * window.getMilestoneMultiplier(atkLvl);
+  let prestigeAtkMult = Math.pow(1.12, effectiveAtkLvl);
 
-    let fortLvl = window.playerStats.prestigeUpgrades?.fort || 0;
-    let effectiveFortLvl = fortLvl * window.getMilestoneMultiplier(fortLvl);
-    let prestigeHpMult = Math.pow(1.1, effectiveFortLvl);
-    let prestigeDefMult = Math.pow(1.05, effectiveFortLvl);
+  let fortLvl = window.playerStats.prestigeUpgrades?.fort || 0;
+  let effectiveFortLvl = fortLvl * window.getMilestoneMultiplier(fortLvl);
+  let prestigeHpMult = Math.pow(1.1, effectiveFortLvl);
+  let prestigeDefMult = Math.pow(1.05, effectiveFortLvl);
 
   let missionAtkMult =
     1.0 + (window.playerStats.missionUpgrades?.atk || 0) * 0.02;
@@ -1867,13 +1892,13 @@ window.resolvePlayerStats = function (useDraft = false) {
 
   window.playerStats.crucibleSelfDmgReduction = p.crucibleSelfDmgReduction;
 
-    if (!useDraft) {
-      window.cachedPlayerStats = p;
-      window.playerStatsDirty = false;
-    }
+  if (!useDraft) {
+    window.cachedPlayerStats = p;
+    window.playerStatsDirty = false;
+  }
 
-    return p;
-  };
+  return p;
+};
 
 // --- INITIAL GLOBAL STATE ---
 
@@ -2024,19 +2049,19 @@ window.playerStats = {
   loginClaimedToday: false,
   renown: 0,
   slotUpgrades: {
-      weapon: 0,
-      subweapon: 0,
-      helmet: 0,
-      chest: 0,
-      leggings: 0,
-      overall: 0,
-      boots: 0,
-      ring1: 0,
-      ring2: 0,
-      art1: 0,
-      art2: 0,
-      art3: 0,
-    },
+    weapon: 0,
+    subweapon: 0,
+    helmet: 0,
+    chest: 0,
+    leggings: 0,
+    overall: 0,
+    boots: 0,
+    ring1: 0,
+    ring2: 0,
+    art1: 0,
+    art2: 0,
+    art3: 0,
+  },
   crucibleAccumulatedGold: 0,
   crucibleAccumulatedXp: 0,
   crucibleDraftDeck: [],
@@ -2046,8 +2071,8 @@ window.playerStats = {
   dungeonAccumulatedLoot: [],
   hasRefundedLegacyTempers: false,
   level: 1,
-      xp: new BigNum(0, 0),
-      xpReq: new BigNum(350, 0),
+  xp: new BigNum(0, 0),
+  xpReq: new BigNum(350, 0),
   sp: 0,
   spAllocations: {
     spHp: 0,
@@ -2086,9 +2111,9 @@ window.playerStats = {
   baseBlock: 0.0,
   baseParry: 0.0,
   baseRareSpawn: 0.01,
-    baseFairySpawn: 1.0,
-    currentHp: new BigNum(100, 0),
-    coins: new BigNum(0, 0),
+  baseFairySpawn: 1.0,
+  currentHp: new BigNum(100, 0),
+  coins: new BigNum(0, 0),
   stage: 1,
   maxStage: 1,
   killCount: 0,
@@ -2186,18 +2211,18 @@ window.playerStats = {
   canvasClicksWindow: [],
   recentHeals: [], // Track siphoned heals in a sliding 1,000ms window
   pendingClanProgress: {
-      kills: 0,
-      rifts: 0,
-      prestige: 0,
-      dungeons: 0,
-      fairies: 0,
-      tempers: 0,
-      reforges: 0,
-      potions: 0,
-      salvage: 0,
-      crits: 0,
-      renown: 0,
-    },
+    kills: 0,
+    rifts: 0,
+    prestige: 0,
+    dungeons: 0,
+    fairies: 0,
+    tempers: 0,
+    reforges: 0,
+    potions: 0,
+    salvage: 0,
+    crits: 0,
+    renown: 0,
+  },
 
   // Achievement Checkpoint Flags
   hasTriggeredMurphysLaw: false,
@@ -2252,17 +2277,17 @@ window.playerStats = {
   visitedTabs: [],
   visitedSubTabs: [],
   hasTriggeredLevel13Unlock: false,
-    hasTriggeredLevel25Unlock: false,
-    hasTriggeredPrestigeUnlock: false,
-    equippedTitle: null,
-    achievementTimestamps: {},
+  hasTriggeredLevel25Unlock: false,
+  hasTriggeredPrestigeUnlock: false,
+  equippedTitle: null,
+  achievementTimestamps: {},
   claimedMailIds: [],
   unlockedSkins: ["default"],
   equippedCostume: "knight",
   unlockedCostumes: ["knight"],
-    playerName: "Guest",
-    clanId: null,
-    audioSessionMode: "ambient",
+  playerName: "Guest",
+  clanId: null,
+  audioSessionMode: "ambient",
   clanName: null,
   clanEmblem: null,
   clanLevel: 1,
@@ -2385,39 +2410,39 @@ window.generateDailyMissions = () => window.QuestSystem.generateDailyMissions();
 // Append generateWeeklyMissions inside window.QuestSystem
 Object.assign(window.QuestSystem, {
   generateWeeklyMissions() {
-      let pool = [
-        {
-          type: "rifts",
-          label: "Slay Rift Guardians",
-          targetBase: 10, // Increased from 3
-          unit: "guardians",
-        },
-        {
-          type: "dungeons",
-          label: "Ascend Dungeon floors",
-          targetBase: 50, // Increased from 15
-          unit: "floors",
-        },
-        {
-          type: "gold",
-          label: "Amass extreme wealth",
-          targetBase: 150000, // Increased from 15000
-          stageScale: true,
-          unit: "Gold",
-        },
-        {
-          type: "kills",
-          label: "Execute massive purges",
-          targetBase: 15000, // Increased from 1500
-          unit: "enemies",
-        },
-        {
-          type: "tempers",
-          label: "Master slot attunement",
-          targetBase: 40, // Increased from 15
-          unit: "slots",
-        },
-      ];
+    let pool = [
+      {
+        type: "rifts",
+        label: "Slay Rift Guardians",
+        targetBase: 10, // Increased from 3
+        unit: "guardians",
+      },
+      {
+        type: "dungeons",
+        label: "Ascend Dungeon floors",
+        targetBase: 50, // Increased from 15
+        unit: "floors",
+      },
+      {
+        type: "gold",
+        label: "Amass extreme wealth",
+        targetBase: 150000, // Increased from 15000
+        stageScale: true,
+        unit: "Gold",
+      },
+      {
+        type: "kills",
+        label: "Execute massive purges",
+        targetBase: 15000, // Increased from 1500
+        unit: "enemies",
+      },
+      {
+        type: "tempers",
+        label: "Master slot attunement",
+        targetBase: 40, // Increased from 15
+        unit: "slots",
+      },
+    ];
 
     pool.sort(() => Math.random() - 0.5);
     let selected = pool.slice(0, 3);
