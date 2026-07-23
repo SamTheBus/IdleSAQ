@@ -7373,50 +7373,144 @@
     let isMaelstrom = equipped.weapon && equipped.weapon.isUniqueMaelstrom;
 
     if (isSingularity) {
-      ctx.rotate(-Math.PI / 8);
-      if (options.slashFrame) {
-        ctx.translate(15, -10);
-        ctx.rotate(-Math.PI / 2.3);
-      }
-      ctx.fillStyle = "#1e1e24";
-      ctx.beginPath();
-      ctx.rect(-2, -2, 4, 10);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = "#110221";
-      ctx.strokeStyle = "#8e44ad";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(-9, 8);
-      ctx.lineTo(9, 8);
-      ctx.lineTo(12, 12);
-      ctx.lineTo(-12, 12);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      let singPulse = Math.sin(Date.now() / 120) * 0.15 + 0.85;
-      ctx.fillStyle = `rgba(37, 3, 60, ${singPulse})`;
-      ctx.strokeStyle = "#e84393";
-      ctx.beginPath();
-      ctx.moveTo(-3, 12);
-      ctx.lineTo(-1.5, 42);
-      ctx.lineTo(1.5, 42);
-      ctx.lineTo(3, 12);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      if (options.slashFrame) {
-        ctx.fillStyle = "rgba(142, 68, 173, 0.35)";
-        ctx.beginPath();
-        ctx.arc(0, 20, 35, 0, Math.PI / 2);
-        ctx.lineTo(0, 0);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = "rgba(232, 67, 147, 0.6)";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-    } else if (isMaelstrom) {
+          ctx.rotate(-Math.PI / 8);
+          if (options.slashFrame) {
+            ctx.translate(15, -10);
+            ctx.rotate(-Math.PI / 2.3);
+          }
+
+          // Calculate depth-sorted orbiting space particles
+          let orbitTime = Date.now() / 200;
+          let orbitalParticles = [];
+          for (let i = 0; i < 3; i++) {
+            let angle = orbitTime + (i * Math.PI * 2) / 3;
+            let ox = Math.cos(angle) * 7.5;
+            let oy = Math.sin(angle) * 2.5;
+            let oz = Math.sin(angle); // Depth factor
+            orbitalParticles.push({ ox, oy, oz });
+          }
+
+          // 1. Draw back particles (orbiting behind the blade)
+          orbitalParticles.forEach(p => {
+            if (p.oz < 0) {
+              ctx.save();
+              ctx.fillStyle = "#ff007f";
+              ctx.beginPath();
+              ctx.arc(p.ox, 42 + p.oy, 1.2, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+            }
+          });
+
+          // 2. Gravitational distortion field behind/around the blade tip
+          ctx.save();
+          let fieldPulse = 1.0 + Math.sin(Date.now() / 150) * 0.08;
+          ctx.strokeStyle = "rgba(142, 68, 173, 0.45)";
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.ellipse(0, 42, 11 * fieldPulse, 4 * fieldPulse, -Math.PI / 12, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+
+          // 3. Draw Weapon Components (Grip, Guard, Blade)
+          // Grip
+          ctx.fillStyle = "#1e1e24";
+          ctx.beginPath();
+          ctx.rect(-2, -2, 4, 10);
+          ctx.fill();
+          ctx.stroke();
+
+          // Crossguard
+          ctx.fillStyle = "#110221";
+          ctx.strokeStyle = "#8e44ad";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-9, 8);
+          ctx.lineTo(9, 8);
+          ctx.lineTo(12, 12);
+          ctx.lineTo(-12, 12);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Metallic-Shaded Blade with glowing fuller line
+          let singPulse = Math.sin(Date.now() / 120) * 0.15 + 0.85;
+          let bladeGrad = ctx.createLinearGradient(-3, 12, 3, 12);
+          bladeGrad.addColorStop(0, "#0d011a");
+          bladeGrad.addColorStop(0.5, "#8e44ad");
+          bladeGrad.addColorStop(1, "#110221");
+
+          ctx.fillStyle = bladeGrad;
+          ctx.strokeStyle = "#e84393";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-3, 12);
+          ctx.lineTo(-1.5, 42);
+          ctx.lineTo(1.5, 42);
+          ctx.lineTo(3, 12);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Center fuller glow
+          ctx.save();
+          ctx.strokeStyle = `rgba(255, 0, 127, ${0.4 + singPulse * 0.4})`;
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(0, 13);
+          ctx.lineTo(0, 40);
+          ctx.stroke();
+          ctx.restore();
+
+          // 4. Draw front particles (orbiting in front of the blade)
+          orbitalParticles.forEach(p => {
+            if (p.oz >= 0) {
+              ctx.save();
+              ctx.fillStyle = "#ffffff";
+              ctx.beginPath();
+              ctx.arc(p.ox, 42 + p.oy, 0.8, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = "#00ffff";
+              ctx.beginPath();
+              ctx.arc(p.ox, 42 + p.oy, 1.8, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+            }
+          });
+
+          // 5. High-fidelity slash trail and spatial tear
+          if (options.slashFrame) {
+            ctx.save();
+            let sweepGrad = ctx.createRadialGradient(0, 20, 10, 0, 20, 45);
+            sweepGrad.addColorStop(0, "rgba(232, 67, 147, 0.35)");
+            sweepGrad.addColorStop(0.5, "rgba(142, 68, 173, 0.12)");
+            sweepGrad.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = sweepGrad;
+            ctx.beginPath();
+            ctx.arc(0, 20, 42, 0, Math.PI / 2);
+            ctx.lineTo(0, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            // Neon cyan spatial tear seam
+            ctx.strokeStyle = "#00ffff";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(0, 20, 36, 0, Math.PI / 2);
+            ctx.stroke();
+
+            // Spatial sparks along the seam
+            ctx.fillStyle = "#ffffff";
+            for (let a = 0; a <= Math.PI / 2; a += Math.PI / 6) {
+              let sx = Math.cos(a) * 36;
+              let sy = 20 + Math.sin(a) * 36;
+              ctx.beginPath();
+              ctx.arc(sx, sy, 1.0, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            ctx.restore();
+          }
+        } else if (isMaelstrom) {
       ctx.rotate(-Math.PI / 8);
       if (options.slashFrame) {
         ctx.translate(15, -10);

@@ -822,7 +822,7 @@ window.AssetCatalog = {
           `;
     },
     sigil(id, color) {
-      return `
+          return `
                 <defs>
                   <linearGradient id="g_sig_${id}" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0%" stop-color="#ffffff"/>
@@ -834,8 +834,112 @@ window.AssetCatalog = {
                 <circle cx="16" cy="16" r="6.2" fill="none" stroke="#ffffff" stroke-dasharray="2 2" stroke-width="1" opacity="0.75" />
                 <path d="M16 9 L16 23 M11 16 L21 16" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
               `;
-    },
-  },
+        },
+        signet_ring(id, color) {
+          return `
+            <defs>
+              <linearGradient id="ring_band_${id}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffeaa7" />
+                <stop offset="100%" stop-color="#d4af37" />
+              </linearGradient>
+              <linearGradient id="ring_gem_${id}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff" />
+                <stop offset="50%" stop-color="${color}" />
+                <stop offset="100%" stop-color="#111116" />
+              </linearGradient>
+            </defs>
+            <!-- Gold Band -->
+            <ellipse cx="16" cy="18" rx="8" ry="9" fill="none" stroke="url(#ring_band_${id})" stroke-width="2.5" />
+            <!-- Gemstone Mount -->
+            <path d="M11 9 L21 9 L22 13 L16 16 L10 13 Z" fill="url(#ring_band_${id})" stroke="#000" stroke-width="1" />
+            <!-- Shield Faceted Gemstone -->
+            <path d="M12 8 L20 8 L21 11 L16 15 L11 11 Z" fill="url(#ring_gem_${id})" stroke="#000" stroke-width="1.2" />
+            <!-- Specular Chime -->
+            <circle cx="14" cy="10" r="1" fill="#fff" opacity="0.8" />
+          `;
+        },
+        loop_ring(id, color) {
+          return `
+            <defs>
+              <linearGradient id="ring_band_${id}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffeaa7" />
+                <stop offset="100%" stop-color="#d4af37" />
+              </linearGradient>
+              <linearGradient id="ring_gem_${id}" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="rgba(0,0,0,0.3)" />
+                <stop offset="70%" stop-color="${color}" />
+                <stop offset="100%" stop-color="#ffffff" />
+              </linearGradient>
+            </defs>
+            <!-- Crossed Double Loop Band -->
+            <ellipse cx="16" cy="19" rx="9" ry="8" fill="none" stroke="url(#ring_band_${id})" stroke-width="1.5" transform="rotate(-10 16 19)" />
+            <ellipse cx="16" cy="19" rx="9" ry="8" fill="none" stroke="url(#ring_band_${id})" stroke-width="1.5" transform="rotate(10 16 19)" />
+            <!-- Outer Bezel -->
+            <circle cx="16" cy="10" r="5" fill="url(#ring_band_${id})" stroke="#000" stroke-width="1" />
+            <!-- Circular Gemstone -->
+            <circle cx="16" cy="10" r="3.5" fill="url(#ring_gem_${id})" stroke="#000" stroke-width="1" />
+            <!-- Shine Sparkle -->
+            <polygon points="16,4 17,9 16,10 15,9" fill="#fff" opacity="0.7" />
+          `;
+        },
+        band_ring(id, color) {
+          return `
+            <defs>
+              <linearGradient id="ring_band_${id}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#abb2b9" />
+                <stop offset="100%" stop-color="#566573" />
+              </linearGradient>
+              <linearGradient id="ring_gem_${id}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffeaa7" />
+                <stop offset="100%" stop-color="#d4af37" />
+              </linearGradient>
+            </defs>
+            <!-- Wide Engraved Band -->
+            <ellipse cx="16" cy="16" rx="10" ry="10" fill="none" stroke="url(#ring_band_${id})" stroke-width="4.5" />
+            <ellipse cx="16" cy="16" rx="10" ry="10" fill="none" stroke="#000000" stroke-width="1" />
+            <!-- Gold Inset Runes/Lines -->
+            <ellipse cx="16" cy="16" rx="10" ry="10" fill="none" stroke="url(#ring_gem_${id})" stroke-width="1.5" stroke-dasharray="4 6" />
+            <!-- Small Inset Rarity Studs -->
+            <circle cx="16" cy="6" r="1.8" fill="${color}" stroke="#000" stroke-width="0.8" />
+            <circle cx="9.5" cy="10.5" r="1.2" fill="${color}" stroke="#000" stroke-width="0.6" />
+            <circle cx="22.5" cy="10.5" r="1.2" fill="${color}" stroke="#000" stroke-width="0.6" />
+          `;
+        },
+        seal_ring(id, color) {
+          return `
+            <defs>
+              <linearGradient id="ring_band_${id}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#95a5a6" />
+                <stop offset="100%" stop-color="#2c3e50" />
+              </linearGradient>
+              <linearGradient id="ring_seal_${id}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#111116" />
+                <stop offset="100%" stop-color="${color}" />
+              </linearGradient>
+            </defs>
+            <!-- Heavy Signet Band -->
+            <ellipse cx="16" cy="18" rx="8" ry="9" fill="none" stroke="url(#ring_band_${id})" stroke-width="3" />
+            <!-- Oval Seal Plate -->
+            <ellipse cx="16" cy="9.5" rx="8.5" ry="5.5" fill="url(#ring_band_${id})" stroke="#000" stroke-width="1.2" />
+            <!-- Engraved Seal Center -->
+            <ellipse cx="16" cy="9.5" rx="6.5" ry="3.8" fill="url(#ring_seal_${id})" stroke="#000" stroke-width="0.8" />
+            <!-- Engraved Seal Emblem -->
+            <polygon points="16,7.5 17,9.5 19,9.5 17.5,10.5 18,12.5 16,11.2 14,12.5 14.5,10.5 13,9.5 15,9.5" fill="#fff" opacity="0.8" />
+          `;
+        },
+        ring(id, color) {
+          return `
+            <defs>
+              <linearGradient id="ring_band_${id}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffeaa7" />
+                <stop offset="100%" stop-color="#d4af37" />
+              </linearGradient>
+            </defs>
+            <ellipse cx="16" cy="17" rx="8" ry="9" fill="none" stroke="url(#ring_band_${id})" stroke-width="2" />
+            <circle cx="16" cy="8" r="3.2" fill="${color}" stroke="#000" stroke-width="1" />
+          `;
+        },
+      },
 
   // Blueprints for procedurally rendering bosses on indicators or consoles
   bosses: {
@@ -1336,12 +1440,50 @@ window.AssetCatalog = {
       `;
     },
     singularity(uid) {
-      return `
-        <defs><linearGradient id="g_un_sg_${uid}" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#0b0116"/><stop offset="100%" stop-color="#8e44ad"/></linearGradient></defs>
-        <path d="M5 27 L25 7 L27 9 L7 29 Z" fill="url(#g_un_sg_${uid})" stroke="#111" stroke-width="1.8"/>
-        <circle cx="26" cy="6" r="4" fill="#ff007f" style="filter: drop-shadow(0 0 4px #ff007f);"/>
-      `;
-    },
+          return `
+            <defs>
+              <linearGradient id="g_un_sg_blade_${uid}" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0%" stop-color="#090114"/>
+                <stop offset="30%" stop-color="#1c0a35"/>
+                <stop offset="70%" stop-color="#8e44ad"/>
+                <stop offset="100%" stop-color="#e84393"/>
+              </linearGradient>
+              <linearGradient id="g_un_sg_edge_${uid}" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="40%" stop-color="#d1a0fc"/>
+                <stop offset="100%" stop-color="#00d2ff"/>
+              </linearGradient>
+              <radialGradient id="g_un_sg_core_${uid}" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="35%" stop-color="#ff007f"/>
+                <stop offset="70%" stop-color="#8e44ad"/>
+                <stop offset="100%" stop-color="rgba(142, 68, 173, 0)"/>
+              </radialGradient>
+            </defs>
+            <!-- Background space-warp grid details -->
+            <path d="M10 26 Q17 21, 21 15" fill="none" stroke="#e84393" stroke-width="0.6" opacity="0.65"/>
+            <path d="M12 28 Q19 23, 23 17" fill="none" stroke="#00d2ff" stroke-width="0.6" opacity="0.55"/>
+            <!-- Main Blade body -->
+            <path d="M6 26 L23 9 L25 11 L8 28 Z" fill="url(#g_un_sg_blade_${uid})" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/>
+            <!-- Sharp reflective cutting edge -->
+            <path d="M23 9 L26 6 L25 5 L22 8 Z" fill="url(#g_un_sg_edge_${uid})" stroke="#111" stroke-width="0.8"/>
+            <!-- Middle Bevel Ridge line -->
+            <line x1="7" y1="27" x2="24" y2="10" stroke="#111" stroke-width="0.8"/>
+            <!-- Core glowing fissure -->
+            <line x1="8" y1="25" x2="21" y2="12" stroke="#ff007f" stroke-width="1" stroke-linecap="round" opacity="0.8"/>
+            <!-- Guard at bottom-left -->
+            <path d="M3 25 Q7 23, 11 29 L9 31 Q5 25, 3 25 Z" fill="#b7950b" stroke="#111" stroke-width="1.2"/>
+            <!-- Grip -->
+            <rect x="2" y="28" width="3" height="6" transform="rotate(-45 3.5 31)" fill="#4d2711" stroke="#111" stroke-width="1"/>
+            <!-- Pommel -->
+            <circle cx="1" cy="33.5" r="1.5" fill="#f1c40f" stroke="#111" stroke-width="0.8"/>
+            <!-- Gravitational lensing accretion ring at tip -->
+            <ellipse cx="26" cy="6" rx="6" ry="2.2" transform="rotate(-30 26 6)" fill="none" stroke="#ff007f" stroke-width="1.2"/>
+            <ellipse cx="26" cy="6" rx="6" ry="2.2" transform="rotate(-30 26 6)" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.8"/>
+            <!-- Inner black hole core -->
+            <circle cx="26" cy="6" r="2.2" fill="#000000" stroke="#ff007f" stroke-width="0.8"/>
+          `;
+        },
     maelstrom(uid) {
       return `
         <defs><linearGradient id="g_un_ml_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#55efc4"/><stop offset="100%" stop-color="#00b894"/></linearGradient></defs>

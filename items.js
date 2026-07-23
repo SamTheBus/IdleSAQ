@@ -1393,12 +1393,12 @@ Object.assign(window.ItemFactory, {
       glow = "rgba(230,126,34,0.4)";
       lore = `"Born of a feather plucked from the solar phoenix, its core burns with the warmth of a thousand dying suns. Even in the deepest cold of the void, its fire never falters."`;
     } else if (item.isUniqueSingularity) {
-      bg = "linear-gradient(135deg, #150326, #030008)";
-      border = "#8e44ad";
-      shadow = "#510a74";
-      glow = "rgba(142,68,173,0.4)";
-      lore = `"This colossal blade harbors the core of a collapsed dying star, pulling the surrounding space into a constant state of gravitational collapse."`;
-    } else if (item.isUniqueMaelstrom) {
+          bg = "linear-gradient(135deg, #0d011a 0%, #1c0529 50%, #030008 100%)";
+          border = "#8e44ad";
+          shadow = "inset 0 0 12px #510a74, 0 0 15px rgba(232, 67, 147, 0.25)";
+          glow = "rgba(142, 68, 173, 0.5)";
+          lore = `"This colossal blade harbors the core of a collapsed dying star, pulling the surrounding space into a constant state of gravitational collapse."`;
+        } else if (item.isUniqueMaelstrom) {
       bg = "linear-gradient(135deg, #031d0d, #010803)";
       border = "#2ecc71";
       shadow = "#145a32";
@@ -1690,12 +1690,12 @@ Object.assign(window.ItemFactory, {
     }
     let actualStatLines = chosenType === "artifact" ? 3 : statLinesCount + 1;
 
-    for (let i = 0; i < actualStatLines; i++) {
-      if (pool.length === 0) break;
-      let selectedStat = pool.pop();
-      let expBase = Math.pow(1.045, stageScale); // Controlled exponential base
+        for (let i = 0; i < actualStatLines; i++) {
+          if (pool.length === 0) break;
+          let selectedStat = pool.pop();
+          let expBase = expScale; // Controlled exponential base aligned with stage scale * 5
 
-      if (selectedStat === "atk") {
+          if (selectedStat === "atk") {
         item.bonusAtk += Math.ceil(
           window.randFloat(0.04, 0.08) * expBase * rarityMult,
         );

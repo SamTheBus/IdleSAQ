@@ -5521,14 +5521,20 @@ window.renderPaperDoll = function () {
       el.style.borderColor = color;
 
       let uniqueStyle = window.getUniqueItemStyle(item);
-      if (uniqueStyle) {
-        el.style.background = uniqueStyle.bg;
-        el.style.borderColor = uniqueStyle.border;
-        el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
-      } else {
-        el.style.background = "";
-        el.style.boxShadow = "";
-      }
+            if (uniqueStyle) {
+              el.style.background = uniqueStyle.bg;
+              el.style.borderColor = uniqueStyle.border;
+              el.style.boxShadow = `inset 0 0 8px ${uniqueStyle.shadow}, 0 0 10px ${uniqueStyle.glow}`;
+              if (item.isUniqueSingularity) {
+                el.style.animation = "voidSingularityShimmer 4s infinite ease-in-out";
+              } else {
+                el.style.animation = "";
+              }
+            } else {
+              el.style.background = "";
+              el.style.boxShadow = "";
+              el.style.animation = "";
+            }
 
       let tierLabel =
         item.statsRolled === "UNIQUE"
@@ -5694,9 +5700,13 @@ window.renderInventory = function () {
 
           let details = `<span style="font-size:10px;color:#aaa;">Slot: ${typeText} | <span style="color:${nameColor};font-weight:bold;">${tierStr}</span></span>`;
           let uniqueStyle = window.getUniqueItemStyle(item);
-          let itemStyleStr = uniqueStyle
-            ? `background: ${uniqueStyle.bg}; border: 1.5px solid ${uniqueStyle.border}; box-shadow: inset 0 0 6px ${uniqueStyle.shadow}, 0 0 8px ${uniqueStyle.glow};`
-            : `border-left: 4.5px solid ${nameColor} !important; background: rgba(15, 17, 26, 0.65);`;
+                    let itemStyleStr = "";
+                    if (uniqueStyle) {
+                      let animStr = item.isUniqueSingularity ? " animation: voidSingularityShimmer 4s infinite ease-in-out;" : "";
+                      itemStyleStr = `background: ${uniqueStyle.bg}; border: 1.5px solid ${uniqueStyle.border}; box-shadow: inset 0 0 6px ${uniqueStyle.shadow}, 0 0 8px ${uniqueStyle.glow};${animStr}`;
+                    } else {
+                      itemStyleStr = `border-left: 4.5px solid ${nameColor} !important; background: rgba(15, 17, 26, 0.65);`;
+                    }
 
           let iconBox = `<div style="margin-right:8px; display:inline-flex; align-items:center; flex-shrink:0;">${window.getEquipIconHtml(item, 28)}</div>`;
 
@@ -6344,29 +6354,10 @@ window.generateItemCardHtml = function (
   html += `<div class="tt-subtitle">${subtitle}</div>`;
 
   // --- IMPLICIT MODIFIERS SECTION ---
-  let implicits = [];
-  if (item.type !== "artifact" && item.statsRolled !== "UNIQUE") {
-    if (item.type === "ring") {
-      if (item.baseAtk > 0)
-        implicits.push({
-          label: "Flat Attack",
-          value: `+${item.baseAtk}`,
-          icon: window.getUiIconSvg("atk", 11),
-        });
-      if (item.baseMaxHp > 0)
-        implicits.push({
-          label: "Flat Max HP",
-          value: `+${item.baseMaxHp}`,
-          icon: window.getUiIconSvg("maxHp", 11),
-        });
-      if (item.baseDef > 0)
-        implicits.push({
-          label: "Flat Defense",
-          value: `+${item.baseDef}`,
-          icon: window.getUiIconSvg("def", 11),
-        });
-
-      if (item.atkPct > 0)
+      let implicits = [];
+      if (item.type !== "artifact" && item.statsRolled !== "UNIQUE") {
+        if (item.type === "ring") {
+          if (item.atkPct > 0)
         implicits.push({
           label: "Attack",
           value: `+${(item.atkPct * 100).toFixed(1)}%`,
@@ -7046,14 +7037,15 @@ window.generateItemCardHtml = function (
   }
 
   if (uniqueStyle) {
-    if (uniqueStyle.lore) {
-      html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
+      if (uniqueStyle.lore) {
+        html += `<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #555; color: #ffb6c1; font-size: 9.5px; line-height: 1.35; font-style: italic; white-space: normal;"><i>${uniqueStyle.lore}</i></div>`;
+      }
+      let animationStyle = item.isUniqueSingularity ? " animation: voidSingularityShimmer 4s infinite ease-in-out;" : "";
+      html = `<div style="position: relative; background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 16px 12px 12px 12px; border-radius: 4px; box-sizing: border-box; width: 100%;${animationStyle}">
+                              ${runicBadge}
+                              ${html}
+                          </div>`;
     }
-    html = `<div style="position: relative; background: ${uniqueStyle.bg}; border: 2px solid ${uniqueStyle.border}; box-shadow: inset 0 0 20px ${uniqueStyle.shadow}, 0 0 15px ${uniqueStyle.glow}; padding: 16px 12px 12px 12px; border-radius: 4px; box-sizing: border-box; width: 100%;">
-                            ${runicBadge}
-                            ${html}
-                        </div>`;
-  }
 
   return html;
 };
