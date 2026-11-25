@@ -5,26 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#080d16" />
     <title>Idle SAQ: Slaying and Questing</title>
-    <link rel="stylesheet" href="./style.css?v=3d5e581694" />
+    <link rel="stylesheet" href="./style.css?v=1953238303" />
   </head>
   <body>
     <div id="app">
       <header>
-        <h1>Idle SAQ <small>Slaying and Questing</small></h1>
+        <h1><span class="crest" aria-hidden="true">⚔</span><span>Idle SAQ <small>Slaying and Questing</small></span></h1>
         <div id="res"></div>
       </header>
       <main>
         <section id="battle">
           <div id="stagebar">
-            <button class="btn" id="stage-prev" data-act="stagePrev" aria-label="Previous stage">◀</button>
+            <button class="nav" id="stage-prev" data-act="stagePrev" aria-label="Previous stage"><svg class="ico" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></svg></button>
             <div id="stage-title"></div>
-            <button class="btn" id="stage-next" data-act="stageNext" aria-label="Next stage">▶</button>
+            <button class="nav" id="stage-next" data-act="stageNext" aria-label="Next stage"><svg class="ico" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></svg></button>
           </div>
           <canvas id="scene" aria-label="Battle. Hold to fight faster."></canvas>
           <div id="progress"></div>
           <div id="controls"></div>
           <div id="skills"></div>
-          <div id="feed" aria-live="polite"></div>
+          <div id="chronicle">
+            <div class="chron-head">Chronicle <span>Hold the battlefield or Space to fight faster · 1 2 3 cast skills</span></div>
+            <div id="feed" aria-live="polite"></div>
+          </div>
         </section>
         <section id="side">
           <nav id="tabs"></nav>
@@ -34,6 +37,6 @@
     </div>
     <div id="overlay"></div>
     <div id="toast" role="status"></div>
-    <script type="module" src="./game.js?v=bc15527296"></script>
+    <script type="module" src="./game.js?v=389da17fcb"></script>
   </body>
 </html>
