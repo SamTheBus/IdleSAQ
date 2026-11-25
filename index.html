@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-release="2e05e7c557-bf6d0c71d3">
+<html lang="en" data-release="12509f9a72-926f01d784">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-title" content="Idle SAQ" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <title>Idle SAQ: Slaying and Questing</title>
-    <link rel="stylesheet" href="./style.css?v=bf6d0c71d3" />
+    <link rel="stylesheet" href="./style.css?v=926f01d784" />
   </head>
   <body>
     <div id="game-container">
@@ -20,16 +20,17 @@
           <span>IDLE <b>SAQ</b></span>
         </div>
         <div class="nav-right">
+          <div class="purse" title="Gold"><span class="coin"></span><b id="hud-coins"></b><small id="hud-sub"></small></div>
           <button id="toggle-auto" data-act="toggleAuto" title="Cast skills automatically"></button>
-          <button id="btn-menu-hub" data-act="hub" data-arg="">MENU <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="dot"></i></button>
+          <button id="btn-menu-hub" data-act="hub" data-arg="" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="dot"></i></button>
         </div>
       </nav>
 
       <section id="battle">
       <div id="canvas-container">
         <div id="canvas-top-hud">
-          <div class="hud-panel hp"><span class="hud-ico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.3 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg></span><div><b id="hud-hp"></b><small id="hud-hp-pct"></small></div><i class="hud-bar"><i id="hud-hp-bar"></i></i></div>
-          <div class="hud-panel gold"><span class="hud-ico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5" opacity=".6"/></svg></span><div><b id="hud-coins"></b><small id="hud-sub"></small></div></div>
+          <div class="plate hero-plate" id="hero-plate"><div class="plate-bar"><i class="chip-bar" id="hud-hp-chip"></i><i id="hud-hp-bar"></i><b id="hud-hp"></b></div><div class="plate-tags" id="hero-tags"></div></div>
+          <div class="plate foe-plate" id="foe-plate"></div>
         </div>
         <canvas id="scene" aria-label="Battle. Hold to fight faster."></canvas>
         <div id="control-bar"></div>
@@ -53,8 +54,9 @@
 
       <nav id="menu-panel" aria-label="Tabs"></nav>
     </div>
+    <div id="sheet"></div>
     <div id="overlay"></div>
     <div id="toast" role="status"></div>
-    <script type="module" src="./game.js?v=2e05e7c557"></script>
+    <script type="module" src="./game.js?v=12509f9a72"></script>
   </body>
 </html>
