@@ -3,40 +3,48 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#080d16" />
+    <meta name="theme-color" content="#121212" />
     <title>Idle SAQ: Slaying and Questing</title>
-    <link rel="stylesheet" href="./style.css?v=1953238303" />
+    <link rel="stylesheet" href="./style.css?v=b4bbddd8c9" />
   </head>
   <body>
-    <div id="app">
-      <header>
-        <h1><span class="crest" aria-hidden="true">⚔</span><span>Idle SAQ <small>Slaying and Questing</small></span></h1>
-        <div id="res"></div>
-      </header>
-      <main>
-        <section id="battle">
-          <div id="stagebar">
-            <button class="nav" id="stage-prev" data-act="stagePrev" aria-label="Previous stage"><svg class="ico" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></svg></button>
-            <div id="stage-title"></div>
-            <button class="nav" id="stage-next" data-act="stageNext" aria-label="Next stage"><svg class="ico" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></svg></button>
-          </div>
-          <canvas id="scene" aria-label="Battle. Hold to fight faster."></canvas>
-          <div id="progress"></div>
-          <div id="controls"></div>
-          <div id="skills"></div>
-          <div id="chronicle">
-            <div class="chron-head">Chronicle <span>Hold the battlefield or Space to fight faster · 1 2 3 cast skills</span></div>
-            <div id="feed" aria-live="polite"></div>
-          </div>
-        </section>
-        <section id="side">
-          <nav id="tabs"></nav>
-          <div id="panel"></div>
-        </section>
-      </main>
+    <div id="game-container">
+      <nav id="top-nav">
+        <div class="logo">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="#00d2ff" stroke-width="1.5" stroke-dasharray="3 3"/><path d="M16 6l7 3v6c0 5-3 8.5-7 10-4-1.5-7-5-7-10V9z" fill="#0f172a" stroke="#00d2ff" stroke-width="1.6"/><path d="M16 9v13M13 12h6" stroke="#e2e8f0" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>IDLE <b>SAQ</b></span>
+        </div>
+        <div class="nav-right">
+          <button id="toggle-auto" data-act="toggleAuto" title="Cast skills automatically"></button>
+          <button id="btn-menu-hub" data-act="hub" data-arg="">MENU ☰<i class="dot"></i></button>
+        </div>
+      </nav>
+
+      <div id="canvas-container">
+        <div id="canvas-top-hud">
+          <div class="hud-panel hp"><span class="hud-ico">♥</span><div><b id="hud-hp"></b><small id="hud-hp-pct"></small></div><i class="hud-bar"><i id="hud-hp-bar"></i></i></div>
+          <div class="hud-panel gold"><span class="hud-ico">●</span><div><b id="hud-coins"></b><small id="hud-sub"></small></div></div>
+        </div>
+        <canvas id="scene" aria-label="Battle. Hold to fight faster."></canvas>
+        <div id="control-bar"></div>
+        <div id="skill-bar"></div>
+      </div>
+
+      <div id="global-xp-header"></div>
+
+      <div id="menu-panel"></div>
+      <div id="panel"></div>
+
+      <footer id="footer">
+        <div class="footer-row">
+          <button class="foot-btn" data-act="toggleLogs">📜 Toggle Battle Logs</button>
+          <button class="foot-btn danger" data-act="hub" data-arg="settings">🚨 Wipe Save</button>
+        </div>
+        <div id="log-panel" hidden><div id="feed" aria-live="polite"></div></div>
+      </footer>
     </div>
     <div id="overlay"></div>
     <div id="toast" role="status"></div>
-    <script type="module" src="./game.js?v=389da17fcb"></script>
+    <script type="module" src="./game.js?v=2bc07e782b"></script>
   </body>
 </html>
