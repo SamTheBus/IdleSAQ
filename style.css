@@ -856,3 +856,13 @@ button, .tab, .seg, .subtab, .tile, .tnode { touch-action: manipulation; }
 .wb-card.drill { margin-top: 8px; }
 .drill-pic { display: grid; place-items: center; color: var(--c); }
 .drill-pic svg { width: 30px; height: 30px; }
+
+/* ---------- Update banner (from SAQ World): a newer build is on the site ---------- */
+#update-banner-v1 { position: fixed; z-index: 60; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); display: flex; align-items: stretch; min-height: 44px; border: 1.5px solid #c9a35a; border-radius: 12px; background: linear-gradient(180deg, #1d2736, #121a26); color: #f1e3c2; box-shadow: 0 6px 18px #0009; font: 600 12px system-ui; touch-action: manipulation; animation: update-banner-in 0.35s ease-out; }
+#update-banner-v1 button { appearance: none; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; touch-action: manipulation; }
+#update-banner-v1 .ub-go { white-space: nowrap; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 8px 12px 8px 18px; }
+#update-banner-v1 .ub-close { min-width: 44px; padding: 0 10px; border-left: 1px solid #c9a35a66; font: 600 20px/1 system-ui; opacity: 0.85; }
+#update-banner-v1 strong { font: 700 13px Georgia, serif; letter-spacing: 0.02em; color: #ffe2a0; }
+#update-banner-v1 span { opacity: 0.85; }
+#update-banner-v1 button:disabled { opacity: 0.8; cursor: default; }
+@keyframes update-banner-in { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
