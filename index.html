@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-release="12509f9a72-926f01d784">
+<html lang="en" data-release="ec3dfb274c-0557714d4a">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-title" content="Idle SAQ" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <title>Idle SAQ: Slaying and Questing</title>
-    <link rel="stylesheet" href="./style.css?v=926f01d784" />
+    <link rel="stylesheet" href="./style.css?v=0557714d4a" />
   </head>
   <body>
     <div id="game-container">
@@ -29,10 +29,11 @@
       <section id="battle">
       <div id="canvas-container">
         <div id="canvas-top-hud">
-          <div class="plate hero-plate" id="hero-plate"><div class="plate-bar"><i class="chip-bar" id="hud-hp-chip"></i><i id="hud-hp-bar"></i><b id="hud-hp"></b></div><div class="plate-tags" id="hero-tags"></div></div>
+          <div class="plate hero-plate" id="hero-plate"><div class="plate-name"><b id="hero-name"></b><span class="plate-tags" id="hero-tags"></span></div><div class="plate-bar"><i class="chip-bar" id="hud-hp-chip"></i><i id="hud-hp-bar"></i><b id="hud-hp"></b></div></div>
           <div class="plate foe-plate" id="foe-plate"></div>
         </div>
-        <canvas id="scene" aria-label="Battle. Hold to fight faster."></canvas>
+        <canvas id="scene" aria-label="Battle. Tap to strike, hold to fight faster."></canvas>
+        <div id="tap-hint" hidden><i></i>Tap to strike · Hold to fight faster</div>
         <div id="control-bar"></div>
         <div id="skill-bar"></div>
       </div>
@@ -57,6 +58,6 @@
     <div id="sheet"></div>
     <div id="overlay"></div>
     <div id="toast" role="status"></div>
-    <script type="module" src="./game.js?v=12509f9a72"></script>
+    <script type="module" src="./game.js?v=ec3dfb274c"></script>
   </body>
 </html>
