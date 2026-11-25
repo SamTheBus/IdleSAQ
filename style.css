@@ -312,7 +312,10 @@ b { font-weight: 700; }
 .icard-ico img { width: 34px; height: 34px; image-rendering: pixelated; }
 .icard-ico.big { width: 52px; height: 52px; }
 .icard-ico.big img { width: 46px; height: 46px; }
-.icard-ico u { position: absolute; top: -5px; right: -5px; text-decoration: none; color: var(--gold); font-size: 12px; }
+.icard-ico u { position: absolute; top: -5px; right: -5px; text-decoration: none; color: var(--gold); font-size: 12px; line-height: 0; }
+.ico .solid { fill: currentColor; stroke: none; }
+.stars-n { white-space: nowrap; }
+.stars-n .ico { width: 0.95em; height: 0.95em; vertical-align: -0.12em; margin-left: 1px; }
 .icard-name { color: var(--r); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .icard-name span { color: var(--muted); font-weight: normal; font-size: 10px; }
 .icard-rar { font-size: 10px; color: #9a9a9a; }
@@ -515,3 +518,83 @@ textarea { width: 100%; margin-top: 8px; background: #0f172a; color: var(--text)
   .classes.pick .class-card { flex-direction: row; text-align: left; flex-wrap: wrap; }
   .classes.pick img { width: 56px; height: 56px; }
 }
+
+/* SVG icons in place of symbols (no emoji anywhere in the game) */
+.hud-ico { display: grid; place-items: center; }
+.hud-ico .ico { width: 18px; height: 18px; }
+.hud-panel.hp .hud-ico, .hud-panel.gold .hud-ico { text-shadow: none; filter: drop-shadow(0 0 4px currentColor); }
+.hud-panel.hp .hud-ico .ico { fill: currentColor; fill-opacity: 0.35; }
+#btn-menu-hub { display: inline-flex; align-items: center; gap: 5px; }
+.tab em .ico { width: 10px; height: 10px; color: #94a3b8; }
+.foot-btn { display: inline-flex; align-items: center; gap: 6px; }
+.foot-btn .ico { width: 14px; height: 14px; }
+.toast-bell { display: grid; color: var(--cyan); }
+.toast-bell .ico { width: 16px; height: 16px; }
+.rechallenge { display: inline-flex; align-items: center; gap: 5px; }
+.icard-mini span { display: inline-flex; align-items: center; gap: 2px; }
+.icard-mini .ico { width: 11px; height: 11px; }
+.hc-right .ico, .line .btn .ico { width: 12px; height: 12px; color: var(--gold); }
+
+/* Training (Attribute Matrix) */
+.train-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid #2c2c2c; }
+.train-row > div:first-child { flex: 1; min-width: 0; font-size: 12px; }
+.train-row .muted { font-size: 11px; }
+.train-btns { display: flex; gap: 4px; }
+.train-btns .btn { padding: 4px 8px; font-size: 11px; }
+b.gold { color: var(--gold); }
+b.bad { color: #ff6b6b; }
+
+/* Materials */
+.mat-strip { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.mat { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; background: #1a1a1a; border: 1px solid #333; font-size: 11px; color: #ddd; }
+.mat i { width: 8px; height: 8px; border-radius: 2px; transform: rotate(45deg); background: var(--m, #888); box-shadow: 0 0 4px var(--m, #888); }
+.mat.souls i { --m: #7dd3fc; border-radius: 50%; transform: none; }
+.cost { display: flex; justify-content: space-between; gap: 8px; }
+.cost small { color: var(--muted); font-size: 10px; }
+.fd-title .lv { float: right; font: bold 12px Consolas, monospace; color: var(--cyan); }
+.attune-bar { height: 7px; margin: 4px 0 6px; }
+.attune-bar > i { background: linear-gradient(90deg, #7c3aed, var(--cyan)); }
+@media (max-width: 480px) {
+  .train-row { flex-wrap: wrap; }
+  .train-btns { width: 100%; }
+  .train-btns .btn { flex: 1; }
+}
+
+.tier-step { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-weight: 700; }
+.odds-line { font-size: 11px; margin: 6px 2px; line-height: 1.6; }
+.codex-count { font-size: 12px; margin: 6px 2px; }
+.fl-row.unknown { opacity: 0.45; cursor: default; }
+.craft-head { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+.craft-head img { width: 48px; height: 48px; image-rendering: pixelated; }
+
+/* Kit and skill trees */
+.kit-title { font-size: 20px; font-weight: 800; letter-spacing: 0.04em; margin-bottom: 6px; }
+.kit-pieces { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.kit-piece { border: 1px solid var(--c); border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; background: color-mix(in srgb, var(--c) 8%, transparent); }
+.kit-piece small { font-size: 10px; text-transform: uppercase; opacity: 0.7; }
+.kit-piece b { color: var(--c); }
+.kit-piece .muted { font-size: 11px; }
+.icard-grants { display: block; font-size: 10px; color: var(--c); margin-top: 2px; }
+.tree-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; }
+.tree-tab { border: 1px solid #2c3540; background: #151b22; color: #cfd6de; border-radius: 6px; padding: 5px 2px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+.tree-tab small { font-size: 10px; opacity: 0.7; font-weight: 500; }
+.tree-tab.on { border-color: var(--c); color: var(--c); background: color-mix(in srgb, var(--c) 12%, #151b22); }
+.tree-grid { display: flex; flex-direction: column; gap: 4px; }
+.tree-head { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--tc); text-align: center; }
+.tree-row { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.tree-row.cap { grid-template-columns: 1fr; }
+.tree-gate { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #e7c27a; background: rgba(10, 14, 19, 0.72); border-radius: 6px; pointer-events: none; text-align: center; padding: 0 6px; }
+.tnode { border: 1px solid #2c3540; background: #141a21; color: #cfd6de; border-radius: 6px; padding: 5px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 1px; min-height: 40px; }
+.tnode b { font-size: 11px; line-height: 1.15; text-align: center; }
+.tnode small { font-size: 10px; opacity: 0.75; font-family: var(--mono, monospace); }
+.tnode.has { border-color: color-mix(in srgb, var(--tc) 60%, #2c3540); background: color-mix(in srgb, var(--tc) 10%, #141a21); }
+.tnode.max { border-color: var(--tc); }
+.tnode.max small { color: var(--tc); opacity: 1; }
+.tnode.can { box-shadow: inset 0 -2px 0 #2ecc71; }
+.tnode.on { outline: 2px solid var(--tc); outline-offset: 1px; }
+.tnode.locked { opacity: 0.45; }
+.tnode.cap b { font-size: 12px; }
+.tdetail { margin-top: 8px; border: 1px solid #2c3540; border-radius: 8px; padding: 8px; background: #11161c; }
+.tdetail p { margin: 4px 0; font-size: 12px; }
+.tree-foot { align-items: center; margin-top: 8px; }
+.tree-foot .muted { flex: 1; font-size: 11px; }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#121212" />
     <title>Idle SAQ: Slaying and Questing</title>
-    <link rel="stylesheet" href="./style.css?v=b4bbddd8c9" />
+    <link rel="stylesheet" href="./style.css?v=b2429b6e3d" />
   </head>
   <body>
     <div id="game-container">
@@ -16,14 +16,14 @@
         </div>
         <div class="nav-right">
           <button id="toggle-auto" data-act="toggleAuto" title="Cast skills automatically"></button>
-          <button id="btn-menu-hub" data-act="hub" data-arg="">MENU ☰<i class="dot"></i></button>
+          <button id="btn-menu-hub" data-act="hub" data-arg="">MENU <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="dot"></i></button>
         </div>
       </nav>
 
       <div id="canvas-container">
         <div id="canvas-top-hud">
-          <div class="hud-panel hp"><span class="hud-ico">♥</span><div><b id="hud-hp"></b><small id="hud-hp-pct"></small></div><i class="hud-bar"><i id="hud-hp-bar"></i></i></div>
-          <div class="hud-panel gold"><span class="hud-ico">●</span><div><b id="hud-coins"></b><small id="hud-sub"></small></div></div>
+          <div class="hud-panel hp"><span class="hud-ico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.3 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg></span><div><b id="hud-hp"></b><small id="hud-hp-pct"></small></div><i class="hud-bar"><i id="hud-hp-bar"></i></i></div>
+          <div class="hud-panel gold"><span class="hud-ico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5" opacity=".6"/></svg></span><div><b id="hud-coins"></b><small id="hud-sub"></small></div></div>
         </div>
         <canvas id="scene" aria-label="Battle. Hold to fight faster."></canvas>
         <div id="control-bar"></div>
@@ -37,14 +37,14 @@
 
       <footer id="footer">
         <div class="footer-row">
-          <button class="foot-btn" data-act="toggleLogs">📜 Toggle Battle Logs</button>
-          <button class="foot-btn danger" data-act="hub" data-arg="settings">🚨 Wipe Save</button>
+          <button class="foot-btn" data-act="toggleLogs"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h11v13a3 3 0 0 1-3 3H6a2 2 0 0 1-2-2v-2h11v2a2 2 0 0 0 2 2"/><path d="M7 4a2 2 0 0 0-2 2v10M10 8.5h5M10 12h5"/></svg> Toggle Battle Logs</button>
+          <button class="foot-btn danger" data-act="hub" data-arg="settings"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.2v.3"/></svg> Wipe Save</button>
         </div>
         <div id="log-panel" hidden><div id="feed" aria-live="polite"></div></div>
       </footer>
     </div>
     <div id="overlay"></div>
     <div id="toast" role="status"></div>
-    <script type="module" src="./game.js?v=2bc07e782b"></script>
+    <script type="module" src="./game.js?v=da265ebd87"></script>
   </body>
 </html>
