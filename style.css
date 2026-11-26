@@ -1406,3 +1406,13 @@ img.cur.altar-star { width: 58px; height: 58px; margin: 0; filter: drop-shadow(0
 .compare .row .btn { flex: 1; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; font-size: 14px; }
 .compare .row .btn.primary { flex: 1.4; }
 .cmp-wornhead { width: 100%; background: none; border: 0; text-align: left; }
+
+/* ---------- Stat icons (colored per stat) and constellation glyphs ---------- */
+.ico.st { stroke-width: 2; }
+.cmp-lines li > .st, .fc-list li > .st { width: 15px; height: 15px; flex: none; }
+.fc-list li { display: flex; align-items: center; gap: 7px; }
+.fc-list li > span { flex: 1; }
+.cmp-tile .ico.st { width: 18px; height: 18px; }
+.cmp-herolist li > .st:first-child { width: 15px; height: 15px; }
+.sc-emblem img { width: 26px; height: 26px; display: block; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
+.star-card:not(.lit) .sc-emblem img { opacity: 0.55; filter: grayscale(0.5) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
