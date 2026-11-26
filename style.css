@@ -1308,3 +1308,24 @@ img.cur.altar-star { width: 58px; height: 58px; margin: 0; filter: drop-shadow(0
 .star-card .btn { width: 100%; min-height: 36px; margin: 0; display: flex; justify-content: center; }
 .sc-done { display: flex; align-items: center; justify-content: center; gap: 5px; min-height: 36px; border-radius: 9px; font: 800 11px var(--font); letter-spacing: 0.08em; text-transform: uppercase; color: var(--c); background: color-mix(in srgb, var(--c) 10%, #0a0f16); border: 1px solid color-mix(in srgb, var(--c) 35%, transparent); }
 .sc-done .ico { width: 12px; height: 12px; }
+
+/* ---------- Warband roster rows (level up right on the row) ---------- */
+.sheet-backdrop, #overlay { cursor: pointer; }
+.sheet, .modal { cursor: auto; }
+.buy-amt { margin-left: auto; color: var(--parch); border-color: var(--frame-dim); }
+.buy-amt b { color: #ffd77a; margin-left: 2px; }
+.buy-amt + .info-btn { margin-left: 0; }
+.wb-list { display: flex; flex-direction: column; gap: 7px; }
+.wb-row { display: flex; align-items: center; gap: 8px; padding: 7px 8px 7px 7px; border-radius: 14px; background: linear-gradient(180deg, #1a2230, #0f151e); border: 1px solid #222c3a; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4); }
+.wb-row-info { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 0; background: none; border: 0; color: inherit; text-align: left; }
+.wb-row .wb-art { width: 56px; height: 56px; }
+.wb-row-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.wb-row .wb-name b { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wb-row .wb-main { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wb-row-sub { display: flex; align-items: center; gap: 6px; }
+.wb-row-sub .wb-meter { flex: 1; max-width: 90px; }
+.wb-row-sub small { font-size: 10px; color: #7d8799; white-space: nowrap; font-variant-numeric: lining-nums; }
+.btn.wb-lvl { flex: none; min-width: 84px; min-height: 50px; padding: 5px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; font-size: 14px; }
+.btn.wb-lvl small .price { font-size: 12px; }
+.wb-cap { flex: none; min-width: 84px; text-align: center; font: 800 10px var(--font); letter-spacing: 0.1em; text-transform: uppercase; color: #ffd77a; padding: 8px 6px; border-radius: 10px; border: 1px solid var(--frame-dim); background: #1d1a10; }
+.wb-row.capped .wb-meter i { background: linear-gradient(90deg, #8a6420, #ffd77a); }
