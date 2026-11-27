@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-release="d9591475b0-7ab04214ec">
+<html lang="en" data-release="3f94468230-588c4f20ac">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -10,7 +10,10 @@
     <meta name="apple-mobile-web-app-title" content="Idle SAQ" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <title>Idle SAQ: Slaying and Questing</title>
-    <link rel="stylesheet" href="./style.css?v=7ab04214ec" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" />
+    <link rel="stylesheet" href="./style.css?v=588c4f20ac" />
   </head>
   <body>
     <div id="game-container">
@@ -29,19 +32,21 @@
       <section id="battle">
       <div id="canvas-container">
         <div id="canvas-top-hud">
-          <div class="plate hero-plate" id="hero-plate"><div class="plate-name"><b id="hero-name"></b><span class="plate-tags" id="hero-tags"></span></div><div class="plate-bar"><i class="chip-bar" id="hud-hp-chip"></i><i id="hud-hp-bar"></i><b id="hud-hp"></b></div></div>
+          <div class="plate hero-plate" id="hero-plate"><span class="plate-face" id="hero-face"></span><div class="plate-main"><div class="plate-name"><b id="hero-name"></b><span class="plate-tags" id="hero-tags"></span></div><div class="plate-bar"><i class="chip-bar" id="hud-hp-chip"></i><i id="hud-hp-bar"></i><b id="hud-hp"></b></div><div class="plate-wb" id="hud-wb"></div></div></div>
           <div class="plate foe-plate" id="foe-plate"></div>
         </div>
         <canvas id="scene" aria-label="Battle. Tap to strike, hold to fight faster."></canvas>
         <div id="tap-hint" hidden><i></i>Tap to strike · Hold to fight faster</div>
         <div id="control-bar"></div>
         <div id="skill-bar"></div>
+        <div id="squad-bar"></div>
       </div>
 
       <div id="global-xp-header"></div>
       <div id="log-panel" hidden><div id="feed" aria-live="polite"></div></div>
       </section>
 
+      <div id="panel-handle" data-act="panelSize" data-arg="" role="button" aria-label="Resize the panel"><i></i></div>
       <div id="panel-scroll">
       <div id="panel"></div>
 
@@ -58,6 +63,6 @@
     <div id="sheet"></div>
     <div id="overlay"></div>
     <div id="toast" role="status"></div>
-    <script type="module" src="./game.js?v=d9591475b0"></script>
+    <script type="module" src="./game.js?v=3f94468230"></script>
   </body>
 </html>
