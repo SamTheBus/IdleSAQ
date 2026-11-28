@@ -2227,3 +2227,43 @@ b, strong { font-weight: 800; }
 .vc-state { font-size: 11px; color: #8b93a3; }
 .vc-state.on { color: #86efac; }
 .vf-need { display: block; margin-top: 4px; font-size: 11px; }
+
+/* The stage, top right where the enemy's plate used to be */
+.stage-badge { display: flex; flex-direction: column; align-items: flex-end; gap: 0; padding-top: 2px; pointer-events: none; text-align: right; }
+.stage-badge small { font: 800 10px var(--font); letter-spacing: 0.12em; text-transform: uppercase; color: #e8d6a8; text-shadow: 0 1px 2px #000, 0 0 3px #000; }
+.stage-badge b { font: 400 22px/1.05 var(--display); color: #fff; letter-spacing: 0.02em; text-shadow: 0 2px 0 #000, 0 0 6px rgba(0, 0, 0, 0.8); -webkit-text-stroke: 1px #000; }
+.stage-badge:empty { display: none; }
+
+/* The boss bar: wide, centred near the top of the field */
+#foe-plate.boss-bar { position: absolute; z-index: 3; left: 50%; transform: translateX(-50%); top: calc(8px + var(--plates-h, 50px) + 6px); width: min(calc(100% - 136px), 440px); flex-direction: row; pointer-events: none; }
+#foe-plate.boss-bar.gone { opacity: 0; visibility: hidden; }
+#foe-plate.boss-bar .plate-main { margin-left: -14px; margin-right: 0; }
+#foe-plate.boss-bar .plate-main .plate-name { padding-left: 18px; padding-right: 0; justify-content: flex-start; }
+#foe-plate.boss-bar .plate-bar { height: 16px; }
+#foe-plate.boss-bar .plate-bar > i { left: 0; right: auto; }
+#foe-plate.boss-bar .plate-bar > b { text-align: center; line-height: 14px; font-size: 11px; }
+#foe-plate.boss-bar .foe-affix { text-align: left; padding-left: 18px; }
+.cb-boss-gap { display: block; height: 1px; }
+#canvas-container.boss-up #squad-bar { top: calc(8px + var(--plates-h, 50px) + 6px + var(--boss-h, 80px) + 8px); }
+
+/* The boss bar's SAQ World health bar */
+#foe-plate .boss-hp { position: relative; height: 20px; }
+#foe-plate .boss-hp canvas { display: block; width: 100%; height: 100%; }
+#foe-plate .boss-hp b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 400 12px/1 var(--display); color: #fff; letter-spacing: 0.03em; text-shadow: 0 1px 0 #000, 0 0 3px #000, 0 0 2px #000; font-variant-numeric: tabular-nums; pointer-events: none; }
+
+/* SAQ World's boss panel: one canvas, centred across the top of the field */
+#foe-plate.boss-bar.world-boss { display: block; padding: 0; background: none; border: 0; box-shadow: none; width: 100%; top: calc(8px + var(--plates-h, 50px) + 4px); }
+#foe-plate.world-boss canvas { display: block; width: 100%; }
+
+/* Phones: the control strip (Hold) steps down under the boss panel with the Warband's portraits */
+@media (orientation: portrait) and (max-width: 600px) {
+  #canvas-container.boss-up #control-bar { top: calc(8px + var(--plates-h, 50px) + 6px + var(--boss-h, 60px) + 8px); }
+}
+
+/* Warband skills on the portraits: the cooldown sweeps round clockwise (the dark part is still
+   recharging), the rim lights in the skill's colour, and the portrait flashes when it fires */
+.sq .sq-cd { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: conic-gradient(from 0deg, transparent 0 calc(var(--cd, 0) * 360deg), rgba(4, 7, 12, 0.72) calc(var(--cd, 0) * 360deg) 360deg); }
+.sq .sq-cd::after { content: ''; position: absolute; inset: -4px; border-radius: 12px; padding: 3px; background: conic-gradient(from 0deg, var(--sk) 0 calc(var(--cd, 0) * 360deg), transparent calc(var(--cd, 0) * 360deg)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0.9; }
+.sq.cast { transform: translateY(-4px) scale(1.14); box-shadow: inset 0 0 0 2px var(--sk), 0 0 16px var(--sk), 0 3px 0 rgba(0, 0, 0, 0.5); }
+.sq.cast .sq-cd { background: radial-gradient(circle, color-mix(in srgb, var(--sk) 55%, transparent), transparent 70%); }
+.wb-skill b em { font-style: normal; color: var(--sk); margin-right: 4px; }
