@@ -338,10 +338,6 @@ b { font-weight: 700; }
 .flavor { font-style: italic; color: #a8a29e; font-size: 12px; margin: 8px 0 0; }
 
 /* ---------- Hero ---------- */
-.classes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.class-card { display: flex; flex-direction: column; gap: 2px; padding: 7px; text-align: left; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 6px; font-size: 10px; color: var(--muted); }
-.class-card b { color: var(--c); font-size: 12px; }
-.class-card.on { border-color: var(--c); box-shadow: 0 0 8px color-mix(in srgb, var(--c) 40%, transparent); background: color-mix(in srgb, var(--c) 8%, #1a1a1a); }
 .live-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 10px; }
 .live-stats > div { display: flex; align-items: center; gap: 5px; font-size: 11px; padding: 2px 0; }
 .live-stats .ico { color: var(--cyan); }
@@ -445,11 +441,6 @@ b { font-weight: 700; }
 textarea { width: 100%; margin-top: 8px; background: #0f172a; color: var(--text); border: 1px solid #334155; border-radius: 6px; padding: 8px; font: 11px Consolas, monospace; }
 
 /* First launch: class pick */
-.classes.pick { grid-template-columns: repeat(3, 1fr); margin-top: 12px; }
-.classes.pick .class-card { align-items: center; text-align: center; padding: 10px 8px; font-size: 11px; }
-.classes.pick img { width: 96px; height: 96px; image-rendering: pixelated; }
-.classes.pick b { font-size: 14px; }
-.classes.pick small { color: #777; font-size: 10px; }
 
 /* ---------- Footer, battle log, toast ---------- */
 #footer { padding: 10px 12px 12px; background: var(--shell); border-top: 1px solid var(--line); }
@@ -511,10 +502,6 @@ textarea { width: 100%; margin-top: 8px; background: #0f172a; color: var(--text)
   .icard-main { grid-template-columns: 32px 1fr; padding: 6px; column-gap: 6px; }
   .icard-ico { width: 32px; height: 32px; }
   .icard-ico img { width: 28px; height: 28px; }
-  .classes { grid-template-columns: 1fr; }
-  .classes.pick { grid-template-columns: 1fr; }
-  .classes.pick .class-card { flex-direction: row; text-align: left; flex-wrap: wrap; }
-  .classes.pick img { width: 56px; height: 56px; }
 }
 
 /* SVG icons in place of symbols (no emoji anywhere in the game) */
