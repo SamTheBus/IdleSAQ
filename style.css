@@ -2356,3 +2356,64 @@ b, strong { font-weight: 800; }
 @media (prefers-reduced-motion: reduce) { .modal.away-modal, .ac-track i, .away-item, .away-gold::after { animation: none; } }
 .away-item .tile:hover { transform: translateY(-2px); }
 .away-item .tile:active { transform: scale(0.94); }
+
+/* First-time tips */
+#tip { position: absolute; z-index: 3; left: 10px; width: min(262px, calc(100% - 20px)); pointer-events: none; }
+#tip.in .tip-card { animation: tip-in 0.32s cubic-bezier(0.2, 1.2, 0.4, 1); }
+@keyframes tip-in { from { transform: translateX(-16px); opacity: 0; } }
+.tip-card { position: relative; display: grid; grid-template-columns: auto 1fr auto; gap: 9px; align-items: start; padding: 9px 9px 11px 10px; border-radius: 12px; overflow: hidden; pointer-events: auto; background: linear-gradient(180deg, rgba(28, 37, 51, 0.96), rgba(14, 20, 29, 0.96)); border: 2px solid var(--outline, #06090d); box-shadow: inset 0 0 0 1px rgba(201, 163, 90, 0.4), 0 4px 0 rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.45); }
+.tip-ico { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; color: #ffd75a; background: rgba(255, 215, 90, 0.12); box-shadow: inset 0 0 0 1.5px rgba(255, 215, 90, 0.35); }
+.tip-ico .ico { width: 17px; height: 17px; }
+.tip-body b { display: block; font: 400 14px/1.1 var(--display); letter-spacing: 0.03em; color: #fff4d6; text-shadow: 0 2px 0 #000; }
+.tip-body p { margin: 3px 0 0; font-size: 11.5px; line-height: 1.35; color: #c3ccd9; }
+.tip-go { margin-top: 6px; padding: 3px 10px; border-radius: 8px; font: 400 12px var(--display); letter-spacing: 0.04em; color: #1b1408; background: linear-gradient(180deg, #ffe08a, #f2b232); border: 1.5px solid var(--outline, #06090d); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.45); cursor: pointer; }
+.tip-x { display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border-radius: 7px; color: #8792a5; background: transparent; border: 0; cursor: pointer; }
+.tip-x:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.tip-x .ico { width: 14px; height: 14px; }
+.tip-time { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: linear-gradient(90deg, #e9a93a, #ffd75a); transform-origin: left; animation: tip-time linear forwards; opacity: 0.8; }
+@keyframes tip-time { to { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { #tip.in .tip-card { animation: none; } }
+
+/* Locked items */
+.tile-lock { position: absolute; left: 3px; top: 3px; display: grid; place-items: center; width: 15px; height: 15px; border-radius: 5px; color: #ffd75a; background: rgba(6, 9, 13, 0.85); }
+.tile-lock .ico { width: 10px; height: 10px; }
+.row > .btn.lock-btn, .lock-btn { flex: 0 0 48px; min-width: 48px; padding-left: 0; padding-right: 0; display: grid; place-items: center; color: #8792a5; }
+.lock-btn .ico { width: 16px; height: 16px; }
+.lock-btn.on { color: #1b1408; background: linear-gradient(180deg, #ffe08a, #f2b232); }
+.sack-note { display: flex; gap: 7px; align-items: flex-start; margin: 8px 2px 0; font-size: 11px; line-height: 1.35; color: var(--muted); }
+.sack-note .ico { flex: 0 0 auto; width: 13px; height: 13px; margin-top: 1px; color: #c9a35a; }
+
+/* Slim tips: a short battlefield gets one line; a tap opens the text */
+.tip-more { display: none; color: #8792a5; }
+.tip-more .ico { width: 14px; height: 14px; }
+#tip.slim .tip-card { align-items: center; gap: 8px; padding: 6px 6px 8px 7px; cursor: pointer; }
+#tip.slim .tip-ico { width: 24px; height: 24px; border-radius: 7px; }
+#tip.slim .tip-ico .ico { width: 14px; height: 14px; }
+#tip.slim .tip-body { display: flex; align-items: center; gap: 6px; min-width: 0; }
+#tip.slim .tip-body b { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#tip.slim .tip-more { display: grid; place-items: center; }
+#tip.slim .tip-body p { display: none; }
+#tip.slim .tip-go { margin: 0 0 0 auto; padding: 2px 9px; }
+#tip.slim.open .tip-card { align-items: start; cursor: default; }
+#tip.slim.open .tip-body { display: block; }
+#tip.slim.open .tip-body p { display: block; }
+#tip.slim.open .tip-more { display: none; }
+#tip.slim.open .tip-go { margin-top: 6px; }
+
+/* Challenge: its own spot, bottom centre of the battlefield */
+#challenge { position: absolute; z-index: 3; left: 50%; transform: translateX(-50%); pointer-events: none; animation: challenge-in 0.35s cubic-bezier(0.2, 1.3, 0.4, 1); }
+#challenge .rechallenge { position: relative; overflow: hidden; height: 46px; padding: 4px 16px 6px 11px; border-radius: 12px; pointer-events: auto; white-space: nowrap; }
+#challenge .rechallenge .ico { width: 18px; height: 18px; }
+#challenge .rc-prog { position: absolute; left: 10px; right: 10px; bottom: 4px; height: 3px; border-radius: 2px; background: rgba(40, 4, 2, 0.5); }
+#challenge .rc-prog::after { content: ''; position: absolute; inset: 0; width: calc(var(--p, 0) * 100%); border-radius: inherit; background: #ffd9d0; transition: width 0.3s; }
+@keyframes challenge-in { from { transform: translate(-50%, 14px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #challenge { animation: none; } }
+@media (max-width: 580px) {
+  #game-container[data-panel='full'] #challenge { display: none; }
+  #challenge .rechallenge { height: 44px; gap: 5px; padding: 3px 11px 6px 8px; }
+  #challenge .rechallenge small { font-size: 8.5px; }
+}
+
+/* Toasts: in the middle of the stage strip */
+#toast.mid { position: fixed; transform: translate(-50%, -50%) scale(0.85); opacity: 0; transition: transform 0.22s cubic-bezier(0.2, 1.3, 0.4, 1), opacity 0.18s; justify-content: center; text-align: center; padding: 7px 14px; }
+#toast.mid.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
