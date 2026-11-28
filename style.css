@@ -2220,3 +2220,10 @@ b, strong { font-weight: 800; }
 .vf-note { text-align: center; font-size: 12px; margin: 6px 0 0; }
 .vault-ghosts { margin-top: 10px; --c: #f2c24f; }
 .vault-ghosts img { width: 30px; height: 30px; filter: brightness(0) opacity(0.45); }
+.vc-sigils > .ico { width: 17px; height: 17px; color: #f2c24f; }
+.vc-meter { flex: 1; height: 8px; border-radius: 5px; background: #0d0f14; border: 1px solid #2a3344; overflow: hidden; }
+.vc-meter i { display: block; height: 100%; background: linear-gradient(90deg, #c9962e, #f6d27a); }
+.vc-sigils small { margin-left: 6px; }
+.vc-state { font-size: 11px; color: #8b93a3; }
+.vc-state.on { color: #86efac; }
+.vf-need { display: block; margin-top: 4px; font-size: 11px; }
